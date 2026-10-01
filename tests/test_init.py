@@ -1,0 +1,130 @@
+"""`init.py`: mặc định chạy thử, `--apply` mới ghi, không ghi đè, chạy hai lần không đổi gì (FR15.1)."""
+
+import json
+from pathlib import Path
+
+from conftest import run_script
+import _common as c
+import check
+import init
+
+DATE = "2026-03-02"
+
+
+def files_of(root: Path) -> dict:
+    return {p.relative_to(root).as_posix(): p.read_bytes() for p in sorted(root.rglob("*")) if p.is_file()}
+
+
+def test_dry_run_writes_nothing(tmp_path, capsys):
+    assert init.main([str(tmp_path), "--date", DATE]) == 0
+    out = capsys.readouterr().out
+    assert files_of(tmp_path) == {}
+    assert "+ tạo" in out and ".agile.json" in out and "REQUESTS.md" in out
+    assert "--apply" in out
+
+
+def test_apply_creates_config_and_ledgers(tmp_path):
+    assert init.main([str(tmp_path), "--apply", "--date", DATE]) == 0
+    got = files_of(tmp_path)
+    assert set(got) == {".agile.json", "docs/plans/REQUESTS.md", "docs/plans/SPRINTS.md", "docs/specs/SPECS.md"}
+    assert json.loads(got[".agile.json"]) == c.DEFAULT_CONFIG
+    for rel, next_id in (("docs/plans/REQUESTS.md", "RQ-001"), ("docs/plans/SPRINTS.md", "SPR-01"), ("docs/specs/SPECS.md", "FS-001")):
+        fm = c.parse_frontmatter(got[rel].decode("utf-8"))
+        assert fm.data["next_id"] == next_id and fm.data["updated"] == DATE
+    assert b"\r\n" not in got["docs/plans/REQUESTS.md"]
+    assert check.check_paths([tmp_path]).exit_code == 0
+
+
+def test_second_run_changes_nothing_and_never_overwrites(tmp_path, capsys):
+    custom = tmp_path / "docs" / "plans" / "REQUESTS.md"
+    custom.parent.mkdir(parents=True)
+    custom.write_text("sổ có sẵn\n", encoding="utf-8", newline="\n")
+    init.main([str(tmp_path), "--apply", "--date", DATE])
+    first = files_of(tmp_path)
+    assert first["docs/plans/REQUESTS.md"] == "sổ có sẵn\n".encode("utf-8")
+    capsys.readouterr()
+    init.main([str(tmp_path), "--apply", "--date", "2026-04-01"])
+    assert files_of(tmp_path) == first
+    assert "+ tạo" not in capsys.readouterr().out
+
+
+def test_existing_config_drives_paths_and_widths(tmp_path):
+    (tmp_path / ".agile.json").write_text(json.dumps({
+        "schema": 1, "artifact_root": "records",
+        "paths": {"requests": "R.md", "sprints": "S.md", "specs": "F/INDEX.md", "feature_specs_dir": "F"},
+        "id_width": {"request": 4, "sprint": 3},
+    }), encoding="utf-8")
+    init.main([str(tmp_path), "--apply", "--date", DATE])
+    for rel, next_id in (("records/R.md", "RQ-0001"), ("records/S.md", "SPR-001"), ("records/F/INDEX.md", "FS-001")):
+        assert c.parse_frontmatter((tmp_path / rel).read_text(encoding="utf-8")).data["next_id"] == next_id
+
+
+def new_sprint(root: Path, slug: str, *extra: str) -> int:
+    return init.main([str(root), "--apply", "--date", DATE, "--sprint", slug, "--title", "Tra đơn | nhanh", *extra])
+
+
+def test_sprint_scaffold_resets_state_and_registers(tmp_path):
+    assert new_sprint(tmp_path, "order-lookup", "--request", "RQ-003", "--size", "large", "--risk", "high", "--risk-tags", "auth,secret") == 0
+    folder = tmp_path / "docs" / "plans" / f"{DATE}-order-lookup"
+    assert sorted(p.name for p in folder.iterdir()) == ["PLAN.md", "PROGRESS.md", "REPORT.md", "SPEC.md"]
+    for name in ("SPEC", "PLAN", "PROGRESS", "REPORT"):
+        text = (folder / f"{name}.md").read_text(encoding="utf-8")
+        data = c.parse_frontmatter(text).data
+        assert data["id"] == f"SPR-01-{name.lower()}" and data["sprint"] == "SPR-01"
+        assert data["request"] == "RQ-003" and data["feature"] is None
+        assert data["title"] == "Tra đơn | nhanh" and data["created"] == DATE and data["updated"] == DATE
+        assert (data["size"], data["risk"], data["risk_tags"]) == ("large", "high", ["auth", "secret"])
+        assert all(value[1] == "pending" and len(value) == 2 for value in data["roles"].values())
+        assert data.get("gate_1", "pending") == "pending" and data.get("gate_1_quote") is None
+        assert data.get("verdict", "pending") == "pending" and data.get("gate_2_at") is None
+        assert data.get("review_round", 0) == 0
+        assert "# Tra đơn | nhanh —" in text
+    assert c.parse_frontmatter((folder / "PROGRESS.md").read_text(encoding="utf-8")).data["status"] == "drafting"
+    ledger = (tmp_path / "docs" / "plans" / "SPRINTS.md").read_text(encoding="utf-8")
+    assert c.parse_frontmatter(ledger).data["next_id"] == "SPR-02"
+    assert f"| SPR-01 | {DATE} |  | Tra đơn \\| nhanh |  | [{DATE}-order-lookup]({DATE}-order-lookup/) |" in ledger
+    report = check.check_paths([tmp_path])
+    assert [f.render() for f in report.findings if f.level in ("Chặn", "Phải sửa")] == []
+
+
+def test_sprint_rerun_is_idempotent_and_next_sprint_gets_next_id(tmp_path):
+    new_sprint(tmp_path, "order-lookup")
+    before = files_of(tmp_path)
+    assert new_sprint(tmp_path, "order-lookup") == 0
+    assert files_of(tmp_path) == before
+    new_sprint(tmp_path, "export-csv", "--tiny")
+    folder = tmp_path / "docs" / "plans" / f"{DATE}-export-csv"
+    assert [p.name for p in folder.iterdir()] == ["SPRINT.md"]
+    data = c.parse_frontmatter((folder / "SPRINT.md").read_text(encoding="utf-8")).data
+    assert data["id"] == "SPR-02-sprint" and data["size"] == "tiny" and data["status"] == "drafting"
+    ledger = (tmp_path / "docs" / "plans" / "SPRINTS.md").read_text(encoding="utf-8")
+    assert ledger.index("| SPR-02 |") < ledger.index("| SPR-01 |"), "mới nhất ở trên"
+
+
+def test_sprint_dry_run_writes_nothing(tmp_path, capsys):
+    init.main([str(tmp_path), "--date", DATE, "--sprint", "order-lookup", "--title", "X"])
+    assert files_of(tmp_path) == {}
+    assert "SPEC.md" in capsys.readouterr().out
+
+
+def test_bad_sprint_arguments_are_input_errors(tmp_path, capsys):
+    assert init.main([str(tmp_path), "--sprint", "Bad Slug", "--title", "X"]) == 2
+    assert init.main([str(tmp_path), "--sprint", "ok", "--title", "X", "--risk", "high"]) == 2
+    assert init.main([str(tmp_path), "--sprint", "ok", "--title", "X", "--risk-tags", "auth"]) == 2
+    assert init.main([str(tmp_path), "--sprint", "ok", "--title", "X", "--risk-tags", "nope", "--risk", "high", "--size", "large"]) == 2
+    assert init.main([str(tmp_path), "--sprint", "ok"]) == 2  # thiếu --title
+    assert init.main([str(tmp_path), "--sprint", "ok", "--title", "X", "--tiny", "--size", "large"]) == 2
+    assert init.main([str(tmp_path), "--sprint", "ok", "--title", "X", "--request", "SPR-1"]) == 2
+    assert init.main([str(tmp_path), "--date", "02/03/2026"]) == 2
+    assert files_of(tmp_path) == {}
+
+
+def test_broken_config_is_input_error(tmp_path):
+    (tmp_path / ".agile.json").write_text("{hỏng", encoding="utf-8")
+    assert init.main([str(tmp_path), "--apply"]) == 2
+
+
+def test_script_runs_standalone(tmp_path):
+    result = run_script("init.py", str(tmp_path), "--date", DATE)
+    assert result.returncode == 0, result.stderr
+    assert "chạy thử" in result.stdout

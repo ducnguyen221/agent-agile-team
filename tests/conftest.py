@@ -1,5 +1,7 @@
 """Đưa `scripts/` lên `sys.path` và cung cấp tiện ích chạy script như dòng lệnh."""
 
+from __future__ import annotations
+
 import os
 import subprocess
 import sys
