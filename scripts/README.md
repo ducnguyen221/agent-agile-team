@@ -18,7 +18,7 @@ python scripts/init.py <gốc-dự-án> --apply             # ghi .agile.json + 
 python scripts/init.py <gốc-dự-án> --apply --sprint <slug> --title "<mục tiêu>" [--tiny]
        [--size tiny|small|medium|large] [--risk normal|high] [--risk-tags a,b] [--request RQ-NNN] [--feature FS-NNN]
        [--date YYYY-MM-DD]
-python scripts/check.py <file.md|thư-mục> [...]        # thư mục: quét đệ quy *.md và mọi .agile.json
+python scripts/check.py <file.md|.agile.json|thư-mục> [...]   # thư mục: quét đệ quy *.md và mọi .agile.json
 python scripts/check.py --self [--root <repo>]
 python scripts/index.py <gốc-dự-án> [--check]          # --check: không ghi, thoát 1 nếu sổ chưa cập nhật
 ```
@@ -45,7 +45,13 @@ xuống dòng (LF/CRLF) của file đó; file mới ghi UTF-8 không BOM, LF.
 
 Mức theo thang chung `method/severity.md`. Luật tài liệu chỉ áp cho file có khoá `doc` hợp lệ; ba luật chung
 về mã (`id-bare-single-letter`, `id-unknown-prefix`, `old-scale-label`) áp cho mọi file `.md` được quét. Mã
-trong code span, khối code, comment HTML và đích của liên kết không bị xét.
+trong code span, khối code, comment HTML và đích của liên kết không bị xét. Truyền thẳng `.agile.json` thì chỉ
+chạy các luật `config-*` cho file đó.
+
+**Code span:** được ngắt qua nhiều dòng trong cùng một đoạn văn, nhưng `check` chỉ nối khi dòng mở và dòng đóng
+đều lẻ số dấu huyền (dòng tự cân thì coi dấu huyền lẻ ở dòng trên là chữ thường). Code span **không lồng**: một
+lệnh chứa dấu huyền (`git commit -m "…"` nhắc mã, JSON inline, dấu thoát PowerShell) phải bọc ngoài bằng **hai**
+dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm gợi ý "code span lồng nhau hoặc ngắt dòng?".
 
 | Mã luật | Mức | Bắt gì |
 |---|---|---|

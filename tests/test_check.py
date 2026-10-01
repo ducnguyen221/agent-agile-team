@@ -265,3 +265,36 @@ def test_not_applicable_reason_may_start_with_markup(tmp_path, reason):
 @pytest.mark.parametrize("text", ["SC1-SC3.", "SC1–SC3.", "SC1 - SC3;", "SC1–SC3)"])
 def test_range_before_punctuation_keeps_all_codes(text):
     assert {"SC1", "SC2", "SC3"} <= set(check.codes_on(f"Phủ {text}")), text
+
+
+# --- TK6.5 ---------------------------------------------------------------------------------------------
+
+
+def test_code_span_split_over_two_lines_hides_external_codes(tmp_path):
+    root = make_sprint(tmp_path)
+    path = root / "PLAN.md"
+    text = path.read_text(encoding="utf-8").replace(
+        "Đạt SC1 (xuất đủ cột).", "Đạt SC1 (xuất đủ cột); lệnh ngoài `tool --case\nRF9 --id P7`.", 1)
+    path.write_text(text, encoding="utf-8", newline="\n")
+    assert check.check_paths([root]).findings == []
+
+
+def test_caught_code_next_to_backtick_gets_a_hint(tmp_path):
+    root = make_sprint(tmp_path)
+    path = root / "PLAN.md"
+    text = path.read_text(encoding="utf-8").replace(
+        "Đạt SC1 (xuất đủ cột).", "Đạt SC1 (xuất đủ cột); `git commit -m \"`RF9`\"`.", 1)
+    path.write_text(text, encoding="utf-8", newline="\n")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "xref-missing"]
+    assert hits and all("code span" in f.message for f in hits), [f.render() for f in hits]
+
+
+def test_agile_json_path_is_checked_directly(tmp_path, capsys):
+    cfg = tmp_path / ".agile.json"
+    cfg.write_text('{"schema": 2}', encoding="utf-8")
+    assert check.main([str(cfg)]) == 1
+    assert "[config-invalid]" in capsys.readouterr().out
+    cfg.write_text('{"schema": 1}', encoding="utf-8")
+    assert check.main([str(cfg)]) == 0
+    cfg.write_text("{hỏng", encoding="utf-8")
+    assert check.main([str(cfg)]) == 2

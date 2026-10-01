@@ -2,7 +2,7 @@
 """Kiểm chuẩn tài liệu sprint, sổ gốc, spec sống và cấu hình dự án; `--self` kiểm lõi sạch của repo.
 
 Cách chạy:
-    python scripts/check.py <đường-dẫn> [<đường-dẫn> ...]   # file .md hoặc thư mục (quét đệ quy *.md)
+    python scripts/check.py <đường-dẫn> [<đường-dẫn> ...]   # file .md, .agile.json hoặc thư mục (quét đệ quy)
     python scripts/check.py --self [--root <repo>]          # lõi sạch, một thang mức, ngân sách AGENTS.md
 
 Mã thoát: 0 = Đạt (không có Chặn/Phải sửa) · 1 = Không đạt · 2 = lỗi đầu vào (đường dẫn không có, file
@@ -137,6 +137,8 @@ DROPPED = re.compile(r"[(—–:-]\s*bỏ\s*(?:\)|$)")  # trạng thái `bỏ` c
 AGENTS_MAX_LINES = 120
 AGENTS_MAX_BYTES = 10 * 1024
 SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache", ".tmp"}
+SPAN_HINT = (" — có dấu huyền kề bên: mã nằm trong code span lồng nhau hoặc ngắt dòng? Code span chứa dấu huyền"
+             " thì bọc ngoài bằng hai dấu huyền")
 
 
 @dataclass
@@ -190,6 +192,16 @@ class Doc:
 
     def line_no(self, idx: int) -> int:
         return self.start + idx
+
+    def hint(self, idx: int, code: str) -> str:
+        """Gợi ý khi mã bị bắt có dấu huyền sát bên, hoặc đếm thô thấy trước mã có số lẻ dấu huyền (code span
+        lồng nhau hoặc ngắt dòng làm lộ phần giữa)."""
+        raw = self.raw[idx]
+        pos = self.masked[idx].find(code)
+        if pos == -1:
+            return ""
+        near = raw[pos - 1:pos] == "`" or raw[pos + len(code):pos + len(code) + 1] == "`"
+        return SPAN_HINT if near or raw[:pos].count("`") % 2 == 1 else ""
 
     @property
     def data(self) -> dict:
@@ -353,7 +365,7 @@ class Engine:
             for m in BARE.finditer(line):
                 if m.group(0) not in c.TIERS:
                     self.add(doc.path, doc.line_no(idx), "id-bare-single-letter",
-                             f"mã trần '{m.group(0)}' — dùng tiền tố hai chữ cái đúng tài liệu hoặc viết bằng chữ")
+                             f"mã trần '{m.group(0)}' — dùng tiền tố hai chữ cái đúng tài liệu hoặc viết bằng chữ" + doc.hint(idx, m.group(0)))
             cells = c.table_cells(line)
             level_cells: list = []
             if cells is None:
@@ -574,7 +586,7 @@ class Engine:
                     unresolved.setdefault(owner, doc.line_no(idx))
                 elif code not in target.defined():
                     where = "tài liệu này" if target is doc else c.display(target.path)
-                    self.add(doc.path, doc.line_no(idx), "xref-missing", f"'{code}' không được định nghĩa ở {where}")
+                    self.add(doc.path, doc.line_no(idx), "xref-missing", f"'{code}' không được định nghĩa ở {where}" + doc.hint(idx, code))
         for owner, line in unresolved.items():
             self.add(doc.path, line, "xref-unresolved", f"không có links.{owner} (hoặc file không tồn tại) để đối chiếu mã của {owner.upper()}")
 
@@ -700,8 +712,10 @@ def check_paths(paths) -> Report:
             for md in _walk(path, "*.md"):
                 engine.check_file(md)
         elif path.is_file():
-            if path.suffix.lower() != ".md":
-                engine.report.errors.append(f"{c.display(path)}: chỉ kiểm file .md hoặc thư mục")
+            if path.name == c.CONFIG_NAME:
+                engine.check_config(path.parent)
+            elif path.suffix.lower() != ".md":
+                engine.report.errors.append(f"{c.display(path)}: chỉ kiểm file .md, {c.CONFIG_NAME} hoặc thư mục")
             else:
                 engine.check_file(path)
         else:
@@ -819,7 +833,7 @@ def main(argv=None, env=None) -> int:
     c.utf8_stdio()
     env = os.environ if env is None else env
     parser = argparse.ArgumentParser(prog="check.py", description="Kiểm chuẩn tài liệu agent-agile-team.")
-    parser.add_argument("paths", nargs="*", help="file .md hoặc thư mục")
+    parser.add_argument("paths", nargs="*", help="file .md, .agile.json hoặc thư mục")
     parser.add_argument("--self", dest="self_mode", action="store_true", help="kiểm lõi sạch của repo này")
     parser.add_argument("--root", default=str(c.REPO), help="gốc repo cho --self (mặc định: repo chứa script)")
     args = parser.parse_args(argv)

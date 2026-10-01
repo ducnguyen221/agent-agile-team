@@ -247,3 +247,34 @@ def test_text_style_roundtrip_keeps_bom_and_crlf(tmp_path):
     assert text == "dong 1\ndong 2\n"
     c.write_text_style(path, text.replace("2", "3"), style)
     assert path.read_bytes() == b"\xef\xbb\xbfdong 1\r\ndong 3\r\n"
+
+
+# --- TK6.5: code span ngắt dòng ----------------------------------------------------------------------
+
+
+def test_code_span_across_lines_is_masked():
+    lines = [
+        "Lệnh `git commit -m \"sửa P1",
+        "và P2\"` rồi P3 ngoài code.",
+        "",
+        "dấu ` lẻ P4",
+        "",
+        "đoạn mới ` P5 không đóng",
+        "| ô ` P6 | bảng |",
+    ]
+    masked = c.mask_markdown(lines)
+    assert [len(m) for m in masked] == [len(x) for x in lines]
+    found = set(re.findall(r"(?<![A-Za-z0-9])P[0-9]+(?![0-9])", "\n".join(masked)))
+    assert found == {"P3", "P4", "P5", "P6"}
+
+
+def test_code_span_does_not_cross_blank_line_or_heading():
+    lines = ["mở ` P1", "", "đóng ` P2", "## Tiêu đề ` P3", "đóng ` P4"]
+    found = set(re.findall(r"P[0-9]", "\n".join(c.mask_markdown(lines))))
+    assert found == {"P1", "P2", "P3", "P4"}
+
+
+def test_balanced_closing_line_does_not_join_an_odd_opener():
+    lines = ['khối `Write-Host "`nTên"` lẻ', "dòng sau `a` P1 rồi `b` P2", "(c) `P3`"]
+    found = set(re.findall(r"P[0-9]", "\n".join(c.mask_markdown(lines))))
+    assert found == {"P1", "P2"}

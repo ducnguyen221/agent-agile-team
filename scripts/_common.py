@@ -338,32 +338,67 @@ _FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 
 
 def mask_markdown(lines: list[str]) -> list[str]:
-    """Thay nội dung khối code, code span và comment HTML bằng dấu cách; giữ số dòng và độ dài dòng."""
+    """Thay nội dung khối code, code span và comment HTML bằng dấu cách; giữ số dòng và độ dài dòng.
+
+    Code span được ngắt qua nhiều dòng của cùng một đoạn văn (như CommonMark): mở ở dòng này, đóng bằng dải
+    dấu huyền cùng độ dài ở dòng sau, không vượt dòng trống, tiêu đề, dòng bảng hay hàng rào code.
+    """
     out: list[str] = []
     fence: str | None = None
     in_comment = False
-    for line in lines:
+    carry = 0  # độ dài dải dấu huyền của code span mở từ dòng trước, chưa đóng
+    for idx, line in enumerate(lines):
         if fence is not None:
             m = _FENCE.match(line)
             if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence) and not line[m.end():].strip():
                 fence = None
             out.append(" " * len(line))
             continue
-        if not in_comment:
+        if not in_comment and not carry:
             m = _FENCE.match(line)
             if m:
                 fence = m.group(1)
                 out.append(" " * len(line))
                 continue
-        masked, in_comment = _mask_inline(line, in_comment)
+        closes_later = (lambda width, i=idx: _closes_later(lines, i, width)) if _can_continue(line) else None
+        masked, in_comment, carry = _mask_inline(line, in_comment, carry, closes_later)
         out.append(masked)
     return out
 
 
-def _mask_inline(line: str, in_comment: bool) -> tuple[str, bool]:
+def _can_continue(line: str) -> bool:
+    """Dòng thuộc một đoạn văn có thể nối sang dòng sau (không trống, không tiêu đề, không dòng bảng)."""
+    stripped = line.strip()
+    return bool(stripped) and not stripped.startswith(("#", "|")) and not _FENCE.match(line)
+
+
+def _closes_later(lines: list[str], idx: int, width: int) -> bool:
+    """Dải mở lẻ ở dòng `idx` có đóng ở dòng sau không. Thận trọng: dòng đóng phải cũng lẻ số dải cùng độ dài —
+    dòng tự cân (ví dụ dấu huyền thoát của PowerShell lọt trong code span ở dòng trước) thì không nối."""
+    for j in range(idx + 1, len(lines)):
+        if not _can_continue(lines[j]):
+            return False
+        runs = _count_runs(lines[j], width)
+        if runs:
+            return runs % 2 == 1
+    return False
+
+
+def _count_runs(line: str, width: int) -> int:
+    return sum(1 for m in re.finditer(r"`+", line) if len(m.group(0)) == width)
+
+
+def _mask_inline(line: str, in_comment: bool, carry: int = 0, closes_later=None) -> tuple[str, bool, int]:
     chars = list(line)
     i = 0
     n = len(line)
+    if carry:
+        close = _find_run(line, 0, carry)
+        if close == -1:
+            return " " * n, in_comment, carry
+        for k in range(0, close + carry):
+            chars[k] = " "
+        i = close + carry
     while i < n:
         if in_comment:
             end = line.find("-->", i)
@@ -371,7 +406,7 @@ def _mask_inline(line: str, in_comment: bool) -> tuple[str, bool]:
             for k in range(i, stop):
                 chars[k] = " "
             if end == -1:
-                return "".join(chars), True
+                return "".join(chars), True, 0
             in_comment = False
             i = stop
             continue
@@ -385,6 +420,10 @@ def _mask_inline(line: str, in_comment: bool) -> tuple[str, bool]:
             width = run - i
             close = _find_run(line, run, width)
             if close == -1:
+                if closes_later is not None and closes_later(width):
+                    for k in range(i, n):
+                        chars[k] = " "
+                    return "".join(chars), False, width
                 i = run  # dấu huyền lẻ là chữ thường
                 continue
             for k in range(i, close + width):
@@ -392,7 +431,7 @@ def _mask_inline(line: str, in_comment: bool) -> tuple[str, bool]:
             i = close + width
             continue
         i += 1
-    return "".join(chars), in_comment
+    return "".join(chars), in_comment, 0
 
 
 def _find_run(line: str, start: int, width: int) -> int:
