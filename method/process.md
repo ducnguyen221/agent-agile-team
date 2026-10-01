@@ -64,7 +64,12 @@ KHI người dùng giao một yêu cầu THÌ Analyst:
   `RK` · `DN` · ước lượng (skill `writing-plan`). PLAN ghi **quyết định** (chữ ký, giá trị, assertion),
   không chép code.
 - Từ cỡ **vừa**, Tech Reviewer review PLAN một lượt trước khi trình (skill `plan-review`): thách thức phạm
-  vi, kiến trúc, phủ test. Phát hiện mức Chặn/Phải sửa thì sửa PLAN trước khi trình.
+  vi, kiến trúc, phủ test. Phát hiện mức Chặn/Phải sửa thì sửa PLAN trước khi trình. Phát hiện ghi ở REPORT
+  mục "Phát hiện của reviewer", tiểu mục "Review PLAN trước Cổng 1".
+- Giao review PLAN cần model cho tier T1. Chưa có bảng tier (`AGENT_AGILE_TIERS`) thì dùng chỉ định tier →
+  model người dùng đã nêu trong chat, ghi nguyên văn vào PROGRESS dòng `Phán quyết:`. Chưa có cả hai → không
+  đoán: ghi `DN` "chỉ định tier → model" kèm khuyến nghị, trình ở Cổng 1; review PLAN chạy **ngay sau** khi có
+  chỉ định, trước khi thực thi (`tiers/README.md` mục 2).
 - **Cấm viết code trước Cổng 1.** Thử nghiệm kỹ thuật để trả lời `CQ` thì được, nhưng kết quả chỉ vào
   SPEC/PLAN, không vào nhánh sản phẩm.
 

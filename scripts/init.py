@@ -4,13 +4,16 @@
 Cách chạy:
     python scripts/init.py <gốc-dự-án>                    # chạy thử: in thao tác, không ghi gì
     python scripts/init.py <gốc-dự-án> --apply            # ghi thật; file có sẵn không bao giờ bị ghi đè
-    python scripts/init.py <gốc-dự-án> --apply --sprint <slug> --title "<mục tiêu>"
+    python scripts/init.py <gốc-dự-án> --apply --sprint <slug> (--title "<mục tiêu>" | --title-file <file>)
         [--tiny] [--size S] [--risk normal|high] [--risk-tags a,b] [--request RQ-NNN] [--feature FS-NNN]
         [--date YYYY-MM-DD]
 
 Sprint mới lấy mã từ `next_id` của SPRINTS, đặt lại trạng thái (`status: drafting` cho PROGRESS/SPRINT, cổng
 và `verdict` về pending/null, `review_round: 0`, mọi vai về nhãn `pending`) rồi ghi một dòng Timeline vào
-SPRINTS và tăng `next_id`. Chạy lại cùng `slug` không đổi gì.
+SPRINTS (xoá comment dòng ví dụ của mẫu) và tăng `next_id`. Chạy lại cùng `slug` không đổi gì.
+
+Tiêu đề có dấu: `--title-file` đọc UTF-8 từ file, không qua shell. Tiêu đề chứa `?` hoặc U+FFFD → cảnh báo
+(shell có thể đã làm mất dấu). `AGENT_AGILE_TIERS` chưa đặt hoặc trỏ file không có → cảnh báo sớm ra stderr.
 
 Mã thoát: 0 = xong (hoặc chạy thử xong) · 2 = lỗi đầu vào.
 """
@@ -33,6 +36,8 @@ LEDGERS = (("requests", "REQUESTS.md", "RQ", "request"), ("sprints", "SPRINTS.md
            ("specs", "SPECS.md", "FS", "feature"))
 SPRINT_FILES = ("SPEC", "PLAN", "PROGRESS", "REPORT")
 STATUS_NEW = {"spec": "draft", "plan": "draft", "progress": "drafting", "report": "draft", "sprint": "drafting"}
+EXAMPLE_COMMENT = "<!-- Ví dụ một dòng"
+SUSPECT_TITLE = ("?", "\ufffd")
 RESET = {"gate_1": "pending", "gate_1_at": "null", "gate_1_quote": "null", "verdict": "pending",
          "gate_2": "pending", "gate_2_at": "null", "gate_2_quote": "null", "review_round": "0"}
 
@@ -216,7 +221,20 @@ def insert_timeline_row(text: str, row: str, path: Path) -> str:
     except StopIteration as exc:
         raise InputError(f"{c.display(path)}: không thấy bảng dưới tiêu đề Timeline") from exc
     lines.insert(sep + 1, row)
-    return "\n".join(lines)
+    return "\n".join(_drop_example(lines, sep + 2))
+
+
+def _drop_example(lines: list, start: int) -> list:
+    """Bỏ comment dòng ví dụ của mẫu dưới bảng — dòng thật đầu tiên thay nó (mẫu dặn xoá khi ghi)."""
+    for i in range(start, len(lines)):
+        if lines[i].startswith("## "):
+            break
+        if lines[i].startswith(EXAMPLE_COMMENT):
+            end = next((j for j in range(i, len(lines)) if "-->" in lines[j]), None)
+            if end is not None:
+                return lines[:i] + lines[end + 1:]
+            break
+    return lines
 
 
 # --- Dòng lệnh -----------------------------------------------------------------------------------------
@@ -225,6 +243,13 @@ def insert_timeline_row(text: str, row: str, path: Path) -> str:
 def validate(args) -> None:
     if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", args.date):
         raise InputError(f"--date {args.date!r} phải có dạng YYYY-MM-DD")
+    if args.title is not None and args.title_file is not None:
+        raise InputError("--title và --title-file chỉ dùng một")
+    if args.title_file is not None:
+        try:
+            args.title = c.read_text(Path(args.title_file)).strip()
+        except (OSError, UnicodeDecodeError) as exc:
+            raise InputError(f"--title-file {args.title_file!r}: không đọc được dạng UTF-8 ({exc})") from exc
     if args.sprint is None:
         return
     if not SLUG.fullmatch(args.sprint):
@@ -233,6 +258,10 @@ def validate(args) -> None:
         raise InputError("--sprint cần --title (mục tiêu sprint)")
     if any(ord(ch) < 32 or ord(ch) == 127 for ch in args.title):
         raise InputError("--title không được chứa ký tự điều khiển (xuống dòng, tab…) — sẽ làm hỏng frontmatter và bảng")
+    if any(ch in args.title for ch in SUSPECT_TITLE):
+        print(f"cảnh báo: --title {args.title!r} có '?' hoặc ký tự thay thế — shell có thể đã làm mất dấu. "
+              "Dùng --title-file <file UTF-8>, hoặc chạy `python -X utf8 scripts/init.py …` từ PowerShell.",
+              file=sys.stderr)
     if args.tiny:
         if args.size not in (None, "tiny"):
             raise InputError("--tiny không đi cùng --size khác tiny")
@@ -251,14 +280,23 @@ def validate(args) -> None:
             raise InputError(f"{flag} {value!r} phải là {rec_prefix}-NNN")
 
 
-def main(argv=None) -> int:
+def warn_tiers(env) -> None:
+    value = env.get("AGENT_AGILE_TIERS", "")
+    if not value or not Path(value).is_file():
+        print("cảnh báo: AGENT_AGILE_TIERS chưa đặt hoặc trỏ file không có — giao việc theo tier (review PLAN từ cỡ "
+              "vừa) sẽ cần người dùng chỉ định tier → model trong chat; xem tiers/README.md mục 2.", file=sys.stderr)
+
+
+def main(argv=None, env=None) -> int:
     c.utf8_stdio()
+    env = os.environ if env is None else env
     parser = argparse.ArgumentParser(prog="init.py", description="Dựng sổ gốc và khung sprint từ mẫu.")
     parser.add_argument("root", help="gốc dự án")
     parser.add_argument("--apply", action="store_true", help="ghi thật (mặc định chỉ in thao tác)")
     parser.add_argument("--date", default=dt.date.today().isoformat(), help="ngày ghi vào file (YYYY-MM-DD)")
     parser.add_argument("--sprint", metavar="SLUG", help="tạo khung một sprint mới")
     parser.add_argument("--title", help="mục tiêu sprint")
+    parser.add_argument("--title-file", help="đọc mục tiêu sprint từ file UTF-8 (không qua shell)")
     parser.add_argument("--tiny", action="store_true", help="việc rất nhỏ: một file SPRINT.md")
     parser.add_argument("--size", choices=["tiny", "small", "medium", "large"])
     parser.add_argument("--risk", choices=["normal", "high"], default="normal")
@@ -276,6 +314,7 @@ def main(argv=None) -> int:
     except InputError as exc:
         print(f"lỗi đầu vào: {exc}")
         return 2
+    warn_tiers(env)
     plan.render(args.apply)
     if args.apply:
         plan.apply()

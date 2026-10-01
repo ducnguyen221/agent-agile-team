@@ -179,3 +179,48 @@ def test_non_utf8_ledger_is_input_error(tmp_path, capsys):
     ledger.write_bytes(ledger.read_text(encoding="utf-8").encode("utf-16"))
     assert new_sprint(tmp_path, "order-lookup") == 2
     assert "UTF-8" in capsys.readouterr().out
+
+
+# --- TK6.5 ---------------------------------------------------------------------------------------------
+
+
+def test_first_real_row_removes_example_comment(tmp_path):
+    new_sprint(tmp_path, "order-lookup")
+    ledger = (tmp_path / "docs" / "plans" / "SPRINTS.md").read_text(encoding="utf-8")
+    assert "Ví dụ một dòng" not in ledger
+    assert ledger.count("| SPR-01 |") == 1
+    assert check.check_paths([tmp_path]).exit_code == 0
+
+
+def test_title_file_keeps_vietnamese(tmp_path):
+    title = tmp_path / "title.txt"
+    title.write_bytes("\ufeffcách ly theo loại\r\n".encode("utf-8"))
+    root = tmp_path / "p"
+    assert init.main([str(root), "--apply", "--date", DATE, "--sprint", "ok", "--title-file", str(title)]) == 0
+    spec = (root / "docs" / "plans" / f"{DATE}-ok" / "SPEC.md").read_text(encoding="utf-8")
+    assert c.parse_frontmatter(spec).data["title"] == "cách ly theo loại"
+    assert init.main([str(root), "--sprint", "x", "--title", "a", "--title-file", str(title)]) == 2
+
+
+def test_replacement_characters_in_title_warn(tmp_path, capsys):
+    assert init.main([str(tmp_path), "--date", DATE, "--sprint", "ok", "--title", "c?ch ly \ufffd"]) == 0
+    err = capsys.readouterr().err
+    assert "--title-file" in err and "-X utf8" in err
+
+
+def test_title_round_trips_through_a_real_process(tmp_path):
+    result = run_script("init.py", str(tmp_path), "--apply", "--date", DATE, "--sprint", "ok", "--title", "cách ly ạ")
+    assert result.returncode == 0, result.stdout + result.stderr
+    spec = (tmp_path / "docs" / "plans" / f"{DATE}-ok" / "SPEC.md").read_text(encoding="utf-8")
+    assert "title: cách ly ạ" in spec
+
+
+def test_missing_tiers_table_warns_early(tmp_path, capsys):
+    assert init.main([str(tmp_path), "--date", DATE], env={}) == 0
+    assert "AGENT_AGILE_TIERS" in capsys.readouterr().err
+    table = tmp_path / "tiers.json"
+    table.write_text("{}", encoding="utf-8")
+    assert init.main([str(tmp_path), "--date", DATE], env={"AGENT_AGILE_TIERS": str(table)}) == 0
+    assert "AGENT_AGILE_TIERS" not in capsys.readouterr().err
+    assert init.main([str(tmp_path), "--date", DATE], env={"AGENT_AGILE_TIERS": str(tmp_path / "none.json")}) == 0
+    assert "AGENT_AGILE_TIERS" in capsys.readouterr().err

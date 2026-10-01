@@ -23,8 +23,10 @@ lệnh rõ, cần **chạy và ghi** → T3. Phân vân giữa hai tier → ch�
 - **Hình dạng:** như [`tiers.example.json`](tiers.example.json) — khóa `schema` (số nguyên, hiện là `1`)
   và `tiers`; mỗi tier có `purpose` và `models` ánh xạ tên harness → mã model của harness đó.
 - **Khi thiếu biến, file không tồn tại hoặc đọc lỗi:** công cụ báo **Chưa chạy** cho phần cần bảng tier,
-  không đoán model, không lấy giá trị mặc định. Agent giao việc thì **hỏi người dùng** bảng ở đâu — không
-  đoán tên model.
+  không đoán model, không lấy giá trị mặc định (`init` cảnh báo ngay khi dựng sprint). Agent giao việc dùng
+  **chỉ định tier → model người dùng đã nêu trong chat** — một nguồn hợp lệ ngang bảng: ghi nguyên văn vào
+  nhật ký PROGRESS dòng `Phán quyết:` và phần tử `"note"` trong `roles`. Chưa có cả bảng lẫn chỉ định → hỏi
+  **ở Cổng 1**, kèm khuyến nghị (`method/process.md` mục 3) — không hỏi lẻ, không đoán tên model.
 - **Khi thiếu một harness hay một tier trong bảng:** báo Chưa chạy cho đúng ô đó; không tự hạ sang tier
   khác. Môi trường chưa chốt model cho T3 thì người dùng chỉ định tier thay thế **từng lượt** (mục 4).
 
@@ -81,7 +83,7 @@ và hãng vào PROGRESS như mục 3. Không có cầu thì ghi "cần người 
 
 | Tình huống | Làm gì |
 |---|---|
-| Không có bảng tier | Hỏi người dùng; Chưa chạy; không đoán |
+| Không có bảng tier | Dùng chỉ định tier → model trong chat (ghi nguyên văn vào `Phán quyết:`); chưa có thì hỏi ở Cổng 1 kèm khuyến nghị; không đoán |
 | Vai cần tier chưa có model | Người dùng chỉ định đè từng lượt + `"note"` |
 | Cạn hạn mức | Dừng tier đó, `BR`, báo; không hạ tier |
 | Muốn hãng khác | Tư vấn một lần; người dùng quyết |

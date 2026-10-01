@@ -11,7 +11,7 @@ Nguồn (hợp đồng `templates/README.md` mục 6):
 - SPRINTS: frontmatter `PROGRESS.md` (hoặc `SPRINT.md`) của từng thư mục sprint, `status` khác `done`/`dropped`.
 Sắp theo mã giảm dần (mới nhất ở trên). Cùng đầu vào cho cùng đầu ra, từng byte.
 
-Mã thoát: 0 = xong / đã cập nhật · 1 = `--check` thấy sổ cũ · 2 = lỗi đầu vào.
+Mã thoát: 0 = xong / đã cập nhật · 1 = `--check` thấy sổ cũ · 2 = lỗi đầu vào (gồm file không phải UTF-8).
 """
 
 from __future__ import annotations
@@ -168,6 +168,9 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     try:
         results = build(Path(args.root))
+    except UnicodeDecodeError as exc:
+        print(f"lỗi đầu vào: có sổ hoặc spec sống không đọc được dạng UTF-8 ({exc.reason}) — lưu lại file bằng UTF-8")
+        return 2
     except InputError as exc:
         print(f"lỗi đầu vào: {exc}")
         return 2

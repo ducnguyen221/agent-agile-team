@@ -149,3 +149,13 @@ def test_script_runs_standalone(tmp_path):
     root = project(tmp_path)
     result = run_script("index.py", str(root))
     assert result.returncode == 0, result.stderr
+
+
+def test_non_utf8_ledger_is_input_error_not_traceback(tmp_path, capsys):
+    root = project(tmp_path)
+    ledger = root / "docs" / "plans" / "SPRINTS.md"
+    ledger.write_bytes(ledger.read_text(encoding="utf-8").encode("utf-16"))
+    assert index.main([str(root)]) == 2
+    assert "UTF-8" in capsys.readouterr().out
+    result = run_script("index.py", str(root))
+    assert result.returncode == 2 and "Traceback" not in result.stderr

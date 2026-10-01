@@ -15,7 +15,7 @@ Ba công cụ cho dự án áp dụng, chỉ dùng thư viện chuẩn Python (3
 ```text
 python scripts/init.py <gốc-dự-án>                     # chạy thử: in "+ tạo / ~ sửa / = giữ", không ghi
 python scripts/init.py <gốc-dự-án> --apply             # ghi .agile.json + REQUESTS, SPRINTS, SPECS
-python scripts/init.py <gốc-dự-án> --apply --sprint <slug> --title "<mục tiêu>" [--tiny]
+python scripts/init.py <gốc-dự-án> --apply --sprint <slug> (--title "<mục tiêu>" | --title-file <file>) [--tiny]
        [--size tiny|small|medium|large] [--risk normal|high] [--risk-tags a,b] [--request RQ-NNN] [--feature FS-NNN]
        [--date YYYY-MM-DD]
 python scripts/check.py <file.md|.agile.json|thư-mục> [...]   # thư mục: quét đệ quy *.md và mọi .agile.json
@@ -23,13 +23,21 @@ python scripts/check.py --self [--root <repo>]
 python scripts/index.py <gốc-dự-án> [--check]          # --check: không ghi, thoát 1 nếu sổ chưa cập nhật
 ```
 
+**Tiêu đề có dấu tiếng Việt.** Các script đọc và ghi file bằng UTF-8, in ra console bằng UTF-8, và nhận tham số
+dạng Unicode của Windows — dấu không mất trong script. Nếu shell gọi (một số cầu Git Bash / `cmd` với code page
+cũ) đã làm mất dấu trước khi tới Python thì script không khôi phục được: dùng `--title-file <file UTF-8>`, hoặc
+chạy `python -X utf8 scripts/init.py …` từ PowerShell. `init` cảnh báo ra stderr khi tiêu đề chứa `?` hoặc ký tự
+thay thế U+FFFD.
+
+Dòng sprint đầu tiên `init` ghi vào SPRINTS thay luôn comment dòng ví dụ của mẫu (mẫu dặn xoá khi ghi dòng thật).
+
 ## Mã thoát
 
 | Script | 0 | 1 | 2 |
 |---|---|---|---|
-| `init.py` | xong (hoặc chạy thử xong) | — | lỗi đầu vào: tham số sai (gồm ký tự điều khiển trong `--title`), `.agile.json` hỏng hoặc sai hình, đích ghi nằm ngoài gốc dự án và `artifact_root`, sổ thiếu `next_id` |
+| `init.py` | xong (hoặc chạy thử xong) | — | lỗi đầu vào: tham số sai (gồm ký tự điều khiển trong `--title`, `--title` cùng `--title-file`, `--title-file` không đọc được dạng UTF-8), `.agile.json` hỏng hoặc sai hình, đích ghi nằm ngoài gốc dự án và `artifact_root`, sổ thiếu `next_id` |
 | `check.py` | Đạt: không có Chặn / Phải sửa (Nên sửa, Ghi chú vẫn in) | Không đạt: có Chặn hoặc Phải sửa | lỗi đầu vào: đường dẫn không có, file không đọc được, frontmatter ngoài tập con, `.agile.json` không phải JSON |
-| `index.py` | đã cập nhật hoặc không đổi | `--check` thấy sổ chưa cập nhật | lỗi đầu vào: thiếu hoặc sai hình `.agile.json`, sổ ngoài gốc dự án, thiếu sổ, dấu mốc sai, frontmatter spec sống hỏng |
+| `index.py` | đã cập nhật hoặc không đổi | `--check` thấy sổ chưa cập nhật | lỗi đầu vào: thiếu hoặc sai hình `.agile.json`, sổ ngoài gốc dự án, thiếu sổ, dấu mốc sai, frontmatter spec sống hỏng, sổ hoặc spec sống không phải UTF-8 |
 
 Mỗi phát hiện của `check` in một dòng `đường-dẫn:dòng: <mức> [<mã luật>] <mô tả>`; dòng cuối là tóm tắt số
 file, số phát hiện theo mức và kết luận. `init` và `index` khi ghi lại một file có sẵn giữ nguyên BOM và kiểu
@@ -39,6 +47,7 @@ xuống dòng (LF/CRLF) của file đó; file mới ghi UTF-8 không BOM, LF.
 
 | Biến | Dùng bởi | Ý nghĩa |
 |---|---|---|
+| `AGENT_AGILE_TIERS` | `init.py` | Đường tới bảng tier → model ngoài repo ([`tiers/README.md`](../tiers/README.md) mục 2). Chưa đặt hoặc trỏ file không có → `init` in cảnh báo ra stderr (mã thoát không đổi), để Analyst xin chỉ định tier trong chat trước khi cần review PLAN |
 | `AGENT_AGILE_DENYLIST` | `check.py --self` | Đường tới danh sách từ cấm **ngoài repo** (hợp đồng ở [`tests/README.md`](../tests/README.md)). Thiếu, không đọc được hoặc rỗng → in `WARNING NOT_CONFIGURED` ra stderr, luật `leak-denylist` **Chưa chạy** (không tính là Đạt); mã thoát không vì thế mà đổi |
 
 ## Luật của `check`
