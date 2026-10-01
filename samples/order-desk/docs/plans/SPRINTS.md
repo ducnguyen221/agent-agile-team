@@ -25,6 +25,8 @@ updated: 2026-01-20
 
 ## Timeline
 
+Sổ SPRINTS ghi mỗi dòng một **sprint** (SPR), mới nhất ở trên:
+
 | Mã | Mở | Đóng | Mục tiêu | Kết luận | Thư mục |
 |---|---|---|---|---|---|
 | SPR-02 | 2026-01-20 |  | Sửa chính tả câu báo không tìm thấy |  | [2026-01-20-fix-not-found-text](2026-01-20-fix-not-found-text/) |

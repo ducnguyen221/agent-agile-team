@@ -20,7 +20,9 @@ updated: 2026-01-16
      - Sửa: FR ghi "(sửa FS-001/FR1.2)" → thay câu KHI … THÌ … của FR1.2, giữ nguyên mã, ghi "(sửa ở SPR-NN)".
      - Bỏ: FR ghi "(bỏ FS-001/FR1.2)" → giữ mã, cuối dòng ghi "— bỏ" (sprint ghi ở mục 5);
        SC chỉ đo hành vi đó cũng ghi bỏ.
-     Rồi thêm một dòng mục 5 ghi đủ ba vế delta và cập nhật `sprints`, `requests`, `updated`, `status`. -->
+     Rồi thêm một dòng mục 5 ghi đủ ba vế delta và cập nhật `sprints`, `requests`, `updated`, `status`.
+     Câu dẫn: trước mỗi bảng / danh sách mã ghi một câu nói tài liệu nào và mã là gì, nghĩa in đậm — ví dụ
+     "SPEC có 3 **user story** (US):" (skill id-convention). -->
 
 > **Kết luận:** <!-- MỘT câu: tính năng làm gì, cho ai, đang ở trạng thái nào. -->
 > Nhân viên tra trạng thái đơn hàng bằng mã đơn; đang chạy từ SPR-01.
@@ -28,6 +30,8 @@ updated: 2026-01-16
 ## 1. Hành vi hiện hành
 
 <!-- Mỗi FR + kịch bản KHI … THÌ … đang đúng ở bản hiện tại. Ghi sprint đã đưa hành vi vào. -->
+
+Spec sống có 1 **functional requirement** (FR) đang chạy:
 
 ### FR1 — Tra đơn theo mã (từ SPR-01)
 
@@ -37,6 +41,8 @@ updated: 2026-01-16
 ## 2. Tiêu chí đang giữ
 
 <!-- SC mà mọi sprint sau phải giữ nguyên (hồi quy). -->
+
+Spec sống giữ 1 **success criterion** (SC):
 
 | Mã | Tiêu chí | Cách đo |
 |---|---|---|

@@ -12,7 +12,9 @@ updated: 2026-01-15
      (mẫu: `feature-spec.md`) mô tả HÀNH VI HIỆN HÀNH. Spec sống chỉ cập nhật sau khi Cổng 2 đạt.
      Mã FS-NNN tăng dần, có gạch nối, KHÔNG tái dùng; lấy mã từ `next_id`.
      Cột Trạng thái viết chữ Việt, khớp khoá `status` của spec sống: đề xuất = `proposed` · đang làm =
-     `in_progress` · đang chạy = `live` · ngừng = `deprecated` · bỏ = `dropped`. -->
+     `in_progress` · đang chạy = `live` · ngừng = `deprecated` · bỏ = `dropped`.
+     Câu dẫn: trước mỗi bảng / danh sách mã ghi một câu nói tài liệu nào và mã là gì, nghĩa in đậm — ví dụ
+     "SPEC có 3 **user story** (US):" (skill id-convention). -->
 
 > Agent phiên mới: đọc khối "Đang mở" rồi mở thẳng file spec sống; không quét cả thư mục.
 
@@ -24,6 +26,8 @@ Không có tính năng nào đang mở.
 <!-- agile:open:end -->
 
 ## Danh mục
+
+Sổ SPECS ghi mỗi dòng một **feature** (FS), mã mới ở trên:
 
 | Mã | Tính năng | Trạng thái | Spec sống | Sprint gần nhất | Cập nhật |
 |---|---|---|---|---|---|

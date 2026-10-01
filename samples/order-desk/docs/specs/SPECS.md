@@ -25,6 +25,8 @@ Không có tính năng nào đang mở.
 
 ## Danh mục
 
+Sổ SPECS ghi mỗi dòng một **feature** (FS), mã mới ở trên:
+
 | Mã | Tính năng | Trạng thái | Spec sống | Sprint gần nhất | Cập nhật |
 |---|---|---|---|---|---|
 | FS-001 | Tra cứu đơn hàng | đang chạy | [order-lookup.md](order-lookup.md) | SPR-01 | 2026-01-16 |

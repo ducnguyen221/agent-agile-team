@@ -129,7 +129,7 @@ trích bắt đầu bằng `> **Kết luận:**` trước tiêu đề cấp 2 đ
 | SPEC | Bối cảnh · Câu chuyện người dùng · Yêu cầu chức năng · Tiêu chí thành công · Ngoài phạm vi · Câu hỏi cần làm rõ (Truy vết: Nên có từ cỡ vừa; Đổi hợp đồng / giao diện: bắt buộc khi cỡ lớn hoặc `risk_tags` có `public_api`, cỡ khác xoá mục — `check` chưa kiểm) |
 | PLAN | Mục tiêu · Kiến trúc · Ràng buộc chung · Trọng tâm review · Việc · Rủi ro · Quyết định cần người · Ước lượng |
 | PROGRESS | Bảng trạng thái việc · Nhật ký · Vướng mắc · Vòng kiểm định hiện tại |
-| REPORT | Tóm tắt cho người không chuyên · Kết quả kiểm định · Phát hiện của reviewer · Rủi ro còn lại · Cách dùng, đã đổi gì, cách hoàn tác · Bài học · Việc để lại · Review & Retro · Cổng 2 |
+| REPORT | Tóm tắt cho người không chuyên · Kết quả kiểm định · Phát hiện của reviewer · Rủi ro còn lại · Cách dùng, đã đổi gì, cách hoàn tác · Bài học · Việc để lại · Review & Retro · Cổng 2 (tiểu mục `### Review PLAN trước Cổng 1` dưới "Phát hiện của reviewer": nơi chuẩn của `RF` review PLAN, nên có từ cỡ vừa — `check` không bắt buộc) |
 | SPRINT (gộp) | SPEC · PLAN · PROGRESS · REPORT |
 | spec sống | Hành vi hiện hành · Tiêu chí đang giữ · Giới hạn đã biết · Quyết định liên quan · Lịch sử sprint |
 | REQUESTS, SPRINTS | Đang mở · Timeline |
@@ -142,6 +142,10 @@ Mục không có nội dung vẫn giữ tiêu đề và ghi "Không có." — kh
 - Mã mục theo tài liệu sở hữu: SPEC `US` `FR` (`FR1.2` là kịch bản) `SC` `CQ` · PLAN `TK` (`TK1.1` là việc
   con) `RK` `DN` · PROGRESS `BR` · REPORT `VR` `RF` `LN` `CO`. Hồ sơ sổ gốc có gạch nối: `RQ-` ≥ 3 chữ số,
   `FS-` ≥ 3 chữ số, `SPR-` ≥ 2 chữ số (độ rộng theo `id_width` của cấu hình).
+- Trước mỗi bảng / danh sách mã có **câu dẫn**: tài liệu nào + nghĩa của mã in đậm + mã trong ngoặc —
+  `SPEC có 1 **user story** (US):`, `Sổ REQUESTS ghi mỗi dòng một **request** (RQ), mới nhất ở trên:` (sổ
+  gốc không ghi số đếm vì `init` thêm dòng). `check` báo `id-list-lead` (Ghi chú) khi bảng có cột đầu "Mã" mà
+  dòng không trống ngay trên không có chữ in đậm; khối "Đang mở" do `index` sinh được miễn.
 - Ô mã của bảng viết `Mã (tên ngắn)`, ví dụ `TK1 (hàm tra cứu đơn)`. Tiêu đề việc trỏ spec:
   `### TK1 — Tên (→ FR1.1, SC1)`. Nhắc sang tài liệu khác: `FS-001/FR1.1`.
 - `check` coi một mã là **được định nghĩa** khi nó đứng đầu tiêu đề, đứng đầu ô thứ nhất của bảng có cột đầu

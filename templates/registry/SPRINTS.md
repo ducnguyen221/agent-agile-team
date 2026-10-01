@@ -10,7 +10,9 @@ updated: 2026-01-15
 
 <!-- Một dòng mỗi sprint, theo timeline, MỚI NHẤT Ở TRÊN. Sprint = một mục tiêu, dài ngắn tùy mục tiêu.
      Mã SPR-NN tăng dần, có gạch nối, KHÔNG tái dùng; lấy mã từ `next_id`.
-     Cột Đóng để trống khi sprint còn mở. Kết luận = kết luận Cổng 2: Đạt / Đạt có điều kiện / Không đạt / bỏ. -->
+     Cột Đóng để trống khi sprint còn mở. Kết luận = kết luận Cổng 2: Đạt / Đạt có điều kiện / Không đạt / bỏ.
+     Câu dẫn: trước mỗi bảng / danh sách mã ghi một câu nói tài liệu nào và mã là gì, nghĩa in đậm — ví dụ
+     "SPEC có 3 **user story** (US):" (skill id-convention). -->
 
 > Agent phiên mới: đọc khối "Đang mở" rồi mở thẳng PROGRESS của sprint; không quét cả thư mục.
 
@@ -22,6 +24,8 @@ Không có sprint nào đang mở.
 <!-- agile:open:end -->
 
 ## Timeline
+
+Sổ SPRINTS ghi mỗi dòng một **sprint** (SPR), mới nhất ở trên:
 
 | Mã | Mở | Đóng | Mục tiêu | Kết luận | Thư mục |
 |---|---|---|---|---|---|

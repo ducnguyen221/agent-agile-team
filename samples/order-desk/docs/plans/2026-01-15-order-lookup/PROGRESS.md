@@ -60,6 +60,8 @@ links:
      hoặc secret, (c) tác động ra ngoài phạm vi đã giao, (d) PLAN hỏng — giả định sai làm đổi tiêu chí thành
      công. Hết hạn mức model của một tier cũng mở BR (không tự hạ tier). Không có thì ghi "Không có." -->
 
+PROGRESS có 1 **blocker** (BR):
+
 | Mã | Vướng mắc | Loại | Xử lý | Cần ai | Trạng thái |
 |---|---|---|---|---|---|
 | BR1 (thiếu quyền đọc) | Tài khoản kiểm thử không đọc được bảng đơn | (c) ngoài phạm vi | Chủ sản phẩm cấp quyền chỉ-đọc lúc 2026-01-15 11:00 | Chủ sản phẩm | đã xử lý |
@@ -71,5 +73,5 @@ links:
      Reviewer là agent KHÁC người làm. Chi tiết RF ghi ở REPORT; ở đây chỉ đếm và trỏ. -->
 
 *Vòng 1 — Business Reviewer (agent-c, T1) và Tech Reviewer (agent-d,
-T1): Đạt có điều kiện; 0 Chặn, 0 Phải sửa, 2 Nên sửa, 0 Ghi chú; RF1 (thông báo khó hiểu) đã sửa ở TK2,
-RF2 (truy vấn chưa có chỉ mục) để lại → CO1.*
+T1): Đạt có điều kiện; 0 Chặn, 0 Phải sửa, 2 Nên sửa, 0 Ghi chú; RF2 (thông báo khó hiểu) đã sửa ở TK2,
+RF3 (truy vấn chưa có chỉ mục) để lại → CO1.*

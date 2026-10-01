@@ -22,6 +22,8 @@ updated: 2026-01-16
 
 <!-- Mỗi FR + kịch bản KHI … THÌ … đang đúng ở bản hiện tại. Ghi sprint đã đưa hành vi vào. -->
 
+Spec sống có 1 **functional requirement** (FR) đang chạy:
+
 ### FR1 — Tra đơn theo mã (từ SPR-01)
 
 - **FR1.1 (mã đúng):** KHI người dùng nhập mã đơn tồn tại THÌ hệ thống hiện trạng thái và thời điểm cập nhật.
@@ -30,6 +32,8 @@ updated: 2026-01-16
 ## 2. Tiêu chí đang giữ
 
 <!-- SC mà mọi sprint sau phải giữ nguyên (hồi quy). -->
+
+Spec sống giữ 1 **success criterion** (SC):
 
 | Mã | Tiêu chí | Cách đo |
 |---|---|---|

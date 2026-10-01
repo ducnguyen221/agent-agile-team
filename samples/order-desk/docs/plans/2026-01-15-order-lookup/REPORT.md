@@ -49,6 +49,8 @@ Khi số đơn tăng nhiều, việc tra có thể chậm dần — đề xuất
 <!-- Mỗi SC (và kịch bản FR quan trọng) có ít nhất một VR. Kết quả: Đạt · Không đạt · Chưa chạy · Không áp dụng
      (kèm lý do). "Chưa chạy" và "Không áp dụng" KHÔNG tính là Đạt. Người kiểm phải là agent khác người làm. -->
 
+REPORT có 1 **verification result** (VR):
+
 | Mã | Kiểm cái gì | Lệnh / thao tác | Kết quả | Người kiểm | Bằng chứng |
 |---|---|---|---|---|---|
 | VR1 (test tra cứu) | SC1, FR1.1, FR1.2 | `pytest tests/test_orders.py` | Đạt | QA · agent-f | 6 passed, coverage 92% |
@@ -59,19 +61,41 @@ Khi số đơn tăng nhiều, việc tra có thể chậm dần — đề xuất
      xử lý (mở · đã sửa · để lại → CO · bác kèm lý do). Reviewer được trả 0 phát hiện nhưng phải ghi rõ
      phần mình KHÔNG đánh giá. -->
 
-### Business Reviewer
+### Review PLAN trước Cổng 1
+
+<!-- Từ cỡ vừa: Tech Reviewer review PLAN trước khi trình Cổng 1 (skill plan-review). Ghi ở đây: dòng trạng thái
+     gộp (kết luận, số phát hiện theo mức, đã gộp vào SPEC/PLAN chưa), bảng RF, phần không đánh giá. Mã RF đánh
+     tiếp với kiểm định sản phẩm (review PLAN đến trước nên thường giữ các số đầu). Cỡ nhỏ hoặc không review PLAN
+     thì ghi "Không áp dụng — <lý do>". -->
+
+- **Trạng thái gộp:** Đạt có điều kiện — 0 Chặn, 0 Phải sửa, 1 Nên sửa; đã gộp vào PLAN trước Cổng 1, không mở
+  vòng review PLAN thứ hai.
+
+Tech Reviewer review PLAN ghi 1 **review finding** (RF):
 
 | Mã | Phát hiện | Mức | Bằng chứng | Xử lý |
 |---|---|---|---|---|
-| RF1 (thông báo khó hiểu) | Câu báo lỗi dùng thuật ngữ nội bộ | Nên sửa | `ui/orders.html:42` | đã sửa |
+| RF1 (thiếu ca ô mã trống) | PLAN chưa kiểm khi người dùng bấm tra với ô mã để trống | Nên sửa | PLAN `TK2` bản đầu | đã sửa — `TK2` thêm kịch bản ô trống vào cách kiểm |
+
+- **Không đánh giá (review PLAN):** mã nguồn (chưa có), hiệu năng.
+
+### Business Reviewer
+
+Business Reviewer ghi 1 **review finding** (RF):
+
+| Mã | Phát hiện | Mức | Bằng chứng | Xử lý |
+|---|---|---|---|---|
+| RF2 (thông báo khó hiểu) | Câu báo lỗi dùng thuật ngữ nội bộ | Nên sửa | `ui/orders.html:42` | đã sửa |
 
 - **Không đánh giá:** hiệu năng khi tải lớn.
 
 ### Tech Reviewer
 
+Tech Reviewer ghi 1 **review finding** (RF):
+
 | Mã | Phát hiện | Mức | Bằng chứng | Xử lý |
 |---|---|---|---|---|
-| RF2 (truy vấn chưa có chỉ mục) | Tra theo mã quét cả bảng | Nên sửa | `services/orders.py:18` | để lại → CO1 |
+| RF3 (truy vấn chưa có chỉ mục) | Tra theo mã quét cả bảng | Nên sửa | `services/orders.py:18` | để lại → CO1 |
 
 - **Không đánh giá:** giao diện trên thiết bị di động.
 
@@ -79,7 +103,7 @@ Khi số đơn tăng nhiều, việc tra có thể chậm dần — đề xuất
 
 <!-- Rủi ro chưa xử lý mà người duyệt phải chấp nhận nếu cho Đạt. Không có thì ghi "Không có." -->
 
-- RF2 (truy vấn chưa có chỉ mục) còn mở — mức Nên sửa, tra chậm dần khi bảng lớn; đã chuyển thành CO1
+- RF3 (truy vấn chưa có chỉ mục) còn mở — mức Nên sửa, tra chậm dần khi bảng lớn; đã chuyển thành CO1
   (chỉ mục mã đơn).
 
 ## 4. Cách dùng, đã đổi gì, cách hoàn tác
@@ -96,6 +120,8 @@ Khi số đơn tăng nhiều, việc tra có thể chậm dần — đề xuất
 <!-- Bài học TÁI DÙNG được, không phải nhật ký. Cột "Đề xuất nâng thành": luật / skill / bước quy trình / không.
      Chỉ ĐỀ XUẤT — chủ sản phẩm quyết. Nơi lưu do lớp riêng của môi trường quy định. -->
 
+REPORT có 1 **lesson** (LN):
+
 | Mã | Bài học | Quan trọng | Đề xuất nâng thành | Nơi lưu |
 |---|---|---|---|---|
 | LN1 (chuẩn hoá đầu vào) | Mã do người gõ hoặc dán phải chuẩn hoá (hoa thường, khoảng trắng) trước khi tra | Có | Bước kiểm trong thẻ Tech Reviewer | nơi lưu bài học của dự án |
@@ -103,6 +129,8 @@ Khi số đơn tăng nhiều, việc tra có thể chậm dần — đề xuất
 ## 6. Việc để lại
 
 <!-- Việc chưa làm, lý do, đề xuất xử lý (sprint sau hoặc yêu cầu mới RQ-NNN). Không có thì ghi "Không có." -->
+
+REPORT có 1 **carry-over** (CO), đã ghi thành dòng mới trong sổ REQUESTS:
 
 | Mã | Việc | Lý do để lại | Đề xuất |
 |---|---|---|---|

@@ -26,6 +26,8 @@ updated: 2026-01-20
 
 ## Timeline
 
+Sổ REQUESTS ghi mỗi dòng một **request** (RQ), mới nhất ở trên:
+
 | Mã | Ngày | Tóm tắt | Trạng thái | Tính năng | Sprint |
 |---|---|---|---|---|---|
 | RQ-003 | 2026-01-20 | Câu báo không tìm thấy sai chính tả | đang làm | FS-001 | SPR-02 |

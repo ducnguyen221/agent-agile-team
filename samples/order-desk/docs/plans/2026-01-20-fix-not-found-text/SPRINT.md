@@ -48,6 +48,8 @@ updated: 2026-01-20
 
 <!-- Một hoặc vài TK, mỗi TK đủ: vai + tier, cách kiểm, hoàn tác, trỏ FR/SC. -->
 
+PLAN có 1 **task** (TK):
+
 - **TK1 (sửa câu báo lỗi) → FR1.1, SC1:** Implementer · T2 thực thi. Cách kiểm: test giao diện xanh.
   Hoàn tác: `git revert`.
 
@@ -69,6 +71,8 @@ updated: 2026-01-20
      (CO) nếu có · Cổng 2: câu nguyên văn + thời điểm, cũng ghi vào frontmatter. Việc rất nhỏ nghiệm thu ngầm
      (người dùng không phản đối trong lượt báo cuối) thì ghi trung thực:
      gate_2: pass · gate_2_at: <thời điểm> · gate_2_quote: "nghiệm thu ngầm — không phản đối tới <thời điểm>". -->
+
+REPORT có 1 **verification result** (VR):
 
 | Mã | Kiểm cái gì | Lệnh / thao tác | Kết quả | Người kiểm |
 |---|---|---|---|---|

@@ -10,7 +10,9 @@ updated: 2026-01-15
 
 <!-- Một dòng mỗi yêu cầu chủ sản phẩm giao, theo timeline, MỚI NHẤT Ở TRÊN. Analyst ghi ngay khi tiếp nhận.
      Mã RQ-NNN tăng dần, có gạch nối, KHÔNG tái dùng; lấy mã từ `next_id` rồi tăng `next_id` lên một.
-     Trạng thái: mới · đang làm · xong · bỏ. Yêu cầu nhiều mục tiêu → nhiều sprint, ghi đủ ở cột Sprint. -->
+     Trạng thái: mới · đang làm · xong · bỏ. Yêu cầu nhiều mục tiêu → nhiều sprint, ghi đủ ở cột Sprint.
+     Câu dẫn: trước mỗi bảng / danh sách mã ghi một câu nói tài liệu nào và mã là gì, nghĩa in đậm — ví dụ
+     "SPEC có 3 **user story** (US):" (skill id-convention). -->
 
 > Agent phiên mới: đọc khối "Đang mở" rồi đi thẳng tới thư mục sprint; không quét cả thư mục.
 
@@ -22,6 +24,8 @@ Không có yêu cầu nào đang mở.
 <!-- agile:open:end -->
 
 ## Timeline
+
+Sổ REQUESTS ghi mỗi dòng một **request** (RQ), mới nhất ở trên:
 
 | Mã | Ngày | Tóm tắt | Trạng thái | Tính năng | Sprint |
 |---|---|---|---|---|---|

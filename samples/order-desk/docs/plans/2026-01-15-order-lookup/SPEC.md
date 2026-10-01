@@ -34,14 +34,17 @@ links:
 
 ## 1. Bối cảnh
 
-<!-- Vì sao cần làm. 3–6 gạch đầu dòng; số liệu phải có nguồn. Trỏ yêu cầu gốc RQ-NNN và tính năng FS-NNN. -->
+<!-- Vì sao cần làm. 3–6 gạch đầu dòng; số liệu phải có nguồn. Trỏ yêu cầu gốc RQ-NNN và tính năng FS-NNN.
+     Việc sửa lỗi, cổng kiểm, hiệu năng: ghi số đo TRƯỚC sprint kèm lệnh đo — đó là bằng chứng gốc để VR so sau. -->
 
 - Yêu cầu gốc: RQ-001 (tra trạng thái đơn hàng). Tính năng chạm tới: FS-001 (tra cứu đơn hàng).
-- Hiện trạng: <!-- điều đang sai hoặc đang thiếu, kèm số đo nếu có -->
+- Hiện trạng: <!-- điều đang sai hoặc đang thiếu, kèm số đo trước sprint + lệnh đo nếu có -->
 
 ## 2. Câu chuyện người dùng
 
 <!-- Mỗi dòng: "Là <ai>, tôi <muốn gì>, để <được gì>". Mã US + tên ngắn trong ngoặc. -->
+
+SPEC có 1 **user story** (US):
 
 | Mã | Câu chuyện | Ưu tiên |
 |---|---|---|
@@ -51,6 +54,8 @@ links:
 
 <!-- Mỗi FR trỏ ít nhất một US. Mỗi kịch bản là một FRx.y viết dạng KHI … THÌ …; kịch bản là thứ đem đi kiểm. -->
 
+SPEC có 1 **functional requirement** (FR); mỗi kịch bản KHI … THÌ … là một mã con:
+
 ### FR1 — Tra đơn theo mã (→ US1)
 
 - **FR1.1 (mã đúng):** KHI người dùng nhập mã đơn tồn tại THÌ hệ thống hiện trạng thái hiện tại và thời điểm cập nhật.
@@ -59,6 +64,8 @@ links:
 ## 4. Tiêu chí thành công
 
 <!-- Mỗi SC đo được: có lệnh/thao tác và ngưỡng. REPORT sẽ có đúng một hoặc nhiều VR cho mỗi SC. -->
+
+SPEC có 1 **success criterion** (SC):
 
 | Mã | Tiêu chí | Cách đo |
 |---|---|---|
@@ -74,6 +81,8 @@ links:
 
 <!-- Gom MỌI điểm chưa rõ vào đây để hỏi một lần ở Cổng 1, không hỏi lẻ. Không có thì ghi "Không có."
      Giả định đang dùng ghi dưới nhãn **ASSUMPTION** để người duyệt chỉ cần lên tiếng nếu không đồng ý. -->
+
+SPEC có 1 **clarification question** (CQ) cần người dùng trả lời ở Cổng 1:
 
 | Mã | Câu hỏi | Đề xuất | Trạng thái |
 |---|---|---|---|
