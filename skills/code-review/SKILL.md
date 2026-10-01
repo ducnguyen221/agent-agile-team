@@ -1,12 +1,12 @@
 ---
 name: code-review
-description: Use when code must be reviewed — a diff, a branch, a PR, "check my changes", a pre-merge or pre-deploy pass, a task review inside a sprint, or a bug hunt without a diff — to decide which reviewer runs, in what order, when to stop, how to brief the reviewer, and how the author receives the findings.
+description: Use when code must be reviewed — a diff, a branch, a PR, "check my changes", a pre-merge or pre-deploy pass, a task review inside a sprint, or a bug hunt without a diff — to decide which reviewer runs, in what order, when to stop, how to brief the reviewer, and how the author receives the findings — including when tempted to fix the clear review items first while others are still unclear.
 metadata:
   group: verification
   roles: [analyst, tech-reviewer, implementer]
-source: ["obra/superpowers skills/requesting-code-review/ (SKILL.md, code-reviewer.md)", "obra/superpowers skills/receiving-code-review/SKILL.md", "dev-process skills/code-review-routing/SKILL.md (locally written, routing table and verify gate)"]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 4c0fdc5736a49b6223a7dfc7626d5495cf55185c]
-license: MIT
+source: ["obra/superpowers skills/requesting-code-review/ (SKILL.md, code-reviewer.md)", "obra/superpowers skills/receiving-code-review/SKILL.md", "academy skills/code-review-routing/SKILL.md (private copy, locally written: routing table and verify gate)"]
+source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 4c0fdc5736a49b6223a7dfc7626d5495cf55185c]
+license: [MIT, MIT, none]
 rewrite_before_public: false
 ---
 

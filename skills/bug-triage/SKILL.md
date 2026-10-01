@@ -4,9 +4,9 @@ description: Use when a bug report, stack trace, failing production flow or "how
 metadata:
   group: process
   roles: [analyst]
-source: "dev-process skills/bug-triager/SKILL.md (unlicensed, local copy)"
+source: academy skills/bug-triager/SKILL.md (private copy)
 source_sha: 4c0fdc5736a49b6223a7dfc7626d5495cf55185c
-license: unlicensed
+license: none
 rewrite_before_public: true
 ---
 

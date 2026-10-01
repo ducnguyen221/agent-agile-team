@@ -48,6 +48,7 @@ là skill · **bỏ** = không mang vào · **ra ngoài** = chuyển sang bộ k
 | `ecc-pack:ecc-context-budget` | `token-economy` | gộp |
 | ECC `strategic-compact` | `token-economy` | gộp |
 | ECC `learn-eval` | `closing-sprint` (`references/lessons.md`) | gộp |
+| `ecc-pack:ecc-knowledge-ops` | — đã rời pack trước Đợt 1; ý tương đương → `closing-sprint/references/lessons.md` + luật memory của môi trường | ra ngoài |
 | agent `ecc-pack:ecc-python-reviewer` | agent `python-reviewer` | đổi tên |
 | agent `ecc-pack:ecc-fastapi-reviewer` | agent `fastapi-reviewer` | đổi tên |
 | agent `ecc-pack:ecc-database-reviewer` | agent `database-reviewer` (bỏ quyền Write/Edit) | đổi tên |
@@ -74,5 +75,5 @@ là skill · **bỏ** = không mang vào · **ra ngoài** = chuyển sang bộ k
 | `dev-process:sprint-orchestrator` | `method/process.md` + `scripts/init.py` + `templates/sprint/` | thành phần khác |
 | `dev-process:registry-syncer` | `scripts/index.py` + `templates/registry/` | thành phần khác |
 | `dev-process:openspec-proposer` | mục "Đổi hợp đồng / giao diện" của `templates/sprint/SPEC.md`; delta Thêm / Sửa / Bỏ của `templates/registry/feature-spec.md` | thành phần khác |
-| `dev-process:test-mapper`, `dev-process:rtm-auditor` | thẻ `roles/executor/qa.md` (bảng phủ `FR` → `VR`) + luật `report-fr-without-vr` của `scripts/check.py` | thành phần khác |
+| `dev-process:test-mapper`, `dev-process:rtm-auditor` | thẻ `roles/executor/qa.md` (bảng phủ `FR` → `VR`) + bốn luật truy vết của `scripts/check.py`: `task-without-trace`, `report-sc-without-vr`, `report-fr-without-vr`, `xref-missing` | thành phần khác |
 | `dev-process:open-code-review-delegate` | — (bản gốc nằm trong lịch sử git của môi trường nguồn) | bỏ |

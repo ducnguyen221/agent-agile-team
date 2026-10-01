@@ -56,12 +56,12 @@ subagent (RK20). Nguyên văn ở `tests/scenarios.txt`.
 - Mục 6, gạch đầu dòng "mục chưa rõ": đổi thành "**Còn mục nào chưa rõ → không sửa mục nào, kể cả mục đã
   rõ**", chỉ được kiểm chứng trong lúc chờ, "hạn gộp gần không phải lý do sửa trước phần đã rõ" (vá kịch bản 3).
 - Mục 8: thêm dòng cờ đỏ "Mục rõ thì làm ngay cho kịp giờ, mục mơ hồ hỏi sau".
-- Đề xuất cho người giữ frontmatter: thêm triệu chứng "tempted to fix the clear review items first" vào
-  `description` (bước 4 của REFACTOR) — lượt này không sửa frontmatter.
+- Triệu chứng "tempted to fix the clear review items first" đã thêm vào `description` (bước 4 của REFACTOR,
+  vòng sửa 1 của TK5).
 
 ## Chạy lại
 
 Như `skills/security-review/tests/pressure.md` mục "Chạy lại"; GREEN đọc `skills/code-review/SKILL.md` (kịch
-bản 2 đọc thêm `references/reviewer.md`); gốc: kịch bản 1 đọc `dev-process/code-review-routing` +
+bản 2 đọc thêm `references/reviewer.md`); gốc: kịch bản 1 đọc bản private `code-review-routing` (mốc `4c0fdc57`) +
 superpowers `requesting-code-review`, kịch bản 2 đọc `requesting-code-review` + `code-reviewer.md`, kịch bản 3
 đọc `receiving-code-review`.

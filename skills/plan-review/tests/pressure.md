@@ -55,4 +55,4 @@ giờ bỏ Bước 0 hay sơ đồ test"), mục 3 ("luật chống bỏ phần"
 ## Chạy lại
 
 Như `skills/security-review/tests/pressure.md` mục "Chạy lại"; GREEN đọc `skills/plan-review/SKILL.md`, gốc
-đọc `dev-process/skills/plan-eng-review/SKILL.md`.
+đọc bản private `skills/plan-eng-review/SKILL.md` (mốc `4c0fdc57`).

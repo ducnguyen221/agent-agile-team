@@ -3,8 +3,8 @@
 Agent reviewer chuyên đề, mỗi agent một file `<tên>.md`. Cả 7 agent **chỉ đọc** (không sửa code, không
 chạy lệnh ghi), là agent **khác** người làm, và được Tech Reviewer kéo theo trigger (skill `code-review`,
 thẻ `roles/verifier/`). Frontmatter không ghi `model:` — tier ghi trong thân (T1 tư duy); model thực tế do
-bảng tier của môi trường quyết. Nguồn ghi ở frontmatter (`source`, `source_sha`, `base_sha`, `license`),
-khớp [UPSTREAM.md](../UPSTREAM.md).
+bảng tier của môi trường quyết. Nguồn ghi ở frontmatter (`source`, `source_sha`, `base_sha`, `license`,
+`rewrite_before_public`), khớp [UPSTREAM.md](../UPSTREAM.md).
 
 ## Mục lục — 7 agent
 

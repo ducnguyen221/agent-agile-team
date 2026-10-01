@@ -13,6 +13,7 @@ hình ở `pyproject.toml`): `python -m coverage run -m pytest` rồi `python -m
 | `test_init.py` | Chạy thử không ghi; `--apply` không ghi đè; chạy hai lần không đổi; sprint mới đặt lại trạng thái và ghi SPRINTS |
 | `test_index.py` | Khối "Đang mở" của ba sổ: lọc, sắp mới nhất ở trên, giống nhau từng byte khi chạy lại, `--check` |
 | `test_samples.py` | `samples/` sạch theo `check`, khối "Đang mở" đã cập nhật, chèn mã trần thì đỏ |
+| `test_provenance.py` | Mọi `skills/*/SKILL.md` và `agents/*.md` có `source`, `source_sha`, `license`, `rewrite_before_public`; `source` là danh sách thì `source_sha` cùng độ dài; mọi SHA (kể cả `base_sha`, trừ `null`) có trong `UPSTREAM.md`; `rewrite_before_public: true` ⇔ skill có dòng ở `THIRD_PARTY.md` mục 3 |
 
 **Fixture:** `fixtures/valid/` là một sprint sạch đủ bốn tài liệu. `fixtures/broken.json` liệt kê ca hỏng cố
 ý: mỗi ca chép bộ sạch sang thư mục tạm, áp **đúng một** thay đổi (thay chuỗi hoặc ghi file mới) rồi đòi mã

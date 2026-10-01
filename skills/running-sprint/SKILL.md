@@ -5,7 +5,7 @@ metadata:
   group: process
   roles: [analyst, implementer]
 source: ["obra/superpowers skills/subagent-driven-development/ (SKILL.md, implementer-prompt.md, task-reviewer-prompt.md, re-review-prompt.md)", "obra/superpowers skills/executing-plans/SKILL.md", "obra/superpowers skills/dispatching-parallel-agents/SKILL.md"]
-source_sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
+source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d]
 license: MIT
 rewrite_before_public: false
 ---
