@@ -1,16 +1,45 @@
 # agent-agile-team
 
-> **Trạng thái: đang dựng — private.** Chưa phát hành, chưa có hướng dẫn cài. Bản tiếng Anh:
-> [README.md](README.md).
+> **Trạng thái: bản tiền phát hành private (`0.1.0-dev`).** Cài được trên Claude Code, Codex và
+> Antigravity; chưa công khai. Bản tiếng Anh: [README.md](README.md).
 
-Phương pháp agile cho đội agent AI: một quy trình (tiếp nhận → SPEC → PLAN → thực thi ↔ kiểm định →
-REPORT → bài học, có hai cổng người duyệt), thẻ vai chỉ định theo tier thay vì tên model, mẫu tài liệu
-sprint và sổ gốc dự án, một bộ skill gọn, và ba công cụ Python chỉ dùng thư viện chuẩn (`init`, `check`,
-`index`) giữ tài liệu nhất quán.
+Phương pháp agile cho đội agent AI. Một người giao việc bằng lời thường và chỉ trả lời ở đúng hai cổng; đội
+agent làm phần còn lại và ghi sổ.
 
-Lõi trong repo này trung tính: không biết gì về máy, người hay dự án cụ thể nào. Môi trường dùng repo
-cắm vào qua hai biến môi trường (`AGENT_AGILE_TIERS`, `AGENT_AGILE_DENYLIST`) và cách nạp luật đầu phiên
-của riêng nó.
+- **Một quy trình, sáu bước, hai cổng người:** tiếp nhận → SPEC + PLAN (**Cổng 1:** duyệt / điều chỉnh) →
+  thực thi ↔ kiểm định (vòng lặp, khuyến nghị 3 vòng) → REPORT (**Cổng 2:** Đạt / Đạt có điều kiện / Không
+  đạt) → bài học. Agent chỉ dừng hỏi ở bốn trường hợp đã nêu tên; hỏi ngoài đó là lỗi quy trình.
+- **Vai theo tier, không theo tên model:** Analyst, Architect, Implementer, QA, Business Reviewer, Tech
+  Reviewer; tier `T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test. **Người làm không tự chấm.**
+- **Tài liệu agent tra rẻ:** bốn tài liệu sprint (SPEC, PLAN, PROGRESS, REPORT, hoặc một file gộp cho việc rất
+  nhỏ) và ba sổ gốc dự án (yêu cầu, sprint, spec sống) có khối "Đang mở" ở đầu. Mọi mục có mã hai chữ cái
+  (`FR3.2`, `TK4`, `RF2`).
+- **28 skill và 7 agent reviewer chỉ-đọc** cho quy trình, kỹ thuật, kiểm định, giao tiếp và tối ưu token.
+- **Ba công cụ Python chỉ dùng thư viện chuẩn:** `init` dựng khung không ghi đè gì, `check` giữ chuẩn tài
+  liệu, `index` sinh lại khối "Đang mở".
+
+Lõi trung tính: không biết gì về máy, người hay dự án cụ thể nào. Môi trường dùng repo cắm vào qua năm điểm
+cắm khai báo — nạp luật đầu phiên, `AGENT_AGILE_TIERS`, `AGENT_AGILE_DENYLIST`, nơi lưu bài học, cầu gọi chéo
+hãng ([`hosts/README.md`](hosts/README.md)).
+
+## Cài
+
+Dán prompt ở cuối [INSTALL.md](INSTALL.md) cho agent; agent làm theo file đó và hỏi trước khi chạm vào máy.
+Tự làm theo từng harness: [`hosts/`](hosts/README.md). Claude Code tóm tắt:
+
+```bash
+git clone https://github.com/OWNER/agent-agile-team ~/agent-agile-team
+claude plugin marketplace add ~/agent-agile-team
+claude plugin install agent-agile-team@agent-agile-team
+```
+
+rồi thêm dòng `@~/agent-agile-team/AGENTS.md` vào `~/.claude/CLAUDE.md` để luật lõi nạp ở mọi phiên. Kiểm:
+`python scripts/check.py --self` kết thúc bằng `Đạt`.
+
+## Sprint đầu tiên
+
+[GUIDE.md](GUIDE.md) dẫn người mới đi một sprint; [`samples/order-desk/`](samples/README.md) là một dự án
+sau hai sprint.
 
 ## Cấu trúc
 
@@ -18,16 +47,19 @@ của riêng nó.
 |---|---|
 | `AGENTS.md` | Luật lõi nạp đầu phiên (ngân sách ≤120 dòng, ≤10 KB) |
 | `method/` | Quy trình, cỡ việc, thang mức, bằng chứng, quy ước |
-| `roles/` | Thẻ vai: thực thi và kiểm định (kèm thẻ chuyên đề) |
-| `tiers/` | Định nghĩa tier và hợp đồng bảng tier |
-| `skills/` | Skill, để phẳng (`skills/<tên>/SKILL.md`) |
-| `agents/` | Agent reviewer và trợ thủ |
+| `roles/` · `tiers/` | Thẻ vai (thực thi, kiểm định, chuyên đề); định nghĩa tier và hợp đồng bảng tier |
+| `skills/` · `agents/` | Skill để phẳng (`skills/<tên>/SKILL.md`); agent reviewer chỉ-đọc |
 | `templates/` | Mẫu tài liệu sprint, sổ gốc, cấu hình dự án |
-| `scripts/` | `init`, `check`, `index` |
-| `tests/` · `samples/` | Test và dự án mẫu kèm kết quả kỳ vọng |
-| `hosts/` | Ghi chú từng harness (Claude, Codex, Claude Desktop, Antigravity) |
+| `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; test; dự án mẫu kèm kết quả kỳ vọng |
+| `hosts/` | Cài và nạp theo từng harness, điểm cắm của lớp riêng |
+| `docs/` | Bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa |
+
+## Ghi nhận
+
+Distill từ Superpowers (obra), Everything Claude Code (affaan-m), gstack (garrytan), lấy ý từ GitHub Spec
+Kit, OpenSpec, BMAD-METHOD và Kiro/EARS. Commit chính xác, giấy phép và nguồn từng skill:
+[UPSTREAM.md](UPSTREAM.md), [NOTICE](NOTICE), [THIRD_PARTY.md](THIRD_PARTY.md).
 
 ## Giấy phép
 
-Chưa chọn; giữ mọi quyền trong thời gian private. Nguồn bên thứ ba ghi ở [UPSTREAM.md](UPSTREAM.md),
-[NOTICE](NOTICE) và [THIRD_PARTY.md](THIRD_PARTY.md).
+Chưa chọn; giữ mọi quyền trong thời gian private ([LICENSE](LICENSE)). Nội dung bên thứ ba giữ giấy phép gốc.

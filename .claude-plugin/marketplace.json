@@ -1,16 +1,19 @@
 {
   "name": "agent-agile-team",
-  "description": "Agile method for AI agent teams — skeleton build, not released.",
+  "description": "Agile method for AI agent teams: six steps, two human gates, tiered roles, sprint templates, skills and three document tools. Private pre-release.",
   "owner": {
     "name": "agent-agile-team maintainers"
   },
   "plugins": [
     {
       "name": "agent-agile-team",
-      "description": "Six-step agile process for AI agent teams with tiered role cards, sprint templates, skills and three document tools.",
+      "description": "Six-step agile process for AI agent teams: tiered role cards, no self-grading, sprint and registry templates, 28 skills, 7 reviewer agents and three document tools (init, check, index).",
       "version": "0.1.0-dev",
       "source": "./",
-      "license": "UNLICENSED"
+      "license": "UNLICENSED",
+      "author": {
+        "name": "agent-agile-team maintainers"
+      }
     }
   ]
 }

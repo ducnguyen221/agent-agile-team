@@ -33,6 +33,11 @@ Chưa phát hành.
   chat, chưa có thì hỏi ở Cổng 1; mẫu REPORT có tiểu mục "Review PLAN trước Cổng 1", mẫu SPEC nhắc số đo trước
   sprint; `writing-plan` có luật cho `TK` tác động ngoài worktree; câu dẫn "tài liệu + nghĩa in đậm" trước mọi
   danh sách / bảng mã (`id-convention`, `response-style`, `AGENTS.md`, mẫu, dự án mẫu).
+- TK8.1–TK8.2 — đóng gói ba harness: manifest thật (tác giả trung tính, mô tả đủ 28 skill / 7 agent; Claude
+  để mặc định dò `skills/` và `agents/`), `hosts/README.md` (bảng harness + năm điểm cắm của lớp riêng + hợp
+  đồng nơi lưu bài học), bốn `hosts/*/README.md` viết thật, `INSTALL.md` cho agent đọc kèm prompt dán Việt/Anh,
+  `GUIDE.md` (sprint đầu tiên cho người mới), `README.md` + `README.vi.md` có mục cài và ghi nhận nguồn,
+  `docs/standardization.md` (áp khuôn 13 mục: 10 áp dụng, 3 điều chỉnh).
 
 **Việc để lại (Đợt 2):**
 
@@ -41,3 +46,5 @@ Chưa phát hành.
 - Viết và chạy thử áp lực `security-audit`, `web-qa` (ngoại lệ chỉ báo cáo ở Đợt 1 — `skills/README.md`
   mục 2).
 - `tests/retrieval.md` cho 10 skill tham chiếu.
+- Ba mục khuôn còn treo (`docs/standardization.md`): test tài liệu cài đặt, CI hai hệ điều hành (cùng lượt lên
+  GitHub private), `docs/troubleshooting.md`.
