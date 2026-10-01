@@ -24,7 +24,7 @@ rewrite_before_public: true  # only references/preflight.md and references/relea
 | 1 | **Tiền kiểm** — bằng chứng đủ chưa, theo cỡ và rủi ro | Analyst | [references/preflight.md](references/preflight.md) |
 | 2 | **REPORT** theo mẫu, trình **Cổng 2** bằng lời trình chuẩn | Analyst | `method/process.md` mục 7 |
 | 3 | Người dùng kết luận **Đạt / Đạt có điều kiện / Không đạt** → ghi `gate_2`, `gate_2_at`, `gate_2_quote` nguyên văn | — | Không đạt → vòng mới hoặc sprint mới; dừng ở đây |
-| 4 | **Cập nhật hồ sơ:** spec sống `FS-` (hành vi hiện hành, tiêu chí đang giữ, giới hạn đã biết, lịch sử sprint) · SPRINTS cột Đóng · REQUESTS trạng thái `xong` · spec sống `status` · chạy công cụ `index` | Analyst | chỉ sau Cổng 2 Đạt / Đạt có điều kiện |
+| 4 | **Cập nhật hồ sơ:** spec sống `FS-` (gộp delta Thêm / Sửa / Bỏ của SPEC theo comment đầu mẫu `feature-spec.md`; hành vi hiện hành, tiêu chí đang giữ, giới hạn đã biết, lịch sử sprint) · SPRINTS cột Đóng · REQUESTS trạng thái `xong` · spec sống `status` · chạy công cụ `index` | Analyst | chỉ sau Cổng 2 Đạt / Đạt có điều kiện |
 | 5 | **Đồng bộ tài liệu** của dự án với diff nhánh | Implementer | [references/docs-sync.md](references/docs-sync.md) |
 | 6 | **Ghi chú phát hành** khi sprint đổi hành vi người dùng thấy hoặc cắt bản | Analyst | [references/release-notes.md](references/release-notes.md) |
 | 7 | **Bài học** `LN`: tự chấm, dedup, lưu nơi lớp riêng quy định; quan trọng → chỉ **đề xuất** nâng | Analyst | [references/lessons.md](references/lessons.md) |

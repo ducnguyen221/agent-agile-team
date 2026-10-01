@@ -111,9 +111,15 @@ Khi số đơn tăng nhiều, việc tra có thể chậm dần — đề xuất
 ## 7. Review & Retro
 
 <!-- Review: sản phẩm so với mục tiêu. Retro: cách làm. Ghi số vòng kiểm định và tổng token phiên làm mốc;
-     chỉ tuyên bố tiết kiệm token khi có cặp số trước/sau. -->
+     chỉ tuyên bố tiết kiệm token khi có cặp số trước/sau.
+     Trước khi viết Retro: đọc lại mọi dòng "Phán quyết:" trong nhật ký PROGRESS — phán quyết nào sai hoặc tốn
+     hơn dự kiến thì ghi vào "Chưa tốt" và cân nhắc thành bài học LN; và rà mọi việc để lại CO còn mở của các
+     sprint trước (sổ SPRINTS, REPORT cũ) — đếm số tồn, ghi CO nào đã trả trong sprint này, CO nào cũ quá hai
+     sprint thì đề xuất mở yêu cầu hoặc bỏ. -->
 
 - **Review:** đạt mục tiêu SPR-01; 1 vòng kiểm định.
+- **Phán quyết đọc lại:** 1 dòng trong PROGRESS (cắt khoảng trắng mã đơn) — đúng, không tốn thêm.
+- **Nợ để lại tồn đọng:** 1 mở (CO1 (chỉ mục mã đơn), sprint này); 0 trả trong sprint.
 - **Làm tốt:** test viết trước code; vòng kiểm định đầu không còn Chặn.
 - **Chưa tốt:** câu báo lỗi chưa được duyệt chữ trước khi làm.
 - **Thử lần sau:** duyệt câu chữ giao diện ngay trong SPEC.

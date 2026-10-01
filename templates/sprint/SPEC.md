@@ -49,7 +49,9 @@ links:
 
 ## 3. Yêu cầu chức năng
 
-<!-- Mỗi FR trỏ ít nhất một US. Mỗi kịch bản là một FRx.y viết dạng KHI … THÌ …; kịch bản là thứ đem đi kiểm. -->
+<!-- Mỗi FR trỏ ít nhất một US. Mỗi kịch bản là một FRx.y viết dạng KHI … THÌ …; kịch bản là thứ đem đi kiểm.
+     Delta so với spec sống: FR đổi hành vi đang có ghi "(sửa FS-001/FR1.2)", FR bỏ hành vi đang có ghi
+     "(bỏ FS-001/FR1.2)" ở cuối dòng; FR không ghi gì là Thêm. Bước 5 gộp vào spec sống theo đúng delta này. -->
 
 ### FR1 — Tra đơn theo mã (→ US1)
 
@@ -81,7 +83,20 @@ links:
 
 - **ASSUMPTION — nguồn dữ liệu:** trạng thái đơn đọc từ hệ thống hiện có, không tạo kho mới.
 
-## 7. Truy vết
+## 7. Đổi hợp đồng / giao diện
+
+<!-- Có khi sprint đổi thứ mà bên khác đang dùng: API, sự kiện, schema dữ liệu, tham số CLI, định dạng file.
+     Bắt buộc khi risk_tags có public_api; không đổi gì thì ghi "Không có.". Mỗi dòng: thay đổi · Thêm / Sửa /
+     Bỏ · payload hoặc chữ ký trước → sau · bên dùng bị ảnh hưởng (có bằng chứng: grep bên gọi, client sinh,
+     log truy cập) · tương thích ngược? · lộ trình deprecate (phiên bản mới hoặc giai đoạn chuyển + ngày bỏ).
+     Thay đổi phá vỡ (bỏ/đổi tên trường, đổi kiểu, đổi URL, đổi cách xác thực) cần lộ trình deprecate và ADR —
+     xem skill api-design, adr. -->
+
+| Thay đổi | Kiểu | Trước → sau | Bên dùng bị ảnh hưởng | Tương thích ngược | Lộ trình deprecate |
+|---|---|---|---|---|---|
+| Endpoint tra trạng thái đơn | Thêm | — → `GET /orders/{code}/status` trả `{status, updated_at}` | Màn hình bán hàng (bên gọi mới) | Có — chỉ thêm | Không cần |
+
+## 8. Truy vết
 
 <!-- Nên có từ cỡ vừa trở lên: mỗi US có FR và SC tương ứng. Cỡ nhỏ được bỏ mục này. -->
 

@@ -13,7 +13,14 @@ updated: 2026-01-16
 
 <!-- Spec sống mô tả HÀNH VI HIỆN HÀNH của một tính năng, không mô tả kế hoạch. Chỉ cập nhật sau khi Cổng 2 của
      một sprint chạm tính năng này đạt — ngay trong sprint đó. Mã FR/SC ở đây thuộc tính năng; nhắc từ tài liệu
-     khác viết `FS-001/FR1.1`. Không đánh số lại; hành vi bỏ đi giữ mã, ghi trạng thái `bỏ`. -->
+     khác viết `FS-001/FR1.1`. Không đánh số lại; hành vi bỏ đi giữ mã, ghi trạng thái `bỏ`.
+     Gộp ở Bước 5 (sau Cổng 2) theo delta của SPEC sprint — Thêm / Sửa / Bỏ:
+     - Thêm: FR của SPEC không ghi "(sửa …)"/"(bỏ …)" → thêm FR mới vào mục 1 với mã kế tiếp, ghi "(từ SPR-NN)";
+       SC cần giữ về sau → thêm vào mục 2.
+     - Sửa: FR ghi "(sửa FS-001/FR1.2)" → thay câu KHI … THÌ … của FR1.2, giữ nguyên mã, ghi "(sửa ở SPR-NN)".
+     - Bỏ: FR ghi "(bỏ FS-001/FR1.2)" → giữ mã, cuối dòng ghi "— bỏ" (sprint ghi ở mục 5);
+       SC chỉ đo hành vi đó cũng ghi bỏ.
+     Rồi thêm một dòng mục 5 ghi đủ ba vế delta và cập nhật `sprints`, `requests`, `updated`, `status`. -->
 
 > **Kết luận:** <!-- MỘT câu: tính năng làm gì, cho ai, đang ở trạng thái nào. -->
 > Nhân viên tra trạng thái đơn hàng bằng mã đơn; đang chạy từ SPR-01.
@@ -49,8 +56,9 @@ Không có.
 
 ## 5. Lịch sử sprint
 
-<!-- MỚI NHẤT Ở TRÊN. Một dòng mỗi sprint đã chạm tính năng; khớp danh sách `sprints` của frontmatter. -->
+<!-- MỚI NHẤT Ở TRÊN. Một dòng mỗi sprint đã chạm tính năng; khớp danh sách `sprints` của frontmatter.
+     Cột "Đổi gì" ghi delta theo khuôn "Thêm … · Sửa … · Bỏ …"; vế không có ghi "—". -->
 
 | Sprint | Đóng | Đổi gì | Cổng 2 |
 |---|---|---|---|
-| SPR-01 | 2026-01-16 | Tạo tính năng: FR1.1, FR1.2 | Đạt |
+| SPR-01 | 2026-01-16 | Tạo tính năng — Thêm FR1.1, FR1.2, SC1 · Sửa — · Bỏ — | Đạt |

@@ -30,6 +30,10 @@ tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage
 lưu file, trỏ đường dẫn.
 
 ## 5. Được làm
+- Lập bảng phủ **trước** khi chạy: mỗi `FR` có ít nhất một `VR` (công cụ `check` báo `FR` thiếu `VR` là
+  Phải sửa); mỗi kịch bản KHI … THÌ … map vào **tầng test thấp nhất chứng minh được** nó — unit trước,
+  tích hợp khi cần ranh giới thật (CSDL, mạng, file), end-to-end hay trình duyệt chỉ khi tầng dưới không
+  chứng minh được. Ghi tầng đã chọn trong `VR`.
 - Chạy cả bộ test, không chỉ file đổi; chạy lại khi mốc code đổi.
 - Chứng minh test hồi quy bằng vòng gỡ sửa → hỏng → đặt lại → đạt.
 - Ghi "Chưa chạy" kèm giới hạn khi thiếu môi trường; đề nghị "Không áp dụng" kèm lý do để reviewer xác nhận.
