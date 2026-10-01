@@ -26,6 +26,13 @@ Chưa phát hành.
 - Vòng sửa 1 sau kiểm định Đợt 1: nợ `CO` chuyển thành dòng `RQ-` trong REQUESTS ngay khi ghi REPORT (retro
   chỉ đọc khối "Đang mở"); luật `leak-denylist` khớp nguyên từ cho mục chữ, chuỗi con cho mục đường dẫn;
   `tests/test_provenance.py` kiểm nguồn gốc mọi skill/agent với `UPSTREAM.md`, `THIRD_PARTY.md`.
+- TK6.5 — vướng mắc của sprint thử đầu tiên: `init --title-file` và cảnh báo tiêu đề mất dấu, cảnh báo sớm khi
+  thiếu `AGENT_AGILE_TIERS`, dòng sprint thật đầu tiên xoá comment ví dụ của SPRINTS; `index` gặp sổ không UTF-8
+  thoát 2 có thông báo; `check` che code span ngắt dòng (thận trọng), gợi ý khi mã bị bắt kề dấu huyền, nhận
+  `.agile.json` truyền thẳng, luật Ghi chú `id-list-lead`; thiếu bảng tier thì dùng chỉ định tier → model trong
+  chat, chưa có thì hỏi ở Cổng 1; mẫu REPORT có tiểu mục "Review PLAN trước Cổng 1", mẫu SPEC nhắc số đo trước
+  sprint; `writing-plan` có luật cho `TK` tác động ngoài worktree; câu dẫn "tài liệu + nghĩa in đậm" trước mọi
+  danh sách / bảng mã (`id-convention`, `response-style`, `AGENTS.md`, mẫu, dự án mẫu).
 
 **Việc để lại (Đợt 2):**
 
