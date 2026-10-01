@@ -134,8 +134,10 @@ diff trong phiên điều phối thay cho reviewer — đốt ngữ cảnh đi�
 - **Cấm:** "Anh nói đúng quá!", "Góp ý tuyệt vời!", "Để em làm ngay" (trước khi kiểm), mọi lời cảm ơn.
   Thay bằng: nói lại yêu cầu kỹ thuật, hỏi làm rõ, phản bác có lý do, hoặc **làm luôn** — code cho thấy
   đã nghe.
-- **Mục nào chưa rõ → dừng, hỏi tất cả mục chưa rõ trong một lượt** rồi mới sửa; các mục có thể liên
-  quan nhau, hiểu một nửa = sửa sai. "Hiểu 1, 2, 3, 6; cần làm rõ 4, 5 trước khi làm."
+- **Còn mục nào chưa rõ → không sửa mục nào, kể cả mục đã rõ:** hỏi tất cả mục chưa rõ trong một lượt,
+  chờ trả lời rồi mới bắt đầu sửa; các mục có thể liên quan nhau, hiểu một nửa = sửa sai. Trong lúc chờ
+  chỉ được kiểm chứng (đọc code, chạy test hiện có), không đổi code. "Hiểu 1, 2, 3, 6; cần làm rõ 4, 5
+  trước khi làm bất kỳ mục nào." Hạn gộp gần không phải lý do sửa trước phần đã rõ.
 - **Phản bác khi:** sửa theo sẽ vỡ chức năng; reviewer thiếu ngữ cảnh; vi phạm YAGNI (reviewer bảo
   "làm cho tử tế" → `grep` xem có ai gọi; không ai gọi → đề xuất bỏ); sai với stack này; có lý do tương
   thích; trái quyết định kiến trúc đã duyệt (→ Analyst, không tự quyết). Phản bác bằng lý do kỹ thuật,
@@ -167,3 +169,4 @@ diff trong phiên điều phối thay cho reviewer — đốt ngữ cảnh đi�
 | "Phát hiện này nghe hợp lý, báo luôn" | qua cổng xác minh; không `file:dòng` thì tối đa Ghi chú |
 | "Reviewer nói vậy thì làm vậy" | kiểm chứng trước; sai thì phản bác có bằng chứng |
 | "Anh nói đúng quá, em sửa ngay" | nói lại yêu cầu rồi kiểm; hoặc sửa và để code trả lời |
+| "Mục rõ thì làm ngay cho kịp giờ, mục mơ hồ hỏi sau" | còn mục chưa rõ thì chưa sửa mục nào; mục mơ hồ có thể đổi cách làm mục rõ |
