@@ -1,0 +1,91 @@
+---
+name: token-economy
+description: Use when a session is long or the context window is filling, a command or file produces large output, a subagent must report back or be briefed, a phase boundary (SPEC → PLAN → PROGRESS → REPORT) is crossed, or anyone is about to claim a token or cost saving.
+metadata:
+  group: meta
+  roles: [all]
+---
+
+# Tiết kiệm token
+
+> **Kết luận:** hai luồng tối ưu khác nhau — cho **người** thì tối ưu để hiểu nhanh, giữa **agent** thì
+> tối ưu token mạnh. Trạng thái sống trong **file**, không trong ngữ cảnh; nạp đúng lúc, truyền con trỏ
+> thay nội dung; lọc tại nguồn; và **không tuyên bố tiết kiệm khi chưa có cặp số đo trước/sau** — kể cả
+> dưới nhãn "ước tính".
+
+## 1. Mười quy tắc
+
+| # | Quy tắc | Làm cụ thể |
+|---|---|---|
+| 1 | **Kết luận trước, xếp lớp** | câu đầu là kết luận; chi tiết ở lớp hai hoặc trong file (skill `response-style`) |
+| 2 | **Bất khả xâm phạm** | số + đơn vị, mã lỗi, stack trace then chốt, chữ phủ định, đường dẫn, phiên bản — không bao giờ bị nén mất |
+| 3 | **Bỏ dẫn nhập, tường thuật, recap** | không "em đã…", không kể bước gọi tool, không tóm tắt lại cuối |
+| 4 | **Lọc tại nguồn** | `--short`, `-q`, `--json` + lọc trường, `grep`/`tail`/`head`, đọc file theo offset; đếm trước khi đọc |
+| 5 | **Output lớn đã lưu file → đọc chọn lọc** | log >200 dòng: lưu `.tmp/`, trỏ đường dẫn, chỉ trích dòng then chốt; không dán lại |
+| 6 | **Việc nhiều output giao subagent** | subagent trả tóm tắt + con trỏ (mục 3), không trả transcript |
+| 7 | **Bảng khi ≥3 mục** | dưới đó dùng câu; không bảng tóm tắt lặp |
+| 8 | **Hai giọng** | chat kỹ thuật gọn; tài liệu bàn giao cho người không chuyên viết câu đầy đủ |
+| 9 | **Kiểm ngược** | đọc riêng kết luận: người đọc hành động và hoàn tác được không? Không → thiếu, thêm; có thừa → cắt |
+| 10 | **Có số đo mới có luật** | mọi tuyên bố "tiết kiệm X %" phải kèm cặp số trước/sau cùng đơn vị việc (mục 5) |
+
+## 2. Trạng thái sống trong file, compact tại ranh giới pha
+
+- PROGRESS và ba sổ gốc là nguồn sự thật; ngữ cảnh phiên chỉ là bộ nhớ làm việc. Sau mỗi `TK`: ghi file
+  trước, rồi mới làm tiếp.
+- **Ranh giới pha** SPEC → PLAN → PROGRESS → REPORT là lúc nén ngữ cảnh (compact). Trước khi nén:
+  (1) mọi quyết định, mã, số liệu, câu duyệt nguyên văn đã nằm trong file; (2) bản nháp bị thay đã đánh
+  dấu `superseded`; (3) tóm tắt nén chỉ gồm: mục tiêu sprint, cổng đã qua, quyết định chính, **đường dẫn**
+  tới SPEC/PLAN/PROGRESS, hành động kế tiếp. Không chép nội dung tài liệu vào tóm tắt.
+- Sau nén: nạp lại **chỉ** PROGRESS và mục PLAN đang làm; SPEC chỉ khi cần đối chiếu một điểm.
+- Ngữ cảnh đầy >80 % giữa pha mà chưa tới ranh giới: ghi trạng thái ra PROGRESS ngay, rồi nén; việc
+  dang dở ghi "đang làm, mốc commit X".
+
+## 3. Giữa agent: khung báo cáo 4 phần
+
+Báo cáo từ subagent về điều phối, và từ điều phối lên sổ:
+
+```
+Kết quả: <xong / xong có lo ngại / bị chặn / thiếu ngữ cảnh> — <một câu>
+Chứng cứ: <lệnh → kết quả then chốt (số, mã thoát)>; <file:dòng đã đổi>; log đầy đủ: <đường dẫn>
+Còn mở: <việc ngoài phạm vi phát hiện được, giả định đã đặt, lo ngại> (hoặc "không")
+Cần người: <quyết định cần người dùng> (hoặc "không")
+```
+
+Mặc định **≤2.000 token** (≈15 dòng với việc thường); câu gọn kiểu "chủ ngữ – động từ – số"; giữ nguyên
+số và chữ phủ định; không mở đầu, không lời cảm ơn, không lặp brief.
+
+**Brief cho subagent** đi chiều ngược: mục tiêu một câu · đường dẫn + **mục** cần đọc (`SPEC.md` mục
+`FR2.2`, không phải "đọc SPEC") · giao diện dùng/sinh · phạm vi file được sửa · điều cấm · cách báo cáo
+(khung trên) · khối văn phong rút gọn. Brief ≤40 dòng; không dán lịch sử phiên, không dán log, không
+chép nội dung tài liệu mà subagent tự đọc được.
+
+## 4. Nạp đúng lúc cần
+
+- Truyền **đường dẫn và mã** (`PLAN.md` mục `TK2`, `RF3`), không dán nội dung.
+- Đọc file lớn: đếm dòng → `grep -n` tìm mốc → đọc theo offset/limit quanh mốc. Log hàng vạn dòng: thu hẹp
+  theo thời gian/từ khoá trước, tìm lỗi **đầu tiên**, không đọc tuần tự.
+- Lệnh nhiều output: chuyển sang chế độ ngắn hoặc JSON rồi lọc trường; output >30 KB lưu file.
+- Nén repo cho agent (khi thật cần) bằng công cụ chạy qua `npx` tạm, không cài global.
+- Không nạp lại tài liệu đã nằm trong ngữ cảnh; không mở lại skill đã đọc trong cùng pha.
+
+## 5. Đo trước khi tuyên bố
+
+- Thước đo: tổng token theo ngày hoặc theo phiên từ công cụ thống kê dùng dữ liệu phiên của harness
+  (ví dụ `npx ccusage@latest daily --json`); hoặc bộ đếm `/usage`, `/context` của harness.
+- **Chuẩn hoá theo việc**: token / sprint hoặc token / phiên cùng loại việc, không so hai ngày có khối
+  lượng khác nhau.
+- Cặp số: trước (≥7 ngày hoặc ≥5 việc cùng loại) ↔ sau (cùng cỡ). Giữ thay đổi nếu giảm ≥10 % **và** rà
+  ≥20 phản hồi mẫu không mất số liệu / mã lỗi / chữ phủ định.
+- **Chưa có cặp số → không có con số.** Bị ép "cứ ước lượng, ghi chữ ước tính cũng được" → trả lời: chưa
+  đo, con số nào lúc này cũng là bịa; đưa **thời điểm có số** (ví dụ: chạy công cụ đo ngay, có số sau
+  N phút nếu còn dữ liệu ngày trước; nếu không, sau N ngày) và **câu dùng được ngay** không chứa phần
+  trăm ("đã bật, đang đo, số có ngày X"). Ngân sách thì tính tiết kiệm = 0 tới khi có số.
+- Mỗi sprint ghi tổng token phiên vào REPORT làm mốc, dù không có tuyên bố nào.
+
+## 6. Tự kiểm trước khi gửi
+
+- Người nhận là ai? Giọng đúng chưa (mục 8 bảng 1)?
+- Câu đầu là kết luận? Có dẫn nhập/recap để cắt không?
+- Có log/dữ liệu dài nào dán vào mà một đường dẫn thay được không?
+- Mọi số còn đơn vị, mọi "không/chưa/chỉ" còn nguyên?
+- Có con số tiết kiệm nào không đi kèm cặp số đo không?
