@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "tiers": {
+    "T1": {
+      "purpose": "thinking",
+      "models": {
+        "claude": "<model-id>",
+        "codex": "<model-id>",
+        "antigravity": "<model-id>"
+      }
+    },
+    "T2": {
+      "purpose": "execution",
+      "models": {
+        "claude": "<model-id>",
+        "codex": "<model-id>",
+        "antigravity": "<model-id>"
+      }
+    },
+    "T3": {
+      "purpose": "chores-and-qa",
+      "models": {
+        "claude": "<model-id>",
+        "codex": "<model-id>",
+        "antigravity": "<model-id>"
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+# Neo ở gốc (`/`) để chỉ chặn thư mục của chính repo, không chặn thư mục cùng tên nằm sâu trong cây.
+
+# Dữ liệu chạy — repo phương pháp không có dữ liệu riêng; dòng này là lưới an toàn.
+/workspace/
+
+# Môi trường Python và cache
+/.venv/
+/venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.coverage.*
+/htmlcov/
+
+# Hồ sơ kế hoạch nội bộ — không phát hành
+/docs/plans/
+
+# Bí mật — repo không cần secret nào để chạy
+.env*
+!.env.example
+*.credentials.json
+*.pem
+*.key
+
+# Nháp tạm của agent — xoá cuối việc
+/.tmp/
+
+# Rác hệ điều hành và cấu hình riêng của từng máy
+.DS_Store
+Thumbs.db
+desktop.ini
+/.claude/settings.local.json
+/.idea/
+/.vscode/

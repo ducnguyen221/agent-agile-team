@@ -1,0 +1,11 @@
+# Chỉ cấu hình test và coverage — repo không đóng gói để cài.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["scripts"]
+
+[tool.coverage.report]
+fail_under = 80

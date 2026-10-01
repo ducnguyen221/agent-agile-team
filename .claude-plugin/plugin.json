@@ -1,0 +1,15 @@
+{
+  "name": "agent-agile-team",
+  "version": "0.1.0-dev",
+  "description": "An agile method for AI agent teams: a six-step process with two human gates, role cards assigned by tier instead of model name, sprint and registry templates, a compact skill set, and three standard-library tools (init, check, index) that keep sprint documents consistent. Skeleton build, not released.",
+  "license": "UNLICENSED",
+  "keywords": [
+    "agile",
+    "agents",
+    "process",
+    "spec",
+    "plan",
+    "review",
+    "sprint"
+  ]
+}

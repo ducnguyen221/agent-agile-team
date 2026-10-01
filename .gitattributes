@@ -1,0 +1,2 @@
+# Mọi file văn bản lưu và checkout bằng LF, bất kể core.autocrlf của máy nào.
+* text=auto eol=lf
