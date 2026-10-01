@@ -1,19 +1,25 @@
 agent-agile-team
 Copyright (c) 2026 the agent-agile-team authors. All rights reserved (private, not yet released).
 
-KHUNG — danh sách dưới là các nguồn sẽ được distill ở Đợt 1. Một nguồn chỉ được coi là "đã dùng" khi
-có file trong repo ghi `source` trỏ tới nó; khi đó thông báo bản quyền tương ứng ở đây là bắt buộc.
+Một nguồn được coi là "đã dùng" khi có file trong repo ghi `source` trỏ tới nó; khi đó thông báo bản
+quyền tương ứng ở đây là bắt buộc. Nguồn của từng skill và agent: UPSTREAM.md, mục "Bảng nguồn theo skill
+và agent". Nguồn chỉ lấy ý và phần phải viết lại trước khi công khai: THIRD_PARTY.md.
 
 ------------------------------------------------------------------------------------------------------
-Nguồn MIT (chép được, giữ thông báo bản quyền và văn bản giấy phép MIT bên dưới)
+Nguồn MIT đã dùng ở Đợt 1 (giữ thông báo bản quyền và văn bản giấy phép MIT bên dưới)
 ------------------------------------------------------------------------------------------------------
 
 - Superpowers (obra/superpowers) — Copyright (c) 2025 Jesse Vincent
-- superpowers-lab (obra/superpowers-lab) — Copyright (c) 2025 Jesse Vincent
 - superpowers-skills (obra/superpowers-skills) — Copyright (c) 2025 Jesse Vincent
 - ECC (affaan-m/ECC) — Copyright (c) 2026 Affaan Mustafa
 - gstack (garrytan/gstack) — Copyright (c) 2026 Garry Tan
-- BMAD-METHOD (bmad-code-org/BMAD-METHOD) — Copyright (c) 2025 BMad Code, LLC (chỉ lấy ý ở Đợt 1)
+- Supabase Agent Skills (supabase/agent-skills) — Copyright (c) 2026 Supabase
+  (đến qua ECC; ghi công trong skill postgres và agent database-reviewer)
+
+Nguồn MIT đã chốt mốc nhưng Đợt 1 chưa chép văn bản (ghi sẵn cho đợt sau):
+
+- superpowers-lab (obra/superpowers-lab) — Copyright (c) 2025 Jesse Vincent
+- BMAD-METHOD (bmad-code-org/BMAD-METHOD) — Copyright (c) 2025 BMad Code, LLC (chỉ lấy ý)
 
 Văn bản giấy phép MIT áp cho từng nguồn trên, với dòng Copyright tương ứng:
 
@@ -36,8 +42,9 @@ Văn bản giấy phép MIT áp cho từng nguồn trên, với dòng Copyright 
     SOFTWARE.
 
 ------------------------------------------------------------------------------------------------------
-Nguồn Apache-2.0 (chỉ cần NOTICE nếu chép văn bản; hiện chỉ lấy ý)
+Nguồn Apache-2.0 (chỉ cần NOTICE nếu chép văn bản; Đợt 1 chỉ lấy ý — đã soát 2026-10-01: không file
+nào trong repo chép văn bản từ hai nguồn này)
 ------------------------------------------------------------------------------------------------------
 
-- caveman (JuliusBrussee/caveman) — Apache License 2.0. Chưa chép đoạn nào.
+- caveman (JuliusBrussee/caveman) — Apache License 2.0. Chỉ lấy ý cho skill token-economy; chưa chép đoạn nào.
 - open-code-review (alibaba/open-code-review) — Apache License 2.0. Thành phần không mang vào repo.

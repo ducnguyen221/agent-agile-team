@@ -1,3 +1,5 @@
 # docs/
 
-KHUNG — `MIGRATION.md` (tên cũ → tên mới) viết ở `TK5.6`.
+| Tài liệu | Nội dung |
+|---|---|
+| [MIGRATION.md](MIGRATION.md) | Tên cũ → tên mới của skill và agent; tra khi gặp tên cũ trong hồ sơ lịch sử |
