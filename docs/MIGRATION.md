@@ -12,7 +12,7 @@ là skill · **bỏ** = không mang vào · **ra ngoài** = chuyển sang bộ k
 
 | Tên cũ | Tên mới | Kiểu |
 |---|---|---|
-| skill biến ý tưởng thành thiết kế (tên gốc ghi ở `UPSTREAM.md`, dòng `shaping-spec`) | `shaping-spec` | đổi tên |
+| `superpowers:brainstorming` | `shaping-spec` | đổi tên |
 | `superpowers:writing-plans` | `writing-plan` | đổi tên |
 | `superpowers:subagent-driven-development` | `running-sprint` | gộp |
 | `superpowers:executing-plans` | `running-sprint` | gộp |

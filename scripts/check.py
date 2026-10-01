@@ -742,6 +742,17 @@ def read_denylist(path: Path | None) -> list | None:
     return words or None
 
 
+_PATH_CHARS = frozenset("\\/:~")  # gạch ngược, gạch xuôi, hai chấm, dấu ngã
+
+
+def _denied(word: str, text: str) -> bool:
+    """`word`, `text` đã casefold. Mục chứa ký tự đường dẫn khớp chuỗi con; mục chữ khớp nguyên từ —
+    không có chữ cái liền trước hay liền sau, nên "cat" không bắt "category" nhưng bắt "cat_x"."""
+    if _PATH_CHARS & set(word):
+        return word in text
+    return re.search(r"(?<![^\W\d_])" + re.escape(word) + r"(?![^\W\d_])", text) is not None
+
+
 def _exempt_line(rel: str, line: str) -> bool:
     if rel == "UPSTREAM.md" and line.lstrip().startswith("|"):
         return True
@@ -766,7 +777,7 @@ def run_self(root: Path, denylist_path: Path | None) -> Report:
             if rel in ("NOTICE", "THIRD_PARTY.md"):
                 continue
             for n, word in enumerate(words, 1):
-                if word in rel.casefold():
+                if _denied(word, rel.casefold()):
                     engine.add(path, 1, "leak-denylist", f"tên file chứa từ cấm số {n} của danh sách")
             data = path.read_bytes()
             if b"\0" in data:
@@ -776,7 +787,7 @@ def run_self(root: Path, denylist_path: Path | None) -> Report:
                     continue
                 low = line.casefold()
                 for n, word in enumerate(words, 1):
-                    if word in low:
+                    if _denied(word, low):
                         engine.add(path, idx, "leak-denylist", f"chứa từ cấm số {n} của danh sách (không in lại từ)")
     agents = root / "AGENTS.md"
     if not agents.is_file():

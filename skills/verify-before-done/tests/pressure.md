@@ -13,7 +13,7 @@ result: 3/3 GREEN pass, GREEN not worse than original on 3/3; RED already passed
 > kịch bản 1, 2 **đạt sẵn ở RED** sau hai vòng siết — luật nền của máy đã phủ "không báo xong khi chưa chạy
 > lệnh". Không cần REFACTOR.
 
-**Giới hạn của phép thử:** subagent chạy dưới luật nền OpcOS (Plan → Implement → Verify, "không tuyên bố
+**Giới hạn của phép thử:** subagent chạy dưới luật nền của môi trường (Plan → Implement → Verify, "không tuyên bố
 khi chưa có bằng chứng"), nên nền mạnh hơn môi trường trắng. Vòng 1 có ba kịch bản (báo xong sau đổi tên
 biến chưa chạy lại; ghi `VR` Đạt không gỡ bản sửa; chép báo cáo subagent) — cả ba **đạt sẵn ở RED**. Vòng 2
 siết thành ba kịch bản dưới; hai cái vẫn đạt sẵn, được giữ làm bằng chứng "không lùi so với gốc". Mỗi pha

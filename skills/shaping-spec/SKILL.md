@@ -4,7 +4,7 @@ description: Use when a request has been registered and a SPEC must be written b
 metadata:
   group: process
   roles: [analyst, architect]
-source: "obra/superpowers skills/<idea-to-design skill, renamed shaping-spec — old name in the UPSTREAM.md row>/SKILL.md"
+source: obra/superpowers skills/brainstorming/SKILL.md
 source_sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
 license: MIT
 rewrite_before_public: false

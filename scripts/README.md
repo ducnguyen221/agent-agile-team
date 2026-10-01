@@ -73,7 +73,7 @@ trong code span, khối code, comment HTML và đích của liên kết không b
 | `config-syntax` | Chặn | `.agile.json` không phải JSON — lỗi đầu vào, thoát 2 |
 | `config-invalid` | Phải sửa | `.agile.json` sai hình (gồm `paths.*` tuyệt đối hoặc chứa `..`, `sprint_dir` dùng placeholder ngoài `{date}`/`{slug}`, `id_width` không phải số nguyên ≥ 1), hoặc ngưỡng coverage khác 80 mà `coverage.reason` rỗng; `init`/`index` dùng chung bộ kiểm này (`_common.config_problems`) |
 | `config-public-root` | Chặn | `visibility: public` mà `artifact_root` (đường tuyệt đối) nằm trong gốc dự án |
-| `leak-denylist` | Chặn | `--self`: file của repo (kể cả tên file) chứa từ cấm; báo số thứ tự từ, không in lại từ |
+| `leak-denylist` | Chặn | `--self`: file của repo (kể cả tên file) chứa từ cấm — mục chữ khớp nguyên từ, mục có ký tự đường dẫn khớp chuỗi con ([`tests/README.md`](../tests/README.md)); báo số thứ tự từ, không in lại từ |
 | `agents-md-budget` | Phải sửa | `--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 240 byte |
 
 **Phạm vi `--self`:** mọi file Git đang theo dõi **và** file chưa add, trừ file bị `.gitignore` (`git ls-files -c -o

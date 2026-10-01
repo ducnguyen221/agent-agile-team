@@ -27,6 +27,10 @@ Test chống rò (lõi không chứa dấu riêng của bất kỳ máy, ngườ
 - **Giá trị:** đường dẫn tuyệt đối tới một file văn bản UTF-8 nằm ngoài repo.
 - **Định dạng:** mỗi dòng một từ cấm, so khớp không phân biệt hoa thường; dòng trống và dòng bắt đầu
   bằng `#` bị bỏ qua.
+- **Cách khớp:** mục là chữ khớp **nguyên từ** — không được có chữ cái liền trước hay liền sau (chữ số,
+  `_`, `-`, `.`, khoảng trắng đều là ranh giới), nên mục `cat` không bắt `category` nhưng bắt
+  `Cat`, `cat_x`, `cat2`. Mục chứa ký tự đường dẫn (`\`, `/`, `:`, `~`) khớp **chuỗi con** ở bất kỳ
+  đâu. Áp cho cả nội dung lẫn tên file.
 - **Phạm vi quét:** mọi file Git đang theo dõi và file chưa add (trừ file bị ignore) trong repo (nội dung và
   tên file); miễn trừ ở
   [`scripts/README.md`](../scripts/README.md) mục "Phạm vi `--self`".

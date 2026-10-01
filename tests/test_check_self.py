@@ -13,6 +13,9 @@ from conftest import REPO, run_script
 import check
 
 WORD = "zq-private-marker"
+# Từ chữ thật của danh sách cấm, ghép lúc chạy để chính file này không chứa nó đứng riêng; "brainstorming"
+# (tên skill gốc của shaping-spec) phải lọt qua vì khớp nguyên từ.
+PLAIN = "bra" + "in"
 
 
 def make_repo(tmp_path: Path) -> Path:
@@ -159,3 +162,35 @@ def test_self_with_paths_is_usage_error(tmp_path):
     with pytest.raises(SystemExit) as err:
         check.main(["--self", str(tmp_path)], env={})
     assert err.value.code == 2
+
+
+def test_denylist_plain_word_matches_whole_words_only(tmp_path):
+    root = make_repo(tmp_path)
+    (root / "README.md").write_text("# Repo\n\nSkill gốc tên brainstorming, đã đổi tên.\n", encoding="utf-8")
+    assert check.run_self(root, denylist(tmp_path, PLAIN)).findings == []
+    (root / "README.md").write_text(f"# Repo\n\nKho tri thức {PLAIN.title()} của máy.\n", encoding="utf-8")
+    hits = [f for f in check.run_self(root, denylist(tmp_path, PLAIN)).findings if f.rule == "leak-denylist"]
+    assert len(hits) == 1 and hits[0].line == 3
+    # chữ số, gạch dưới, dấu chấm không phải chữ cái → vẫn là ranh giới
+    for text in (f"{PLAIN}_notes", f"{PLAIN}2", f"~/.{PLAIN}/x", f"{PLAIN.upper()}."):
+        (root / "README.md").write_text(f"# Repo\n\n{text}\n", encoding="utf-8")
+        assert rules_of(check.run_self(root, denylist(tmp_path, PLAIN))) == {"leak-denylist"}, text
+
+
+def test_denylist_path_entry_matches_substring(tmp_path):
+    root = make_repo(tmp_path)
+    # mục chứa ký tự đường dẫn khớp chuỗi con, kể cả khi dính liền chữ cái
+    (root / "README.md").write_text("# Repo\n\nMở file ở XC:\\Users\\someone\\a.txt.\n", encoding="utf-8")
+    assert rules_of(check.run_self(root, denylist(tmp_path, "c:\\users"))) == {"leak-denylist"}
+    home = "/" + "home" + "/"  # ghép lúc chạy: chính file này cũng bị quét bằng danh sách thật
+    (root / "README.md").write_text(f"# Repo\n\nĐường {home}someone/x.\n", encoding="utf-8")
+    assert rules_of(check.run_self(root, denylist(tmp_path, home))) == {"leak-denylist"}
+
+
+def test_denylist_whole_word_applies_to_file_names(tmp_path):
+    root = make_repo(tmp_path)
+    (root / "skills" / "demo" / "brainstorming.md").write_text("# x\n", encoding="utf-8")
+    assert check.run_self(root, denylist(tmp_path, PLAIN)).findings == []
+    (root / "skills" / "demo" / f"{PLAIN}-notes.md").write_text("# x\n", encoding="utf-8")
+    hits = [f for f in check.run_self(root, denylist(tmp_path, PLAIN)).findings if f.rule == "leak-denylist"]
+    assert len(hits) == 1 and f"{PLAIN}-notes" in str(hits[0].path)
