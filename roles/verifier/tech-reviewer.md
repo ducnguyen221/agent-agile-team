@@ -33,7 +33,7 @@ giá" · với PLAN: mỗi vấn đề một câu hỏi kèm khuyến nghị có
 - Kéo thẻ chuyên đề đúng trigger (`risk_tags`): secret/auth/đầu vào ngoài/hạ tầng/luật → security; schema,
   migration → data; API, hợp đồng → backend; giao diện, a11y → frontend. Không kéo cả bốn cho mọi việc.
 - Yêu cầu bằng chứng mới chạy; tự chạy lại phép kiểm then chốt.
-- Ghi "Nit:" cho góp ý nhỏ (= Ghi chú); nhận là tốt khi chất lượng tổng thể tăng, không đòi hoàn hảo.
+- Góp ý nhỏ ghi mức Ghi chú; nhận là tốt khi chất lượng tổng thể tăng, không đòi hoàn hảo.
 - Trả 0 phát hiện khi không có gì — kèm phần không đánh giá.
 
 ## 6. Không được làm

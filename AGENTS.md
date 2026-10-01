@@ -10,6 +10,7 @@ Một người + nhiều agent phát triển phần mềm theo sprint = một m�
   và nói vì sao.
 - Thứ tự: skill **quy trình** trước (định hình spec, viết plan, chạy sprint, debug, review), skill **kỹ
   thuật** sau. "Làm X" → định hình spec trước; "sửa lỗi" → debug trước.
+- Cờ đỏ: nghĩ "việc này đơn giản, khỏi cần skill" chính là lúc phải rà.
 - Skill đã đọc ở phiên trước không tính: skill đổi, đọc lại bản hiện tại.
 - Lệnh trực tiếp của người dùng thắng skill; skill thắng thói quen mặc định.
 - Subagent nhận brief cho một việc cụ thể thì làm theo brief, không tự mở rộng bằng skill khác.
@@ -49,8 +50,8 @@ và Không áp dụng không bao giờ là Đạt.
 - **Người làm không tự chấm.** Kiểm định do agent khác (phiên/subagent mới, ngữ cảnh soạn riêng, không dán
   lịch sử). Reviewer được trả 0 phát hiện, phải ghi phần không đánh giá. Việc nhỏ: một agent giữ nhiều
   vai thực thi, Analyst luôn điều phối.
-- Giao việc theo **tier**, không theo tên model; bảng tier → model đọc từ `AGENT_AGILE_TIERS`; thiếu
-  bảng thì hỏi, không đoán. **Luôn ghi vai · tier · model** vào PROGRESS khi giao subagent.
+- Giao việc theo **tier**, không theo tên model; bảng tier → model đọc từ file mà biến môi trường
+  `AGENT_AGILE_TIERS` trỏ tới (ngoài repo); thiếu bảng thì hỏi, không đoán. **Luôn ghi vai · tier · model** vào PROGRESS khi giao subagent.
 - Cạn hạn mức: dừng tier đó, ghi `BR`, báo — **không tự hạ tier**. Người dùng chỉ định đè → làm theo,
   ghi `"note"` trong `roles`. Muốn hãng khác → chỉ **tư vấn**, người dùng quyết.
 

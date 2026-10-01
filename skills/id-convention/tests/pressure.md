@@ -15,7 +15,7 @@ result: 3/3 GREEN pass
 **Giới hạn của phép thử:** kịch bản thứ hai ban đầu (tóm tắt trạng thái trong chat với mã đã kèm tên
 trong đề bài) nền đã đạt sẵn, bị thay bằng kịch bản cấp mã mới.
 
-## ID1 — Viết bảng việc + rủi ro + quyết định cho PLAN
+## Kịch bản 1 — Viết bảng việc + rủi ro + quyết định cho PLAN
 
 **Áp lực:** SPEC được mô tả bằng lời ("yêu cầu chức năng số 2, kịch bản 2.1…"), không cho sẵn mã; việc
 thứ 4 bị bỏ; cần ưu tiên.
@@ -25,7 +25,7 @@ thứ 4 bị bỏ; cần ưu tiên.
 | RED | **Không đạt** — mã `V1`–`V5`, `R1`–`R3`, `Q1`; trỏ spec bằng `YC2`, `TC1` (tự chế); ưu tiên "Cao / Trung bình"; việc bỏ viết `~~gạch ngang~~` và "(không giao)"; vai "Developer/Tester" | 6 loại lỗi trong một bảng |
 | GREEN | **Đạt** — `TK1 (sinh PDF hóa đơn thường)` … `TK5`; trỏ `FR2.1 (…)`, `SC2 (…)`; ưu tiên "Bắt buộc / Không làm đợt này"; `TK4` giữ mã, trạng thái `bỏ`, ghi "việc mới sẽ nhận TK6"; `RK1`–`RK3`, `DN1 (cách sinh PDF)` có bảng phương án | còn dùng "Developer/Tester" thay vì Implementer/QA — ngoài phạm vi skill này, thuộc `roles/` |
 
-## ID2 — Cấp mã mới trong PROGRESS cho ba sự kiện
+## Kịch bản 2 — Cấp mã mới trong PROGRESS cho ba sự kiện
 
 **Áp lực:** lỗi ngoài phạm vi, một điều chỉnh tự quyết, tách `TK3` với một quyết định mới cần người;
 người dùng dặn "ghi nhanh, anh không đọc đâu".
@@ -35,7 +35,7 @@ người dùng dặn "ghi nhanh, anh không đọc đâu".
 | RED | **Không đạt** — tách thành `TK3a`/`TK3b`; lỗi ngoài phạm vi mở `BR2` (không chặn gì); phán quyết ghi thành `RK4` mới và không có dòng `Phán quyết:`; 5 bảng cho 3 sự kiện | tiền tố tự chế + sai loại mục |
 | GREEN | **Đạt** — lỗi ngoài phạm vi → `RQ-<kế tiếp>` trong REQUESTS, "không mở BR vì không buộc dừng"; dòng `Phán quyết: chọn WeasyPrint … — vì … — nếu sai tốn nửa ngày`; `TK3.1`/`TK3.2`; `DN2` kế tiếp; "không đặt RK mới"; từ chối đoán số `RQ-` vì chưa mở sổ | đúng mục 4 của skill |
 
-## ID3 — Review đoạn REPORT có mã sai
+## Kịch bản 3 — Review đoạn REPORT có mã sai
 
 **Áp lực:** đoạn trích có `V1`, `P1` "mức cao", `D3`→`D4` đánh số lại, `US-004`, `SP-2026-03`, `A7`,
 `L1`; reviewer phải liệt kê lỗi và viết lại.
@@ -48,10 +48,10 @@ người dùng dặn "ghi nhanh, anh không đọc đâu".
 ## Lỗ hổng đã vá sau RED (REFACTOR)
 
 - Mục 4 "Cấp mã mới": việc con `TK3.1` (cấm `TK3a`), lỗi ngoài phạm vi → `RQ-` không `BR`, phán quyết
-  không có mã (vá ID2).
+  không có mã (vá kịch bản 2).
 - Mục 5 bảng "Cấm — sửa thành" liệt kê đúng các tiền tố tự chế đã gặp (`YC`, `TC`, `FD`, `DC`, `LO`) và
-  mã kiểu `SP-2026-03`, `US-004` (vá ID1, ID3).
-- Mục 3: mã hệ thống ngoài trong dấu code **và** kèm tên + nguồn (vá ID3).
+  mã kiểu `SP-2026-03`, `US-004` (vá kịch bản 1, 3).
+- Mục 3: mã hệ thống ngoài trong dấu code **và** kèm tên + nguồn (vá kịch bản 3).
 
 ## Chạy lại
 

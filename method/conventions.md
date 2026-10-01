@@ -71,5 +71,5 @@ Không có ngoại lệ "cho nhanh"; vi phạm là phát hiện mức **Chặn**
 
 - Thân tài liệu bằng ngôn ngữ làm việc của dự án; **frontmatter tiếng Anh** (khoá và giá trị liệt kê),
   vì công cụ và harness đọc frontmatter để định tuyến.
-- Frontmatter chỉ dùng tập con YAML: khoá-giá trị phẳng, danh sách, và danh sách đối tượng một cấp
-  (`roles`). Không neo, không nhiều dòng, không kiểu phức tạp.
+- Frontmatter chỉ dùng tập con YAML: khoá–giá trị phẳng, danh sách inline, khối lồng một cấp (`roles`,
+  `links`) — hợp đồng đầy đủ ở `templates/README.md` mục 2. Không neo, không nhiều dòng, không kiểu phức tạp.

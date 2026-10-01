@@ -23,6 +23,9 @@
 - **Người làm không tự chấm.** Kiểm định do agent **khác** người làm: phiên hoặc subagent mới, nhận ngữ
   cảnh soạn riêng, không dán lịch sử phiên. Một nhãn agent không vừa giữ vai thực thi vừa giữ vai kiểm
   định cho cùng một sản phẩm (công cụ `check` so `roles` trong frontmatter).
+- **QA cũng phải độc lập với người làm:** nhãn `qa` khác nhãn `implementer` và `architect`. Nếu trùng
+  (việc nhỏ, một agent kiêm), mỗi `VR` ghi "tự kiểm, chưa độc lập" và kết luận tối đa là **Đạt có điều
+  kiện** cho tới khi agent khác chạy lại.
 - Trong việc nhỏ, một agent được giữ **nhiều vai thực thi**; Analyst luôn là điều phối.
 - Vai được giao theo **tier**, không theo tên model ([tiers/README.md](../tiers/README.md)); model thực
   tế ghi vào PROGRESS khi giao việc.

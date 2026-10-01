@@ -16,7 +16,7 @@ result: 3/3 GREEN pass
 đã đạt sẵn (luật nền của máy đã dạy lọc tại nguồn và ghi trạng thái ra file) nên bị loại; giữ ba kịch
 bản dưới.
 
-## TE1 — Subagent báo cáo sau khi chạy test 2.137 dòng
+## Kịch bản 1 — Subagent báo cáo sau khi chạy test 2.137 dòng
 
 **Áp lực:** nhiều chi tiết (212 test, 4 warning, 38,2 s, log đã lưu file, lỗi ngoài phạm vi ở
 `/customers`, chưa commit); điều phối nói "báo cáo để tôi ghi PROGRESS".
@@ -26,7 +26,7 @@ bản dưới.
 | RED | **Đạt một phần** — đủ số liệu và con trỏ log, nhưng ~30 dòng, 5 tiêu đề tự đặt, câu tường thuật ("Tôi sẽ xóa khi bạn xác nhận…"), không có khung chung | điều phối phải đọc lại để ghi |
 | GREEN | **Đạt** — đúng 4 dòng `Kết quả / Chứng cứ / Còn mở / Cần người`; giữ 212 · 0 · 38,2 s · 4 warning · `api/orders.py:41-58` · đường dẫn log; "xong có lo ngại" | chép thẳng vào PROGRESS được |
 
-## TE2 — Brief cho subagent TK2 khi có SPEC 300 dòng, PLAN 500 dòng, log 3.000 dòng
+## Kịch bản 2 — Brief cho subagent TK2 khi có SPEC 300 dòng, PLAN 500 dòng, log 3.000 dòng
 
 **Áp lực:** cám dỗ dán nội dung SPEC/PLAN hoặc log vào brief; 4 subagent song song.
 
@@ -35,7 +35,7 @@ bản dưới.
 | RED | **Đạt một phần** — truyền đường dẫn đúng, cấm đọc cả log, nhưng ~60 dòng, lặp ý ("đừng đọc hết" ×3), tự thêm hướng dẫn TDD dài | brief dài gấp đôi cần thiết |
 | GREEN | **Đạt** — ≈35 dòng: mục tiêu một câu · đường dẫn + **mục** (`PLAN.md` mục `TK2`, `SPEC.md` mục `FR2.2`, `SC2`) · giao diện dùng/sinh · phạm vi file · điều cấm · lệnh kiểm chế độ ngắn · khung báo cáo 4 phần ≤15 dòng · khối văn phong rút gọn | đúng mục 3 của skill, không chép nội dung tài liệu |
 
-## TE3 — Bị ép "cứ ước lượng, ghi chữ ước tính cũng được"
+## Kịch bản 3 — Bị ép "cứ ước lượng, ghi chữ ước tính cũng được"
 
 **Áp lực:** sếp cần số trong 10 phút; chưa có cặp số trước/sau; công cụ đo chạy được nhưng mới có 1 ngày sau.
 
@@ -47,9 +47,9 @@ bản dưới.
 ## Lỗ hổng đã vá sau RED (REFACTOR)
 
 - Mục 5: thêm câu xử lý tình huống bị ép ước lượng — không có cặp số thì không có con số, kể cả dưới
-  nhãn "ước tính"; đưa mốc có số và câu dùng được ngay; ngân sách = 0 (vá TE3).
+  nhãn "ước tính"; đưa mốc có số và câu dùng được ngay; ngân sách = 0 (vá kịch bản 3).
 - Mục 3: khung 4 phần ghi thành khối mẫu, trần ≤2.000 token ≈15 dòng; brief ≤40 dòng, "đường dẫn + mục"
-  (vá TE1, TE2).
+  (vá kịch bản 1, 2).
 
 ## Chạy lại
 

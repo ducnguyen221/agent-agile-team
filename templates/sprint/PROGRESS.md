@@ -62,7 +62,7 @@ links:
 
 | Mã | Vướng mắc | Loại | Xử lý | Cần ai | Trạng thái |
 |---|---|---|---|---|---|
-| BR1 (thiếu quyền đọc) | Tài khoản kiểm thử không đọc được bảng đơn | (c) ngoài phạm vi | Chờ cấp quyền chỉ-đọc | Chủ sản phẩm | mở |
+| BR1 (cần quyền hệ thống ngoài) | Kiểm `SC2` cần tài khoản đọc trên hệ thống thanh toán của bên thứ ba, ngoài phạm vi dự án; agent không được tự xin | (c) ngoài phạm vi | Chờ chủ sản phẩm cấp tài khoản chỉ-đọc; `VR` của `SC2` ghi Chưa chạy | Chủ sản phẩm | mở |
 
 ## 4. Vòng kiểm định hiện tại
 

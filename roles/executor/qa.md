@@ -33,7 +33,7 @@ lưu file, trỏ đường dẫn.
 - Chạy cả bộ test, không chỉ file đổi; chạy lại khi mốc code đổi.
 - Chứng minh test hồi quy bằng vòng gỡ sửa → hỏng → đặt lại → đạt.
 - Ghi "Chưa chạy" kèm giới hạn khi thiếu môi trường; đề nghị "Không áp dụng" kèm lý do để reviewer xác nhận.
-- Chỉ ra `FR` chưa có test và `AC` chưa đo được — yêu cầu Analyst bổ sung `SC` trước khi kiểm.
+- Chỉ ra `FR` chưa có test và tiêu chí (`SC`) chưa đo được — yêu cầu Analyst bổ sung `SC` trước khi kiểm.
 
 ## 6. Không được làm
 - Sửa code, test hay cấu hình kiểm để xanh; đánh dấu skip/xfail.

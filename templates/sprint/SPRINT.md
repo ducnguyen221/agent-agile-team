@@ -66,7 +66,9 @@ updated: 2026-01-20
 ## 4. REPORT
 
 <!-- Kết quả kiểm (VR) do agent khác chạy · phát hiện (RF) + mức · cách hoàn tác · bài học (LN) và việc để lại
-     (CO) nếu có · Cổng 2: câu nguyên văn + thời điểm, cũng ghi vào frontmatter. -->
+     (CO) nếu có · Cổng 2: câu nguyên văn + thời điểm, cũng ghi vào frontmatter. Việc rất nhỏ nghiệm thu ngầm
+     (người dùng không phản đối trong lượt báo cuối) thì ghi trung thực:
+     gate_2: pass · gate_2_at: <thời điểm> · gate_2_quote: "nghiệm thu ngầm — không phản đối tới <thời điểm>". -->
 
 | Mã | Kiểm cái gì | Lệnh / thao tác | Kết quả | Người kiểm |
 |---|---|---|---|---|
@@ -75,4 +77,4 @@ updated: 2026-01-20
 - **Phát hiện:** chưa kiểm.
 - **Cách dùng / đã đổi gì / hoàn tác:** câu báo lỗi trong `ui/orders.html`; hoàn tác bằng `git revert`.
 - **Bài học · việc để lại:** Không có.
-- **Cổng 2:** chờ nghiệm thu.
+- **Cổng 2:** chờ nghiệm thu (khi đóng: câu nguyên văn, hoặc "nghiệm thu ngầm — không phản đối tới <thời điểm>").

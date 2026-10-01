@@ -45,5 +45,6 @@ Thiếu đầu vào để kiểm (ghi "Không đánh giá", không đoán) · ph
 (ghi Chặn, báo Analyst mở `BR`) · cạn hạn mức tier.
 
 ## 8. Skill dùng
-`code-review` (khung Strengths / Issues / Ready) · `shaping-spec` (tự review SPEC 4 điểm) ·
+`code-review` (khung: điểm tốt · phát hiện theo mức Chặn / Phải sửa / Nên sửa / Ghi chú · kết luận Đạt /
+Đạt có điều kiện / Không đạt) · `shaping-spec` (tự review SPEC 4 điểm) ·
 `plan-review` (phần thách thức phạm vi) · `response-style` · `id-convention` · `token-economy`.

@@ -91,3 +91,6 @@ gật). Archive hồ sơ không có nghĩa đã kiểm trên production.
 - Trường `roles` trong frontmatter ghi ai làm, ai kiểm; công cụ kiểm so hai danh sách đó. Công cụ chỉ chứng
   minh hồ sơ **nhất quán**, không chứng minh danh tính — trách nhiệm điều phối là giao kiểm định cho agent
   khác thật.
+- `VR` do QA chạy chỉ tính là độc lập khi nhãn `qa` khác nhãn `implementer`/`architect` của cùng sản
+  phẩm. Trùng nhãn → mỗi `VR` ghi "tự kiểm, chưa độc lập"; kết luận của sprint tối đa **Đạt có điều
+  kiện** cho tới khi agent khác chạy lại.

@@ -13,8 +13,13 @@ updated: 2026-10-01
 
 Thuật ngữ: **sprint** — một lượt làm việc phục vụ đúng một mục tiêu · **cổng** — điểm dừng chờ người
 dùng quyết · **vòng** — một lần quay từ kiểm định về thực thi · **điều phối** — vai Analyst khi nó
-dẫn sprint. Mã mục (`TK`, `RF`, `BR`…) theo [skills/id-convention](../skills/id-convention/SKILL.md);
-thang mức theo [severity.md](severity.md); cỡ việc theo [sizing.md](sizing.md).
+dẫn sprint · **frontmatter** — khối khoá–giá trị ở đầu file tài liệu, máy đọc được · **subagent** —
+agent con được agent chính giao một việc kèm brief riêng · **worktree** — bản chép riêng của repo để
+làm một việc mà không đụng bản chính. Mã mục (`TK`, `RF`, `BR`…) theo
+[skills/id-convention](../skills/id-convention/SKILL.md); thang mức theo [severity.md](severity.md);
+cỡ việc theo [sizing.md](sizing.md). Các skill nhắc tên trong file này (`intake`, `shaping-spec`,
+`writing-plan`, `plan-review`, `running-sprint`, `code-review`, `closing-sprint`) đến từ đợt distill
+sau — xem `docs/MIGRATION.md`.
 
 ## 1. Sơ đồ
 
@@ -29,11 +34,15 @@ thang mức theo [severity.md](severity.md); cỡ việc theo [sizing.md](sizing
 
 Bước 3 và 4 lặp cho tới khi không còn phát hiện mức Chặn hay Phải sửa (mục 6).
 
+**Người dùng cần làm gì:** giao yêu cầu bằng lời thường ở Bước 1; trả lời **"duyệt"** hoặc **"điều
+chỉnh: <gì>"** ở Cổng 1; kết luận **Đạt / Đạt có điều kiện / Không đạt** ở Cổng 2. Ngoài ra chỉ phải
+lên tiếng khi agent dừng ở bốn điều kiện (mục 5), sau vòng 3 (mục 6) hoặc khi cạn hạn mức tier.
+
 ## 2. Bước 1 — Tiếp nhận (không cổng)
 
 KHI người dùng giao một yêu cầu THÌ Analyst:
 
-1. Ghi một dòng `RQ-` mới vào sổ REQUESTS: ngày, tóm tắt một câu, trạng thái `mở`.
+1. Ghi một dòng `RQ-` mới vào sổ REQUESTS: ngày, tóm tắt một câu, trạng thái `mới`.
 2. Tách theo mục tiêu: một mục tiêu = một sprint (`SPR-`); yêu cầu chứa nhiều mục tiêu thì tách thành
    nhiều sprint, mỗi sprint vẫn trỏ về cùng `RQ-`.
 3. Định cỡ và rủi ro theo [sizing.md](sizing.md). Rủi ro chỉ nâng cỡ, không hạ.
@@ -45,6 +54,10 @@ KHI người dùng giao một yêu cầu THÌ Analyst:
 
 ## 3. Bước 2 — SPEC rồi PLAN, Cổng 1
 
+- Mở sprint: ghi dòng `SPR-` vào sổ SPRINTS (cột Mở, Mục tiêu; cột Đóng để trống) và dựng thư mục
+  sprint từ mẫu — công cụ `init` làm. Nếu SPEC mở một **tính năng mới** thì cấp `FS-` và tạo spec sống
+  ngay ở bước này (trạng thái `đề xuất`); tính năng có sẵn thì chỉ trỏ `FS-` cũ. Sổ SPECS và spec sống
+  chỉ cập nhật **hành vi hiện hành** sau Cổng 2.
 - Analyst viết **SPEC** (làm cái gì, cho ai, thế nào là xong): bối cảnh · `US` · `FR` với kịch bản
   KHI… THÌ… · `SC` · ngoài phạm vi · `CQ` (có thể rỗng, ghi rõ "không có"). Cỡ **lớn** có thêm mục
   "Đổi hợp đồng / giao diện": liệt kê API, sự kiện, schema sẽ đổi và mọi bên dùng chúng (skill `shaping-spec`).
@@ -59,7 +72,18 @@ KHI người dùng giao một yêu cầu THÌ Analyst:
 
 **Trình Cổng 1.** Analyst gửi người dùng **một** bản tóm tắt, theo thứ tự: kết luận một câu → `CQ`
 còn mở → `DN` cần người → rủi ro mức Chặn / Phải sửa → ước lượng công sức → đường tới SPEC và PLAN.
-Mỗi mã kèm tên ngắn. Không dán cả tài liệu vào chat.
+Mỗi mã kèm tên ngắn. Không dán cả tài liệu vào chat. Lời trình chuẩn:
+
+```
+Cổng 1 — sprint <SPR-> (<mục tiêu một câu>), cỡ <cỡ>, rủi ro <mức>.
+Kết luận: <SPEC + PLAN sẵn sàng; điểm cần anh quyết là …>
+CQ còn mở: <CQk (tên) — đề xuất: …> (hoặc "không")
+DN cần anh: <DNk (tên) — phương án, khuyến nghị> (hoặc "không")
+Rủi ro Chặn/Phải sửa: <RKk (tên) — cách giảm> (hoặc "không")
+Ước lượng: <số việc, số vòng dự kiến>
+Tài liệu: <đường tới SPEC>, <đường tới PLAN>
+Anh trả lời: "duyệt" / "điều chỉnh: <gì>"
+```
 
 **Kết quả Cổng 1.**
 - *Duyệt* → ghi `gate_1: approved` vào frontmatter SPEC và PLAN, kèm thời điểm `gate_1_at` và **câu
@@ -96,10 +120,11 @@ Một phán quyết sai tốn công làm lại mà người dùng thấy và ho�
 tốn cả buổi của người dùng và không mua được gì. Phán quyết đổi tiêu chí thành công hay vượt phạm vi đã
 duyệt **không** phải phán quyết — đó là điều kiện dừng (d) ở mục 5.
 
-## 5. Bốn điều kiện dừng — và chỉ bốn
+## 5. Bốn điều kiện dừng giữa chừng
 
-KHI gặp một trong bốn trường hợp sau THÌ dừng, ghi `BR` vào bảng Vướng mắc của PROGRESS (vướng gì,
-loại (a)–(d), đã làm gì, cần ai, trạng thái) và hỏi người dùng:
+Ngoài hai cổng, bốn điều kiện này, mốc sau vòng 3 và cạn hạn mức tier, **không hỏi**. KHI gặp một trong
+bốn trường hợp sau THÌ dừng, ghi `BR` vào bảng Vướng mắc của PROGRESS (vướng gì, loại (a)–(d), đã làm
+gì, cần ai, trạng thái) và hỏi người dùng:
 
 | | Điều kiện | Ví dụ |
 |---|---|---|
@@ -151,11 +176,23 @@ lại · cách dùng, đã đổi gì, cách hoàn tác · bài học (`LN`) · 
 phẩm đã đạt gì ↔ cách làm nên đổi gì) · Cổng 2 · tổng token phiên (mốc đo). REPORT thay cho bàn giao:
 không có tài liệu bàn giao riêng.
 
-**Trình Cổng 2** giống Cổng 1: một bản tóm tắt, kết luận trước, mã kèm tên. Người dùng kết luận
-**Đạt / Đạt có điều kiện / Không đạt**:
-- *Đạt* → ghi `gate_2: pass` + `gate_2_at` + `gate_2_quote` nguyên văn; cập nhật **spec sống** của tính năng trong `docs/specs/`
-  ngay trong sprint; đóng sprint trong SPRINTS; lúc này mới trình menu nhánh (gộp local / push + PR /
-  giữ nguyên — skill `closing-sprint`; push và PR là tác động ra ngoài, cần người dùng gật).
+**Trình Cổng 2** giống Cổng 1: một bản tóm tắt, kết luận trước, mã kèm tên. Lời trình chuẩn:
+
+```
+Cổng 2 — sprint <SPR-> (<mục tiêu một câu>), sau <n> vòng kiểm định.
+Kết luận: <đạt gì so với SC; reviewer kết luận …>
+Kiểm định: <k/m SC có VR Đạt; VR Chưa chạy/Không áp dụng: … (lý do)>
+Phát hiện còn mở: <RFk (tên) — mức — xử lý> (hoặc "không")
+Việc để lại: <COk (tên) — chủ — mốc> (hoặc "không")
+Cách dùng / đã đổi gì / hoàn tác: <một dòng mỗi ý>; REPORT: <đường dẫn>
+Anh kết luận: Đạt / Đạt có điều kiện (kèm điều kiện) / Không đạt (kèm lý do)
+```
+
+Người dùng kết luận **Đạt / Đạt có điều kiện / Không đạt**:
+- *Đạt* → ghi `gate_2: pass` + `gate_2_at` + `gate_2_quote` nguyên văn; cập nhật **spec sống** của tính
+  năng trong thư mục spec sống theo cấu hình (`paths.feature_specs_dir`) ngay trong sprint; đóng sprint
+  trong SPRINTS; lúc này mới trình menu nhánh (gộp local / push + PR / giữ nguyên — skill
+  `closing-sprint`; push và PR là tác động ra ngoài, cần người dùng gật).
 - *Đạt có điều kiện* (`conditional_pass`) → như Đạt, điều kiện ghi thành `CO` có chủ và mốc theo dõi.
 - *Không đạt* (`fail`) → ghi lý do nguyên văn; mở vòng mới hoặc sprint mới theo người dùng chọn.
 
@@ -178,7 +215,9 @@ KHI cỡ **rất nhỏ** (đổi chữ, một dòng, không đổi hành vi) TH�
   `gate_1: approved`, `gate_1_at` là thời điểm giao, `gate_1_quote` là **trích nguyên văn** lời giao với
   tiền tố "đạt theo lời giao: …". Lời giao chưa nêu rõ kết quả thì không phải việc rất nhỏ — nâng cỡ.
 - **Cổng 2** gộp vào lời báo cuối lượt: câu đầu là kết quả + bằng chứng; người dùng không phản đối trong
-  lượt đó là nghiệm thu; vẫn ghi `gate_2` kèm thời điểm.
+  lượt đó là nghiệm thu **ngầm** — ghi trung thực `gate_2: pass`, `gate_2_at`, và
+  `gate_2_quote: "nghiệm thu ngầm — không phản đối tới <thời điểm>"`; người dùng lên tiếng thì ghi câu
+  nguyên văn thay vào.
 - Luật "người làm không tự chấm" vẫn áp: `VR` do agent khác chạy, hoặc ghi rõ "tự kiểm, chưa độc lập"
   và kết luận chỉ được là **Đạt có điều kiện**.
 

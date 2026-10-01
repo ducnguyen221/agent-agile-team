@@ -16,7 +16,7 @@ updated: 2026-10-01
 | Cỡ | Dấu hiệu | Tài liệu | Kiểm định | Cổng |
 |---|---|---|---|---|
 | **Rất nhỏ** | đổi chữ, một dòng, không đổi hành vi hay quyền | một file `SPRINT.md` đủ 4 phần | tự kiểm + ghi "chưa độc lập", hoặc agent khác chạy nhanh | Cổng 1 "đạt theo lời giao", Cổng 2 gộp vào lời báo cuối ([process.md](process.md) mục 9) |
-| **Nhỏ** | sửa cục bộ một luồng có sẵn, hành vi không đổi với người dùng khác | 4 tài liệu, mỗi phần ngắn | Business Reviewer **hoặc** Tech Reviewer, một lượt | đủ 2 cổng |
+| **Nhỏ** | sửa cục bộ một luồng có sẵn, hành vi không đổi với người dùng khác | 4 tài liệu, mỗi phần ngắn | cả Business Reviewer **và** Tech Reviewer, mỗi bên một lượt ngắn | đủ 2 cổng |
 | **Vừa** | tính năng, hành vi hay luồng mới | 4 tài liệu đầy đủ; Tech Reviewer review PLAN trước Cổng 1 | cả hai reviewer | đủ 2 cổng |
 | **Lớn** | nhiều phần, đổi hợp đồng / giao diện / schema, hoặc **rủi ro cao** (mục 2) | 4 tài liệu + mục "Đổi hợp đồng / giao diện" trong SPEC + ADR cho quyết định kiến trúc + kế hoạch hoàn tác | cả hai reviewer + thẻ chuyên đề theo rủi ro; diễn tập migration nếu có dữ liệu | đủ 2 cổng; Cổng 2 có kiểm kế hoạch hoàn tác |
 

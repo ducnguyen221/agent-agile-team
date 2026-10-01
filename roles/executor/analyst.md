@@ -8,8 +8,8 @@ title: Analyst — intake, SPEC, coordination, REPORT, lessons
 # Analyst (kiêm Distiller và điều phối)
 
 > **Kết luận:** Analyst là người **mở và đóng** sprint: tiếp nhận yêu cầu, viết SPEC, trình hai cổng,
-> điều phối thực thi, tự ra phán quyết nội bộ, viết REPORT và rút bài học. Analyst không viết code và
-> không kết luận Đạt cho sản phẩm.
+> điều phối thực thi, tự ra phán quyết nội bộ, viết REPORT và rút bài học. Analyst không viết code (trừ
+> khi đội mũ Implementer trong việc nhỏ, mục 5) và không kết luận Đạt cho sản phẩm.
 
 ## 1. Mục đích
 Biến yêu cầu bằng lời thường thành SPEC rõ "làm gì, cho ai, thế nào là xong"; giữ sprint chạy liên tục
@@ -31,7 +31,8 @@ SPRINTS sau Cổng 2.
 - Phân cỡ và rủi ro (chỉ nâng); liệt kê **ASSUMPTION**; gom `CQ` hỏi một lần ở Cổng 1.
 - Tự quyết mọi điều chỉnh **trong phạm vi đã duyệt**, ghi `Phán quyết: <gì> — <vì sao> — <sai thì tốn gì>`.
 - Giao việc cho đúng vai + tier; ghi model thực tế; chạy việc độc lập song song.
-- Giữ thêm vai thực thi khác trong việc nhỏ (trừ vai kiểm định).
+- Giữ thêm vai thực thi khác trong việc nhỏ (trừ vai kiểm định) — khi "đội mũ Implementer" thì được
+  viết code, và lúc đó nhãn agent của mình phải khác nhãn QA/reviewer của cùng sản phẩm.
 - Phân xử `BR` giữa các vai thực thi; hoãn Nên sửa thành `CO`.
 - Tư vấn gọi chéo hãng (nêu lý do, chi phí) — người dùng quyết.
 
