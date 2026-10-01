@@ -89,6 +89,14 @@ mình. `TK` trỏ `TK` khác thì trỏ vào khối Giao diện của nó, khôn
 
 `TK` không sinh code (tài liệu, cấu hình) vẫn có Bước: làm → kiểm (lệnh + kỳ vọng) → commit.
 
+**`TK` tác động ngoài worktree hoặc ngoài repo** (ghi state của máy, cấu hình người dùng, hệ ngoài, dịch vụ
+thật) — chọn một, ghi rõ trong `TK`:
+
+- **Đo trong worktree, ghi thật sau:** `TK` chỉ làm và kiểm bằng bản tạm trong worktree; bước ghi thật thành
+  **bàn giao sau Cổng 2** (REPORT mục "Cách dùng, đã đổi gì, cách hoàn tác"). Ưu tiên cách này.
+- **Bắt buộc giữa sprint:** `Cổng: người` + trỏ một `DN` nêu đích danh đường dẫn / hệ bị chạm, cách hoàn tác;
+  `TK` dừng ở bước đó tới khi `DN` có câu trả lời (`method/process.md` mục 5, điều kiện (c)).
+
 ## 5. Chỗ trống là lỗi PLAN
 
 Không bao giờ viết: "TBD", "làm sau", "xử lý biên phù hợp", "thêm validation", "viết test cho phần

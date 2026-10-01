@@ -54,6 +54,7 @@ Không có bảng tóm tắt ở cuối, không lặp kết luận.
 |---|---|
 | Thuật ngữ không giải nghĩa | giải nghĩa ngắn trong ngoặc ở lần đầu: "migration (bước đổi cấu trúc dữ liệu)" |
 | Mã trần (`TK4`, `RF2` không tên) | `TK4 (dựng script kiểm)` — mọi lần trong chat, lần đầu mỗi đoạn trong tài liệu |
+| Liệt kê mã không có câu dẫn tài liệu + nghĩa in đậm | câu dẫn trước danh sách: "PLAN có 5 **task** (TK) và 2 **decision** (DN) cần anh quyết:" (skill `id-convention` mục 3) |
 | Tự chế viết tắt | viết đủ từ, hoặc dùng mã đã có trong `id-convention` |
 | Bảng cho 1–2 mục | câu hoặc gạch đầu dòng |
 | Kể bước gọi tool ("em đã chạy grep, rồi đọc file…") | nêu kết quả và bằng chứng; bước đi vào PROGRESS nếu cần |
@@ -103,7 +104,8 @@ này). REPORT có mục "Tóm tắt cho người không chuyên" viết như m�
 
 ```
 Văn phong: câu đầu là kết luận/điều cần làm; không dẫn nhập, không kể bước gọi tool, không tóm tắt lặp.
-Mã luôn kèm tên ngắn. Thuật ngữ giải nghĩa lần đầu. Bảng chỉ khi ≥3 mục × 2 thuộc tính.
+Mã luôn kèm tên ngắn; trước danh sách mã có câu dẫn "<tài liệu> có N **<nghĩa>** (<mã>):".
+Thuật ngữ giải nghĩa lần đầu. Bảng chỉ khi ≥3 mục × 2 thuộc tính.
 Nén không bao giờ bỏ: báo lỗi, cảnh báo bảo mật, xác nhận thao tác phá hủy, số liệu + đơn vị, mã lỗi,
 đường dẫn, chữ phủ định (không/chưa/chỉ/trừ khi). Số không có nguồn thì nói "chưa đo" + cách đo.
 Báo cáo về điều phối: Kết quả / Chứng cứ / Còn mở / Cần người, ≤15 dòng, con trỏ file thay log.

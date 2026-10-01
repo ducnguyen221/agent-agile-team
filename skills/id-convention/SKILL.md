@@ -14,7 +14,8 @@ rewrite_before_public: false
 
 > **Kết luận:** mỗi loại mục có một tiền tố **hai chữ cái rút từ tên tiếng Anh**, thuộc đúng một tài
 > liệu; hồ sơ trong sổ gốc có gạch nối và số tăng dần không tái dùng; mọi mã **luôn kèm tên ngắn** trong
-> chat; cấm mã trần một chữ cái, cấm tự chế tiền tố, cấm đánh số lại, ưu tiên viết bằng chữ.
+> chat; **trước mọi danh sách / bảng mã có câu dẫn** nói tài liệu nào và mã là gì (nghĩa in đậm); cấm mã
+> trần một chữ cái, cấm tự chế tiền tố, cấm đánh số lại, ưu tiên viết bằng chữ.
 
 ## 1. Luật đặt tiền tố
 
@@ -62,6 +63,7 @@ rewrite_before_public: false
 | Nhắc chéo trong cùng sprint | `TK4 → FR3.2` |
 | Nhắc sang tài liệu khác | `FS-007/FR3.2`, `SPR-12/TK4` |
 | Lần đầu trong một đoạn tài liệu, và **mọi lần** trong chat | mã + tên ngắn: `RF1 (API thiếu phân trang)` |
+| Liệt kê nhiều mã (bảng, gạch đầu dòng) trong tài liệu **và** trong chat | câu dẫn ngay trên: tài liệu nào + số mục + nghĩa của mã **in đậm** + mã trong ngoặc — `SPEC có 10 **user story** (US):`, `Sổ gốc REQUESTS có 4 **request** (RQ):`, `PLAN có 5 **task** (TK) và 2 **decision** (DN) cần anh quyết:`. Từ in đậm lấy cột "Tên tiếng Anh" của mục 2, viết thường |
 | Mã của hệ thống/tài liệu ngoài (`A7` của khuôn chuẩn hóa repo, `P1` của một tool) | trong dấu code **và** kèm tên + nguồn: `` `A7` (lõi sạch, khuôn chuẩn hóa repo) `` — công cụ kiểm không coi là mã của tài liệu |
 | Ưu tiên | bằng chữ: **Bắt buộc / Nên có / Có thì tốt / Không làm đợt này** |
 | Mức phát hiện | bằng chữ: Chặn / Phải sửa / Nên sửa / Ghi chú |
@@ -89,6 +91,7 @@ rewrite_before_public: false
 | Mã sprint kiểu `SP-2026-03`, `US-004`, `REL-…` | `SPR-03`; `US4` (mục trong SPEC) hoặc `RQ-004` (hồ sơ sổ gốc) — tuỳ nó là gì |
 | Đánh số lại khi bỏ mục | giữ số, trạng thái `bỏ` |
 | Mã trần trong chat ("TK3 xong chưa?") | "TK3 (giao diện) xong chưa?" |
+| Liệt kê mã không có câu dẫn ("RQ-001 …, RQ-002 …" đứng trơ) | thêm câu dẫn: "Sổ gốc REQUESTS có 2 **request** (RQ):" rồi mới liệt kê |
 | "mức cao / mức thấp" | Chặn / Phải sửa / Nên sửa / Ghi chú |
 
 ## 6. Kiểm nhanh một tài liệu
@@ -100,5 +103,7 @@ rewrite_before_public: false
 5. Có số bị tái dùng hay đánh số lại? Mục bỏ còn mã và trạng thái `bỏ`?
 6. Mã hệ thống ngoài nằm trong dấu code kèm tên + nguồn?
 7. Ưu tiên và mức bằng chữ?
+8. Mỗi bảng / danh sách mã có câu dẫn (tài liệu + nghĩa in đậm) ngay trên?
 
-Công cụ `check` của repo chạy các bước 1, 2, 4, 5 và 7 tự động; 3 và 6 là việc của reviewer.
+Công cụ `check` của repo chạy các bước 1, 2, 4, 5 và 7 tự động, và bước 8 cho bảng có cột đầu "Mã" (luật
+`id-list-lead`, mức Ghi chú); 3, 6 và bước 8 cho danh sách là việc của reviewer.

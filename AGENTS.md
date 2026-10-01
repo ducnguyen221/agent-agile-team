@@ -73,7 +73,9 @@ và Không áp dụng không bao giờ là Đạt.
 - Tiền tố hai chữ cái từ tên tiếng Anh (hai từ → chữ đầu mỗi từ; một từ → đầu + cuối), thuộc đúng một
   tài liệu: SPEC `US` `FR` (`FR3.2` kịch bản) `SC` `CQ` · PLAN `TK` (`TK2.3` việc con) `RK` `DN` ·
   PROGRESS `BR` · REPORT `VR` `RF` `LN` `CO`. Sổ gốc: `RQ-014` `FS-007` `SPR-12`, tăng dần, không tái dùng.
-- Mã luôn kèm tên ngắn (mọi lần trong chat). Nhắc chéo `TK4 → FR3.2`, sang tài liệu khác `FS-007/FR3.2`.
+- Mã luôn kèm tên ngắn (mọi lần trong chat). Trước mọi danh sách / bảng mã: câu dẫn nói tài liệu nào và mã
+  là gì, nghĩa in đậm — "SPEC có 10 **user story** (US):", "Sổ gốc REQUESTS có 4 **request** (RQ):".
+  Nhắc chéo `TK4 → FR3.2`, sang tài liệu khác `FS-007/FR3.2`.
   Mã hệ khác để trong dấu code + tên. Không đánh số lại; mục bỏ giữ mã, trạng thái `bỏ`.
 - Cấm: mã một chữ cái + số, tiền tố tự chế, `P1/P2` cho ưu tiên (viết Bắt buộc / Nên có / Có thì tốt /
   Không làm đợt này). Ngoại lệ duy nhất: tier `T1/T2/T3`.
