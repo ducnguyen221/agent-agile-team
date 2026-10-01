@@ -57,13 +57,39 @@ def test_denylist_word_is_caught_case_insensitively(tmp_path):
 
 def test_denylist_exemptions(tmp_path):
     root = make_repo(tmp_path)
-    (root / "NOTICE").write_text(f"Copyright (c) 2026 {WORD}\n", encoding="utf-8")
-    (root / "THIRD_PARTY.md").write_text(f"| nguồn | {WORD} |\n", encoding="utf-8")
-    (root / "UPSTREAM.md").write_text(f"# Nguồn\n\n| `{WORD}/repo` | main |\n", encoding="utf-8")
+    (root / "NOTICE").write_text(f"Copyright (c) 2026 {WORD}\n\nAny text {WORD}\n", encoding="utf-8")
+    (root / "THIRD_PARTY.md").write_text(f"| nguồn | MIT © 2026 {WORD} |\nCopyright {WORD}\n", encoding="utf-8")
+    (root / "UPSTREAM.md").write_text(f"# Nguồn\n\n| `{WORD}/repo` | `0123abcd` | main |\n", encoding="utf-8")
+    (root / "docs").mkdir()
+    (root / "docs" / "MIGRATION.md").write_text(f"| `{WORD}:old-skill` | `new` |\n| `{WORD}:*` | — |\n",
+                                                 encoding="utf-8")
     (root / "skills" / "demo" / "tests" / "pressure.md").write_text(f"---\nmodel: {WORD}\n---\n\nChạy bằng model `{WORD}`.\n", encoding="utf-8")
     assert check.run_self(root, denylist(tmp_path, WORD)).findings == []
-    (root / "UPSTREAM.md").write_text(f"# Nguồn\n\nVăn xuôi nhắc {WORD}.\n", encoding="utf-8")
-    assert rules_of(check.run_self(root, denylist(tmp_path, WORD))) == {"leak-denylist"}
+
+
+@pytest.mark.parametrize("rel, text", [
+    ("UPSTREAM.md", f"# Nguồn\n\nVăn xuôi nhắc {WORD}.\n"),
+    ("UPSTREAM.md", f"| `obra/repo` | gốc {WORD} (không giấy phép) | private |\n"),   # cột khác cột nguồn
+    ("THIRD_PARTY.md", f"| `adr` | `SKILL.md` | bộ {WORD} |\n"),                     # không phải dòng ghi công
+    ("docs/MIGRATION.md", f"Gặp tên {WORD} trong hồ sơ cũ thì tra bảng.\n"),           # văn xuôi, không phải mã cũ
+    ("docs/MIGRATION.md", f"| `{WORD}/path/file.md` | x |\n"),                         # code span không phải `bộ:tên`
+])
+def test_denylist_exemptions_are_narrow(tmp_path, rel, text):
+    """Đột biến `RF4`/`RF5`: miễn trừ chỉ che đúng phần được nêu (ghi công, `owner/repo` + SHA, mã skill cũ)."""
+    root = make_repo(tmp_path)
+    (root / rel).parent.mkdir(parents=True, exist_ok=True)
+    (root / rel).write_text(text, encoding="utf-8")
+    hits = [f for f in check.run_self(root, denylist(tmp_path, WORD)).findings if f.rule == "leak-denylist"]
+    assert len(hits) == 1, f"{rel}: {hits}"
+
+
+def test_every_leak_exemption_is_explicit_and_documented():
+    readme = (REPO / "scripts" / "README.md").read_text(encoding="utf-8")
+    assert check.LEAK_EXEMPTIONS, "danh sách miễn trừ phải tường minh"
+    for pattern, kind, reason in check.LEAK_EXEMPTIONS:
+        assert kind in check.LEAK_EXEMPTION_KINDS, f"{pattern}: kiểu miễn trừ lạ {kind!r}"
+        assert len(reason) > 20, f"{pattern}: thiếu lý do"
+        assert pattern in readme, f"{pattern} chưa ghi ở scripts/README.md mục Phạm vi --self"
 
 
 def test_denylist_scans_non_markdown_and_fixtures(tmp_path):

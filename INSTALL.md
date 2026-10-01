@@ -52,8 +52,15 @@ macOS là `python3 …`.
 Mặc định clone vào thư mục người dùng, ví dụ `~/agent-agile-team` (hỏi nếu người dùng muốn chỗ khác):
 
 ```bash
-git clone https://github.com/OWNER/agent-agile-team ~/agent-agile-team
+git clone https://github.com/OWNER/agent-agile-team ~/agent-agile-team                # macOS, bash
 ```
+
+```powershell
+git clone https://github.com/OWNER/agent-agile-team "$HOME\agent-agile-team"         # Windows PowerShell
+```
+
+Windows PowerShell 5.1 **không** mở `~` cho chương trình ngoài (`git`, `python`, `claude`): mọi lệnh Windows
+trong file này dùng `"$HOME\agent-agile-team"`.
 
 Người dùng đã có bản clone thì dùng luôn, chạy `git pull --ff-only` trong đó.
 
@@ -65,7 +72,12 @@ của harness — đây là file luật của người dùng: nói rõ dòng nà
 ### 4a. Claude Code
 
 ```bash
-claude plugin marketplace add ~/agent-agile-team
+claude plugin marketplace add ~/agent-agile-team                  # macOS, bash
+claude plugin install agent-agile-team@agent-agile-team
+```
+
+```powershell
+claude plugin marketplace add "$HOME\agent-agile-team"            # Windows PowerShell
 claude plugin install agent-agile-team@agent-agile-team
 ```
 
@@ -107,8 +119,11 @@ Biến chỉ thấy ở tiến trình **mới** — khởi động lại ứng d
 ## 6. Kiểm
 
 ```bash
-cd ~/agent-agile-team
-python scripts/check.py --self          # macOS: python3
+cd ~/agent-agile-team && python3 scripts/check.py --self                        # macOS, bash
+```
+
+```powershell
+python "$HOME\agent-agile-team\scripts\check.py" --self --root "$HOME\agent-agile-team"   # Windows PowerShell
 ```
 
 Dòng cuối có `→ Đạt` là lõi nguyên vẹn; `chống rò: NOT_CONFIGURED` nghĩa là chưa đặt danh sách từ cấm — đúng,

@@ -4,7 +4,7 @@ description: Use when a bug report, stack trace, failing production flow or "how
 metadata:
   group: process
   roles: [analyst]
-source: academy skills/bug-triager/SKILL.md (private copy)
+source: private-process-skills skills/bug-triager/SKILL.md (private copy)
 source_sha: 4c0fdc5736a49b6223a7dfc7626d5495cf55185c
 license: none
 rewrite_before_public: true

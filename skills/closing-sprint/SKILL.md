@@ -4,7 +4,7 @@ description: Use when verification has no open blocking findings and the sprint 
 metadata:
   group: process
   roles: [analyst, implementer]
-source: ["obra/superpowers skills/finishing-a-development-branch/SKILL.md", "garrytan/gstack document-release/SKILL.md.tmpl (via local distill)", "academy skills/preflight-gate/SKILL.md, skills/release-notes-writer/SKILL.md (private copy)", "affaan-m/ECC commands/learn-eval.md"]
+source: ["obra/superpowers skills/finishing-a-development-branch/SKILL.md", "garrytan/gstack document-release/SKILL.md.tmpl (via local distill)", "private-process-skills skills/preflight-gate/SKILL.md, skills/release-notes-writer/SKILL.md (private copy)", "affaan-m/ECC commands/learn-eval.md"]
 source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 96764e80a641e28141ec8297223768029f5bf483, 4c0fdc5736a49b6223a7dfc7626d5495cf55185c, c70874fae9eb0e5ad0365beb7e2955899fd1d30f]
 license: [MIT, MIT, none, MIT]  # none = references/preflight.md, references/release-notes.md
 rewrite_before_public: true  # only references/preflight.md and references/release-notes.md derive from the source without a license

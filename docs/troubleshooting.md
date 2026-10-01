@@ -1,7 +1,7 @@
 # Lỗi hay gặp
 
-> **Kết luận:** sáu triệu chứng hay gặp khi cài và dùng lần đầu, mỗi cái một cách xử lý. Phần lớn là
-> **cấu hình chưa đặt** (điểm cắm của lớp riêng) hoặc **mã hoá ký tự** của shell — không phải lỗi của script.
+> **Kết luận:** bảy triệu chứng hay gặp khi cài và dùng lần đầu, mỗi cái một cách xử lý. Phần lớn là
+> **cấu hình chưa đặt** (điểm cắm của lớp riêng) hoặc **cách shell xử lý** dấu `~` và mã hoá ký tự — không phải lỗi của script.
 
 Cài đặt: [`INSTALL.md`](../INSTALL.md). Điểm cắm: [`hosts/README.md`](../hosts/README.md) mục 2.
 
@@ -13,6 +13,7 @@ Cài đặt: [`INSTALL.md`](../INSTALL.md). Điểm cắm: [`hosts/README.md`](.
 | Tiêu đề sprint mất dấu tiếng Việt (`Tra c?u ??n`), `init` cảnh báo dấu `?` hoặc ký tự thay thế | Shell gọi Python (một số cầu Git Bash, `cmd` code page cũ) làm mất dấu **trước khi** tới script | Ghi tiêu đề vào file UTF-8 rồi dùng `--title-file <file>`, hoặc chạy `python -X utf8 scripts/init.py …` từ PowerShell. Tiêu đề đã ghi sai thì sửa tay trong frontmatter + dòng SPRINTS |
 | `index.py` / `init.py` thoát 2: `không đọc được dạng UTF-8 … — lưu lại sổ bằng UTF-8` | Sổ gốc hoặc spec sống bị lưu bằng bảng mã khác (Windows PowerShell 5.1 `Set-Content` mặc định ANSI; một số editor mặc định UTF-16) | Mở file, lưu lại dạng **UTF-8** (có hay không BOM đều được); PowerShell thì ghi bằng `-Encoding utf8`. Chạy lại lệnh |
 | Sau khi chạy `init`/`index`, `git diff` báo đổi **cả file** dù chỉ một dòng | Kiểu xuống dòng bị đổi (LF ↔ CRLF) — thường do editor hoặc `core.autocrlf`, không do script: script giữ nguyên BOM và kiểu xuống dòng của file có sẵn | `git diff --ignore-cr-at-eol` để xác nhận; dự án muốn cố định thì thêm `.gitattributes` (`* text=auto eol=lf`) rồi `git add --renormalize .`. Repo phương pháp này đã ép LF |
+| Windows PowerShell: `python ~/agent-agile-team/…` báo `can't open file '…\~\agent-agile-team…'`, `git -C ~/agent-agile-team …` báo `cannot change to '~/agent-agile-team'` | Windows PowerShell 5.1 chỉ mở `~` cho lệnh của chính PowerShell (`cd`, `Get-ChildItem`), **không** mở cho chương trình ngoài (`python`, `git`, `claude`) — chúng nhận nguyên chữ `~` | Dùng `"$HOME\agent-agile-team"` (hoặc `$env:USERPROFILE`) thay `~/agent-agile-team`, như các khối lệnh PowerShell trong `INSTALL.md` và `GUIDE.md`. Riêng dòng `@~/agent-agile-team/AGENTS.md` trong file luật của Claude Code giữ nguyên — Claude Code tự mở `~` |
 
 Không thấy triệu chứng của mình ở đây: chạy `python scripts/check.py --self` và chép nguyên dòng cuối; mã thoát
 của ba script ở [`scripts/README.md`](../scripts/README.md) mục "Mã thoát". Trên macOS dùng `python3` thay

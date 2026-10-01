@@ -62,4 +62,4 @@ rate limit gọi AI) — GREEN trích đúng các câu đó.
 Ba lượt cho mỗi kịch bản, cùng model `sonnet`, mỗi lượt một subagent mới, câu mở "QUAN TRỌNG: đây là tình
 huống thật, bạn phải chọn và hành động — không hỏi lại", chỉ đọc file, không chạy lệnh. RED: thêm "không
 dùng công cụ Skill, không mở SKILL.md nào". GREEN: "đọc `skills/security-review/SKILL.md` trước". Gốc: đọc
-`ecc-pack/skills/ecc-security-review/SKILL.md` trước. Chấm theo cột Bằng chứng.
+`SKILL.md` của bản security-review trong bộ skill và agent kỹ thuật private (mốc `3599962a`, `UPSTREAM.md`) trước. Chấm theo cột Bằng chứng.

@@ -21,7 +21,12 @@
 ## 2. Skill và agent — cài plugin
 
 ```bash
-claude plugin marketplace add ~/agent-agile-team          # bản clone cục bộ
+claude plugin marketplace add ~/agent-agile-team          # bản clone cục bộ — macOS, bash
+claude plugin install agent-agile-team@agent-agile-team
+```
+
+```powershell
+claude plugin marketplace add "$HOME\agent-agile-team"    # Windows PowerShell — 5.1 không mở `~`
 claude plugin install agent-agile-team@agent-agile-team
 ```
 
@@ -32,7 +37,11 @@ claude plugin install agent-agile-team@agent-agile-team
 Thử khi đang sửa repo, không cài lại plugin:
 
 ```bash
-claude --plugin-dir ~/agent-agile-team
+claude --plugin-dir ~/agent-agile-team                    # macOS, bash
+```
+
+```powershell
+claude --plugin-dir "$HOME\agent-agile-team"              # Windows PowerShell
 ```
 
 ## 3. Kiểm, cập nhật, gỡ

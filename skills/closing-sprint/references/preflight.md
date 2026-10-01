@@ -1,6 +1,6 @@
 # Tiền kiểm bằng chứng — trước khi trình Cổng 2 và trước khi gộp
 
-<!-- Nguồn: academy preflight-gate (private copy, không giấy phép — viết lại hoàn toàn, ý: ma trận
+<!-- Nguồn: bộ skill quy trình private, `preflight-gate` (private copy, không giấy phép — viết lại hoàn toàn, ý: ma trận
      cổng theo rủi ro; bằng chứng đính kèm; secret trong diff = không đạt). rewrite_before_public. -->
 
 > **Kết luận:** tiền kiểm là **lưới cuối**: so bằng chứng đã có với ma trận theo **cỡ và rủi ro**,

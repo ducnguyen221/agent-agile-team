@@ -4,7 +4,7 @@ description: Use when code must be reviewed — a diff, a branch, a PR, "check m
 metadata:
   group: verification
   roles: [analyst, tech-reviewer, implementer]
-source: ["obra/superpowers skills/requesting-code-review/ (SKILL.md, code-reviewer.md)", "obra/superpowers skills/receiving-code-review/SKILL.md", "academy skills/code-review-routing/SKILL.md (private copy, locally written: routing table and verify gate)"]
+source: ["obra/superpowers skills/requesting-code-review/ (SKILL.md, code-reviewer.md)", "obra/superpowers skills/receiving-code-review/SKILL.md", "private-process-skills skills/code-review-routing/SKILL.md (private copy, locally written: routing table and verify gate)"]
 source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 4c0fdc5736a49b6223a7dfc7626d5495cf55185c]
 license: [MIT, MIT, none]
 rewrite_before_public: false

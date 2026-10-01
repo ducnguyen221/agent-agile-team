@@ -797,12 +797,50 @@ def _denied(word: str, text: str) -> bool:
     return re.search(r"(?<![^\W\d_])" + re.escape(word) + r"(?![^\W\d_])", text) is not None
 
 
-def _exempt_line(rel: str, line: str) -> bool:
-    if rel == "UPSTREAM.md" and line.lstrip().startswith("|"):
-        return True
-    if re.fullmatch(r"skills/[^/]+/tests/pressure\.md", rel) and re.search(r"(?i)\bmodel\b", line):
-        return True
-    return False
+# Miễn trừ chống rò — tường minh, hẹp, có lý do; mỗi mục ghi lại ở `scripts/README.md` mục "Phạm vi `--self`".
+# (mẫu đường dẫn, kiểu, lý do). Kiểu quyết định phần nào của dòng được che trước khi so từ cấm:
+#   file          — bỏ qua cả file (kể cả tên file)
+#   credit-line   — bỏ qua dòng ghi công / bản quyền (`Copyright`, `©`)
+#   upstream-ref  — che code span là `owner/repo` hoặc SHA hex; phần còn lại của dòng vẫn bị quét
+#   old-skill-id  — che code span là mã skill cũ dạng `bộ:tên` hoặc `bộ:*`; phần còn lại vẫn bị quét
+#   model-line    — bỏ qua dòng có chữ `model` (hồ sơ thử ghi model đã chạy)
+LEAK_EXEMPTIONS = (
+    ("NOTICE", "file", "giấy phép MIT/Apache-2.0 buộc giữ nguyên thông báo bản quyền của tác giả nguồn"),
+    ("THIRD_PARTY.md", "credit-line", "dòng ghi công và bản quyền theo giấy phép của nguồn bên thứ ba"),
+    ("UPSTREAM.md", "upstream-ref", "tên repo nguồn `owner/repo` và SHA chốt là dấu vết nguồn gốc bắt buộc"),
+    ("docs/MIGRATION.md", "old-skill-id", "hồ sơ lịch sử cố ý nêu mã skill cũ để tra tên mới tương ứng"),
+    ("skills/*/tests/pressure.md", "model-line", "hồ sơ thử áp lực ghi model đã chạy kịch bản"),
+)
+LEAK_EXEMPTION_KINDS = frozenset({"file", "credit-line", "upstream-ref", "old-skill-id", "model-line"})
+
+_CODE_SPAN = re.compile(r"`([^`\n]*)`")
+_UPSTREAM_REF = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*|[0-9a-f]{7,40}")
+_OLD_SKILL_ID = re.compile(r"[a-z0-9][a-z0-9-]*:(?:\*|[a-z0-9][a-z0-9-]*)")
+_CREDIT = re.compile(r"(?i)\bcopyright\b|©")
+
+
+def _leak_kind(rel: str) -> str | None:
+    for pattern, kind, _reason in LEAK_EXEMPTIONS:
+        if re.fullmatch(re.escape(pattern).replace(r"\*", "[^/]+"), rel):
+            return kind
+    return None
+
+
+def _mask_spans(line: str, token: re.Pattern) -> str:
+    return _CODE_SPAN.sub(lambda m: " " if token.fullmatch(m.group(1)) else m.group(0), line)
+
+
+def _leak_view(kind: str | None, line: str) -> str:
+    """Phần của dòng còn phải quét sau khi áp miễn trừ của file; chuỗi rỗng = cả dòng được miễn."""
+    if kind == "credit-line" and _CREDIT.search(line):
+        return ""
+    if kind == "model-line" and re.search(r"(?i)\bmodel\b", line):
+        return ""
+    if kind == "upstream-ref":
+        return _mask_spans(line, _UPSTREAM_REF)
+    if kind == "old-skill-id":
+        return _mask_spans(line, _OLD_SKILL_ID)
+    return line
 
 
 def run_self(root: Path, denylist_path: Path | None) -> Report:
@@ -818,7 +856,8 @@ def run_self(root: Path, denylist_path: Path | None) -> Report:
     if words:
         for path in files:
             rel = path.relative_to(root).as_posix()
-            if rel in ("NOTICE", "THIRD_PARTY.md"):
+            kind = _leak_kind(rel)
+            if kind == "file":
                 continue
             for n, word in enumerate(words, 1):
                 if _denied(word, rel.casefold()):
@@ -827,9 +866,9 @@ def run_self(root: Path, denylist_path: Path | None) -> Report:
             if b"\0" in data:
                 continue
             for idx, line in enumerate(c.normalize(data.decode("utf-8", "replace")).split("\n"), 1):
-                if _exempt_line(rel, line):
+                low = _leak_view(kind, line).casefold()
+                if not low:
                     continue
-                low = line.casefold()
                 for n, word in enumerate(words, 1):
                     if _denied(word, low):
                         engine.add(path, idx, "leak-denylist", f"chứa từ cấm số {n} của danh sách (không in lại từ)")

@@ -9,7 +9,8 @@ hình ở `pyproject.toml`): `python -m coverage run -m pytest` rồi `python -m
 | `test_version_sync.py` | Mọi manifest cùng một version; mục đầu `CHANGELOG.md` là version đó |
 | `test_common.py` | Tập con YAML (mọi cấu trúc ngoài tập con báo lỗi có dòng), che mã trong Markdown, `.agile.json` |
 | `test_check.py` | Bộ sạch `fixtures/valid/` thoát 0; mỗi ca trong `fixtures/broken.json` bị bắt đúng mã luật, đúng file, đúng mã thoát; mỗi luật có ít nhất một ca; `templates/` sạch |
-| `test_check_self.py` | `--self`: chống rò bằng danh sách tạm (đột biến), miễn trừ, `NOT_CONFIGURED`, ngân sách `AGENTS.md`, nhãn thang cũ, chính repo này |
+| `test_install_docs.py` | `INSTALL.md`: hai prompt VI/EN ≤12 dòng, mục 0–7, đủ bốn `hosts/`; con trỏ `CLAUDE.md`/`GEMINI.md`; khối PowerShell không dùng `~`, lệnh bash trên bản clone có khối PowerShell tương ứng; link tương đối trong tài liệu người dùng không gãy (có ca đột biến) |
+| `test_check_self.py` | `--self`: chống rò bằng danh sách tạm (đột biến), miễn trừ tường minh và hẹp (`LEAK_EXEMPTIONS` — mỗi kiểu có ca đột biến, mỗi mục có lý do và được ghi ở `scripts/README.md`), `NOT_CONFIGURED`, ngân sách `AGENTS.md`, nhãn thang cũ, chính repo này |
 | `test_init.py` | Chạy thử không ghi; `--apply` không ghi đè; chạy hai lần không đổi; sprint mới đặt lại trạng thái và ghi SPRINTS |
 | `test_index.py` | Khối "Đang mở" của ba sổ: lọc, sắp mới nhất ở trên, giống nhau từng byte khi chạy lại, `--check` |
 | `test_samples.py` | `samples/` sạch theo `check`, khối "Đang mở" đã cập nhật, chèn mã trần thì đỏ |

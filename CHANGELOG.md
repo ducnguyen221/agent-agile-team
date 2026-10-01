@@ -42,6 +42,12 @@ Chưa phát hành.
   bộ không gãy — `A5`), `docs/troubleshooting.md` sáu triệu chứng, được README/GUIDE/INSTALL trỏ tới (`A10`),
   `.github/workflows/verify.yml` — 3 hệ điều hành × Python 3.9/3.13, mọi nhánh, `contents: read`, action ghim
   SHA (`A11`).
+- Vòng sửa 1 sau kiểm định TK8: lệnh Windows dùng `"$HOME\agent-agile-team"` (PowerShell 5.1 không mở `~` cho
+  chương trình ngoài) ở INSTALL, README, GUIDE, `hosts/claude`, kèm triệu chứng thứ bảy ở `docs/troubleshooting.md`
+  và test bắt `~` trong khối PowerShell; miễn trừ chống rò thành danh sách tường minh `LEAK_EXEMPTIONS` trong
+  `check.py` (mỗi mục một kiểu, một lý do): `THIRD_PARTY.md` chỉ miễn dòng ghi công, `UPSTREAM.md` chỉ che
+  `owner/repo` và SHA, `docs/MIGRATION.md` chỉ che mã skill cũ `bộ:tên`; nguồn private gọi trung tính
+  ("bộ skill quy trình private", `private-process-skills` trong frontmatter); `pytest==8.4.2` ghim trong CI.
 
 **Việc để lại (Đợt 2):**
 

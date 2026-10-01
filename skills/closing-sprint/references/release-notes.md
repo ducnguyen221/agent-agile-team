@@ -1,6 +1,6 @@
 # Ghi chú phát hành
 
-<!-- Nguồn: academy release-notes-writer (private copy, không giấy phép — viết lại hoàn toàn, ý:
+<!-- Nguồn: bộ skill quy trình private, `release-notes-writer` (private copy, không giấy phép — viết lại hoàn toàn, ý:
      khung đã ship / tác động / cách kiểm / observability / hoàn tác; hai bản nội bộ ↔ bên ngoài).
      rewrite_before_public. -->
 

@@ -95,6 +95,15 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 **Phạm vi `--self`:** mọi file Git đang theo dõi **và** file chưa add, trừ file bị `.gitignore` (`git ls-files -c -o
 --exclude-standard`); không phải repo Git thì quét cây thư mục. `--self` không nhận đường dẫn (thoát 2); chọn repo
 bằng `--root`. Luật tài liệu bỏ
-qua `tests/fixtures/` (ca hỏng cố ý). Chống rò quét cả `tests/fixtures/` nhưng miễn: `NOTICE` và
-`THIRD_PARTY.md` (tên tác giả theo giấy phép), dòng bảng của `UPSTREAM.md` (dòng ghi nguồn), và dòng có chữ
-`model` trong `skills/*/tests/pressure.md` (hồ sơ thử ghi model).
+qua `tests/fixtures/` (ca hỏng cố ý). Chống rò quét cả `tests/fixtures/`. Miễn trừ chống rò là **danh sách
+tường minh** `LEAK_EXEMPTIONS` trong `check.py` — mỗi mục một đường, một kiểu, một lý do; thêm mục mới phải thêm
+dòng vào bảng dưới (`tests/test_check_self.py` kiểm), và miễn trừ chỉ che đúng phần được nêu, phần còn lại của
+dòng vẫn bị quét:
+
+| Đường | Kiểu | Che gì | Lý do |
+|---|---|---|---|
+| `NOTICE` | `file` | cả file | giấy phép buộc giữ nguyên thông báo bản quyền |
+| `THIRD_PARTY.md` | `credit-line` | dòng có `Copyright` hoặc `©` | dòng ghi công theo giấy phép nguồn |
+| `UPSTREAM.md` | `upstream-ref` | code span là `owner/repo` hoặc SHA hex | dấu vết nguồn gốc bắt buộc |
+| `docs/MIGRATION.md` | `old-skill-id` | code span là mã skill cũ `bộ:tên` / `bộ:*` | hồ sơ lịch sử cố ý nêu tên cũ để tra |
+| `skills/*/tests/pressure.md` | `model-line` | dòng có chữ `model` | hồ sơ thử ghi model đã chạy |

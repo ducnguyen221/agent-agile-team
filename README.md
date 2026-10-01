@@ -31,8 +31,14 @@ Paste the prompt at the end of [INSTALL.md](INSTALL.md) into your agent; it foll
 before touching anything. Manual steps per harness: [`hosts/`](hosts/README.md). Claude Code in short:
 
 ```bash
-git clone https://github.com/OWNER/agent-agile-team ~/agent-agile-team
+git clone https://github.com/OWNER/agent-agile-team ~/agent-agile-team             # macOS, bash
 claude plugin marketplace add ~/agent-agile-team
+claude plugin install agent-agile-team@agent-agile-team
+```
+
+```powershell
+git clone https://github.com/OWNER/agent-agile-team "$HOME\agent-agile-team"      # Windows PowerShell
+claude plugin marketplace add "$HOME\agent-agile-team"
 claude plugin install agent-agile-team@agent-agile-team
 ```
 

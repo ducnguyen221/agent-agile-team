@@ -5,7 +5,7 @@ metadata:
   group: technique
   kind: reference
   roles: [architect]
-source: academy skills/adr-writer/SKILL.md (private copy)
+source: private-process-skills skills/adr-writer/SKILL.md (private copy)
 source_sha: 4c0fdc5736a49b6223a7dfc7626d5495cf55185c
 license: none
 rewrite_before_public: true

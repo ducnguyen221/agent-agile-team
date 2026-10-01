@@ -23,8 +23,13 @@ Chưa cài: xem [`INSTALL.md`](INSTALL.md). Luật đầy đủ: [`method/proces
 Trong thư mục dự án của bạn (không phải thư mục repo này), nhờ agent chạy — hoặc tự chạy:
 
 ```bash
-python ~/agent-agile-team/scripts/init.py .            # chạy thử: in sẽ tạo gì, không ghi
-python ~/agent-agile-team/scripts/init.py . --apply    # tạo .agile.json + REQUESTS, SPRINTS, SPECS
+python3 ~/agent-agile-team/scripts/init.py .            # macOS: chạy thử — in sẽ tạo gì, không ghi
+python3 ~/agent-agile-team/scripts/init.py . --apply    # tạo .agile.json + REQUESTS, SPRINTS, SPECS
+```
+
+```powershell
+python "$HOME\agent-agile-team\scripts\init.py" .            # Windows PowerShell: chạy thử
+python "$HOME\agent-agile-team\scripts\init.py" . --apply
 ```
 
 `init` không bao giờ ghi đè file có sẵn; chạy lại không đổi gì. Đường dẫn mặc định (`docs/plans/`,
@@ -54,13 +59,20 @@ ngoài các trường hợp này là lỗi quy trình — bạn cứ nhắc.
 ## 5. Ba công cụ giữ sổ sách
 
 ```bash
-python ~/agent-agile-team/scripts/check.py docs/plans      # kiểm tài liệu: đủ phần, mã đúng chuẩn, không tự chấm
-python ~/agent-agile-team/scripts/index.py .               # sinh lại khối "Đang mở" ở đầu ba sổ gốc
-python ~/agent-agile-team/scripts/check.py --self --root ~/agent-agile-team   # kiểm chính repo phương pháp
+python3 ~/agent-agile-team/scripts/check.py docs/plans      # macOS: kiểm tài liệu — đủ phần, mã đúng chuẩn, không tự chấm
+python3 ~/agent-agile-team/scripts/index.py .               # sinh lại khối "Đang mở" ở đầu ba sổ gốc
+python3 ~/agent-agile-team/scripts/check.py --self --root ~/agent-agile-team   # kiểm chính repo phương pháp
+```
+
+```powershell
+python "$HOME\agent-agile-team\scripts\check.py" docs\plans      # Windows PowerShell
+python "$HOME\agent-agile-team\scripts\index.py" .
+python "$HOME\agent-agile-team\scripts\check.py" --self --root "$HOME\agent-agile-team"
 ```
 
 `check` thoát 0 = Đạt, 1 = Không đạt (in từng phát hiện kèm file và dòng), 2 = lỗi đầu vào. Agent chạy chúng
-trước mỗi cổng; bạn chỉ cần đọc dòng cuối. macOS: `python3` thay cho `python`. Gặp cảnh báo hay mất dấu tiếng
+trước mỗi cổng; bạn chỉ cần đọc dòng cuối. Windows PowerShell 5.1 không hiểu `~` trong lệnh `python`/`git` — dùng
+`"$HOME\…"` như khối trên. Gặp cảnh báo hay mất dấu tiếng
 Việt: [`docs/troubleshooting.md`](docs/troubleshooting.md).
 
 ## 6. Đọc tài liệu sprint thế nào cho nhanh

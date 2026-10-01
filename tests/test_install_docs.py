@@ -102,7 +102,43 @@ def test_install_asks_before_touching_the_machine():
         assert needle in safety
 
 
-# --- Con trỏ luật (`A2`) ------------------------------------------------------------------------------
+# --- Lệnh Windows (`RF1` vòng sửa 1) ----------------------------------------------------------------------
+# PowerShell 5.1 không mở `~` cho chương trình ngoài (`git -C ~/…`, `python ~/…`, `claude … ~/…`): khối lệnh
+# PowerShell phải dùng `$HOME`; tài liệu nào dạy lệnh bash có `~/agent-agile-team` phải có khối PowerShell tương ứng.
+
+FENCE_LANG = re.compile(r"(?ms)^```(\w*)\r?\n(.*?)^```")
+TILDE_PATH = re.compile(r"(?<![\w@])~[/\\]")
+WINDOWS_DOCS = ("INSTALL.md", "README.md", "README.vi.md", "GUIDE.md", "hosts/claude/README.md")
+
+
+def fenced(text: str, lang: str) -> list[str]:
+    return [body for name, body in FENCE_LANG.findall(text) if name == lang]
+
+
+@pytest.mark.parametrize("rel", USER_DOCS)
+def test_powershell_blocks_do_not_use_tilde(rel):
+    for block in fenced(read(rel), "powershell"):
+        assert not TILDE_PATH.search(block), f"{rel}: khối PowerShell dùng `~` — đổi sang \"$HOME\\…\"\n{block}"
+
+
+@pytest.mark.parametrize("rel", WINDOWS_DOCS)
+def test_bash_commands_on_the_clone_have_a_powershell_twin(rel):
+    text = read(rel)
+    if any("~/agent-agile-team" in block for block in fenced(text, "bash")):
+        twins = fenced(text, "powershell")
+        assert any("$HOME\\agent-agile-team" in block for block in twins), \
+            f"{rel}: lệnh bash có `~/agent-agile-team` nhưng thiếu khối PowerShell dùng $HOME"
+
+
+def test_tilde_detector_catches_the_broken_windows_command():
+    """Đột biến: đúng lệnh từng gãy trên PowerShell 5.1; `@~/…` (import của Claude Code) thì không bắt."""
+    assert TILDE_PATH.search("git -C ~/agent-agile-team pull --ff-only")
+    assert TILDE_PATH.search(r"python ~\agent-agile-team\scripts\check.py --self")
+    assert not TILDE_PATH.search('python "$HOME\\agent-agile-team\\scripts\\check.py" --self')
+    assert not TILDE_PATH.search("@~/agent-agile-team/AGENTS.md")
+
+
+# --- Con trỏ luật (`A2`)------------------------------------------------------------------------------
 
 
 def test_claude_md_is_exactly_the_import_line():
