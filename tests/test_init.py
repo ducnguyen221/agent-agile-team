@@ -171,3 +171,11 @@ def test_script_runs_standalone(tmp_path):
     result = run_script("init.py", str(tmp_path), "--date", DATE)
     assert result.returncode == 0, result.stderr
     assert "chạy thử" in result.stdout
+
+
+def test_non_utf8_ledger_is_input_error(tmp_path, capsys):
+    init.main([str(tmp_path), "--apply", "--date", DATE])
+    ledger = tmp_path / "docs" / "plans" / "SPRINTS.md"
+    ledger.write_bytes(ledger.read_text(encoding="utf-8").encode("utf-16"))
+    assert new_sprint(tmp_path, "order-lookup") == 2
+    assert "UTF-8" in capsys.readouterr().out

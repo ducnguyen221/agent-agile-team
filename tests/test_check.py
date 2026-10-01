@@ -241,3 +241,27 @@ def test_script_runs_standalone():
     result = run_script("check.py", str(VALID))
     assert result.returncode == 0, result.stdout + result.stderr
     assert "0 phát hiện" in result.stdout
+
+
+# --- Vòng sửa 2 ----------------------------------------------------------------------------------------
+
+
+def test_broken_id_width_reports_config_only(tmp_path):
+    root = make_sprint(tmp_path)
+    (root / ".agile.json").write_text('{"schema": 1, "id_width": {"sprint": "hai", "request": 0}}', encoding="utf-8")
+    report = check.check_paths([root])
+    assert "config-invalid" in rules_of(report)
+    assert [f.render() for f in report.findings if f.rule == "frontmatter-value"] == []
+
+
+@pytest.mark.parametrize("reason", ["**chưa có dữ liệu**", '"chưa có dữ liệu"', "`chưa có` dữ liệu"])
+def test_not_applicable_reason_may_start_with_markup(tmp_path, reason):
+    root = make_sprint(tmp_path)
+    _add_fr2(root, "### FR2 — Lọc theo ngày (→ US1)")
+    _set_report(root, "## 2. Phát hiện", f"- FR2 (lọc theo ngày): NOT_APPLICABLE — {reason}\n\n## 2. Phát hiện")
+    assert "report-fr-without-vr" not in rules_of(check.check_paths([root]))
+
+
+@pytest.mark.parametrize("text", ["SC1-SC3.", "SC1–SC3.", "SC1 - SC3;", "SC1–SC3)"])
+def test_range_before_punctuation_keeps_all_codes(text):
+    assert {"SC1", "SC2", "SC3"} <= set(check.codes_on(f"Phủ {text}")), text

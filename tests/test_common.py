@@ -201,8 +201,14 @@ def test_format_id_pads_to_width():
 
 
 def test_source_has_no_literal_bom():
+    bom = "\ufeff"
+    for path in [*(c.REPO / "scripts").glob("*.py"), *(c.REPO / "tests").glob("*.py")]:
+        assert bom not in path.read_text(encoding="utf-8"), path.name
+
+
+def test_docstrings_are_plain_vietnamese_not_escapes():
     for path in (c.REPO / "scripts").glob("*.py"):
-        assert "﻿" not in path.read_text(encoding="utf-8"), path.name
+        assert "\\u1" not in path.read_text(encoding="utf-8"), path.name
 
 
 def test_config_problems_shared_shape_rules():

@@ -86,7 +86,7 @@ def normalize(text: str) -> str:
 
 @dataclass
 class TextStyle:
-    """Ki\u1ec3u file g\u1ed1c c\u1ea7n gi\u1eef khi ghi l\u1ea1i: c\u00f3 BOM kh\u00f4ng, xu\u1ed1ng d\u00f2ng LF hay CRLF."""
+    """Kiểu file gốc cần giữ khi ghi lại: có BOM không, xuống dòng LF hay CRLF."""
 
     bom: bool = False
     newline: str = "\n"
@@ -99,7 +99,7 @@ def read_text_style(path: Path) -> tuple[str, TextStyle]:
 
 
 def write_text_style(path: Path, text: str, style: TextStyle | None = None) -> None:
-    """Ghi v\u0103n b\u1ea3n LF theo ki\u1ec3u c\u1ee7a file g\u1ed1c (m\u1eb7c \u0111\u1ecbnh: UTF-8 kh\u00f4ng BOM, LF)."""
+    """Ghi văn bản LF theo kiểu của file gốc (mặc định: UTF-8 không BOM, LF)."""
     style = style or TextStyle()
     out = text.replace("\n", style.newline)
     if style.bom:

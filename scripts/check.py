@@ -118,7 +118,7 @@ REQUIRED_HEADINGS = {
 CODE = re.compile(r"(?<![\w/\-])([A-Z]{2})([0-9]+(?:\.[0-9]+)*)(?![\w\-])")
 CODE_AT_START = re.compile(r"([A-Z]{2})([0-9]+(?:\.[0-9]+)*)(?![\w\-])")
 BARE = re.compile(r"(?<![\w\-.])([A-Z])([0-9]+)(?![\w\-])")
-RANGE = re.compile(r"(?<![\w/\-])([A-Z]{2})([0-9]+)\s*[–—-]\s*([A-Z]{2})([0-9]+)(?![\w\-.])")
+RANGE = re.compile(r"(?<![\w/\-])([A-Z]{2})([0-9]+)\s*[–—-]\s*([A-Z]{2})([0-9]+)(?![\w\-]|\.[0-9])")
 HEADING = re.compile(r"^(#{1,6})\s+(?:\*\*)?")
 BOLD_ITEM = re.compile(r"^\s*(?:[-*+]|[0-9]+\.)\s+\*\*")
 LINK_URL = re.compile(r"\]\([^)]*\)|<https?://[^>]*>|https?://\S+")
@@ -132,7 +132,7 @@ OLD_FIELD = re.compile(r"(?i)\b(?:severity|mức)\s*:\s*\**\s*(critical|high|med
 SELF_CHECK = "tự kiểm, chưa độc lập"
 NOT_APPLICABLE = "NOT_APPLICABLE"
 # NOT_APPLICABLE chỉ miễn khi có lý do theo sau (một chữ sau dấu nối tuỳ chọn).
-NA_WITH_REASON = re.compile(r"NOT_APPLICABLE[ ]*[—–:(-]?[ ]*[A-Za-zÀ-ỹ0-9]")
+NA_WITH_REASON = re.compile(r"NOT_APPLICABLE[ ]*[—–:(-]?[ ]*[*_'\"`]*[A-Za-zÀ-ỹ0-9]")
 DROPPED = re.compile(r"[(—–:-]\s*bỏ\s*(?:\)|$)")  # trạng thái `bỏ` của mục: "(bỏ)" hoặc "— bỏ" cuối dòng
 AGENTS_MAX_LINES = 120
 AGENTS_MAX_BYTES = 10 * 1024
@@ -412,7 +412,8 @@ class Engine:
                 bad(key, f"{key}: {value!r} phải là mã {rec_prefix}-NNN" + (" hoặc danh sách" if allow_list else ""))
                 return
             width = widths.get(WIDTH_KEY[rec_prefix])
-            width = width if isinstance(width, int) and not isinstance(width, bool) and width >= 1 else 1
+            if not (isinstance(width, int) and not isinstance(width, bool) and width >= 1):
+                width = c.DEFAULT_CONFIG["id_width"][WIDTH_KEY[rec_prefix]]  # cấu hình hỏng đã báo config-invalid
             for v in items:
                 parsed = c.parse_id(v)
                 if parsed and v != c.format_id(rec_prefix, parsed[1], width):

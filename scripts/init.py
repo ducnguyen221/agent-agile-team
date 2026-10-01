@@ -157,7 +157,12 @@ def _pending_content(plan: Plan, path: Path) -> tuple[str | None, c.TextStyle | 
     for kind, dest, content, style in reversed(plan.actions):
         if dest == path and kind != "skip":
             return content, style
-    return c.read_text_style(path) if path.is_file() else (None, None)
+    if not path.is_file():
+        return None, None
+    try:
+        return c.read_text_style(path)
+    except UnicodeDecodeError as exc:
+        raise InputError(f"{c.display(path)}: không đọc được dạng UTF-8 ({exc.reason}) — lưu lại sổ bằng UTF-8") from exc
 
 
 def plan_sprint(root: Path, cfg: dict, args, plan: Plan) -> None:
