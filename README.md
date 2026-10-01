@@ -37,7 +37,8 @@ claude plugin install agent-agile-team@agent-agile-team
 ```
 
 then add `@~/agent-agile-team/AGENTS.md` to `~/.claude/CLAUDE.md` so the core rules load in every session.
-Check: `python scripts/check.py --self` ends with `Đạt` (pass).
+Check: `python scripts/check.py --self` ends with `Đạt` (pass). Common problems:
+[docs/troubleshooting.md](docs/troubleshooting.md).
 
 ## First sprint
 

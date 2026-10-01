@@ -113,7 +113,8 @@ python scripts/check.py --self          # macOS: python3
 
 Dòng cuối có `→ Đạt` là lõi nguyên vẹn; `chống rò: NOT_CONFIGURED` nghĩa là chưa đặt danh sách từ cấm — đúng,
 không phải lỗi. Chép nguyên dòng cuối cho người dùng. Rồi mở **phiên mới** trong harness và hỏi "luật lõi
-agent-agile-team nói gì về hai cổng?" — trả lời đúng là luật đã nạp. Bước tiếp: [`GUIDE.md`](GUIDE.md).
+agent-agile-team nói gì về hai cổng?" — trả lời đúng là luật đã nạp. Bước tiếp: [`GUIDE.md`](GUIDE.md). Có
+lỗi: [`docs/troubleshooting.md`](docs/troubleshooting.md) — triệu chứng → nguyên nhân → cách xử lý.
 
 ## 7. Cập nhật và gỡ
 

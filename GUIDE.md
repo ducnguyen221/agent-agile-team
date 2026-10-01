@@ -60,7 +60,8 @@ python ~/agent-agile-team/scripts/check.py --self --root ~/agent-agile-team   # 
 ```
 
 `check` thoát 0 = Đạt, 1 = Không đạt (in từng phát hiện kèm file và dòng), 2 = lỗi đầu vào. Agent chạy chúng
-trước mỗi cổng; bạn chỉ cần đọc dòng cuối. macOS: `python3` thay cho `python`.
+trước mỗi cổng; bạn chỉ cần đọc dòng cuối. macOS: `python3` thay cho `python`. Gặp cảnh báo hay mất dấu tiếng
+Việt: [`docs/troubleshooting.md`](docs/troubleshooting.md).
 
 ## 6. Đọc tài liệu sprint thế nào cho nhanh
 

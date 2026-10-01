@@ -38,6 +38,10 @@ Chưa phát hành.
   đồng nơi lưu bài học), bốn `hosts/*/README.md` viết thật, `INSTALL.md` cho agent đọc kèm prompt dán Việt/Anh,
   `GUIDE.md` (sprint đầu tiên cho người mới), `README.md` + `README.vi.md` có mục cài và ghi nhận nguồn,
   `docs/standardization.md` (áp khuôn 13 mục: 10 áp dụng, 3 điều chỉnh).
+- Ba mục khuôn còn lại: `tests/test_install_docs.py` (prompt VI/EN ≤12 dòng, đủ bước và bốn `hosts/`, link nội
+  bộ không gãy — `A5`), `docs/troubleshooting.md` sáu triệu chứng, được README/GUIDE/INSTALL trỏ tới (`A10`),
+  `.github/workflows/verify.yml` — 3 hệ điều hành × Python 3.9/3.13, mọi nhánh, `contents: read`, action ghim
+  SHA (`A11`).
 
 **Việc để lại (Đợt 2):**
 
@@ -46,5 +50,4 @@ Chưa phát hành.
 - Viết và chạy thử áp lực `security-audit`, `web-qa` (ngoại lệ chỉ báo cáo ở Đợt 1 — `skills/README.md`
   mục 2).
 - `tests/retrieval.md` cho 10 skill tham chiếu.
-- Ba mục khuôn còn treo (`docs/standardization.md`): test tài liệu cài đặt, CI hai hệ điều hành (cùng lượt lên
-  GitHub private), `docs/troubleshooting.md`.
+- Chạy lần đầu `.github/workflows/verify.yml` khi đẩy lên GitHub private (`A11` — đã viết, chưa chạy).

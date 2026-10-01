@@ -34,7 +34,7 @@ claude plugin install agent-agile-team@agent-agile-team
 ```
 
 rồi thêm dòng `@~/agent-agile-team/AGENTS.md` vào `~/.claude/CLAUDE.md` để luật lõi nạp ở mọi phiên. Kiểm:
-`python scripts/check.py --self` kết thúc bằng `Đạt`.
+`python scripts/check.py --self` kết thúc bằng `Đạt`. Lỗi hay gặp: [docs/troubleshooting.md](docs/troubleshooting.md).
 
 ## Sprint đầu tiên
 
