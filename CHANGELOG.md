@@ -23,3 +23,14 @@ Chưa phát hành.
   bảng phủ `FR` → `VR` theo tầng test thấp nhất. `pytest` gom thêm test trong `skills/`.
 - Thử áp lực bắt buộc cho skill kỷ luật/quy trình (`tests/pressure.md`); skill tham chiếu miễn ở Đợt 1,
   Đợt 2 thêm `tests/retrieval.md`.
+- Vòng sửa 1 sau kiểm định Đợt 1: nợ `CO` chuyển thành dòng `RQ-` trong REQUESTS ngay khi ghi REPORT (retro
+  chỉ đọc khối "Đang mở"); luật `leak-denylist` khớp nguyên từ cho mục chữ, chuỗi con cho mục đường dẫn;
+  `tests/test_provenance.py` kiểm nguồn gốc mọi skill/agent với `UPSTREAM.md`, `THIRD_PARTY.md`.
+
+**Việc để lại (Đợt 2):**
+
+- Chạy thử áp lực 6 skill quy trình đã có kịch bản: `intake`, `shaping-spec`, `writing-plan`,
+  `running-sprint`, `closing-sprint`, `bug-triage`.
+- Viết và chạy thử áp lực `security-audit`, `web-qa` (ngoại lệ chỉ báo cáo ở Đợt 1 — `skills/README.md`
+  mục 2).
+- `tests/retrieval.md` cho 10 skill tham chiếu.

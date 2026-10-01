@@ -3,7 +3,7 @@ skill: writing-plan
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 model: pending
 date: 2026-10-01
-result: not run — scenarios designed, execution deferred to TK5.7
+result: not run — scenarios designed, execution deferred to wave 2
 ---
 
 # Thử áp lực — writing-plan

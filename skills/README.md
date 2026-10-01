@@ -27,6 +27,22 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
   (phải đạt). Cách viết: skill `writing-skills`, `references/testing.md`.
 - Skill **tham chiếu kỹ thuật** (`metadata.kind: reference`) **miễn** ở Đợt 1 — loại này cần kiểm **truy
   xuất** (agent tìm đúng mục khi cần), không kiểm áp lực. Đợt 2 thêm `tests/retrieval.md`.
+- **Ngoại lệ Đợt 1:** `security-audit`, `web-qa` là skill **chỉ báo cáo** (không sửa gì) — thử áp lực dời
+  sang **Đợt 2**. Lý do: kịch bản thật cần cả một repo hoặc trình duyệt dựng sẵn, không gói được thành prompt
+  tự chứa như các kịch bản đã chạy ở Đợt 1; sai ở hai skill này lộ ra trong báo cáo người đọc được, không
+  lặng lẽ đổi mã.
+- `tests/scenarios.txt` (tuỳ chọn): **nguyên văn** prompt các kịch bản đã chạy, để chạy lại được. Đuôi `.txt`
+  để `check` không quét như tài liệu; file chứa khoá, mật khẩu hay token làm mồi thì dòng thứ hai ghi rõ
+  chúng là **GIÁ TRỊ GIẢ**.
+
+**Hiện trạng Đợt 1:**
+
+| Trạng thái | Skill |
+|---|---|
+| Đã chạy RED → GREEN, so với bản gốc, có `scenarios.txt` | `security-review`, `verify-before-done`, `code-review`, `debugging`, `tdd`, `plan-review` |
+| Đã chạy RED → GREEN | `response-style`, `id-convention`, `token-economy`, `writing-skills` |
+| Kịch bản viết sẵn, **chưa chạy** (Đợt 2) | `intake`, `shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`, `bug-triage` |
+| Chưa có `pressure.md` — ngoại lệ chỉ báo cáo (Đợt 2) | `security-audit`, `web-qa` |
 
 ## 3. Mục lục — 28 skill
 
