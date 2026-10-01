@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -25,6 +26,8 @@ def build_command(template: str | None, test_file: str) -> list[str]:
     parts = shlex.split(template, posix=True)
     if not any("{file}" in p for p in parts):
         parts.append("{file}")
+    if parts:  # không qua shell: Windows chỉ tìm .exe theo tên trần, npm/npx là .cmd → phải lấy đường đầy đủ
+        parts[0] = shutil.which(parts[0]) or parts[0]
     return [p.replace("{file}", test_file) for p in parts]
 
 
