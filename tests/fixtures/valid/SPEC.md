@@ -32,7 +32,7 @@ links:
 - Yêu cầu gốc: RQ-007 (xuất danh sách đơn). Tính năng: FS-002 (xuất dữ liệu).
 
 ## 2. Câu chuyện người dùng
-
+SPEC có 1 **user story** (US):
 | Mã | Câu chuyện | Ưu tiên |
 |---|---|---|
 | US1 (xuất nhanh) | Là kế toán, tôi xuất danh sách đơn ra CSV, để đối soát | Bắt buộc |
@@ -44,7 +44,7 @@ links:
 - **FR1.1 (đủ cột):** KHI người dùng bấm xuất THÌ file có đủ cột mã, ngày, trạng thái.
 
 ## 4. Tiêu chí thành công
-
+SPEC có 1 **success criterion** (SC):
 | Mã | Tiêu chí | Cách đo |
 |---|---|---|
 | SC1 (xuất đủ cột) | File CSV có đủ ba cột | Test tự động của FR1 xanh |

@@ -36,13 +36,13 @@ links:
 Kế toán bấm một nút là có file danh sách đơn.
 
 ## 1. Kết quả kiểm định
-
+REPORT có 1 **verification result** (VR):
 | Mã | Kiểm cái gì | Lệnh / thao tác | Kết quả | Người kiểm | Bằng chứng |
 |---|---|---|---|---|---|
 | VR1 (test xuất) | SC1, FR1.1 | `pytest` | Đạt | QA · agent-f | 4 passed |
 
 ## 2. Phát hiện của reviewer
-
+Reviewer ghi 1 **review finding** (RF):
 | Mã | Phát hiện | Mức | Bằng chứng | Xử lý |
 |---|---|---|---|---|
 | RF1 (tên cột) | Tên cột viết tắt | Ghi chú | `export.py:12` | bác: theo SPEC |

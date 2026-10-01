@@ -298,3 +298,25 @@ def test_agile_json_path_is_checked_directly(tmp_path, capsys):
     assert check.main([str(cfg)]) == 0
     cfg.write_text("{hỏng", encoding="utf-8")
     assert check.main([str(cfg)]) == 2
+
+
+def test_code_table_needs_bold_lead_sentence(tmp_path):
+    root = make_sprint(tmp_path)
+    path = root / "SPEC.md"
+    text = path.read_text(encoding="utf-8")
+    assert "SPEC có 1 **user story** (US):" in text
+    path.write_text(text.replace("SPEC có 1 **user story** (US):", "Câu chuyện:", 1), encoding="utf-8", newline="\n")
+    report = check.check_paths([root])
+    hits = [f for f in report.findings if f.rule == "id-list-lead"]
+    assert [(f.path.name, f.line) for f in hits] == [("SPEC.md", 36)] and hits[0].level == "Ghi chú"
+    assert report.exit_code == 0
+
+
+def test_generated_open_block_is_exempt_from_lead_rule(tmp_path):
+    import init
+    init.main([str(tmp_path), "--apply", "--date", "2026-03-02", "--sprint", "ok", "--title", "X"], env={})
+    ledger = tmp_path / "docs" / "plans" / "SPRINTS.md"
+    text = ledger.read_text(encoding="utf-8").replace(
+        "Không có sprint nào đang mở.", "| Mã | Mở |\n|---|---|\n| SPR-01 | 2026-03-02 |", 1)
+    ledger.write_text(text, encoding="utf-8", newline="\n")
+    assert "id-list-lead" not in rules_of(check.check_paths([tmp_path]))

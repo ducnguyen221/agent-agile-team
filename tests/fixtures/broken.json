@@ -43,6 +43,8 @@
      "replace": ["gate_1_quote: \"duyệt\"", "gate_1_quote: null"]},
     {"rule": "old-scale-label", "exit": 1, "file": "REPORT.md",
      "replace": ["| Ghi chú | `export.py:12`", "| High | `export.py:12`"]},
+    {"rule": "id-list-lead", "exit": 0, "file": "SPEC.md", "line": 36,
+     "replace": ["SPEC có 1 **user story** (US):", "Câu chuyện:"]},
     {"rule": "doc-unknown", "exit": 0, "file": "memo.md",
      "write": {"memo.md": "---\nid: memo\ndoc: memo\n---\n\n# Ghi nhớ\n"}},
     {"rule": "config-syntax", "exit": 2, "file": ".agile.json",

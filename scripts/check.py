@@ -41,6 +41,7 @@ RULES: dict[str, tuple[str, str]] = {
     "id-bare-single-letter": (PHAI, "mã một chữ cái + số ngoài dấu code (trừ T1/T2/T3)"),
     "id-unknown-prefix": (PHAI, "định nghĩa mục bằng tiền tố hai chữ cái ngoài bảng mã"),
     "id-wrong-doc": (PHAI, "định nghĩa mục bằng tiền tố thuộc tài liệu khác"),
+    "id-list-lead": (GHI, "bảng có cột đầu `Mã` mà dòng ngay trên không có câu dẫn in đậm (tài liệu + nghĩa của mã)"),
     "xref-missing": (PHAI, "nhắc tới mã không được định nghĩa ở tài liệu sở hữu"),
     "xref-unresolved": (GHI, "không tìm được tài liệu sở hữu qua `links` để đối chiếu mã"),
     "task-without-trace": (PHAI, "việc `TK` không trỏ `FR`/`SC` nào (việc con kế thừa việc cha)"),
@@ -137,6 +138,7 @@ DROPPED = re.compile(r"[(—–:-]\s*bỏ\s*(?:\)|$)")  # trạng thái `bỏ` c
 AGENTS_MAX_LINES = 120
 AGENTS_MAX_BYTES = 10 * 1024
 SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache", ".tmp"}
+OPEN_START, OPEN_END = "<!-- agile:open:start -->", "<!-- agile:open:end -->"  # khối do `index` sinh
 SPAN_HINT = (" — có dấu huyền kề bên: mã nằm trong code span lồng nhau hoặc ngắt dòng? Code span chứa dấu huyền"
              " thì bọc ngoài bằng hai dấu huyền")
 
@@ -348,6 +350,7 @@ class Engine:
         self.frontmatter_rules(doc)
         self.heading_rules(doc)
         self.id_rules(doc)
+        self.lead_rule(doc)
         if doc.kind in ("plan", "sprint"):
             self.trace_rule(doc)
         if doc.kind in ("report", "sprint"):
@@ -589,6 +592,27 @@ class Engine:
                     self.add(doc.path, doc.line_no(idx), "xref-missing", f"'{code}' không được định nghĩa ở {where}" + doc.hint(idx, code))
         for owner, line in unresolved.items():
             self.add(doc.path, line, "xref-unresolved", f"không có links.{owner} (hoặc file không tồn tại) để đối chiếu mã của {owner.upper()}")
+
+    def lead_rule(self, doc: Doc) -> None:
+        """Bảng mã (cột đầu "Mã") cần câu dẫn in đậm ngay trên: tài liệu nào, mã là gì. Bỏ qua khối "Đang mở"."""
+        generated = prev_table = False
+        for idx, line in enumerate(doc.masked):
+            raw = doc.raw[idx].strip()
+            if raw in (OPEN_START, OPEN_END):
+                generated = raw == OPEN_START
+            cells = c.table_cells(line)
+            if cells is None or prev_table:
+                prev_table = cells is not None
+                continue
+            prev_table = True
+            if generated or cells[0].strip("* ").casefold() != "mã":
+                continue
+            above = idx - 1
+            while above >= 0 and not doc.masked[above].strip():
+                above -= 1
+            if above < 0 or "**" not in doc.masked[above]:
+                self.add(doc.path, doc.line_no(idx), "id-list-lead",
+                         "bảng mã thiếu câu dẫn ngay trên — ví dụ 'SPEC có 3 **user story** (US):' (skill id-convention)")
 
     def trace_rule(self, doc: Doc) -> None:
         tasks: dict = {}

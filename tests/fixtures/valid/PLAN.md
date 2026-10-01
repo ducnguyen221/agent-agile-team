@@ -51,7 +51,7 @@ links:
 - **TK1.1 (viết test trước):** kế thừa phần trỏ của TK1 (hàm xuất CSV).
 
 ## Rủi ro
-
+PLAN có 1 **risk** (RK):
 | Mã | Rủi ro | Mức | Giảm thiểu |
 |---|---|---|---|
 | RK1 (dấu phẩy trong tên) | Tên khách có dấu phẩy làm lệch cột | Nên sửa | Dùng thư viện CSV chuẩn |

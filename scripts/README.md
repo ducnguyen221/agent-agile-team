@@ -75,6 +75,7 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `id-bare-single-letter` | Phải sửa | Mã một chữ cái + số (`P1`, `D3`) ngoài dấu code; trừ tier `T1`/`T2`/`T3` |
 | `id-unknown-prefix` | Phải sửa | Mục được định nghĩa bằng tiền tố hai chữ cái ngoài bảng mã (`YC2`); không áp cho `skills/*/tests/` |
 | `id-wrong-doc` | Phải sửa | Mục định nghĩa bằng tiền tố của tài liệu khác (`BR1` trong PLAN) |
+| `id-list-lead` | Ghi chú | Bảng có cột đầu "Mã" mà dòng không trống ngay trên (bỏ qua comment) không có chữ in đậm — thiếu câu dẫn "tài liệu + nghĩa của mã" (`templates/README.md` mục 5); khối "Đang mở" do `index` sinh được miễn |
 | `xref-missing` | Phải sửa | Nhắc tới mã không được định nghĩa ở tài liệu sở hữu (tìm qua `links`) |
 | `xref-unresolved` | Ghi chú | Không tìm được tài liệu sở hữu qua `links` để đối chiếu |
 | `task-without-trace` | Phải sửa | `TK` (tiêu đề hoặc gạch đầu dòng in đậm) không trỏ `FR`/`SC`; `TK1.1` kế thừa `TK1`, mồ côi thì báo |
