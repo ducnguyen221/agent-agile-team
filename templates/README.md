@@ -151,6 +151,9 @@ Mục không có nội dung vẫn giữ tiêu đề và ghi "Không có." — kh
   code, comment HTML, hoặc sau dấu `/` (`FS-001/FR1.1`) không được đối chiếu.
 - Kết quả phép kiểm (`VR`, cột trạng thái việc): Đạt · Không đạt · Chưa chạy · Không áp dụng (kèm lý do);
   bảng việc thêm Đang làm · bỏ.
+- Phủ kiểm của REPORT: mỗi `SC` của SPEC xuất hiện trong ít nhất một dòng `VR`; mỗi `FR` cũng vậy — dòng `VR`
+  trỏ `FRn` hoặc một kịch bản `FRn.m` đều tính. `FR` có trạng thái `bỏ` ở dòng định nghĩa ("(bỏ)" hoặc "— bỏ"
+  cuối dòng), hoặc được ghi `NOT_APPLICABLE` kèm lý do, thì được miễn.
 - Mức phát hiện và rủi ro: Chặn · Phải sửa · Nên sửa · Ghi chú. Kết luận: Đạt · Đạt có điều kiện · Không đạt.
 - Điều chỉnh nội bộ trong nhật ký PROGRESS theo khuôn
   `Phán quyết: <quyết gì> — <vì sao> — <sai thì tốn gì>`.

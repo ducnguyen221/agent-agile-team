@@ -45,6 +45,7 @@ RULES: dict[str, tuple[str, str]] = {
     "xref-unresolved": (GHI, "không tìm được tài liệu sở hữu qua `links` để đối chiếu mã"),
     "task-without-trace": (PHAI, "việc `TK` không trỏ `FR`/`SC` nào (việc con kế thừa việc cha)"),
     "report-sc-without-vr": (PHAI, "`SC` của SPEC không có `VR` nào trong REPORT"),
+    "report-fr-without-vr": (PHAI, "`FR` của SPEC không có `VR` nào trỏ tới nó hoặc kịch bản con (trừ `bỏ`/NOT_APPLICABLE)"),
     "self-review": (CHAN, "một nhãn agent vừa giữ vai thực thi vừa giữ vai kiểm định"),
     "qa-not-independent": (PHAI, "QA trùng nhãn với implementer/architect mà không khai tự kiểm, hoặc khai tự kiểm mà verdict là pass"),
     "roles-invalid": (PHAI, "`roles` sai hình: vai lạ, tier ngoài T1–T3, thiếu nhãn agent"),
@@ -128,6 +129,8 @@ OLD_CELL = {"critical", "high", "medium", "low", "important", "minor", "warning"
 OLD_CELL_UPPER = {"BLOCK", "WARN", "INFO", "NOTE", "Block"}
 OLD_FIELD = re.compile(r"(?i)\b(?:severity|mức)\s*:\s*\**\s*(critical|high|medium|low|important|minor)\b")
 SELF_CHECK = "tự kiểm, chưa độc lập"
+NOT_APPLICABLE = "NOT_APPLICABLE"
+DROPPED = re.compile(r"[(—–:-]\s*bỏ\s*(?:\)|$)")  # trạng thái `bỏ` của mục: "(bỏ)" hoặc "— bỏ" cuối dòng
 AGENTS_MAX_LINES = 120
 AGENTS_MAX_BYTES = 10 * 1024
 SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache", ".tmp"}
@@ -552,8 +555,6 @@ class Engine:
 
     def verification_rules(self, doc: Doc) -> None:
         vr_rows = [d for d in doc.defs if prefix(d.code) == "VR" and d.position == "table"]
-        if not vr_rows:
-            vr_rows = []
         covered = set()
         for d in vr_rows:
             covered.update(x for x in codes_on(doc.masked[d.line - doc.start]) if prefix(x) == "SC")
@@ -563,6 +564,8 @@ class Engine:
                 if prefix(d.code) == "SC" and "." not in d.code and d.code not in covered:
                     line = vr_rows[0].line if vr_rows else doc.start
                     self.add(doc.path, line, "report-sc-without-vr", f"{d.code} của SPEC chưa có VR nào")
+        if spec is not None and doc.kind == "report":
+            self._fr_coverage(doc, spec, vr_rows)
         roles = doc.data.get("roles")
         if not vr_rows or not isinstance(roles, dict):
             return
@@ -581,6 +584,28 @@ class Engine:
         elif doc.data.get("verdict") == "pass":
             self.add(doc.path, doc.key_line("verdict"), "qa-not-independent",
                      "VR tự kiểm, chưa độc lập: verdict tối đa conditional_pass")
+
+    def _fr_coverage(self, doc: Doc, spec: Doc, vr_rows: list) -> None:
+        """Mỗi `FRn` của SPEC có `VR` trỏ tới `FRn` hoặc kịch bản `FRn.m`; miễn khi `bỏ` hoặc NOT_APPLICABLE."""
+
+        def top(code: str) -> str:
+            return code.split(".")[0]
+
+        tested = {top(x) for d in vr_rows for x in codes_on(doc.masked[d.line - doc.start]) if prefix(x) == "FR"}
+        waived = set()
+        for d in spec.defs:
+            raw = spec.raw[d.line - spec.start]
+            if prefix(d.code) == "FR" and (NOT_APPLICABLE in raw or DROPPED.search(raw)):
+                waived.add(top(d.code))
+        for idx, line in enumerate(doc.masked):
+            if NOT_APPLICABLE in doc.raw[idx]:
+                waived.update(top(x) for x in codes_on(line) if prefix(x) == "FR")
+        line = vr_rows[0].line if vr_rows else doc.start
+        for code in sorted({top(d.code) for d in spec.defs if prefix(d.code) == "FR"}, key=lambda x: int(x[2:])):
+            if code not in tested and code not in waived:
+                self.add(doc.path, line, "report-fr-without-vr",
+                         f"{code} của SPEC chưa có VR nào trỏ tới nó hoặc kịch bản {code}.x "
+                         "(bỏ → ghi 'bỏ' ở SPEC; không áp dụng → NOT_APPLICABLE + lý do)")
 
     # -- cấu hình --
 

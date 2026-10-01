@@ -83,6 +83,27 @@ def test_declared_self_check_allows_conditional_pass_only(tmp_path):
     assert "qa-not-independent" not in rules_of(check.check_paths([root]))
 
 
+def _add_fr2(root: Path, heading: str) -> None:
+    spec = root / "SPEC.md"
+    text = spec.read_text(encoding="utf-8").replace(
+        "## 4. Tiêu chí thành công",
+        f"{heading}\n\n- **FR2.1 (lọc):** KHI chọn ngày THÌ chỉ xuất đơn trong ngày.\n\n## 4. Tiêu chí thành công", 1)
+    spec.write_text(text, encoding="utf-8", newline="\n")
+
+
+def test_fr_without_vr_exemptions(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_fr2(root, "### FR2 — Lọc theo ngày (→ US1) — bỏ")
+    assert "report-fr-without-vr" not in rules_of(check.check_paths([root]))
+    root = make_sprint(tmp_path / "b")
+    _add_fr2(root, "### FR2 — Lọc theo ngày (→ US1)")
+    assert "report-fr-without-vr" in rules_of(check.check_paths([root]))
+    _set_report(root, "## 2. Phát hiện", "- FR2 (lọc theo ngày): NOT_APPLICABLE — chưa có dữ liệu ngày.\n\n## 2. Phát hiện")
+    assert "report-fr-without-vr" not in rules_of(check.check_paths([root]))
+    _set_report(root, "| SC1, FR1.1 |", "| SC1, FR1.1, FR2.1 |")
+    assert "report-fr-without-vr" not in rules_of(check.check_paths([root]))
+
+
 def test_subtask_without_parent_is_flagged(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "PLAN.md"
