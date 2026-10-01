@@ -3,9 +3,11 @@ name: database-migrations
 description: Use when creating or altering tables, columns, indexes or constraints, writing a data backfill or data-fix script, planning a zero-downtime schema change, setting up migration tooling, reviewing a migration, or before a migration runs against production-sized or production data.
 metadata:
   group: technique
+  kind: reference
   roles: [implementer, tech-reviewer]
 source: [affaan-m/ECC skills/database-migrations/SKILL.md, academy skills/migration-rehearsal/SKILL.md (private copy)]
 source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, 4c0fdc5736a49b6223a7dfc7626d5495cf55185c]
+base_sha: 3599962a013653191c41676021c7e7dc519ee351
 license: [MIT, none]
 rewrite_before_public: true
 ---

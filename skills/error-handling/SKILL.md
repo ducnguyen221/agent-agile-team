@@ -3,9 +3,11 @@ name: error-handling
 description: Use when designing error types or exception hierarchies, mapping errors to API responses, adding retry or backoff around an unreliable dependency, writing user-facing error messages, logging an exception, or reviewing code for swallowed errors, bad fallbacks or cascading failures.
 metadata:
   group: technique
+  kind: reference
   roles: [implementer, tech-reviewer]
 source: affaan-m/ECC skills/error-handling/SKILL.md
 source_sha: c70874fae9eb0e5ad0365beb7e2955899fd1d30f
+base_sha: 3599962a013653191c41676021c7e7dc519ee351
 license: MIT
 rewrite_before_public: false
 ---

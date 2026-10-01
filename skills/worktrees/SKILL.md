@@ -3,6 +3,7 @@ name: worktrees
 description: Use when starting work on a task that needs isolation from the current checkout, before executing a plan or a task brief, when several implementers work in parallel on one repo, or when finishing work and deciding how to clean up a worktree.
 metadata:
   group: technique
+  kind: reference
   roles: [implementer, analyst]
 source: obra/superpowers skills/using-git-worktrees/SKILL.md
 source_sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d

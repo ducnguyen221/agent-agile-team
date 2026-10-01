@@ -3,9 +3,11 @@ name: api-design
 description: Use when designing, changing or reviewing a REST endpoint or its contract — resource URLs, HTTP methods, status codes, response or error envelopes, pagination, filtering, auth, rate limits, versioning — or when a SPEC must list an API change and its consumers.
 metadata:
   group: technique
+  kind: reference
   roles: [architect, implementer, tech-reviewer]
 source: affaan-m/ECC skills/api-design/SKILL.md
 source_sha: c70874fae9eb0e5ad0365beb7e2955899fd1d30f
+base_sha: 3599962a013653191c41676021c7e7dc519ee351
 license: MIT
 rewrite_before_public: false
 ---

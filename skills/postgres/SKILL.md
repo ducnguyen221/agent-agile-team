@@ -3,9 +3,11 @@ name: postgres
 description: Use when writing PostgreSQL queries or migrations, designing tables, columns, or indexes, choosing data types, troubleshooting a slow query or table bloat, implementing Row Level Security, paginating large tables, building a job queue on Postgres, or setting connection and timeout settings.
 metadata:
   group: technique
+  kind: reference
   roles: [implementer, tech-reviewer]
 source: affaan-m/ECC skills/postgres-patterns/SKILL.md
 source_sha: c70874fae9eb0e5ad0365beb7e2955899fd1d30f
+base_sha: 3599962a013653191c41676021c7e7dc519ee351
 license: MIT
 rewrite_before_public: false
 ---

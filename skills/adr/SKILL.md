@@ -3,6 +3,7 @@ name: adr
 description: Use when a decision is hard to reverse or affects several parts of the system (choosing a platform, framework, datastore or auth model, changing a contract or data model, adding a cross-service dependency, dropping a technology), when a large-size task needs its architecture decisions recorded, when a reviewer asks for an ADR, or when an accepted ADR must be superseded.
 metadata:
   group: technique
+  kind: reference
   roles: [architect]
 source: academy skills/adr-writer/SKILL.md (private copy)
 source_sha: 4c0fdc5736a49b6223a7dfc7626d5495cf55185c

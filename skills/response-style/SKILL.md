@@ -4,6 +4,10 @@ description: Use when replying to a person or to another agent, writing a brief 
 metadata:
   group: communication
   roles: [all]
+source: ["concept: BLUF (US Army AR 25-50)", "concept: Minto pyramid principle and SCQ", "concept: plain language guidelines (digital.gov)", "concept: Google developer documentation style guide", "concept: Diataxis", "concept: Microsoft Writing Style Guide", "concept: NN/g writing for the web", "concept: Anthropic prompting guide and Claude Code output styles"]
+source_sha: null  # web documents without a commit; read 2026-10-01
+license: "ideas only, no text copied (public domain, CC BY, CC BY-SA and proprietary docs - see THIRD_PARTY.md)"
+rewrite_before_public: false
 ---
 
 # Văn phong phản hồi

@@ -1,7 +1,7 @@
 # Chỉ cấu hình test và coverage — repo không đóng gói để cài.
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "skills"]
 addopts = "-q"
 
 [tool.coverage.run]

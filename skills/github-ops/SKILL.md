@@ -3,9 +3,11 @@ name: github-ops
 description: Use when working with a GitHub repository through the gh CLI - triaging issues, checking PR status or CI checks, investigating a failed Actions run, preparing a release or changelog from merged PRs, reviewing Dependabot or secret-scanning alerts, or cleaning up stale issues and PRs.
 metadata:
   group: technique
+  kind: reference
   roles: [implementer, analyst]
 source: affaan-m/ECC skills/github-ops/SKILL.md
 source_sha: c70874fae9eb0e5ad0365beb7e2955899fd1d30f
+base_sha: 3599962a013653191c41676021c7e7dc519ee351
 license: MIT
 rewrite_before_public: false
 ---

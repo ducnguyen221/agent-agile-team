@@ -3,9 +3,11 @@ name: python
 description: Use when writing, reviewing, or refactoring Python code, designing a Python package or module, setting up Python tooling (uv, ruff, mypy, pytest), or writing and reviewing pytest tests — fixtures, mocks, parametrization, async tests, coverage.
 metadata:
   group: technique
+  kind: reference
   roles: [implementer, qa, tech-reviewer]
 source: [affaan-m/ECC skills/python-patterns/SKILL.md, affaan-m/ECC skills/python-testing/SKILL.md]
 source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, c70874fae9eb0e5ad0365beb7e2955899fd1d30f]
+base_sha: 3599962a013653191c41676021c7e7dc519ee351
 license: MIT
 rewrite_before_public: false
 ---
