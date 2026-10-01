@@ -5,7 +5,7 @@ tools: [Read, Grep, Glob, Bash]
 source: [affaan-m/ECC agents/rag-pipeline-reviewer.md]
 source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f]
 base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: MIT
+license: [MIT]
 rewrite_before_public: false
 ---
 

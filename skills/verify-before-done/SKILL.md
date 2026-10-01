@@ -3,7 +3,7 @@ name: verify-before-done
 description: Use when about to say work is done, fixed, passing or ready, before marking a TK done, committing, opening a PR, moving to the next task, handing back to the coordinator, or accepting another agent success report, and whenever recording a VR.
 source: [obra/superpowers skills/verification-before-completion/SKILL.md]
 source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d]
-license: MIT
+license: [MIT]
 rewrite_before_public: false
 metadata:
   group: verification

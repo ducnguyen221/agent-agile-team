@@ -6,7 +6,7 @@ metadata:
   roles: [all]
 source: ["github/spec-kit (US, FR and SC item codes; clarification markers)", "concept: ISO/IEC/IEEE 29148 requirement identifiers", "concept: MoSCoW prioritisation (written as words)"]
 source_sha: [d2ddd910266ad14afe79c5414c88ee316aca6e9a, null, null]
-license: "ideas only, no text copied (spec-kit MIT; ISO standard proprietary)"
+license: ["MIT (ideas only, no text copied)", "proprietary standard (ideas only)", "none (method, ideas only)"]
 rewrite_before_public: false
 ---
 

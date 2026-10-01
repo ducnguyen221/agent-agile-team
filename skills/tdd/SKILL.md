@@ -6,7 +6,7 @@ metadata:
   roles: [implementer, qa]
 source: [obra/superpowers skills/test-driven-development/SKILL.md, obra/superpowers skills/test-driven-development/writing-good-tests.md, obra/superpowers-skills skills/testing/testing-anti-patterns/SKILL.md]
 source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, cdcd624ad3fd8026deb692e565351854569798dd]
-license: MIT
+license: [MIT, MIT, MIT]
 rewrite_before_public: false
 ---
 

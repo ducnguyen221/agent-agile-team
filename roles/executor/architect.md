@@ -25,7 +25,8 @@ PLAN của Tech Reviewer (từ cỡ vừa).
 ## 4. Đầu ra
 PLAN (mục tiêu · kiến trúc · ràng buộc chung · trọng tâm review ≤5 · `TK` · `RK` · `DN` · ước lượng) ·
 ADR `NNNN-<slug>.md` cho quyết định khó đảo ngược · bảng giao diện dùng chung giữa các `TK` (consumes /
-produces) · với cỡ lớn: mục "Đổi hợp đồng / giao diện" phối hợp với Analyst.
+produces) · mục "Đổi hợp đồng / giao diện" (bắt buộc khi cỡ lớn hoặc `risk_tags` có `public_api`; cỡ khác
+xoá mục) phối hợp với Analyst.
 
 ## 5. Được làm
 - Chia `TK` theo giao diện, không theo file; ghi với mỗi `TK`: file chạm, giao diện dùng/sinh, bước test

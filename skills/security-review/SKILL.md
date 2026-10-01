@@ -4,7 +4,7 @@ description: Use when code adds or changes attack surface - authentication or au
 source: [affaan-m/ECC skills/security-review/SKILL.md, affaan-m/ECC skills/security-review/cloud-infrastructure-security.md]
 source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, c70874fae9eb0e5ad0365beb7e2955899fd1d30f]
 base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: MIT
+license: [MIT, MIT]
 rewrite_before_public: false
 metadata:
   group: verification

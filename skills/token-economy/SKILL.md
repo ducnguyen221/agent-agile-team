@@ -7,7 +7,7 @@ metadata:
 source: ["affaan-m/ECC skills/context-budget/SKILL.md (via local distill)", "affaan-m/ECC skills/strategic-compact/SKILL.md", "JuliusBrussee/caveman (idea only: terse agent-to-agent register)", "ryoppippi/ccusage (called only)", "yamadashy/repomix (called only)"]
 source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, c70874fae9eb0e5ad0365beb7e2955899fd1d30f, f5d729488caa8f6a5b6c8086fe2cccd3e8a63f91, 1597d65298b6ad93abc8fa174c3bcf78ae86e27a, 0b3f82b401bbc520fd1aca67c06d24e40a868d3e]
 base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: "MIT (ECC); Apache-2.0 idea only, no text copied (caveman); MIT tools called, not copied (ccusage, repomix)"
+license: [MIT, MIT, "Apache-2.0 (idea only, no text copied)", "MIT (called only, not copied)", "MIT (called only, not copied)"]
 rewrite_before_public: false
 ---
 

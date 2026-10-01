@@ -6,7 +6,7 @@ metadata:
   roles: [architect, analyst]
 source: [obra/superpowers skills/writing-skills/SKILL.md, obra/superpowers skills/writing-skills/testing-skills-with-subagents.md, obra/superpowers skills/writing-skills/persuasion-principles.md, obra/superpowers skills/diagnosing-superpowers]
 source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d]
-license: MIT
+license: [MIT, MIT, MIT, MIT]
 rewrite_before_public: false
 ---
 

@@ -6,7 +6,7 @@ metadata:
   roles: [implementer, qa, tech-reviewer]
 source: [obra/superpowers skills/systematic-debugging/SKILL.md, garrytan/gstack investigate/SKILL.md.tmpl, obra/superpowers-skills skills/debugging/defense-in-depth/SKILL.md, obra/superpowers-skills skills/testing/condition-based-waiting/SKILL.md]
 source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 96764e80a641e28141ec8297223768029f5bf483, cdcd624ad3fd8026deb692e565351854569798dd, cdcd624ad3fd8026deb692e565351854569798dd]
-license: MIT
+license: [MIT, MIT, MIT, MIT]
 rewrite_before_public: false
 ---
 

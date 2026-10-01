@@ -19,7 +19,7 @@ nào, không có lớp xuất file; người dùng giục.
 | Chấm | RED kỳ vọng | GREEN kỳ vọng |
 |---|---|---|
 | Phân loại | nhận "bounded", bắt đầu viết code | nói ra "không có luồng sẵn → architectural/vừa", viết SPEC; không code |
-| Mục "Đổi hợp đồng / giao diện" | không có | có nếu cỡ lớn; nếu vừa, ghi API mới ở Bối cảnh |
+| Mục "Đổi hợp đồng / giao diện" | không có | có nếu cỡ lớn hoặc `risk_tags` có `public_api`; cỡ khác xoá mục, ghi API mới ở Bối cảnh |
 
 ## Kịch bản 2 — Duyệt ý tưởng được suy thành duyệt tất cả
 

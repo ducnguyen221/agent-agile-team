@@ -67,6 +67,15 @@ def test_source_sha_parallel_to_source(path):
         shas = data["source_sha"]
         assert isinstance(shas, list) and len(shas) == len(data["source"]), \
             "source là danh sách thì source_sha phải là danh sách cùng độ dài, cùng thứ tự"
+        licenses = data["license"]
+        assert isinstance(licenses, list) and len(licenses) == len(data["source"]), \
+            "source là danh sách thì license phải là danh sách cùng độ dài, cùng thứ tự"
+
+
+@pytest.mark.parametrize("path", FILES, ids=IDS)
+def test_unlicensed_source_is_written_none(path):
+    assert "unlicensed" not in [str(x).strip() for x in as_list(front(path)["license"])], \
+        "nguồn không giấy phép ghi `none`"
 
 
 @pytest.mark.parametrize("path", FILES, ids=IDS)

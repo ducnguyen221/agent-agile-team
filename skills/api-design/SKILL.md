@@ -102,8 +102,9 @@ Location: /api/v1/customers/abc-123
 
 ## 3. Đổi hợp đồng: liệt kê bên dùng trước khi đổi
 
-Đổi API (thêm, sửa, bỏ endpoint, trường, mã lỗi, cách xác thực) là đổi hợp đồng. Cỡ lớn ghi vào mục
-**"Đổi hợp đồng / giao diện"** của SPEC; cỡ nhỏ hơn vẫn ghi ít nhất một dòng trong SPEC hoặc PLAN.
+Đổi API (thêm, sửa, bỏ endpoint, trường, mã lỗi, cách xác thực) là đổi hợp đồng. Mục **"Đổi hợp đồng /
+giao diện"** của SPEC bắt buộc khi cỡ lớn hoặc `risk_tags` có `public_api`; cỡ khác xoá mục và ghi thay đổi
+ít nhất một dòng trong SPEC hoặc PLAN.
 
 1. **Liệt kê bên dùng** có bằng chứng: grep bên gọi trong repo, client sinh từ OpenAPI, log truy cập.
    "Không ai dùng" mà không có bằng chứng thì coi như có người dùng.

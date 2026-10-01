@@ -4,7 +4,7 @@ description: Use when asked for a whole-repository security audit, threat model,
 source: [garrytan/gstack cso/SKILL.md.tmpl]
 source_sha: [96764e80a641e28141ec8297223768029f5bf483]
 base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: MIT
+license: [MIT]
 rewrite_before_public: false
 metadata:
   group: verification

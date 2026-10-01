@@ -4,7 +4,7 @@ description: Use when a web app must be checked in a real browser - verifying a 
 source: [garrytan/gstack qa-only/SKILL.md.tmpl]
 source_sha: [96764e80a641e28141ec8297223768029f5bf483]
 base_sha: 4c0fdc5736a49b6223a7dfc7626d5495cf55185c
-license: MIT
+license: [MIT]
 rewrite_before_public: false
 metadata:
   group: verification
