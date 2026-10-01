@@ -634,8 +634,8 @@ class Engine:
 # --- Quét đường dẫn ------------------------------------------------------------------------------------
 
 
-def _walk_md(root: Path):
-    for path in sorted(root.rglob("*.md")):
+def _walk(root: Path, pattern: str):
+    for path in sorted(root.rglob(pattern)):
         rel = path.relative_to(root).parts[:-1]
         if any(part in SKIP_DIRS or part.startswith(".") for part in rel):
             continue
@@ -647,8 +647,9 @@ def check_paths(paths) -> Report:
     for raw in paths:
         path = Path(raw)
         if path.is_dir():
-            engine.check_config(path)
-            for md in _walk_md(path):
+            for config in _walk(path, c.CONFIG_NAME):
+                engine.check_config(config.parent)
+            for md in _walk(path, "*.md"):
                 engine.check_file(md)
         elif path.is_file():
             if path.suffix.lower() != ".md":

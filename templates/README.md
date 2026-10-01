@@ -21,10 +21,18 @@ khoá frontmatter, giá trị cho phép, tiêu đề bắt buộc, khuôn sổ g
 | `project/agile.json` | `.agile.json` ở gốc dự án | Cấu hình đường dẫn, coverage, chế độ hiển thị |
 
 **Giá trị trong mẫu là ví dụ hợp lệ**, không phải chỗ trống kiểu `<...>`: nhờ vậy `check` chạy được trên
-chính thư mục `templates/`. Khi tạo file thật, `init` ghi đè các khoá `id`, `sprint`, `request`, `feature`,
-`title`, `created`, `updated` (sổ gốc: `next_id`, `updated`) và thay cụm "Tên mục tiêu sprint" / "Tên tính
-năng" ở tiêu đề cấp 1; phần thân ví dụ là để người viết thay. Dòng ví dụ của sổ gốc nằm trong comment HTML
-nên `init` chép sang là sổ rỗng.
+chính thư mục `templates/`. Phần thân ví dụ là để người viết thay. Dòng ví dụ của sổ gốc nằm trong comment
+HTML nên `init` chép sang là sổ rỗng.
+
+Khi tạo file thật, `init` ghi lại frontmatter như sau (khoá không có trong mẫu thì không thêm):
+
+| Tạo gì | Khoá được ghi |
+|---|---|
+| Sổ gốc | `next_id` = mã đầu tiên theo `id_width`, `updated` = ngày chạy |
+| Sprint mới (4 file, hoặc `SPRINT.md` khi `--tiny`) | `id` = `<sprint>-<doc>`, `sprint` = `next_id` của SPRINTS, `request`/`feature` theo tham số (không có thì `null`), `title`, `created`, `updated`; **đặt lại trạng thái**: `status` = `drafting` (PROGRESS, SPRINT) hoặc `draft` (SPEC, PLAN, REPORT), `review_round: 0`, `gate_1`/`verdict`/`gate_2` = `pending`, `*_at`/`*_quote` = `null`, mọi vai trong `roles` = `[tier, pending]`; `size`/`risk`/`risk_tags` theo tham số (mặc định `medium`/`normal`/`[]`, `--tiny` → `tiny`) |
+| SPRINTS khi tạo sprint | thêm một dòng Timeline ở đầu bảng (Mã, Mở = ngày chạy, Mục tiêu = `title`; Đóng và Kết luận để trống) và tăng `next_id` |
+
+Tiêu đề cấp 1 thay cụm "Tên mục tiêu sprint" bằng `title`. Chạy lại cùng `slug` không đổi gì.
 
 Chỉ dẫn viết nằm trong comment HTML `<!-- ... -->` ngay dưới mỗi tiêu đề; người viết được xoá sau khi viết.
 
@@ -41,7 +49,7 @@ ngoài tập con là lỗi đầu vào, `check` báo `đường-dẫn:dòng` và
 | Cặp khoá–giá trị | `khoá: giá trị`, bắt đầu ở cột 0 | `size: medium` |
 | Khoá | `[a-z][a-z0-9_-]*` — khoá gốc dùng `snake_case`, khoá vai dùng `kebab-case`; không trùng trong cùng cấp | `gate_1`, `business-reviewer` |
 | Khối lồng một cấp | khoá có giá trị rỗng; các dòng con thụt **đúng 2 dấu cách**, mỗi dòng là một cặp khoá–giá trị | `roles:` rồi `  analyst: [T1, agent-a]` |
-| `null` | chữ `null` | `gate_1_at: null` |
+| `null` | chữ `null`; khoá rỗng **không có dòng con** cũng là `null` | `gate_1_at: null`, `feature:` |
 | Bool | `true` / `false` | |
 | Số nguyên | `-?[0-9]+` | `review_round: 0` |
 | Chuỗi trần | phần sau `: `, cắt khoảng trắng hai đầu; không bắt đầu bằng `[` `"` `'` `{` `>` `&` `*` `!` `%` `@`, dấu sổ đứng hay dấu huyền, không bắt đầu bằng `- ` | `status: in_progress` |
@@ -59,6 +67,10 @@ inline `{}`, anchor/alias/tag, lồng sâu hơn một cấp, ký tự tab, nhi�
 ## 3. Khoá frontmatter
 
 Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn tiếng Việt tương ứng.
+
+`check` áp luật tài liệu theo khoá `doc` **có mặt và thuộc bảng dưới**. File `.md` có frontmatter mà không có
+`doc` (thẻ vai, skill, phương pháp) chỉ chịu luật chung về mã; `doc` có mà lạ → Ghi chú. Khoá ngoài bảng này
+→ mức **Ghi chú**, không phải lỗi. Thiếu khoá bắt buộc của loại tài liệu → Phải sửa.
 
 | Khoá | Có ở | Giá trị |
 |---|---|---|
@@ -100,7 +112,10 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
   hai phiên của cùng một model là hai agent khác nhau. Chưa giao thì `pending`. Model thực tế ghi ở cột
   "Vai · tier · model" của PROGRESS.
 - Luật `check` dựa vào: trong một file, không nhãn `agent` nào (trừ `pending`) vừa giữ vai thực thi vừa giữ
-  vai kiểm định. Một agent được giữ nhiều vai thực thi.
+  vai kiểm định (mức Chặn). Một agent được giữ nhiều vai thực thi.
+- **Độc lập kiểm định:** file có `VR` (REPORT, SPRINT) thì nhãn `qa` phải khác nhãn `implementer` và
+  `architect`. Trùng nhãn → Phải sửa, trừ khi dòng `VR` ghi rõ "tự kiểm, chưa độc lập"; khi đó `verdict`
+  tối đa `conditional_pass`.
 - Phần tử thứ ba `"note"` ghi lý do khi chủ sản phẩm chỉ định model khác tier mặc định cho lượt đó.
 
 ## 4. Tiêu đề bắt buộc
@@ -129,6 +144,11 @@ Mục không có nội dung vẫn giữ tiêu đề và ghi "Không có." — kh
   `FS-` ≥ 3 chữ số, `SPR-` ≥ 2 chữ số (độ rộng theo `id_width` của cấu hình).
 - Ô mã của bảng viết `Mã (tên ngắn)`, ví dụ `TK1 (hàm tra cứu đơn)`. Tiêu đề việc trỏ spec:
   `### TK1 — Tên (→ FR1.1, SC1)`. Nhắc sang tài liệu khác: `FS-001/FR1.1`.
+- `check` coi một mã là **được định nghĩa** khi nó đứng đầu tiêu đề, đứng đầu ô thứ nhất của bảng có cột đầu
+  "Mã", hoặc đứng đầu gạch đầu dòng in đậm (`- **FR1.1 (…):**`). Việc `TK` được nhận ở tiêu đề lẫn gạch đầu
+  dòng in đậm (`- **TK1 (…) → FR1.1, SC1:**`) và phải trỏ ít nhất một `FR`/`SC` trên chính dòng đó; `TK1.1`
+  không tự khai thì kế thừa phần trỏ của `TK1`. Khoảng `SC1–SC3` tính đủ ba mã. Mã trong code span, khối
+  code, comment HTML, hoặc sau dấu `/` (`FS-001/FR1.1`) không được đối chiếu.
 - Kết quả phép kiểm (`VR`, cột trạng thái việc): Đạt · Không đạt · Chưa chạy · Không áp dụng (kèm lý do);
   bảng việc thêm Đang làm · bỏ.
 - Mức phát hiện và rủi ro: Chặn · Phải sửa · Nên sửa · Ghi chú. Kết luận: Đạt · Đạt có điều kiện · Không đạt.
@@ -150,12 +170,16 @@ Mục không có nội dung vẫn giữ tiêu đề và ghi "Không có." — kh
 | SPECS | frontmatter các spec sống trong `paths.feature_specs_dir` có `status` là `proposed` hoặc `in_progress` | Mã · Tính năng · Trạng thái · Spec sống |
 | SPRINTS | frontmatter `PROGRESS.md` (hoặc `SPRINT.md`) của từng thư mục sprint có `status` khác `done` và `dropped`; mục tiêu lấy từ dòng Timeline cùng mã | Mã · Mở · Mục tiêu · Trạng thái · Vòng · Thư mục |
 
+Cột Trạng thái của khối viết chữ Việt: SPECS `proposed` → đề xuất, `in_progress` → đang làm; SPRINTS
+`drafting` → đang viết SPEC/PLAN, `awaiting_gate_1` → chờ Cổng 1, `in_progress` → đang làm, `verifying` → đang
+kiểm định, `blocked` → vướng, `awaiting_gate_2` → chờ Cổng 2.
+
 ## 7. Cấu hình dự án (`project/agile.json` → `.agile.json`)
 
 | Khoá | Mặc định | Ý nghĩa |
 |---|---|---|
 | `schema` | `1` | Phiên bản hình dạng file |
-| `visibility` | `private` | `private`: hồ sơ nằm trong repo dự án. `public`: `artifact_root` **phải** trỏ ra ngoài repo (không đưa kế hoạch nội bộ lên repo công khai); `check` báo Không đạt nếu không thoả |
+| `visibility` | `private` | `private`: hồ sơ nằm trong repo dự án. `public`: `artifact_root` **phải** trỏ ra ngoài repo (không đưa kế hoạch nội bộ lên repo công khai); `check` so đường dẫn tuyệt đối và báo mức **Chặn** nếu `artifact_root` nằm trong gốc dự án |
 | `artifact_root` | `.` | Gốc của mọi đường dẫn trong `paths` trừ `adr_dir`; tương đối theo gốc dự án hoặc tuyệt đối |
 | `paths.requests` · `paths.sprints` | `docs/plans/REQUESTS.md` · `docs/plans/SPRINTS.md` | Hai sổ timeline |
 | `paths.sprint_dir` | `docs/plans/{date}-{slug}` | Thư mục mỗi sprint; `{date}` = `YYYY-MM-DD` ngày mở, `{slug}` = kebab-case |
