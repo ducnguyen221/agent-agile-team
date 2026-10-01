@@ -135,13 +135,16 @@ def rewrite(text: str, block: list, path: Path) -> str:
 
 
 def build(root: Path) -> list:
-    """Trả [(đường dẫn sổ, nội dung cũ, nội dung mới)]."""
+    """Trả [(đường dẫn sổ, nội dung cũ, nội dung mới, kiểu file gốc)]."""
     try:
         cfg = c.load_config(root)
+        problems = c.config_problems(cfg)
+        if problems:
+            raise c.ConfigError(f"{c.display(root / c.CONFIG_NAME)}: " + "; ".join(problems))
+        paths = cfg["paths"]
+        ledgers = {key: c.safe_path(root, cfg, paths[key]) for key in ("requests", "specs", "sprints")}
     except c.ConfigError as exc:
         raise InputError(str(exc)) from exc
-    paths = cfg["paths"]
-    ledgers = {key: c.artifact_path(root, cfg, paths[key]) for key in ("requests", "specs", "sprints")}
     for key, path in ledgers.items():
         if not path.is_file():
             raise InputError(f"{c.display(path)}: không có sổ {key.upper()} (chạy init.py --apply)")
@@ -152,8 +155,8 @@ def build(root: Path) -> list:
     }
     out = []
     for key, path in ledgers.items():
-        old = c.read_text(path)
-        out.append((path, old, rewrite(old, blocks[key], path)))
+        old, style = c.read_text_style(path)
+        out.append((path, old, rewrite(old, blocks[key], path), style))
     return out
 
 
@@ -169,7 +172,7 @@ def main(argv=None) -> int:
         print(f"lỗi đầu vào: {exc}")
         return 2
     stale = False
-    for path, old, new in results:
+    for path, old, new, style in results:
         if old == new:
             print(f"= không đổi {c.display(path)}")
             continue
@@ -177,8 +180,7 @@ def main(argv=None) -> int:
         if args.check:
             print(f"! chưa cập nhật {c.display(path)}")
         else:
-            with open(path, "w", encoding="utf-8", newline="\n") as handle:
-                handle.write(new)
+            c.write_text_style(path, new, style)  # giữ BOM và kiểu xuống dòng của file gốc
             print(f"~ đã ghi {c.display(path)}")
     return 1 if (args.check and stale) else 0
 

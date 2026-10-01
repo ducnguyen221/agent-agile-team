@@ -130,6 +130,43 @@ def test_range_counts_for_trace_and_vr(tmp_path):
     assert check.check_paths([root]).findings == []
 
 
+def test_ascii_hyphen_range_keeps_both_ends(tmp_path):
+    for text in ("SC1-SC3", "SC1–SC3", "SC1 - SC3"):
+        assert {"SC1", "SC2", "SC3"} <= set(check.codes_on(f"| VR1 | {text}, FR1.1 |")), text
+    root = make_sprint(tmp_path)
+    spec = root / "SPEC.md"
+    spec.write_text(spec.read_text(encoding="utf-8").replace(
+        "| SC1 (xuất đủ cột) | File CSV có đủ ba cột | Test tự động của FR1 xanh |",
+        "| SC1 (xuất đủ cột) | File CSV có đủ ba cột | Test tự động của FR1 xanh |\n"
+        "| SC2 (có tiêu đề) | Có dòng tên cột | Test |\n| SC3 (UTF-8) | Mở được tiếng Việt | Test |", 1),
+        encoding="utf-8", newline="\n")
+    _set_report(root, "| SC1, FR1.1 |", "| SC1-SC3, FR1.1 |")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+    _set_report(root, "| SC1-SC3, FR1.1 |", "| SC1-SC9, FR1.1 |")
+    assert "xref-missing" in rules_of(check.check_paths([root]))
+
+
+def test_old_scale_only_in_severity_columns(tmp_path):
+    (tmp_path / "a.md").write_text("| Việc | Cỡ |\n|---|---|\n| Tra đơn | medium |\n", encoding="utf-8")
+    assert check.check_paths([tmp_path]).findings == []
+    (tmp_path / "a.md").write_text("| Mã | Phát hiện | Severity |\n|---|---|---|\n| RF1 (x) | y | Medium |\n", encoding="utf-8")
+    assert rules_of(check.check_paths([tmp_path])) == {"old-scale-label"}
+
+
+def test_not_applicable_needs_a_reason(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_fr2(root, "### FR2 — Lọc theo ngày (→ US1)")
+    _set_report(root, "## 2. Phát hiện", "- FR2 (lọc theo ngày): NOT_APPLICABLE\n\n## 2. Phát hiện")
+    assert "report-fr-without-vr" in rules_of(check.check_paths([root]))
+
+
+def test_record_id_width_follows_project_config(tmp_path):
+    root = make_sprint(tmp_path)
+    (root / ".agile.json").write_text('{"schema": 1, "id_width": {"sprint": 3}}', encoding="utf-8")
+    messages = [f.message for f in check.check_paths([root]).findings if f.rule == "frontmatter-value"]
+    assert any("SPR-003" in m for m in messages), messages
+
+
 def test_risk_and_size_consistency(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "SPEC.md"

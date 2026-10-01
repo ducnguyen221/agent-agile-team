@@ -50,6 +50,12 @@
     {"rule": "config-invalid", "exit": 1, "file": ".agile.json",
      "write": {".agile.json": "{\"schema\": 1, \"coverage\": {\"line_min_percent\": 70, \"reason\": \"\"}}"}},
     {"rule": "config-public-root", "exit": 1, "file": ".agile.json",
-     "write": {".agile.json": "{\"schema\": 1, \"visibility\": \"public\", \"artifact_root\": \"docs\"}"}}
+     "write": {".agile.json": "{\"schema\": 1, \"visibility\": \"public\", \"artifact_root\": \"docs\"}"}},
+    {"rule": "config-invalid", "exit": 1, "file": ".agile.json",
+     "write": {".agile.json": "{\"schema\": 1, \"paths\": {\"requests\": \"../../ngoai/REQUESTS.md\"}}"}},
+    {"rule": "frontmatter-key-missing", "exit": 1, "file": "notes/PLAN.md", "line": 1,
+     "write": {"notes/PLAN.md": "---\ntitle: Kế hoạch viết tay\n---\n\n# Kế hoạch\n"}},
+    {"rule": "frontmatter-value", "exit": 1, "file": "notes/SPRINTS.md", "line": 5,
+     "write": {"notes/SPRINTS.md": "---\nid: SPRINTS\ndoc: sprints\ntitle: Sprint ledger\nnext_id: SPR-1\nupdated: 2026-02-01\n---\n\n# Sổ sprint\n\n## Đang mở\n\n<!-- agile:open:start -->\nKhông có sprint nào đang mở.\n<!-- agile:open:end -->\n\n## Timeline\n"}}
   ]
 }

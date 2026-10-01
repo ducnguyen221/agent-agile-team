@@ -195,3 +195,49 @@ def test_format_id_pads_to_width():
     assert c.format_id("SPR", 123, 2) == "SPR-123"
     assert c.parse_id("SPR-07") == ("SPR", 7)
     assert c.parse_id("không") is None
+
+
+# --- Vòng sửa 1 ----------------------------------------------------------------------------------------
+
+
+def test_source_has_no_literal_bom():
+    for path in (c.REPO / "scripts").glob("*.py"):
+        assert "﻿" not in path.read_text(encoding="utf-8"), path.name
+
+
+def test_config_problems_shared_shape_rules():
+    assert c.config_problems(c.DEFAULT_CONFIG) == []
+    bad = c.merge_config({"paths": {"requests": "../outside/R.md", "sprints": "/abs/S.md"}, "id_width": {"sprint": "x"}})
+    joined = " | ".join(c.config_problems(bad))
+    assert "paths.requests" in joined and "paths.sprints" in joined and "id_width" in joined
+    bad = c.merge_config({"paths": {"sprint_dir": "docs/{date}-{oops}"}})
+    assert any("sprint_dir" in p for p in c.config_problems(bad))
+
+
+def test_safe_path_refuses_escape(tmp_path):
+    cfg = c.merge_config({})
+    assert c.safe_path(tmp_path, cfg, "docs/plans/R.md") == (tmp_path / "docs/plans/R.md").resolve()
+    with pytest.raises(c.ConfigError):
+        c.safe_path(tmp_path, cfg, "../escape.md")
+    outside = tmp_path.parent / "records-outside"
+    cfg = c.merge_config({"artifact_root": str(outside)})
+    assert c.safe_path(tmp_path, cfg, "R.md") == (outside / "R.md").resolve()
+    with pytest.raises(c.ConfigError):
+        c.safe_path(tmp_path, cfg, "../../elsewhere.md")
+
+
+def test_body_lines_keeps_body_between_horizontal_rules():
+    text = "---\nĐoạn mở đầu có P1.\n---\nThân.\n"
+    start, lines = c.body_lines(text)
+    assert start == 1 and lines[1] == "Đoạn mở đầu có P1."
+    start, lines = c.body_lines("---\ndescription: >\n  nhiều dòng\nname: x\n---\nThân\n")
+    assert start == 6 and lines == ["Thân"]
+
+
+def test_text_style_roundtrip_keeps_bom_and_crlf(tmp_path):
+    path = tmp_path / "a.md"
+    path.write_bytes(b"\xef\xbb\xbfdong 1\r\ndong 2\r\n")
+    text, style = c.read_text_style(path)
+    assert text == "dong 1\ndong 2\n"
+    c.write_text_style(path, text.replace("2", "3"), style)
+    assert path.read_bytes() == b"\xef\xbb\xbfdong 1\r\ndong 3\r\n"

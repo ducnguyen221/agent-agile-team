@@ -124,6 +124,49 @@ def test_broken_config_is_input_error(tmp_path):
     assert init.main([str(tmp_path), "--apply"]) == 2
 
 
+def test_paths_escaping_project_are_refused(tmp_path):
+    root = tmp_path / "proj"
+    root.mkdir()
+    (root / ".agile.json").write_text(json.dumps({"schema": 1, "paths": {"requests": "../../evil.md"}}), encoding="utf-8")
+    assert init.main([str(root), "--apply", "--date", DATE]) == 2
+    assert not (tmp_path.parent / "evil.md").exists()
+    assert set(files_of(root)) == {".agile.json"}
+
+
+def test_bad_config_values_are_input_errors_not_tracebacks(tmp_path):
+    cases = ({"paths": {"sprint_dir": "docs/{date}-{nope}"}}, {"paths": {"sprint_dir": "docs/{date-{slug}"}},
+             {"id_width": {"sprint": "hai"}})
+    for n, raw in enumerate(cases):
+        root = tmp_path / f"p{n}"
+        root.mkdir()
+        (root / ".agile.json").write_text(json.dumps({"schema": 1, **raw}), encoding="utf-8")
+        assert init.main([str(root), "--apply", "--date", DATE, "--sprint", "ok", "--title", "X"]) == 2, raw
+
+
+def test_control_characters_in_title_are_refused(tmp_path):
+    for title in ("dòng\nmới", "tab\there", "cr\rhere"):
+        assert init.main([str(tmp_path), "--apply", "--sprint", "ok", "--title", title]) == 2
+    assert files_of(tmp_path) == {}
+
+
+def test_second_apply_reports_existing_config(tmp_path, capsys):
+    init.main([str(tmp_path), "--apply", "--date", DATE])
+    capsys.readouterr()
+    init.main([str(tmp_path), "--apply", "--date", DATE])
+    lines = capsys.readouterr().out.splitlines()
+    assert any(line.startswith("= giữ (đã có)") and line.endswith(".agile.json") for line in lines), lines
+
+
+def test_sprint_update_keeps_ledger_bom_and_crlf(tmp_path):
+    init.main([str(tmp_path), "--apply", "--date", DATE])
+    ledger = tmp_path / "docs" / "plans" / "SPRINTS.md"
+    ledger.write_bytes(b"\xef\xbb\xbf" + ledger.read_bytes().replace(b"\n", b"\r\n"))
+    new_sprint(tmp_path, "order-lookup")
+    data = ledger.read_bytes()
+    assert data.startswith(b"\xef\xbb\xbf") and b"\n" not in data.replace(b"\r\n", b"")
+    assert b"| SPR-01 |" in data
+
+
 def test_script_runs_standalone(tmp_path):
     result = run_script("init.py", str(tmp_path), "--date", DATE)
     assert result.returncode == 0, result.stderr

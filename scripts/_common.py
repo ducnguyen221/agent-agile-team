@@ -79,9 +79,33 @@ def read_text(path: Path) -> str:
 
 
 def normalize(text: str) -> str:
-    if text.startswith("﻿"):
+    if text.startswith("\ufeff"):
         text = text[1:]
     return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+@dataclass
+class TextStyle:
+    """Ki\u1ec3u file g\u1ed1c c\u1ea7n gi\u1eef khi ghi l\u1ea1i: c\u00f3 BOM kh\u00f4ng, xu\u1ed1ng d\u00f2ng LF hay CRLF."""
+
+    bom: bool = False
+    newline: str = "\n"
+
+
+def read_text_style(path: Path) -> tuple[str, TextStyle]:
+    raw = Path(path).read_bytes().decode("utf-8")
+    style = TextStyle(bom=raw.startswith("\ufeff"), newline="\r\n" if "\r\n" in raw else "\n")
+    return normalize(raw), style
+
+
+def write_text_style(path: Path, text: str, style: TextStyle | None = None) -> None:
+    """Ghi v\u0103n b\u1ea3n LF theo ki\u1ec3u c\u1ee7a file g\u1ed1c (m\u1eb7c \u0111\u1ecbnh: UTF-8 kh\u00f4ng BOM, LF)."""
+    style = style or TextStyle()
+    out = text.replace("\n", style.newline)
+    if style.bom:
+        out = "\ufeff" + out
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    Path(path).write_bytes(out.encode("utf-8"))
 
 
 def utf8_stdio() -> None:
@@ -284,15 +308,29 @@ def _inline_list(text: str, no: int) -> list:
 # --- Markdown ------------------------------------------------------------------------------------------
 
 
+_YAMLISH = re.compile(r"\s*$|\s*#|[A-Za-z_][\w-]*:(\s|$)|\s+\S")
+
+
 def body_lines(text: str) -> tuple[int, list[str]]:
-    """Trả (số dòng đầu của thân, các dòng thân). Frontmatter hỏng thì coi cả file là thân."""
+    """Trả (số dòng đầu của thân, các dòng thân).
+
+    Chỉ cắt khối đầu khi nó là frontmatter: đọc được theo tập con, hoặc mọi dòng có dáng YAML (khoá ở cột 0,
+    dòng thụt, comment) — để frontmatter YAML đầy đủ của skill không bị quét như thân. Hai đường kẻ `---` bao
+    quanh văn xuôi thì vẫn là thân.
+    """
     lines = normalize(text).split("\n")
     if lines and lines[-1] == "":
         lines = lines[:-1]
     if lines and lines[0].rstrip() == "---":
         for idx in range(1, len(lines)):
             if lines[idx].rstrip() == "---":
-                return idx + 2, lines[idx + 1:]
+                try:
+                    parsed = parse_frontmatter(text) is not None
+                except SubsetError:
+                    parsed = False
+                if parsed or all(_YAMLISH.match(line) for line in lines[1:idx]):
+                    return idx + 2, lines[idx + 1:]
+                break
     return 1, lines
 
 
@@ -437,6 +475,74 @@ def artifact_path(root: Path, cfg: dict, rel: str) -> Path:
     if not base.is_absolute():
         base = Path(root) / base
     return base / rel
+
+
+def _within(target: Path, base: Path) -> bool:
+    return target == base or base in target.parents
+
+
+def safe_path(root: Path, cfg: dict, rel: str) -> Path:
+    """Như `artifact_path` nhưng đã resolve và **bắt buộc** nằm trong gốc dự án hoặc trong `artifact_root`.
+
+    Chặn cấu hình `paths.*` trỏ ra ngoài (`..`, đường tuyệt đối) làm `init`/`index` ghi đè file lạ.
+    """
+    target = artifact_path(root, cfg, rel).resolve()
+    base = artifact_path(root, cfg, "").resolve()
+    if _within(target, Path(root).resolve()) or _within(target, base):
+        return target
+    raise ConfigError(f"'{rel}' trỏ ra ngoài gốc dự án và artifact_root ({display(target)})")
+
+
+def _escapes(value: str) -> bool:
+    parts = re.split(r"[\\/]", value)
+    return value.startswith(("/", "\\")) or bool(re.match(r"[A-Za-z]:", value)) or ".." in parts
+
+
+def config_problems(cfg: dict) -> list[str]:
+    """Kiểm hình `.agile.json` đã gộp mặc định; dùng chung cho `check` (luật `config-invalid`) và `init`/`index`."""
+    problems = []
+    if cfg.get("schema") != 1:
+        problems.append(f"schema: {cfg.get('schema')!r} phải là 1")
+    if cfg.get("visibility") not in ("private", "public"):
+        problems.append(f"visibility: {cfg.get('visibility')!r} phải là private hoặc public")
+    if not isinstance(cfg.get("artifact_root"), str):
+        problems.append("artifact_root phải là chuỗi")
+    paths = cfg.get("paths")
+    if not isinstance(paths, dict) or not all(isinstance(v, str) and v for v in paths.values()):
+        problems.append("paths.* phải là chuỗi khác rỗng")
+    else:
+        for key, value in paths.items():
+            if _escapes(value):
+                problems.append(f"paths.{key}: '{value}' phải là đường tương đối, không chứa '..'")
+        sprint_dir = paths.get("sprint_dir", "")
+        try:
+            sprint_dir.format(date="d", slug="s")
+        except (KeyError, ValueError, IndexError):
+            problems.append(f"paths.sprint_dir: '{sprint_dir}' chỉ được dùng {{date}} và {{slug}}")
+        else:
+            if "{slug}" not in sprint_dir:
+                problems.append("paths.sprint_dir phải chứa {slug}")
+    widths = cfg.get("id_width")
+    if not isinstance(widths, dict) or not all(isinstance(v, int) and not isinstance(v, bool) and v >= 1 for v in widths.values()):
+        problems.append("id_width.* phải là số nguyên ≥ 1")
+    cov = cfg.get("coverage")
+    pct = cov.get("line_min_percent") if isinstance(cov, dict) else None
+    if isinstance(pct, bool) or not isinstance(pct, int) or not 0 <= pct <= 100:
+        problems.append("coverage.line_min_percent phải là số nguyên 0–100")
+    elif pct != 80 and not str(cov.get("reason") or "").strip():
+        problems.append(f"coverage.line_min_percent = {pct} khác 80 mà coverage.reason rỗng")
+    return problems
+
+
+def find_config(start: Path) -> dict:
+    """Cấu hình của dự án chứa `start` (tìm `.agile.json` ngược lên); không có hoặc hỏng → mặc định."""
+    for folder in [Path(start).resolve(), *Path(start).resolve().parents]:
+        if (folder / CONFIG_NAME).is_file():
+            try:
+                return load_config(folder)
+            except ConfigError:
+                break
+    return copy.deepcopy(DEFAULT_CONFIG)
 
 
 def display(path: Path) -> str:

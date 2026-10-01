@@ -184,6 +184,7 @@ kiểm định, `blocked` → vướng, `awaiting_gate_2` → chờ Cổng 2.
 | `schema` | `1` | Phiên bản hình dạng file |
 | `visibility` | `private` | `private`: hồ sơ nằm trong repo dự án. `public`: `artifact_root` **phải** trỏ ra ngoài repo (không đưa kế hoạch nội bộ lên repo công khai); `check` so đường dẫn tuyệt đối và báo mức **Chặn** nếu `artifact_root` nằm trong gốc dự án |
 | `artifact_root` | `.` | Gốc của mọi đường dẫn trong `paths` trừ `adr_dir`; tương đối theo gốc dự án hoặc tuyệt đối |
+| `paths.*` (chung) | — | Đường **tương đối**, không chứa `..`; `init`/`index` từ chối ghi ra ngoài gốc dự án và `artifact_root` (thoát 2), `check` báo `config-invalid` |
 | `paths.requests` · `paths.sprints` | `docs/plans/REQUESTS.md` · `docs/plans/SPRINTS.md` | Hai sổ timeline |
 | `paths.sprint_dir` | `docs/plans/{date}-{slug}` | Thư mục mỗi sprint; `{date}` = `YYYY-MM-DD` ngày mở, `{slug}` = kebab-case |
 | `paths.specs` · `paths.feature_specs_dir` | `docs/specs/SPECS.md` · `docs/specs` | Mục lục tính năng và thư mục spec sống |

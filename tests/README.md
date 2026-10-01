@@ -27,7 +27,8 @@ Test chống rò (lõi không chứa dấu riêng của bất kỳ máy, ngườ
 - **Giá trị:** đường dẫn tuyệt đối tới một file văn bản UTF-8 nằm ngoài repo.
 - **Định dạng:** mỗi dòng một từ cấm, so khớp không phân biệt hoa thường; dòng trống và dòng bắt đầu
   bằng `#` bị bỏ qua.
-- **Phạm vi quét:** mọi file Git đang theo dõi trong repo (nội dung và tên file); miễn trừ ở
+- **Phạm vi quét:** mọi file Git đang theo dõi và file chưa add (trừ file bị ignore) trong repo (nội dung và
+  tên file); miễn trừ ở
   [`scripts/README.md`](../scripts/README.md) mục "Phạm vi `--self`".
 - **Khi thiếu biến, file không đọc được hoặc rỗng:** test chống rò báo **Chưa chạy** (skip có lý do), không
   báo Đạt; `check.py --self` in `WARNING NOT_CONFIGURED`.

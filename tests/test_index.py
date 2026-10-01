@@ -1,5 +1,6 @@
 """`index.py`: sinh lại khối "Đang mở" của ba sổ gốc; cùng đầu vào cho cùng đầu ra (FR15.3)."""
 
+import json
 from pathlib import Path
 
 from conftest import run_script
@@ -119,6 +120,28 @@ def test_missing_markers_config_or_ledger_are_input_errors(tmp_path):
 def test_broken_feature_frontmatter_is_input_error(tmp_path):
     root = project(tmp_path)
     (root / "docs" / "specs" / "bad.md").write_text("---\nid: FS-009\ndoc: feature\nsprints:\n  - SPR-01\n---\n", encoding="utf-8")
+    assert index.main([str(root)]) == 2
+
+
+def test_rewrite_keeps_bom_and_crlf(tmp_path):
+    root = project(tmp_path)
+    init.main([str(root), "--apply", "--date", DATE, "--sprint", "order-lookup", "--title", "Tra đơn"])
+    ledger = root / "docs" / "plans" / "SPRINTS.md"
+    ledger.write_bytes(b"\xef\xbb\xbf" + ledger.read_bytes().replace(b"\n", b"\r\n"))
+    assert index.main([str(root)]) == 0
+    data = ledger.read_bytes()
+    assert data.startswith(b"\xef\xbb\xbf") and b"\n" not in data.replace(b"\r\n", b"")
+    assert b"| SPR-01 |" in data
+    assert index.main([str(root), "--check"]) == 0
+
+
+def test_ledger_outside_project_is_refused(tmp_path):
+    root = tmp_path / "proj"
+    root.mkdir()
+    project(root)
+    cfg = json.loads((root / ".agile.json").read_text(encoding="utf-8"))
+    cfg["paths"]["requests"] = "../../stray.md"
+    (root / ".agile.json").write_text(json.dumps(cfg), encoding="utf-8")
     assert index.main([str(root)]) == 2
 
 

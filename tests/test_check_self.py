@@ -136,3 +136,26 @@ def test_self_cli_standalone():
     result = run_script("check.py", "--self", env={"AGENT_AGILE_DENYLIST": ""})
     assert result.returncode == 0, result.stdout + result.stderr
     assert "NOT_CONFIGURED" in result.stderr
+
+
+def _git(root: Path, *args: str) -> None:
+    import subprocess
+    subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True, stdin=subprocess.DEVNULL)
+
+
+def test_self_scans_untracked_but_not_ignored_files(tmp_path):
+    root = make_repo(tmp_path)
+    (root / ".gitignore").write_text("/scratch/\n", encoding="utf-8")
+    _git(root, "init", "-q")
+    _git(root, "add", "AGENTS.md", "README.md", ".gitignore")
+    (root / "NEW.md").write_text(f"chưa add: {WORD}\n", encoding="utf-8")
+    (root / "scratch").mkdir()
+    (root / "scratch" / "x.md").write_text(f"bị ignore: {WORD}\n", encoding="utf-8")
+    hits = [f for f in check.run_self(root, denylist(tmp_path, WORD)).findings if f.rule == "leak-denylist"]
+    assert [Path(f.path).name for f in hits] == ["NEW.md"]
+
+
+def test_self_with_paths_is_usage_error(tmp_path):
+    with pytest.raises(SystemExit) as err:
+        check.main(["--self", str(tmp_path)], env={})
+    assert err.value.code == 2

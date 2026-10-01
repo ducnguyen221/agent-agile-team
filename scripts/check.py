@@ -100,6 +100,7 @@ VERDICT_VALUES = {"pending", "pass", "conditional_pass", "fail"}
 EXECUTORS = {"analyst", "architect", "implementer", "qa"}
 VERIFIERS = {"business-reviewer", "tech-reviewer"}
 NEXT_ID_PREFIX = {"requests": "RQ", "specs": "FS", "sprints": "SPR"}
+WIDTH_KEY = {"RQ": "request", "FS": "feature", "SPR": "sprint"}
 
 REQUIRED_HEADINGS = {
     "spec": ("Bối cảnh", "Câu chuyện người dùng", "Yêu cầu chức năng", "Tiêu chí thành công", "Ngoài phạm vi", "Câu hỏi cần làm rõ"),
@@ -130,6 +131,8 @@ OLD_CELL_UPPER = {"BLOCK", "WARN", "INFO", "NOTE", "Block"}
 OLD_FIELD = re.compile(r"(?i)\b(?:severity|mức)\s*:\s*\**\s*(critical|high|medium|low|important|minor)\b")
 SELF_CHECK = "tự kiểm, chưa độc lập"
 NOT_APPLICABLE = "NOT_APPLICABLE"
+# NOT_APPLICABLE chỉ miễn khi có lý do theo sau (một chữ sau dấu nối tuỳ chọn).
+NA_WITH_REASON = re.compile(r"NOT_APPLICABLE[ ]*[—–:(-]?[ ]*[A-Za-zÀ-ỹ0-9]")
 DROPPED = re.compile(r"[(—–:-]\s*bỏ\s*(?:\)|$)")  # trạng thái `bỏ` của mục: "(bỏ)" hoặc "— bỏ" cuối dòng
 AGENTS_MAX_LINES = 120
 AGENTS_MAX_BYTES = 10 * 1024
@@ -232,6 +235,9 @@ def load_doc(path: Path) -> Doc:
         kind = doc.data.get("doc")
         if kind in DOC_KINDS:
             doc.kind = kind
+        elif doc.fm is not None and "doc" not in doc.data and path.name in KNOWN_NAMES:
+            doc.load_findings.append(Finding(path, 1, "frontmatter-key-missing",
+                                             f"{path.name} là tài liệu chuẩn nhưng frontmatter thiếu khoá 'doc' (doc: {KNOWN_NAMES[path.name]})"))
         elif doc.fm is not None and "doc" in doc.data:
             doc.load_findings.append(Finding(path, doc.key_line("doc"), "doc-unknown", f"doc: {kind!r} không thuộc {', '.join(DOC_KINDS)}"))
     doc.defs = _definitions(doc)
@@ -270,10 +276,19 @@ def codes_on(line: str) -> list:
     """Mã hai chữ cái trên một dòng đã che, gồm cả mã trong khoảng `SC1–SC3` đã khai triển."""
     found = [m.group(1) + m.group(2) for m in CODE.finditer(line)]
     for m in RANGE.finditer(line):
+        # Gạch ASCII (`SC1-SC3`) làm CODE bỏ sót hai đầu khoảng: khai triển đủ từ đầu tới cuối.
         if m.group(1) == m.group(3):
             lo, hi = int(m.group(2)), int(m.group(4))
-            found.extend(f"{m.group(1)}{n}" for n in range(lo + 1, hi))
+            codes = [f"{m.group(1)}{n}" for n in range(lo, hi + 1)]
+        else:
+            codes = [m.group(1) + m.group(2), m.group(3) + m.group(4)]
+        found.extend(x for x in codes if x not in found)
     return found
+
+
+def _is_level_header(cell: str) -> bool:
+    name = cell.strip("*_ ").casefold()
+    return name.startswith("mức") or "severity" in name or name == "level"
 
 
 def prefix(code: str) -> str:
@@ -286,6 +301,7 @@ def prefix(code: str) -> str:
 class Engine:
     def __init__(self):
         self.cache: dict = {}
+        self.configs: dict = {}
         self.report = Report()
 
     def doc(self, path: Path) -> Doc | None:
@@ -298,10 +314,17 @@ class Engine:
                 self.report.errors.append(f"{c.display(path)}: không đọc được ({exc})")
         return self.cache[key]
 
+    def config_for(self, path: Path) -> dict:
+        """Cấu hình của dự án chứa file (tìm `.agile.json` ngược lên); nhớ theo thư mục."""
+        key = path.resolve().parent
+        if key not in self.configs:
+            self.configs[key] = c.find_config(key)
+        return self.configs[key]
+
     def add(self, path: Path, line: int, rule: str, message: str) -> None:
         self.report.findings.append(Finding(path, line, rule, message))
 
-    def check_file(self, path: Path, *, self_mode_root: Path | None = None) -> None:
+    def check_file(self, path: Path) -> None:
         doc = self.doc(path)
         if doc is None:
             return
@@ -324,20 +347,31 @@ class Engine:
         parts = doc.path.resolve().parts
         skill_tests = any(parts[i] == "skills" and parts[i + 2] == "tests" for i in range(len(parts) - 2))
         severity_table = len(parts) >= 2 and parts[-2:] == ("method", "severity.md")
+        level_columns: list = []
+        in_table = False
         for idx, line in enumerate(doc.masked):
             for m in BARE.finditer(line):
                 if m.group(0) not in c.TIERS:
                     self.add(doc.path, doc.line_no(idx), "id-bare-single-letter",
                              f"mã trần '{m.group(0)}' — dùng tiền tố hai chữ cái đúng tài liệu hoặc viết bằng chữ")
+            cells = c.table_cells(line)
+            level_cells: list = []
+            if cells is None:
+                in_table, level_columns = False, []
+            elif not in_table:  # hàng tiêu đề: nhớ cột mức/severity
+                in_table = True
+                level_columns = [i for i, cell in enumerate(cells) if _is_level_header(cell)]
+            else:
+                level_cells = [cells[i] for i in level_columns if i < len(cells)]
             if not severity_table:
-                self._old_scale(doc, idx, line)
+                self._old_scale(doc, idx, line, level_cells)
         if not skill_tests:
             for d in doc.defs:
                 if prefix(d.code) not in c.OWNER:
                     self.add(doc.path, d.line, "id-unknown-prefix", f"'{d.code}' dùng tiền tố '{prefix(d.code)}' ngoài bảng mã")
 
-    def _old_scale(self, doc: Doc, idx: int, line: str) -> None:
-        cells = c.table_cells(line) or []
+    def _old_scale(self, doc: Doc, idx: int, line: str, cells: list) -> None:
+        """Nhãn thang cũ: chỉ ở ô thuộc cột mức/severity của bảng, hoặc sau "Mức:"/"Severity:" trong dòng."""
         for cell in cells:
             bare = cell.strip("*_ ")
             if bare.casefold() in OLD_CELL or bare in OLD_CELL_UPPER:
@@ -376,7 +410,15 @@ class Engine:
                      (c.parse_id(v) or ("", 0))[0] == rec_prefix for v in items)
             if not ok:
                 bad(key, f"{key}: {value!r} phải là mã {rec_prefix}-NNN" + (" hoặc danh sách" if allow_list else ""))
+                return
+            width = widths.get(WIDTH_KEY[rec_prefix])
+            width = width if isinstance(width, int) and not isinstance(width, bool) and width >= 1 else 1
+            for v in items:
+                parsed = c.parse_id(v)
+                if parsed and v != c.format_id(rec_prefix, parsed[1], width):
+                    bad(key, f"{key}: {v!r} sai độ rộng id_width — phải là '{c.format_id(rec_prefix, parsed[1], width)}'")
 
+        widths = self.config_for(path).get("id_width") or {}
         if kind in STATUS:
             check_set("status", STATUS[kind])
         for key in ("created", "updated"):
@@ -595,10 +637,10 @@ class Engine:
         waived = set()
         for d in spec.defs:
             raw = spec.raw[d.line - spec.start]
-            if prefix(d.code) == "FR" and (NOT_APPLICABLE in raw or DROPPED.search(raw)):
+            if prefix(d.code) == "FR" and (NA_WITH_REASON.search(raw) or DROPPED.search(raw)):
                 waived.add(top(d.code))
         for idx, line in enumerate(doc.masked):
-            if NOT_APPLICABLE in doc.raw[idx]:
+            if NA_WITH_REASON.search(doc.raw[idx]):
                 waived.update(top(x) for x in codes_on(line) if prefix(x) == "FR")
         line = vr_rows[0].line if vr_rows else doc.start
         for code in sorted({top(d.code) for d in spec.defs if prefix(d.code) == "FR"}, key=lambda x: int(x[2:])):
@@ -625,27 +667,7 @@ class Engine:
             self.add(path, 1, "config-invalid", "gốc phải là object JSON")
             return
         cfg = c.merge_config(raw)
-        problems = []
-        if cfg.get("schema") != 1:
-            problems.append(f"schema: {cfg.get('schema')!r} phải là 1")
-        if cfg.get("visibility") not in ("private", "public"):
-            problems.append(f"visibility: {cfg.get('visibility')!r} phải là private hoặc public")
-        if not isinstance(cfg.get("artifact_root"), str):
-            problems.append("artifact_root phải là chuỗi")
-        paths = cfg.get("paths")
-        if not isinstance(paths, dict) or not all(isinstance(v, str) and v for v in paths.values()):
-            problems.append("paths.* phải là chuỗi khác rỗng")
-        elif "{slug}" not in paths.get("sprint_dir", ""):
-            problems.append("paths.sprint_dir phải chứa {slug}")
-        widths = cfg.get("id_width")
-        if not isinstance(widths, dict) or not all(isinstance(v, int) and not isinstance(v, bool) and v >= 1 for v in widths.values()):
-            problems.append("id_width.* phải là số nguyên ≥ 1")
-        cov = cfg.get("coverage")
-        pct = cov.get("line_min_percent") if isinstance(cov, dict) else None
-        if isinstance(pct, bool) or not isinstance(pct, int) or not 0 <= pct <= 100:
-            problems.append("coverage.line_min_percent phải là số nguyên 0–100")
-        elif pct != 80 and not str(cov.get("reason") or "").strip():
-            problems.append(f"coverage.line_min_percent = {pct} khác 80 mà coverage.reason rỗng")
+        problems = c.config_problems(cfg)
         for problem in problems:
             self.add(path, 1, "config-invalid", problem)
         if cfg.get("visibility") == "public" and isinstance(cfg.get("artifact_root"), str):
@@ -691,14 +713,15 @@ def check_paths(paths) -> Report:
 
 
 def tracked_files(root: Path) -> list:
+    """File Git đang theo dõi **và** file chưa add (trừ file bị ignore); không phải repo Git → quét cây."""
     try:
-        out = subprocess.run(["git", "-C", str(root), "ls-files", "-z"], capture_output=True, timeout=60,
-                             stdin=subprocess.DEVNULL)
+        out = subprocess.run(["git", "-C", str(root), "ls-files", "-z", "-c", "-o", "--exclude-standard"],
+                             capture_output=True, timeout=60, stdin=subprocess.DEVNULL)
     except (OSError, subprocess.SubprocessError):
         out = None
     if out is not None and out.returncode == 0 and out.stdout:
         rels = [p for p in out.stdout.decode("utf-8", "replace").split("\0") if p]
-        return [root / rel for rel in rels if (root / rel).is_file()]
+        return [root / rel for rel in dict.fromkeys(rels) if (root / rel).is_file()]
     files = []
     for path in sorted(root.rglob("*")):
         rel = path.relative_to(root).parts
@@ -790,6 +813,8 @@ def main(argv=None, env=None) -> int:
     args = parser.parse_args(argv)
     if not args.self_mode and not args.paths:
         parser.error("cần ít nhất một đường dẫn, hoặc --self")
+    if args.self_mode and args.paths:
+        parser.error("--self không nhận đường dẫn; dùng --root <repo> để chọn repo")
     if args.self_mode:
         value = env.get("AGENT_AGILE_DENYLIST", "")
         report = run_self(Path(args.root), Path(value) if value else None)

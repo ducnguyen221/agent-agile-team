@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -93,33 +94,29 @@ def reset_roles(text: str) -> str:
 class Plan:
     """Danh sách thao tác: (kiểu, đường dẫn, nội dung). Chạy thử chỉ in; `--apply` mới ghi."""
 
-    def __init__(self, root: Path):
-        self.root = root
-        self.actions: list = []
+    def __init__(self):
+        self.actions: list = []  # (kiểu, đường dẫn, nội dung, kiểu file)
 
     def create(self, path: Path, content: str) -> None:
         if path.exists():
-            self.actions.append(("skip", path, None))
+            self.actions.append(("skip", path, None, None))
         else:
-            self.actions.append(("create", path, content))
+            self.actions.append(("create", path, content, None))
 
-    def update(self, path: Path, content: str) -> None:
-        self.actions.append(("update", path, content))
+    def update(self, path: Path, content: str, style: c.TextStyle | None) -> None:
+        self.actions.append(("update", path, content, style))
 
     def render(self, apply: bool) -> None:
         labels = {"create": "+ tạo", "update": "~ sửa", "skip": "= giữ (đã có)"}
-        for kind, path, _ in self.actions:
+        for kind, path, _, _ in self.actions:
             print(f"{labels[kind]} {c.display(path)}")
         if not apply:
             print("(chạy thử — không ghi gì; thêm --apply để ghi)")
 
     def apply(self) -> None:
-        for kind, path, content in self.actions:
-            if kind == "skip":
-                continue
-            path.parent.mkdir(parents=True, exist_ok=True)
-            with open(path, "w", encoding="utf-8", newline="\n") as handle:
-                handle.write(content)
+        for kind, path, content, style in self.actions:
+            if kind != "skip":
+                c.write_text_style(path, content, style)
 
 
 def template(rel: str) -> str:
@@ -133,37 +130,49 @@ def plan_project(root: Path, date: str, plan: Plan) -> dict:
             cfg = c.load_config(root)
         except c.ConfigError as exc:
             raise InputError(str(exc)) from exc
+        plan.create(config_path, "")  # đã có → in "= giữ", không ghi
     else:
         raw = template("project/agile.json")
         plan.create(config_path, raw)
         cfg = c.merge_config(json.loads(raw))
+    problems = c.config_problems(cfg)
+    if problems:
+        raise InputError(f"{c.display(config_path)}: " + "; ".join(problems))
     for key, name, rec_prefix, width_key in LEDGERS:
         text = template(f"registry/{name}")
-        first = c.format_id(rec_prefix, 1, int(cfg["id_width"][width_key]))
-        plan.create(c.artifact_path(root, cfg, cfg["paths"][key]), set_keys(text, {"next_id": first, "updated": date}))
+        first = c.format_id(rec_prefix, 1, cfg["id_width"][width_key])
+        plan.create(target(root, cfg, cfg["paths"][key]), set_keys(text, {"next_id": first, "updated": date}))
     return cfg
 
 
-def _pending_content(plan: Plan, path: Path) -> str | None:
-    for kind, target, content in reversed(plan.actions):
-        if target == path and kind != "skip":
-            return content
-    return c.read_text(path) if path.is_file() else None
+def target(root: Path, cfg: dict, rel: str) -> Path:
+    """Đích ghi đã resolve; ngoài gốc dự án và `artifact_root` → lỗi đầu vào."""
+    try:
+        return c.safe_path(root, cfg, rel)
+    except c.ConfigError as exc:
+        raise InputError(str(exc)) from exc
+
+
+def _pending_content(plan: Plan, path: Path) -> tuple[str | None, c.TextStyle | None]:
+    for kind, dest, content, style in reversed(plan.actions):
+        if dest == path and kind != "skip":
+            return content, style
+    return c.read_text_style(path) if path.is_file() else (None, None)
 
 
 def plan_sprint(root: Path, cfg: dict, args, plan: Plan) -> None:
-    ledger_path = c.artifact_path(root, cfg, cfg["paths"]["sprints"])
+    ledger_path = target(root, cfg, cfg["paths"]["sprints"])
     pattern = cfg["paths"]["sprint_dir"]
-    base = c.artifact_path(root, cfg, "")
+    base = c.artifact_path(root, cfg, "").resolve()
     exact = re.compile(re.escape(pattern).replace(re.escape("{date}"), "[0-9]{4}-[0-9]{2}-[0-9]{2}")
                        .replace(re.escape("{slug}"), re.escape(args.sprint)))
     existing = sorted(p for p in base.glob(pattern.replace("{date}", "*").replace("{slug}", "*"))
                       if p.is_dir() and exact.fullmatch(p.relative_to(base).as_posix()))
     if existing:
         for p in existing:
-            plan.actions.append(("skip", p, None))
+            plan.actions.append(("skip", p, None, None))
         return
-    ledger = _pending_content(plan, ledger_path)
+    ledger, style = _pending_content(plan, ledger_path)
     try:
         fm = c.parse_frontmatter(ledger) if ledger is not None else None
     except c.SubsetError as exc:
@@ -171,9 +180,9 @@ def plan_sprint(root: Path, cfg: dict, args, plan: Plan) -> None:
     parsed = c.parse_id(fm.data.get("next_id")) if fm else None
     if not parsed or parsed[0] != "SPR":
         raise InputError(f"{c.display(ledger_path)}: thiếu next_id SPR-NN hợp lệ")
-    width = int(cfg["id_width"]["sprint"])
+    width = cfg["id_width"]["sprint"]
     sprint_id = c.format_id("SPR", parsed[1], width)
-    folder = c.artifact_path(root, cfg, pattern.format(date=args.date, slug=args.sprint))
+    folder = target(root, cfg, pattern.format(date=args.date, slug=args.sprint))
 
     values = {
         "sprint": sprint_id, "request": yaml_value(args.request), "feature": yaml_value(args.feature),
@@ -186,11 +195,11 @@ def plan_sprint(root: Path, cfg: dict, args, plan: Plan) -> None:
         text = reset_roles(text).replace("# Tên mục tiêu sprint —", f"# {args.title} —", 1)
         plan.create(folder / f"{name}.md", text)
 
-    rel = Path(folder).relative_to(ledger_path.parent).as_posix() if folder.is_relative_to(ledger_path.parent) else folder.as_posix()
+    rel = Path(os.path.relpath(folder, ledger_path.parent)).as_posix()
     title_cell = args.title.replace("|", "\\|")
     row = f"| {sprint_id} | {args.date} |  | {title_cell} |  | [{folder.name}]({rel}/) |"
     updated = set_keys(ledger, {"next_id": c.format_id("SPR", parsed[1] + 1, width), "updated": args.date})
-    plan.update(ledger_path, insert_timeline_row(updated, row, ledger_path))
+    plan.update(ledger_path, insert_timeline_row(updated, row, ledger_path), style)
 
 
 def insert_timeline_row(text: str, row: str, path: Path) -> str:
@@ -217,6 +226,8 @@ def validate(args) -> None:
         raise InputError(f"--sprint {args.sprint!r} phải là kebab-case chữ thường")
     if not args.title or not args.title.strip():
         raise InputError("--sprint cần --title (mục tiêu sprint)")
+    if any(ord(ch) < 32 or ord(ch) == 127 for ch in args.title):
+        raise InputError("--title không được chứa ký tự điều khiển (xuống dòng, tab…) — sẽ làm hỏng frontmatter và bảng")
     if args.tiny:
         if args.size not in (None, "tiny"):
             raise InputError("--tiny không đi cùng --size khác tiny")
@@ -251,7 +262,7 @@ def main(argv=None) -> int:
     parser.add_argument("--feature", help="FS-NNN của tính năng")
     args = parser.parse_args(argv)
     root = Path(args.root)
-    plan = Plan(root)
+    plan = Plan()
     try:
         validate(args)
         cfg = plan_project(root, args.date, plan)
