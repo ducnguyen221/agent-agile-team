@@ -126,7 +126,7 @@ trích bắt đầu bằng `> **Kết luận:**` trước tiêu đề cấp 2 đ
 
 | Tài liệu | Cụm tiêu đề cấp 2 bắt buộc |
 |---|---|
-| SPEC | Bối cảnh · Câu chuyện người dùng · Yêu cầu chức năng · Tiêu chí thành công · Ngoài phạm vi · Câu hỏi cần làm rõ (Truy vết: Nên có từ cỡ vừa; Đổi hợp đồng / giao diện: có khi sprint đổi thứ bên khác đang dùng, bắt buộc khi `risk_tags` có `public_api` — `check` chưa kiểm) |
+| SPEC | Bối cảnh · Câu chuyện người dùng · Yêu cầu chức năng · Tiêu chí thành công · Ngoài phạm vi · Câu hỏi cần làm rõ (Truy vết: Nên có từ cỡ vừa; Đổi hợp đồng / giao diện: bắt buộc khi cỡ lớn hoặc `risk_tags` có `public_api`, cỡ khác xoá mục — `check` chưa kiểm) |
 | PLAN | Mục tiêu · Kiến trúc · Ràng buộc chung · Trọng tâm review · Việc · Rủi ro · Quyết định cần người · Ước lượng |
 | PROGRESS | Bảng trạng thái việc · Nhật ký · Vướng mắc · Vòng kiểm định hiện tại |
 | REPORT | Tóm tắt cho người không chuyên · Kết quả kiểm định · Phát hiện của reviewer · Rủi ro còn lại · Cách dùng, đã đổi gì, cách hoàn tác · Bài học · Việc để lại · Review & Retro · Cổng 2 |
@@ -157,7 +157,7 @@ Mục không có nội dung vẫn giữ tiêu đề và ghi "Không có." — kh
 - Mức phát hiện và rủi ro: Chặn · Phải sửa · Nên sửa · Ghi chú. Kết luận: Đạt · Đạt có điều kiện · Không đạt.
 - Điều chỉnh nội bộ trong nhật ký PROGRESS theo khuôn
   `Phán quyết: <quyết gì> — <vì sao> — <sai thì tốn gì>`. Mục Review & Retro của REPORT đọc lại các dòng này
-  và rà nợ `CO` còn mở.
+  và rà nợ để lại ở khối "Đang mở" của REQUESTS (mỗi `CO` đã thành một dòng `RQ-` ghi nguồn `từ SPR-xx/COn`).
 - Delta so với spec sống: dòng `FR` của SPEC ghi `(sửa FS-001/FR1.2)` hoặc `(bỏ FS-001/FR1.2)` ở cuối; không
   ghi gì là Thêm. Dấu delta khác trạng thái `bỏ` của chính mục (`(bỏ)` trần): `FR` mang delta Bỏ vẫn cần `VR`
   chứng minh hành vi đã gỡ. Bước 5 gộp theo delta (cách gộp: comment đầu `registry/feature-spec.md`); cột "Đổi

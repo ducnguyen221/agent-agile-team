@@ -2,7 +2,7 @@
 id: REQUESTS
 doc: requests
 title: Request ledger
-next_id: RQ-003
+next_id: RQ-004
 updated: 2026-01-20
 ---
 
@@ -20,14 +20,16 @@ updated: 2026-01-20
 <!-- Khối này do công cụ `index` ghi lại — đừng sửa tay. -->
 | Mã | Ngày | Tóm tắt | Trạng thái | Sprint |
 |---|---|---|---|---|
-| RQ-002 | 2026-01-20 | Câu báo không tìm thấy sai chính tả | đang làm | SPR-02 |
+| RQ-003 | 2026-01-20 | Câu báo không tìm thấy sai chính tả | đang làm | SPR-02 |
+| RQ-002 | 2026-01-16 | Thêm chỉ mục cho cột mã đơn (từ SPR-01/CO1) | mới | — |
 <!-- agile:open:end -->
 
 ## Timeline
 
 | Mã | Ngày | Tóm tắt | Trạng thái | Tính năng | Sprint |
 |---|---|---|---|---|---|
-| RQ-002 | 2026-01-20 | Câu báo không tìm thấy sai chính tả | đang làm | FS-001 | SPR-02 |
+| RQ-003 | 2026-01-20 | Câu báo không tìm thấy sai chính tả | đang làm | FS-001 | SPR-02 |
+| RQ-002 | 2026-01-16 | Thêm chỉ mục cho cột mã đơn (từ SPR-01/CO1) | mới | FS-001 | — |
 | RQ-001 | 2026-01-15 | Tra trạng thái đơn hàng bằng mã đơn | xong | FS-001 | SPR-01 |
 <!-- Ví dụ một dòng (xoá comment khi ghi dòng thật đầu tiên):
 | RQ-001 | 2026-01-15 | Tra trạng thái đơn hàng bằng mã đơn | đang làm | FS-001 | SPR-01 |

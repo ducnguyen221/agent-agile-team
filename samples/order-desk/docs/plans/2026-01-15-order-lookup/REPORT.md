@@ -106,7 +106,7 @@ Khi số đơn tăng nhiều, việc tra có thể chậm dần — đề xuất
 
 | Mã | Việc | Lý do để lại | Đề xuất |
 |---|---|---|---|
-| CO1 (chỉ mục mã đơn) | Thêm chỉ mục cho cột mã đơn | DN1 (chỉ mục mã đơn) chọn để sprint sau | Mở yêu cầu mới khi bảng đơn lớn |
+| CO1 (chỉ mục mã đơn) | Thêm chỉ mục cho cột mã đơn | DN1 (chỉ mục mã đơn) chọn để sprint sau | RQ-002 (từ SPR-01/CO1) — làm khi bảng đơn lớn |
 
 ## 7. Review & Retro
 

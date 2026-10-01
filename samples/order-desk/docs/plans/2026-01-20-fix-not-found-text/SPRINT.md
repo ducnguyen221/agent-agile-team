@@ -3,7 +3,7 @@ id: SPR-02-sprint
 doc: sprint
 title: Sửa chính tả câu báo không tìm thấy
 sprint: SPR-02
-request: RQ-002
+request: RQ-003
 feature: FS-001
 status: verifying
 size: tiny
@@ -38,7 +38,7 @@ updated: 2026-01-20
 
 <!-- Bối cảnh một dòng · một FR có kịch bản · một SC đo được · ngoài phạm vi · CQ (thường "Không có."). -->
 
-- **Bối cảnh:** RQ-002 (lỗi chính tả màn hình tra đơn), tính năng FS-001 (tra cứu đơn hàng).
+- **Bối cảnh:** RQ-003 (lỗi chính tả màn hình tra đơn), tính năng FS-001 (tra cứu đơn hàng).
 - **FR1.1 (câu đúng chính tả):** KHI mã đơn không tồn tại THÌ màn hình hiện "Không tìm thấy đơn hàng".
 - **SC1 (chữ đúng):** test giao diện so khớp đúng câu trên.
 - **Ngoài phạm vi:** đổi bố cục màn hình.

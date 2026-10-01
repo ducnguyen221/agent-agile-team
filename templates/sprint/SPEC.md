@@ -85,10 +85,11 @@ links:
 
 ## 7. Đổi hợp đồng / giao diện
 
-<!-- Có khi sprint đổi thứ mà bên khác đang dùng: API, sự kiện, schema dữ liệu, tham số CLI, định dạng file.
-     Bắt buộc khi risk_tags có public_api; không đổi gì thì ghi "Không có.". Mỗi dòng: thay đổi · Thêm / Sửa /
-     Bỏ · payload hoặc chữ ký trước → sau · bên dùng bị ảnh hưởng (có bằng chứng: grep bên gọi, client sinh,
-     log truy cập) · tương thích ngược? · lộ trình deprecate (phiên bản mới hoặc giai đoạn chuyển + ngày bỏ).
+<!-- Thứ bên khác đang dùng: API, sự kiện, schema dữ liệu, tham số CLI, định dạng file. Bắt buộc khi cỡ lớn
+     hoặc risk_tags có public_api; cỡ khác xoá mục. Bắt buộc mà không đổi gì thì ghi "Không có.". Mỗi dòng:
+     thay đổi · Thêm / Sửa / Bỏ · payload hoặc chữ ký trước → sau · bên dùng bị ảnh hưởng (có bằng chứng: grep
+     bên gọi, client sinh, log truy cập) · tương thích ngược? · lộ trình deprecate (phiên bản mới hoặc giai
+     đoạn chuyển + ngày bỏ).
      Thay đổi phá vỡ (bỏ/đổi tên trường, đổi kiểu, đổi URL, đổi cách xác thực) cần lộ trình deprecate và ADR —
      xem skill api-design, adr. -->
 

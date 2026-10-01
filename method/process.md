@@ -17,9 +17,7 @@ dẫn sprint · **frontmatter** — khối khoá–giá trị ở đầu file t�
 agent con được agent chính giao một việc kèm brief riêng · **worktree** — bản chép riêng của repo để
 làm một việc mà không đụng bản chính. Mã mục (`TK`, `RF`, `BR`…) theo
 [skills/id-convention](../skills/id-convention/SKILL.md); thang mức theo [severity.md](severity.md);
-cỡ việc theo [sizing.md](sizing.md). Các skill nhắc tên trong file này (`intake`, `shaping-spec`,
-`writing-plan`, `plan-review`, `running-sprint`, `code-review`, `closing-sprint`) đến từ đợt distill
-sau — xem `docs/MIGRATION.md`.
+cỡ việc theo [sizing.md](sizing.md). Gặp tên skill cũ trong hồ sơ lịch sử: `docs/MIGRATION.md`.
 
 ## 1. Sơ đồ
 
@@ -47,9 +45,8 @@ KHI người dùng giao một yêu cầu THÌ Analyst:
    nhiều sprint, mỗi sprint vẫn trỏ về cùng `RQ-`.
 3. Định cỡ và rủi ro theo [sizing.md](sizing.md). Rủi ro chỉ nâng cỡ, không hạ.
 4. Liệt kê giả định dưới nhãn **ASSUMPTION** (mỗi giả định một dòng, nói rõ nếu sai thì đổi gì).
-5. Rà **danh mục thiếu ngữ cảnh** (skill `intake`): mục tiêu, người dùng cuối, ràng buộc, định nghĩa
-   xong, dữ liệu mẫu, môi trường, phụ thuộc, điều cấm, tiêu chí đo, phạm vi ngoài, tiền lệ. Điểm chưa rõ
-   mà **không tự giả định được** thì gom thành `CQ` để hỏi **một lần** ở Cổng 1.
+5. Rà 11 điểm thiếu ngữ cảnh theo skill `intake`. Điểm chưa rõ mà **không tự giả định được** thì gom
+   thành `CQ` để hỏi **một lần** ở Cổng 1.
 6. Đi thẳng sang bước 2. **Không dừng chờ** người dùng ở bước này.
 
 ## 3. Bước 2 — SPEC rồi PLAN, Cổng 1
@@ -59,8 +56,9 @@ KHI người dùng giao một yêu cầu THÌ Analyst:
   ngay ở bước này (trạng thái `đề xuất`); tính năng có sẵn thì chỉ trỏ `FS-` cũ. Sổ SPECS và spec sống
   chỉ cập nhật **hành vi hiện hành** sau Cổng 2.
 - Analyst viết **SPEC** (làm cái gì, cho ai, thế nào là xong): bối cảnh · `US` · `FR` với kịch bản
-  KHI… THÌ… · `SC` · ngoài phạm vi · `CQ` (có thể rỗng, ghi rõ "không có"). Cỡ **lớn** có thêm mục
-  "Đổi hợp đồng / giao diện": liệt kê API, sự kiện, schema sẽ đổi và mọi bên dùng chúng (skill `shaping-spec`).
+  KHI… THÌ… · `SC` · ngoài phạm vi · `CQ` (có thể rỗng, ghi rõ "không có"). Mục "Đổi hợp đồng / giao diện" (API, sự
+  kiện, schema sẽ đổi và mọi bên dùng chúng — skill `shaping-spec`) bắt buộc khi cỡ lớn hoặc `risk_tags` có
+  `public_api`; cỡ khác xoá mục.
 - Architect viết **PLAN** (làm thế nào, ai làm, kiểm ra sao): mục tiêu · kiến trúc · ràng buộc chung ·
   trọng tâm review (≤5) · `TK` (vai + tier, đầu vào/ra, cách kiểm, cổng, hoàn tác, trỏ `FR`/`SC`) ·
   `RK` · `DN` · ước lượng (skill `writing-plan`). PLAN ghi **quyết định** (chữ ký, giá trị, assertion),
@@ -176,6 +174,10 @@ lại · cách dùng, đã đổi gì, cách hoàn tác · bài học (`LN`) · 
 phẩm đã đạt gì ↔ cách làm nên đổi gì) · Cổng 2 · tổng token phiên (mốc đo). REPORT thay cho bàn giao:
 không có tài liệu bàn giao riêng.
 
+**Nợ để lại vào sổ.** Mỗi `CO` ghi vào REPORT thì cùng lúc thành **một dòng `RQ-`** trạng thái `mới` trong
+REQUESTS, tóm tắt ghi nguồn `từ SPR-xx/COn`; cột Đề xuất của REPORT ghi mã `RQ-` đó. Điều kiện của *Đạt có
+điều kiện* sinh sau Cổng 2 cũng vậy. Nợ chỉ sống ở REQUESTS — không ai phải mở REPORT cũ để tìm nợ.
+
 **Trình Cổng 2** giống Cổng 1: một bản tóm tắt, kết luận trước, mã kèm tên. Lời trình chuẩn:
 
 ```
@@ -193,7 +195,8 @@ Người dùng kết luận **Đạt / Đạt có điều kiện / Không đạt
   năng trong thư mục spec sống theo cấu hình (`paths.feature_specs_dir`) ngay trong sprint; đóng sprint
   trong SPRINTS; lúc này mới trình menu nhánh (gộp local / push + PR / giữ nguyên — skill
   `closing-sprint`; push và PR là tác động ra ngoài, cần người dùng gật).
-- *Đạt có điều kiện* (`conditional_pass`) → như Đạt, điều kiện ghi thành `CO` có chủ và mốc theo dõi.
+- *Đạt có điều kiện* (`conditional_pass`) → như Đạt, điều kiện ghi thành `CO` có chủ và mốc theo dõi, kèm
+  dòng `RQ-` như trên.
 - *Không đạt* (`fail`) → ghi lý do nguyên văn; mở vòng mới hoặc sprint mới theo người dùng chọn.
 
 ## 8. Bước 6 — Bài học
@@ -201,6 +204,8 @@ Người dùng kết luận **Đạt / Đạt có điều kiện / Không đạt
 KHI sprint đóng THÌ Analyst (kiêm Distiller) rút bài học `LN`, tự chấm trước khi lưu (skill
 `closing-sprint`, phần bài học): bài học có **tái dùng** được không? có tra lại được từ code/git/docs
 không (nếu có thì không lưu)? có mâu thuẫn với bài học cũ không (nếu có thì gộp, không đẻ bản trùng)?
+Retro thấy nợ để lại bằng cách đọc **khối "Đang mở" của REQUESTS** (dòng có nguồn `từ SPR-xx/COn`), không
+mở REPORT cũ.
 
 - Nơi lưu bài học do **lớp riêng** của môi trường quy định (điểm cắm trong `hosts/`); lõi chỉ quy định
   bài học ghi theo timeline, mỗi bài học một nguồn (sprint nào, bằng chứng nào).

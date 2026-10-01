@@ -71,7 +71,7 @@ Ngoài chế độ làm rõ, hỏi lẻ giữa Bước 2–5 là lỗi quy trìn
 | `SC` | đo được: lệnh/thao tác + ngưỡng | mỗi `SC` sẽ có ít nhất một `VR` ở REPORT |
 | Ngoài phạm vi | cái không làm đợt này | không bao giờ rỗng ở cỡ vừa trở lên |
 | `CQ` + ASSUMPTION | mục 3 | mỗi `CQ` có đề xuất |
-| Đổi hợp đồng / giao diện (chỉ cỡ **lớn**) | API, sự kiện, schema sẽ đổi; delta **thêm / sửa / bỏ**; **mọi bên dùng** chúng (tra bằng tìm kiếm mã, không đoán) | không có bên dùng nào bị bỏ sót |
+| Đổi hợp đồng / giao diện (bắt buộc khi cỡ **lớn** hoặc `risk_tags` có `public_api`; cỡ khác xoá mục) | API, sự kiện, schema sẽ đổi; delta **thêm / sửa / bỏ**; **mọi bên dùng** chúng (tra bằng tìm kiếm mã, không đoán) | không có bên dùng nào bị bỏ sót |
 
 Mã theo skill `id-convention`: tiền tố hai chữ, mã kèm tên ngắn lần đầu trong đoạn, không `P1/P2`.
 

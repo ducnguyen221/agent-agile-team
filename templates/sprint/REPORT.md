@@ -102,24 +102,25 @@ Khi số đơn tăng nhiều, việc tra có thể chậm dần — đề xuất
 
 ## 6. Việc để lại
 
-<!-- Việc chưa làm, lý do, đề xuất xử lý (sprint sau hoặc yêu cầu mới RQ-NNN). Không có thì ghi "Không có." -->
+<!-- Việc chưa làm, lý do, đề xuất xử lý. Mỗi CO ghi ở đây thì cùng lúc ghi một dòng RQ- trạng thái `mới` vào sổ
+     REQUESTS, tóm tắt ghi nguồn `từ SPR-xx/COn`; cột Đề xuất ghi mã RQ- đó. Không có thì ghi "Không có." -->
 
 | Mã | Việc | Lý do để lại | Đề xuất |
 |---|---|---|---|
-| CO1 (chỉ mục mã đơn) | Thêm chỉ mục cho cột mã đơn | DN1 (chỉ mục mã đơn) chọn để sprint sau | Mở yêu cầu mới khi bảng đơn lớn |
+| CO1 (chỉ mục mã đơn) | Thêm chỉ mục cho cột mã đơn | DN1 (chỉ mục mã đơn) chọn để sprint sau | RQ-002 (từ SPR-01/CO1) — làm khi bảng đơn lớn |
 
 ## 7. Review & Retro
 
 <!-- Review: sản phẩm so với mục tiêu. Retro: cách làm. Ghi số vòng kiểm định và tổng token phiên làm mốc;
      chỉ tuyên bố tiết kiệm token khi có cặp số trước/sau.
      Trước khi viết Retro: đọc lại mọi dòng "Phán quyết:" trong nhật ký PROGRESS — phán quyết nào sai hoặc tốn
-     hơn dự kiến thì ghi vào "Chưa tốt" và cân nhắc thành bài học LN; và rà mọi việc để lại CO còn mở của các
-     sprint trước (sổ SPRINTS, REPORT cũ) — đếm số tồn, ghi CO nào đã trả trong sprint này, CO nào cũ quá hai
-     sprint thì đề xuất mở yêu cầu hoặc bỏ. -->
+     hơn dự kiến thì ghi vào "Chưa tốt" và cân nhắc thành bài học LN; và đọc khối "Đang mở" của sổ REQUESTS (không
+     mở REPORT cũ) — dòng có nguồn `từ SPR-xx/COn` là nợ để lại: đếm số tồn, ghi nợ nào đã trả trong sprint này,
+     nợ nào mở quá hai sprint thì đề xuất làm hoặc bỏ. -->
 
 - **Review:** đạt mục tiêu SPR-01; 1 vòng kiểm định.
 - **Phán quyết đọc lại:** 1 dòng trong PROGRESS (cắt khoảng trắng mã đơn) — đúng, không tốn thêm.
-- **Nợ để lại tồn đọng:** 1 mở (CO1 (chỉ mục mã đơn), sprint này); 0 trả trong sprint.
+- **Nợ để lại tồn đọng:** 1 mở trong khối "Đang mở" của REQUESTS (RQ-002, từ SPR-01/CO1); 0 trả trong sprint.
 - **Làm tốt:** test viết trước code; vòng kiểm định đầu không còn Chặn.
 - **Chưa tốt:** câu báo lỗi chưa được duyệt chữ trước khi làm.
 - **Thử lần sau:** duyệt câu chữ giao diện ngay trong SPEC.

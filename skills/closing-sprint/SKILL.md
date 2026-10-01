@@ -22,7 +22,7 @@ rewrite_before_public: true  # only references/preflight.md and references/relea
 | # | Việc | Ai | Chi tiết |
 |---|---|---|---|
 | 1 | **Tiền kiểm** — bằng chứng đủ chưa, theo cỡ và rủi ro | Analyst | [references/preflight.md](references/preflight.md) |
-| 2 | **REPORT** theo mẫu, trình **Cổng 2** bằng lời trình chuẩn | Analyst | `method/process.md` mục 7 |
+| 2 | **REPORT** theo mẫu; mỗi `CO` ghi luôn thành một dòng `RQ-` `mới` trong REQUESTS (tóm tắt ghi `từ SPR-xx/COn`, cột Đề xuất của REPORT ghi mã `RQ-`); trình **Cổng 2** bằng lời trình chuẩn | Analyst | `method/process.md` mục 7 |
 | 3 | Người dùng kết luận **Đạt / Đạt có điều kiện / Không đạt** → ghi `gate_2`, `gate_2_at`, `gate_2_quote` nguyên văn | — | Không đạt → vòng mới hoặc sprint mới; dừng ở đây |
 | 4 | **Cập nhật hồ sơ:** spec sống `FS-` (gộp delta Thêm / Sửa / Bỏ của SPEC theo comment đầu mẫu `feature-spec.md`; hành vi hiện hành, tiêu chí đang giữ, giới hạn đã biết, lịch sử sprint) · SPRINTS cột Đóng · REQUESTS trạng thái `xong` · spec sống `status` · chạy công cụ `index` | Analyst | chỉ sau Cổng 2 Đạt / Đạt có điều kiện |
 | 5 | **Đồng bộ tài liệu** của dự án với diff nhánh | Implementer | [references/docs-sync.md](references/docs-sync.md) |
@@ -30,7 +30,8 @@ rewrite_before_public: true  # only references/preflight.md and references/relea
 | 7 | **Bài học** `LN`: tự chấm, dedup, lưu nơi lớp riêng quy định; quan trọng → chỉ **đề xuất** nâng | Analyst | [references/lessons.md](references/lessons.md) |
 | 8 | **Menu nhánh** (mục 2–4) rồi dọn | Analyst (+ người dùng) | — |
 
-Đạt có điều kiện: điều kiện thành `CO` có chủ và mốc trước bước 4.
+Đạt có điều kiện: điều kiện thành `CO` có chủ và mốc, kèm dòng `RQ-` như bước 2, trước bước 4. Nợ để lại chỉ
+sống ở REQUESTS: retro đọc khối "Đang mở" của sổ, không mở REPORT cũ.
 
 ## 2. Trước menu: test cả bộ trên đúng cây sắp gộp
 

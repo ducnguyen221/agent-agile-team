@@ -16,7 +16,7 @@ Trước khi rút bài học, đọc lại ba thứ của sprint — đây là r
 | Đọc | Hỏi |
 |---|---|
 | Mọi dòng `Phán quyết:` trong PROGRESS | phán quyết nào sai, tốn gì? phán quyết nào lẽ ra là `CQ` ở Cổng 1? |
-| `CO` và "Nên sửa hoãn" (nợ để lại) | nợ nào đã hoãn hai sprint — thành `RQ-` riêng chưa? |
+| Khối "Đang mở" của REQUESTS — dòng có nguồn `từ SPR-xx/COn` (nợ để lại; không mở REPORT cũ) | nợ nào đã mở quá hai sprint — làm hay bỏ? sprint này trả được nợ nào? |
 | Số vòng kiểm định, lý do mỗi vòng | lỗi bị bắt ở vòng nào, lẽ ra bắt sớm hơn ở đâu (PLAN, review PLAN, review theo việc)? |
 | Số lần hỏi người ngoài cổng (mục tiêu 0) | hỏi vì thiếu luật, thiếu ngữ cảnh, hay thiếu can đảm phán quyết? |
 
