@@ -104,6 +104,6 @@ dòng vẫn bị quét:
 |---|---|---|---|
 | `NOTICE` | `file` | cả file | giấy phép buộc giữ nguyên thông báo bản quyền |
 | `THIRD_PARTY.md` | `credit-line` | dòng có `Copyright` hoặc `©` | dòng ghi công theo giấy phép nguồn |
-| `UPSTREAM.md` | `upstream-ref` | code span là `owner/repo` hoặc SHA hex | dấu vết nguồn gốc bắt buộc |
+| `UPSTREAM.md` | `upstream-ref` | code span là SHA hex, hoặc `owner/repo` với owner thuộc danh sách nguồn công khai `UPSTREAM_OWNERS` trong `check.py` (owner lạ vẫn bị quét; thêm nguồn mới thì thêm owner) | dấu vết nguồn gốc bắt buộc |
 | `docs/MIGRATION.md` | `old-skill-id` | code span là mã skill cũ `bộ:tên` / `bộ:*` | hồ sơ lịch sử cố ý nêu tên cũ để tra |
 | `skills/*/tests/pressure.md` | `model-line` | dòng có chữ `model` | hồ sơ thử ghi model đã chạy |

@@ -59,7 +59,7 @@ def test_denylist_exemptions(tmp_path):
     root = make_repo(tmp_path)
     (root / "NOTICE").write_text(f"Copyright (c) 2026 {WORD}\n\nAny text {WORD}\n", encoding="utf-8")
     (root / "THIRD_PARTY.md").write_text(f"| nguồn | MIT © 2026 {WORD} |\nCopyright {WORD}\n", encoding="utf-8")
-    (root / "UPSTREAM.md").write_text(f"# Nguồn\n\n| `{WORD}/repo` | `0123abcd` | main |\n", encoding="utf-8")
+    (root / "UPSTREAM.md").write_text(f"# Nguồn\n\n| `obra/{WORD}-skills` | `0123abcd` | main |\n", encoding="utf-8")
     (root / "docs").mkdir()
     (root / "docs" / "MIGRATION.md").write_text(f"| `{WORD}:old-skill` | `new` |\n| `{WORD}:*` | — |\n",
                                                  encoding="utf-8")
@@ -70,6 +70,7 @@ def test_denylist_exemptions(tmp_path):
 @pytest.mark.parametrize("rel, text", [
     ("UPSTREAM.md", f"# Nguồn\n\nVăn xuôi nhắc {WORD}.\n"),
     ("UPSTREAM.md", f"| `obra/repo` | gốc {WORD} (không giấy phép) | private |\n"),   # cột khác cột nguồn
+    ("UPSTREAM.md", f"| `{WORD}/private-repo` | `0123abcd` | main |\n"),             # owner ngoài allowlist nguồn công khai
     ("THIRD_PARTY.md", f"| `adr` | `SKILL.md` | bộ {WORD} |\n"),                     # không phải dòng ghi công
     ("docs/MIGRATION.md", f"Gặp tên {WORD} trong hồ sơ cũ thì tra bảng.\n"),           # văn xuôi, không phải mã cũ
     ("docs/MIGRATION.md", f"| `{WORD}/path/file.md` | x |\n"),                         # code span không phải `bộ:tên`

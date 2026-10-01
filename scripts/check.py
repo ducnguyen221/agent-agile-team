@@ -814,7 +814,28 @@ LEAK_EXEMPTIONS = (
 LEAK_EXEMPTION_KINDS = frozenset({"file", "credit-line", "upstream-ref", "old-skill-id", "model-line"})
 
 _CODE_SPAN = re.compile(r"`([^`\n]*)`")
-_UPSTREAM_REF = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*|[0-9a-f]{7,40}")
+# Chủ (owner) của các nguồn công khai ghi trong UPSTREAM.md — chỉ `owner/repo` của những chủ này được che; owner lạ
+# (kể cả trùng từ cấm) vẫn bị quét. Thêm nguồn mới vào UPSTREAM.md thì thêm chủ vào đây (so khớp không phân biệt hoa thường).
+UPSTREAM_OWNERS = frozenset(o.casefold() for o in (
+    "obra", "affaan-m", "garrytan", "github", "Fission-AI", "supabase", "alibaba", "bmad-code-org",
+    "JuliusBrussee", "ryoppippi", "yamadashy", "google", "OWASP", "basecamp.com",
+))
+_SHA = re.compile(r"[0-9a-f]{7,40}")
+_OWNER_REPO = re.compile(r"([A-Za-z0-9][A-Za-z0-9_.-]*)/[A-Za-z0-9][A-Za-z0-9_.-]*")
+
+
+class _UpstreamRef:
+    """Code span được che trong UPSTREAM.md: SHA hex, hoặc `owner/repo` với owner thuộc `UPSTREAM_OWNERS`."""
+
+    @staticmethod
+    def fullmatch(text: str) -> bool:
+        if _SHA.fullmatch(text):
+            return True
+        m = _OWNER_REPO.fullmatch(text)
+        return bool(m) and m.group(1).casefold() in UPSTREAM_OWNERS
+
+
+_UPSTREAM_REF = _UpstreamRef()
 _OLD_SKILL_ID = re.compile(r"[a-z0-9][a-z0-9-]*:(?:\*|[a-z0-9][a-z0-9-]*)")
 _CREDIT = re.compile(r"(?i)\bcopyright\b|©")
 
