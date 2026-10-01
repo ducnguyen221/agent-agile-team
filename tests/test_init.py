@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from conftest import run_script
 import _common as c
 import check
@@ -202,10 +204,12 @@ def test_title_file_keeps_vietnamese(tmp_path):
     assert init.main([str(root), "--sprint", "x", "--title", "a", "--title-file", str(title)]) == 2
 
 
-def test_replacement_characters_in_title_warn(tmp_path, capsys):
-    assert init.main([str(tmp_path), "--date", DATE, "--sprint", "ok", "--title", "c?ch ly \ufffd"]) == 0
+@pytest.mark.parametrize("title, warns", [("c?ch ly", True), ("cách ly \ufffd", True), ("Có nên cache?", False),
+                                          ("Vì sao chậm? Đo lại", False), ("cách ly", False)])
+def test_replacement_characters_in_title_warn(tmp_path, capsys, title, warns):
+    assert init.main([str(tmp_path), "--date", DATE, "--sprint", "ok", "--title", title], env={"AGENT_AGILE_TIERS": ""}) == 0
     err = capsys.readouterr().err
-    assert "--title-file" in err and "-X utf8" in err
+    assert ("--title-file" in err and "-X utf8" in err) == warns, err
 
 
 def test_title_round_trips_through_a_real_process(tmp_path):
@@ -215,12 +219,15 @@ def test_title_round_trips_through_a_real_process(tmp_path):
     assert "title: cách ly ạ" in spec
 
 
-def test_missing_tiers_table_warns_early(tmp_path, capsys):
+def test_missing_tiers_table_warns_only_for_a_sprint(tmp_path, capsys):
+    sprint = ["--sprint", "ok", "--title", "X"]
     assert init.main([str(tmp_path), "--date", DATE], env={}) == 0
+    assert "AGENT_AGILE_TIERS" not in capsys.readouterr().err
+    assert init.main([str(tmp_path), "--date", DATE, *sprint], env={}) == 0
     assert "AGENT_AGILE_TIERS" in capsys.readouterr().err
     table = tmp_path / "tiers.json"
     table.write_text("{}", encoding="utf-8")
-    assert init.main([str(tmp_path), "--date", DATE], env={"AGENT_AGILE_TIERS": str(table)}) == 0
+    assert init.main([str(tmp_path), "--date", DATE, *sprint], env={"AGENT_AGILE_TIERS": str(table)}) == 0
     assert "AGENT_AGILE_TIERS" not in capsys.readouterr().err
-    assert init.main([str(tmp_path), "--date", DATE], env={"AGENT_AGILE_TIERS": str(tmp_path / "none.json")}) == 0
+    assert init.main([str(tmp_path), "--date", DATE, *sprint], env={"AGENT_AGILE_TIERS": str(tmp_path / "none.json")}) == 0
     assert "AGENT_AGILE_TIERS" in capsys.readouterr().err

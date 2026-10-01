@@ -66,9 +66,9 @@ REPORT có 1 **verification result** (VR):
 ### Review PLAN trước Cổng 1
 
 <!-- Từ cỡ vừa: Tech Reviewer review PLAN trước khi trình Cổng 1 (skill plan-review). Ghi ở đây: dòng trạng thái
-     gộp (kết luận, số phát hiện theo mức, đã gộp vào SPEC/PLAN chưa), bảng RF, phần không đánh giá. Mã RF đánh
-     tiếp với kiểm định sản phẩm (review PLAN đến trước nên thường giữ các số đầu). Cỡ nhỏ hoặc không review PLAN
-     thì ghi "Không áp dụng — <lý do>". -->
+     gộp (kết luận, số phát hiện theo mức, đã gộp vào SPEC/PLAN chưa), bảng RF, phần không đánh giá. Số RF theo
+     thứ tự thời gian review (review PLAN đến trước nên giữ các số đầu); không đánh số lại. Cỡ nhỏ hoặc không
+     review PLAN thì ghi "Không áp dụng — <lý do>". -->
 
 - **Trạng thái gộp:** Đạt có điều kiện — 0 Chặn, 0 Phải sửa, 1 Nên sửa; đã gộp vào PLAN trước Cổng 1, không mở
   vòng review PLAN thứ hai.

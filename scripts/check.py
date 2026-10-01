@@ -195,13 +195,10 @@ class Doc:
     def line_no(self, idx: int) -> int:
         return self.start + idx
 
-    def hint(self, idx: int, code: str) -> str:
-        """Gợi ý khi mã bị bắt có dấu huyền sát bên, hoặc đếm thô thấy trước mã có số lẻ dấu huyền (code span
-        lồng nhau hoặc ngắt dòng làm lộ phần giữa)."""
+    def hint(self, idx: int, pos: int, code: str) -> str:
+        """Gợi ý khi mã bị bắt (ở cột `pos`) có dấu huyền sát bên, hoặc đếm thô thấy trước mã có số lẻ dấu huyền
+        (code span lồng nhau hoặc ngắt dòng làm lộ phần giữa)."""
         raw = self.raw[idx]
-        pos = self.masked[idx].find(code)
-        if pos == -1:
-            return ""
         near = raw[pos - 1:pos] == "`" or raw[pos + len(code):pos + len(code) + 1] == "`"
         return SPAN_HINT if near or raw[:pos].count("`") % 2 == 1 else ""
 
@@ -288,7 +285,13 @@ def _definitions(doc: Doc) -> list:
 
 def codes_on(line: str) -> list:
     """Mã hai chữ cái trên một dòng đã che, gồm cả mã trong khoảng `SC1–SC3` đã khai triển."""
-    found = [m.group(1) + m.group(2) for m in CODE.finditer(line)]
+    return [code for code, _ in codes_at(line)]
+
+
+def codes_at(line: str) -> list:
+    """Như `codes_on` nhưng kèm cột bắt đầu của từng mã (mã khai triển từ khoảng lấy cột đầu khoảng)."""
+    found = [(m.group(1) + m.group(2), m.start()) for m in CODE.finditer(line)]
+    seen = {code for code, _ in found}
     for m in RANGE.finditer(line):
         # Gạch ASCII (`SC1-SC3`) làm CODE bỏ sót hai đầu khoảng: khai triển đủ từ đầu tới cuối.
         if m.group(1) == m.group(3):
@@ -296,7 +299,10 @@ def codes_on(line: str) -> list:
             codes = [f"{m.group(1)}{n}" for n in range(lo, hi + 1)]
         else:
             codes = [m.group(1) + m.group(2), m.group(3) + m.group(4)]
-        found.extend(x for x in codes if x not in found)
+        for x in codes:
+            if x not in seen:
+                seen.add(x)
+                found.append((x, m.start()))
     return found
 
 
@@ -368,7 +374,7 @@ class Engine:
             for m in BARE.finditer(line):
                 if m.group(0) not in c.TIERS:
                     self.add(doc.path, doc.line_no(idx), "id-bare-single-letter",
-                             f"mã trần '{m.group(0)}' — dùng tiền tố hai chữ cái đúng tài liệu hoặc viết bằng chữ" + doc.hint(idx, m.group(0)))
+                             f"mã trần '{m.group(0)}' — dùng tiền tố hai chữ cái đúng tài liệu hoặc viết bằng chữ" + doc.hint(idx, m.start(), m.group(0)))
             cells = c.table_cells(line)
             level_cells: list = []
             if cells is None:
@@ -580,7 +586,7 @@ class Engine:
                          f"'{d.code}' thuộc {c.OWNER[prefix(d.code)].upper()}, không định nghĩa trong {doc.kind.upper()}")
         unresolved: dict = {}
         for idx, line in enumerate(doc.masked):
-            for code in codes_on(line):
+            for code, pos in codes_at(line):
                 if prefix(code) not in c.OWNER:
                     continue
                 owner = c.OWNER[prefix(code)]
@@ -589,7 +595,7 @@ class Engine:
                     unresolved.setdefault(owner, doc.line_no(idx))
                 elif code not in target.defined():
                     where = "tài liệu này" if target is doc else c.display(target.path)
-                    self.add(doc.path, doc.line_no(idx), "xref-missing", f"'{code}' không được định nghĩa ở {where}" + doc.hint(idx, code))
+                    self.add(doc.path, doc.line_no(idx), "xref-missing", f"'{code}' không được định nghĩa ở {where}" + doc.hint(idx, pos, code))
         for owner, line in unresolved.items():
             self.add(doc.path, line, "xref-unresolved", f"không có links.{owner} (hoặc file không tồn tại) để đối chiếu mã của {owner.upper()}")
 

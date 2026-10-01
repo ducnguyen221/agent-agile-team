@@ -26,8 +26,8 @@ python scripts/index.py <gốc-dự-án> [--check]          # --check: không gh
 **Tiêu đề có dấu tiếng Việt.** Các script đọc và ghi file bằng UTF-8, in ra console bằng UTF-8, và nhận tham số
 dạng Unicode của Windows — dấu không mất trong script. Nếu shell gọi (một số cầu Git Bash / `cmd` với code page
 cũ) đã làm mất dấu trước khi tới Python thì script không khôi phục được: dùng `--title-file <file UTF-8>`, hoặc
-chạy `python -X utf8 scripts/init.py …` từ PowerShell. `init` cảnh báo ra stderr khi tiêu đề chứa `?` hoặc ký tự
-thay thế U+FFFD.
+chạy `python -X utf8 scripts/init.py …` từ PowerShell. `init` cảnh báo ra stderr khi tiêu đề có ký tự thay thế
+U+FFFD hoặc `?` kẹp giữa hai chữ (`c?ch`); câu hỏi hợp lệ như "Có nên cache?" không bị cảnh báo.
 
 Dòng sprint đầu tiên `init` ghi vào SPRINTS thay luôn comment dòng ví dụ của mẫu (mẫu dặn xoá khi ghi dòng thật).
 
@@ -47,7 +47,7 @@ xuống dòng (LF/CRLF) của file đó; file mới ghi UTF-8 không BOM, LF.
 
 | Biến | Dùng bởi | Ý nghĩa |
 |---|---|---|
-| `AGENT_AGILE_TIERS` | `init.py` | Đường tới bảng tier → model ngoài repo ([`tiers/README.md`](../tiers/README.md) mục 2). Chưa đặt hoặc trỏ file không có → `init` in cảnh báo ra stderr (mã thoát không đổi), để Analyst xin chỉ định tier trong chat trước khi cần review PLAN |
+| `AGENT_AGILE_TIERS` | `init.py` | Đường tới bảng tier → model ngoài repo ([`tiers/README.md`](../tiers/README.md) mục 2). Chưa đặt hoặc trỏ file không có → `init --sprint` in cảnh báo ra stderr (mã thoát không đổi), để Analyst xin chỉ định tier trong chat trước khi cần review PLAN |
 | `AGENT_AGILE_DENYLIST` | `check.py --self` | Đường tới danh sách từ cấm **ngoài repo** (hợp đồng ở [`tests/README.md`](../tests/README.md)). Thiếu, không đọc được hoặc rỗng → in `WARNING NOT_CONFIGURED` ra stderr, luật `leak-denylist` **Chưa chạy** (không tính là Đạt); mã thoát không vì thế mà đổi |
 
 ## Luật của `check`

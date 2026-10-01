@@ -12,8 +12,9 @@ Sprint mới lấy mã từ `next_id` của SPRINTS, đặt lại trạng thái 
 và `verdict` về pending/null, `review_round: 0`, mọi vai về nhãn `pending`) rồi ghi một dòng Timeline vào
 SPRINTS (xoá comment dòng ví dụ của mẫu) và tăng `next_id`. Chạy lại cùng `slug` không đổi gì.
 
-Tiêu đề có dấu: `--title-file` đọc UTF-8 từ file, không qua shell. Tiêu đề chứa `?` hoặc U+FFFD → cảnh báo
-(shell có thể đã làm mất dấu). `AGENT_AGILE_TIERS` chưa đặt hoặc trỏ file không có → cảnh báo sớm ra stderr.
+Tiêu đề có dấu: `--title-file` đọc UTF-8 từ file, không qua shell. Tiêu đề có U+FFFD hoặc `?` kẹp giữa hai chữ
+→ cảnh báo (shell có thể đã làm mất dấu). Dựng sprint khi `AGENT_AGILE_TIERS` chưa đặt hoặc trỏ file không có →
+cảnh báo sớm ra stderr.
 
 Mã thoát: 0 = xong (hoặc chạy thử xong) · 2 = lỗi đầu vào.
 """
@@ -37,7 +38,7 @@ LEDGERS = (("requests", "REQUESTS.md", "RQ", "request"), ("sprints", "SPRINTS.md
 SPRINT_FILES = ("SPEC", "PLAN", "PROGRESS", "REPORT")
 STATUS_NEW = {"spec": "draft", "plan": "draft", "progress": "drafting", "report": "draft", "sprint": "drafting"}
 EXAMPLE_COMMENT = "<!-- Ví dụ một dòng"
-SUSPECT_TITLE = ("?", "\ufffd")
+SUSPECT_TITLE = re.compile(r"\ufffd|\w\?\w")  # ký tự thay thế, hoặc "?" kẹp giữa hai chữ ("c?ch")
 RESET = {"gate_1": "pending", "gate_1_at": "null", "gate_1_quote": "null", "verdict": "pending",
          "gate_2": "pending", "gate_2_at": "null", "gate_2_quote": "null", "review_round": "0"}
 
@@ -258,8 +259,8 @@ def validate(args) -> None:
         raise InputError("--sprint cần --title (mục tiêu sprint)")
     if any(ord(ch) < 32 or ord(ch) == 127 for ch in args.title):
         raise InputError("--title không được chứa ký tự điều khiển (xuống dòng, tab…) — sẽ làm hỏng frontmatter và bảng")
-    if any(ch in args.title for ch in SUSPECT_TITLE):
-        print(f"cảnh báo: --title {args.title!r} có '?' hoặc ký tự thay thế — shell có thể đã làm mất dấu. "
+    if SUSPECT_TITLE.search(args.title):
+        print(f"cảnh báo: --title {args.title!r} có '?' giữa hai chữ hoặc ký tự thay thế — shell có thể đã làm mất dấu. "
               "Dùng --title-file <file UTF-8>, hoặc chạy `python -X utf8 scripts/init.py …` từ PowerShell.",
               file=sys.stderr)
     if args.tiny:
@@ -314,7 +315,8 @@ def main(argv=None, env=None) -> int:
     except InputError as exc:
         print(f"lỗi đầu vào: {exc}")
         return 2
-    warn_tiers(env)
+    if args.sprint:
+        warn_tiers(env)
     plan.render(args.apply)
     if args.apply:
         plan.apply()

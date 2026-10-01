@@ -320,3 +320,15 @@ def test_generated_open_block_is_exempt_from_lead_rule(tmp_path):
         "Không có sprint nào đang mở.", "| Mã | Mở |\n|---|---|\n| SPR-01 | 2026-03-02 |", 1)
     ledger.write_text(text, encoding="utf-8", newline="\n")
     assert "id-list-lead" not in rules_of(check.check_paths([tmp_path]))
+
+
+def test_hint_uses_the_position_of_each_match(tmp_path):
+    root = make_sprint(tmp_path)
+    path = root / "PLAN.md"
+    text = path.read_text(encoding="utf-8").replace(
+        "Đạt SC1 (xuất đủ cột).", 'Đạt SC1 (xuất đủ cột); RF9 thường, P4 thường; `git commit -m "`RF9 P4`"`.', 1)
+    path.write_text(text, encoding="utf-8", newline="\n")
+    report = check.check_paths([root])
+    for rule in ("xref-missing", "id-bare-single-letter"):
+        hits = [f for f in report.findings if f.rule == rule]
+        assert sorted("code span" in f.message for f in hits) == [False, True], [f.render() for f in hits]
