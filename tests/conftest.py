@@ -16,6 +16,11 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 
+def write_lf(path: Path, text: str) -> None:
+    """Ghi UTF-8, giữ xuống dòng LF trên mọi hệ điều hành; `Path.write_text(newline=...)` chỉ có từ Python 3.10."""
+    path.write_bytes(text.encode("utf-8"))
+
+
 def run_script(name: str, *args: str, env: dict | None = None, cwd: Path | None = None) -> subprocess.CompletedProcess:
     """Chạy `scripts/<name>` bằng tiến trình con, trả kết quả có stdout/stderr dạng UTF-8."""
     full_env = dict(os.environ)

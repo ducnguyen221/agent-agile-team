@@ -60,6 +60,10 @@ Chưa phát hành.
   sprint, mở rộng phải ghi sổ trước), con trỏ từ `AGENTS.md`, README, `docs/README.md`. `UPSTREAM_OWNERS` thêm
   `rtk-ai`, `oraios`, `mksglu`, `microsoft`; `tests/test_provenance.py` đỏ khi Sổ theo dõi thiếu nguồn nhắc ở
   `UPSTREAM.md` hay frontmatter, hoặc lệch với `UPSTREAM_OWNERS`.
+- CI lượt đầu đỏ ở cả ba job Python 3.9: test ghi file bằng `Path.write_text(newline=...)` — tham số chỉ có từ
+  Python 3.10. Test đổi sang tiện ích `write_lf` trong `tests/conftest.py` (ghi byte UTF-8, giữ LF);
+  `tests/test_common.py` đỏ khi mã trong `scripts/`, `tests/`, `skills/` vượt mức sàn Python của
+  `verify.yml` (cú pháp, hoặc `write_text`/`read_text` có `newline=`).
 
 **Việc để lại (Đợt 2):**
 

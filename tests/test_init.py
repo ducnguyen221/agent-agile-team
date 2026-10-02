@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import run_script
+from conftest import run_script, write_lf
 import _common as c
 import check
 import init
@@ -40,7 +40,7 @@ def test_apply_creates_config_and_ledgers(tmp_path):
 def test_second_run_changes_nothing_and_never_overwrites(tmp_path, capsys):
     custom = tmp_path / "docs" / "plans" / "REQUESTS.md"
     custom.parent.mkdir(parents=True)
-    custom.write_text("sổ có sẵn\n", encoding="utf-8", newline="\n")
+    write_lf(custom, "sổ có sẵn\n")
     init.main([str(tmp_path), "--apply", "--date", DATE])
     first = files_of(tmp_path)
     assert first["docs/plans/REQUESTS.md"] == "sổ có sẵn\n".encode("utf-8")

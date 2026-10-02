@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import FIXTURES, REPO, run_script
+from conftest import FIXTURES, REPO, run_script, write_lf
 import check
 
 VALID = FIXTURES / "valid"
@@ -26,11 +26,11 @@ def apply_case(root: Path, case: dict) -> None:
         old, new = case["replace"]
         text = target.read_text(encoding="utf-8")
         assert old in text, f"ca {case['rule']}: không thấy chuỗi cần thay trong {target.name}"
-        target.write_text(text.replace(old, new, 1), encoding="utf-8", newline="\n")
+        write_lf(target, text.replace(old, new, 1))
     for rel, content in case.get("write", {}).items():
         path = root / rel
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content, encoding="utf-8", newline="\n")
+        write_lf(path, content)
 
 
 def rules_of(report) -> set:
@@ -71,7 +71,7 @@ def test_rule_levels_use_the_single_scale():
 
 def _set_report(root: Path, old: str, new: str) -> None:
     path = root / "REPORT.md"
-    path.write_text(path.read_text(encoding="utf-8").replace(old, new, 1), encoding="utf-8", newline="\n")
+    write_lf(path, path.read_text(encoding="utf-8").replace(old, new, 1))
 
 
 def test_declared_self_check_allows_conditional_pass_only(tmp_path):
@@ -88,7 +88,7 @@ def _add_fr2(root: Path, heading: str) -> None:
     text = spec.read_text(encoding="utf-8").replace(
         "## 4. Tiêu chí thành công",
         f"{heading}\n\n- **FR2.1 (lọc):** KHI chọn ngày THÌ chỉ xuất đơn trong ngày.\n\n## 4. Tiêu chí thành công", 1)
-    spec.write_text(text, encoding="utf-8", newline="\n")
+    write_lf(spec, text)
 
 
 def test_fr_without_vr_exemptions(tmp_path):
@@ -108,7 +108,7 @@ def test_subtask_without_parent_is_flagged(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "PLAN.md"
     text = path.read_text(encoding="utf-8").replace("## Rủi ro", "- **TK5.1 (mồ côi):** không có TK5.\n\n## Rủi ro", 1)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    write_lf(path, text)
     hits = [f for f in check.check_paths([root]).findings if f.rule == "task-without-trace"]
     assert len(hits) == 1 and "TK5.1" in hits[0].message
 
@@ -116,16 +116,12 @@ def test_subtask_without_parent_is_flagged(tmp_path):
 def test_range_counts_for_trace_and_vr(tmp_path):
     root = make_sprint(tmp_path)
     spec = root / "SPEC.md"
-    spec.write_text(
-        spec.read_text(encoding="utf-8").replace(
-            "| SC1 (xuất đủ cột) | File CSV có đủ ba cột | Test tự động của FR1 xanh |",
-            "| SC1 (xuất đủ cột) | File CSV có đủ ba cột | Test tự động của FR1 xanh |\n"
-            "| SC2 (có tiêu đề) | Có dòng tên cột | Test |\n| SC3 (UTF-8) | Mở được tiếng Việt | Test |",
-            1,
-        ),
-        encoding="utf-8",
-        newline="\n",
-    )
+    write_lf(spec, spec.read_text(encoding="utf-8").replace(
+        "| SC1 (xuất đủ cột) | File CSV có đủ ba cột | Test tự động của FR1 xanh |",
+        "| SC1 (xuất đủ cột) | File CSV có đủ ba cột | Test tự động của FR1 xanh |\n"
+        "| SC2 (có tiêu đề) | Có dòng tên cột | Test |\n| SC3 (UTF-8) | Mở được tiếng Việt | Test |",
+        1,
+    ))
     _set_report(root, "| SC1, FR1.1 |", "| SC1–SC3, FR1.1 |")
     assert check.check_paths([root]).findings == []
 
@@ -135,11 +131,10 @@ def test_ascii_hyphen_range_keeps_both_ends(tmp_path):
         assert {"SC1", "SC2", "SC3"} <= set(check.codes_on(f"| VR1 | {text}, FR1.1 |")), text
     root = make_sprint(tmp_path)
     spec = root / "SPEC.md"
-    spec.write_text(spec.read_text(encoding="utf-8").replace(
+    write_lf(spec, spec.read_text(encoding="utf-8").replace(
         "| SC1 (xuất đủ cột) | File CSV có đủ ba cột | Test tự động của FR1 xanh |",
         "| SC1 (xuất đủ cột) | File CSV có đủ ba cột | Test tự động của FR1 xanh |\n"
-        "| SC2 (có tiêu đề) | Có dòng tên cột | Test |\n| SC3 (UTF-8) | Mở được tiếng Việt | Test |", 1),
-        encoding="utf-8", newline="\n")
+        "| SC2 (có tiêu đề) | Có dòng tên cột | Test |\n| SC3 (UTF-8) | Mở được tiếng Việt | Test |", 1))
     _set_report(root, "| SC1, FR1.1 |", "| SC1-SC3, FR1.1 |")
     assert [f.render() for f in check.check_paths([root]).findings] == []
     _set_report(root, "| SC1-SC3, FR1.1 |", "| SC1-SC9, FR1.1 |")
@@ -170,7 +165,7 @@ def test_record_id_width_follows_project_config(tmp_path):
 def test_risk_and_size_consistency(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "SPEC.md"
-    path.write_text(path.read_text(encoding="utf-8").replace("risk_tags: []", "risk_tags: [secret]", 1), encoding="utf-8", newline="\n")
+    write_lf(path, path.read_text(encoding="utf-8").replace("risk_tags: []", "risk_tags: [secret]", 1))
     messages = [f.message for f in check.check_paths([root]).findings if f.rule == "frontmatter-value"]
     assert any("risk_tags" in m for m in messages), messages
 
@@ -179,7 +174,7 @@ def test_bare_letter_inside_link_url_is_ignored(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "SPEC.md"
     text = path.read_text(encoding="utf-8").replace("- Xuất Excel.", "- Xuất Excel, xem [tài liệu](https://example.com/A1/B2).", 1)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    write_lf(path, text)
     assert check.check_paths([root]).findings == []
 
 
@@ -187,7 +182,7 @@ def test_external_reference_with_slash_is_not_resolved(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "PLAN.md"
     text = path.read_text(encoding="utf-8").replace("Đạt SC1 (xuất đủ cột).", "Đạt SC1 (xuất đủ cột); giữ FS-001/FR7.3.", 1)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    write_lf(path, text)
     assert check.check_paths([root]).findings == []
 
 
@@ -275,7 +270,7 @@ def test_code_span_split_over_two_lines_hides_external_codes(tmp_path):
     path = root / "PLAN.md"
     text = path.read_text(encoding="utf-8").replace(
         "Đạt SC1 (xuất đủ cột).", "Đạt SC1 (xuất đủ cột); lệnh ngoài `tool --case\nRF9 --id P7`.", 1)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    write_lf(path, text)
     assert check.check_paths([root]).findings == []
 
 
@@ -284,7 +279,7 @@ def test_caught_code_next_to_backtick_gets_a_hint(tmp_path):
     path = root / "PLAN.md"
     text = path.read_text(encoding="utf-8").replace(
         "Đạt SC1 (xuất đủ cột).", "Đạt SC1 (xuất đủ cột); `git commit -m \"`RF9`\"`.", 1)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    write_lf(path, text)
     hits = [f for f in check.check_paths([root]).findings if f.rule == "xref-missing"]
     assert hits and all("code span" in f.message for f in hits), [f.render() for f in hits]
 
@@ -305,7 +300,7 @@ def test_code_table_needs_bold_lead_sentence(tmp_path):
     path = root / "SPEC.md"
     text = path.read_text(encoding="utf-8")
     assert "SPEC có 1 **user story** (US):" in text
-    path.write_text(text.replace("SPEC có 1 **user story** (US):", "Câu chuyện:", 1), encoding="utf-8", newline="\n")
+    write_lf(path, text.replace("SPEC có 1 **user story** (US):", "Câu chuyện:", 1))
     report = check.check_paths([root])
     hits = [f for f in report.findings if f.rule == "id-list-lead"]
     assert [(f.path.name, f.line) for f in hits] == [("SPEC.md", 36)] and hits[0].level == "Ghi chú"
@@ -318,7 +313,7 @@ def test_generated_open_block_is_exempt_from_lead_rule(tmp_path):
     ledger = tmp_path / "docs" / "plans" / "SPRINTS.md"
     text = ledger.read_text(encoding="utf-8").replace(
         "Không có sprint nào đang mở.", "| Mã | Mở |\n|---|---|\n| SPR-01 | 2026-03-02 |", 1)
-    ledger.write_text(text, encoding="utf-8", newline="\n")
+    write_lf(ledger, text)
     assert "id-list-lead" not in rules_of(check.check_paths([tmp_path]))
 
 
@@ -327,7 +322,7 @@ def test_hint_uses_the_position_of_each_match(tmp_path):
     path = root / "PLAN.md"
     text = path.read_text(encoding="utf-8").replace(
         "Đạt SC1 (xuất đủ cột).", 'Đạt SC1 (xuất đủ cột); RF9 thường, P4 thường; `git commit -m "`RF9 P4`"`.', 1)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    write_lf(path, text)
     report = check.check_paths([root])
     for rule in ("xref-missing", "id-bare-single-letter"):
         hits = [f for f in report.findings if f.rule == rule]

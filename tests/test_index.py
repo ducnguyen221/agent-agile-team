@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from conftest import run_script
+from conftest import run_script, write_lf
 import _common as c
 import index
 import init
@@ -25,7 +25,7 @@ def add_rows(path: Path, after_header: str, rows: list) -> None:
     text = path.read_text(encoding="utf-8")
     head = text.index(after_header)
     sep = text.index("\n", text.index("|---", head)) + 1
-    path.write_text(text[:sep] + "".join(r + "\n" for r in rows) + text[sep:], encoding="utf-8", newline="\n")
+    write_lf(path, text[:sep] + "".join(r + "\n" for r in rows) + text[sep:])
 
 
 def test_empty_project_keeps_empty_sentences(tmp_path):
@@ -73,10 +73,10 @@ def test_sprints_open_block_from_progress_frontmatter(tmp_path):
     init.main([str(root), "--apply", "--date", DATE, "--sprint", "fix-typo", "--title", "Sửa chữ", "--tiny"])
     init.main([str(root), "--apply", "--date", DATE, "--sprint", "old-work", "--title", "Việc cũ"])
     old = root / "docs" / "plans" / f"{DATE}-old-work" / "PROGRESS.md"
-    old.write_text(old.read_text(encoding="utf-8").replace("status: drafting", "status: done", 1), encoding="utf-8", newline="\n")
+    write_lf(old, old.read_text(encoding="utf-8").replace("status: drafting", "status: done", 1))
     tiny = root / "docs" / "plans" / f"{DATE}-fix-typo" / "SPRINT.md"
-    tiny.write_text(tiny.read_text(encoding="utf-8").replace("status: drafting", "status: verifying", 1)
-                    .replace("review_round: 0", "review_round: 2", 1), encoding="utf-8", newline="\n")
+    write_lf(tiny, tiny.read_text(encoding="utf-8").replace("status: drafting", "status: verifying", 1)
+             .replace("review_round: 0", "review_round: 2", 1))
     assert index.main([str(root)]) == 0
     got = block(root / "docs" / "plans" / "SPRINTS.md")
     assert "| Mã | Mở | Mục tiêu | Trạng thái | Vòng | Thư mục |" in got
@@ -111,7 +111,7 @@ def test_missing_markers_config_or_ledger_are_input_errors(tmp_path):
     assert index.main([str(tmp_path)]) == 2  # chưa có .agile.json
     root = project(tmp_path)
     ledger = root / "docs" / "plans" / "SPRINTS.md"
-    ledger.write_text(ledger.read_text(encoding="utf-8").replace(index.END, ""), encoding="utf-8", newline="\n")
+    write_lf(ledger, ledger.read_text(encoding="utf-8").replace(index.END, ""))
     assert index.main([str(root)]) == 2
     ledger.unlink()
     assert index.main([str(root)]) == 2

@@ -206,6 +206,24 @@ def test_source_has_no_literal_bom():
         assert bom not in path.read_text(encoding="utf-8"), path.name
 
 
+def test_sources_stay_within_python_floor_of_ci():
+    """CI chạy cả Python 3.9: cú pháp 3.10+ hay `Path.write_text(newline=...)` (thêm ở 3.10) làm đỏ cả ma trận 3.9."""
+    import ast
+
+    workflow = (c.REPO / ".github" / "workflows" / "verify.yml").read_text(encoding="utf-8")
+    floor = min(tuple(int(x) for x in v.split(".")) for v in re.findall(r'"(3\.\d+)"', workflow))
+    bad = []
+    for path in [p for d in ("scripts", "tests", "skills") for p in (c.REPO / d).rglob("*.py")]:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path), feature_version=floor)
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and node.func.attr in {"write_text", "read_text"}
+                    and any(k.arg == "newline" for k in node.keywords)
+                    and floor < (3, 10)):
+                bad.append(f"{path.relative_to(c.REPO).as_posix()}:{node.lineno}")
+    assert bad == [], f"Path.write_text/read_text(newline=...) cần Python 3.10+, CI có {floor}: {bad}"
+
+
 def test_docstrings_are_plain_vietnamese_not_escapes():
     for path in (c.REPO / "scripts").glob("*.py"):
         assert "\\u1" not in path.read_text(encoding="utf-8"), path.name

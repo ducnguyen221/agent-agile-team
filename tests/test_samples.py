@@ -2,7 +2,7 @@
 
 import shutil
 
-from conftest import SAMPLES
+from conftest import SAMPLES, write_lf
 import check
 import index
 
@@ -37,7 +37,7 @@ def test_bare_code_inserted_into_sample_fails(tmp_path):
     root = tmp_path / "samples"
     shutil.copytree(SAMPLES, root)
     spec = next(root.rglob("SPEC.md"))
-    spec.write_text(spec.read_text(encoding="utf-8") + "\nGhi chú thêm: D3.\n", encoding="utf-8", newline="\n")
+    write_lf(spec, spec.read_text(encoding="utf-8") + "\nGhi chú thêm: D3.\n")
     report = check.check_paths([root])
     assert report.exit_code == 1
     assert "id-bare-single-letter" in rules_of(report)
