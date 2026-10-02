@@ -64,6 +64,11 @@ Chưa phát hành.
   Python 3.10. Test đổi sang tiện ích `write_lf` trong `tests/conftest.py` (ghi byte UTF-8, giữ LF);
   `tests/test_common.py` đỏ khi mã trong `scripts/`, `tests/`, `skills/` vượt mức sàn Python của
   `verify.yml` (cú pháp, hoặc `write_text`/`read_text` có `newline=`).
+- `A11` chạy thật: run `37077757196` (commit `2a09e34`) xanh 6/6 job (Ubuntu, Windows, macOS × Python 3.9/3.13);
+  `docs/standardization.md` ghi `A11` xong. Việc để lại "chạy lần đầu `verify.yml`" bên dưới đã xong.
+- `hosts/claude/README.md`: trên Claude, skill dựng sẵn tên trần `code-review` / `security-review` thắng tên trần,
+  nên khi skill của repo nói "skill `code-review`" thì gọi `agent-agile-team:code-review` (tương tự
+  `security-review`); skill và luật lõi giữ tên trần để không phụ thuộc harness.
 
 **Việc để lại (Đợt 2):**
 
