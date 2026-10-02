@@ -8,6 +8,101 @@ Cách dùng: **chép** = chép nguyên văn được, giữ thông báo bản qu
 văn bản · **NOTICE** = chép được nhưng mang theo NOTICE Apache-2.0 · **private** = chỉ dùng khi repo còn
 private, phải viết lại trước khi công khai.
 
+**File này là nguồn sự thật duy nhất để theo dõi bản mới của mọi nguồn gốc.** Repo thay thế các bộ skill
+gốc, nên môi trường dùng repo có thể không còn cài bộ nào trong số đó — không plugin, cache hay kho nào khác
+báo khi nguồn gốc ra bản mới. Muốn cập nhật hay mở rộng: quay lại các nguồn trong mục "Sổ theo dõi" dưới,
+so bản mới, distill và bổ sung theo [docs/updating-from-upstream.md](docs/updating-from-upstream.md).
+
+## Sổ theo dõi nguồn gốc
+
+Mục này giữ **trạng thái hiện tại** của từng nguồn; các khối đợt bên dưới là lịch sử chốt SHA. Cột
+**Đã distill tới** = SHA mà nội dung trong repo đang bám (chỉ đổi khi distill xong một đợt) · cột **Kiểm gần
+nhất** = ngày và HEAD đã xem ở lượt kiểm gần nhất (đổi cả khi lượt kiểm không lấy gì) · cột **Kiểm** = khi
+nào phải xem lại nguồn này. SHA rút gọn 8 ký tự; bản đầy đủ ở khối đợt.
+
+### Repo đã dùng hoặc đã xét
+
+Bảng dưới có 21 nguồn dạng repo, chia theo **vai trò**: **distill** (nội dung đã vào skill/agent) · **ý**
+(chỉ lấy khái niệm) · **chỉ gọi** (công cụ chạy qua `npx`) · **đã loại** (đánh giá rồi không lấy, ghi để
+khỏi đánh giá lại).
+
+| Nguồn | Vai trò | Nhận nội dung | Đã distill tới | Kiểm gần nhất | Kiểm |
+|---|---|---|---|---|---|
+| `obra/superpowers` | distill · chép | `shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`, `tdd`, `debugging`, `worktrees`, `verify-before-done`, `code-review`, `writing-skills` | Đợt 1 · `8ca22dba` (`v6.4.2`) | 2026-10-01 · `8ca22dba` | mọi lượt |
+| `affaan-m/ECC` (tên cũ `affaan-m/everything-claude-code`) | distill · chép | `intake`, `python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`, `security-review`, `token-economy`, phần bài học của `closing-sprint`; 7 agent | Đợt 1 · `c70874fa` (`v2.2.2`) | 2026-10-01 · `c70874fa` | mọi lượt — nguồn chính của Đợt 2 |
+| `garrytan/gstack` | distill · chép | `plan-review`, `security-audit`, `web-qa`, phần điều tra của `debugging`, docs-sync và retro của `closing-sprint` | Đợt 1 · `96764e80` (VERSION 1.91.9.0) | 2026-10-01 · `96764e80` | mọi lượt — Đợt 2 lấy thêm `review`, `qa`, `ship` |
+| `obra/superpowers-lab` | đã ghi mốc, chưa distill | — (Đợt 2: tìm hàm trùng lặp cho `code-review`) | chưa distill — mốc Đợt 1 `51111f74` | 2026-10-01 · `51111f74` | mọi lượt |
+| `obra/superpowers-skills` | distill · chép | phần bổ sung của `tdd`, `debugging` | Đợt 1 · `cdcd624a` | 2026-10-01 · `cdcd624a` | không — repo lưu trữ từ 2025-10-14; chỉ xem còn lưu trữ không |
+| `supabase/agent-skills` | distill gián tiếp (đến qua ECC) | mẫu Postgres trong `postgres`, agent `database-reviewer` | qua ECC `c70874fa`; mốc xác minh giấy phép `544bfc56` | 2026-10-01 · `544bfc56` | khi ECC đổi phần Postgres |
+| `github/spec-kit` | ý | `id-convention`, mẫu SPEC/PLAN, `shaping-spec` | ý từ `d2ddd910` (`v1.0.13`) | 2026-10-01 · `d2ddd910` | mọi lượt — đọc release notes |
+| `Fission-AI/OpenSpec` | ý | spec sống và delta Thêm / Sửa / Bỏ (`templates/registry/feature-spec.md`, mẫu SPEC) | ý từ `3a34ea30` (`v1.14.0`) | 2026-10-01 · `3a34ea30` | mọi lượt — đọc release notes |
+| `bmad-code-org/BMAD-METHOD` | ý | thẻ vai trong `roles/` | ý từ `1cbcfa27` | 2026-10-01 · `1cbcfa27` | mọi lượt |
+| `google/eng-practices` | ý | `roles/verifier/tech-reviewer.md` | ý từ `3bb3ec25` | 2026-10-01 · `3bb3ec25` | không — repo lưu trữ |
+| `OWASP/ASVS` | ý | thẻ chuyên đề security, `security-review` | ý từ `2b300716` | 2026-10-01 · `2b300716` | khi ASVS ra bản mới |
+| `JuliusBrussee/caveman` | ý, không cài | lối viết gọn giữa agent trong `token-economy` | ý từ `f5d72948` | 2026-10-01 · `f5d72948` | mọi lượt |
+| `ryoppippi/ccusage` | chỉ gọi | lệnh đo token trong `token-economy` | không chép — gọi bản mới nhất | 2026-10-01 · `1597d652` | khi cú pháp lệnh đổi |
+| `yamadashy/repomix` | chỉ gọi | lệnh nén repo trong `token-economy` | không chép — gọi bản mới nhất | 2026-10-01 · `0b3f82b4` | khi cú pháp lệnh đổi |
+| `alibaba/open-code-review` | đã loại | — (thành phần ủy quyền cho công cụ review ngoài, Tech Reviewer có đường riêng) | — | 2026-10-01 · `a758d9cb` | không |
+| `rtk-ai/rtk` | đã loại, **xét lại có điều kiện** | — (ứng viên nén output lệnh shell) | — | 2026-10-02 · `3a12dfe3` nhánh `develop`, bản phát hành `v0.50.0` | khi đạt `v1.0` hoặc các issue chặn đã đóng: không bắt tool PowerShell (#1319, #1248), gỡ cài đặt xoá cả hook khác cùng matcher (#3036), hook tự cho phép lệnh (#3791), cắt output im lặng (#4073, #4098); còn ghi đè file hook của harness Codex |
+| `oraios/serena` | đã loại | — | — | 2026-10-02 · `d0f7f926` (`v1.7.0`) | không, trừ khi nhu cầu đổi — nghiên cứu Đợt 1 ghi GPL, GitHub báo `NOASSERTION`: đọc LICENSE trước khi xét lại; quá nặng cho repo phương pháp |
+| `mksglu/context-mode` | đã loại | — | — | 2026-10-02 · `928bdf10` (`v1.0.169`) | không — nghiên cứu Đợt 1 ghi ELv2 (không phải giấy phép mở), GitHub báo `NOASSERTION` |
+| `microsoft/LLMLingua` | đã loại | — | — | 2026-10-02 · `5a4c78ae` | không — MIT nhưng cần mô hình nén prompt, quá nặng cho repo phương pháp |
+| `affaan-m/agentshield` | đã loại | — | — | 2026-10-02 · `b0891303` | không — ngoài phạm vi phương pháp |
+| squeez | đã loại | — | — | chưa xác định repo — nghiên cứu Đợt 1 chỉ ghi tên | không; xác định repo trước nếu xét lại |
+
+### Tài liệu web (không có commit)
+
+Bảng dưới có 7 nguồn **tài liệu web** — không có SHA, nên cột kiểm ghi ngày đọc gần nhất.
+
+| Nguồn | Vai trò | Nhận nội dung | Đọc gần nhất | Kiểm |
+|---|---|---|---|---|
+| Kiro / EARS (`kiro.dev/docs/specs/concepts/`) | ý | dạng kịch bản KHI…THÌ… trong mẫu SPEC, `shaping-spec` | 2026-10-01 | khi sửa mẫu SPEC |
+| Shape Up (`basecamp.com/shapeup`) | ý, không trích | sprint một mục tiêu, giới hạn công sức trong `method/` | 2026-10-01 | khi sửa `method/sizing.md` |
+| Scrum Guide 2020 (`scrumguides.org`) | ý, không chép | mục tiêu sprint, review/retro trong `method/`, mẫu REPORT | 2026-10-01 | khi có Scrum Guide bản mới |
+| ISO/IEC/IEEE 29148 | ý | mã yêu cầu ổn định trong `id-convention` | 2026-10-01 | khi tiêu chuẩn ra bản mới |
+| MoSCoW | ý | mức ưu tiên viết bằng chữ trong mẫu SPEC, `id-convention` | 2026-10-01 | không |
+| Nguồn văn phong (BLUF, Minto/SCQ, plain language, Google dev style, Diátaxis, Microsoft style, NN/g) | ý | `response-style` | 2026-10-01 | khi sửa `response-style` |
+| Tài liệu Anthropic (hướng dẫn prompting, context engineering, Claude Code output styles) | ý, chỉ trỏ link | `response-style`, `token-economy` | 2026-10-01 | mỗi lượt — hành vi harness đổi theo bản |
+
+Nguồn **private** (không giấy phép) không theo dõi ở đây: lớp riêng của môi trường giữ bản đồ và đường theo
+dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đợt 1 và `THIRD_PARTY.md` mục 3.
+
+## Nhật ký kiểm bản mới
+
+Mỗi lượt kiểm một dòng, mới nhất trên cùng: ngày · nguồn đã kiểm · HEAD đã xem · quyết định (`lấy` / `bỏ
+qua` / `hoãn` — gì, vì sao, sai thì tốn gì). Lượt kiểm không lấy gì vẫn ghi, để lần sau không đọc lại cùng
+đoạn thay đổi. Cách làm: [docs/updating-from-upstream.md](docs/updating-from-upstream.md) mục 3.
+
+- Chưa có lượt kiểm nào sau Đợt 1.
+
+## Đợt 2 — dự kiến (chưa chốt SHA)
+
+Mục này ghi thành phần đã chọn nhưng **chưa distill**, để đợt sau khỏi phải lập lại bảng ánh xạ. Khi bắt
+đầu Đợt 2: chốt HEAD mới nhất của từng nguồn thành khối "Đợt 2 — chốt SHA", rồi đối chiếu bảng dưới với bản
+mới (thành phần có thể đã đổi tên, gộp hay bị xoá ở upstream). Bảng dưới chia theo **mức**: **lấy** (đã chọn)
+· **xét** (chỉ lấy khi có ca dùng thật, ghi lý do lấy/bỏ).
+
+| Nguồn | Thành phần nguồn | Đích dự kiến | Mức |
+|---|---|---|---|
+| `affaan-m/ECC` agent | planner, architect (+ code-architect) | `roles/executor/architect.md`, `skills/writing-plan` | lấy |
+| `affaan-m/ECC` agent | code-explorer · code-reviewer (lọc theo độ tin cậy, được trả 0 phát hiện) · pr-test-analyzer · build-error-resolver (+ lệnh build-fix) | `agents/code-explorer`, `agents/code-reviewer`, `agents/test-analyzer`, `agents/build-fixer` | lấy |
+| `affaan-m/ECC` agent | spec-miner · tdd-guide | `skills/shaping-spec/references/spec-mining.md` · `skills/tdd` | lấy |
+| `affaan-m/ECC` agent | typescript-reviewer, react-reviewer | `agents/typescript-reviewer`, `agents/react-reviewer` | lấy |
+| `affaan-m/ECC` agent | agent-evaluator, gan-*, type-design-analyzer, code-simplifier, refactor-cleaner, a11y-architect | thẻ vai / agent tương ứng | xét |
+| `affaan-m/ECC` skill quy trình | orch-pipeline + 5 orch-* (+ lệnh orch-*) | `method/sizing.md` | lấy |
+| `affaan-m/ECC` skill quy trình | santa-method · verification-loop · delivery-gate · loop-design-check | `roles/verifier/` · `skills/verify-before-done/references/loop.md` · `method/evidence.md` (nội dung thành luật, không dùng Stop hook) · `method/process.md` | lấy |
+| `affaan-m/ECC` skill quy trình | intent-driven-development · product-capability, lệnh plan-prd, prp-* · search-first · iterative-retrieval · eval-harness | `skills/intake` · `skills/shaping-spec` · thẻ Architect và Implementer · `skills/token-economy` · `skills/eval-harness` | lấy |
+| `affaan-m/ECC` workflow | `orch-review.workflow.js` | `method/review-gate.md` — chỉ lấy thiết kế, không chạy JS | lấy |
+| `affaan-m/ECC` skill quy trình | blueprint, contract-first, council, inherit-legacy-style, living-docs-governance (xét trước tiên), codebase-onboarding | tuỳ ca dùng | xét |
+| `affaan-m/ECC` skill kỹ thuật | react-patterns, react-testing · vite-patterns, frontend-patterns · e2e-testing, ai-regression-testing · browser-qa, click-path-audit | `skills/react` · `skills/frontend` · `skills/e2e-testing` · `skills/web-qa` | lấy |
+| `affaan-m/ECC` rules | `rules/common` (coding-style, testing, security, git-workflow, code-review, development-workflow, agents) · `rules/python`, `rules/typescript`, `rules/react` | `method/standards/common/` · `method/standards/<ngôn ngữ>.md` — ngưỡng coverage giữ 80 % | lấy |
+| `affaan-m/ECC` rules | `rules/web` | `method/standards/web.md` | xét |
+| `affaan-m/ECC` lệnh | code-review, review-pr · test-coverage · update-docs | `skills/code-review` · thẻ QA · `skills/closing-sprint/references/docs-sync.md` | lấy |
+| `garrytan/gstack` | `review` · `qa` · `ship` | `skills/code-review` · `skills/web-qa` · `skills/closing-sprint` | lấy |
+| `obra/superpowers-lab` | finding-duplicate-functions | `skills/code-review/references/duplicates.md` | lấy |
+| `affaan-m/ECC`, `obra/superpowers` | viết lại sâu 9 mục "gọn" của Đợt 1 có nguồn công khai: `deployment` (+ docker), `fastapi`, `postgres`, agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`, `rag-pipeline-reviewer`; `writing-skills/references/diagnosing.md` | tại chỗ, đối chiếu HEAD mới | lấy |
+| nguồn private (nhãn trung tính) | viết lại sâu 6 mục "gọn" còn lại: `bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md`, bảng phủ `FR` → `VR` của thẻ QA, luật truy vết của `check` | viết lại từ ý, không mở bản gốc (`THIRD_PARTY.md` mục 3) | lấy |
+
 ## Đợt 1 — chốt SHA 2026-10-01 (15:20–15:28 UTC+7)
 
 Trạng thái: **đã distill** 2026-10-01 — 28 skill, 7 agent. Nguồn của từng skill và agent: mục

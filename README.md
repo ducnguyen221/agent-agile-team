@@ -68,7 +68,8 @@ a project after two sprints.
 
 Distilled from Superpowers (obra), Everything Claude Code (affaan-m), gstack (garrytan), with concepts from
 GitHub Spec Kit, OpenSpec, BMAD-METHOD and Kiro/EARS. Exact commits, licences and per-skill sources:
-[UPSTREAM.md](UPSTREAM.md), [NOTICE](NOTICE), [THIRD_PARTY.md](THIRD_PARTY.md).
+[UPSTREAM.md](UPSTREAM.md), [NOTICE](NOTICE), [THIRD_PARTY.md](THIRD_PARTY.md). Updating or extending from
+those sources: [docs/updating-from-upstream.md](docs/updating-from-upstream.md).
 
 ## Licence
 

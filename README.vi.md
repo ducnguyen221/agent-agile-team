@@ -64,7 +64,8 @@ sau hai sprint.
 
 Distill từ Superpowers (obra), Everything Claude Code (affaan-m), gstack (garrytan), lấy ý từ GitHub Spec
 Kit, OpenSpec, BMAD-METHOD và Kiro/EARS. Commit chính xác, giấy phép và nguồn từng skill:
-[UPSTREAM.md](UPSTREAM.md), [NOTICE](NOTICE), [THIRD_PARTY.md](THIRD_PARTY.md).
+[UPSTREAM.md](UPSTREAM.md), [NOTICE](NOTICE), [THIRD_PARTY.md](THIRD_PARTY.md). Cập nhật hay mở rộng từ
+các nguồn đó: [docs/updating-from-upstream.md](docs/updating-from-upstream.md).
 
 ## Giấy phép
 

@@ -2,6 +2,7 @@
 
 Một người + nhiều agent phát triển phần mềm theo sprint = một mục tiêu. Chi tiết: `method/`, `roles/`,
 `tiers/`, `skills/`, `templates/`. Khi file này khác chi tiết, chi tiết thắng.
+Cập nhật hay mở rộng skill/agent: quay lại nguồn gốc trong `UPSTREAM.md`, theo `docs/updating-from-upstream.md`.
 
 ## Dùng skill
 

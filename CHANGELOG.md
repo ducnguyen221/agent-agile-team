@@ -53,6 +53,13 @@ Chưa phát hành.
   rights reserved — private"); URL repo thật thay `OWNER/agent-agile-team` ở INSTALL, README, `hosts/`. Chống rò
   thêm nhóm miễn trừ có chủ đích `author-attribution` (kiểu `author-field`, `author-section`, `author-url`) —
   tên tác giả ở chỗ khác vẫn bị chặn.
+- Theo dõi nguồn gốc: `UPSTREAM.md` thêm "Sổ theo dõi nguồn gốc" (21 repo + 7 tài liệu web: vai trò, nơi nhận
+  nội dung, mốc đã distill, lần kiểm gần nhất, khi nào kiểm — gồm cả nguồn đã loại và điều kiện xét lại),
+  "Nhật ký kiểm bản mới" và "Đợt 2 — dự kiến" (thành phần đã chọn, đích, mức lấy/xét); quy trình
+  `docs/updating-from-upstream.md` (khi nào kiểm, so HEAD với mốc, quyết định lấy/bỏ qua/hoãn, distill như một
+  sprint, mở rộng phải ghi sổ trước), con trỏ từ `AGENTS.md`, README, `docs/README.md`. `UPSTREAM_OWNERS` thêm
+  `rtk-ai`, `oraios`, `mksglu`, `microsoft`; `tests/test_provenance.py` đỏ khi Sổ theo dõi thiếu nguồn nhắc ở
+  `UPSTREAM.md` hay frontmatter, hoặc lệch với `UPSTREAM_OWNERS`.
 
 **Việc để lại (Đợt 2):**
 

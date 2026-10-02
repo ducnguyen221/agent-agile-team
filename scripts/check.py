@@ -837,10 +837,12 @@ _AUTHOR_HEADING = re.compile(r"^##\s+(?:Author|Tác giả)\s*$")
 
 _CODE_SPAN = re.compile(r"`([^`\n]*)`")
 # Chủ (owner) của các nguồn công khai ghi trong UPSTREAM.md — chỉ `owner/repo` của những chủ này được che; owner lạ
-# (kể cả trùng từ cấm) vẫn bị quét. Thêm nguồn mới vào UPSTREAM.md thì thêm chủ vào đây (so khớp không phân biệt hoa thường).
+# (kể cả trùng từ cấm) vẫn bị quét. Thêm nguồn mới vào UPSTREAM.md thì thêm chủ vào đây (so khớp không phân biệt hoa thường);
+# `tests/test_provenance.py` đỏ khi Sổ theo dõi của UPSTREAM.md và danh sách này lệch nhau.
 UPSTREAM_OWNERS = frozenset(o.casefold() for o in (
     "obra", "affaan-m", "garrytan", "github", "Fission-AI", "supabase", "alibaba", "bmad-code-org",
     "JuliusBrussee", "ryoppippi", "yamadashy", "google", "OWASP", "basecamp.com",
+    "rtk-ai", "oraios", "mksglu", "microsoft",
 ))
 _SHA = re.compile(r"[0-9a-f]{7,40}")
 _OWNER_REPO = re.compile(r"([A-Za-z0-9][A-Za-z0-9_.-]*)/[A-Za-z0-9][A-Za-z0-9_.-]*")
