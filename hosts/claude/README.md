@@ -30,9 +30,8 @@ claude plugin marketplace add "$HOME\agent-agile-team"    # Windows PowerShell �
 claude plugin install agent-agile-team@agent-agile-team
 ```
 
-Đã có quyền đọc repo trên GitHub thì thay dòng đầu bằng `claude plugin marketplace add OWNER/agent-agile-team`
-(`OWNER` là tài khoản chứa repo). Skill hiện với tên có tiền tố `agent-agile-team:` (ví dụ
-`agent-agile-team:intake`), nên không đè skill cùng tên của plugin khác.
+Đã có quyền đọc repo trên GitHub thì thay dòng đầu bằng `claude plugin marketplace add https://github.com/ducnguyen221/agent-agile-team.git`.
+Skill hiện với tên có tiền tố `agent-agile-team:` (ví dụ `agent-agile-team:intake`), nên không đè skill cùng tên của plugin khác.
 
 Thử khi đang sửa repo, không cài lại plugin:
 

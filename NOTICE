@@ -1,5 +1,5 @@
 agent-agile-team
-Copyright (c) 2026 the agent-agile-team authors. All rights reserved (private, not yet released).
+Copyright (c) 2026 Nguyễn Quang Đức (https://ducnguyen.vn). All rights reserved (private, not yet released).
 
 Một nguồn được coi là "đã dùng" khi có file trong repo ghi `source` trỏ tới nó; khi đó thông báo bản
 quyền tương ứng ở đây là bắt buộc. Nguồn của từng skill và agent: UPSTREAM.md, mục "Bảng nguồn theo skill

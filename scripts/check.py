@@ -804,14 +804,36 @@ def _denied(word: str, text: str) -> bool:
 #   upstream-ref  — che code span là `owner/repo` hoặc SHA hex; phần còn lại của dòng vẫn bị quét
 #   old-skill-id  — che code span là mã skill cũ dạng `bộ:tên` hoặc `bộ:*`; phần còn lại vẫn bị quét
 #   model-line    — bỏ qua dòng có chữ `model` (hồ sơ thử ghi model đã chạy)
+#   author-field  — bỏ qua dòng của trường `author` / `owner` (cả khối) và `repository` / `homepage` trong manifest
+#   author-section — bỏ qua mục `## Author` / `## Tác giả` của README (tới tiêu đề kế tiếp)
+#   author-url    — che đúng hai URL của tác giả (`AUTHOR_REPO_URL`, `AUTHOR_SITE`); phần còn lại vẫn bị quét
+# Một file khớp nhiều mục thì áp mọi kiểu khớp. Nhóm `author-attribution` (ba kiểu author-* và `credit-line` của
+# LICENSE) là ngoại lệ có chủ đích do chủ sản phẩm quyết ngày 02/10/2026: ghi công tác giả ở đúng các chỗ nêu trên.
 LEAK_EXEMPTIONS = (
     ("NOTICE", "file", "giấy phép MIT/Apache-2.0 buộc giữ nguyên thông báo bản quyền của tác giả nguồn"),
     ("THIRD_PARTY.md", "credit-line", "dòng ghi công và bản quyền theo giấy phép của nguồn bên thứ ba"),
     ("UPSTREAM.md", "upstream-ref", "tên repo nguồn `owner/repo` và SHA chốt là dấu vết nguồn gốc bắt buộc"),
     ("docs/MIGRATION.md", "old-skill-id", "hồ sơ lịch sử cố ý nêu mã skill cũ để tra tên mới tương ứng"),
     ("skills/*/tests/pressure.md", "model-line", "hồ sơ thử áp lực ghi model đã chạy kịch bản"),
+    (".claude-plugin/plugin.json", "author-field", "author-attribution: trường tác giả, repository, homepage của manifest Claude"),
+    (".claude-plugin/marketplace.json", "author-field", "author-attribution: chủ marketplace và trường tác giả của mục plugin"),
+    (".codex-plugin/plugin.json", "author-field", "author-attribution: trường tác giả, repository, homepage của manifest Codex"),
+    ("README.md", "author-section", "author-attribution: mục `## Author` ghi tên và trang của tác giả"),
+    ("README.vi.md", "author-section", "author-attribution: mục `## Tác giả` ghi tên và trang của tác giả"),
+    ("LICENSE", "credit-line", "author-attribution: dòng Copyright của chính repo ghi tên tác giả"),
+    ("**", "author-url", "author-attribution: đúng hai URL của tác giả (repo GitHub, trang cá nhân) được nêu ở mọi file"),
 )
-LEAK_EXEMPTION_KINDS = frozenset({"file", "credit-line", "upstream-ref", "old-skill-id", "model-line"})
+LEAK_EXEMPTION_KINDS = frozenset({"file", "credit-line", "upstream-ref", "old-skill-id", "model-line",
+                                  "author-field", "author-section", "author-url"})
+# Hai URL của tác giả — chỉ đúng hai chuỗi này được che; `owner/repo` viết tắt, repo khác của cùng tài khoản, tên
+# miền khác có cùng tiền tố, email đều vẫn bị quét.
+AUTHOR_REPO_URL = "github.com/ducnguyen221/agent-agile-team"
+AUTHOR_SITE = "ducnguyen.vn"
+_AUTHOR_URL = re.compile(
+    r"(?i)(?<![A-Za-z0-9-])(?:" + re.escape(AUTHOR_REPO_URL) + r"(?![A-Za-z0-9_-])|"
+    + re.escape(AUTHOR_SITE) + r"(?![A-Za-z0-9-]))")
+_AUTHOR_KEY = re.compile(r'^\s*"(?:author|owner|repository|homepage)"\s*:')
+_AUTHOR_HEADING = re.compile(r"^##\s+(?:Author|Tác giả)\s*$")
 
 _CODE_SPAN = re.compile(r"`([^`\n]*)`")
 # Chủ (owner) của các nguồn công khai ghi trong UPSTREAM.md — chỉ `owner/repo` của những chủ này được che; owner lạ
@@ -840,28 +862,53 @@ _OLD_SKILL_ID = re.compile(r"[a-z0-9][a-z0-9-]*:(?:\*|[a-z0-9][a-z0-9-]*)")
 _CREDIT = re.compile(r"(?i)\bcopyright\b|©")
 
 
-def _leak_kind(rel: str) -> str | None:
-    for pattern, kind, _reason in LEAK_EXEMPTIONS:
-        if re.fullmatch(re.escape(pattern).replace(r"\*", "[^/]+"), rel):
-            return kind
-    return None
+def _glob(pattern: str) -> str:
+    """`**` khớp mọi đường (kể cả `/`), `*` khớp một đoạn tên."""
+    return re.escape(pattern).replace(r"\*\*", ".+").replace(r"\*", "[^/]+")
+
+
+def _leak_kinds(rel: str) -> list:
+    return [kind for pattern, kind, _reason in LEAK_EXEMPTIONS if re.fullmatch(_glob(pattern), rel)]
 
 
 def _mask_spans(line: str, token: re.Pattern) -> str:
     return _CODE_SPAN.sub(lambda m: " " if token.fullmatch(m.group(1)) else m.group(0), line)
 
 
-def _leak_view(kind: str | None, line: str) -> str:
-    """Phần của dòng còn phải quét sau khi áp miễn trừ của file; chuỗi rỗng = cả dòng được miễn."""
-    if kind == "credit-line" and _CREDIT.search(line):
-        return ""
-    if kind == "model-line" and re.search(r"(?i)\bmodel\b", line):
-        return ""
-    if kind == "upstream-ref":
-        return _mask_spans(line, _UPSTREAM_REF)
-    if kind == "old-skill-id":
-        return _mask_spans(line, _OLD_SKILL_ID)
+def _leak_view(kinds: list, line: str) -> str:
+    """Phần của dòng còn phải quét sau khi áp mọi miễn trừ của file; chuỗi rỗng = cả dòng được miễn."""
+    for kind in kinds:
+        if kind == "credit-line" and _CREDIT.search(line):
+            return ""
+        if kind == "model-line" and re.search(r"(?i)\bmodel\b", line):
+            return ""
+        if kind == "upstream-ref":
+            line = _mask_spans(line, _UPSTREAM_REF)
+        elif kind == "old-skill-id":
+            line = _mask_spans(line, _OLD_SKILL_ID)
+        elif kind == "author-url":
+            line = _AUTHOR_URL.sub(" ", line)
     return line
+
+
+def _author_lines(kinds: list, lines: list) -> set:
+    """Số dòng (đếm từ 1) được miễn trọn vì là phần ghi công tác giả: trường của manifest hoặc mục README."""
+    keep = set()
+    if "author-field" in kinds:
+        depth = 0
+        for idx, line in enumerate(lines, 1):
+            if depth == 0 and not _AUTHOR_KEY.match(line):
+                continue
+            keep.add(idx)
+            depth = max(0, depth + line.count("{") + line.count("[") - line.count("}") - line.count("]"))
+    if "author-section" in kinds:
+        inside = False
+        for idx, line in enumerate(lines, 1):
+            if line.startswith("#"):
+                inside = bool(_AUTHOR_HEADING.match(line))
+            if inside:
+                keep.add(idx)
+    return keep
 
 
 def run_self(root: Path, denylist_path: Path | None) -> Report:
@@ -877,8 +924,8 @@ def run_self(root: Path, denylist_path: Path | None) -> Report:
     if words:
         for path in files:
             rel = path.relative_to(root).as_posix()
-            kind = _leak_kind(rel)
-            if kind == "file":
+            kinds = _leak_kinds(rel)
+            if "file" in kinds:
                 continue
             for n, word in enumerate(words, 1):
                 if _denied(word, rel.casefold()):
@@ -886,8 +933,12 @@ def run_self(root: Path, denylist_path: Path | None) -> Report:
             data = path.read_bytes()
             if b"\0" in data:
                 continue
-            for idx, line in enumerate(c.normalize(data.decode("utf-8", "replace")).split("\n"), 1):
-                low = _leak_view(kind, line).casefold()
+            lines = c.normalize(data.decode("utf-8", "replace")).split("\n")
+            exempt = _author_lines(kinds, lines)
+            for idx, line in enumerate(lines, 1):
+                if idx in exempt:
+                    continue
+                low = _leak_view(kinds, line).casefold()
                 if not low:
                     continue
                 for n, word in enumerate(words, 1):

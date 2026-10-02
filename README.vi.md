@@ -28,13 +28,13 @@ Dán prompt ở cuối [INSTALL.md](INSTALL.md) cho agent; agent làm theo file 
 Tự làm theo từng harness: [`hosts/`](hosts/README.md). Claude Code tóm tắt:
 
 ```bash
-git clone https://github.com/OWNER/agent-agile-team ~/agent-agile-team             # macOS, bash
+git clone https://github.com/ducnguyen221/agent-agile-team ~/agent-agile-team            # macOS, bash
 claude plugin marketplace add ~/agent-agile-team
 claude plugin install agent-agile-team@agent-agile-team
 ```
 
 ```powershell
-git clone https://github.com/OWNER/agent-agile-team "$HOME\agent-agile-team"      # Windows PowerShell
+git clone https://github.com/ducnguyen221/agent-agile-team "$HOME\agent-agile-team"      # Windows PowerShell
 claude plugin marketplace add "$HOME\agent-agile-team"
 claude plugin install agent-agile-team@agent-agile-team
 ```
@@ -69,3 +69,7 @@ Kit, OpenSpec, BMAD-METHOD và Kiro/EARS. Commit chính xác, giấy phép và n
 ## Giấy phép
 
 Chưa chọn; giữ mọi quyền trong thời gian private ([LICENSE](LICENSE)). Nội dung bên thứ ba giữ giấy phép gốc.
+
+## Tác giả
+
+Nguyễn Quang Đức — <https://ducnguyen.vn>. Repo: <https://github.com/ducnguyen221/agent-agile-team> (private).

@@ -107,3 +107,12 @@ dòng vẫn bị quét:
 | `UPSTREAM.md` | `upstream-ref` | code span là SHA hex, hoặc `owner/repo` với owner thuộc danh sách nguồn công khai `UPSTREAM_OWNERS` trong `check.py` (owner lạ vẫn bị quét; thêm nguồn mới thì thêm owner) | dấu vết nguồn gốc bắt buộc |
 | `docs/MIGRATION.md` | `old-skill-id` | code span là mã skill cũ `bộ:tên` / `bộ:*` | hồ sơ lịch sử cố ý nêu tên cũ để tra |
 | `skills/*/tests/pressure.md` | `model-line` | dòng có chữ `model` | hồ sơ thử ghi model đã chạy |
+| `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json` | `author-field` | dòng của trường `author` / `owner` (cả khối `{…}`) và `repository` / `homepage`; trường khác (`description`, `keywords`…) vẫn bị quét | `author-attribution` |
+| `README.md`, `README.vi.md` | `author-section` | mục `## Author` (README.md) / `## Tác giả` (README.vi.md), từ tiêu đề tới tiêu đề kế tiếp | `author-attribution` |
+| `LICENSE` | `credit-line` | dòng có `Copyright` hoặc `©` | `author-attribution` |
+| `**` (mọi file) | `author-url` | đúng hai URL của tác giả — `AUTHOR_REPO_URL` (repo GitHub) và `AUTHOR_SITE` (trang cá nhân) trong `check.py`; `owner/repo` viết tắt, repo khác cùng tài khoản, tên miền khác cùng tiền tố, email vẫn bị quét | `author-attribution` |
+
+`author-attribution` là ngoại lệ có chủ đích do chủ sản phẩm quyết (02/10/2026): repo ghi công tác giả — tên, trang,
+địa chỉ repo — ở đúng các chỗ trên. Tên tác giả ở văn xuôi skill, luật, mẫu, tài liệu khác vẫn là **Chặn**
+(`tests/test_check_self.py`: `test_author_attribution_is_narrow`, `test_author_url_mask_is_narrow`). Một file khớp
+nhiều dòng của bảng thì áp mọi kiểu khớp.

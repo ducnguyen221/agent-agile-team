@@ -19,7 +19,7 @@ Chọn **một** đường:
 
 - **A. Plugin.** Repo có manifest [`.codex-plugin/plugin.json`](../../.codex-plugin/plugin.json)
   (`skills: ./skills/`). Lệnh plugin của Codex khác nhau theo phiên bản — xem `codex plugin --help` trên máy,
-  thêm marketplace từ bản clone (hoặc `OWNER/agent-agile-team` trên GitHub) rồi cài `agent-agile-team`.
+  thêm marketplace từ bản clone (hoặc `https://github.com/ducnguyen221/agent-agile-team`) rồi cài `agent-agile-team`.
 - **B. Mở thẳng repo.** Không cài gì; agent đọc `skills/<tên>/SKILL.md` khi luật lõi bảo rà skill. Hợp khi
   chỉ thử hoặc đang sửa repo.
 

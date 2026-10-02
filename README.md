@@ -31,13 +31,13 @@ Paste the prompt at the end of [INSTALL.md](INSTALL.md) into your agent; it foll
 before touching anything. Manual steps per harness: [`hosts/`](hosts/README.md). Claude Code in short:
 
 ```bash
-git clone https://github.com/OWNER/agent-agile-team ~/agent-agile-team             # macOS, bash
+git clone https://github.com/ducnguyen221/agent-agile-team ~/agent-agile-team            # macOS, bash
 claude plugin marketplace add ~/agent-agile-team
 claude plugin install agent-agile-team@agent-agile-team
 ```
 
 ```powershell
-git clone https://github.com/OWNER/agent-agile-team "$HOME\agent-agile-team"      # Windows PowerShell
+git clone https://github.com/ducnguyen221/agent-agile-team "$HOME\agent-agile-team"      # Windows PowerShell
 claude plugin marketplace add "$HOME\agent-agile-team"
 claude plugin install agent-agile-team@agent-agile-team
 ```
@@ -74,3 +74,7 @@ GitHub Spec Kit, OpenSpec, BMAD-METHOD and Kiro/EARS. Exact commits, licences an
 
 Not chosen yet; all rights reserved while private ([LICENSE](LICENSE)). Third-party content keeps its own
 licence.
+
+## Author
+
+Nguyễn Quang Đức — <https://ducnguyen.vn>. Repository: <https://github.com/ducnguyen221/agent-agile-team> (private).

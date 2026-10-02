@@ -84,6 +84,99 @@ def test_denylist_exemptions_are_narrow(tmp_path, rel, text):
     assert len(hits) == 1, f"{rel}: {hits}"
 
 
+MANIFEST = """{{
+  "name": "demo",
+  "description": "Sạch.",
+  "author": {{
+    "name": "{w}",
+    "email": "{w}@example.com",
+    "url": "https://{w}.example"
+  }},
+  "homepage": "https://example.com/{w}",
+  "repository": "https://example.com/{w}/demo",
+  "license": "UNLICENSED"
+}}
+"""
+MARKETPLACE = """{{
+  "name": "demo",
+  "owner": {{
+    "name": "{w}",
+    "email": "{w}@example.com"
+  }},
+  "plugins": [
+    {{
+      "name": "demo",
+      "author": {{ "name": "{w}", "url": "https://{w}.example" }},
+      "homepage": "https://example.com/{w}"
+    }}
+  ]
+}}
+"""
+
+
+def test_author_attribution_exemptions(tmp_path):
+    """Quyết định ghi công tác giả (`author-attribution`): tên, email, trang của tác giả chỉ được miễn ở trường
+    tác giả của ba manifest, mục Tác giả/Author của hai README và dòng Copyright của LICENSE."""
+    root = make_repo(tmp_path)
+    for rel in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json"):
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / rel).write_text(MANIFEST.format(w=WORD), encoding="utf-8")
+    (root / ".claude-plugin" / "marketplace.json").write_text(MARKETPLACE.format(w=WORD), encoding="utf-8")
+    (root / "README.md").write_text(f"# Repo\n\nSạch.\n\n## Author\n\n{WORD} — https://{WORD}.example\n", encoding="utf-8")
+    (root / "README.vi.md").write_text(f"# Repo\n\nSạch.\n\n## Tác giả\n\n{WORD}\n", encoding="utf-8")
+    (root / "LICENSE").write_text(f"All rights reserved — private.\n\nCopyright (c) 2026 {WORD}.\n", encoding="utf-8")
+    assert check.run_self(root, denylist(tmp_path, WORD)).findings == []
+
+
+@pytest.mark.parametrize("rel, text", [
+    ("skills/demo/SKILL.md", f"# Demo\n\nSkill do {WORD} viết.\n"),                         # văn xuôi skill: luôn Chặn
+    (".claude-plugin/plugin.json", f'{{\n  "description": "by {WORD}",\n  "author": {{ "name": "x" }}\n}}\n'),
+    (".codex-plugin/plugin.json", f'{{\n  "author": {{\n    "name": "x"\n  }},\n  "keywords": ["{WORD}"]\n}}\n'),
+    ("docs/other.json", f'{{\n  "author": {{ "name": "{WORD}" }}\n}}\n'),                    # không phải manifest
+    ("README.md", f"# Repo\n\nDo {WORD} viết.\n\n## Author\n\nx\n"),                           # ngoài mục Author
+    ("README.md", f"# Repo\n\n## Author\n\nx\n\n## Licence\n\n{WORD}\n"),                      # mục kế tiếp
+    ("README.vi.md", f"# Repo\n\n## Tác giả của bản dịch\n\n{WORD}\n"),                        # tiêu đề khác
+    ("GUIDE.md", f"# Hướng dẫn\n\n## Author\n\n{WORD}\n"),                                     # mục Author ngoài README
+    ("LICENSE", f"All rights reserved — {WORD}.\n"),                                           # không phải dòng Copyright
+])
+def test_author_attribution_is_narrow(tmp_path, rel, text):
+    root = make_repo(tmp_path)
+    (root / rel).parent.mkdir(parents=True, exist_ok=True)
+    (root / rel).write_text(text, encoding="utf-8")
+    hits = [f for f in check.run_self(root, denylist(tmp_path, WORD)).findings if f.rule == "leak-denylist"]
+    assert len(hits) == 1 and hits[0].level == "Chặn", f"{rel}: {hits}"
+
+
+def _author_word() -> str:
+    """Từ cấm chứa trong URL tác giả — rút từ chính hằng của `check.py` để file này không chứa nó đứng riêng."""
+    return check.AUTHOR_SITE.split(".")[0]
+
+
+def test_author_urls_are_masked_in_any_file(tmp_path):
+    root = make_repo(tmp_path)
+    word = _author_word()
+    (root / "skills" / "demo" / "SKILL.md").write_text(
+        f"# Demo\n\nTrang https://{check.AUTHOR_SITE}/profile · repo https://{check.AUTHOR_REPO_URL}.git\n"
+        f"Clone: `git clone https://{check.AUTHOR_REPO_URL.upper()}`\n", encoding="utf-8")
+    assert check.run_self(root, denylist(tmp_path, word)).findings == []
+
+
+@pytest.mark.parametrize("text", [
+    "https://github.com/{owner}/other-repo",            # repo khác của cùng tài khoản
+    "`{owner}/agent-agile-team`",                       # dạng viết tắt owner/repo không phải URL đã duyệt
+    "Thư: {word}@example.com",                          # email ngoài trường tác giả của manifest
+    "https://{site}x/trang",                            # tên miền khác có cùng tiền tố
+])
+def test_author_url_mask_is_narrow(tmp_path, text):
+    root = make_repo(tmp_path)
+    word = _author_word()
+    owner = check.AUTHOR_REPO_URL.split("/")[1]
+    line = text.format(owner=owner, word=word, site=check.AUTHOR_SITE)
+    (root / "skills" / "demo" / "SKILL.md").write_text(f"# Demo\n\n{line}\n", encoding="utf-8")
+    hits = [f for f in check.run_self(root, denylist(tmp_path, word)).findings if f.rule == "leak-denylist"]
+    assert len(hits) == 1, f"{line}: {hits}"
+
+
 def test_every_leak_exemption_is_explicit_and_documented():
     readme = (REPO / "scripts" / "README.md").read_text(encoding="utf-8")
     assert check.LEAK_EXEMPTIONS, "danh sách miễn trừ phải tường minh"

@@ -48,6 +48,11 @@ Chưa phát hành.
   `check.py` (mỗi mục một kiểu, một lý do): `THIRD_PARTY.md` chỉ miễn dòng ghi công, `UPSTREAM.md` chỉ che
   `owner/repo` và SHA, `docs/MIGRATION.md` chỉ che mã skill cũ `bộ:tên`; nguồn private gọi trung tính
   ("bộ skill quy trình private", `private-process-skills` trong frontmatter); `pytest==8.4.2` ghim trong CI.
+- Tác giả và địa chỉ repo: ba manifest ghi `author` (tên, email, trang), `homepage`, `repository`; README
+  EN/VI có mục Author/Tác giả; dòng Copyright của `NOTICE`, `LICENSE` ghi tên tác giả (giấy phép vẫn "All
+  rights reserved — private"); URL repo thật thay `OWNER/agent-agile-team` ở INSTALL, README, `hosts/`. Chống rò
+  thêm nhóm miễn trừ có chủ đích `author-attribution` (kiểu `author-field`, `author-section`, `author-url`) —
+  tên tác giả ở chỗ khác vẫn bị chặn.
 
 **Việc để lại (Đợt 2):**
 
