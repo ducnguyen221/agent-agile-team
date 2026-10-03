@@ -40,7 +40,7 @@ viết lại để không phải viết lại cả skill.
 
 | Skill | File phải viết lại | Nguồn private |
 |---|---|---|
-| `closing-sprint` | `references/preflight.md` (`references/release-notes.md` đã viết lại phòng sạch ở `TK10.5`) | `preflight-gate` |
+| `closing-sprint` | không còn — `references/release-notes.md` (`TK10.5`) và `references/preflight.md` (`TK10.6`) đã viết lại phòng sạch; cờ giữ `true` chờ quyết định về `tests/test_provenance.py` (phép kiểm đòi mục này còn ít nhất một dòng skill) | `preflight-gate`, `release-notes-writer` (chỉ còn là nguồn ý) |
 | `roles/executor/qa.md` (thẻ vai, không có cờ) | mục 4 cụm "bảng phủ"; mục 5 gạch đầu dòng "bảng phủ `FR` → `VR` theo tầng test" và gạch đầu dòng "`FR` chưa có test, `SC` chưa đo được" | `test-mapper` |
 | `scripts/README.md` (tài liệu, không có cờ) | bảng "Luật của `check`", cột "Bắt gì" của bốn luật truy vết `task-without-trace`, `report-sc-without-vr`, `report-fr-without-vr`, `xref-missing` | `rtm-auditor` |
 
