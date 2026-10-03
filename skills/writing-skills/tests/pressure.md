@@ -76,6 +76,10 @@ công cụ gọi skill, đọc `SKILL.md` bằng đường tuyệt đối; bản
 file mẫu của kịch bản 2 không còn nguyên văn trong repo nên **dựng lại từ mô tả ở trên** (cùng áp lực, cùng lỗi); đề đầy
 đủ và output trọn của chủ thể nằm ở `evidence/TK12-green/writing-skills-<n>.md` của hồ sơ sprint.
 
+Văn bản ba đề đã gửi ở lượt này nay lưu ở `tests/scenarios.txt` (chép từ hồ sơ sprint, chỉ thay đường dẫn tuyệt đối bằng chỗ giữ
+chỗ): **kịch bản 2 của lượt TK12 được dựng lại từ mô tả, không phải nguyên văn gốc**; hai file mẫu của kịch bản 2 vẫn không lưu
+trong repo.
+
 | Kịch bản | Kết quả | Bằng chứng |
 |---|---|---|
 | 1 | **Đạt** (agent `a7645bb2`) | công thức năm phần, ngoại lệ thành hai câu "KHI … THÌ …"; trả lời người duyệt viện mục 4 ("trừ khi thật cần" mở lại mặc cả); ghi Chưa chạy, không bịa GREEN |
@@ -87,7 +91,7 @@ vượt trần dòng) **không thấy lại trong lượt này** (một mẫu, k
 
 ## Chạy lại
 
-Như `response-style/tests/pressure.md`: prompt tự chứa; RED thêm "không dùng công cụ gọi skill, không mở
+Prompt ở `tests/scenarios.txt` (tự chứa; thay `<đường tuyệt đối …>` bằng đường thật). Như `response-style/tests/pressure.md`: prompt tự chứa; RED thêm "không dùng công cụ gọi skill, không mở
 SKILL.md nào", GREEN thay bằng "đọc `skills/writing-skills/SKILL.md` (và `references/` nếu cần) trước".
 Kịch bản 2 cần hai file mẫu: một PROGRESS ghi 2 vòng review và 5 phiên; một transcript JSONL ≈500 dòng có
 30 lần đọc cùng file, 9 lần cùng lệnh test hỏng, một dòng log 200.000 ký tự rồi một bản ghi compact, 40 lần
