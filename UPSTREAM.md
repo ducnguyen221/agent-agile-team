@@ -213,7 +213,7 @@ không giấy phép, phải viết lại trước khi công khai (danh sách fil
 | `error-handling` | `affaan-m/ECC` — `skills/error-handling/` | `c70874fa` | `3599962a` | MIT | chép |
 | `deployment` | `affaan-m/ECC` — `skills/deployment-patterns/`, `skills/docker-patterns/` | `c70874fa` | `3599962a` | MIT | chép |
 | `github-ops` | `affaan-m/ECC` — `skills/github-ops/` | `c70874fa` | `3599962a` | MIT | chép |
-| `adr` | bộ quy trình private — `adr-writer` (gốc private, không giấy phép) | `4c0fdc57` | — | không giấy phép | private |
+| `adr` | ý từ bộ quy trình private — `adr-writer` (gốc private, không giấy phép); viết lại phòng sạch từ danh sách ý (`TK10.3`), không mở bản gốc | — | — | không giấy phép (chỉ lấy ý) | ý |
 | `verify-before-done` | `obra/superpowers` — `skills/verification-before-completion/` | `8ca22dba` | — | MIT | chép |
 | `code-review` | `obra/superpowers` — `skills/requesting-code-review/`, `skills/receiving-code-review/`; bộ quy trình private — `code-review-routing` (tự viết) | `8ca22dba` · `4c0fdc57` | — | MIT; tự viết | viết lại |
 | `plan-review` | `garrytan/gstack` — `plan-eng-review/SKILL.md.tmpl`, `plan-eng-review/sections/` | `96764e80` | `4c0fdc57` | MIT | chép |
