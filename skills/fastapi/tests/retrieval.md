@@ -3,43 +3,42 @@ skill: fastapi
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 235d85f4a02fa7a2e6e1d9896f88f365410dd91f
+skill_sha: 79140a71a0b2f0a450333698d8adda6765774fe6
 date: 2026-10-03
-result: pass 6/6
+result: pass 7/7 (6 tình huống + 1 ranh giới), 0 partial
+agent_ids:
+  questions: aca1d2476945acb8e
+  answers: ab5106b7165090ed2
 ---
 
 Đã đọc: `<gốc worktree>\skills\fastapi\SKILL.md`
 
-# Thử truy xuất — fastapi
+# Thử truy xuất - fastapi
 
-> **Kết luận:** 6/6 câu Đạt (ngưỡng ≥5/6), trong đó câu 5 chỉ Đạt một phần vì không có chỉ dẫn tắt trang tài liệu
-> OpenAPI ở production. Chủ thể trỏ đúng mục "Luật then chốt" và đúng tệp `references/` ở năm câu tình huống, và nhận ra câu
-> ranh giới thuộc agent `fastapi-reviewer`.
+> **Kết luận:** pass 7/7 (6 tình huống + 1 ranh giới); ngưỡng >=4/5 câu tình huống + câu ranh giới. Chạy lại (lượt 2) với bộ câu mới, người soạn
+> và chủ thể đều là agent mới. Chủ thể trỏ đúng mục ở cả 6 câu tình huống (những phần skill không phủ, chủ thể nói rõ và được ghi ở cuối file) và nhận
+> ra câu ranh giới thuộc `api-design`.
 
-Sáu câu hỏi do một agent **chưa đọc** skill soạn (chỉ biết `description` và lĩnh vực); nguyên văn và loại câu ở
-`questions.md` trong hồ sơ sprint của lớp riêng (`docs/plans/2026-10-03-agent-agile-team-wave-2/evidence/TK11-retrieval/`).
-Dòng "Đã đọc" chép từ bài trả lời của chủ thể, đoạn đầu đường dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng; nguyên văn ở hồ sơ sprint của lớp riêng.
-Cột "Mục kỳ vọng" do người chấm ghi **trước khi** mở bài trả lời của chủ thể. Câu 6 là câu ranh giới: đáp án của
-người soạn (agent `fastapi-reviewer`) đã được người chấm đối chiếu với `agents/fastapi-reviewer.md` (review độc lập,
-chỉ đọc, cho diff FastAPI) và nhận là đúng.
-
-Cách chấm "một phần": mục chủ thể trỏ có câu trả lời dùng được cho quyết định mà câu hỏi đặt ra thì Đạt, phần
-chi tiết phụ còn thiếu ghi ở mục cuối; chỉ Không đạt khi skill không có đáp án dùng được cho quyết định đó.
+Bảy câu hỏi do một agent **chưa đọc** skill soạn (chỉ biết `description` hiện hành, lĩnh vực và tên các skill khác); nguyên văn câu hỏi, file nháp
+"Mục kỳ vọng" (có mtime), bài trả lời trọn của chủ thể và id agent ở `evidence/TK12-green/fastapi-retrieval-rerun-2.md` trong hồ sơ sprint của lớp riêng
+(`docs/plans/2026-10-03-agent-agile-team-wave-2/`). Dòng "Đã đọc" chép từ bài trả lời của chủ thể, đoạn đầu đường dẫn (thư mục người dùng) lược thành
+`<gốc worktree>` vì repo chặn tên người dùng. Cột "Mục kỳ vọng" ghi vào file nháp **trước khi** giao chủ thể (thứ tự: nhận câu -> ghi kỳ vọng ->
+giao chủ thể -> chấm). Câu 7 là câu ranh giới: đáp án của người soạn là `api-design`. Trong câu 7 đoạn đường dẫn mẫu `/v1/[users]/{id}/orders` đặt `users` trong ngoặc vuông (nguyên văn không có ngoặc) vì cổng chống rò của repo chặn chuỗi đó; bản nguyên văn ở file hồ sơ.
 
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
-| 1 | Router `orders` đang có logic nghiệp vụ nằm thẳng trong hàm endpoint và tạo session DB ở từng hàm. Nên tổ chức dependency injection ra sao? | `SKILL.md` › 2, 3 (Dependency, Service) + `references/app-schemas-dependencies.md` › 4 + `references/routes-errors-openapi-testing.md` › 2 | `SKILL.md` › 2. Chia trách nhiệm, 3. Luật then chốt; `references/app-schemas-dependencies.md` › 4. Dependency; `references/routes-errors-openapi-testing.md` › 6. Phản mẫu | Đạt |
-| 2 | Endpoint async gọi `requests.get()` đồng bộ tới dịch vụ ngoài làm cả server đứng hình lúc tải cao. Sửa như thế nào? | `SKILL.md` › 3 (Async) + 4 + `references/routes-errors-openapi-testing.md` › 6. Phản mẫu | `SKILL.md` › 3. Luật then chốt (Async), 4; `references/routes-errors-openapi-testing.md` › 1 | Đạt |
-| 3 | Cần bảo vệ nhóm route `/admin` bằng JWT và kiểm quyền theo vai trò. Đặt phần xác thực và phân quyền ở đâu trong FastAPI? | `SKILL.md` › 3 (Xác thực) + `references/app-schemas-dependencies.md` › 4. Dependency | `SKILL.md` › 3 (Xác thực); `references/app-schemas-dependencies.md` › 4. Dependency | Đạt (một phần: không nêu cách gắn dependency cho cả nhóm route) |
-| 4 | Test cho route cần thay `get_db` bằng DB giả. Dùng cơ chế nào của FastAPI và dọn override thế nào sau mỗi test? | `SKILL.md` › 3 (Test) + `references/routes-errors-openapi-testing.md` › 5. Test | `SKILL.md` › 3 (Test); `references/routes-errors-openapi-testing.md` › 5. Test | Đạt |
-| 5 | Chuẩn bị đưa service lên production: docs OpenAPI đang mở công khai, CORS đang `*`. Các thiết lập production cần chỉnh gì? | `SKILL.md` › 3 (CORS, Cấu hình) + `references/app-schemas-dependencies.md` › 1, 2 | `SKILL.md` › 3 (CORS, Cấu hình); `references/app-schemas-dependencies.md` › 1, 2 | Đạt (một phần: có CORS, secret, cấu hình; không có cách đóng trang docs) |
-| 6 | PR FastAPI đã xong, cần một reviewer chỉ đọc chấm độ sẵn sàng production của diff. Gọi bên nào? | mục khác: agent `fastapi-reviewer` | mục khác: agent `fastapi-reviewer` (từ `SKILL.md` › 8) | Đạt |
+| 1 | Mình có endpoint POST /v1/invoices nhận body JSON lồng 3 cấp (khách hàng, danh sách dòng hàng, địa chỉ giao). Hiện client gửi thiếu trường hoặc sai kiểu thì app văng 500 và trả stack trace thô; còn response thì đang trả luôn cả cột `password_hash` của bảng user vì trả thẳng object ORM. Nên khai báo model vào/ra thế nào để input bị từ chối gọn và output chỉ lộ đúng trường cần? | `SKILL.md` › 3. Luật then chốt (Schema: tách Create/Update/Response, response không có hash mật khẩu; luôn `response_model`) + › 4 bảng (trả ORM thô = Chặn); `references/app-schemas-dependencies.md` › 3. Schema Pydantic | `SKILL.md` › 3 (Schema), › 4, › 6; `references/app-schemas-dependencies.md` › 3 | Đạt |
+| 2 | Service có 14 route cùng cần "người dùng hiện tại", và 6 trong số đó còn cần kiểm tra user thuộc đúng tenant trong header `X-Tenant-ID`. Hiện mỗi route tự parse header rồi tự query lại user, copy-paste khắp nơi. Gom việc này lại một chỗ và cho các route dùng chung bằng cách nào cho gọn? | `SKILL.md` › 3 (Dependency: bí danh kiểu `DbDep`) + › 2 (`dependencies.py` giữ người dùng hiện tại/phân quyền); `references/app-schemas-dependencies.md` › 4. Dependency (`get_current_user`). Header tenant cụ thể không có; chỉ suy từ mẫu dependency | `SKILL.md` › 3 (Dependency, Xác thực); `references/app-schemas-dependencies.md` › 4 | Đạt |
+| 3 | Endpoint GET /reports/export chạy ~40 giây vì phải dựng file CSV từ 2 triệu dòng, client bên ngoài hay timeout ở giây thứ 30. Mình định cho trả về ngay rồi xử lý phần nặng sau, và trả file qua dạng stream. Trong FastAPI làm được những cách nào, chọn cái nào để không chặn các request khác? | `SKILL.md` › 3. Luật then chốt › Async (`async def` chỉ gọi thư viện async; chặn thì khai `def` hoặc bọc) + › 7 hiệu năng. KHÔNG có `BackgroundTasks`, `StreamingResponse`, hàng đợi tác vụ nền. Đạt nếu agent nêu đúng phần Async và nói rõ phần nền/stream không có | `SKILL.md` › 3 (Async), › 4, › 7; nói rõ skill không phủ BackgroundTasks / stream / hàng đợi | Đạt |
+| 4 | Frontend và mobile đang nhận lỗi mỗi route một kiểu: chỗ thì `{"detail": "not found"}`, chỗ thì `{"error": "..."}`, lỗi validate thì ra mảng dài của Pydantic. Muốn mọi lỗi 4xx/5xx của service đều ra một khuôn thống nhất có mã lỗi và request id. Cài đặt khuôn đó vào app FastAPI ở chỗ nào? | `SKILL.md` › 3 (Lỗi: một lớp lỗi miền + exception handler đăng ký tập trung, phong bì `{error:{code,message}}`) + › 2 (`main.py` sở hữu exception handler); `references/routes-errors-openapi-testing.md` › 3. Xử lý lỗi tập trung. Request id có thể không có | `SKILL.md` › 2, › 3 (Lỗi); `references/routes-errors-openapi-testing.md` › 3; `references/app-schemas-dependencies.md` › 1; nói rõ không có request id | Đạt |
+| 5 | Tài liệu Swagger của mình hiện có cả 60 route chung một danh sách dài, response mẫu trống trơn, và client sinh code tự động từ openapi.json đặt tên hàm rất xấu (kiểu `read_items_items__get`). Chỉnh gì ở router và từng route để docs gọn, có ví dụ và tên operation sạch? | `SKILL.md` › 3 (OpenAPI: tuỳ biến bằng gán vào `app.openapi`, khai response lỗi từng route) + › 4 (OpenAPI thiếu response model/response lỗi); `references/routes-errors-openapi-testing.md` › 4. Tuỳ biến OpenAPI. `tags`/`operation_id`/ví dụ có thể không có | `SKILL.md` › 3 (OpenAPI), › 4; `references/routes-errors-openapi-testing.md` › 4; nói rõ không có `operation_id` / ví dụ | Đạt |
+| 6 | Khi app khởi động cần mở pool kết nối Postgres và Redis, tắt app thì đóng lại cho sạch; ngoài ra cấu hình (URL DB, secret ký token, bật/tắt debug) hiện đang đọc rải rác bằng `os.getenv` trong nhiều file, deploy lên 3 môi trường hay sai. Quản lý vòng đời tài nguyên và cấu hình theo kiểu chuẩn của FastAPI ra sao? | `SKILL.md` › 3 (Khởi tạo: `create_app()` + `lifespan`; Cấu hình: pydantic-settings, secret bắt buộc không mặc định); `references/app-schemas-dependencies.md` › 1. Factory dựng app và › 2. Cấu hình bằng pydantic-settings | `SKILL.md` › 3 (Khởi tạo, Cấu hình), › 7; `references/app-schemas-dependencies.md` › 1, › 2 | Đạt |
+| 7 | Team đang bàn trước khi code: endpoint danh sách đơn hàng nên phân trang kiểu offset hay cursor, thêm lọc theo trạng thái thế nào, đường dẫn đặt `/v1/orders` hay `/v1/[users]/{id}/orders`, và mã trạng thái nào cho trường hợp đơn đã bị huỷ. Chưa ai viết dòng code nào, chỉ muốn chốt hợp đồng API cho các bên dùng. | mục khác: skill `api-design` (`SKILL.md` › 1: 'Hình URL, mã trạng thái, phong bì lỗi, phân trang, đổi hợp đồng → skill `api-design`') | mục khác: `api-design` (từ `SKILL.md` › 1) | Đạt |
 
 ## Thiếu nội dung / mâu thuẫn
 
-- `skills/fastapi/SKILL.md:77` (mục OpenAPI) và `skills/fastapi/references/app-schemas-dependencies.md:7-53` (`create_app`): `description` hứa "OpenAPI docs,
-  or production settings" nhưng không có chỉ dẫn tắt hay giới hạn `docs_url`, `redoc_url`, `openapi_url` ở môi trường production (câu 5). Đề xuất: thêm một
-  dòng vào mục "Khởi tạo" của `SKILL.md`: production đặt ba tham số này theo cấu hình môi trường (tắt, hoặc chỉ mở sau xác thực).
-- `skills/fastapi/SKILL.md:64-66` và `references/app-schemas-dependencies.md:179` (mục 4): có dependency xác thực và phân quyền riêng nhưng không cho thấy gắn chúng
-  vào cả nhóm route `/admin` (ví dụ `APIRouter(dependencies=[...])`) (câu 3). Đề xuất: một dòng ví dụ gắn ở cấp router.
-- Không có mâu thuẫn giữa `SKILL.md` và hai tệp `references/` trong sáu câu này.
+- Không có chỗ nào `description` hiện hành hứa mà thân skill không có.
+- Tác vụ nền / `BackgroundTasks` / `StreamingResponse` / hàng đợi cho endpoint chạy lâu: không có (câu 3).
+- Request id trong khuôn lỗi; ghi đè handler cho `RequestValidationError` / `HTTPException`: không có (câu 4).
+- `operation_id` / `generate_unique_id_function`, `openapi_tags`, ví dụ trong schema: không có; chỉ có `tags` khi `include_router` và tuỳ biến `app.openapi` (câu 5).
+- Đọc header `X-Tenant-ID` trong dependency: không có ví dụ; chỉ suy ra từ khuôn dependency phân quyền (câu 2). Ví dụ Redis cho `lifespan`: không có riêng (câu 6).
