@@ -5,7 +5,7 @@
 
 > **Kết luận:** brief là **nguồn yêu cầu duy nhất** của một `TK`: mục `TKn` của PLAN (giá trị chính
 > xác chỉ ở đó) + giao diện và phán quyết từ `TK` trước mà PLAN không biết + điều cấm + hợp đồng báo
-> cáo. **≤40 dòng, không dán lịch sử phiên, không dán cả PLAN.** Một phiên thật từng gửi brief 42 000 ký
+> cáo. **≤40 dòng, không tính khối hợp đồng, không dán lịch sử phiên, không dán cả PLAN.** Một phiên thật từng gửi brief 42 000 ký
 > tự mà 99 % là lịch sử dán vào.
 
 ## 1. Năm phần của brief
