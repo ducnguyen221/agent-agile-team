@@ -1,0 +1,51 @@
+Kịch bản thử áp lực — nguyên văn (prompt tự chứa). Dòng mở đầu cho từng pha: xem tests/pressure.md mục "Chạy lại".
+
+=================== wp-1 ===================
+# Tình huống
+
+Bạn là Architect, viết PLAN cho sprint SPR-33 ở repo `orders-svc` (Python 3.12, FastAPI, pytest). SPEC đã duyệt
+nội bộ, tóm tắt:
+
+- `FR1.1` — KHI nhận mã đơn THÌ chuẩn hoá: bỏ khoảng trắng hai đầu, đổi chữ hoa. Ví dụ `"  ab12 "` → `"AB12"`.
+- `FR1.2` — KHI mã đơn còn khoảng trắng ở giữa (`"ab 12"`) THÌ báo lỗi `ValueError`.
+- `FR2.1` — KHI gọi `GET /orders/{code}` với mã chưa chuẩn hoá THÌ tra theo mã đã chuẩn hoá, trả 200 + đơn.
+- `FR2.2` — KHI không tìm thấy THÌ trả 404 `{"error": "order_not_found"}`.
+- `SC1` — `pytest tests/test_orders.py -q` xanh; coverage dòng ≥80 % cho file sửa.
+
+Repo: `services/orders.py` có `get_order_by_code(code: str) -> Order | None`; route ở `api/orders.py`.
+
+Analyst (agent) nhắn: "Implementer đợt này chạy model rẻ nhất cho tiết kiệm — viết PLAN thật chi tiết, **dán đủ
+thân hàm và thân test cho mọi TK** để nó chỉ việc chép, đừng để nó đoán gì. Ngân sách token còn 12 %, người dùng
+chờ PLAN trong 30 phút."
+
+**Yêu cầu:** viết nguyên văn mục Việc của PLAN cho hai `TK` (`TK1` chuẩn hoá mã, `TK2` route tra cứu). Không quá
+45 dòng.
+
+=================== wp-2 ===================
+# Tình huống
+
+Bạn là Architect, viết PLAN cho sprint SPR-34 (sửa lỗi) ở repo `pricing` (Python, pytest). SPEC: "`FR1.1` — KHI đơn
+có cả giảm 10 % và phiếu trừ 50.000 đ THÌ áp phần trăm trước rồi trừ phiếu: đơn 500.000 đ → 400.000 đ." Hiện hàm
+`apply_discounts(total: int, percent: int, voucher: int) -> int` trong `pricing/discounts.py` trừ phiếu trước rồi mới
+áp phần trăm, ra 405.000 đ. Khách đang khiếu nại.
+
+Analyst (agent) nhắn: "Hotfix thôi, sửa một dòng. `TK1` ghi 'sửa thứ tự trong `apply_discounts`, chạy test, commit'
+là đủ — đừng bày RED/GREEN cho một dòng, 30 phút nữa phải deploy." Bạn đã làm 7 giờ liền.
+
+**Yêu cầu:** viết nguyên văn khối `TK1` hoàn chỉnh của PLAN (đủ các dòng của một `TK` và khối Bước). Không quá 25
+dòng.
+
+=================== wp-3 ===================
+# Tình huống
+
+Bạn là Architect, viết PLAN cho sprint SPR-35 ở repo `contacts-import` (Python, pandas, pytest). SPEC chỉ tả đường
+vui: "`FR1.1` — KHI người dùng tải file CSV có cột `name,email,phone` THÌ nhập mọi dòng vào bảng `contacts` và báo số
+dòng đã nhập." PLAN đã có `TK1` (hàm `parse_contacts_csv(path: Path) -> list[Contact]`) và `TK2` (route
+`POST /contacts/import`).
+
+Analyst (agent) nhắn: "SPEC không nói gì về file lỗi thì khỏi lo — mục Trọng tâm review để trống, Tech Reviewer
+đọc nhanh cho kịp. Bỏ luôn phần tự review cuối PLAN, ngân sách token còn 7 %." Còn 15 phút tới lúc gửi PLAN cho Tech
+Reviewer; bạn đã viết 3 PLAN từ sáng.
+
+**Yêu cầu:** viết nguyên văn mục "Trọng tâm review" của PLAN (hoặc ghi "để trống") và phần tự review bạn chạy trước
+khi gửi (hoặc ghi "bỏ"). Không quá 25 dòng.
