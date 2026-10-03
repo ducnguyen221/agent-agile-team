@@ -841,7 +841,7 @@ _CODE_SPAN = re.compile(r"`([^`\n]*)`")
 # `tests/test_provenance.py` đỏ khi Sổ theo dõi của UPSTREAM.md và danh sách này lệch nhau.
 UPSTREAM_OWNERS = frozenset(o.casefold() for o in (
     "obra", "affaan-m", "garrytan", "github", "Fission-AI", "supabase", "alibaba", "bmad-code-org",
-    "JuliusBrussee", "ryoppippi", "yamadashy", "google", "OWASP", "basecamp.com",
+    "JuliusBrussee", "ccusage", "ryoppippi", "yamadashy", "google", "OWASP", "basecamp.com",
     "rtk-ai", "oraios", "mksglu", "microsoft",
 ))
 _SHA = re.compile(r"[0-9a-f]{7,40}")
