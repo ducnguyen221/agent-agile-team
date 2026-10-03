@@ -41,7 +41,6 @@ viết lại để không phải viết lại cả skill.
 | Skill | File phải viết lại | Nguồn private |
 |---|---|---|
 | `adr` | `SKILL.md` (cả skill) | `adr-writer` |
-| `bug-triage` | `SKILL.md` (cả skill; `tests/pressure.md` tự viết, giữ được) | `bug-triager` |
 | `database-migrations` | `references/rehearsal.md` (`SKILL.md` chỉ trỏ tới, giữ được) | `migration-rehearsal` |
 | `closing-sprint` | `references/preflight.md`, `references/release-notes.md` | `preflight-gate`, `release-notes-writer` |
 | `roles/executor/qa.md` (thẻ vai, không có cờ) | mục 4 cụm "bảng phủ"; mục 5 gạch đầu dòng "bảng phủ `FR` → `VR` theo tầng test" và gạch đầu dòng "`FR` chưa có test, `SC` chưa đo được" | `test-mapper` |

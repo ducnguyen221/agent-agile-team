@@ -201,7 +201,7 @@ không giấy phép, phải viết lại trước khi công khai (danh sách fil
 | `writing-plan` | `obra/superpowers` — `skills/writing-plans/SKILL.md` (v6.4.2) | `8ca22dba` | — | MIT | viết lại |
 | `running-sprint` | `obra/superpowers` — `skills/subagent-driven-development/`, `skills/executing-plans/`, `skills/dispatching-parallel-agents/` | `8ca22dba` | — | MIT | viết lại |
 | `closing-sprint` | `obra/superpowers` — `skills/finishing-a-development-branch/`; `garrytan/gstack` — `document-release/`, `retro/`; `affaan-m/ECC` — `commands/learn-eval.md`; bộ quy trình private — `preflight-gate`, `release-notes-writer` | `8ca22dba` · `96764e80` · `c70874fa` · `4c0fdc57` | — | MIT; không giấy phép (2 file references) | viết lại; private (2 file) |
-| `bug-triage` | bộ quy trình private — `bug-triager` (gốc private, không giấy phép) | `4c0fdc57` | — | không giấy phép | private |
+| `bug-triage` | ý từ bộ quy trình private — `bug-triager` (gốc private, không giấy phép); viết lại phòng sạch từ danh sách ý (`TK10.2`), không mở bản gốc | — | — | không giấy phép (chỉ lấy ý) | ý |
 | `tdd` | `obra/superpowers` — `skills/test-driven-development/` (+ `writing-good-tests.md`); `obra/superpowers-skills` — `skills/testing/testing-anti-patterns/` | `8ca22dba` · `cdcd624a` | — | MIT | chép |
 | `debugging` | `obra/superpowers` — `skills/systematic-debugging/`; `garrytan/gstack` — `investigate/SKILL.md.tmpl`; `obra/superpowers-skills` — `defense-in-depth`, `condition-based-waiting`; script `find-polluter.sh` viết lại thành Python | `8ca22dba` · `96764e80` · `cdcd624a` | — | MIT | chép |
 | `worktrees` | `obra/superpowers` — `skills/using-git-worktrees/` | `8ca22dba` | — | MIT | chép |
