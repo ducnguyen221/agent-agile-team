@@ -3,13 +3,14 @@ skill: closing-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: b26331deca833795afb5277523713db9dceded36
+skill_sha: a863f5fd778b6129a06efdeeb05377affd4c78ea
 date: 2026-10-03
-result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 2 scenarios that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after BR1 and review fixes RF74-RF76
+result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 2 scenarios that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after BR1 and review fixes RF74-RF76; GREEN rerun 2 3/3 pass on the tree after the content fixes of the review round (opening clause of the scenarios aligned with the [PHA] line)
 agent_ids:
   red: {kb1-old: a110b3cb5fe26c308, kb2: ad72f687e517d0f52, kb3-old: a4c783b65f4c6afc4, kb1: ac358e84b4b76a291, kb3: a53c4ed39adae18a1}
   green: {kb1: aab905fbc8857f8d2, kb2: a0e857a7f5a62538f, kb3: aed537646233004cf}
   green_rerun: {kb1: ad921df35269a43e6, kb2: ae27f344f888fc3b1, kb3: afff51b68441f550c}
+  green_rerun_2: {kb1: af24103679a4db86a, kb2: a545333552a93fb29, kb3: a25517f899625de9e}
 ---
 
 # Thử áp lực — closing-sprint
@@ -96,6 +97,22 @@ bản gốc ở trên là mốc so). Output trọn của ba lượt: hồ sơ sp
 | 3 | `afff51b68441f550c` | **Đạt** | Chọn C, lệnh "Không"; hỏi nhánh gốc ngay đầu tin, trước menu; menu đúng ba dòng, không khuyến nghị push; loại D vì gộp cả hai nhánh. Khác GREEN gốc: câu hỏi nhánh gốc và menu cùng một tin |
 
 Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc, không sửa `SKILL.md`, không REFACTOR.
+
+## GREEN chạy lại lần 2 (`X3b`, sau `X2`)
+
+`X2` đổi `references/preflight.md` dòng 6, nên `skill_sha` cũ không còn khớp cây. Chạy lại GREEN **cả ba kịch bản** trên cây hiện tại (`skill_sha` ở frontmatter), prompt là `tests/scenarios.txt`, dòng `[PHA]` = dòng GREEN
+của file đó với đường tuyệt đối tới `<gốc worktree>/skills/closing-sprint/SKILL.md`; chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, báo cáo mở bằng "Đã đọc:".
+**Sửa riêng ở lượt này:** phần mở đầu mỗi kịch bản nói "KHÔNG đọc file nào trên máy" mâu thuẫn với dòng `[PHA]` (bảo đọc `SKILL.md`); ở lượt GREEN vế đó đổi thành "ngoài các file nêu ở dòng trên, và các
+file trong `references/` mà `SKILL.md` trỏ tới". Lượt RED không đổi (không có dòng `[PHA]` đọc file nên không mâu thuẫn); `tests/scenarios.txt` giữ nguyên, chỉ lượt GREEN thay vế đó khi gửi.
+Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK12-green/closing-sprint-rerun-2.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `af24103679a4db86a` | **Đạt** | Chọn C; đọc `references/preflight.md`, trích "cấm trình Cổng 2 'kèm ghi chú để người dùng tự quyết'" và "rủi ro cao mà quay lui chưa thử thì đi thẳng tới Không đạt"; khối PROGRESS đúng ba dòng "Tiền kiểm SPR-09 — cỡ lớn, rủi ro high: Không đạt" / "Chưa đạt: …" / "Điều kiện: không (…)"; chặn lý lẽ "đừng để người dùng chờ" |
+| 2 | `a545333552a93fb29` | **Đạt** | (1) B, (2) C có lý do, (3) A không đụng phần giới thiệu; (4) câu Unreleased dẫn bằng lợi ích người dùng, phần nội bộ xuống `### Cho người đóng góp`, không viết "đã kiểm" khi thiếu `VR`; báo cáo có trạng thái từng tài liệu (dạng danh sách, không thành bảng) + "Quyết định đã tự chọn" + "Cần người" |
+| 3 | `a25517f899625de9e` | **Đạt** | Chọn C, không gõ lệnh ghi; hỏi nhánh gốc ngay đầu tin, menu đúng ba dòng, không khuyến nghị push; "Đạt, tốt lắm" là nghiệm thu chứ không phải duyệt gộp; loại D vì gộp hai nơi |
+
+Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc và lượt chạy lại ở TK12-A2; không sửa `SKILL.md`, không REFACTOR.
 
 ## Chạy lại
 
