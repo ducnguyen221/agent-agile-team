@@ -58,6 +58,9 @@ ORDER BY idx_scan;
 - Số liệu `pg_stat_*` tính từ lần đặt lại thống kê gần nhất: index "không dùng" trên CSDL mới khởi động hay bản
   sao ít tải chưa chứng minh gì.
 - Ngưỡng trong câu lệnh (100 ms, 1000 dòng chết) là điểm bắt đầu; so với số đo nền của chính dự án.
+- Truy vấn khoá ngoại xét từng cột riêng: khoá ngoại ghép `(a, b)` đã có index `(a, b)` vẫn bị báo ở cột `b`
+  (dương tính giả); đọc index thật trước khi kết luận thiếu.
+- `mean_exec_time` có từ PostgreSQL 13; bản cũ hơn dùng `mean_time`.
 - Chuỗi kết nối lấy từ biến môi trường; không in ra báo cáo.
 
 ## 3. Cấu hình mẫu
