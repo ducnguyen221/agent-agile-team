@@ -88,7 +88,8 @@ def problems(data: dict) -> list:
     """Lỗi của một file thử (không gồm so `skill_sha` với cây skill)."""
     found = []
     for key in ("result", "model"):
-        if key not in data or not str(data[key]).strip():
+        # `result:` để trống (hoặc `~`, `null`) đọc ra None, mà `str(None)` = "None" không rỗng: coi là thiếu.
+        if data.get(key) is None or str(data[key]).strip().lower() in ("", "none", "null", "~"):
             found.append(f"thiếu khoá `{key}`")
         elif not head(data[key]):
             found.append(f"`{key}` không có trạng thái ở đầu: {str(data[key])!r}")
@@ -175,6 +176,20 @@ def test_value_without_head_is_caught(key, value):
 
 def test_annotation_after_head_is_not_a_state():
     assert problems({**GOOD, "result": "pass 5/6; 1 câu chưa chạy lại vì pending review"}) == []
+
+
+@pytest.mark.parametrize("text", ["---\nresult:\nmodel: m\n---\n", "---\nresult: r\nmodel:\n---\n",
+                                  "---\nresult: ~\nmodel: m\n---\n", "---\nresult: r\nmodel: null\n---\n"])
+def test_blank_key_in_frontmatter_is_caught(text):
+    """`result:` hay `model:` để trống đọc ra None; None không được lọt thành chuỗi "None" (kẽ hở của RF93)."""
+    data = c.parse_frontmatter(text).data
+    assert problems({**GOOD, **data}), f"{data!r} lọt máy kiểm"
+
+
+@pytest.mark.parametrize("key", ["result", "model"])
+@pytest.mark.parametrize("value", [None, "", "  ", "None", "null"])
+def test_empty_or_null_value_is_no_state(key, value):
+    assert problems({**GOOD, key: value}), f"{key}={value!r} lọt máy kiểm"
 
 
 @pytest.mark.parametrize("bad", ["2026-13-40", "hôm qua", ""])
