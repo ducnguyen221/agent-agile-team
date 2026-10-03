@@ -1,6 +1,6 @@
 ---
 name: adr
-description: Use when someone is about to commit to a technical choice that would be costly to walk back or that touches many parts of a system - for example selecting the database, framework, hosting platform or login model, reshaping stored data or an inter-service contract, introducing a dependency between services, or dropping a technology - and also when a large-size task must document its design choices, when a reviewer wants a decision record, or when overturning a decision accepted earlier.
+description: Use when about to commit to a technical choice that is costly to reverse or spans many parts of a system - picking the database, framework, hosting platform or login model, reshaping data or a service contract, adding a dependency between services, dropping a technology - or when a large task must record design choices, a reviewer wants a decision record, or an accepted decision is overturned.
 metadata:
   group: technique
   kind: reference
