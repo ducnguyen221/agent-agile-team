@@ -41,11 +41,11 @@ viết lại để không phải viết lại cả skill.
 | Skill | File phải viết lại | Nguồn private |
 |---|---|---|
 | `closing-sprint` | không còn — `references/release-notes.md` (`TK10.5`) và `references/preflight.md` (`TK10.6`) đã viết lại phòng sạch; cờ giữ `true` chờ quyết định về `tests/test_provenance.py` (phép kiểm đòi mục này còn ít nhất một dòng skill) | `preflight-gate`, `release-notes-writer` (chỉ còn là nguồn ý) |
-| `scripts/README.md` (tài liệu, không có cờ) | bảng "Luật của `check`", cột "Bắt gì" của bốn luật truy vết `task-without-trace`, `report-sc-without-vr`, `report-fr-without-vr`, `xref-missing` | `rtm-auditor` |
 
-Hai dòng cuối không phải skill nên không có cờ `rewrite_before_public`; bảng này là nơi duy nhất theo dõi
-chúng. Văn bản gốc của mọi mục trong bảng đã **gỡ khỏi nhánh** và thay bằng khung "đang viết lại (`TK10`)";
-bản mới viết từ danh sách ý, không mở bản gốc.
+Đã viết lại phòng sạch từ danh sách ý (`TK10.2`–`TK10.8`, không mở bản gốc), dòng đã rời bảng: `bug-triage`
+(`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`), `roles/executor/qa.md`
+(bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill đó ghi nguồn ý
+dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).
 
 Trước khi công khai: viết lại các file trên từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
 `source`/`license` và dòng tương ứng ở `UPSTREAM.md`.
