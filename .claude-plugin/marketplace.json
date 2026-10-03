@@ -9,7 +9,7 @@
     {
       "name": "agent-agile-team",
       "description": "Six-step agile process for AI agent teams: tiered role cards, no self-grading, sprint and registry templates, 28 skills, 7 reviewer agents and three document tools (init, check, index).",
-      "version": "0.1.0-dev",
+      "version": "0.2.0-dev",
       "source": "./",
       "license": "UNLICENSED",
       "author": {
