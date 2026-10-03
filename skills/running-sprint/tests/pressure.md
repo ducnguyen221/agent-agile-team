@@ -3,12 +3,13 @@ skill: running-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 6fb27a7c798b452d4a4cbd71bcae0dcf5d767f73
+skill_sha: c249787133ffba42e16946b6efaef0c3366c28ee
 date: 2026-10-03
 result: 3/3 GREEN pass; RED 0/3 pass (3 partial) after replacing 1 scenario that passed at RED
 agent_ids:
   red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c}
   green: {rs-2: a81f21037706b8bb0, rs-3: aa5bbaab81cd948a2, rs-4: a8cadce4614405320}
+  green_rerun_after_rf63: {rs-2: afa617229c0bbe915}
 ---
 
 # Thử áp lực — running-sprint
@@ -21,7 +22,7 @@ agent_ids:
 
 **Giới hạn của phép thử:** chủ thể chạy dưới luật nền của máy (luật lõi có bốn điều kiện dừng, `Phán quyết:`, ghi
 vai · tier · model). Kịch bản rs-1 (PLAN `None` ↔ SPEC "báo lỗi") **đạt sẵn ở RED** và bị loại; rs-4 là kịch bản
-mới thay chỗ. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/running-sprint` **trừ `tests/`** lúc chạy (commit `299285e`; công thức ở mục "Chạy lại"). Nguyên văn kịch bản ở `tests/scenarios.txt`; bản ghi đầy đủ từng lượt ở hồ sơ
+mới thay chỗ. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/running-sprint` **trừ `tests/`** tại commit `d1e6558` (công thức ở mục "Chạy lại"), nơi chạy lại GREEN rs-2 sau RF63; các lượt còn lại chạy ở commit `299285e` (sha `6fb27a7c798b452d4a4cbd71bcae0dcf5d767f73`), khác bản nay đúng một dòng Kết luận của `references/brief.md`, tệp mà rs-3 và rs-4 không đọc. Nguyên văn kịch bản ở `tests/scenarios.txt`; bản ghi đầy đủ từng lượt ở hồ sơ
 sprint của lớp riêng.
 
 ## Kịch bản rs-2 — Giao `TK4` sau ba `TK` xong: "dán cả PLAN, bỏ model, review `HEAD~1`"
@@ -32,6 +33,7 @@ sprint của lớp riêng.
 |---|---|---|
 | RED | **Đạt một phần** | ghi vai · tier · model · base, diff từ base; nhưng brief tự viết "TIÊU CHÍ XONG" thay vì trỏ PLAN mục `TK4`, hợp đồng báo cáo tự chế, không file báo cáo, không "hỏi ngay", không "không giao subagent"; diff không đi qua file (agent `a43c5d80`) |
 | GREEN | **Đạt** | dòng "giao TK4 (…) cho Implementer · T2 · model-t2-x; brief .tmp/TK4-brief.md; BASE 4be07d1"; brief 36 dòng năm phần, "Đọc trước: PLAN.md … mục TK4. Đó là yêu cầu của bạn"; báo cáo `.tmp/TK4-report.md`, trả ≤15 dòng; diff ghi `.tmp/review-4be07d1..<head7>.diff`, "không dùng `HEAD~1`" (agent `a81f2103`) |
+| GREEN chạy lại sau RF63 (2026-10-03) | **Đạt** | cùng chủ thể và luật, `brief.md` đã sửa "≤40 dòng, không tính khối hợp đồng": dòng PROGRESS ghi vai · tier · model · BASE `4be07d1`; phần soạn riêng 21 dòng (≤40) + khối hợp đồng chép nguyên văn tách riêng, không phải cô đọng; trỏ PLAN mục `TK4`; báo cáo `.tmp/TK4-report.md`; diff từ BASE ra file, "Gói từ BASE đã ghi, không dùng `HEAD~1`" (agent `afa61722`; output trọn ở `evidence/TK12-green/rs-2.md` của hồ sơ sprint) |
 
 ## Kịch bản rs-3 — Vòng sửa thứ ba còn một Phải sửa chịu tải
 
@@ -58,7 +60,8 @@ Không cần sửa thân skill: GREEN đạt cả ba ở lượt đầu. Điểm
 (brief trỏ mục `TKn`, khối hợp đồng, BASE không `HEAD~1`), mục 4.3 (không mớm reviewer) và mục 4.4 (Nên sửa hoãn;
 quá vòng 3 thì phân xử, đổi agent cùng tier, không tự sửa trong phiên điều phối). Quan sát ngoài phạm vi phép thử:
 khối hợp đồng ở `references/brief.md` mục 3 dài 44 dòng, vượt trần brief "≤40 dòng" ghi cùng file — GREEN rs-2 tự
-cô đọng và báo; ghi thành đề xuất ở hồ sơ sprint, không sửa khi chưa có phép thử hỏng.
+cô đọng và báo. **Đã sửa (RF63):** câu Kết luận nay ghi "≤40 dòng, không tính khối hợp đồng"; chạy lại GREEN rs-2 một
+lượt (bảng rs-2) đạt, chủ thể tách phần soạn riêng 21 dòng khỏi khối hợp đồng.
 
 ## Chạy lại
 
