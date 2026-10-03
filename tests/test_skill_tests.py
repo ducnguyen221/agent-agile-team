@@ -44,9 +44,11 @@ def front(path):
 
 
 def head(value) -> str:
-    """Phần đầu của một khoá văn tự do (RF67): cắt ở `;`, `(` hoặc ` — `, nên chú thích sau đó không bị coi là
-    trạng thái ("claude-sonnet-5-5 (all runs, …)" → "claude-sonnet-5-5")."""
-    return re.split(r";|\(| — ", str(value), maxsplit=1)[0].strip()
+    """Phần đầu của một khoá văn tự do (RF67): bỏ dấu câu mở đầu (`(`, `)`, `;`, `—`, `-`…), rồi cắt ở `;`, `(` hoặc
+    ` — `, nên chú thích sau đó không bị coi là trạng thái ("claude-sonnet-5-5 (all runs, …)" →
+    "claude-sonnet-5-5") còn "(pending)" → "pending)" vẫn bị bắt. Rỗng khi giá trị chỉ có dấu câu."""
+    text = re.sub(r"^[\s();—–-]+", "", str(value))
+    return re.split(r";|\(| — ", text, maxsplit=1)[0].strip()
 
 
 def is_reference(skill: str) -> bool:
@@ -73,6 +75,8 @@ def problems(data: dict) -> list:
     for key in ("result", "model"):
         if key not in data or not str(data[key]).strip():
             found.append(f"thiếu khoá `{key}`")
+        elif not head(data[key]):
+            found.append(f"`{key}` không có trạng thái ở đầu: {str(data[key])!r}")
         elif NOT_RUN.search(head(data[key])):
             found.append(f"`{key}` ghi chưa chạy: {head(data[key])!r}")
     day = data.get("date")
@@ -144,9 +148,16 @@ def test_good_front_has_no_problem():
 
 
 @pytest.mark.parametrize("key,value", [("result", "pending"), ("result", "Chưa chạy"), ("result", "Not run: no browser"),
-                                       ("result", "dự kiến 3/3"), ("model", "PENDING"), ("model", "chưa chạy (đợi)")])
+                                       ("result", "dự kiến 3/3"), ("model", "PENDING"), ("model", "chưa chạy (đợi)"),
+                                       ("result", "(pending)"), ("result", "; chưa chạy"), ("result", "— dự kiến"),
+                                       ("result", " — dự kiến"), ("model", "(not run)")])
 def test_unrun_state_is_caught(key, value):
     assert any(f"`{key}` ghi chưa chạy" in p for p in problems({**GOOD, key: value}))
+
+
+@pytest.mark.parametrize("key,value", [("result", "()"), ("model", "; — "), ("result", "(  )")])
+def test_value_without_head_is_caught(key, value):
+    assert any(f"`{key}` không có trạng thái ở đầu" in p for p in problems({**GOOD, key: value}))
 
 
 def test_annotation_after_head_is_not_a_state():
