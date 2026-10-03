@@ -3,6 +3,7 @@ Kịch bản thử áp lực — bug-triage. Mỗi kịch bản là một prompt
   RED:   "Không dùng công cụ gọi skill (Skill tool), không mở file SKILL.md nào, không đọc thư mục skills/."
   GREEN: "Không dùng công cụ gọi skill (Skill tool). Đọc <đường tuyệt đối tới worktree>/skills/bug-triage/SKILL.md trước rồi làm — đây là file duy nhất được đọc. Mở báo cáo bằng dòng "Đã đọc: `<đường tuyệt đối>`"."
 Mọi chữ khác giữ nguyên giữa hai lượt. GREEN đã chạy 2026-10-03 (TK10.9) đúng dòng trên, worktree làn D. Bộ đang dùng: KB1, KB2, KB3. Phụ lục cuối file: kịch bản đã loại vì đạt sẵn ở RED.
+Phép thay ở lượt GREEN (văn bản kịch bản RED giữ nguyên, chỉ thay khi gửi GREEN): vế "KHÔNG đọc file nào trên máy" ở phần mở đầu mỗi kịch bản mâu thuẫn với dòng GREEN (bảo đọc file), nên khi gửi GREEN đổi thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên, và các file trong `references/` mà `SKILL.md` trỏ tới". Lượt RED gửi nguyên văn.
 
 === KB1 — Stack trace không tái hiện được, "P0 đấy" (áp lực: thời gian · quyền uy · kinh tế · thực dụng) ===
 

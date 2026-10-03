@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: a863f5fd778b6129a06efdeeb05377affd4c78ea
 date: 2026-10-03
-result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 2 scenarios that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after BR1 and review fixes RF74-RF76; GREEN rerun 2 3/3 pass on the tree after the content fixes of the review round (opening clause of the scenarios aligned with the [PHA] line)
+result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 2 scenarios that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after BR1 and review fixes RF74-RF76; GREEN rerun 2 3/3 pass on the tree after the content fixes of the review round (opening clause of the scenarios replaced at send time in GREEN only; scenarios.txt unchanged, recipe in section Chạy lại)
 agent_ids:
   red: {kb1-old: a110b3cb5fe26c308, kb2: ad72f687e517d0f52, kb3-old: a4c783b65f4c6afc4, kb1: ac358e84b4b76a291, kb3: a53c4ed39adae18a1}
   green: {kb1: aab905fbc8857f8d2, kb2: a0e857a7f5a62538f, kb3: aed537646233004cf}
@@ -122,3 +122,5 @@ dòng cấm công cụ Skill + đường **tuyệt đối** tới `SKILL.md` tro
 `<đường tuyệt đối>`". Cùng tier T3, cùng model; mỗi lượt một subagent mới; ghi `skill_sha` = băm cây
 `skills/closing-sprint` trừ `tests/` (`git ls-tree <commit>:skills/<tên> | awk -F'\t' '$2!="tests"' | git mktree`),
 id agent, ngày, và kết quả thật — không ghi "dự kiến".
+
+Phép thay vế mở đầu ở lượt GREEN: phần mở đầu mỗi kịch bản trong `tests/scenarios.txt` nói "KHÔNG đọc file nào trên máy", mâu thuẫn với dòng GREEN bảo đọc `SKILL.md`; khi gửi GREEN đổi vế đó thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên, và các file trong `references/` mà `SKILL.md` trỏ tới". Lượt RED giữ nguyên văn; `tests/scenarios.txt` không đổi.

@@ -307,6 +307,38 @@ def test_retrieval_cell_follows_the_computed_result():
     assert retrieval_cell(sample) == "strict 5/6 (+1 partial, 0 fail), at threshold; points-right 6/6"
 
 
+REPLACEMENT = "ngoài các file nêu ở dòng trên"
+
+
+def contradiction_gaps(scenarios: str, pressure: str) -> list:
+    """Kịch bản nói 'KHÔNG đọc file nào trên máy' mà dòng GREEN bảo đọc `SKILL.md` thì công thức chạy lại phải ghi phép
+    thay vế mở đầu ở lượt GREEN, cả ở `scenarios.txt` (đầu tệp, trước kịch bản đầu) lẫn mục 'Chạy lại' của `pressure.md`;
+    thiếu thì chạy lại theo công thức sẽ tái tạo mâu thuẫn (RF121)."""
+    if "KHÔNG đọc file nào trên máy" not in scenarios:
+        return []
+    gaps = []
+    if REPLACEMENT not in scenarios.split("\n=== ", 1)[0]:
+        gaps.append("phần đầu scenarios.txt thiếu phép thay vế mở đầu ở lượt GREEN")
+    if REPLACEMENT not in pressure.rsplit("\n## Chạy lại", 1)[-1]:
+        gaps.append("mục 'Chạy lại' của pressure.md thiếu phép thay vế mở đầu ở lượt GREEN")
+    return gaps
+
+
+@pytest.mark.parametrize("skill", sorted(p.parent.parent.name for p in REPO.glob("skills/*/tests/scenarios.txt")))
+def test_rerun_recipe_states_the_green_opening_clause(skill):
+    base = REPO / "skills" / skill / "tests"
+    assert contradiction_gaps(c.read_text(base / "scenarios.txt"), c.read_text(base / "pressure.md")) == []
+
+
+def test_contradiction_gaps_are_caught():
+    scen = "đầu\n\n=== KB1 ===\nKHÔNG đọc file nào trên máy\n"
+    assert len(contradiction_gaps(scen, "x\n## Chạy lại\ny")) == 2
+    ok_scen = f"đầu {REPLACEMENT}\n\n=== KB1 ===\nKHÔNG đọc file nào trên máy\n"
+    assert contradiction_gaps(ok_scen, "x\n## Chạy lại\ny") == ["mục 'Chạy lại' của pressure.md thiếu phép thay vế mở đầu ở lượt GREEN"]
+    assert contradiction_gaps(ok_scen, f"x\n## Chạy lại\n{REPLACEMENT}") == []
+    assert contradiction_gaps("không có vế cấm", "x") == []
+
+
 def _row(n, expected, verdict):
     return f"| {n} | câu hỏi | {expected} | trỏ | {verdict} |"
 
