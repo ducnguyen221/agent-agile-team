@@ -1,6 +1,6 @@
 ---
 name: adr
-description: Use when a technical decision is expensive to undo or reaches across several parts of a system - picking a platform, framework, datastore or authentication model, changing a data model or a contract between services, adding a cross-service dependency, retiring a technology - when a large-size task needs its design choices written down, when a reviewer insists on a written decision record, or when a decision accepted earlier is being overturned.
+description: Use when someone is about to commit to a technical choice that would be costly to walk back or that touches many parts of a system - for example selecting the database, framework, hosting platform or login model, reshaping stored data or an inter-service contract, introducing a dependency between services, or dropping a technology - and also when a large-size task must document its design choices, when a reviewer wants a decision record, or when overturning a decision accepted earlier.
 metadata:
   group: technique
   kind: reference
@@ -99,7 +99,7 @@ cổng thấy cùng một hình.
 | Gặp | Làm |
 |---|---|
 | Chỉ có một lựa chọn thật — bảng lựa chọn thành màn diễn | bổ sung phương án thật (giữ hiện trạng cũng tính), hoặc nêu tên ràng buộc đã loại hết các phương án kia |
-| Quyết định chạm bảo mật, dữ liệu cá nhân, phân quyền | reviewer chuyên đề bảo mật (skill `security-review`) đọc trước khi `accepted`; `risk_tags` của sprint ghi tương ứng |
+| Quyết định liên quan tới an ninh hệ thống, thông tin cá nhân hay việc cấp quyền truy cập | trước khi chuyển sang `accepted`, để reviewer chuyên đề bảo mật đọc qua (skill `security-review`); nhãn tương ứng phải có trong `risk_tags` của sprint |
 | Quyết định làm đổi `SC` của sprint đang chạy | PLAN hỏng — điều kiện dừng (d): `BR`, báo Analyst |
 | Thực hiện quyết định không đảo ngược được (xoá dữ liệu, gỡ dịch vụ đang chạy) | điều kiện dừng (a): chỉ làm khi người dùng gật |
 | Muốn sửa nội dung một ADR đã `accepted` | không sửa — viết ADR mới thay thế (mục 3 bước 6) |
