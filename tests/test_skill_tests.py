@@ -109,11 +109,24 @@ def test_test_file_was_run(path):
     assert not problems(front(path))
 
 
-@pytest.mark.parametrize("path", TEST_FILES, ids=IDS)
+def has_sha(path) -> bool:
+    """File thử có khoá `skill_sha` không. File không đọc được frontmatter coi như có, để test dưới đỏ đúng lý do
+    thay vì làm hỏng lúc thu thập."""
+    try:
+        return bool(front(path).get("skill_sha"))
+    except Exception:
+        return True
+
+
+# Chỉ tham số hoá phép so băm cho file CÓ `skill_sha`: file cũ (date trước ngày bắt đầu sprint) không có thì không
+# sinh ca nào, không còn ca skip; file từ ngày bắt đầu sprint thiếu `skill_sha` vẫn đỏ ở `test_test_file_was_run`.
+SHA_FILES = [p for p in TEST_FILES if has_sha(p)]
+SHA_IDS = [p.relative_to(REPO).as_posix() for p in SHA_FILES]
+
+
+@pytest.mark.parametrize("path", SHA_FILES, ids=SHA_IDS)
 def test_skill_sha_matches_skill_tree(path):
     data = front(path)
-    if not data.get("skill_sha"):
-        pytest.skip("file thử không ghi skill_sha (date trước ngày bắt đầu sprint)")
     actual = tree_hash(path.parent.parent.name)
     if actual is None:
         pytest.skip("không tính được băm cây skill ở HEAD (không có git)")
