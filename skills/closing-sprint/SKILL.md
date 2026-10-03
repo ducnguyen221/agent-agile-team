@@ -7,7 +7,7 @@ metadata:
 source: ["obra/superpowers skills/finishing-a-development-branch/SKILL.md", "garrytan/gstack document-release/SKILL.md.tmpl (via local distill)", "concept: preflight evidence gate by size and risk (references/preflight.md, clean-room rewrite from an idea list)", "affaan-m/ECC commands/learn-eval.md", "concept: release notes built from the sprint report, internal and external versions (references/release-notes.md, clean-room rewrite from an idea list)"]
 source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 96764e80a641e28141ec8297223768029f5bf483, null, c70874fae9eb0e5ad0365beb7e2955899fd1d30f, null]
 license: [MIT, MIT, none, MIT, none]  # none = idea-only sources of references/preflight.md and references/release-notes.md
-rewrite_before_public: true  # both private-derived files are rewritten (TK10.5, TK10.6); kept true pending a decision on tests/test_provenance.py, which requires at least one skill row in THIRD_PARTY.md section 3
+rewrite_before_public: false  # both private-derived files were rewritten clean-room (TK10.5, TK10.6)
 ---
 
 # Đóng sprint (Bước 5–6 và sau Cổng 2)

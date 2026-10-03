@@ -40,10 +40,11 @@ viết lại để không phải viết lại cả skill.
 
 | Skill | File phải viết lại | Nguồn private |
 |---|---|---|
-| `closing-sprint` | không còn — `references/release-notes.md` (`TK10.5`) và `references/preflight.md` (`TK10.6`) đã viết lại phòng sạch; cờ giữ `true` chờ quyết định về `tests/test_provenance.py` (phép kiểm đòi mục này còn ít nhất một dòng skill) | `preflight-gate`, `release-notes-writer` (chỉ còn là nguồn ý) |
 
-Đã viết lại phòng sạch từ danh sách ý (`TK10.2`–`TK10.8`, không mở bản gốc), dòng đã rời bảng: `bug-triage`
-(`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`), `roles/executor/qa.md`
+Bảng hiện trống: không skill nào mang cờ `true` (bất biến cờ ↔ bảng vẫn được `tests/test_provenance.py` kiểm).
+
+Đã viết lại phòng sạch từ danh sách ý (`TK10.2`–`TK10.8`, không mở bản gốc), dòng đã rời bảng: `closing-sprint`
+(`references/release-notes.md`, `references/preflight.md`), `bug-triage` (`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`), `roles/executor/qa.md`
 (bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill đó ghi nguồn ý
 dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).
 

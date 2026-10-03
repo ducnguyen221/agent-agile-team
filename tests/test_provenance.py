@@ -93,8 +93,7 @@ def test_every_sha_is_pinned_in_upstream(path):
 def test_rewrite_flag_matches_third_party():
     flagged = {p.parent.name for p in FILES if p.name == "SKILL.md" and front(p)["rewrite_before_public"] is True}
     flagged |= {p.stem for p in FILES if p.parent.name == "agents" and front(p)["rewrite_before_public"] is True}
-    listed = rewrite_list()
-    assert listed, "THIRD_PARTY.md mục 3 không có dòng nào"
+    listed = rewrite_list()  # thiếu mục 3 thì tự báo lỗi; bảng rỗng hợp lệ khi không skill nào mang cờ (SC7)
     assert flagged == listed, f"cờ true nhưng thiếu ở THIRD_PARTY: {sorted(flagged - listed)}; " \
                               f"có ở THIRD_PARTY nhưng cờ false: {sorted(listed - flagged)}"
 
