@@ -15,7 +15,7 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
 | `metadata.roles` | có | danh sách vai dùng skill, hoặc `[all]` |
 | `metadata.kind` | không | `reference` — skill tham chiếu kỹ thuật (mẫu, bảng tra), không có luật sắt hay cổng; vắng = skill kỷ luật/quy trình |
 | `source` | có | repo + đường file nguồn (danh sách khi gộp nhiều nguồn); nguồn chỉ lấy ý ghi `concept: <tên>` |
-| `source_sha` | có | SHA HEAD đã chốt ở [UPSTREAM.md](../UPSTREAM.md), cùng thứ tự với `source`; `null` cho tài liệu web không có commit |
+| `source_sha` | có | SHA HEAD đã chốt ở [UPSTREAM.md](../UPSTREAM.md), cùng thứ tự với `source`; `null` cho tài liệu web không có commit, hoặc cho nguồn chỉ lấy ý (`concept:`) |
 | `base_sha` | không | mốc của **bản distill private** đã làm điểm xuất phát — khuyến khích khi có, để lần distill sau đối chiếu được |
 | `license` | có | giấy phép của nguồn; `none` cho nguồn không giấy phép; `source` là danh sách thì `license` là danh sách cùng độ dài, cùng thứ tự |
 | `rewrite_before_public` | có | `true` khi có file lấy từ nguồn không giấy phép — phải viết lại trước khi repo công khai (file nào: [THIRD_PARTY.md](../THIRD_PARTY.md)) |

@@ -32,7 +32,7 @@ cách đó, các nguồn **chỉ lấy ý**, và danh sách file **phải viết
 | caveman (`JuliusBrussee/caveman`) | Apache-2.0 | Không cài, chỉ lấy lối viết gọn | Luồng gọn giữa agent → `token-economy` |
 | Nguồn văn phong (BLUF, Minto/SCQ, plain language, Google dev style, Diátaxis, Microsoft style, NN/g, hướng dẫn prompting Anthropic) | nhiều loại (phạm vi công cộng, CC BY, CC BY-SA, giữ bản quyền) | Giấy phép từng trang chưa đọc hết — chỉ lấy ý là an toàn dù giả định sai | Kết luận trước, ma trận độ dài, danh sách cấm kèm cách làm thay → `response-style` |
 
-## 3. Nguồn private — phải viết lại trước khi công khai
+## 3. Nguồn private — file lấy từ đó phải viết lại trước khi công khai
 
 Bộ skill quy trình private (gốc private, **không giấy phép**) chỉ dùng được khi repo còn private. Cờ
 `rewrite_before_public: true` đặt ở **cấp skill** (frontmatter `SKILL.md`); bảng dưới ghi đúng file nào cần
@@ -48,8 +48,10 @@ Bảng hiện trống: không skill nào mang cờ `true` (bất biến cờ ↔
 (bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill đó ghi nguồn ý
 dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).
 
-Trước khi công khai: viết lại các file trên từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
-`source`/`license` và dòng tương ứng ở `UPSTREAM.md`.
+Quy tắc cho file MỚI về sau: file nào lấy từ nguồn private không giấy phép thì thêm một dòng vào bảng trên và đặt
+cờ `true` ở skill; trước khi công khai, viết lại từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
+`source`/`license` và dòng tương ứng ở `UPSTREAM.md`, rồi chuyển dòng sang danh sách "đã viết lại" ở trên. Các file đã
+liệt kê ở trên không cần viết lại lần nữa.
 
 ## 4. Công cụ chỉ gọi
 
