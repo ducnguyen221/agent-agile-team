@@ -4,10 +4,10 @@ description: Use when verification has no open blocking findings and the sprint 
 metadata:
   group: process
   roles: [analyst, implementer]
-source: ["obra/superpowers skills/finishing-a-development-branch/SKILL.md", "garrytan/gstack document-release/SKILL.md.tmpl (via local distill)", "concept: preflight evidence gate by size and risk (references/preflight.md, clean-room rewrite from an idea list)", "affaan-m/ECC commands/learn-eval.md", "concept: release notes built from the sprint report, internal and external versions (references/release-notes.md, clean-room rewrite from an idea list)"]
+source: ["obra/superpowers skills/finishing-a-development-branch/SKILL.md", "garrytan/gstack document-release/SKILL.md.tmpl (via local distill)", "concept: preflight evidence gate by size and risk (references/preflight.md, rewritten from an idea list that kept some source wording; 8-gram overlap 0 after rephrasing; rewrite before public, see CO2 and RQ-021 in the owner private record)", "affaan-m/ECC commands/learn-eval.md", "concept: release notes built from the sprint report, internal and external versions (references/release-notes.md, rewritten from an idea list that kept some source wording; 8-gram overlap 0 after rephrasing; rewrite before public, see CO2 and RQ-021 in the owner private record)"]
 source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 96764e80a641e28141ec8297223768029f5bf483, null, c70874fae9eb0e5ad0365beb7e2955899fd1d30f, null]
 license: [MIT, MIT, none, MIT, none]  # none = idea-only sources of references/preflight.md and references/release-notes.md
-rewrite_before_public: false  # both private-derived files were rewritten clean-room (TK10.5, TK10.6)
+rewrite_before_public: false  # both private-derived files were rewritten from idea lists that kept some source wording; the real rewrite is a before-public milestone (CO2, RQ-021)
 ---
 
 # Đóng sprint (Bước 5–6 và sau Cổng 2)

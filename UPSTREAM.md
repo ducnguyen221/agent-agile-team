@@ -65,7 +65,7 @@ Bảng dưới có 7 nguồn **tài liệu web** — không có SHA, nên cột 
 | Tài liệu Anthropic (hướng dẫn prompting, context engineering, Claude Code output styles) | ý, chỉ trỏ link | `response-style`, `token-economy` | 2026-10-01 | mỗi lượt — hành vi harness đổi theo bản |
 
 Nguồn **private** (không giấy phép) không theo dõi ở đây: lớp riêng của môi trường giữ bản đồ và đường theo
-dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đợt 1 và `THIRD_PARTY.md` mục 3. SPR-02 đã viết lại phòng sạch 7 đích lấy ý từ nguồn private (`bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md` và `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn luật truy vết trong `scripts/README.md`), nên cờ `rewrite_before_public` không còn `true` ở đâu.
+dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đợt 1 và `THIRD_PARTY.md` mục 3. SPR-02 đã viết lại 7 đích từ danh sách ý lấy từ nguồn private, có mang một số câu chữ nguồn, 8-gram 0 trùng sau khi diễn đạt lại, chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo) (`bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md` và `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn luật truy vết trong `scripts/README.md`), nên cờ `rewrite_before_public` không còn `true` ở đâu.
 
 ## Nhật ký kiểm bản mới
 
@@ -115,12 +115,12 @@ mới (thành phần có thể đã đổi tên, gộp hay bị xoá ở upstrea
 | `garrytan/gstack` | `review` · `qa` · `ship` | `skills/code-review` · `skills/web-qa` · `skills/closing-sprint` | lấy |
 | `obra/superpowers-lab` | finding-duplicate-functions | `skills/code-review/references/duplicates.md` | lấy |
 | `affaan-m/ECC`, `obra/superpowers` | viết lại sâu 9 mục "gọn" của Đợt 1 có nguồn công khai: `deployment` (+ docker), `fastapi`, `postgres`, agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`, `rag-pipeline-reviewer`; `writing-skills/references/diagnosing.md` | tại chỗ, đối chiếu HEAD mới | đã làm (SPR-02) |
-| nguồn private (nhãn trung tính) | viết lại sâu 6 mục "gọn" còn lại: `bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md`, bảng phủ `FR` → `VR` của thẻ QA, luật truy vết của `check` | viết lại từ ý, không mở bản gốc (`THIRD_PARTY.md` mục 3) | đã làm (SPR-02) |
+| nguồn private (nhãn trung tính) | viết lại sâu 6 mục "gọn" còn lại: `bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md`, bảng phủ `FR` → `VR` của thẻ QA, luật truy vết của `check` | viết lại từ danh sách ý, còn mang một số câu chữ nguồn; chưa đạt quy trình phòng sạch (`THIRD_PARTY.md` mục 3, `CO2`) | đã làm (SPR-02) |
 
 ## Đợt 2 — chốt SHA 2026-10-03 (07:41 UTC+7)
 
 Trạng thái: **đã chốt; mới distill phần làm cứng Đợt 1** (SPR-02: viết lại sâu 9 mục trên ECC `ef648e01` và superpowers
-`8ca22dba`, viết lại phòng sạch 7 đích) — phần nội dung mới chưa distill. Nội dung Đợt 2 chỉ đọc từ đúng các SHA dưới;
+`8ca22dba`, viết lại 7 đích từ danh sách ý, chưa đạt quy trình phòng sạch) — phần nội dung mới chưa distill. Nội dung Đợt 2 chỉ đọc từ đúng các SHA dưới;
 thành phần và đích ở mục "Đợt 2 — dự kiến" (chuyển vào khối này khi distill xong). HEAD đo bằng lệnh của
 [docs/updating-from-upstream.md](docs/updating-from-upstream.md) mục 3 bước 2; ngày commit theo giờ UTC.
 
@@ -202,20 +202,20 @@ không giấy phép, phải viết lại trước khi công khai (danh sách fil
 | `shaping-spec` | `obra/superpowers` — `skills/brainstorming/SKILL.md`; **tên gốc `brainstorming`** | `8ca22dba` | — | MIT | viết lại |
 | `writing-plan` | `obra/superpowers` — `skills/writing-plans/SKILL.md` (v6.4.2) | `8ca22dba` | — | MIT | viết lại |
 | `running-sprint` | `obra/superpowers` — `skills/subagent-driven-development/`, `skills/executing-plans/`, `skills/dispatching-parallel-agents/` | `8ca22dba` | — | MIT | viết lại |
-| `closing-sprint` | `obra/superpowers` — `skills/finishing-a-development-branch/`; `garrytan/gstack` — `document-release/`, `retro/`; ý từ bộ quy trình private — `preflight-gate` (`references/preflight.md`, viết lại phòng sạch từ danh sách ý, `TK10.6`, không mở bản gốc); `affaan-m/ECC` — `commands/learn-eval.md`; ý từ bộ quy trình private — `release-notes-writer` (`references/release-notes.md`, viết lại phòng sạch từ danh sách ý, `TK10.5`, không mở bản gốc) | `8ca22dba` · `96764e80` · — · `c70874fa` · — | — | MIT; không giấy phép, chỉ lấy ý (2 file references) | viết lại; ý (2 file) |
-| `bug-triage` | ý từ bộ quy trình private — `bug-triager` (gốc private, không giấy phép); viết lại phòng sạch từ danh sách ý (`TK10.2`), không mở bản gốc | — | — | không giấy phép (chỉ lấy ý) | ý |
+| `closing-sprint` | `obra/superpowers` — `skills/finishing-a-development-branch/`; `garrytan/gstack` — `document-release/`, `retro/`; ý từ bộ quy trình private — `preflight-gate` (`references/preflight.md`, viết lại từ danh sách ý có mang một số câu chữ nguồn, `TK10.6`, chưa đạt quy trình phòng sạch, viết lại thật sự trước khi công khai: `CO2`, `RQ-021`); `affaan-m/ECC` — `commands/learn-eval.md`; ý từ bộ quy trình private — `release-notes-writer` (`references/release-notes.md`, viết lại từ danh sách ý có mang một số câu chữ nguồn, `TK10.5`, chưa đạt quy trình phòng sạch, viết lại thật sự trước khi công khai: `CO2`, `RQ-021`) | `8ca22dba` · `96764e80` · — · `c70874fa` · — | — | MIT; không giấy phép, chỉ lấy ý (2 file references) | viết lại; ý (2 file) |
+| `bug-triage` | ý từ bộ quy trình private — `bug-triager` (gốc private, không giấy phép); viết lại từ danh sách ý có mang một số câu chữ nguồn (`TK10.2`); chưa đạt quy trình phòng sạch, viết lại thật sự trước khi công khai (`CO2`, `RQ-021`) | — | — | không giấy phép (chỉ lấy ý) | ý |
 | `tdd` | `obra/superpowers` — `skills/test-driven-development/` (+ `writing-good-tests.md`); `obra/superpowers-skills` — `skills/testing/testing-anti-patterns/` | `8ca22dba` · `cdcd624a` | — | MIT | chép |
 | `debugging` | `obra/superpowers` — `skills/systematic-debugging/`; `garrytan/gstack` — `investigate/SKILL.md.tmpl`; `obra/superpowers-skills` — `defense-in-depth`, `condition-based-waiting`; script `find-polluter.sh` viết lại thành Python | `8ca22dba` · `96764e80` · `cdcd624a` | — | MIT | chép |
 | `worktrees` | `obra/superpowers` — `skills/using-git-worktrees/` | `8ca22dba` | — | MIT | chép |
 | `python` | `affaan-m/ECC` — `skills/python-patterns/`, `skills/python-testing/` | `c70874fa` | `3599962a` | MIT | chép |
 | `fastapi` | `affaan-m/ECC` — `skills/fastapi-patterns/` | `ef648e01` | `3599962a` | MIT | chép |
 | `postgres` | `affaan-m/ECC` — `skills/postgres-patterns/` (phần mẫu từ `supabase/agent-skills`), `agents/database-reviewer.md` | `ef648e01` · `ef648e01` | `3599962a` | MIT | chép |
-| `database-migrations` | `affaan-m/ECC` — `skills/database-migrations/`; ý từ bộ quy trình private — `migration-rehearsal` (gốc private, không giấy phép): `references/rehearsal.md` viết lại phòng sạch từ danh sách ý (`TK10.4`), không mở bản gốc | `c70874fa` · — | `3599962a` | MIT; không giấy phép (chỉ lấy ý, `references/rehearsal.md`) | chép; ý (1 file) |
+| `database-migrations` | `affaan-m/ECC` — `skills/database-migrations/`; ý từ bộ quy trình private — `migration-rehearsal` (gốc private, không giấy phép): `references/rehearsal.md` viết lại từ danh sách ý có mang một số câu chữ nguồn (`TK10.4`); chưa đạt quy trình phòng sạch, viết lại thật sự trước khi công khai (`CO2`, `RQ-021`) | `c70874fa` · — | `3599962a` | MIT; không giấy phép (chỉ lấy ý, `references/rehearsal.md`) | chép; ý (1 file) |
 | `api-design` | `affaan-m/ECC` — `skills/api-design/` | `c70874fa` | `3599962a` | MIT | chép |
 | `error-handling` | `affaan-m/ECC` — `skills/error-handling/` | `c70874fa` | `3599962a` | MIT | chép |
 | `deployment` | `affaan-m/ECC` — `skills/deployment-patterns/`, `skills/docker-patterns/` | `ef648e01` | `3599962a` | MIT | chép |
 | `github-ops` | `affaan-m/ECC` — `skills/github-ops/` | `c70874fa` | `3599962a` | MIT | chép |
-| `adr` | ý từ bộ quy trình private — `adr-writer` (gốc private, không giấy phép); viết lại phòng sạch từ danh sách ý (`TK10.3`), không mở bản gốc | — | — | không giấy phép (chỉ lấy ý) | ý |
+| `adr` | ý từ bộ quy trình private — `adr-writer` (gốc private, không giấy phép); viết lại từ danh sách ý có mang một số câu chữ nguồn (`TK10.3`); chưa đạt quy trình phòng sạch, viết lại thật sự trước khi công khai (`CO2`, `RQ-021`) | — | — | không giấy phép (chỉ lấy ý) | ý |
 | `verify-before-done` | `obra/superpowers` — `skills/verification-before-completion/` | `8ca22dba` | — | MIT | chép |
 | `code-review` | `obra/superpowers` — `skills/requesting-code-review/`, `skills/receiving-code-review/`; bộ quy trình private — `code-review-routing` (tự viết) | `8ca22dba` · `4c0fdc57` | — | MIT; tự viết | viết lại |
 | `plan-review` | `garrytan/gstack` — `plan-eng-review/SKILL.md.tmpl`, `plan-eng-review/sections/` | `96764e80` | `4c0fdc57` | MIT | chép |

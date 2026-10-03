@@ -1,7 +1,8 @@
 # Tiền kiểm bằng chứng
 
-<!-- Nguồn ý: bộ skill quy trình private, `preflight-gate` (không giấy phép). Viết lại phòng sạch từ danh sách ý
-     (`TK10.6`), không mở văn bản gốc. -->
+<!-- Nguồn ý: bộ skill quy trình private, `preflight-gate` (không giấy phép). Viết lại từ danh sách ý có mang một
+     số câu chữ nguồn (`TK10.6`); 8-gram 0 trùng sau khi diễn đạt lại; chưa đạt quy trình phòng sạch, phải viết lại
+     thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo). -->
 
 > **Kết luận:** tiền kiểm là lần soát cuối trước Cổng 2 và trước khi gộp. Đặt bằng chứng hiện có cạnh **bảng
 > yêu cầu của cỡ việc** (mục 2; rủi ro cao dùng hàng nặng hơn), soát **danh mục đánh số** (mục 3), rồi chốt bằng

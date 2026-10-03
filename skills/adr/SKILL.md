@@ -5,7 +5,7 @@ metadata:
   group: technique
   kind: reference
   roles: [architect]
-source: "concept: architecture decision records - short, numbered, at least two real options, superseded not edited (clean-room rewrite from an idea list)"
+source: "concept: architecture decision records - short, numbered, at least two real options, superseded not edited (rewritten from an idea list that kept some source wording; 8-gram overlap 0 after rephrasing; rewrite before public, see CO2 and RQ-021 in the owner private record)"
 source_sha: null
 license: none
 rewrite_before_public: false

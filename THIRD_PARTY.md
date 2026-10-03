@@ -43,7 +43,7 @@ viết lại để không phải viết lại cả skill.
 
 Bảng hiện trống: không skill nào mang cờ `true` (bất biến cờ ↔ bảng vẫn được `tests/test_provenance.py` kiểm).
 
-Đã viết lại phòng sạch từ danh sách ý (`TK10.2`–`TK10.8`, không mở bản gốc), dòng đã rời bảng: `closing-sprint`
+Đã viết lại từ danh sách ý (`TK10.2`–`TK10.8`) có mang một số câu chữ nguồn; 8-gram 0 trùng sau khi diễn đạt lại; chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo). Dòng đã rời bảng: `closing-sprint`
 (`references/release-notes.md`, `references/preflight.md`), `bug-triage` (`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`), `roles/executor/qa.md`
 (bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill đó ghi nguồn ý
 dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).

@@ -1,7 +1,8 @@
 # Ghi chú phát hành
 
-<!-- Nguồn ý: bộ skill quy trình private, `release-notes-writer` (không giấy phép). Viết lại phòng sạch từ danh
-     sách ý (`TK10.5`), không mở văn bản gốc. -->
+<!-- Nguồn ý: bộ skill quy trình private, `release-notes-writer` (không giấy phép). Viết lại từ danh sách ý có mang một số
+     câu chữ nguồn (`TK10.5`); 8-gram 0 trùng sau khi diễn đạt lại; chưa đạt quy trình phòng sạch, phải viết lại
+     thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo). -->
 
 > **Kết luận:** mỗi dòng của ghi chú phát hành phải truy được về một mục của **REPORT** (`VR`, `RF`, `CO`) —
 > điều REPORT không có thì không viết; sắp theo **tác động**, không theo commit; luôn có cách kiểm, cách quan sát và cách hoàn tác. Hai bản: **nội bộ** đủ
