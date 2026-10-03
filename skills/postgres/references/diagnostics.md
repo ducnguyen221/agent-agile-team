@@ -69,7 +69,7 @@ ALTER SYSTEM SET work_mem = '8MB';
 
 -- Timeouts
 ALTER SYSTEM SET idle_in_transaction_session_timeout = '30s';
-ALTER SYSTEM SET statement_timeout = '30s';
+ALTER ROLE app_role SET statement_timeout = '30s';  -- vai trò ứng dụng, không đặt toàn máy
 
 -- Monitoring
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
@@ -86,7 +86,7 @@ SELECT pg_reload_conf();
   giá trị đó. Tăng cho một phiên hay một vai trò trước khi tăng toàn máy.
 - Nhiều tiến trình ứng dụng thì đặt pool phía trước (pooler hoặc pool trong ứng dụng) thay vì nâng
   `max_connections`; mỗi kết nối tốn bộ nhớ riêng.
-- `statement_timeout` toàn máy có thể giết migration dài: đặt riêng cho vai trò ứng dụng, migration dùng vai
-  trò khác (skill `database-migrations`).
+- `statement_timeout` đặt toàn máy có thể giết migration dài: mẫu trên đặt riêng cho vai trò ứng dụng
+  (`app_role` là tên giả định, thay bằng vai trò thật), migration dùng vai trò khác (skill `database-migrations`).
 - Chạy những lệnh trên lên máy chủ dùng chung hay production: dừng, trình lệnh + ảnh hưởng + cách hoàn tác,
   chờ người dùng gật.
