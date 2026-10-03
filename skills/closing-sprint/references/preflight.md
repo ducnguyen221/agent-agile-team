@@ -23,6 +23,10 @@
 
 Sprint chỉ sửa tài liệu dùng hàng rất nhỏ / nhỏ của ma trận.
 
+**Thứ tự với REPORT.** Trong `SKILL.md`, tiền kiểm là bước 1, REPORT là bước 2. Vì thế lần chạy ở bước 1 soát mọi
+dòng của danh mục **trừ** dòng 4, 9 và 12 — ba dòng này đọc nội dung REPORT. Chúng được soát ở bước 2, ngay khi
+REPORT nháp viết xong và **trước** lời trình Cổng 2; khối kết luận ở mục 4 chỉ chốt sau khi cả ba dòng đã soát.
+
 ## 2. Ma trận cổng
 
 Cỡ theo `method/sizing.md`. Hàng dưới **cộng thêm** vào hàng trên; rủi ro chỉ đẩy xuống hàng nặng hơn, không
@@ -31,7 +35,8 @@ bao giờ kéo lên. Mọi `VR` phải do agent khác người làm chạy và *
 
 | Cỡ | Bằng chứng bắt buộc |
 |---|---|
-| Rất nhỏ, nhỏ | cả bộ test xanh trên đúng mốc · lint sạch · review toàn nhánh bởi agent khác (rất nhỏ được tự kiểm, ghi "chưa độc lập" — kết luận tối đa Đạt có điều kiện) · mỗi `SC` có `VR` Đạt |
+| Rất nhỏ | cả bộ test xanh trên đúng mốc · lint sạch · mỗi `SC` có `VR` Đạt · kiểm bởi agent khác chạy nhanh, hoặc tự kiểm ghi "chưa độc lập" (khi đó kết luận tối đa Đạt có điều kiện) |
+| Nhỏ | như rất nhỏ, nhưng không được tự kiểm: **cả hai** reviewer — Business Reviewer **và** Tech Reviewer, mỗi bên một lượt ngắn trên toàn nhánh (`method/sizing.md` mục 1) |
 | Vừa | + mỗi cờ tính năng có người chịu và giá trị mặc định · hành vi mới để lại dấu vết đọc được (log hoặc metric) · luồng mới có ít nhất một test chạy qua ranh giới thật · phần code mới và code sửa đạt ngưỡng coverage của dự án (mặc định 80 %) |
 | Lớn, hoặc `risk: high` | + mỗi nhãn trong `risk_tags` có reviewer chuyên đề của nó · đổi dữ liệu thì migration đã chạy thử trên bản sao (`database-migrations`, `references/rehearsal.md`) · đưa lên từng nấc, và đường quay lui **đã thử thật** — có lệnh cụ thể và ngưỡng để quyết định quay lui · quyết định kiến trúc nằm trong ADR (sprint không có quyết định nào thì PLAN nói vậy) |
 

@@ -53,7 +53,7 @@ và dễ sinh hai bản sửa đá nhau.
 3. **Giữ thang có nghĩa.** Gán Chặn cho mọi lỗi làm thang vô dụng: không còn cách nói cái gì phải làm trước.
    Hạ mức khi bằng chứng cho phép (có đường vòng, ít người dính, không chạm dữ liệu hay tiền) và ghi bằng
    chứng đó vào dòng `RQ-`. Lời người báo ("đã hứa với khách", "sếp bảo gấp") là áp lực, không phải bằng
-   chứng. Nhãn của hệ khác (`P0`, `S1`, "critical") chỉ để hiểu ý người báo — tra `method/severity.md` mục 4,
+   chứng. Nhãn của hệ khác (`P0`, `S1`, `critical`) chỉ để hiểu ý người báo — tra `method/severity.md` mục 4,
    trích trong dấu code; mức chính thức vẫn xếp theo bảng trên.
 4. **Ghi sổ.** Một dòng `RQ-` trong REQUESTS (mã lấy từ `next_id`, ngày ISO, trạng thái `mới`); cột Tóm tắt
    theo công thức:
