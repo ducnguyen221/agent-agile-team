@@ -3,47 +3,42 @@ skill: error-handling
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 37a98ce8788dece71d810e3f61773fb049a1d506
+skill_sha: 26b515dc240ba62dfd0a2f00c929c50eb1597cfb
 date: 2026-10-03
-result: pass 5/6
+result: pass 7/7 (6 tình huống + 1 ranh giới), 0 partial
+agent_ids:
+  questions: a26875bddfa622b57
+  answers: ab0f8e80278a0eeb5
 ---
 
 Đã đọc: `<gốc worktree>\skills\error-handling\SKILL.md`
 
-# Thử truy xuất — error-handling
+# Thử truy xuất - error-handling
 
-> **Kết luận:** 5/6 câu Đạt (ngưỡng ≥5/6). Câu 5 Không đạt vì thiếu nội dung: `description` hứa "cascading failures" nhưng
-> skill không có gì về timeout theo tầng, circuit breaker hay chặn lan truyền. Chủ thể tự nhận "trả lời một phần" và không bịa;
-> truy xuất ở năm câu còn lại đúng.
+> **Kết luận:** pass 7/7 (6 tình huống + 1 ranh giới); ngưỡng >=4/5 câu tình huống + câu ranh giới. Chạy lại (lượt 2) với bộ câu mới, người soạn
+> và chủ thể đều là agent mới. Chủ thể trỏ đúng mục ở cả 6 câu tình huống (những phần skill không phủ, chủ thể nói rõ và được ghi ở cuối file) và nhận
+> ra câu ranh giới thuộc `debugging`.
 
-Sáu câu hỏi do một agent **chưa đọc** skill soạn (chỉ biết `description` và lĩnh vực); nguyên văn và loại câu ở
-`questions.md` trong hồ sơ sprint của lớp riêng (`docs/plans/2026-10-03-agent-agile-team-wave-2/evidence/TK11-retrieval/`).
-Dòng "Đã đọc" chép từ bài trả lời của chủ thể, đoạn đầu đường dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng; nguyên văn ở hồ sơ sprint của lớp riêng.
-Cột "Mục kỳ vọng" do người chấm ghi **trước khi** mở bài trả lời của chủ thể. Câu 6 là câu ranh giới: đáp án của
-người soạn (`debugging`) đã được người chấm đối chiếu với bảng "Khi nào" của `bug-triage` (câu "vì sao nó hỏng" thì
-`debugging` trước) và `debugging` mục 1; chủ thể trả `bug-triage` rồi `debugging` thì được chấp nhận, vì cả hai đều là
-skill ngoài `error-handling` và chủ thể đã nêu `debugging` là bước tìm nguyên nhân gốc.
-
-Cách chấm "một phần": mục chủ thể trỏ có câu trả lời dùng được cho quyết định mà câu hỏi đặt ra thì Đạt, phần
-chi tiết phụ còn thiếu ghi ở mục cuối; chỉ Không đạt khi skill không có đáp án dùng được cho quyết định đó.
+Bảy câu hỏi do một agent **chưa đọc** skill soạn (chỉ biết `description` hiện hành, lĩnh vực và tên các skill khác); nguyên văn câu hỏi, file nháp
+"Mục kỳ vọng" (có mtime), bài trả lời trọn của chủ thể và id agent ở `evidence/TK12-green/error-handling-retrieval-rerun-2.md` trong hồ sơ sprint của lớp riêng
+(`docs/plans/2026-10-03-agent-agile-team-wave-2/`). Dòng "Đã đọc" chép từ bài trả lời của chủ thể, đoạn đầu đường dẫn (thư mục người dùng) lược thành
+`<gốc worktree>` vì repo chặn tên người dùng. Cột "Mục kỳ vọng" ghi vào file nháp **trước khi** giao chủ thể (thứ tự: nhận câu -> ghi kỳ vọng ->
+giao chủ thể -> chấm). Câu 7 là câu ranh giới: đáp án của người soạn là `debugging`.
 
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
-| 1 | Dịch vụ cần phân biệt lỗi nghiệp vụ (hết hàng) với lỗi hạ tầng (DB mất kết nối). Nên tổ chức hệ thống exception như thế nào? | `SKILL.md` › 2. Mẫu lõi (+ `references/python-go-patterns.md` › 1. Python) | `SKILL.md` › 2. Mẫu lõi; `references/python-go-patterns.md` › Phân cấp ngoại lệ | Đạt (một phần: không nói riêng tách nghiệp vụ và hạ tầng) |
-| 2 | Client gọi API giao hàng bên thứ ba hay trả 503 và timeout lẻ tẻ. Retry bao nhiêu lần, backoff kiểu nào, và lỗi nào không nên retry? | `references/retry-and-user-messages.md` › 1. Retry (+ `SKILL.md` › 2) | `references/retry-and-user-messages.md` › 1. Retry — Python | Đạt |
-| 3 | Lỗi `ValidationError` trong service đang bị trả ra thành 500 kèm stack trace cho người dùng. Ánh xạ sang response và thông điệp hiển thị cho người dùng nên thế nào? | `SKILL.md` › 2 + `references/python-go-patterns.md` › Handler toàn cục FastAPI + `references/retry-and-user-messages.md` › 3 | `references/python-go-patterns.md` › Handler toàn cục FastAPI; `references/retry-and-user-messages.md` › 3. Câu báo lỗi cho người dùng | Đạt |
-| 4 | Trong code có khối `except Exception: return []` quanh hàm lấy danh sách khuyến mãi. Fallback này có chấp nhận được không, và log lỗi thế nào cho đúng? | `SKILL.md` › 1 nguyên tắc 4, 3, 5 (+ agent `silent-failure-hunter`) | `SKILL.md` › 1. Năm nguyên tắc (mục 4), 3. Lỗi không được làm lộ secret; agent `silent-failure-hunter` | Đạt (một phần: không có tiêu chí khi nào fallback hợp lệ) |
-| 5 | Service A gọi B gọi C, khi C chậm thì cả chuỗi sập dây chuyền. Cần xử lý lỗi theo hướng nào để chặn lan truyền? | không có chỗ trả lời; `description` hứa "cascading failures" | `SKILL.md` › 2. Mẫu lõi (trần retry), chủ thể ghi "chỉ chạm gián tiếp, không đủ" | **Không đạt (thiếu nội dung)** |
-| 6 | Production báo `KeyError: 'customer_id'` ở `checkout.py`, chưa biết nguyên nhân gốc là do dữ liệu hay do code. Bắt đầu từ đâu? | mục khác: skill `debugging` | mục khác: `bug-triage` rồi `debugging` | Đạt |
+| 1 | Hàm `charge_customer()` hiện bắt `except Exception as e: logger.error(str(e))` rồi `raise` lại ở ba tầng khác nhau, nên mỗi lỗi thanh toán thấy log lặp 3 dòng mà vẫn không biết là thẻ bị từ chối hay cổng thanh toán sập. Nên bắt và ghi log ở đâu, bao nhiêu lần, và cần giữ lại thông tin gì? | `SKILL.md` › 3. Lỗi không được làm lộ secret (log loại lỗi + mã, không `str(exc)` thô) + › 2. Mẫu lõi ('một handler ở biên HTTP', lỗi lạ → log rồi 500) + › 1 nguyên tắc 4 + › 5 danh mục (log có ngữ cảnh). KHÔNG có quy tắc tường minh 'log đúng một lần' | `SKILL.md` › 1, › 2, › 3, › 5; `references/python-go-patterns.md` › 1 | Đạt |
+| 2 | Team đang định nghĩa mã lỗi cho API đặt phòng (khoảng 25 loại: phòng đã hết, sai ngày, token hết hạn, quota…). Lúc đầu mỗi chỗ tự `raise ValueError("...")` một kiểu, giờ frontend không biết lỗi nào cho bấm thử lại, lỗi nào phải đổi dữ liệu. Nên thiết kế mã lỗi và phân loại thế nào để client xử lý được? | `SKILL.md` › 1 nguyên tắc 2 (lỗi có kiểu) và › 2. Mẫu lõi (`AppError` gốc có `code` + `status_code`); `references/python-go-patterns.md` › 1. Python › Phân cấp ngoại lệ. Cờ 'có thể thử lại' không rõ có trong skill | `SKILL.md` › 1, › 2; `references/python-go-patterns.md` › 1 (Phân cấp ngoại lệ); `references/retry-and-user-messages.md` › 1 | Đạt |
+| 3 | Job đồng bộ đơn hàng gọi API kế toán, lỗi 429 thì hiện đang `while True: sleep(1)` gọi lại, lúc cao điểm hơn 200 worker cùng dội vào làm bên kia sập lâu hơn. Sửa lại thế nào cho khỏi thành bão request, và khi nào thì nên bỏ cuộc? | `references/retry-and-user-messages.md` › 1. Retry — Python (backoff mũ + jitter, trần số lần, retry 5xx/429/mạng, không 4xx khác); `SKILL.md` › 2. Mẫu lõi (chỉ retry lỗi thoáng qua) | `SKILL.md` › 2; `references/retry-and-user-messages.md` › 1. Retry — Python, › 2. Retry — TypeScript | Đạt |
+| 4 | App mobile hiện hiện nguyên chuỗi `psycopg2.OperationalError: connection refused to 10.0.3.12:5432` lên toast cho khách. Viết lại thông báo thế nào để khách biết cần làm gì tiếp mà không lộ chi tiết nội bộ, và chi tiết kỹ thuật thì để ở đâu? | `references/retry-and-user-messages.md` › 3. Câu báo lỗi cho người dùng (một bảng tra mã → câu) + `SKILL.md` › 1 nguyên tắc 3 và › 3 (không đưa chuỗi lỗi DB ra người dùng/log) | `SKILL.md` › 3, › 1; `references/retry-and-user-messages.md` › 3; `references/python-go-patterns.md` › 1 | Đạt |
+| 5 | Review PR thấy `try: send_email(user) except: pass` sau bước tạo tài khoản, và ở chỗ khác `int(price) if price else 0` để "cho khỏi lỗi". Em nên nhận xét gì, và đâu là chỗ chấp nhận được, đâu là chỗ phải để lỗi nổ ra? | `SKILL.md` › 1 nguyên tắc 1 và 4 + › 5. Danh mục (không `except:` trần; mọi except xử lý/ném lại/log) + › 4 (giao agent `silent-failure-hunter`). Tiêu chí 'fallback chấp nhận được khi nào' chỉ gián tiếp | `SKILL.md` › 1, › 4 (agent `silent-failure-hunter`), › 5 | Đạt |
+| 6 | Worker xử lý hàng đợi nhận một message hỏng, parse JSON lỗi, hiện cứ ném exception rồi queue giao lại message đó vô hạn, kẹt luôn 4.000 message phía sau. Nên xử lý lỗi theo hướng nào: bỏ, gửi sang hàng chờ lỗi, hay thử lại? | KHÔNG có mục chuyên (hàng đợi / dead-letter / poison message không có trong skill). Gần nhất: `SKILL.md` › 2 (chỉ retry lỗi thoáng qua, có trần) và `references/retry-and-user-messages.md` › 1. Đạt nếu agent nói rõ khoảng trống | `SKILL.md` › 1, › 2; `references/retry-and-user-messages.md` › 1; nói rõ skill không phủ hàng đợi / dead-letter | Đạt |
+| 7 | Sau khi deploy, bảng điều khiển báo tỷ lệ response 500 tăng từ 0,2% lên 6% ở endpoint `/orders`, và nhóm đang cãi nhau là do bản deploy hay do DB. Cần quy trình gì để tìm ra nguyên nhân gốc trước khi đụng vào code? | mục khác: skill `debugging` (`SKILL.md` › 4 'Liên quan': `debugging` (truy lỗi lan tầng)). Không phải bản thân error-handling | mục khác: `debugging` (từ `SKILL.md` › 4, dòng Liên quan) | Đạt |
 
 ## Thiếu nội dung / mâu thuẫn
 
-- **Thiếu nội dung, quan trọng.** `skills/error-handling/SKILL.md:3` (`description`: "reviewing code for … cascading failures"): thân skill
-  không có timeout cho từng lời gọi ra ngoài, circuit breaker, bulkhead, hay fail-fast; dòng 38-39 chỉ nói retry có trần, dòng 100-101
-  chỉ giao agent `silent-failure-hunter` rà "lỗi không lan lên bên gọi" (hướng ngược lại). Đề xuất: thêm mục "Chặn lan truyền" khoảng 10
-  dòng (timeout mỗi lời gọi, circuit breaker, giới hạn đồng thời, trả lỗi nhanh khi phụ thuộc đã hỏng), hoặc bỏ cụm "cascading failures" khỏi
-  `description`.
-- `skills/error-handling/SKILL.md:34-40` (mẫu lõi): có phân cấp `AppError` nhưng không nói rõ cách tách lỗi nghiệp vụ khỏi lỗi hạ tầng (câu 1).
-  Đề xuất: một dòng nêu hai nhánh `DomainError` (4xx) và `InfrastructureError` (5xx) dưới `AppError`.
-- `skills/error-handling/SKILL.md:28` và `:111`: nguyên tắc "không nuốt lỗi" có, nhưng không nêu khi nào một fallback là hợp lệ (câu 4).
-  Đề xuất: một dòng điều kiện (fallback phải được log, có đo, và không che dữ liệu sai thành dữ liệu rỗng).
+- Không có chỗ nào `description` hiện hành hứa mà thân skill không có.
+- Hàng đợi / thông điệp độc / hàng chờ lỗi (dead-letter): không có (câu 6). Skill không trỏ sang skill khác.
+- Quy tắc 'ghi log đúng một lần ở biên' không được nêu tường minh; chủ thể suy ra từ 'một handler ở biên HTTP' (câu 1).
+- Phân loại ~25 mã lỗi và cờ 'có thể thử lại' cho client: không có phương pháp; có `is_retriable` ở `references/retry-and-user-messages.md` nhưng là hàm phía bên gọi (câu 2).
+- Giới hạn tốc độ phía client / điều phối chung nhiều worker / circuit breaker: không có (câu 3). Khớp với việc `description` đã bỏ cụm 'cascading failures' ở vòng sửa trước.
