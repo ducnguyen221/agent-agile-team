@@ -32,9 +32,9 @@ def upstream_shas() -> set:
     return set(re.findall(r"\b[0-9a-f]{40}\b", c.read_text(REPO / "UPSTREAM.md")))
 
 
-def rewrite_list() -> set:
-    """Tên skill ở cột đầu bảng mục 3 ("phải viết lại trước khi công khai") của THIRD_PARTY.md."""
-    text = c.read_text(REPO / "THIRD_PARTY.md")
+def rewrite_list(text: str | None = None) -> set:
+    """Tên skill ở cột đầu bảng mục 3 ("phải viết lại trước khi công khai") của THIRD_PARTY.md (hoặc của `text`)."""
+    text = c.read_text(REPO / "THIRD_PARTY.md") if text is None else text
     section = re.search(r"^## 3\..*?(?=^## |\Z)", text, re.S | re.M)
     assert section, "THIRD_PARTY.md thiếu mục 3"
     names = set()
@@ -96,6 +96,17 @@ def test_rewrite_flag_matches_third_party():
     listed = rewrite_list()  # thiếu mục 3 thì tự báo lỗi; bảng rỗng hợp lệ khi không skill nào mang cờ (SC7)
     assert flagged == listed, f"cờ true nhưng thiếu ở THIRD_PARTY: {sorted(flagged - listed)}; " \
                               f"có ở THIRD_PARTY nhưng cờ false: {sorted(listed - flagged)}"
+
+
+def test_rewrite_list_reads_a_table_row():
+    text = "\n".join(["## 2. Khác", "", "| `y` | a |", "", "## 3. Phải viết lại", "", "| Skill | Nguồn |", "|---|---|",
+                        "| `x` | private |", "", "## 4. Hết", ""])
+    assert rewrite_list(text) == {"x"}
+
+
+def test_rewrite_list_fails_without_section_3():
+    with pytest.raises(AssertionError, match="mục 3"):
+        rewrite_list("\n".join(["## 2. Khác", "", "| `x` | private |", ""]))
 
 
 # Sổ theo dõi nguồn gốc (UPSTREAM.md): nguồn sự thật duy nhất để kiểm bản mới (docs/updating-from-upstream.md).
