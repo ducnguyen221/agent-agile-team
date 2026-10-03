@@ -1,8 +1,8 @@
 # Pipeline CI/CD, health check, cấu hình môi trường, lệnh hoàn tác
 
 > **Kết luận:** PR chạy lint → kiểm kiểu → test; gộp vào nhánh chính thì build image gắn tag theo commit,
-> lên staging, smoke test, rồi production qua môi trường có người duyệt. Health check tách đơn giản và
-> chi tiết; cấu hình kiểm bằng schema lúc khởi động. Lệnh hoàn tác production chỉ chạy khi người dùng gật.
+> lên staging, smoke test, rồi production qua môi trường có người duyệt. Health check tách
+> liveness, readiness và chi tiết nội bộ; cấu hình kiểm bằng schema lúc khởi động. Lệnh hoàn tác production chỉ chạy khi người dùng gật.
 
 ## 1. GitHub Actions (pipeline chuẩn)
 
@@ -53,18 +53,41 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
+  deploy-staging:
     needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - name: Deploy the image built above to staging
+        run: |
+          # Platform-specific command, e.g.:
+          # kubectl set image deployment/app app=ghcr.io/${{ github.repository }}:${{ github.sha }}
+          echo "Deploying ${{ github.sha }} to staging"
+
+  smoke:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke test staging
+        run: ./scripts/smoke.sh "${{ vars.STAGING_URL }}"   # fails the run on any broken critical path
+
+  deploy:
+    needs: smoke
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     environment: production        # require reviewer approval on this environment
     steps:
-      - name: Deploy to production
+      - name: Promote the same image to production (no rebuild)
         run: |
           # Platform-specific command, e.g.:
           # kubectl set image deployment/app app=ghcr.io/${{ github.repository }}:${{ github.sha }}
-          echo "Deploying ${{ github.sha }}"
+          echo "Deploying ${{ github.sha }} to production"
 ```
+
+Production nhận **đúng image** `:${{ github.sha }}` đã qua staging và smoke test, không build lại. Môi trường
+`production` đặt người duyệt; agent không tự kích hoạt job này (SKILL mục 4).
 
 Workflow CI chi tiết hơn: skill `github-ops`.
 
@@ -80,10 +103,21 @@ Merged to main:
 
 ## 3. Endpoint health
 
+Mỗi probe một endpoint, vì mỗi probe hỏi một câu khác nhau (SKILL mục 2 bước 3):
+
 ```typescript
-// Simple health check
-app.get("/health", (req, res) => {
+// Liveness: is the process alive? Never checks dependencies,
+// otherwise a flaky database restarts every instance at once.
+app.get("/livez", (req, res) => {
   res.status(200).json({ status: "ok" });
+});
+
+// Readiness: can this instance serve traffic now? Checks only the
+// dependencies a request cannot succeed without; 503 takes the instance
+// out of the load balancer without restarting it.
+app.get("/readyz", async (req, res) => {
+  const db = await checkDatabase();
+  res.status(db.status === "ok" ? 200 : 503).json({ status: db.status });
 });
 
 // Detailed health check (internal monitoring only)
@@ -115,30 +149,30 @@ async function checkDatabase(): Promise<HealthCheck> {
 }
 ```
 
-`/health/detailed` không mở công khai; nó lộ phụ thuộc và phiên bản.
+`/health/detailed` chỉ cho giám sát nội bộ, không gắn vào probe và không mở công khai; nó lộ phụ thuộc và phiên bản.
 
 ## 4. Probe Kubernetes
 
 ```yaml
-livenessProbe:
+livenessProbe:            # process alive only
   httpGet:
-    path: /health
+    path: /livez
     port: 3000
   initialDelaySeconds: 10
   periodSeconds: 30
   failureThreshold: 3
 
-readinessProbe:
+readinessProbe:           # essential dependencies reachable
   httpGet:
-    path: /health
+    path: /readyz
     port: 3000
   initialDelaySeconds: 5
   periodSeconds: 10
   failureThreshold: 2
 
-startupProbe:
+startupProbe:             # holds liveness off during a slow start
   httpGet:
-    path: /health
+    path: /livez
     port: 3000
   initialDelaySeconds: 0
   periodSeconds: 5

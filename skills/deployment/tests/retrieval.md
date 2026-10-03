@@ -44,3 +44,4 @@ duyệt thật, có ảnh chụp) và nhận là đúng.
   smoke test → production, production nhận đúng image đã qua staging". Đề xuất: thêm job `deploy-staging` + `smoke` trước `deploy`, hoặc ghi
   chú YAML là rút gọn.
 - Chủ đề `description` đều có mục trả lời; không có chỗ nào thiếu nội dung.
+- Kết quả đo ở `skill_sha` cũ `0c0f87c992a2bcf7e684e6a6fc910e81a63aaf30`; sửa RF91–RF92 (`references/cicd-health-config.md`: probe tách `/livez` ↔ `/readyz`, YAML thêm `deploy-staging` + `smoke`) sau đó, chạy lại ở `TK12`.
