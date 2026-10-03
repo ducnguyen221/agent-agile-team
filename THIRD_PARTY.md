@@ -44,6 +44,12 @@ viết lại để không phải viết lại cả skill.
 | `bug-triage` | `SKILL.md` (cả skill; `tests/pressure.md` tự viết, giữ được) | `bug-triager` |
 | `database-migrations` | `references/rehearsal.md` (`SKILL.md` chỉ trỏ tới, giữ được) | `migration-rehearsal` |
 | `closing-sprint` | `references/preflight.md`, `references/release-notes.md` | `preflight-gate`, `release-notes-writer` |
+| `roles/executor/qa.md` (thẻ vai, không có cờ) | mục 4 cụm "bảng phủ"; mục 5 gạch đầu dòng "bảng phủ `FR` → `VR` theo tầng test" và gạch đầu dòng "`FR` chưa có test, `SC` chưa đo được" | `test-mapper` |
+| `scripts/README.md` (tài liệu, không có cờ) | bảng "Luật của `check`", cột "Bắt gì" của bốn luật truy vết `task-without-trace`, `report-sc-without-vr`, `report-fr-without-vr`, `xref-missing` | `rtm-auditor` |
+
+Hai dòng cuối không phải skill nên không có cờ `rewrite_before_public`; bảng này là nơi duy nhất theo dõi
+chúng. Văn bản gốc của mọi mục trong bảng đã **gỡ khỏi nhánh** và thay bằng khung "đang viết lại (`TK10`)";
+bản mới viết từ danh sách ý, không mở bản gốc.
 
 Trước khi công khai: viết lại các file trên từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
 `source`/`license` và dòng tương ứng ở `UPSTREAM.md`.

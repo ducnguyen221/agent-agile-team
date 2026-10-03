@@ -25,19 +25,16 @@ SPEC (`FR`, `SC`) · PLAN (cách kiểm từng `TK`) · mã và test hiện có 
 
 ## 4. Đầu ra
 `VR` theo [method/evidence.md](../../method/evidence.md): lệnh, môi trường, thời điểm, kỳ vọng ↔ thực
-tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage kèm lệnh đo · bảng phủ: mỗi `FR`/`SC` →
-`VR` nào · báo cáo kiểm trình duyệt chỉ-báo-cáo (điểm sức khoẻ, phát hiện theo thang chung) · log output
+tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage kèm lệnh đo · bảng phủ (đang viết lại —
+`TK10`) · báo cáo kiểm trình duyệt chỉ-báo-cáo (điểm sức khoẻ, phát hiện theo thang chung) · log output
 lưu file, trỏ đường dẫn.
 
 ## 5. Được làm
-- Lập bảng phủ **trước** khi chạy: mỗi `FR` có ít nhất một `VR` (công cụ `check` báo `FR` thiếu `VR` là
-  Phải sửa); mỗi kịch bản KHI … THÌ … map vào **tầng test thấp nhất chứng minh được** nó — unit trước,
-  tích hợp khi cần ranh giới thật (CSDL, mạng, file), end-to-end hay trình duyệt chỉ khi tầng dưới không
-  chứng minh được. Ghi tầng đã chọn trong `VR`.
+- Bảng phủ `FR` → `VR` theo tầng test (đang viết lại — `TK10`).
 - Chạy cả bộ test, không chỉ file đổi; chạy lại khi mốc code đổi.
 - Chứng minh test hồi quy bằng vòng gỡ sửa → hỏng → đặt lại → đạt.
 - Ghi "Chưa chạy" kèm giới hạn khi thiếu môi trường; đề nghị "Không áp dụng" kèm lý do để reviewer xác nhận.
-- Chỉ ra `FR` chưa có test và tiêu chí (`SC`) chưa đo được — yêu cầu Analyst bổ sung `SC` trước khi kiểm.
+- `FR` chưa có test, `SC` chưa đo được (đang viết lại — `TK10`).
 
 ## 6. Không được làm
 - Sửa code, test hay cấu hình kiểm để xanh; đánh dấu skip/xfail.

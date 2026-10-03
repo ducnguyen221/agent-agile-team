@@ -76,11 +76,11 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `id-unknown-prefix` | Phải sửa | Mục được định nghĩa bằng tiền tố hai chữ cái ngoài bảng mã (`YC2`); không áp cho `skills/*/tests/` |
 | `id-wrong-doc` | Phải sửa | Mục định nghĩa bằng tiền tố của tài liệu khác (`BR1` trong PLAN) |
 | `id-list-lead` | Ghi chú | Bảng có cột đầu "Mã" mà dòng không trống ngay trên (bỏ qua comment) không có chữ in đậm — thiếu câu dẫn "tài liệu + nghĩa của mã" (`templates/README.md` mục 5); khối "Đang mở" do `index` sinh được miễn |
-| `xref-missing` | Phải sửa | Nhắc tới mã không được định nghĩa ở tài liệu sở hữu (tìm qua `links`) |
+| `xref-missing` | Phải sửa | (đang viết lại — `TK10`; luật đang chạy không đổi, xem `check.py`) |
 | `xref-unresolved` | Ghi chú | Không tìm được tài liệu sở hữu qua `links` để đối chiếu |
-| `task-without-trace` | Phải sửa | `TK` (tiêu đề hoặc gạch đầu dòng in đậm) không trỏ `FR`/`SC`; `TK1.1` kế thừa `TK1`, mồ côi thì báo |
-| `report-sc-without-vr` | Phải sửa | `SC` của SPEC không xuất hiện trong dòng `VR` nào của REPORT (hoặc SPRINT) |
-| `report-fr-without-vr` | Phải sửa | REPORT: `FR` của SPEC không có dòng `VR` nào trỏ tới `FRn` hoặc kịch bản `FRn.m`; miễn khi dòng định nghĩa ở SPEC ghi trạng thái `bỏ` ("(bỏ)" / "— bỏ" cuối dòng) hoặc một dòng ghi `NOT_APPLICABLE` kèm lý do |
+| `task-without-trace` | Phải sửa | (đang viết lại — `TK10`; luật đang chạy không đổi, xem `check.py`) |
+| `report-sc-without-vr` | Phải sửa | (đang viết lại — `TK10`; luật đang chạy không đổi, xem `check.py`) |
+| `report-fr-without-vr` | Phải sửa | (đang viết lại — `TK10`; luật đang chạy không đổi, xem `check.py`) |
 | `self-review` | Chặn | Một nhãn agent vừa giữ vai thực thi vừa giữ vai kiểm định trong `roles` |
 | `qa-not-independent` | Phải sửa | Có `VR` mà `qa` trùng nhãn `implementer`/`architect` không ghi "tự kiểm, chưa độc lập"; hoặc có ghi mà `verdict: pass` |
 | `roles-invalid` | Phải sửa | `roles` sai hình: vai lạ, tier ngoài `T1`–`T3`, thiếu nhãn agent |
