@@ -1,0 +1,161 @@
+"""Máy kiểm nợ thử (FR11.5, SC5): mọi skill kỷ luật có `tests/pressure.md`, mọi skill tham chiếu
+(`metadata.kind: reference`) có `tests/retrieval.md`; file thử không còn ở trạng thái chưa chạy; file thử từ ngày bắt
+đầu sprint có `skill_sha` + `tier`, và `skill_sha` khớp băm cây skill trừ `tests/` tính ở HEAD (công thức:
+`git ls-tree HEAD:skills/<tên>` bỏ mục `tests`, rồi `git mktree`): skill đổi sau khi thử thì test đỏ, đến khi thử lại.
+"""
+
+from __future__ import annotations
+
+import datetime
+import re
+import subprocess
+
+import pytest
+
+from conftest import REPO
+import _common as c
+
+# Ngày bắt đầu sprint wave-2: file thử có `date` từ ngày này trở đi phải mang `skill_sha` và `tier` (FR10.5).
+SPRINT_START = datetime.date(2026, 10, 3)
+NOT_RUN = re.compile(r"not run|pending|chưa chạy|dự kiến", re.I)
+SKILLS = sorted(p.parent.name for p in REPO.glob("skills/*/SKILL.md"))
+
+
+def front(path):
+    """Frontmatter của file thử. Khoá `agent_ids` là bản ghi định danh agent (map lồng nhau, tập con YAML của
+    `_common` không đọc được) chứ không phải khoá kiểm — bỏ khối đó trước khi đọc."""
+    lines = c.read_text(path).splitlines()
+    assert lines and lines[0] == "---", "thiếu frontmatter"
+    kept, skipping = [], False
+    for i, line in enumerate(lines):
+        if i > 0 and line == "---":
+            kept.extend(lines[i:])
+            break
+        if line.startswith("agent_ids:"):
+            skipping = True
+            continue
+        if skipping and (line.startswith(" ") or not line.strip()):
+            continue
+        skipping = False
+        kept.append(line)
+    fm = c.parse_frontmatter("\n".join(kept) + "\n")
+    assert fm is not None, "thiếu frontmatter"
+    return fm.data
+
+
+def head(value) -> str:
+    """Phần đầu của một khoá văn tự do (RF67): cắt ở `;`, `(` hoặc ` — `, nên chú thích sau đó không bị coi là
+    trạng thái ("claude-sonnet-5-5 (all runs, …)" → "claude-sonnet-5-5")."""
+    return re.split(r";|\(| — ", str(value), maxsplit=1)[0].strip()
+
+
+def is_reference(skill: str) -> bool:
+    meta = front(REPO / "skills" / skill / "SKILL.md").get("metadata") or {}
+    return isinstance(meta, dict) and meta.get("kind") == "reference"
+
+
+def tree_hash(skill: str):
+    """Băm cây thư mục skill TRỪ `tests/` ở HEAD, hoặc None khi không có git/HEAD."""
+    try:
+        ls = subprocess.run(["git", "ls-tree", f"HEAD:skills/{skill}"], cwd=REPO, capture_output=True, timeout=60)
+        if ls.returncode != 0:
+            return None
+        rows = [r for r in ls.stdout.split(b"\n") if r and r.split(b"\t", 1)[1] != b"tests"]
+        mk = subprocess.run(["git", "mktree"], cwd=REPO, input=b"\n".join(rows) + b"\n", capture_output=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return mk.stdout.decode().strip() if mk.returncode == 0 else None
+
+
+def problems(data: dict) -> list:
+    """Lỗi của một file thử (không gồm so `skill_sha` với cây skill)."""
+    found = []
+    for key in ("result", "model"):
+        if key not in data or not str(data[key]).strip():
+            found.append(f"thiếu khoá `{key}`")
+        elif NOT_RUN.search(head(data[key])):
+            found.append(f"`{key}` ghi chưa chạy: {head(data[key])!r}")
+    day = data.get("date")
+    try:
+        day = day if isinstance(day, datetime.date) else datetime.date.fromisoformat(str(day))
+    except ValueError:
+        found.append(f"`date` không phải ngày hợp lệ: {day!r}")
+    else:
+        if day >= SPRINT_START:
+            if not re.fullmatch(r"[0-9a-f]{40}", str(data.get("skill_sha") or "")):
+                found.append("thiếu `skill_sha` (40 ký tự hex) dù date từ ngày bắt đầu sprint")
+            if not str(data.get("tier") or "").strip():
+                found.append("thiếu `tier` dù date từ ngày bắt đầu sprint")
+    return found
+
+
+def test_skills_found():
+    assert len(SKILLS) >= 28
+
+
+@pytest.mark.parametrize("skill", SKILLS)
+def test_skill_has_its_test_file(skill):
+    name = "retrieval.md" if is_reference(skill) else "pressure.md"
+    assert (REPO / "skills" / skill / "tests" / name).is_file(), \
+        f"skill {'tham chiếu' if name == 'retrieval.md' else 'kỷ luật'} `{skill}` thiếu tests/{name}"
+
+
+TEST_FILES = [p for s in SKILLS for n in ("pressure.md", "retrieval.md") for p in [REPO / "skills" / s / "tests" / n] if p.is_file()]
+IDS = [p.relative_to(REPO).as_posix() for p in TEST_FILES]
+
+
+@pytest.mark.parametrize("path", TEST_FILES, ids=IDS)
+def test_test_file_was_run(path):
+    assert not problems(front(path))
+
+
+@pytest.mark.parametrize("path", TEST_FILES, ids=IDS)
+def test_skill_sha_matches_skill_tree(path):
+    data = front(path)
+    if not data.get("skill_sha"):
+        pytest.skip("file thử không ghi skill_sha (date trước ngày bắt đầu sprint)")
+    actual = tree_hash(path.parent.parent.name)
+    if actual is None:
+        pytest.skip("không tính được băm cây skill ở HEAD (không có git)")
+    assert str(data["skill_sha"]) == actual, \
+        f"skill đổi sau khi thử, chạy lại: ghi {data['skill_sha']}, cây skill trừ tests/ ở HEAD là {actual}"
+
+
+# Đột biến (SC5): mỗi kiểu hỏng phải bị bắt đúng lý do.
+GOOD = {"result": "3/3 GREEN pass; RED 0/3 pass (3 partial)", "model": "claude-sonnet-5-5 (all runs)",
+        "date": "2026-10-03", "tier": "T3", "skill_sha": "0" * 40}
+
+
+def test_good_front_has_no_problem():
+    assert problems(GOOD) == []
+
+
+@pytest.mark.parametrize("key,value", [("result", "pending"), ("result", "Chưa chạy"), ("result", "Not run: no browser"),
+                                       ("result", "dự kiến 3/3"), ("model", "PENDING"), ("model", "chưa chạy (đợi)")])
+def test_unrun_state_is_caught(key, value):
+    assert any(f"`{key}` ghi chưa chạy" in p for p in problems({**GOOD, key: value}))
+
+
+def test_annotation_after_head_is_not_a_state():
+    assert problems({**GOOD, "result": "pass 5/6; 1 câu chưa chạy lại vì pending review"}) == []
+
+
+@pytest.mark.parametrize("bad", ["2026-13-40", "hôm qua", ""])
+def test_invalid_date_is_caught(bad):
+    assert any("date" in p for p in problems({**GOOD, "date": bad}))
+
+
+def test_new_file_needs_sha_and_tier_but_old_file_does_not():
+    assert any("skill_sha" in p for p in problems({k: v for k, v in GOOD.items() if k != "skill_sha"}))
+    assert any("tier" in p for p in problems({k: v for k, v in GOOD.items() if k != "tier"}))
+    old = {k: v for k, v in GOOD.items() if k not in ("skill_sha", "tier")}
+    assert problems({**old, "date": "2026-10-01"}) == []
+
+
+def test_tree_hash_ignores_tests_dir():
+    skill = SKILLS[0]
+    first = tree_hash(skill)
+    if first is None:
+        pytest.skip("không có git")
+    assert re.fullmatch(r"[0-9a-f]{40}", first)
+    assert first == tree_hash(skill)
