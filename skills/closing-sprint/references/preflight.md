@@ -24,7 +24,7 @@
 Sprint chỉ sửa tài liệu dùng hàng rất nhỏ / nhỏ của ma trận.
 
 **Thứ tự với REPORT.** Trong `SKILL.md`, tiền kiểm là bước 1, REPORT là bước 2. Vì thế lần chạy ở bước 1 soát mọi
-dòng của danh mục **trừ** dòng 4, 9 và 12 — ba dòng này đọc nội dung REPORT. Chúng được soát ở bước 2, ngay khi
+dòng của danh mục **trừ** dòng 4, 9 và 12 — ba dòng này đọc phần REPORT chỉ có sau bước 2. Chúng được soát ở bước 2, ngay khi
 REPORT nháp viết xong và **trước** lời trình Cổng 2; khối kết luận ở mục 4 chỉ chốt sau khi cả ba dòng đã soát.
 
 ## 2. Ma trận cổng
@@ -68,7 +68,7 @@ Kết quả máy chỉ chứng minh hồ sơ **nhất quán**; nó không chứn
 |---|---|
 | Đạt | mọi ô của hàng ma trận và mọi dòng danh mục đạt |
 | Đạt có điều kiện | còn lại chỉ Nên sửa đã hoãn, Phải sửa người dùng đã chấp nhận ghi rõ, hoặc tự kiểm ở việc rất nhỏ — mỗi điều kiện là `CO` có chủ và mốc |
-| Không đạt | còn bất kỳ ô nào khác; hoặc điều kiện thiếu chủ / mốc; hoặc dòng 7, test bị tắt, rủi ro cao thiếu hoàn tác |
+| Không đạt | còn bất kỳ ô nào khác; hoặc điều kiện thiếu chủ / mốc; hoặc dòng 7, test bị tắt, rủi ro cao mà đường quay lui chưa từng được thử |
 
 Ghi đúng ba dòng vào nhật ký PROGRESS:
 
