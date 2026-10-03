@@ -17,8 +17,7 @@ dự kiến").
   cho `diagnosing.md`): `deployment` (+ `references/docker.md`), `fastapi`, `postgres` (+
   `references/diagnostics.md`), bốn agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`,
   `rag-pipeline-reviewer`, và `writing-skills/references/diagnosing.md`.
-- Viết lại 7 đích từ danh sách ý lấy từ nguồn private, có mang một số câu chữ nguồn; 8-gram 0 trùng sau khi diễn đạt
-  lại; chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo):
+- Viết lại 7 đích từ danh sách ý lấy từ nguồn private, có mang một số câu chữ nguồn; 8-gram bằng 0 sau khi loại stoplist 45 cụm chung (trước khi loại: còn cụm trùng ở 5/7 đích); chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo):
   `bug-triage`, `adr`,
   `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md` và
   `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn luật truy vết trong `scripts/README.md`. Cờ

@@ -65,7 +65,7 @@ Bảng dưới có 7 nguồn **tài liệu web** — không có SHA, nên cột 
 | Tài liệu Anthropic (hướng dẫn prompting, context engineering, Claude Code output styles) | ý, chỉ trỏ link | `response-style`, `token-economy` | 2026-10-01 | mỗi lượt — hành vi harness đổi theo bản |
 
 Nguồn **private** (không giấy phép) không theo dõi ở đây: lớp riêng của môi trường giữ bản đồ và đường theo
-dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đợt 1 và `THIRD_PARTY.md` mục 3. SPR-02 đã viết lại 7 đích từ danh sách ý lấy từ nguồn private, có mang một số câu chữ nguồn, 8-gram 0 trùng sau khi diễn đạt lại, chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo) (`bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md` và `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn luật truy vết trong `scripts/README.md`), nên cờ `rewrite_before_public` không còn `true` ở đâu.
+dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đợt 1 và `THIRD_PARTY.md` mục 3. SPR-02 đã viết lại 7 đích từ danh sách ý lấy từ nguồn private, có mang một số câu chữ nguồn; 8-gram bằng 0 sau khi loại stoplist 45 cụm chung (trước khi loại: còn cụm trùng ở 5/7 đích); chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2` (viết lại phòng sạch trước khi công khai), `RQ-021` ở hồ sơ riêng của chủ repo). Đích: `bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md` và `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn luật truy vết trong `scripts/README.md`. Cờ `rewrite_before_public` giữ `false` theo quyết định của chủ repo; mốc viết lại là `CO2`.
 
 ## Nhật ký kiểm bản mới
 

@@ -1,7 +1,7 @@
 # Diễn tập migration
 
 <!-- Nguồn ý: bộ skill quy trình private, `migration-rehearsal` (không giấy phép). Viết lại từ danh sách ý có mang một số
-     câu chữ nguồn (`TK10.4`); 8-gram 0 trùng sau khi diễn đạt lại; chưa đạt quy trình phòng sạch, phải viết lại
+     câu chữ nguồn (`TK10.4`); chưa đạt quy trình phòng sạch, phải viết lại
      thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo). -->
 
 > **Kết luận:** trước khi xin chạy thật bất kỳ migration nào từ rủi ro vừa trở lên, chạy thử nó trọn vẹn trên

@@ -176,3 +176,73 @@ def test_catalog_detects_missing_row():
     mutated = "\n".join(l for l in text.splitlines() if not l.startswith("| `obra/superpowers-lab`"))
     assert "obra/superpowers-lab" in catalog_sources(text)
     assert "obra/superpowers-lab" not in catalog_sources(mutated)
+
+
+# Số đo trùng câu chữ nguồn (8-gram) chỉ đúng kèm điều kiện đo (X7, RF của re-review lần 2): số 0 có được SAU KHI loại
+# stoplist 45 cụm chung; không loại thì còn cụm trùng ở 5/7 đích. Câu nêu số đo phải mang điều kiện; metadata vào băm
+# (`skills/**`) thì không nêu số đo, vì đổi chữ ở đó đổi `skill_sha` và buộc chạy lại thử nghiệm.
+GRAM_CLAIM = re.compile(r"8-gram|overlap 0", re.I)
+GRAM_SUFFIXES = {".md", ".json", ".txt", ".yml", ".yaml"}
+
+
+def gram_claim_problems(root=REPO) -> list:
+    """Lỗi ở mọi tệp văn bản dưới `root` (trừ `tests/`, `.git`, `docs/plans`): trong `skills/` cấm nêu số đo 8-gram; ngoài
+    đó mỗi lần nêu phải có `stoplist` trong 200 ký tự kế tiếp."""
+    found = []
+    for path in sorted(root.rglob("*")):
+        rel = path.relative_to(root)
+        parts = rel.parts
+        if (not path.is_file() or path.suffix not in GRAM_SUFFIXES or "tests" in parts or ".git" in parts
+                or parts[:2] == ("docs", "plans")):
+            continue
+        text = c.read_text(path)
+        for m in GRAM_CLAIM.finditer(text):
+            line = text.count("\n", 0, m.start()) + 1
+            if parts[0] == "skills":
+                found.append(f"{rel.as_posix()}:{line}: metadata vào băm không được nêu số đo 8-gram")
+            elif "stoplist" not in text[m.start():m.start() + 200].lower():
+                found.append(f"{rel.as_posix()}:{line}: số đo 8-gram thiếu điều kiện (loại stoplist 45 cụm chung)")
+    return sorted(set(found))  # một dòng nêu cả '8-gram' và 'overlap 0' chỉ báo một lần
+
+
+def test_8gram_claims_carry_their_condition():
+    assert gram_claim_problems() == []
+
+
+def test_8gram_claim_check_catches_each_kind_of_bad_claim(tmp_path):
+    (tmp_path / "skills" / "x").mkdir(parents=True)
+    (tmp_path / "skills" / "x" / "SKILL.md").write_text("source: 8-gram overlap 0 after rephrasing\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("Viết lại; 8-gram 0 trùng sau khi diễn đạt lại\n", encoding="utf-8")
+    (tmp_path / "THIRD_PARTY.md").write_text("8-gram bằng 0 sau khi loại stoplist 45 cụm chung\n", encoding="utf-8")
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "t.md").write_text("8-gram 0\n", encoding="utf-8")
+    (tmp_path / "docs" / "plans").mkdir(parents=True)
+    (tmp_path / "docs" / "plans" / "p.md").write_text("8-gram 0\n", encoding="utf-8")
+    found = gram_claim_problems(tmp_path)
+    assert len(found) == 2, found
+    assert any("skills/x/SKILL.md:1" in f and "metadata vào băm" in f for f in found)
+    assert any("CHANGELOG.md:1" in f and "thiếu điều kiện" in f for f in found)
+
+
+# THIRD_PARTY mục 3: file đã liệt kê là "đã viết lại từ danh sách ý, còn mang câu chữ nguồn" thì VẪN phải viết lại thật
+# sự trước khi công khai (`CO2`); câu "không cần viết lại lần nữa" cho chúng mâu thuẫn với lời đó (X7, lỗi a).
+NO_REWRITE_NEEDED = "không cần viết lại lần nữa"
+MUST_REWRITE = "phải viết lại thật sự trước khi công khai"
+
+
+def third_party_contradictions(text: str) -> list:
+    if MUST_REWRITE in text and NO_REWRITE_NEEDED in text:
+        return [f"THIRD_PARTY.md vừa ghi '{MUST_REWRITE}' vừa ghi '{NO_REWRITE_NEEDED}'"]
+    return []
+
+
+def test_third_party_does_not_excuse_the_listed_files_from_rewriting():
+    text = c.read_text(REPO / "THIRD_PARTY.md")
+    assert MUST_REWRITE in text, "THIRD_PARTY.md mất lời 'phải viết lại thật sự trước khi công khai'"
+    assert third_party_contradictions(text) == []
+
+
+def test_third_party_contradiction_check_catches_the_old_sentence():
+    old = f"7 đích: {MUST_REWRITE}. Các file đã liệt kê ở trên {NO_REWRITE_NEEDED}."
+    assert len(third_party_contradictions(old)) == 1
+    assert third_party_contradictions(f"7 đích: {MUST_REWRITE}.") == []

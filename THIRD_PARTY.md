@@ -43,7 +43,7 @@ viết lại để không phải viết lại cả skill.
 
 Bảng hiện trống: không skill nào mang cờ `true` (bất biến cờ ↔ bảng vẫn được `tests/test_provenance.py` kiểm).
 
-Đã viết lại từ danh sách ý (`TK10.2`–`TK10.8`) có mang một số câu chữ nguồn; 8-gram 0 trùng sau khi diễn đạt lại; chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo). Dòng đã rời bảng: `closing-sprint`
+Đã viết lại từ danh sách ý (`TK10.2`–`TK10.8`) có mang một số câu chữ nguồn; 8-gram bằng 0 sau khi loại stoplist 45 cụm chung (trước khi loại: còn cụm trùng ở 5/7 đích); chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo). Dòng đã rời bảng: `closing-sprint`
 (`references/release-notes.md`, `references/preflight.md`), `bug-triage` (`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`), `roles/executor/qa.md`
 (bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill đó ghi nguồn ý
 dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).
@@ -51,7 +51,8 @@ dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của 
 Quy tắc cho file MỚI về sau: file nào lấy từ nguồn private không giấy phép thì thêm một dòng vào bảng trên và đặt
 cờ `true` ở skill; trước khi công khai, viết lại từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
 `source`/`license` và dòng tương ứng ở `UPSTREAM.md`, rồi chuyển dòng sang danh sách "đã viết lại" ở trên. Các file đã
-liệt kê ở trên không cần viết lại lần nữa.
+liệt kê ở trên vẫn phải viết lại thật sự trước khi công khai (`CO2`); bảng trên trống vì cờ giữ `false`, không vì việc
+đã xong.
 
 ## 4. Công cụ chỉ gọi
 
