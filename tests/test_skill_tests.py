@@ -51,9 +51,17 @@ def head(value) -> str:
     return re.split(r";|\(| — ", text, maxsplit=1)[0].strip()
 
 
-def is_reference(skill: str) -> bool:
-    meta = front(REPO / "skills" / skill / "SKILL.md").get("metadata") or {}
+def is_reference(skill: str, root=REPO) -> bool:
+    meta = front(root / "skills" / skill / "SKILL.md").get("metadata") or {}
     return isinstance(meta, dict) and meta.get("kind") == "reference"
+
+
+def missing_test_file(skill: str, root=REPO):
+    """Lỗi 'thiếu tệp thử' của một skill (kỷ luật cần `pressure.md`, tham chiếu cần `retrieval.md`), hoặc None."""
+    name = "retrieval.md" if is_reference(skill, root) else "pressure.md"
+    if not (root / "skills" / skill / "tests" / name).is_file():
+        return f"skill {'tham chiếu' if name == 'retrieval.md' else 'kỷ luật'} `{skill}` thiếu tests/{name}"
+    return None
 
 
 def tree_hash(skill: str, repo=REPO):
@@ -106,9 +114,7 @@ def test_skills_found():
 
 @pytest.mark.parametrize("skill", SKILLS)
 def test_skill_has_its_test_file(skill):
-    name = "retrieval.md" if is_reference(skill) else "pressure.md"
-    assert (REPO / "skills" / skill / "tests" / name).is_file(), \
-        f"skill {'tham chiếu' if name == 'retrieval.md' else 'kỷ luật'} `{skill}` thiếu tests/{name}"
+    assert missing_test_file(skill) is None, missing_test_file(skill)
 
 
 TEST_FILES = [p for s in SKILLS for n in ("pressure.md", "retrieval.md") for p in [REPO / "skills" / s / "tests" / n] if p.is_file()]
@@ -183,13 +189,55 @@ def test_new_file_needs_sha_and_tier_but_old_file_does_not():
     assert problems({**old, "date": "2026-10-01"}) == []
 
 
-def test_tree_hash_ignores_tests_dir():
-    skill = SKILLS[0]
-    first = tree_hash(skill)
-    if first is None:
-        pytest.skip("không có git")
-    assert re.fullmatch(r"[0-9a-f]{40}", first)
-    assert first == tree_hash(skill)
+def write_skill(repo, kind: str, body: str):
+    (repo / "skills" / "x").mkdir(parents=True, exist_ok=True)
+    text = "---\nname: x\nmetadata:\n  kind: " + kind + "\n---\n" + body + "\n"
+    (repo / "skills" / "x" / "SKILL.md").write_text(text, encoding="utf-8")
+
+
+def git(repo, *args):
+    ident = ["-c", "user.name=t", "-c", "user.email=t@example.com"]
+    res = subprocess.run(["git", *ident, *args], cwd=repo, capture_output=True)
+    assert res.returncode == 0, res.stderr.decode(errors="replace")
+
+
+def commit_all(repo, message):
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", message)
+
+
+def git_repo(path, kind: str):
+    """Repo git tạm có một skill `x` (SKILL.md + tests/p.md), đã commit."""
+    (path / "skills" / "x" / "tests").mkdir(parents=True)
+    write_skill(path, kind, "body")
+    (path / "skills" / "x" / "tests" / "p.md").write_text("probe v1\n", encoding="utf-8")
+    git(path, "init", "-q")
+    commit_all(path, "init")
+    return path
+
+
+def test_tree_hash_ignores_only_the_tests_dir(tmp_path):
+    repo = git_repo(tmp_path, "discipline")
+    first = tree_hash("x", repo)
+    assert first is not None and re.fullmatch(r"[0-9a-f]{40}", first)
+    (repo / "skills" / "x" / "tests" / "p.md").write_text("probe v2\n", encoding="utf-8")
+    commit_all(repo, "edit tests")
+    assert tree_hash("x", repo) == first, "đổi tests/ không được đổi băm"
+    write_skill(repo, "discipline", "body 2")
+    commit_all(repo, "edit skill")
+    assert tree_hash("x", repo) != first, "đổi SKILL.md phải đổi băm"
+
+
+def test_missing_test_file_is_caught_by_kind(tmp_path):
+    (tmp_path / "d").mkdir()
+    (tmp_path / "r").mkdir()
+    discipline, reference = git_repo(tmp_path / "d", "discipline"), git_repo(tmp_path / "r", "reference")
+    assert "thiếu tests/pressure.md" in (missing_test_file("x", discipline) or "")
+    assert "thiếu tests/retrieval.md" in (missing_test_file("x", reference) or "")
+    (discipline / "skills" / "x" / "tests" / "pressure.md").write_text("x", encoding="utf-8")
+    (reference / "skills" / "x" / "tests" / "retrieval.md").write_text("x", encoding="utf-8")
+    assert missing_test_file("x", discipline) is None
+    assert missing_test_file("x", reference) is None
 
 
 def test_tree_hash_skips_only_when_git_is_missing(monkeypatch):

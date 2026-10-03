@@ -28,7 +28,9 @@ dự kiến").
   (`skills/README.md` mục 4).
 - `tests/test_skill_tests.py`: máy kiểm tệp thử — skill kỷ luật có `pressure.md`, skill tham chiếu có
   `retrieval.md`, `result`/`model`/`date` hợp lệ, `skill_sha` khớp băm cây skill trừ `tests/` (skill đổi sau
-  khi thử thì đỏ); có ca đột biến cho từng kiểu hỏng.
+  khi thử thì đỏ; `git` có mà lỗi thì đỏ, chỉ thiếu lệnh `git` mới skip); có ca đột biến cho trạng thái chưa chạy
+  (kể cả giá trị mở đầu bằng dấu câu như `(pending)`), `date`, thiếu `skill_sha`/`tier`, và ca repo git tạm cho
+  phép băm cùng cho kiểm thiếu tệp thử theo `metadata.kind`.
 - Phiên bản các manifest (`.claude-plugin`, `.codex-plugin`, `marketplace.json`) lên `0.2.0-dev`. Số đếm không
   đổi: 28 skill, 7 agent.
 
