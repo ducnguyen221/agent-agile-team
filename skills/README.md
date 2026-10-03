@@ -25,24 +25,18 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
 - Skill **kỷ luật/quy trình** (có luật sắt hoặc cổng — không có `metadata.kind: reference`) **bắt buộc**
   có `tests/pressure.md`: 3 kịch bản thử áp lực, chạy bằng subagent không có skill (ghi lỗi) rồi có skill
   (phải đạt). Cách viết: skill `writing-skills`, `references/testing.md`.
-- Skill **tham chiếu kỹ thuật** (`metadata.kind: reference`) **miễn** ở Đợt 1 — loại này cần kiểm **truy
-  xuất** (agent tìm đúng mục khi cần), không kiểm áp lực. Đợt 2 thêm `tests/retrieval.md`.
-- **Ngoại lệ Đợt 1:** `security-audit`, `web-qa` là skill **chỉ báo cáo** (không sửa gì) — thử áp lực dời
-  sang **Đợt 2**. Lý do: kịch bản thật cần cả một repo hoặc trình duyệt dựng sẵn, không gói được thành prompt
-  tự chứa như các kịch bản đã chạy ở Đợt 1; sai ở hai skill này lộ ra trong báo cáo người đọc được, không
-  lặng lẽ đổi mã.
+- Skill **tham chiếu kỹ thuật** (`metadata.kind: reference`) không kiểm áp lực mà kiểm **truy xuất** (agent
+  tìm đúng mục khi cần): bắt buộc có `tests/retrieval.md` với ≥4/5 câu Đạt.
+- `security-audit`, `web-qa` là skill **chỉ báo cáo** (không sửa gì); kịch bản thật cần cả một repo hoặc
+  trình duyệt dựng sẵn, nên thử áp lực bằng prompt tự chứa (đã chạy ở SPR-02, xem mục 4).
+- Frontmatter của `pressure.md`/`retrieval.md`: `result` và `model` là kết quả đã chạy (không phải `not run`/
+  `pending`/`chưa chạy`/`dự kiến`), `date`; file từ 2026-10-03 thêm `tier` và `skill_sha` (băm cây skill trừ
+  `tests/`). `tests/test_skill_tests.py` kiểm các điều này.
 - `tests/scenarios.txt` (tuỳ chọn): **nguyên văn** prompt các kịch bản đã chạy, để chạy lại được. Đuôi `.txt`
   để `check` không quét như tài liệu; file chứa khoá, mật khẩu hay token làm mồi thì dòng thứ hai ghi rõ
   chúng là **GIÁ TRỊ GIẢ**.
 
-**Hiện trạng Đợt 1:**
-
-| Trạng thái | Skill |
-|---|---|
-| Đã chạy RED → GREEN, so với bản gốc, có `scenarios.txt` | `security-review`, `verify-before-done`, `code-review`, `debugging`, `tdd`, `plan-review` |
-| Đã chạy RED → GREEN | `response-style`, `id-convention`, `token-economy`, `writing-skills` |
-| Kịch bản viết sẵn, **chưa chạy** (Đợt 2) | `intake`, `shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`, `bug-triage` |
-| Chưa có `pressure.md` — ngoại lệ chỉ báo cáo (Đợt 2) | `security-audit`, `web-qa` |
+**Hiện trạng thử:** cả 28 skill đã có tệp thử đã chạy — bảng ở mục 4.
 
 ## 3. Mục lục — 28 skill
 
@@ -100,6 +94,43 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | Skill | Dùng khi |
 |---|---|
 | [writing-skills](writing-skills/SKILL.md) | tạo/sửa skill, viết description hoặc thử áp lực, đề xuất nâng bài học thành skill, chẩn đoán phiên/sprint chạy sai |
+
+## 4. Hiện trạng thử — 28 skill
+
+Đọc từ frontmatter của tệp thử, không từ trí nhớ; cột `result` rút gọn đoạn đầu (số kịch bản/câu Đạt),
+chi tiết RED và GREEN ở chính tệp. `date` 2026-10-01 là lần chạy Đợt 1 (model `sonnet`, chưa ghi `tier` và
+`skill_sha`); 2026-10-03 là lần chạy hoặc chạy lại ở SPR-02 trên bản skill hiện tại (`claude-sonnet-5-5`, tier T3).
+
+| Skill | Loại | Tệp thử | `result` | `date` |
+|---|---|---|---|---|
+| [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [api-design](api-design/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [debugging](debugging/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [deployment](deployment/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 5/6 | 2026-10-03 |
+| [fastapi](fastapi/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [github-ops](github-ops/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [postgres](postgres/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 5/6 | 2026-10-03 |
+| [python](python/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [tdd](tdd/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after 1 REFACTOR round | 2026-10-01 |
+| [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 2/2 discriminating scenarios GREEN pass | 2026-10-03 |
+| [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 
 Agent reviewer chuyên đề: [agents/README.md](../agents/README.md). Gặp tên cũ trong hồ sơ lịch sử:
 [docs/MIGRATION.md](../docs/MIGRATION.md).
