@@ -3,49 +3,44 @@ skill: deployment
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 7821ed2b8db9eb24d7eb359c91c44f60fe95b268
+skill_sha: 6b0cf6003eb87163121978994d2917c3fec71559
 date: 2026-10-03
-result: pass 6/6 (rerun with a new question set after RF91-RF92; first run of the same day passed 6/6 on the earlier tree)
+result: pass 6/6, 3 partial
 agent_ids:
-  questions: a72b31dd351091fcf
-  answers: a246a05b167de1156
+  questions: a08b0b716bc5c8aad
+  answers: ad5c49b16bee844f7
 ---
 
-Đã đọc: `<gốc worktree>\skills\deployment\SKILL.md` (kèm bốn file `references/`: `cicd-health-config.md`, `docker.md`, `docker-compose-dev.md`, `deployment-strategies.md`)
+Đã đọc: `<gốc worktree>\skills\deployment\SKILL.md` (và các file trong `references/` mà `SKILL.md` trỏ tới, nếu có)
 
 # Thử truy xuất — deployment
 
-> **Kết luận:** 6/6 câu Đạt (ngưỡng ≥4/5 câu tình huống: 5/5; câu ranh giới Đạt) trên **bộ câu mới** và cây sau sửa RF91–RF92. Lượt
-> đầu cùng ngày (6/6, `skill_sha` `0c0f87c992a2bcf7e684e6a6fc910e81a63aaf30`) chạy trước khi `references/cicd-health-config.md` được
-> sửa (probe tách `/livez` ↔ `/readyz`, mẫu YAML thêm `deploy-staging` + `smoke`); file này ghi lượt chạy lại trên cây hiện tại.
-> Chủ thể nêu đúng `/readyz`/`/livez` và việc tách readiness với liveness, tức đã đọc bản sau sửa.
+> **Kết luận:** 6/6 câu Đạt (ngưỡng ≥4/5 câu tình huống và câu ranh giới), trong đó 3 câu chỉ Đạt một phần (câu 1, 4, 5). Chủ thể đọc `SKILL.md` và sáu file `references/`, nói thẳng phần skill không có
+> (`.venv` và hot reload Python, cách tổ chức cấu hình theo môi trường, công cụ tự động hoá canary, lệnh `gh run`) thay vì bịa; câu ranh giới trỏ đúng `github-ops`. Phát hiện thêm ngoài ngưỡng: một con trỏ chéo lệch số mục
+> trong `references/deployment-strategies.md` (xem cuối).
 
-Sáu câu hỏi do một agent mới **chưa đọc** skill soạn (chỉ biết `description` và lĩnh vực, được cho 6 chủ đề của bộ cũ để không lặp);
-nguyên văn ở bảng dưới và ở `evidence/TK12-green/deployment-retrieval-rerun.md` trong hồ sơ sprint của lớp riêng, cùng output trọn của
-chủ thể (dòng "Đã đọc" ở đó có đường tuyệt đối; ở đây lược thành `<gốc worktree>` vì repo chặn tên người dùng). Câu 6 là câu ranh giới:
-đáp án của người soạn (`database-migrations`) đã được đối chiếu với `description` của skill đích ("altering tables, columns … writing a
-data backfill … zero-downtime schema change") và nhận là đúng.
+Sáu câu hỏi do một agent **chưa đọc** skill soạn (chỉ biết `description` và lĩnh vực, kèm danh sách chủ đề của bộ cũ để không lặp); lượt này là **bộ câu mới** chạy lại sau khi `X2` đổi nội dung skill
+(chạy lại theo giao thức rerun-2). Cột "Mục kỳ vọng" do người chấm ghi vào file nháp **trước khi** giao chủ thể (mtime file nháp 2026-10-03 21:40:39 +0700 (21:40:39,75), sớm hơn lệnh giao chủ thể đầu tiên); mục kỳ vọng ghi theo cây MỚI.
+Câu 6 là câu ranh giới, đáp án do người soạn nêu và người chấm đối chiếu với `description` của skill đáp.
+Nguyên văn câu hỏi của người soạn, file nháp kỳ vọng, output TRỌN của chủ thể (đường dẫn thư mục người dùng giữ nguyên ở đó, còn ở đây lược thành `<gốc worktree>` vì repo chặn tên người dùng)
+và số lượt công cụ: hồ sơ sprint của lớp riêng, `evidence/TK12-green/deployment-retrieval-rerun-2.md`.
 
-**Cách chấm, ghi thật:** cột "Mục kỳ vọng" **không** được ghi trước khi mở bài trả lời như khuôn quy định — báo cáo của chủ thể được
-harness chuyển vào ngữ cảnh người chấm ngay khi xong. Mục kỳ vọng suy từ mục lục `SKILL.md` (bảng "Đọc thêm khi cần") và từ cột kỳ vọng
-của bộ cũ cho cùng chủ đề, rồi đối chiếu tiêu đề thật trong các file `references/`; nên chấm lại độc lập khi kiểm định.
+Cách chấm "một phần": mục chủ thể trỏ có câu trả lời dùng được cho quyết định mà câu hỏi đặt ra thì Đạt, phần chi tiết phụ còn thiếu ghi trong ngoặc và ở mục cuối; chỉ Không đạt khi skill không có đáp án dùng được.
+Ngưỡng: ≥4/5 câu tình huống Đạt và câu ranh giới Đạt. `result` ghi cả số "một phần".
 
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
-| 1 | Dịch vụ `orders-api` có 3 replica, mỗi lần deploy vài giây người dùng nhận 502 vì pod cũ tắt trước khi pod mới sẵn sàng. Cấu hình readiness probe, `maxUnavailable` và thời gian chờ tắt thế nào để cập nhật không rớt request? | `SKILL.md` › 2 bước 3 + `references/cicd-health-config.md` › 4. Probe Kubernetes (+ `references/docker.md` › 1, tiến trình nhận `SIGTERM`) | `SKILL.md` › 2 bước 3; `cicd-health-config.md` › 4. Probe Kubernetes; `docker.md` › 1. Luật chính | Đạt |
-| 2 | Release 2.14 lên production 10 phút thì 5xx nhảy từ 0,2% lên 6%. Quay về 2.13 hay sửa tiến? Trước release cần chuẩn bị gì để quay lui nhanh và an toàn, nhất là khi bản mới đã chạy migration đổi cột? | `SKILL.md` › 3, 4, 5 + `cicd-health-config.md` › 6. Lệnh hoàn tác tức thì (+ `database-migrations` cho phần migration) | `SKILL.md` › 3, 5, 4; `cicd-health-config.md` › 6; migration → `database-migrations` | Đạt |
-| 3 | docker compose với `api`, `postgres`, `redis`; `docker compose up` thì `api` crash `connection refused` tới `postgres:5432` vì khởi động nhanh hơn database. Sửa khai báo thứ tự khởi động, healthcheck và `depends_on` thế nào? | `references/docker-compose-dev.md` › 1 + `docker.md` › 1 (phụ thuộc khởi động) và › 3 (`depends_on` không chờ healthcheck) | `docker-compose-dev.md` › 1. Stack web app chuẩn; `docker.md` › 1, 3 | Đạt |
-| 4 | Pod `report-worker` ở `CrashLoopBackOff`, `kubectl logs` trống, container thoát gần như ngay. Chui vào xem gì và kiểm theo thứ tự nào để biết chết vì lệnh khởi động sai, thiếu file hay quyền? | `references/docker.md` › 2. Debug (+ `SKILL.md` › 7 → `debugging`) | `docker.md` › 2. Debug; `SKILL.md` › 7 → `debugging` | Đạt |
-| 5 | Mai phát hành v3.0 cho ~40.000 người dùng, staging khác production ở vài biến môi trường. Trước giờ phát hành rà những gì (cấu hình, secret, theo dõi sau phát hành, người trực)? | `SKILL.md` › 8. Sẵn sàng production + `cicd-health-config.md` › 5. Cấu hình môi trường (+ › 3) | `SKILL.md` › 8, 3; `cicd-health-config.md` › 5. Cấu hình môi trường | Đạt |
-| 6 | Migration chạy `ALTER TABLE orders ADD COLUMN ...` trên bảng 80 triệu dòng khi production đang chạy. Tách bước nào (cột nullable, backfill theo lô, rồi ràng buộc) để không khoá bảng? | mục khác: skill `database-migrations` | mục khác: `database-migrations` | Đạt |
+| 1 | Compose dev cho API FastAPI hot reload: bind-mount `./src`, nhưng `node_modules` và `.venv` trên host đè lên bản trong image. Cấu hình volume và override giữa compose dev và prod thế nào? | `references/docker-compose-dev.md` › 1 (volume ẩn danh `/app/node_modules`) + › 3. File override; `.venv` không nói trực tiếp | `references/docker-compose-dev.md` › 1. Stack web app chuẩn, › 3. File override; `docker-network-volume-security.md` › 2; `docker.md` › 1 | Đạt (một phần: mẫu volume ẩn danh và override dev/prod đủ; chỉ ví dụ Node, không `.venv`, không `uvicorn --reload`, mẫu mount `.:/app` chứ không `./src` — chủ thể ghi là suy ra) |
+| 2 | Mỗi lần sửa một dòng, `docker build` cài lại toàn bộ dependency ~6 phút trên CI; Dockerfile `COPY . .` rồi `pip install -r requirements.txt`. Sắp xếp lại thứ tự lệnh và dùng cache layer ra sao? | `references/dockerfiles.md` › 1 (Node: manifest trước, `COPY . .` sau), › 3. Python/Django, › 4. Nên và không nên; `SKILL.md` › 2.1 | `references/dockerfiles.md` › 3, › 4; `docker.md` › 1, › 3; `cicd-health-config.md` › 1 (cache buildx `type=gha`) | Đạt |
+| 3 | Image lẫn `.git`, `.env`, `tests/`, context 900 MB, chưa có `.dockerignore`. Loại những gì, có rủi ro lộ secret nào cần xử lý? | `references/docker-network-volume-security.md` › 4. `.dockerignore` + › 3. Bảo mật container (secret trong lớp image) | `docker-network-volume-security.md` › 4, › 3; `dockerfiles.md` › 4; `docker.md` › 3; `SKILL.md` › 6 | Đạt (chủ thể ghi mẫu `.dockerignore` thiên về Node, không có `.venv`/`__pycache__`) |
+| 4 | Ba môi trường dev/staging/prod với URL database, feature flag, khoá API khác nhau; hiện sửa tay `.env` từng server, từng deploy prod nhầm cấu hình staging. Tổ chức và kiểm tra cấu hình thế nào để không lặp lại? | `references/cicd-health-config.md` › 5. Cấu hình môi trường (biến môi trường, kiểm schema lúc khởi động, sai thì dừng) + `SKILL.md` › 2.4; cách tổ chức file cấu hình theo môi trường không có | `cicd-health-config.md` › 5, › 1; `SKILL.md` › 2, › 8 | Đạt (một phần: có kiểm schema lúc khởi động, `APP_ENV`, secret manager, cùng image qua staging; không có cách tổ chức cấu hình theo môi trường, bỏ sửa tay `.env`, kiểm chéo URL với `APP_ENV`) |
+| 5 | Canary 10% cho dịch vụ đơn hàng, hiện ngồi nhìn dashboard tự tăng 50% hoặc rollback. Muốn tự tăng dần và tự dừng khi lỗi hoặc p95 vượt ngưỡng: đặt tiêu chí và quy trình thế nào? | `SKILL.md` › 3. Trước, trong và sau khi bật lưu lượng + › 1 (Canary) + `deployment-strategies.md` › 3; công cụ tự động hoá không có; › 4: mỗi bước tăng canary production cần người gật | `SKILL.md` › 3, › 4, › 1, › 5; `references/deployment-strategies.md` › 3. Canary | Đạt (một phần: có khung điều kiện huỷ đo được, quan sát mỗi nấc, hoàn tác, và giới hạn quyền; không có ngưỡng số, cỡ nấc, công cụ tự động hoá) |
+| 6 | Workflow GitHub Actions chạy 2 giờ sáng đỏ ở bước "Run tests". Dùng `gh` xem lại run, tải log job lỗi, re-run chỉ job fail. Lệnh `gh run` nào? | mục khác: skill `github-ops` | mục khác: `github-ops` (từ `cicd-health-config.md` › 1 và `SKILL.md` › 7 "Liên quan") | Đạt (ranh giới) |
 
 ## Thiếu nội dung / mâu thuẫn
 
-- Không có mâu thuẫn trong các mục chủ thể đã đọc; hai mâu thuẫn của lượt trước (probe chung `/health`, mẫu YAML thiếu staging) không còn
-  xuất hiện: chủ thể mô tả readiness `/readyz` riêng, liveness `/livez` riêng, startup probe.
-- **Ghi chú.** Câu 1: skill không đưa giá trị hay cách chọn cho `maxUnavailable` và `terminationGracePeriodSeconds` (chủ thể nói hai
-  số đó người dùng phải tự chọn); `SKILL.md` chỉ nêu rolling là mặc định và hai bản chạy song song.
-- **Nên sửa (ngoài phạm vi lượt này).** Câu 4: `references/docker.md` › 2 viết cho Docker/Compose; không có đường `kubectl` cho
-  `CrashLoopBackOff` (xem log lần chạy trước, mô tả pod, container tạm để chui vào container thoát ngay) nên chủ thể chuyển sang
-  `debugging`. Đề xuất cho điều phối quyết có thêm mục ngắn hay không; không đổi mục lục/tiêu đề vì truy xuất đã Đạt.
-- Chủ đề `description` còn lại đều có mục trả lời.
+- **Lệch tham chiếu (không đổi kết quả).** `skills/deployment/references/deployment-strategies.md` mục 3 (Canary), dòng cuối: "theo điều kiện dừng ở SKILL mục 3". Tiêu đề "Điều kiện dừng" của `SKILL.md` là **mục 4**
+  (mục 3 là "Trước, trong và sau khi bật lưu lượng"); nội dung liên quan có ở cả hai mục. Đề xuất: đổi thành "mục 3 và 4" hoặc "mục 4".
+- **Thiếu nội dung, nhẹ.** Không có ví dụ Python cho volume ẩn danh (`.venv`) và hot reload (câu 1); cách tổ chức cấu hình theo môi trường và chống nhầm staging/prod ngoài kiểm schema lúc khởi động (câu 4);
+  công cụ hoặc cấu hình tự động hoá canary (câu 5). Không phải lỗ hổng so với `description`: skill nói rõ đây là khung quyết định chứ không phải hướng dẫn công cụ.
+- Không có mâu thuẫn nào khác giữa `SKILL.md` và sáu file `references/` chủ thể đọc.
