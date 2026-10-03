@@ -28,12 +28,12 @@ khỏi đánh giá lại).
 
 | Nguồn | Vai trò | Nhận nội dung | Đã distill tới | Kiểm gần nhất | Kiểm |
 |---|---|---|---|---|---|
-| `obra/superpowers` | distill · chép | `shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`, `tdd`, `debugging`, `worktrees`, `verify-before-done`, `code-review`, `writing-skills` | Đợt 1 · `8ca22dba` (`v6.4.2`) | 2026-10-03 · `8ca22dba` | mọi lượt |
-| `affaan-m/ECC` (tên cũ `affaan-m/everything-claude-code`) | distill · chép | `intake`, `python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`, `security-review`, `token-economy`, phần bài học của `closing-sprint`; 7 agent | Đợt 1 · `c70874fa` (`v2.2.2`) | 2026-10-03 · `ef648e01` | mọi lượt — nguồn chính của Đợt 2 |
+| `obra/superpowers` | distill · chép | `shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`, `tdd`, `debugging`, `worktrees`, `verify-before-done`, `code-review`, `writing-skills` | Đợt 1 · `8ca22dba` (`v6.4.2`); SPR-02 viết lại sâu `references/diagnosing.md` của `writing-skills`, cùng SHA | 2026-10-03 · `8ca22dba` | mọi lượt |
+| `affaan-m/ECC` (tên cũ `affaan-m/everything-claude-code`) | distill · chép | `intake`, `python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`, `security-review`, `token-economy`, phần bài học của `closing-sprint`; 7 agent | Đợt 1 · `c70874fa` (`v2.2.2`); SPR-02 viết lại sâu 8 mục trên `ef648e01`: `deployment` (+ `references/docker.md`), `fastapi`, `postgres`, agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`, `rag-pipeline-reviewer` | 2026-10-03 · `ef648e01` | mọi lượt — nguồn chính của Đợt 2 |
 | `garrytan/gstack` | distill · chép | `plan-review`, `security-audit`, `web-qa`, phần điều tra của `debugging`, docs-sync và retro của `closing-sprint` | Đợt 1 · `96764e80` (VERSION 1.91.9.0) | 2026-10-03 · `f30b7b78` (VERSION 1.91.13.0) | mọi lượt — Đợt 2 lấy thêm `review`, `qa`, `ship` |
 | `obra/superpowers-lab` | đã ghi mốc, chưa distill | — (Đợt 2: tìm hàm trùng lặp cho `code-review`) | chưa distill — mốc Đợt 1 `51111f74` | 2026-10-03 · `51111f74` | mọi lượt |
 | `obra/superpowers-skills` | distill · chép | phần bổ sung của `tdd`, `debugging` | Đợt 1 · `cdcd624a` | 2026-10-03 · `cdcd624a` (còn lưu trữ) | không — repo lưu trữ từ 2025-10-14; chỉ xem còn lưu trữ không |
-| `supabase/agent-skills` | distill gián tiếp (đến qua ECC) | mẫu Postgres trong `postgres`, agent `database-reviewer` | qua ECC `c70874fa`; mốc xác minh giấy phép `544bfc56` | 2026-10-03 · `c9be0e93` | khi ECC đổi phần Postgres |
+| `supabase/agent-skills` | distill gián tiếp (đến qua ECC) | mẫu Postgres trong `postgres`, agent `database-reviewer` | qua ECC `c70874fa`; riêng `postgres` và `database-reviewer` qua ECC `ef648e01` (SPR-02); mốc xác minh giấy phép `544bfc56` | 2026-10-03 · `c9be0e93` | khi ECC đổi phần Postgres |
 | `github/spec-kit` | ý | `id-convention`, mẫu SPEC/PLAN, `shaping-spec` | ý từ `d2ddd910` (`v1.0.13`) | 2026-10-03 · `e1fa857a` (`v1.1.0`) | mọi lượt — đọc release notes |
 | `Fission-AI/OpenSpec` | ý | spec sống và delta Thêm / Sửa / Bỏ (`templates/registry/feature-spec.md`, mẫu SPEC) | ý từ `3a34ea30` (`v1.14.0`) | 2026-10-03 · `2500d6da` (`v1.14.0`) | mọi lượt — đọc release notes |
 | `bmad-code-org/BMAD-METHOD` | ý | thẻ vai trong `roles/` | ý từ `1cbcfa27` | 2026-10-03 · `4f61d4e7` (`v6.12.0`) | mọi lượt |
@@ -65,7 +65,7 @@ Bảng dưới có 7 nguồn **tài liệu web** — không có SHA, nên cột 
 | Tài liệu Anthropic (hướng dẫn prompting, context engineering, Claude Code output styles) | ý, chỉ trỏ link | `response-style`, `token-economy` | 2026-10-01 | mỗi lượt — hành vi harness đổi theo bản |
 
 Nguồn **private** (không giấy phép) không theo dõi ở đây: lớp riêng của môi trường giữ bản đồ và đường theo
-dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đợt 1 và `THIRD_PARTY.md` mục 3.
+dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đợt 1 và `THIRD_PARTY.md` mục 3. SPR-02 đã viết lại phòng sạch 7 đích lấy ý từ nguồn private (`bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md` và `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn luật truy vết trong `scripts/README.md`), nên cờ `rewrite_before_public` không còn `true` ở đâu.
 
 ## Nhật ký kiểm bản mới
 
@@ -114,13 +114,14 @@ mới (thành phần có thể đã đổi tên, gộp hay bị xoá ở upstrea
 | `affaan-m/ECC` lệnh | code-review, review-pr · test-coverage · update-docs | `skills/code-review` · thẻ QA · `skills/closing-sprint/references/docs-sync.md` | lấy |
 | `garrytan/gstack` | `review` · `qa` · `ship` | `skills/code-review` · `skills/web-qa` · `skills/closing-sprint` | lấy |
 | `obra/superpowers-lab` | finding-duplicate-functions | `skills/code-review/references/duplicates.md` | lấy |
-| `affaan-m/ECC`, `obra/superpowers` | viết lại sâu 9 mục "gọn" của Đợt 1 có nguồn công khai: `deployment` (+ docker), `fastapi`, `postgres`, agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`, `rag-pipeline-reviewer`; `writing-skills/references/diagnosing.md` | tại chỗ, đối chiếu HEAD mới | lấy |
-| nguồn private (nhãn trung tính) | viết lại sâu 6 mục "gọn" còn lại: `bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md`, bảng phủ `FR` → `VR` của thẻ QA, luật truy vết của `check` | viết lại từ ý, không mở bản gốc (`THIRD_PARTY.md` mục 3) | lấy |
+| `affaan-m/ECC`, `obra/superpowers` | viết lại sâu 9 mục "gọn" của Đợt 1 có nguồn công khai: `deployment` (+ docker), `fastapi`, `postgres`, agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`, `rag-pipeline-reviewer`; `writing-skills/references/diagnosing.md` | tại chỗ, đối chiếu HEAD mới | đã làm (SPR-02) |
+| nguồn private (nhãn trung tính) | viết lại sâu 6 mục "gọn" còn lại: `bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md`, bảng phủ `FR` → `VR` của thẻ QA, luật truy vết của `check` | viết lại từ ý, không mở bản gốc (`THIRD_PARTY.md` mục 3) | đã làm (SPR-02) |
 
 ## Đợt 2 — chốt SHA 2026-10-03 (07:41 UTC+7)
 
-Trạng thái: **đã chốt, chưa distill** — nội dung Đợt 2 chỉ đọc từ đúng các SHA dưới; thành phần và đích ở mục
-"Đợt 2 — dự kiến" (chuyển vào khối này khi distill xong). HEAD đo bằng lệnh của
+Trạng thái: **đã chốt; mới distill phần làm cứng Đợt 1** (SPR-02: viết lại sâu 9 mục trên ECC `ef648e01` và superpowers
+`8ca22dba`, viết lại phòng sạch 7 đích) — phần nội dung mới chưa distill. Nội dung Đợt 2 chỉ đọc từ đúng các SHA dưới;
+thành phần và đích ở mục "Đợt 2 — dự kiến" (chuyển vào khối này khi distill xong). HEAD đo bằng lệnh của
 [docs/updating-from-upstream.md](docs/updating-from-upstream.md) mục 3 bước 2; ngày commit theo giờ UTC.
 
 ### Repo mã nguồn
@@ -188,7 +189,8 @@ chiếu với HEAD ở bảng trên.
 
 ### Bảng nguồn theo skill và agent
 
-SHA rút gọn 8 ký tự — bản đầy đủ ở các bảng trên; frontmatter của skill/agent ghi bản đầy đủ. Cột
+SHA rút gọn 8 ký tự — bản đầy đủ ở các bảng trên; frontmatter của skill/agent ghi bản đầy đủ. Cột SHA HEAD theo
+frontmatter hiện tại: mục SPR-02 viết lại sâu ghi `ef648e01` (khối Đợt 2), mục còn lại giữ mốc Đợt 1. Cột
 `base_sha` = mốc bản distill private đã làm điểm xuất phát (`3599962a` bộ kỹ thuật, `4c0fdc57` bộ quy
 trình), "—" khi distill thẳng từ HEAD. Cách dùng: **chép** = giữ nội dung nguồn (dịch, cắt, sửa theo luật
 lõi) · **viết lại** = viết lại theo khung repo, giữ ý · **ý** = chỉ khái niệm · **private** = từ nguồn
@@ -206,12 +208,12 @@ không giấy phép, phải viết lại trước khi công khai (danh sách fil
 | `debugging` | `obra/superpowers` — `skills/systematic-debugging/`; `garrytan/gstack` — `investigate/SKILL.md.tmpl`; `obra/superpowers-skills` — `defense-in-depth`, `condition-based-waiting`; script `find-polluter.sh` viết lại thành Python | `8ca22dba` · `96764e80` · `cdcd624a` | — | MIT | chép |
 | `worktrees` | `obra/superpowers` — `skills/using-git-worktrees/` | `8ca22dba` | — | MIT | chép |
 | `python` | `affaan-m/ECC` — `skills/python-patterns/`, `skills/python-testing/` | `c70874fa` | `3599962a` | MIT | chép |
-| `fastapi` | `affaan-m/ECC` — `skills/fastapi-patterns/` | `c70874fa` | `3599962a` | MIT | chép |
-| `postgres` | `affaan-m/ECC` — `skills/postgres-patterns/` (phần mẫu từ `supabase/agent-skills`) | `c70874fa` | `3599962a` | MIT | chép |
+| `fastapi` | `affaan-m/ECC` — `skills/fastapi-patterns/` | `ef648e01` | `3599962a` | MIT | chép |
+| `postgres` | `affaan-m/ECC` — `skills/postgres-patterns/` (phần mẫu từ `supabase/agent-skills`), `agents/database-reviewer.md` | `ef648e01` · `ef648e01` | `3599962a` | MIT | chép |
 | `database-migrations` | `affaan-m/ECC` — `skills/database-migrations/`; ý từ bộ quy trình private — `migration-rehearsal` (gốc private, không giấy phép): `references/rehearsal.md` viết lại phòng sạch từ danh sách ý (`TK10.4`), không mở bản gốc | `c70874fa` · — | `3599962a` | MIT; không giấy phép (chỉ lấy ý, `references/rehearsal.md`) | chép; ý (1 file) |
 | `api-design` | `affaan-m/ECC` — `skills/api-design/` | `c70874fa` | `3599962a` | MIT | chép |
 | `error-handling` | `affaan-m/ECC` — `skills/error-handling/` | `c70874fa` | `3599962a` | MIT | chép |
-| `deployment` | `affaan-m/ECC` — `skills/deployment-patterns/`, `skills/docker-patterns/` | `c70874fa` | `3599962a` | MIT | chép |
+| `deployment` | `affaan-m/ECC` — `skills/deployment-patterns/`, `skills/docker-patterns/` | `ef648e01` | `3599962a` | MIT | chép |
 | `github-ops` | `affaan-m/ECC` — `skills/github-ops/` | `c70874fa` | `3599962a` | MIT | chép |
 | `adr` | ý từ bộ quy trình private — `adr-writer` (gốc private, không giấy phép); viết lại phòng sạch từ danh sách ý (`TK10.3`), không mở bản gốc | — | — | không giấy phép (chỉ lấy ý) | ý |
 | `verify-before-done` | `obra/superpowers` — `skills/verification-before-completion/` | `8ca22dba` | — | MIT | chép |
@@ -225,9 +227,9 @@ không giấy phép, phải viết lại trước khi công khai (danh sách fil
 | `token-economy` | `affaan-m/ECC` — `skills/context-budget/`, `skills/strategic-compact/`; caveman (ý); ccusage, repomix (chỉ gọi) | `c70874fa` · `f5d72948` · `1597d652` · `0b3f82b4` | `3599962a` | MIT; Apache-2.0 (chỉ ý) | chép (ECC); ý (caveman) |
 | `writing-skills` | `obra/superpowers` — `skills/writing-skills/` (+ `testing-skills-with-subagents.md`, `persuasion-principles.md`), `skills/diagnosing-superpowers/` | `8ca22dba` | — | MIT | chép |
 | agent `python-reviewer` | `affaan-m/ECC` — `agents/python-reviewer.md` | `c70874fa` | `3599962a` | MIT | chép |
-| agent `fastapi-reviewer` | `affaan-m/ECC` — `agents/fastapi-reviewer.md` | `c70874fa` | `3599962a` | MIT | chép |
-| agent `database-reviewer` | `affaan-m/ECC` — `agents/database-reviewer.md` (phần mẫu từ `supabase/agent-skills`) | `c70874fa` | `3599962a` | MIT | chép |
+| agent `fastapi-reviewer` | `affaan-m/ECC` — `agents/fastapi-reviewer.md` | `ef648e01` | `3599962a` | MIT | chép |
+| agent `database-reviewer` | `affaan-m/ECC` — `agents/database-reviewer.md` (phần mẫu từ `supabase/agent-skills`) | `ef648e01` | `3599962a` | MIT | chép |
 | agent `security-reviewer` | `affaan-m/ECC` — `agents/security-reviewer.md` | `c70874fa` | `3599962a` | MIT | chép |
 | agent `silent-failure-hunter` | `affaan-m/ECC` — `agents/silent-failure-hunter.md` | `c70874fa` | `3599962a` | MIT | chép |
-| agent `comment-analyzer` | `affaan-m/ECC` — `agents/comment-analyzer.md` | `c70874fa` | `3599962a` | MIT | chép |
-| agent `rag-pipeline-reviewer` | `affaan-m/ECC` — `agents/rag-pipeline-reviewer.md` | `c70874fa` | `3599962a` | MIT | chép |
+| agent `comment-analyzer` | `affaan-m/ECC` — `agents/comment-analyzer.md` | `ef648e01` | `3599962a` | MIT | chép |
+| agent `rag-pipeline-reviewer` | `affaan-m/ECC` — `agents/rag-pipeline-reviewer.md` | `ef648e01` | `3599962a` | MIT | chép |
