@@ -17,7 +17,9 @@ import _common as c
 
 # Ngày bắt đầu sprint wave-2: file thử có `date` từ ngày này trở đi phải mang `skill_sha` và `tier` (FR10.5).
 SPRINT_START = datetime.date(2026, 10, 3)
-NOT_RUN = re.compile(r"not run|pending|chưa chạy|dự kiến", re.I)
+# Bốn từ gốc của FR11.5 (`not run`, `pending`, `chưa chạy`, `dự kiến`) cộng các từ giữ chỗ hay gặp: `TBD`, `TODO`,
+# `N/A`, `none`, `false`, `null` (nguyên từ, để "nonexistent" không bị bắt oan).
+NOT_RUN = re.compile(r"not run|pending|chưa chạy|dự kiến|\b(?:tbd|todo|n/a|none|false|null)\b", re.I)
 SKILLS = sorted(p.parent.name for p in REPO.glob("skills/*/SKILL.md"))
 
 
@@ -44,9 +46,11 @@ def front(path):
 
 
 def head(value) -> str:
-    """Phần đầu của một khoá văn tự do (RF67): bỏ dấu câu mở đầu (`(`, `)`, `;`, `—`, `-`…), rồi cắt ở `;`, `(` hoặc
-    ` — `, nên chú thích sau đó không bị coi là trạng thái ("claude-sonnet-5-5 (all runs, …)" →
-    "claude-sonnet-5-5") còn "(pending)" → "pending)" vẫn bị bắt. Rỗng khi giá trị chỉ có dấu câu."""
+    """Phần đầu của một khoá văn tự do (RF67): bỏ khoảng trắng và các dấu mở đầu `(`, `)`, `;`, `—`, `–`, `-`, rồi cắt
+    ở `;`, `(` hoặc ` — `, nên chú thích sau đó không bị coi là trạng thái ("claude-sonnet-5-5 (all runs, …)" →
+    "claude-sonnet-5-5") còn "(pending)" → "pending)" vẫn bị bắt. Rỗng khi giá trị chỉ có các dấu bị bỏ đó; dấu khác
+    (`.`, `?`, `…`, `[]`, `~`…) KHÔNG bị bỏ nên `head()` giữ nguyên chúng — `problems()` bắt riêng bằng phép 'phải bắt đầu
+    bằng chữ hoặc số và có ít nhất một chữ'."""
     text = re.sub(r"^[\s();—–-]+", "", str(value))
     return re.split(r";|\(| — ", text, maxsplit=1)[0].strip()
 
@@ -88,13 +92,18 @@ def problems(data: dict) -> list:
     """Lỗi của một file thử (không gồm so `skill_sha` với cây skill)."""
     found = []
     for key in ("result", "model"):
-        # `result:` để trống (hoặc `~`, `null`) đọc ra None, mà `str(None)` = "None" không rỗng: coi là thiếu.
-        if data.get(key) is None or str(data[key]).strip().lower() in ("", "none", "null", "~"):
+        value = data.get(key)
+        # `result:` để trống (hoặc `~`, `null`) đọc ra None; `result: false`, `[]`, `{}`, `0` đọc ra bool/list/dict/int:
+        # không phải chuỗi trạng thái thì coi là thiếu hoặc sai kiểu, không ép thành chuỗi rồi cho qua.
+        if value is None or (isinstance(value, str) and not value.strip()):
             found.append(f"thiếu khoá `{key}`")
-        elif not head(data[key]):
-            found.append(f"`{key}` không có trạng thái ở đầu: {str(data[key])!r}")
-        elif NOT_RUN.search(head(data[key])):
-            found.append(f"`{key}` ghi chưa chạy: {head(data[key])!r}")
+        elif not isinstance(value, str):
+            found.append(f"`{key}` không phải chuỗi trạng thái: {value!r}")
+        elif not re.match(r"[^\W_]", head(value)) or not re.search(r"[^\W\d_]", head(value)):
+            # giá trị phải bắt đầu bằng chữ hoặc số và có ít nhất một chữ: bắt ".", "?", "…", "[]", "{}", "~", "0"
+            found.append(f"`{key}` không có trạng thái ở đầu: {value!r}")
+        elif NOT_RUN.search(head(value)):
+            found.append(f"`{key}` ghi chưa chạy: {head(value)!r}")
     day = data.get("date")
     try:
         day = day if isinstance(day, datetime.date) else datetime.date.fromisoformat(str(day))
@@ -164,14 +173,30 @@ def test_good_front_has_no_problem():
 @pytest.mark.parametrize("key,value", [("result", "pending"), ("result", "Chưa chạy"), ("result", "Not run: no browser"),
                                        ("result", "dự kiến 3/3"), ("model", "PENDING"), ("model", "chưa chạy (đợi)"),
                                        ("result", "(pending)"), ("result", "; chưa chạy"), ("result", "— dự kiến"),
-                                       ("result", " — dự kiến"), ("model", "(not run)")])
+                                       ("result", " — dự kiến"), ("model", "(not run)"),
+                                       ("result", "TBD"), ("result", "tbd"), ("result", "TODO"), ("model", "N/A"),
+                                       ("result", "n/a"), ("result", "none"), ("result", "None"), ("model", "false"),
+                                       ("result", "False"), ("result", "null"), ("model", "NULL"),
+                                       ("result", "(none)"), ("result", "None;"), ("result", "none."),
+                                       ("result", "TBD; sẽ chạy sau"), ("result", "(TODO)")])
 def test_unrun_state_is_caught(key, value):
     assert any(f"`{key}` ghi chưa chạy" in p for p in problems({**GOOD, key: value}))
 
 
-@pytest.mark.parametrize("key,value", [("result", "()"), ("model", "; — "), ("result", "(  )")])
+@pytest.mark.parametrize("key,value", [("result", "()"), ("model", "; — "), ("result", "(  )"),
+                                       ("result", "."), ("result", "?"), ("result", "…"), ("result", "..."),
+                                       ("model", "*"), ("model", ":"), ("model", "/"), ("result", "[]"),
+                                       ("result", "{}"), ("result", "~"), ("model", "0"), ("result", "(.)"),
+                                       ("result", "- ."), ("result", "3/3"), ("model", "2026")])
 def test_value_without_head_is_caught(key, value):
+    """Giá trị giữ chỗ chỉ có dấu câu, hoặc chỉ có số (không chữ nào), không phải trạng thái đã chạy."""
     assert any(f"`{key}` không có trạng thái ở đầu" in p for p in problems({**GOOD, key: value}))
+
+
+@pytest.mark.parametrize("key", ["result", "model"])
+@pytest.mark.parametrize("value", [False, True, 0, 1, [], {}, ["pass"]])
+def test_non_string_value_is_caught(key, value):
+    assert any(f"`{key}` không phải chuỗi trạng thái" in p for p in problems({**GOOD, key: value}))
 
 
 def test_annotation_after_head_is_not_a_state():
@@ -179,7 +204,12 @@ def test_annotation_after_head_is_not_a_state():
 
 
 @pytest.mark.parametrize("text", ["---\nresult:\nmodel: m\n---\n", "---\nresult: r\nmodel:\n---\n",
-                                  "---\nresult: ~\nmodel: m\n---\n", "---\nresult: r\nmodel: null\n---\n"])
+                                  "---\nresult: ~\nmodel: m\n---\n", "---\nresult: r\nmodel: null\n---\n",
+                                  "---\nresult: .\nmodel: m\n---\n", "---\nresult: []\nmodel: m\n---\n",
+                                  "---\nresult: false\nmodel: m\n---\n", "---\nresult: r\nmodel: …\n---\n",
+                                  "---\nresult: (none)\nmodel: m\n---\n", "---\nresult: None;\nmodel: m\n---\n",
+                                  "---\nresult: TBD\nmodel: m\n---\n", "---\nresult: r\nmodel: N/A\n---\n",
+                                  "---\nresult: r\nmodel: ?\n---\n"])
 def test_blank_key_in_frontmatter_is_caught(text):
     """`result:` hay `model:` để trống đọc ra None; None không được lọt thành chuỗi "None" (kẽ hở của RF93)."""
     data = c.parse_frontmatter(text).data
@@ -187,7 +217,7 @@ def test_blank_key_in_frontmatter_is_caught(text):
 
 
 @pytest.mark.parametrize("key", ["result", "model"])
-@pytest.mark.parametrize("value", [None, "", "  ", "None", "null"])
+@pytest.mark.parametrize("value", [None, "", "  ", "None", "null", "TBD", "TODO", "N/A", "false", "(none)", "None;", "."])
 def test_empty_or_null_value_is_no_state(key, value):
     assert problems({**GOOD, key: value}), f"{key}={value!r} lọt máy kiểm"
 
@@ -229,8 +259,9 @@ def retrieval_result(text: str) -> str:
         if len(cells) != 5:
             raise ValueError(f"hàng bảng không đủ 5 cột: {line[:60]!r}")
         verdict, is_boundary = cells[4], cells[2].startswith("mục khác:")
-        if re.match(r"Đạt \(một phần", verdict):
-            raise ValueError(f"ô `Đạt (một phần …)` mơ hồ, ghi Đạt hoặc Một phần: {verdict[:40]!r}")
+        if verdict.startswith("Đạt") and re.search(r"một\s*phần", verdict, re.I):
+            # mọi cách viết "Đạt … một phần" (`Đạt (một phần`, `Đạt một phần`, `Đạt/Một phần`, `Đạt — một phần`…) đều mơ hồ
+            raise ValueError(f"ô `Đạt … một phần` mơ hồ, ghi Đạt hoặc Một phần: {verdict[:40]!r}")
         kind = ("fail" if verdict.startswith("Không đạt") else "partial" if verdict.startswith("Một phần")
                 else "pass" if verdict.startswith("Đạt") else None)
         if kind is None:
@@ -278,6 +309,19 @@ def readme_status_rows():
     return rows
 
 
+def lead(text) -> str:
+    """Đoạn đầu của `result` kỷ luật: đến dấu `,`, `;` hay ` (` đầu tiên (ví dụ "3/3 GREEN pass")."""
+    return re.split(r",| \(|;", str(text), maxsplit=1)[0].strip()
+
+
+def discipline_cell_gap(shown: str, result) -> str | None:
+    """Ô `result` ở bảng README cho tệp kỷ luật phải có đoạn đầu BẰNG đoạn đầu của `result` ở frontmatter (không chỉ là
+    tiền tố của nó: `3/3` hay `3/3 GREEN pass` không khớp `3/3 GREEN passed partially`). Trả lỗi hoặc None."""
+    if lead(shown) != lead(result):
+        return f"ô result `{shown}` có đoạn đầu {lead(shown)!r}, frontmatter có {lead(result)!r}"
+    return None
+
+
 def retrieval_cell(result: str) -> str:
     """Ô `result` ở bảng README cho một tệp truy xuất, rút từ `result` ở frontmatter."""
     m = re.fullmatch(r"strict (\S+) \(\+(\d+) partial, (\d+) fail\) — (at|below) threshold \(.*\); points-right (\S+)", result)
@@ -298,8 +342,27 @@ def test_readme_status_table_matches_the_test_files():
         if path.name == "retrieval.md":
             assert shown == retrieval_cell(str(data["result"])), f"{skill}: ô result lệch frontmatter"
         else:
-            assert str(data["result"]).startswith(re.split(r",| \(|;", shown)[0]), \
-                f"{skill}: ô result `{shown}` lệch frontmatter"
+            gap = discipline_cell_gap(shown, data["result"])
+            assert gap is None, f"{skill}: {gap}"
+
+
+@pytest.mark.parametrize("shown,result", [("3/3 GREEN pass", "3/3 GREEN pass, no refactor; RED 1/3 passed"),
+                                           ("3/3 GREEN pass after 1 REFACTOR round", "3/3 GREEN pass after 1 REFACTOR round (scenario 3), x"),
+                                           ("discriminating scenarios RED 0/2 pass (2 partial); GREEN wq-1 partial",
+                                            "discriminating scenarios RED 0/2 pass (2 partial); GREEN wq-1 partial (regraded)"),
+                                           ("3/3 GREEN pass", "3/3 GREEN pass")])
+def test_discipline_cell_matching_lead_is_accepted(shown, result):
+    assert discipline_cell_gap(shown, result) is None
+
+
+@pytest.mark.parametrize("shown,result", [("3/3", "3/3 GREEN partial, no refactor"),
+                                          ("3/3 GREEN pass", "3/3 GREEN passed partially"),
+                                          ("3/3 GREEN", "3/3 GREEN pass"),
+                                          ("3/3 GREEN pass", "3/3 GREEN pass after 1 REFACTOR round"),
+                                          ("2/3 GREEN pass", "3/3 GREEN pass")])
+def test_discipline_cell_with_loose_prefix_is_caught(shown, result):
+    """Ô README lệch frontmatter mà chỉ là tiền tố của nó vẫn phải đỏ (RF128, lỗ hổng so tiền tố)."""
+    assert discipline_cell_gap(shown, result) is not None
 
 
 def test_retrieval_cell_follows_the_computed_result():
@@ -319,7 +382,12 @@ def contradiction_gaps(scenarios: str, pressure: str) -> list:
     gaps = []
     if REPLACEMENT not in scenarios.split("\n=== ", 1)[0]:
         gaps.append("phần đầu scenarios.txt thiếu phép thay vế mở đầu ở lượt GREEN")
-    if REPLACEMENT not in pressure.rsplit("\n## Chạy lại", 1)[-1]:
+    # Chỉ đọc đúng mục `## Chạy lại` (đến tiêu đề `## ` kế): mất hay đổi tên tiêu đề thì đỏ, không lấy cả tệp rồi
+    # tình cờ khớp cụm ở mục lịch sử (RF132).
+    section = re.search(r"^## Chạy lại[ \t]*$(.*?)(?=^## |\Z)", pressure, re.M | re.S)
+    if section is None:
+        gaps.append("pressure.md thiếu tiêu đề mục '## Chạy lại'")
+    elif REPLACEMENT not in section.group(1):
         gaps.append("mục 'Chạy lại' của pressure.md thiếu phép thay vế mở đầu ở lượt GREEN")
     return gaps
 
@@ -337,6 +405,21 @@ def test_contradiction_gaps_are_caught():
     assert contradiction_gaps(ok_scen, "x\n## Chạy lại\ny") == ["mục 'Chạy lại' của pressure.md thiếu phép thay vế mở đầu ở lượt GREEN"]
     assert contradiction_gaps(ok_scen, f"x\n## Chạy lại\n{REPLACEMENT}") == []
     assert contradiction_gaps("không có vế cấm", "x") == []
+
+
+def test_rerun_recipe_check_needs_the_rerun_heading():
+    """RF132: cụm thay vế có ở mục lịch sử nhưng mục `## Chạy lại` mất hay đổi tên → phải đỏ (trước đây vẫn xanh)."""
+    scen = f"đầu {REPLACEMENT}\n\n=== KB1 ===\nKHÔNG đọc file nào trên máy\n"
+    history = f"## GREEN chạy lại lần 3\n{REPLACEMENT}\n"
+    assert contradiction_gaps(scen, history) == ["pressure.md thiếu tiêu đề mục '## Chạy lại'"]
+    assert contradiction_gaps(scen, history + "## Chạy lại sau\n" + REPLACEMENT) == \
+        ["pressure.md thiếu tiêu đề mục '## Chạy lại'"]
+    assert contradiction_gaps(scen, history + "## Chạy lại\nx\n") == \
+        ["mục 'Chạy lại' của pressure.md thiếu phép thay vế mở đầu ở lượt GREEN"]
+    # cụm nằm ở mục đứng SAU `## Chạy lại` không tính cho mục đó
+    assert contradiction_gaps(scen, f"## Chạy lại\nx\n## Phụ lục\n{REPLACEMENT}\n") == \
+        ["mục 'Chạy lại' của pressure.md thiếu phép thay vế mở đầu ở lượt GREEN"]
+    assert contradiction_gaps(scen, history + f"## Chạy lại\n{REPLACEMENT}\n## Phụ lục\ny") == []
 
 
 def _row(n, expected, verdict):
@@ -360,6 +443,11 @@ def test_retrieval_result_counts_strictly_and_judges_threshold():
 def test_retrieval_result_rejects_ambiguous_or_unreadable_tables():
     with pytest.raises(ValueError, match="mơ hồ"):
         retrieval_result(_table("Đạt (một phần: thiếu mẫu)", "Đạt"))
+    for ambiguous in ("Đạt một phần", "Đạt (Một phần: thiếu mẫu)", "Đạt/Một phần", "Đạt — một phần", "Đạt  (một phần",
+                      "Đạt (một  phần", "Đạt, Một Phần"):
+        with pytest.raises(ValueError, match="mơ hồ"):
+            retrieval_result(_table(ambiguous, "Đạt"))
+    retrieval_result(_table("Đạt (kèm phần phụ thiếu mẫu)", "Đạt"))  # Đạt kèm chú thích không có "một phần": không oan
     with pytest.raises(ValueError, match="bắt đầu bằng"):
         retrieval_result(_table("Pass", "Đạt"))
     with pytest.raises(ValueError, match="1 câu ranh giới"):

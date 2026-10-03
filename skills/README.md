@@ -133,7 +133,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
-| [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after the TK9 rewrite | 2026-10-03 |
 
 Agent reviewer chuyên đề: [agents/README.md](../agents/README.md). Gặp tên cũ trong hồ sơ lịch sử:
 [docs/MIGRATION.md](../docs/MIGRATION.md).
