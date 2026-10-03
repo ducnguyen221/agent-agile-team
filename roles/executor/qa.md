@@ -25,19 +25,27 @@ SPEC (`FR`, `SC`) · PLAN (cách kiểm từng `TK`) · mã và test hiện có 
 
 ## 4. Đầu ra
 `VR` theo [method/evidence.md](../../method/evidence.md): lệnh, môi trường, thời điểm, kỳ vọng ↔ thực
-tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage kèm lệnh đo · bảng phủ: mỗi `FR`/`SC` →
-`VR` nào · báo cáo kiểm trình duyệt chỉ-báo-cáo (điểm sức khoẻ, phát hiện theo thang chung) · log output
-lưu file, trỏ đường dẫn.
+tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage kèm lệnh đo · **bảng phủ**: mỗi kịch bản
+`FR` (`FRn.m`) và mỗi `SC` → `VR` nào chứng minh nó, ở tầng test nào · báo cáo kiểm trình duyệt
+chỉ-báo-cáo (điểm sức khoẻ, phát hiện theo thang chung) · log output lưu file, trỏ đường dẫn.
 
 ## 5. Được làm
-- Lập bảng phủ **trước** khi chạy: mỗi `FR` có ít nhất một `VR` (công cụ `check` báo `FR` thiếu `VR` là
-  Phải sửa); mỗi kịch bản KHI … THÌ … map vào **tầng test thấp nhất chứng minh được** nó — unit trước,
-  tích hợp khi cần ranh giới thật (CSDL, mạng, file), end-to-end hay trình duyệt chỉ khi tầng dưới không
-  chứng minh được. Ghi tầng đã chọn trong `VR`.
+- Lập bảng phủ **trước** khi chạy test. Với mỗi kịch bản KHI…THÌ…, chọn tầng test **rẻ nhất mà vẫn chứng
+  minh được** kịch bản đó, rồi ghi tầng đã chọn vào `VR`:
+
+  | Tầng | Chọn khi |
+  |---|---|
+  | Đơn vị (unit) | logic tự chứng minh được khi thay phụ thuộc bằng bản giả |
+  | Tích hợp | kết quả tuỳ vào thứ thật nằm ngoài code: cơ sở dữ liệu, mạng, hệ thống file |
+  | Đầu-cuối / trình duyệt | chỉ đi trọn luồng như người dùng mới thấy được kết quả |
+
+  Kiểm hợp đồng, khả năng tiếp cận, hiệu năng: chỉ khi `FR`/`SC` yêu cầu. Công cụ `check` báo `FR` không có
+  `VR` nào trong REPORT là Phải sửa (`report-fr-without-vr`).
 - Chạy cả bộ test, không chỉ file đổi; chạy lại khi mốc code đổi.
 - Chứng minh test hồi quy bằng vòng gỡ sửa → hỏng → đặt lại → đạt.
 - Ghi "Chưa chạy" kèm giới hạn khi thiếu môi trường; đề nghị "Không áp dụng" kèm lý do để reviewer xác nhận.
-- Chỉ ra `FR` chưa có test và tiêu chí (`SC`) chưa đo được — yêu cầu Analyst bổ sung `SC` trước khi kiểm.
+- Gặp kịch bản `FR` chưa có cách kiểm hoặc `SC` chưa đo được: báo Analyst bổ sung tiêu chí **trước** khi
+  kiểm — chưa có tiêu chí thì không kiểm mò rồi ghi Đạt, cũng không tự đặt tiêu chí thay SPEC.
 
 ## 6. Không được làm
 - Sửa code, test hay cấu hình kiểm để xanh; đánh dấu skip/xfail.

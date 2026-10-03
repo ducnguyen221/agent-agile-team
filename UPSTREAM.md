@@ -200,20 +200,20 @@ không giấy phép, phải viết lại trước khi công khai (danh sách fil
 | `shaping-spec` | `obra/superpowers` — `skills/brainstorming/SKILL.md`; **tên gốc `brainstorming`** | `8ca22dba` | — | MIT | viết lại |
 | `writing-plan` | `obra/superpowers` — `skills/writing-plans/SKILL.md` (v6.4.2) | `8ca22dba` | — | MIT | viết lại |
 | `running-sprint` | `obra/superpowers` — `skills/subagent-driven-development/`, `skills/executing-plans/`, `skills/dispatching-parallel-agents/` | `8ca22dba` | — | MIT | viết lại |
-| `closing-sprint` | `obra/superpowers` — `skills/finishing-a-development-branch/`; `garrytan/gstack` — `document-release/`, `retro/`; `affaan-m/ECC` — `commands/learn-eval.md`; bộ quy trình private — `preflight-gate`, `release-notes-writer` | `8ca22dba` · `96764e80` · `c70874fa` · `4c0fdc57` | — | MIT; không giấy phép (2 file references) | viết lại; private (2 file) |
-| `bug-triage` | bộ quy trình private — `bug-triager` (gốc private, không giấy phép) | `4c0fdc57` | — | không giấy phép | private |
+| `closing-sprint` | `obra/superpowers` — `skills/finishing-a-development-branch/`; `garrytan/gstack` — `document-release/`, `retro/`; `affaan-m/ECC` — `commands/learn-eval.md`; ý từ bộ quy trình private — `preflight-gate`, `release-notes-writer` (`references/preflight.md`, `references/release-notes.md` viết lại phòng sạch từ danh sách ý, `TK10.6`, `TK10.5`, không mở bản gốc) | `8ca22dba` · `96764e80` · `c70874fa` · — · — | — | MIT; không giấy phép, chỉ lấy ý (2 file references) | viết lại; ý (2 file) |
+| `bug-triage` | ý từ bộ quy trình private — `bug-triager` (gốc private, không giấy phép); viết lại phòng sạch từ danh sách ý (`TK10.2`), không mở bản gốc | — | — | không giấy phép (chỉ lấy ý) | ý |
 | `tdd` | `obra/superpowers` — `skills/test-driven-development/` (+ `writing-good-tests.md`); `obra/superpowers-skills` — `skills/testing/testing-anti-patterns/` | `8ca22dba` · `cdcd624a` | — | MIT | chép |
 | `debugging` | `obra/superpowers` — `skills/systematic-debugging/`; `garrytan/gstack` — `investigate/SKILL.md.tmpl`; `obra/superpowers-skills` — `defense-in-depth`, `condition-based-waiting`; script `find-polluter.sh` viết lại thành Python | `8ca22dba` · `96764e80` · `cdcd624a` | — | MIT | chép |
 | `worktrees` | `obra/superpowers` — `skills/using-git-worktrees/` | `8ca22dba` | — | MIT | chép |
 | `python` | `affaan-m/ECC` — `skills/python-patterns/`, `skills/python-testing/` | `c70874fa` | `3599962a` | MIT | chép |
 | `fastapi` | `affaan-m/ECC` — `skills/fastapi-patterns/` | `c70874fa` | `3599962a` | MIT | chép |
 | `postgres` | `affaan-m/ECC` — `skills/postgres-patterns/` (phần mẫu từ `supabase/agent-skills`) | `c70874fa` | `3599962a` | MIT | chép |
-| `database-migrations` | `affaan-m/ECC` — `skills/database-migrations/`; bộ quy trình private — `migration-rehearsal` (gốc private, không giấy phép) | `c70874fa` · `4c0fdc57` | `3599962a` | MIT; không giấy phép (`references/rehearsal.md`) | chép; private (1 file) |
+| `database-migrations` | `affaan-m/ECC` — `skills/database-migrations/`; ý từ bộ quy trình private — `migration-rehearsal` (gốc private, không giấy phép): `references/rehearsal.md` viết lại phòng sạch từ danh sách ý (`TK10.4`), không mở bản gốc | `c70874fa` · — | `3599962a` | MIT; không giấy phép (chỉ lấy ý, `references/rehearsal.md`) | chép; ý (1 file) |
 | `api-design` | `affaan-m/ECC` — `skills/api-design/` | `c70874fa` | `3599962a` | MIT | chép |
 | `error-handling` | `affaan-m/ECC` — `skills/error-handling/` | `c70874fa` | `3599962a` | MIT | chép |
 | `deployment` | `affaan-m/ECC` — `skills/deployment-patterns/`, `skills/docker-patterns/` | `c70874fa` | `3599962a` | MIT | chép |
 | `github-ops` | `affaan-m/ECC` — `skills/github-ops/` | `c70874fa` | `3599962a` | MIT | chép |
-| `adr` | bộ quy trình private — `adr-writer` (gốc private, không giấy phép) | `4c0fdc57` | — | không giấy phép | private |
+| `adr` | ý từ bộ quy trình private — `adr-writer` (gốc private, không giấy phép); viết lại phòng sạch từ danh sách ý (`TK10.3`), không mở bản gốc | — | — | không giấy phép (chỉ lấy ý) | ý |
 | `verify-before-done` | `obra/superpowers` — `skills/verification-before-completion/` | `8ca22dba` | — | MIT | chép |
 | `code-review` | `obra/superpowers` — `skills/requesting-code-review/`, `skills/receiving-code-review/`; bộ quy trình private — `code-review-routing` (tự viết) | `8ca22dba` · `4c0fdc57` | — | MIT; tự viết | viết lại |
 | `plan-review` | `garrytan/gstack` — `plan-eng-review/SKILL.md.tmpl`, `plan-eng-review/sections/` | `96764e80` | `4c0fdc57` | MIT | chép |

@@ -40,10 +40,12 @@ viết lại để không phải viết lại cả skill.
 
 | Skill | File phải viết lại | Nguồn private |
 |---|---|---|
-| `adr` | `SKILL.md` (cả skill) | `adr-writer` |
-| `bug-triage` | `SKILL.md` (cả skill; `tests/pressure.md` tự viết, giữ được) | `bug-triager` |
-| `database-migrations` | `references/rehearsal.md` (`SKILL.md` chỉ trỏ tới, giữ được) | `migration-rehearsal` |
-| `closing-sprint` | `references/preflight.md`, `references/release-notes.md` | `preflight-gate`, `release-notes-writer` |
+| `closing-sprint` | không còn — `references/release-notes.md` (`TK10.5`) và `references/preflight.md` (`TK10.6`) đã viết lại phòng sạch; cờ giữ `true` chờ quyết định về `tests/test_provenance.py` (phép kiểm đòi mục này còn ít nhất một dòng skill) | `preflight-gate`, `release-notes-writer` (chỉ còn là nguồn ý) |
+
+Đã viết lại phòng sạch từ danh sách ý (`TK10.2`–`TK10.8`, không mở bản gốc), dòng đã rời bảng: `bug-triage`
+(`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`), `roles/executor/qa.md`
+(bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill đó ghi nguồn ý
+dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).
 
 Trước khi công khai: viết lại các file trên từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
 `source`/`license` và dòng tương ứng ở `UPSTREAM.md`.
