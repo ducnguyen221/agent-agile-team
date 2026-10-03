@@ -263,6 +263,50 @@ def test_retrieval_result_is_computed_from_its_table(path):
     assert str(front(path)["result"]) == retrieval_result(c.read_text(path))
 
 
+README_ROW = re.compile(r"^\| \[(?P<skill>[a-z-]+)\]\([^)]*\) \| [^|]+ \| `(?P<file>[a-z]+\.md)` \| (?P<result>.*) \| (?P<date>[0-9-]+) \|$")
+
+
+def readme_status_rows():
+    """Các hàng của bảng 'Hiện trạng thử' ở `skills/README.md` mục 4: {skill: (tệp, result, date)}."""
+    text = c.read_text(REPO / "skills" / "README.md")
+    section = text.split("## 4. Hiện trạng thử", 1)[1]
+    rows = {}
+    for line in section.splitlines():
+        m = README_ROW.match(line)
+        if m:
+            rows[m["skill"]] = (m["file"], m["result"], m["date"])
+    return rows
+
+
+def retrieval_cell(result: str) -> str:
+    """Ô `result` ở bảng README cho một tệp truy xuất, rút từ `result` ở frontmatter."""
+    m = re.fullmatch(r"strict (\S+) \(\+(\d+) partial, (\d+) fail\) — (at|below) threshold \(.*\); points-right (\S+)", result)
+    assert m, f"result không theo khuôn truy xuất: {result!r}"
+    return f"strict {m[1]} (+{m[2]} partial, {m[3]} fail), {m[4]} threshold; points-right {m[5]}"
+
+
+def test_readme_status_table_matches_the_test_files():
+    """Bảng 'Hiện trạng thử' (README mục 4) đọc từ frontmatter: mỗi skill một hàng, `date` khớp, ô truy xuất khớp số thật."""
+    rows = readme_status_rows()
+    assert sorted(rows) == SKILLS, "bảng thiếu hoặc thừa hàng so với skills/*/SKILL.md"
+    for path in TEST_FILES:
+        skill = path.parent.parent.name
+        name, shown, day = rows[skill]
+        data = front(path)
+        assert name == path.name, f"{skill}: tệp thử ghi {name}, thực tế {path.name}"
+        assert day == str(data["date"]), f"{skill}: date bảng {day}, frontmatter {data['date']}"
+        if path.name == "retrieval.md":
+            assert shown == retrieval_cell(str(data["result"])), f"{skill}: ô result lệch frontmatter"
+        else:
+            assert str(data["result"]).startswith(re.split(r",| \(|;", shown)[0]), \
+                f"{skill}: ô result `{shown}` lệch frontmatter"
+
+
+def test_retrieval_cell_follows_the_computed_result():
+    sample = retrieval_result(_table("Đạt", "Đạt", "Đạt", "Đạt", "Một phần (thiếu)"))
+    assert retrieval_cell(sample) == "strict 5/6 (+1 partial, 0 fail), at threshold; points-right 6/6"
+
+
 def _row(n, expected, verdict):
     return f"| {n} | câu hỏi | {expected} | trỏ | {verdict} |"
 

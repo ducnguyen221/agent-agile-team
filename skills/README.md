@@ -97,8 +97,11 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 
 ## 4. Hiện trạng thử — 28 skill
 
-Đọc từ frontmatter của tệp thử, không từ trí nhớ; cột `result` rút gọn đoạn đầu (số kịch bản/câu Đạt),
-chi tiết RED và GREEN ở chính tệp. `date` 2026-10-01 là lần chạy Đợt 1 (model `sonnet`, chưa ghi `tier` và
+Đọc từ frontmatter của tệp thử, không từ trí nhớ (`tests/test_skill_tests.py` đối chiếu bảng này với frontmatter). Tệp kỷ luật:
+cột `result` là đoạn đầu (số kịch bản Đạt), chi tiết RED và GREEN ở chính tệp. Tệp truy xuất: một thước chung — `strict` là
+số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không đạt), `points-right` là Đạt + Một phần (số câu trỏ đúng nơi),
+`at/below threshold` là so với ngưỡng PLAN (≥4/5 câu tình huống Đạt + câu ranh giới Đạt); định nghĩa đầy đủ ở mỗi `retrieval.md`.
+`below threshold` nghĩa là skill còn thiếu nội dung, không phải agent trỏ sai. `date` 2026-10-01 là lần chạy Đợt 1 (model `sonnet`, chưa ghi `tier` và
 `skill_sha`); 2026-10-03 là lần chạy hoặc chạy lại ở SPR-02 trên bản skill hiện tại (`claude-sonnet-5-5`, tier T3).
 
 | Skill | Loại | Tệp thử | `result` | `date` |
@@ -109,24 +112,24 @@ chi tiết RED và GREEN ở chính tệp. `date` 2026-10-01 là lần chạy Đ
 | [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
-| [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
-| [api-design](api-design/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 1 partial | 2026-10-03 |
-| [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 4 partial | 2026-10-03 |
+| [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/6 (+0 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-03 |
+| [api-design](api-design/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-03 |
+| [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/7 (+4 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-03 |
 | [debugging](debugging/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
-| [deployment](deployment/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
-| [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 3 partial | 2026-10-03 |
-| [fastapi](fastapi/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 3 partial | 2026-10-03 |
-| [github-ops](github-ops/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 6 partial | 2026-10-03 |
-| [postgres](postgres/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 5/6 | 2026-10-03 |
-| [python](python/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [deployment](deployment/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/6 (+2 partial, 0 fail), below threshold; points-right 6/6 | 2026-10-03 |
+| [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-03 |
+| [fastapi](fastapi/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-03 |
+| [github-ops](github-ops/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 1/7 (+6 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-03 |
+| [postgres](postgres/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 5/6 (+1 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-03 |
+| [python](python/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/6 (+3 partial, 0 fail), below threshold; points-right 6/6 | 2026-10-03 |
 | [tdd](tdd/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
-| [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/6 (+3 partial, 0 fail), below threshold; points-right 6/6 | 2026-10-03 |
 | [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after 1 REFACTOR round | 2026-10-01 |
 | [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
-| [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | wq-2 GREEN pass, wq-1 GREEN partial (regraded: code format `RF-A`), RED 0/2 pass | 2026-10-03 |
+| [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | discriminating scenarios RED 0/2 pass (2 partial); GREEN wq-1 partial (fails only code format `RF-A`), wq-2 pass | 2026-10-03 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
