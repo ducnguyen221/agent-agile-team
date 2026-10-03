@@ -3,7 +3,7 @@ skill: closing-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 61b1a5a209f0a3b499c04bd6e52bb8305cf24b8e
+skill_sha: 8d1e9789ce87ac36721c971232f73f32270299ac
 date: 2026-10-03
 result: RED run on 3 scenarios (1 passed as-is, 2 partial); GREEN deferred to the rewritten references (TK10.9)
 agents: [ac358e84b4b76a291, ad72f687e517d0f52, a53c4ed39adae18a1]
@@ -11,7 +11,7 @@ agents: [ac358e84b4b76a291, ad72f687e517d0f52, a53c4ed39adae18a1]
 
 # Thử áp lực — closing-sprint
 
-> **Kết luận:** RED đã chạy 2026-10-03 trên bản `SKILL.md` ở `skill_sha` (tree `skills/closing-sprint` tại
+> **Kết luận:** RED đã chạy 2026-10-03 trên bản `SKILL.md` ở `skill_sha` (cây `skills/closing-sprint` trừ `tests/`, tại
 > commit được thử); GREEN **chưa chạy** — chủ ý, vì `references/preflight.md` và `references/release-notes.md`
 > đang được viết lại, GREEN chạy trên bản viết lại. Kết quả RED: chủ thể không có skill vẫn giữ đúng **kỷ
 > luật** (không gộp trước Cổng 2, không `--force`, không bump VERSION, không ghi đè CHANGELOG) nhờ luật lõi;
@@ -77,4 +77,4 @@ bản 2) · menu ba dòng + câu hỏi nhánh gốc (kịch bản 3).
 Prompt nguyên văn ở `tests/scenarios.txt`; RED thay `[PHA]` bằng dòng cấm công cụ Skill; GREEN thay bằng
 đường **tuyệt đối** tới `SKILL.md` trong worktree (kịch bản 1 đọc thêm `references/preflight.md`, kịch bản 2
 `references/docs-sync.md`). Cùng tier T3, cùng model; mỗi lượt một subagent mới; ghi `skill_sha` =
-`git rev-parse HEAD:skills/closing-sprint` sau commit, id agent, ngày, và kết quả thật — không ghi "dự kiến".
+băm cây `skills/closing-sprint` trừ `tests/` (`git ls-tree <commit>:skills/<tên> | awk -F'\t' '$2!="tests"' | git mktree`), id agent, ngày, và kết quả thật — không ghi "dự kiến".

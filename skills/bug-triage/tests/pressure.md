@@ -3,7 +3,7 @@ skill: bug-triage
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 5dcc20cdf1432aee2f3d5e51299cdd9d71a2f6be
+skill_sha: 475aa308b8b96b5d0f52d5adaf026925f4ab7c4e
 date: 2026-10-03
 result: RED run on 3 scenarios (1 passed as-is, 2 partial); GREEN deferred to the rewritten SKILL.md (TK10.9)
 agents: [af4a4d5dd6ee8d433, ae87bf0f50ed02c74, aac873d03d7035d40]
@@ -68,5 +68,5 @@ Chưa vá — `SKILL.md` không đổi ở bước này (`TK2.6` chỉ RED; file
 
 Prompt nguyên văn ở `tests/scenarios.txt`; RED thay `[PHA]` bằng dòng cấm công cụ Skill; GREEN thay bằng
 đường **tuyệt đối** tới `SKILL.md` trong worktree. Cùng tier T3, cùng model; mỗi lượt một subagent mới; ghi
-`skill_sha` = `git rev-parse HEAD:skills/bug-triage` sau commit, id agent, ngày, kết quả thật — không ghi
+`skill_sha` = băm cây `skills/bug-triage` trừ `tests/` (`git ls-tree <commit>:skills/<tên> | awk -F'\t' '$2!="tests"' | git mktree`), id agent, ngày, kết quả thật — không ghi
 "dự kiến".
