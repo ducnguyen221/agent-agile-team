@@ -60,6 +60,7 @@ có vấn đề cụ thể và lý do bảo trì.
 - Response trả đối tượng ORM thô, hoặc model có hash mật khẩu, token, cờ phân quyền nội bộ.
 - Dependency xác thực vượt qua được, không kiểm chữ ký, hạn, hay chấp nhận thuật toán do token tự khai.
 - Route ghi hay đọc dữ liệu của người khác mà không kiểm quyền sở hữu.
+- `allow_origins=["*"]` cùng `allow_credentials=True`: Starlette trả lại đúng `Origin` của request kèm credentials (cả preflight) → trang web nào cũng đọc được response đã đăng nhập.
 
 **Tính đúng — Phải sửa**
 - Client CSDL hay HTTP đồng bộ trong `async def` (gợi ý sửa: thư viện async, hoặc route `def` thường).
@@ -68,7 +69,6 @@ có vấn đề cụ thể và lý do bảo trì.
 - Phiên CSDL hay client tạo thẳng trong handler thay vì qua dependency; client không đóng trong `lifespan`.
 - Kiểm trùng bằng truy vấn trước rồi chèn, không có ràng buộc unique ở CSDL; lỗi trùng ra `500`.
 - `lifespan` tạo bảng trong bản chạy thật thay vì migration.
-- `allow_origins=["*"]` cùng CORS có credentials.
 - Endpoint ghi thiếu model Pydantic cho body.
 - Phân trang offset không `ORDER BY` xác định hoặc không trần `limit`.
 - Ghi đè test nhắm sai dependency, hay không xoá sau test (test xanh mà không kiểm gì, hoặc rò sang test khác).

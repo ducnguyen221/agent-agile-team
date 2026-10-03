@@ -49,8 +49,9 @@ def create_app() -> FastAPI:
 app = create_app()
 ```
 
-Không dùng `allow_origins=["*"]` cùng `allow_credentials=True`: trình duyệt từ chối tổ hợp này và
-Starlette không cho phép với request mang credential.
+Không dùng `allow_origins=["*"]` cùng `allow_credentials=True`: Starlette không từ chối mà trả lại đúng
+`Origin` của request (preflight, và response khi request mang cookie) kèm credentials, nên trang web nào
+cũng đọc được response đã đăng nhập. Liệt kê nguồn cụ thể.
 
 ## 2. Cấu hình bằng pydantic-settings
 

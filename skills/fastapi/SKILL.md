@@ -87,10 +87,10 @@ Mức gợi ý theo hậu quả nếu bỏ qua (`method/severity.md` mục 1); r
 | Secret, token viết cứng; SQL dựng bằng f-string hay nối chuỗi | lộ secret, SQL injection | Chặn |
 | Response trả đối tượng ORM thô hay model có hash mật khẩu, token | lộ dữ liệu xác thực | Chặn |
 | Dependency xác thực bỏ qua được, không kiểm chữ ký hay hạn | ai cũng vào được | Chặn |
+| `allow_origins=["*"]` cùng `allow_credentials=True` | Starlette trả lại đúng `Origin` của request kèm credentials (cả preflight) → trang web nào cũng đọc được response đã đăng nhập | Chặn |
 | Đổi kiểu `sub` không bọc lỗi → `500` thay vì `401` | token rác làm lỗi máy chủ, nhiễu giám sát | Phải sửa |
 | Gọi CSDL hay HTTP đồng bộ trong `async def` | một request chậm chặn cả vòng sự kiện | Phải sửa |
 | Kiểm trùng bằng truy vấn trước, không có ràng buộc unique | hai request cùng lúc tạo bản trùng | Phải sửa |
-| `allow_origins=["*"]` cùng credentials | trình duyệt từ chối hoặc mở cửa cho mọi nguồn | Phải sửa |
 | Ghi đè test nhắm sai dependency | test xanh mà không kiểm gì | Phải sửa |
 | Phân trang offset không `ORDER BY` hay không trần `limit` | trang sót, lặp dòng; một request kéo cả bảng | Phải sửa |
 | Client HTTP ngoài không timeout | request treo tới khi hết worker | Nên sửa (Phải sửa nếu là đường găng) |
