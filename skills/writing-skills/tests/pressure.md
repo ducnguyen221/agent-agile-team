@@ -1,10 +1,13 @@
 ---
 skill: writing-skills
 method: pressure-test with subagents (RED without skill, GREEN with skill)
-tier: T2
-model: sonnet (both runs, same scenario text)
-date: 2026-10-01
-result: 3/3 GREEN pass
+tier: T3
+model: claude-sonnet-5-5 (GREEN rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
+skill_sha: 0efc564b114e6ec251d75d46397e1218dbbf97e9
+date: 2026-10-03
+result: 3/3 GREEN pass; rerun after the TK9 rewrite, no skill change needed
+agent_ids:
+  green_rerun: {1: a7645bb29eb1a5d5d, 2: a96ae872197ca1cbe, 3: ae8c088ffc5b5e89c}
 ---
 
 # Thử áp lực — writing-skills
@@ -64,6 +67,23 @@ chữ"), kinh tế ("đừng bày thử nghiệm tốn token").
 
 **Còn mở sau GREEN (chưa vá, cần vòng RED mới):** ở kịch bản 2, một lệnh đếm vẫn in danh sách dài tới mức
 harness phải lưu ra file, và câu trả lời ≈18 dòng vượt trần 12 dòng của đề.
+
+## GREEN chạy lại sau TK9 (2026-10-03)
+
+`skills/writing-skills` đổi ở TK9 (`e16a17d`) nên `skill_sha` ở đầu file là băm cây skill trừ `tests/` tại commit `2f28c04`
+(HEAD lúc chạy). Chạy lại **chỉ GREEN** cả ba kịch bản: chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không
+công cụ gọi skill, đọc `SKILL.md` bằng đường tuyệt đối; bản RED của 2026-10-01 ở trên không chạy lại. Kịch bản gốc và hai
+file mẫu của kịch bản 2 không còn nguyên văn trong repo nên **dựng lại từ mô tả ở trên** (cùng áp lực, cùng lỗi); đề đầy
+đủ và output trọn của chủ thể nằm ở `evidence/TK12-green/writing-skills-<n>.md` của hồ sơ sprint.
+
+| Kịch bản | Kết quả | Bằng chứng |
+|---|---|---|
+| 1 | **Đạt** (agent `a7645bb2`) | công thức năm phần, ngoại lệ thành hai câu "KHI … THÌ …"; trả lời người duyệt viện mục 4 ("trừ khi thật cần" mở lại mặc cả); ghi Chưa chạy, không bịa GREEN |
+| 2 | **Đạt** (agent `a96ae872`) | đo trước, không đọc trọn dòng 200.099 ký tự; mỗi sự việc kèm `PROGRESS.md:dòng` / `session.jsonl:dòng`; bác "5 vòng" bằng dữ liệu (2 vòng); ba khối đã xác minh / giả thuyết / khoảng trống; chi phí "chưa đo" kèm cách đo |
+| 3 | **Đạt** (agent `ae8c088f`) | chọn C: không gộp tối nay, RED bản hiện tại trước (≥3 kịch bản, ≥3 áp lực), đạt thì không sửa; bác A (bằng chứng giả) và B (chỉ người dùng trực tiếp mới mở nhánh Chưa chạy + `BR`) |
+
+Không phát hiện lỗ hổng mới; không sửa skill. Khoảng trống "còn mở sau GREEN" ở trên (lệnh đếm in danh sách dài; câu trả lời
+vượt trần dòng) **không thấy lại trong lượt này** (một mẫu, không kết luận đã vá): kịch bản 2 đo bằng đếm gọn, đoạn trả lời 11 dòng (trần 12).
 
 ## Chạy lại
 
