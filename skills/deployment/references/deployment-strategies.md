@@ -64,4 +64,4 @@ v2: 100%
 - **Dùng khi:** lưu lượng cao, thay đổi rủi ro, đi cùng feature flag.
 
 Mỗi bước tăng lưu lượng canary trên production là một hành động ra ngoài: theo điều kiện dừng ở SKILL
-mục 3.
+mục 4.
