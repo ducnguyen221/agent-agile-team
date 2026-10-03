@@ -110,13 +110,13 @@ chi tiết RED và GREEN ở chính tệp. `date` 2026-10-01 là lần chạy Đ
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
-| [api-design](api-design/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
-| [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [api-design](api-design/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 1 partial | 2026-10-03 |
+| [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 4 partial | 2026-10-03 |
 | [debugging](debugging/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [deployment](deployment/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
-| [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 5/6 | 2026-10-03 |
-| [fastapi](fastapi/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
-| [github-ops](github-ops/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
+| [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 3 partial | 2026-10-03 |
+| [fastapi](fastapi/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 3 partial | 2026-10-03 |
+| [github-ops](github-ops/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 7/7, 6 partial | 2026-10-03 |
 | [postgres](postgres/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 5/6 | 2026-10-03 |
 | [python](python/tests/retrieval.md) | tham chiếu | `retrieval.md` | pass 6/6 | 2026-10-03 |
 | [tdd](tdd/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
