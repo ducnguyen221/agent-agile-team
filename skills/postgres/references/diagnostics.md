@@ -21,19 +21,20 @@ trên CSDL không phải production (sequence vẫn tăng, trigger vẫn chạy 
 ## 2. Truy vấn chẩn đoán (chỉ đọc)
 
 ```sql
--- Foreign keys without an index on the referencing side
+-- Foreign keys without an index led by that column on the referencing side
 SELECT conrelid::regclass, a.attname
 FROM pg_constraint c
 JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey)
 WHERE c.contype = 'f'
   AND NOT EXISTS (
     SELECT 1 FROM pg_index i
-    WHERE i.indrelid = c.conrelid AND a.attnum = ANY(i.indkey)
+    WHERE i.indrelid = c.conrelid AND i.indkey[0] = a.attnum
   );
 
 -- Slowest statements on average (needs the pg_stat_statements extension)
 SELECT query, mean_exec_time, calls
 FROM pg_stat_statements
+WHERE mean_exec_time > 100
 ORDER BY mean_exec_time DESC
 LIMIT 10;
 

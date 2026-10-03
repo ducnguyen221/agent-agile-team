@@ -171,5 +171,9 @@ async def get_current_user(
 CurrentUser = Annotated[User, Depends(get_current_user)]
 ```
 
+`TokenError` là lớp lỗi của chính `app/core/security.py`: `decode_token` bắt lỗi của thư viện JWT
+(`jwt.PyJWTError` với PyJWT, `JWTError` với python-jose) cùng lỗi `iss`, `aud`, hạn dùng, rồi ném lại thành
+`TokenError` để dependency chỉ cần bắt một loại.
+
 Không tạo session, client hay credential ngay trong route handler. Kiểm tra quyền (`403`) để ở dependency
 riêng nhận `CurrentUser`, không trộn vào `get_current_user` (`401`).
