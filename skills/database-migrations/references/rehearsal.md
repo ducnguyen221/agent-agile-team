@@ -3,20 +3,21 @@
 <!-- Nguồn ý: bộ skill quy trình private, `migration-rehearsal` (không giấy phép). Viết lại phòng sạch từ danh
      sách ý (`TK10.4`), không mở văn bản gốc. -->
 
-> **Kết luận:** migration rủi ro vừa trở lên phải **diễn tập trên bản sao cỡ production** trước khi xin chạy
-> thật: đo thời gian, khoá, lỗi ứng dụng, lag replica; viết và duyệt **đường lùi trước** đường tiến; có
-> runbook production với **tiêu chí huỷ** và bước hoàn tác. Dữ liệu chỉ đi một chiều: chạy ở production rồi
+> **Kết luận:** trước khi xin chạy thật bất kỳ migration nào từ rủi ro vừa trở lên, chạy thử nó trọn vẹn trên
+> **một bản sao có lượng dữ liệu như production** và ghi lại các số đo ở mục 2 bước 4; đường lùi được viết và
+> review **trước** đường tiến; runbook production nêu **tiêu chí huỷ** bằng con số và từng bước hoàn tác. Dữ liệu chỉ đi một chiều: chạy ở production rồi
 > thì "hoàn tác" là một migration tiến mới — vì thế mọi bất ngờ phải lộ ra ở buổi diễn tập, không ở buổi thật.
 
 **Dùng khi:** thêm hoặc sửa file migration, với bất kỳ công cụ nào (Alembic, Flyway, Knex, Prisma, SQL thuần);
-lệnh `ALTER`/`DROP`/`CREATE INDEX`, đổi khoá ngoại, đổi kiểu cột; script backfill hay sửa dữ liệu.
-**Không dùng khi:** chỉ đọc schema, chạy truy vấn phân tích, hoặc thay đổi không chạm tầng lưu trữ.
+lệnh `ALTER`/`DROP`/`CREATE INDEX`, đổi khoá ngoại, đổi kiểu cột; mọi script ghi lại dữ liệu hàng loạt (lấp
+cột mới, chữa dữ liệu sai).
+**Không dùng khi:** thay đổi không đụng tới nơi lưu dữ liệu, hoặc việc chỉ là đọc — xem cấu trúc bảng, chạy báo cáo.
 
 ## 1. Đầu vào
 
 - File migration (cả hướng tiến và hướng lùi) và script backfill nếu có.
-- **Cỡ bảng đích đo bằng truy vấn** trên staging hoặc bản sao — không chép từ sổ, không ước bằng cảm giác.
-  Ví dụ trên Postgres (số dòng là ước lượng từ thống kê, đủ để chọn chiến lược):
+- **Số liệu thật của các bảng bị chạm** (số dòng, dung lượng kể cả index), lấy bằng một truy vấn chạy ngay lúc
+  chuẩn bị, trên staging hay bản sao; con số nhớ được hay ghi trong tài liệu cũ không dùng. Ví dụ trên Postgres (số dòng là ước lượng từ thống kê, đủ để chọn chiến lược):
 
   ```sql
   SELECT relname,
@@ -27,7 +28,8 @@ lệnh `ALTER`/`DROP`/`CREATE INDEX`, đổi khoá ngoại, đổi kiểu cột;
   ```
 
 - Hành vi khoá của engine với **từng** lệnh trong migration (tra tài liệu engine đúng phiên bản đang chạy).
-- Dạng tải: chạy 24/7 hay có cửa sổ bảo trì; có replica đọc không; giờ thấp điểm.
+- Hệ thống được phép chậm hay ngừng lúc nào: có khung bảo trì hay phải phục vụ liên tục, giờ nào ít truy cập
+  nhất, và có bản sao chỉ-đọc nào phải bám kịp máy chính hay không.
 
 ## 2. Các bước
 
@@ -72,8 +74,8 @@ lệnh `ALTER`/`DROP`/`CREATE INDEX`, đổi khoá ngoại, đổi kiểu cột;
    kiểm trước (sao lưu mới **đã khôi phục thử**, đủ đĩa, không job nặng trùng giờ) · lệnh chính xác theo thứ
    tự · bảng theo dõi (chỉ số, ngưỡng) · **tiêu chí huỷ** (ví dụ "khoá chờ > 5 s hoặc lag > 30 s thì dừng ở
    lô hiện tại") · bước hoàn tác · ai cần báo trước và sau.
-   Duyệt: rủi ro vừa → Tech Reviewer kéo chuyên đề dữ liệu; rủi ro cao → thêm người vận hành do người dùng
-   chỉ định.
+   Ai ký runbook tuỳ mức rủi ro: mức vừa cần thẻ chuyên đề dữ liệu mà Tech Reviewer kéo vào; mức cao thì ngoài
+   thẻ đó còn phải có một người trực vận hành, do chính người dùng chọn.
 
 ## 3. Đầu ra
 
@@ -81,7 +83,7 @@ lệnh `ALTER`/`DROP`/`CREATE INDEX`, đổi khoá ngoại, đổi kiểu cột;
 
   ```text
   Diễn tập <migration> trên <bản sao: nguồn, cỡ, ngày khôi phục> — <engine + phiên bản>
-  Tiến: <thời gian> · khoá chờ lâu nhất <…> · lỗi ứng dụng <…> · lag replica tối đa <…>
+  Tiến: <thời gian> · lag replica tối đa <…> · khoá chờ lâu nhất <…> · lỗi ứng dụng <…>
   Lùi: <thời gian> · dữ liệu khớp trước ↔ sau: <số dòng, tổng then chốt>
   Kết quả: Đạt | Không đạt — <vì sao>
   ```
@@ -95,8 +97,8 @@ lệnh `ALTER`/`DROP`/`CREATE INDEX`, đổi khoá ngoại, đổi kiểu cột;
 
 | Tình huống | Mức | Làm |
 |---|---|---|
-| Không đảo ngược được và người dùng chưa chấp nhận rõ | Chặn | `BR`, trình `DN` kèm cách cứu thay thế |
+| Migration một chiều (không có đường lùi) mà chưa có `DN` người dùng đồng ý bằng chữ | Chặn | `BR`, trình `DN` kèm cách cứu thay thế |
 | Khoá trên bảng nóng kéo dài quá cửa sổ cho phép | Chặn | đổi sang cách trực tuyến: bảng bóng, công cụ đổi schema trực tuyến, hoặc chia nhỏ lệnh |
 | Backfill không idempotent hoặc không chạy tiếp được | Phải sửa | sửa điều kiện chọn dòng và log tiến độ, diễn tập lại |
-| Rủi ro cao mà chưa diễn tập | Chặn | diễn tập rồi mới trình Cổng 2 |
+| Rủi ro cao, chưa có buổi chạy thử nào | Chặn | chưa được trình Cổng 2: chạy thử trên bản sao, ghi `VR`, rồi mới trình |
 | Không có bản sao để diễn tập | — | `VR` ghi Chưa chạy kèm giới hạn, báo Analyst; không thay bằng "chạy thử trên production" |

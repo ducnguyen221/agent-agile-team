@@ -3,8 +3,8 @@
 <!-- Nguồn ý: bộ skill quy trình private, `release-notes-writer` (không giấy phép). Viết lại phòng sạch từ danh
      sách ý (`TK10.5`), không mở văn bản gốc. -->
 
-> **Kết luận:** ghi chú phát hành lấy nội dung từ **REPORT** (`VR`, `RF`, `CO`), không từ trí nhớ; nhóm theo
-> **tác động**, không theo commit; luôn có cách kiểm, cách quan sát và cách hoàn tác. Hai bản: **nội bộ** đủ
+> **Kết luận:** mỗi dòng của ghi chú phát hành phải truy được về một mục của **REPORT** (`VR`, `RF`, `CO`) —
+> điều REPORT không có thì không viết; sắp theo **tác động**, không theo commit; luôn có cách kiểm, cách quan sát và cách hoàn tác. Hai bản: **nội bộ** đủ
 > chi tiết vận hành, **bên ngoài** chỉ nói điều người dùng thấy và cần làm — không mã nội bộ, không hạ tầng,
 > dẫn bằng lợi ích. Viết ghi chú không bao giờ kéo theo tăng version.
 

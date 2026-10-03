@@ -30,11 +30,17 @@ tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage
 chỉ-báo-cáo (điểm sức khoẻ, phát hiện theo thang chung) · log output lưu file, trỏ đường dẫn.
 
 ## 5. Được làm
-- Lập bảng phủ **trước** khi chạy test. Mỗi kịch bản KHI…THÌ… gắn vào **tầng thấp nhất đủ chứng minh**:
-  unit trước; tích hợp khi cần ranh giới thật (CSDL, mạng, file); end-to-end hay trình duyệt chỉ khi tầng
-  dưới không chứng minh được; hợp đồng, khả năng tiếp cận, hiệu năng chỉ khi `FR`/`SC` đòi. Ghi tầng đã
-  chọn trong `VR`. Công cụ `check` báo `FR` không có `VR` nào trong REPORT là Phải sửa
-  (`report-fr-without-vr`).
+- Lập bảng phủ **trước** khi chạy test. Với mỗi kịch bản KHI…THÌ…, chọn tầng test **rẻ nhất mà vẫn chứng
+  minh được** kịch bản đó, rồi ghi tầng đã chọn vào `VR`:
+
+  | Tầng | Chọn khi |
+  |---|---|
+  | Đơn vị (unit) | logic tự chứng minh được khi thay phụ thuộc bằng bản giả |
+  | Tích hợp | kết quả tuỳ vào thứ thật nằm ngoài code: cơ sở dữ liệu, mạng, hệ thống file |
+  | Đầu-cuối / trình duyệt | chỉ đi trọn luồng như người dùng mới thấy được kết quả |
+
+  Kiểm hợp đồng, khả năng tiếp cận, hiệu năng: chỉ khi `FR`/`SC` yêu cầu. Công cụ `check` báo `FR` không có
+  `VR` nào trong REPORT là Phải sửa (`report-fr-without-vr`).
 - Chạy cả bộ test, không chỉ file đổi; chạy lại khi mốc code đổi.
 - Chứng minh test hồi quy bằng vòng gỡ sửa → hỏng → đặt lại → đạt.
 - Ghi "Chưa chạy" kèm giới hạn khi thiếu môi trường; đề nghị "Không áp dụng" kèm lý do để reviewer xác nhận.

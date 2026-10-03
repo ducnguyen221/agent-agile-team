@@ -3,11 +3,15 @@
 <!-- Nguồn ý: bộ skill quy trình private, `preflight-gate` (không giấy phép). Viết lại phòng sạch từ danh sách ý
      (`TK10.6`), không mở văn bản gốc. -->
 
-> **Kết luận:** tiền kiểm là lưới cuối trước Cổng 2 và trước khi gộp: so bằng chứng đang có với **ma trận theo
-> cỡ và rủi ro** (mục 2), đi hết **danh mục đánh số** (mục 3), rồi ghi **khối kết luận ba dòng** (mục 4). Kết
-> luận là Đạt / Đạt có điều kiện / Không đạt. Đạt có điều kiện chỉ hợp lệ khi mỗi điều kiện là một `CO` **có
-> chủ và mốc** — thiếu một trong hai là Không đạt. Secret trong diff, test bị tắt thay vì sửa, rủi ro cao
-> không có kế hoạch hoàn tác: Không đạt, không thương lượng.
+> **Kết luận:** tiền kiểm là lần soát cuối trước Cổng 2 và trước khi gộp. Đặt bằng chứng hiện có cạnh **bảng
+> yêu cầu của cỡ việc** (mục 2; rủi ro cao dùng hàng nặng hơn), soát **danh mục đánh số** (mục 3), rồi chốt bằng
+> **khối ba dòng** (mục 4) với một trong ba kết luận: Đạt / Đạt có điều kiện / Không đạt. Điều kiện nào cũng phải
+> là một `CO` ghi **người chịu và hạn**; thiếu thì kết luận rơi xuống Không đạt. Ba trường hợp đi thẳng tới
+> Không đạt, không cân nhắc:
+>
+> - diff để lọt khoá, token hay mật khẩu;
+> - có test bị vô hiệu hoá (skip, xfail, xoá) để né lỗi thay vì chữa lỗi;
+> - việc rủi ro cao mà đường quay lui chưa từng được thử.
 
 ## 1. Khi nào
 
@@ -28,8 +32,8 @@ bao giờ kéo lên. Mọi `VR` phải do agent khác người làm chạy và *
 | Cỡ | Bằng chứng bắt buộc |
 |---|---|
 | Rất nhỏ, nhỏ | cả bộ test xanh trên đúng mốc · lint sạch · review toàn nhánh bởi agent khác (rất nhỏ được tự kiểm, ghi "chưa độc lập" — kết luận tối đa Đạt có điều kiện) · mỗi `SC` có `VR` Đạt |
-| Vừa | + test tích hợp cho luồng mới · coverage ≥ ngưỡng dự án (mặc định 80 %) cho code mới và code sửa · mỗi cờ tính năng có chủ và giá trị mặc định · log hoặc metric quan sát được hành vi mới |
-| Lớn, hoặc `risk: high` | + review chuyên đề theo từng nhãn `risk_tags` · diễn tập migration nếu đổi dữ liệu (`database-migrations`, `references/rehearsal.md`) · triển khai theo bậc kèm kế hoạch hoàn tác **đã kiểm** (lệnh + điều kiện huỷ) · ADR, hoặc PLAN ghi "không có quyết định kiến trúc mới" |
+| Vừa | + mỗi cờ tính năng có người chịu và giá trị mặc định · hành vi mới để lại dấu vết đọc được (log hoặc metric) · luồng mới có ít nhất một test chạy qua ranh giới thật · phần code mới và code sửa đạt ngưỡng coverage của dự án (mặc định 80 %) |
+| Lớn, hoặc `risk: high` | + mỗi nhãn trong `risk_tags` có reviewer chuyên đề của nó · đổi dữ liệu thì migration đã chạy thử trên bản sao (`database-migrations`, `references/rehearsal.md`) · đưa lên từng nấc, và đường quay lui **đã thử thật** — có lệnh cụ thể và ngưỡng để quyết định quay lui · quyết định kiến trúc nằm trong ADR (sprint không có quyết định nào thì PLAN nói vậy) |
 
 ## 3. Danh mục kiểm
 
@@ -40,7 +44,7 @@ Analyst tự đối chiếu, ghi bằng chứng `file:dòng` hoặc lệnh. Dòn
 |---|---|---|---|
 | 1 | Mỗi `SC` có `VR` Đạt; mỗi `FR` (hoặc kịch bản của nó) có ít nhất một `VR` | `SC` bắt buộc thiếu `VR`, hoặc `VR` là Chưa chạy / Không áp dụng chưa có reviewer xác nhận | máy (`report-sc-without-vr`, `report-fr-without-vr`) + tay (kết quả từng `VR`) |
 | 2 | `VR` độc lập, có lệnh + kết quả + mốc commit, không cũ hơn thay đổi code cuối | người chạy trùng người làm mà không ghi; mốc trong `VR` trước commit sửa code cuối | máy (`qa-not-independent`, `self-review`) + tay (mốc so với `git log`) |
-| 3 | 0 `RF` Chặn còn mở; `RF` Phải sửa còn mở chỉ khi người dùng chấp nhận, câu chấp nhận ghi rõ | còn Chặn; Phải sửa mở không có lời chấp nhận | tay |
+| 3 | Không còn phát hiện mức Chặn nào chưa xử lý; phát hiện Phải sửa nào để treo đều có câu đồng ý của người dùng, chép nguyên văn | có Chặn chưa xử lý; Phải sửa bị treo mà không có câu đồng ý | tay |
 | 4 | Nên sửa hoãn đã thành `CO` có chủ + mốc, kèm dòng `RQ-` trong REQUESTS | `CO` thiếu chủ hoặc mốc, hoặc không có dòng sổ | tay |
 | 5 | Sprint sửa lỗi: test hồi quy có vòng gỡ sửa → hỏng → đặt lại → đạt | chỉ có lần đạt | tay |
 | 6 | Không thêm skip/xfail, không tắt test, không nới linter, không hạ coverage (`method/conventions.md` mục 4) | diff chạm cấu hình kiểm mà không có `TK` riêng có lý do | tay (đọc diff file cấu hình test/lint) |

@@ -1,6 +1,6 @@
 ---
 name: adr
-description: Use when a technical decision is expensive to undo or reaches across several parts of a system - picking a platform, framework, datastore or authentication model, changing a data model or a contract between services, adding a cross-service dependency, retiring a technology - when a large task must record its architecture decisions, when a reviewer asks for an ADR, or when an earlier ADR has to be replaced.
+description: Use when a technical decision is expensive to undo or reaches across several parts of a system - picking a platform, framework, datastore or authentication model, changing a data model or a contract between services, adding a cross-service dependency, retiring a technology - when a large-size task needs its design choices written down, when a reviewer insists on a written decision record, or when a decision accepted earlier is being overturned.
 metadata:
   group: technique
   kind: reference
@@ -15,17 +15,17 @@ rewrite_before_public: false
 
 > **Kết luận:** ADR là **một trang** ghi một quyết định khó đảo ngược: bối cảnh, một câu quyết định, **ít
 > nhất hai lựa chọn thật** trong bảng bốn cột, hệ quả. Số bốn chữ số tăng dần, không cấp lại; trạng thái
-> `proposed` → `accepted` khi người dùng duyệt ở cổng; PLAN **trỏ** tới ADR chứ không chép. Đổi ý thì viết
-> ADR mới thay thế — ADR cũ chỉ đổi dòng trạng thái, không sửa thân, không xoá.
+> `proposed` → `accepted` khi người dùng duyệt ở cổng; PLAN **trỏ** tới ADR chứ không chép. Muốn lật một quyết
+> định đã chốt: viết bản mới; bản cũ giữ nguyên chữ và file, chỉ nhận nhãn `superseded by` trỏ sang bản mới.
 
 ## 1. Khi nào
 
 | Viết ADR | Không viết ADR — làm gì thay |
 |---|---|
-| Chọn nền tảng, framework, kho dữ liệu, mô hình xác thực | Refactor không đổi kiến trúc → mô tả trong `TK` của PLAN |
+| Cách xác thực người dùng; nơi lưu dữ liệu; framework hay nền tảng để chạy | Refactor không đổi kiến trúc → mô tả trong `TK` của PLAN |
 | Thêm phụ thuộc giữa các service; bỏ một công nghệ đang dùng | Đổi luật, quy trình làm việc → file luật của dự án |
 | Đổi mô hình dữ liệu hay hợp đồng giữa các phần | Đổi một endpoint / một schema đơn thuần → mục "Đổi hợp đồng / giao diện" của SPEC (skill `api-design`); chỉ thêm ADR khi đằng sau có một lựa chọn kiến trúc |
-| Việc cỡ **lớn**: ít nhất một ADR, hoặc PLAN ghi rõ "không có quyết định kiến trúc mới" (`method/sizing.md`, `method/conventions.md` mục 3) | Lựa chọn tương đương, dễ đổi lại (tên thư viện tiện ích, kiểu đặt tên) → dòng `Phán quyết:` trong PROGRESS |
+| Sprint cỡ **lớn** — mặc định phải có ADR; sprint lớn mà thật sự không chọn gì về kiến trúc thì PLAN nói thẳng điều đó trong một câu (luật ở `method/sizing.md`, `method/conventions.md` mục 3) | Lựa chọn tương đương, dễ đổi lại (tên thư viện tiện ích, kiểu đặt tên) → dòng `Phán quyết:` trong PROGRESS |
 | Reviewer đòi ADR; cuộc tranh luận thiết kế cần được chốt lại thành chữ | — |
 
 Phép thử nhanh: nếu sáu tháng sau có người hỏi "sao hồi đó lại chọn thế này?" mà câu trả lời tốn hơn một
@@ -98,7 +98,7 @@ cổng thấy cùng một hình.
 
 | Gặp | Làm |
 |---|---|
-| Chỉ có một lựa chọn thật — bảng lựa chọn thành màn diễn | thêm lựa chọn thật (kể cả "giữ nguyên"), hoặc ghi rõ vì sao không có lựa chọn khác (ràng buộc bắt buộc nào) |
+| Chỉ có một lựa chọn thật — bảng lựa chọn thành màn diễn | bổ sung phương án thật (giữ hiện trạng cũng tính), hoặc nêu tên ràng buộc đã loại hết các phương án kia |
 | Quyết định chạm bảo mật, dữ liệu cá nhân, phân quyền | reviewer chuyên đề bảo mật (skill `security-review`) đọc trước khi `accepted`; `risk_tags` của sprint ghi tương ứng |
 | Quyết định làm đổi `SC` của sprint đang chạy | PLAN hỏng — điều kiện dừng (d): `BR`, báo Analyst |
 | Thực hiện quyết định không đảo ngược được (xoá dữ liệu, gỡ dịch vụ đang chạy) | điều kiện dừng (a): chỉ làm khi người dùng gật |

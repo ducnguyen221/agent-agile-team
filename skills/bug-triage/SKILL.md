@@ -44,7 +44,7 @@ và dễ sinh hai bản sửa đá nhau.
    | Dấu hiệu (một là đủ) | Mức | Đường xử lý |
    |---|---|---|
    | Dịch vụ ngừng; luồng chính không ai dùng được; dữ liệu mất, hỏng hoặc lộ; tiền, thanh toán, hoá đơn sai hoặc không xuất được | Chặn | **Sửa nóng ngay** — mở sprint riêng, không chờ sprint đang chạy |
-   | Chức năng chính hỏng với nhiều người, không có đường vòng | Phải sửa | Sprint hiện tại nếu lỗi nằm trong phạm vi đã duyệt ở Cổng 1; ngoài phạm vi → mở sprint kế |
+   | Phần lớn người dùng không đi hết được một luồng quan trọng, và cũng không có cách làm khác | Phải sửa | Sprint hiện tại nếu lỗi nằm trong phạm vi đã duyệt ở Cổng 1; ngoài phạm vi → mở sprint kế |
    | Chức năng phụ hỏng, hoặc chức năng chính hỏng nhưng có đường vòng dùng được | Nên sửa | Sprint sau |
    | Thẩm mỹ (lệch bố cục, màu, chữ), ca biên hiếm không làm sai dữ liệu | Ghi chú | Backlog: dòng `RQ-` mới, chưa gán sprint |
 
@@ -93,7 +93,7 @@ Thiếu thông tin tái hiện **không** phải điều kiện dừng: ghi `RQ-
 
 ## 4. Đầu ra
 
-Một khối ngắn cho người điều phối hoặc người dùng — không dán log, chỉ trỏ đường:
+Báo kết quả phân loại bằng khối bốn dòng dưới đây; log để ở file, trong khối chỉ ghi đường dẫn tới nó:
 
 ```text
 Phân loại RQ-NNN: <mức>[ tạm] — <đường xử lý>
