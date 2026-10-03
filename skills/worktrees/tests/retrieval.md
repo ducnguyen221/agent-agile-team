@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: c4f7534eb458e5167d34eec0e660f03c4c1e3718
 date: 2026-10-03
-result: below threshold (2/5 situations pass, 3 partial, 0 fail; boundary pass)
+result: "strict 3/6 (+3 partial, 0 fail) — below threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); points-right 6/6"
 agent_ids:
   questions: ab40a8772df23badb
   answers: a9acf3ec649d4ddc0
@@ -25,8 +25,7 @@ Câu 6 là câu ranh giới, đáp án do người soạn nêu và người ch�
 Nguyên văn câu hỏi của người soạn, file nháp kỳ vọng, output TRỌN của chủ thể (đường dẫn thư mục người dùng giữ nguyên ở đó, còn ở đây lược thành `<gốc worktree>` vì repo chặn tên người dùng)
 và số lượt công cụ: hồ sơ sprint của lớp riêng, `evidence/TK12-green/worktrees-retrieval-rerun-3.md`.
 
-Cách chấm: **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho quyết định chính;
-**Không đạt** = trỏ sai hoặc bịa. Ngưỡng: ≥4/5 câu tình huống Đạt và câu ranh giới Đạt. `result` ghi cả số "một phần".
+Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho quyết định chính; **Không đạt** = trỏ sai hoặc bịa. Ngưỡng PLAN TK11: tỉ lệ câu tình huống Đạt ≥ 4/5 (80 %) và câu ranh giới Đạt; câu ranh giới tính riêng. `result` ghi số Đạt hẳn (`strict`) và số Một phần; `points-right` là Đạt + Một phần, tức số câu trỏ đúng nơi.
 
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|

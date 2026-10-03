@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: 26b515dc240ba62dfd0a2f00c929c50eb1597cfb
 date: 2026-10-03
-result: pass 7/7 (6 tình huống + 1 ranh giới), 3 partial
+result: "strict 4/7 (+3 partial, 0 fail) — below threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); points-right 7/7"
 agent_ids:
   questions: a26875bddfa622b57
   answers: ab0f8e80278a0eeb5
@@ -15,7 +15,7 @@ agent_ids:
 
 # Thử truy xuất - error-handling
 
-> **Kết luận:** pass 7/7 (6 tình huống + 1 ranh giới), 3 partial; ngưỡng >=4/5 câu tình huống + câu ranh giới. Chạy lại (lượt 2) với bộ câu mới, người soạn
+> **Kết luận:** strict 4/7 (+3 partial, 0 fail), points-right 7/7: dưới ngưỡng (3/6 câu tình huống Đạt; câu ranh giới Đạt). Chạy lại (lượt 2) với bộ câu mới, người soạn
 > và chủ thể đều là agent mới. Chủ thể trỏ đúng mục ở cả 6 câu tình huống (những phần skill không phủ, chủ thể nói rõ và được ghi ở cuối file) và nhận
 > ra câu ranh giới thuộc `debugging`.
 
@@ -36,7 +36,7 @@ giao chủ thể -> chấm). Câu 7 là câu ranh giới: đáp án của ngư�
 | 7 | Sau khi deploy, bảng điều khiển báo tỷ lệ response 500 tăng từ 0,2% lên 6% ở endpoint `/orders`, và nhóm đang cãi nhau là do bản deploy hay do DB. Cần quy trình gì để tìm ra nguyên nhân gốc trước khi đụng vào code? | mục khác: skill `debugging` (`SKILL.md` › 4 'Liên quan': `debugging` (truy lỗi lan tầng)). Không phải bản thân error-handling | mục khác: `debugging` (từ `SKILL.md` › 4, dòng Liên quan) | Đạt |
 
 
-Chấm lại (điều phối yêu cầu): Đạt = trỏ đúng mục VÀ mục có nội dung trả lời câu; Một phần = trỏ đúng nơi nhưng nội dung thiếu, hoặc đạt qua đáp thay thế đã chấp nhận; Không đạt = trỏ sai hoặc bịa. Ngưỡng tính Đạt + Một phần cho việc trỏ đúng; số một phần ghi ở `result`.
+Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho quyết định chính; **Không đạt** = trỏ sai hoặc bịa. Ngưỡng PLAN TK11: tỉ lệ câu tình huống Đạt ≥ 4/5 (80 %) và câu ranh giới Đạt; câu ranh giới tính riêng. `result` ghi số Đạt hẳn (`strict`) và số Một phần; `points-right` là Đạt + Một phần, tức số câu trỏ đúng nơi.
 
 ## Thiếu nội dung / mâu thuẫn
 

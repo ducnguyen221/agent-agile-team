@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: dde5b6a0ecb7f5eac7daa12e8c96ab8fd32a50b4
 date: 2026-10-03
-result: pass 7/7 (6 tình huống + 1 ranh giới), 1 partial
+result: "strict 6/7 (+1 partial, 0 fail) — at threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); points-right 7/7"
 agent_ids:
   questions: a20c3fe70f425e155
   answers: a2a2dfad264dbfeff
@@ -15,7 +15,7 @@ agent_ids:
 
 # Thử truy xuất - api-design
 
-> **Kết luận:** pass 7/7 (6 tình huống + 1 ranh giới), 1 partial; ngưỡng >=4/5 câu tình huống + câu ranh giới. Chạy lại (lượt 2) với bộ câu mới, người soạn
+> **Kết luận:** strict 6/7 (+1 partial, 0 fail), points-right 7/7: đạt ngưỡng (5/6 câu tình huống Đạt; câu ranh giới Đạt). Chạy lại (lượt 2) với bộ câu mới, người soạn
 > và chủ thể đều là agent mới. Chủ thể trỏ đúng mục ở cả 6 câu tình huống (những phần skill không phủ, chủ thể nói rõ và được ghi ở cuối file) và nhận
 > ra câu ranh giới thuộc `error-handling`.
 
@@ -36,7 +36,7 @@ giao chủ thể -> chấm). Câu 7 là câu ranh giới: đáp án của ngư�
 | 7 | API trả 500 kèm stack trace, thỉnh thoảng timeout khi gọi sang dịch vụ thanh toán. Mình cần thiết kế phân cấp exception (lỗi nghiệp vụ, lỗi hạ tầng), quy tắc retry với backoff khi gọi sang dịch vụ đó và nội dung log cho từng loại lỗi. Nên làm theo hướng nào? | mục khác: skill `error-handling` (api-design `SKILL.md` › 4 'Liên quan' trỏ sang đó). Chấp nhận thêm `debugging` cho phần nguyên nhân 500/timeout | mục khác: `error-handling` (từ `SKILL.md` › 4, dòng Liên quan) | Đạt |
 
 
-Chấm lại (điều phối yêu cầu): Đạt = trỏ đúng mục VÀ mục có nội dung trả lời câu; Một phần = trỏ đúng nơi nhưng nội dung thiếu, hoặc đạt qua đáp thay thế đã chấp nhận; Không đạt = trỏ sai hoặc bịa. Ngưỡng tính Đạt + Một phần cho việc trỏ đúng; số một phần ghi ở `result`.
+Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho quyết định chính; **Không đạt** = trỏ sai hoặc bịa. Ngưỡng PLAN TK11: tỉ lệ câu tình huống Đạt ≥ 4/5 (80 %) và câu ranh giới Đạt; câu ranh giới tính riêng. `result` ghi số Đạt hẳn (`strict`) và số Một phần; `points-right` là Đạt + Một phần, tức số câu trỏ đúng nơi.
 
 ## Thiếu nội dung / mâu thuẫn
 

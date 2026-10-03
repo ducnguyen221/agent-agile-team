@@ -204,6 +204,92 @@ def test_new_file_needs_sha_and_tier_but_old_file_does_not():
     assert problems({**old, "date": "2026-10-01"}) == []
 
 
+# Thước chấm truy xuất (SC5, RF120): MỘT định nghĩa cho mọi `skills/*/tests/retrieval.md`, và `result` là số đếm sinh ra
+# từ bảng chấm trong chính tệp — không gõ tay, không thước riêng từng tệp.
+RETRIEVAL_FILES = [p for p in TEST_FILES if p.name == "retrieval.md"]
+RETRIEVAL_IDS = [p.relative_to(REPO).as_posix() for p in RETRIEVAL_FILES]
+RETRIEVAL_ROW = re.compile(r"^\| \d+ \|")
+RETRIEVAL_RULE = (
+    "Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính "
+    "của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho "
+    "quyết định chính; **Không đạt** = trỏ sai hoặc bịa. Ngưỡng PLAN TK11: tỉ lệ câu tình huống Đạt ≥ 4/5 (80 %) và câu "
+    "ranh giới Đạt; câu ranh giới tính riêng. `result` ghi số Đạt hẳn (`strict`) và số Một phần; `points-right` là Đạt + "
+    "Một phần, tức số câu trỏ đúng nơi."
+)
+
+
+def retrieval_result(text: str) -> str:
+    """`result` chuẩn của một tệp truy xuất, đếm từ bảng chấm của nó. Lỗi (ValueError) nếu bảng không đọc được."""
+    grades = {"pass": 0, "partial": 0, "fail": 0}
+    situations = pass_situations = boundary = pass_boundary = 0
+    for line in text.splitlines():
+        if not RETRIEVAL_ROW.match(line):
+            continue
+        cells = [x.strip() for x in re.split(r"(?<!\\)\|", line)[1:-1]]
+        if len(cells) != 5:
+            raise ValueError(f"hàng bảng không đủ 5 cột: {line[:60]!r}")
+        verdict, is_boundary = cells[4], cells[2].startswith("mục khác:")
+        if re.match(r"Đạt \(một phần", verdict):
+            raise ValueError(f"ô `Đạt (một phần …)` mơ hồ, ghi Đạt hoặc Một phần: {verdict[:40]!r}")
+        kind = ("fail" if verdict.startswith("Không đạt") else "partial" if verdict.startswith("Một phần")
+                else "pass" if verdict.startswith("Đạt") else None)
+        if kind is None:
+            raise ValueError(f"ô kết quả không bắt đầu bằng Đạt / Một phần / Không đạt: {verdict[:40]!r}")
+        grades[kind] += 1
+        if is_boundary:
+            boundary += 1
+            pass_boundary += kind == "pass"
+        else:
+            situations += 1
+            pass_situations += kind == "pass"
+    if boundary != 1 or situations < 1:
+        raise ValueError(f"cần đúng 1 câu ranh giới và ≥1 câu tình huống, thấy {boundary} và {situations}")
+    total = situations + boundary
+    ok = pass_situations * 5 >= situations * 4 and pass_boundary == 1
+    return (f"strict {grades['pass']}/{total} (+{grades['partial']} partial, {grades['fail']} fail) — "
+            f"{'at' if ok else 'below'} threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); "
+            f"points-right {grades['pass'] + grades['partial']}/{total}")
+
+
+@pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
+def test_retrieval_file_uses_the_shared_rule(path):
+    text = c.read_text(path)
+    assert RETRIEVAL_RULE in text, "tệp không dùng định nghĩa chấm chung (RETRIEVAL_RULE)"
+    assert "Ngưỡng tính Đạt + Một phần" not in text, "còn thước chấm cũ"
+
+
+@pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
+def test_retrieval_result_is_computed_from_its_table(path):
+    assert str(front(path)["result"]) == retrieval_result(c.read_text(path))
+
+
+def _row(n, expected, verdict):
+    return f"| {n} | câu hỏi | {expected} | trỏ | {verdict} |"
+
+
+def _table(*verdicts, boundary="Đạt"):
+    rows = [_row(i, "`SKILL.md` › 1", v) for i, v in enumerate(verdicts, 1)]
+    rows.append(_row(len(verdicts) + 1, "mục khác: skill `x`", boundary))
+    return "\n".join(["| # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |", "|---|---|---|---|---|", *rows])
+
+
+def test_retrieval_result_counts_strictly_and_judges_threshold():
+    strict = retrieval_result(_table("Đạt", "Đạt", "Đạt", "Đạt", "Một phần (thiếu)"))
+    assert strict.startswith("strict 5/6 (+1 partial, 0 fail) — at threshold") and strict.endswith("points-right 6/6")
+    assert "below threshold" in retrieval_result(_table("Đạt", "Đạt", "Đạt", "Một phần", "Một phần"))
+    assert "below threshold" in retrieval_result(_table("Đạt", "Đạt", "Đạt", "Đạt", "Đạt", boundary="Một phần (thay thế)"))
+    assert "(+0 partial, 1 fail)" in retrieval_result(_table("Đạt", "Đạt", "Đạt", "Đạt", "Không đạt"))
+
+
+def test_retrieval_result_rejects_ambiguous_or_unreadable_tables():
+    with pytest.raises(ValueError, match="mơ hồ"):
+        retrieval_result(_table("Đạt (một phần: thiếu mẫu)", "Đạt"))
+    with pytest.raises(ValueError, match="bắt đầu bằng"):
+        retrieval_result(_table("Pass", "Đạt"))
+    with pytest.raises(ValueError, match="1 câu ranh giới"):
+        retrieval_result(_table("Đạt").replace("mục khác:", "mục:"))
+
+
 def write_skill(repo, kind: str, body: str):
     (repo / "skills" / "x").mkdir(parents=True, exist_ok=True)
     text = "---\nname: x\nmetadata:\n  kind: " + kind + "\n---\n" + body + "\n"

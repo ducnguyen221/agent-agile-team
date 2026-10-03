@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: ee60372d2429a3e3db75358226396fbcf0c3537b
 date: 2026-10-03
-result: pass 7/7 (6 tình huống + 1 ranh giới), 4 partial
+result: "strict 3/7 (+4 partial, 0 fail) — below threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); points-right 7/7"
 agent_ids:
   questions: a98471e3e606092bb
   answers: aacd41bfb8c8d0753
@@ -15,7 +15,7 @@ agent_ids:
 
 # Thử truy xuất - database-migrations
 
-> **Kết luận:** pass 7/7 (6 tình huống + 1 ranh giới), 4 partial; ngưỡng >=4/5 câu tình huống + câu ranh giới. Chạy lại (lượt 2) với bộ câu mới, người soạn
+> **Kết luận:** strict 3/7 (+4 partial, 0 fail), points-right 7/7: dưới ngưỡng (2/6 câu tình huống Đạt; câu ranh giới Đạt). Chạy lại (lượt 2) với bộ câu mới, người soạn
 > và chủ thể đều là agent mới. Chủ thể trỏ đúng mục ở cả 6 câu tình huống (những phần skill không phủ, chủ thể nói rõ và được ghi ở cuối file) và nhận
 > ra câu ranh giới thuộc `postgres`.
 
@@ -36,7 +36,7 @@ giao chủ thể -> chấm). Câu 7 là câu ranh giới: đáp án của ngư�
 | 7 | Query lấy danh sách đơn của một khách trong `orders` (60 triệu dòng) đang chậm 8 giây, EXPLAIN cho thấy seq scan, và cột lọc `customer_id` + `created_at` đã có index nhưng planner không dùng. Nên đọc EXPLAIN thế nào, kiểm statistics, chọn kiểu index và cấu hình Postgres ra sao để nó chạy dưới 100 ms? | mục khác: skill `postgres` (`SKILL.md` › 5. Tra cứu: 'Thiết kế schema, index, truy vấn Postgres: skill `postgres`') | mục khác: `postgres` (từ `SKILL.md` › 5. Tra cứu) | Đạt |
 
 
-Chấm lại (điều phối yêu cầu): Đạt = trỏ đúng mục VÀ mục có nội dung trả lời câu; Một phần = trỏ đúng nơi nhưng nội dung thiếu, hoặc đạt qua đáp thay thế đã chấp nhận; Không đạt = trỏ sai hoặc bịa. Ngưỡng tính Đạt + Một phần cho việc trỏ đúng; số một phần ghi ở `result`.
+Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho quyết định chính; **Không đạt** = trỏ sai hoặc bịa. Ngưỡng PLAN TK11: tỉ lệ câu tình huống Đạt ≥ 4/5 (80 %) và câu ranh giới Đạt; câu ranh giới tính riêng. `result` ghi số Đạt hẳn (`strict`) và số Một phần; `points-right` là Đạt + Một phần, tức số câu trỏ đúng nơi.
 
 ## Thiếu nội dung / mâu thuẫn
 

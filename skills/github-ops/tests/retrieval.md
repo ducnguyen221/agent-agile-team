@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: df6ceb55a83c77b921ebe3f92465a4d9fc3b92f8
 date: 2026-10-03
-result: pass 7/7 (6 tình huống + 1 ranh giới), 6 partial
+result: "strict 1/7 (+6 partial, 0 fail) — below threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); points-right 7/7"
 agent_ids:
   questions: aa708aba22abdc1fb
   answers: adad14f55d42db94d
@@ -15,9 +15,9 @@ agent_ids:
 
 # Thử truy xuất - github-ops
 
-> **Kết luận:** pass 7/7 (6 tình huống + 1 ranh giới), 6 partial; ngưỡng >=4/5 câu tình huống + câu ranh giới. Chạy lại (lượt 2) với bộ câu mới, người soạn
-> và chủ thể đều là agent mới. Chủ thể trỏ đúng mục ở cả 6 câu tình huống (những phần skill không phủ, chủ thể nói rõ và được ghi ở cuối file) và nhận
-> ra câu ranh giới thuộc `error-handling`.
+> **Kết luận:** strict 1/7 (+6 partial, 0 fail), points-right 7/7: dưới ngưỡng (1/6 câu tình huống Đạt; câu ranh giới Một phần). Chạy lại (lượt 2) với bộ câu mới, người soạn
+> và chủ thể đều là agent mới. Chủ thể trỏ đúng mục ở cả 6 câu tình huống (những phần skill không phủ, chủ thể nói rõ và được ghi ở cuối file) và ở
+> câu ranh giới trỏ `code-review` (đáp thay thế đã chấp nhận), không phải `error-handling` là đáp án chính.
 
 Bảy câu hỏi do một agent **chưa đọc** skill soạn (chỉ biết `description` hiện hành, lĩnh vực và tên các skill khác); nguyên văn câu hỏi, file nháp
 "Mục kỳ vọng" (có mtime), bài trả lời trọn của chủ thể và id agent ở `evidence/TK12-green/github-ops-retrieval-rerun-2.md` trong hồ sơ sprint của lớp riêng
@@ -36,7 +36,9 @@ giao chủ thể -> chấm). Câu 7 là câu ranh giới: đáp án của ngư�
 | 7 | Tôi đang xem PR #305 và thấy hàm xử lý thanh toán nuốt hết exception rồi trả về giá trị mặc định, thêm vào đó là một vòng retry không có giới hạn. Tôi cần nhận xét xem cách xử lý lỗi này có ổn không và đề xuất thiết kế lại cho đúng. Nên làm theo hướng nào? | mục khác: skill `error-handling` (nuốt lỗi, fallback sai, retry không trần). `code-review` chấp nhận được cho việc review một PR (`github-ops` › 1 'Không dùng cho': review một PR/diff → `code-review`). `github-ops` tự nó KHÔNG phải đáp án | mục khác: `code-review` (từ `SKILL.md` › 1, mục Không dùng cho); không nêu `error-handling` | Một phần (đáp thay thế `code-review` đã chấp nhận trước) |
 
 
-Chấm lại (điều phối yêu cầu): Đạt = trỏ đúng mục VÀ mục có nội dung trả lời câu; Một phần = trỏ đúng nơi nhưng nội dung thiếu, hoặc đạt qua đáp thay thế đã chấp nhận; Không đạt = trỏ sai hoặc bịa. Ngưỡng tính Đạt + Một phần cho việc trỏ đúng; số một phần ghi ở `result`.
+Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho quyết định chính; **Không đạt** = trỏ sai hoặc bịa. Ngưỡng PLAN TK11: tỉ lệ câu tình huống Đạt ≥ 4/5 (80 %) và câu ranh giới Đạt; câu ranh giới tính riêng. `result` ghi số Đạt hẳn (`strict`) và số Một phần; `points-right` là Đạt + Một phần, tức số câu trỏ đúng nơi.
+
+Câu 7 (ranh giới): chủ thể trả `code-review`, đáp thay thế mà người chấm đã chấp nhận trước, nhưng không phải đáp án chính `error-handling`, nên tính Một phần, không tính Đạt; vì ranh giới chưa Đạt, tệp dưới ngưỡng bất kể số câu tình huống.
 
 ## Thiếu nội dung / mâu thuẫn
 

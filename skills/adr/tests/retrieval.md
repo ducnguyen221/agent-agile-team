@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: 6ec980f797a9be9573d5c53b58b1df879b2b494c
 date: 2026-10-03
-result: pass 6/6 (rerun with a new question set after the description was shortened from 490 to 396 characters)
+result: "strict 6/6 (+0 partial, 0 fail) — at threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); points-right 6/6"
 agent_ids:
   questions: a9241d4672a5a250a
   answers: a6bbb3b62fb8db542
@@ -15,7 +15,7 @@ agent_ids:
 
 # Thử truy xuất — adr
 
-> **Kết luận:** 6/6 câu Đạt (ngưỡng ≥4/5 câu tình huống + câu ranh giới). Chủ thể trỏ đúng mục ở cả năm câu tình huống
+> **Kết luận:** strict 6/6 (+0 partial, 0 fail), points-right 6/6: đạt ngưỡng (5/5 câu tình huống Đạt; câu ranh giới Đạt). Chủ thể trỏ đúng mục ở cả năm câu tình huống
 > và nhận ra câu ranh giới thuộc `api-design`. Chạy lại vì `description` đổi (490 -> 396 ký tự) làm lệch `skill_sha`;
 > bộ câu mới, người soạn và chủ thể đều là agent mới.
 
@@ -26,6 +26,8 @@ dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo ch�
 **trước khi** giao chủ thể (thứ tự: nhận câu -> ghi kỳ vọng -> giao chủ thể -> chấm). Skill chỉ có `SKILL.md`, không có
 `references/`. Câu 6 là câu ranh giới: đáp án của người soạn (`api-design`) đã được đối chiếu với `description` của
 skill đích (thiết kế hoặc đổi một endpoint REST, phân trang, mã lỗi) và nhận là đúng.
+
+Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho quyết định chính; **Không đạt** = trỏ sai hoặc bịa. Ngưỡng PLAN TK11: tỉ lệ câu tình huống Đạt ≥ 4/5 (80 %) và câu ranh giới Đạt; câu ranh giới tính riêng. `result` ghi số Đạt hẳn (`strict`) và số Một phần; `points-right` là Đạt + Một phần, tức số câu trỏ đúng nơi.
 
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
