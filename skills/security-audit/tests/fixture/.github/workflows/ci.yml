@@ -1,0 +1,17 @@
+# CI của invoice-hub — chạy test cho mọi pull request, kể cả PR từ fork.
+name: ci
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: quickci-tools/pytest-cache@main
+      - run: echo "Đang test PR: ${{ github.event.pull_request.title }}"
+      - run: pip install -r requirements.txt && pytest -q
+        env:
+          PAYGATE_API_KEY: ${{ secrets.PAYGATE_API_KEY }}
