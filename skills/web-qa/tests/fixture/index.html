@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trà Mộc — Cửa hàng trà</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">Trà Mộc</a>
+  <nav>
+    <a href="index.html">Trang chủ</a>
+    <a href="about.html">Giới thiệu</a>
+    <a href="checkout.html">Giỏ hàng (<span id="cart-count">0</span>)</a>
+  </nav>
+</header>
+
+<main>
+  <img class="banner" src="img/banner.svg">
+
+  <h1>Trà Shan tuyết cổ thụ</h1>
+  <section class="product">
+    <img class="product-photo" src="img/product-1.jpg" alt="Hộp trà Shan tuyết 200 g">
+    <div class="product-info">
+      <p class="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
+      <p class="price">350.000 ₫ / hộp 200 g</p>
+      <div class="btn" onclick="addToCart()">Thêm vào giỏ</div>
+      <p id="cart-note" class="note" role="status"></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>Trà Mộc · Hotline 1900 0000 · Giao hàng toàn quốc</p>
+</footer>
+
+<script>
+  var count = 0;
+
+  function addToCart() {
+    count += 1;
+    document.getElementById("cart-count").textContent = count;
+    document.getElementById("cart-note").textContent = "Đã thêm " + count + " hộp vào giỏ.";
+  }
+
+  window.analytics.init({ site: "tramoc", page: "home" });
+</script>
+</body>
+</html>

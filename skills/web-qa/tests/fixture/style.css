@@ -1,0 +1,20 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; color: #222; background: #fbf8f2; }
+.site-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: #3d5a40; }
+.site-header a { color: #fff; text-decoration: none; margin-left: 16px; }
+.site-header .logo { margin-left: 0; font-weight: 700; font-size: 1.25rem; }
+main { max-width: 960px; margin: 0 auto; padding: 24px; }
+.banner { width: 100%; height: auto; display: block; border-radius: 8px; }
+.product { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; }
+.product-photo { width: 280px; height: 280px; object-fit: cover; background: #e8e2d6; }
+.product-info { flex: 1; min-width: 220px; }
+.price { font-size: 1.4rem; font-weight: 700; color: #3d5a40; }
+.btn { display: inline-block; padding: 10px 20px; background: #c0632b; color: #fff; border-radius: 6px; cursor: pointer; user-select: none; }
+.note { color: #3d5a40; min-height: 1.2em; }
+form input { display: block; width: 100%; max-width: 420px; padding: 10px; margin: 8px 0; border: 1px solid #bbb; border-radius: 4px; }
+form label { display: block; margin-top: 12px; }
+.summary { width: 900px; border-collapse: collapse; margin: 16px 0; }
+.summary th, .summary td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+form button { padding: 12px 28px; background: #c0632b; color: #fff; border: 0; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+.message { font-weight: 700; color: #3d5a40; min-height: 1.2em; }
+.site-footer { text-align: center; padding: 24px; color: #666; }

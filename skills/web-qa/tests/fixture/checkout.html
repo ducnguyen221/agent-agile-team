@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trà Mộc — Thanh toán</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="logo" href="index.html">Trà Mộc</a>
+  <nav>
+    <a href="index.html">Trang chủ</a>
+    <a href="checkout.html">Giỏ hàng</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Thanh toán</h1>
+  <form id="order-form" novalidate>
+    <input id="fullname" type="text" placeholder="Họ và tên">
+    <input id="email" type="email" placeholder="Email">
+    <input id="phone" type="tel" placeholder="Số điện thoại">
+
+    <label for="qty">Số lượng (hộp)</label>
+    <input id="qty" type="number" value="1">
+
+    <table class="summary">
+      <tr><th>Sản phẩm</th><th>Đơn giá</th><th>Số lượng</th><th>Thành tiền</th></tr>
+      <tr><td>Trà Shan tuyết cổ thụ, hộp 200 g</td><td>350.000 ₫</td><td id="qty-cell">1</td><td id="total">350.000 ₫</td></tr>
+    </table>
+
+    <button type="submit">Đặt hàng</button>
+  </form>
+  <p id="message" class="message" role="status"></p>
+</main>
+
+<footer class="site-footer">
+  <p>Trà Mộc · Hotline 1900 0000 · Giao hàng toàn quốc</p>
+</footer>
+
+<script>
+  var PRICE = 350000;
+  var form = document.getElementById("order-form");
+  var qty = document.getElementById("qty");
+
+  function money(v) {
+    return v.toLocaleString("vi-VN") + " ₫";
+  }
+
+  qty.addEventListener("input", function () {
+    var n = Number(qty.value);
+    document.getElementById("qty-cell").textContent = n;
+    document.getElementById("total").textContent = money(PRICE * n);
+  });
+
+  function submitOrder(order) {
+    return new Promise(function (resolve, reject) {
+      setTimeout(function () {
+        reject(new Error("POST /api/orders 500 Internal Server Error"));
+      }, 300);
+    });
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var fullname = document.getElementById("fullname").value.trim();
+    var email = document.getElementById("email").value.trim();
+    var phone = document.getElementById("phone").value.trim();
+    if (!fullname || !email || !phone) {
+      console.warn("order-form: validation failed");
+      return;
+    }
+    var code = "TM-" + String(Date.now() % 100000).padStart(5, "0");
+    document.getElementById("message").textContent = "Đặt hàng thành công! Mã đơn của bạn: " + code;
+    submitOrder({ fullname: fullname, email: email, phone: phone, qty: Number(qty.value), code: code });
+  });
+</script>
+</body>
+</html>
