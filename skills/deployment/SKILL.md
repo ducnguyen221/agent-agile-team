@@ -61,7 +61,7 @@ mặc định khi chưa có.
   check hỏng — cùng thời gian quan sát mỗi nấc và lệnh hoàn tác cụ thể. Không có số đo nền → đo trước rồi
   mới deploy.
 - **Trong** (rolling, canary): chỉ tăng nấc khi số đo nằm trong ngưỡng suốt thời gian quan sát. Chạm điều kiện
-  huỷ → hoàn tác trước, điều tra sau (skill `debugging`); không "chờ thêm chút xem có tự hết".
+  huỷ → dừng tăng nấc, hoàn tác theo lệnh đã ghi (nếu người dùng đã duyệt sẵn kế hoạch hoàn tác kèm điều kiện huỷ đó; chưa thì trình lệnh và chờ gật, mục 4), rồi điều tra (skill `debugging`); không "chờ thêm chút xem có tự hết".
 - **Sau:** smoke test trên production, so số đo với nền; ghi thành `VR` gồm lệnh + kết quả mới chạy
   (`method/evidence.md`). Lỗi lọt qua deploy → ghi vào REQUESTS theo skill `bug-triage`.
 
@@ -70,7 +70,8 @@ mặc định khi chưa có.
 - **Deploy production, rollback production, chạy migration trên dữ liệu thật, xoá volume hay image** là hành
   động ra ngoài hoặc không đảo ngược: dừng, trình lệnh sẽ chạy + ảnh hưởng + cách hoàn tác, **chờ người dùng
   gật**. Gật cho một lần deploy không phải gật cho lần sau; pipeline tự deploy không thay được lời gật đó khi
-  chính agent là người kích hoạt.
+  chính agent là người kích hoạt. Ngoại lệ duy nhất: người dùng đã duyệt sẵn kế hoạch hoàn tác kèm điều
+  kiện huỷ (mục 3) — chạm đúng điều kiện đó thì hoàn tác đúng kế hoạch đã duyệt, không hơn.
 - Deploy staging, build image cục bộ, chạy compose dev được làm trong phạm vi việc đã giao.
 - Không sửa cấu hình CI hay cấu hình deploy để "cho qua"; đổi cấu hình kiểm là một việc riêng có lý do.
 - Deploy production nằm **sau Cổng 2** (skill `closing-sprint`), không phải bước cuối của thực thi.
