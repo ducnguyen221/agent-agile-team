@@ -115,6 +115,7 @@ người dùng chọn giữ. Worktree do người khác/harness tạo mà mình 
 | Thư mục chưa bị git bỏ qua | Thêm `.gitignore` + commit trước |
 | Lỗi quyền khi tạo | Làm tại chỗ, báo rõ |
 | Baseline hỏng | Ghi PROGRESS; chặn `TK` thì ghi `BR` |
+| Lỗi "branch đã được checkout ở worktree khác" | `git worktree list` tìm worktree đang giữ nhánh; chuyển nhánh hoặc gỡ worktree đó (nếu của mình) rồi mới tạo lại; không `--force` khi chưa xem file chưa commit trong đó |
 
 | Bào chữa | Thực tế |
 |---|---|

@@ -5,11 +5,11 @@ metadata:
   group: technique
   kind: reference
   roles: [implementer, tech-reviewer]
-source: [affaan-m/ECC skills/database-migrations/SKILL.md, private-process-skills skills/migration-rehearsal/SKILL.md (private copy)]
-source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, 4c0fdc5736a49b6223a7dfc7626d5495cf55185c]
+source: [affaan-m/ECC skills/database-migrations/SKILL.md, "concept: migration rehearsal on a production-sized copy (references/rehearsal.md, rewritten from an idea list that kept some source wording; must be genuinely rewritten before public, see CO2 and RQ-021 in the owner private record)"]
+source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, null]
 base_sha: 3599962a013653191c41676021c7e7dc519ee351
 license: [MIT, none]
-rewrite_before_public: true
+rewrite_before_public: false
 ---
 
 # Migration cơ sở dữ liệu

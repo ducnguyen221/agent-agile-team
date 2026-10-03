@@ -3,6 +3,38 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+## 0.2.0-dev
+
+Chưa phát hành. SPR-02 — làm cứng Đợt 1 (phần nội dung mới của Đợt 2 chưa làm, xem `UPSTREAM.md` mục "Đợt 2 —
+dự kiến").
+
+- Mốc Đợt 2: khối "Đợt 2 — chốt SHA 2026-10-03" và một dòng nhật ký kiểm cho 20 nguồn repo ở `UPSTREAM.md`;
+  `ccusage` đổi tên chủ thành `ccusage/ccusage` (`UPSTREAM_OWNERS` giữ cả `ryoppippi`). Bảng nguồn theo
+  skill/agent ghi đúng `ef648e01` cho 7 mục đã viết lại sâu, `postgres` thêm nguồn thứ hai
+  `agents/database-reviewer.md`; `docs/updating-from-upstream.md` mục 4 nói rõ `base_sha` giữ nguyên khi đổi
+  `source_sha`.
+- Viết lại sâu 9 mục "gọn" của Đợt 1 có nguồn công khai, đối chiếu ECC `ef648e01` (và Superpowers `8ca22dba`
+  cho `diagnosing.md`): `deployment` (+ `references/docker.md`), `fastapi`, `postgres` (+
+  `references/diagnostics.md`), bốn agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`,
+  `rag-pipeline-reviewer`, và `writing-skills/references/diagnosing.md`.
+- Viết lại 7 đích từ danh sách ý lấy từ nguồn private, có mang một số câu chữ nguồn; 8-gram bằng 0 sau khi loại stoplist 45 cụm chung (trước khi loại: còn cụm trùng ở 5/7 đích); chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo):
+  `bug-triage`, `adr`,
+  `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md` và
+  `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn luật truy vết trong `scripts/README.md`. Cờ
+  `rewrite_before_public: true` không còn ở skill hay agent nào.
+- Thử áp lực nền (RED rồi GREEN) cho `intake`, `shaping-spec`, `writing-plan`, `running-sprint`,
+  `closing-sprint`, `bug-triage`, và cho `security-audit`, `web-qa`; thử truy xuất cho 10 skill tham chiếu
+  (`adr`, `api-design`, `database-migrations`, `deployment`, `error-handling`, `fastapi`, `github-ops`,
+  `postgres`, `python`, `worktrees`); thử định tuyến 14/14. Cả 28 skill giờ có tệp thử đã chạy
+  (`skills/README.md` mục 4).
+- `tests/test_skill_tests.py`: máy kiểm tệp thử — skill kỷ luật có `pressure.md`, skill tham chiếu có
+  `retrieval.md`, `result`/`model`/`date` hợp lệ, `skill_sha` khớp băm cây skill trừ `tests/` (skill đổi sau
+  khi thử thì đỏ; `git` có mà lỗi thì đỏ, chỉ thiếu lệnh `git` mới skip); có ca đột biến cho trạng thái chưa chạy
+  (kể cả giá trị mở đầu bằng dấu câu như `(pending)`), `date`, thiếu `skill_sha`/`tier`, và ca repo git tạm cho
+  phép băm cùng cho kiểm thiếu tệp thử theo `metadata.kind`.
+- Phiên bản các manifest (`.claude-plugin`, `.codex-plugin`, `marketplace.json`) lên `0.2.0-dev`. Số đếm không
+  đổi: 28 skill, 7 agent.
+
 ## 0.1.0-dev
 
 Chưa phát hành.

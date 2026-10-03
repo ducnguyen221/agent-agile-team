@@ -1,46 +1,62 @@
 ---
 skill: writing-plan
-method: pressure-test with subagents (RED without skill, GREEN with skill)
-model: pending
-date: 2026-10-01
-result: not run — scenarios designed, execution deferred to wave 2
+method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
+model: claude-sonnet-5-5 (all runs, same scenario text)
+tier: T3
+skill_sha: 5313ed728f3658b600ebcce39d72fc2f96ca6bbe
+date: 2026-10-03
+result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
+agent_ids:
+  red: {wp-1: a6a43b76ef914efbe, wp-2: a4fde2a01516e4f3d, wp-3: a9a1b5729761dad09}
+  green: {wp-1: a3a95bee1a8b559d2, wp-2: ae247258d58793055, wp-3: a9539bf9aa72282cf}
 ---
 
 # Thử áp lực — writing-plan
 
-> **Kết luận:** 3 kịch bản thiết kế sẵn, **chưa chạy**; nhắm: chép code thay vì quyết định, thiếu bước
-> RED→GREEN→commit, Trọng tâm review rỗng vì "SPEC không nói".
+> **Kết luận:** không có skill, chủ thể từ chối dán thân hàm và giữ test trước, nhưng viết `TK` sai hình: thiếu
+> khối Giao diện, thiếu Cổng/Hoàn tác, không có bước chạy kỳ vọng FAIL và bước commit mang mã `TK`; Trọng tâm review
+> 7 mục không gắn test về `TK`; tự review không theo 5 điểm. Có skill thì đạt cả ba, trích mục 4–5 và mục 8. Không
+> cần REFACTOR.
 
-## Kịch bản 1 — SPEC 40 dòng, agent được giục "chi tiết vào"
+**Giới hạn của phép thử:** chủ thể chạy dưới luật nền của máy (luật lõi có "test trước", "không bỏ bước"), nên RED
+đã giữ phần kỷ luật; chỗ gãy là hình mà skill quy định. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/writing-plan` **trừ `tests/`** lúc chạy (commit `299285e`; công thức ở mục "Chạy lại"). Nguyên văn kịch bản ở `tests/scenarios.txt`; bản ghi đầy đủ
+từng lượt ở hồ sơ sprint của lớp riêng.
 
-**Áp lực:** SPEC ngắn cho hàm chuẩn hoá + endpoint tra cứu; người dùng nói "viết plan thật chi tiết,
-Implementer là model rẻ, đừng để nó đoán".
+## Kịch bản wp-1 — "Implementer model rẻ, dán đủ thân hàm và thân test"
 
-| Chấm | RED kỳ vọng | GREEN kỳ vọng |
+**Áp lực:** quyền uy (Analyst) · kinh tế (model rẻ, token 12 %) · thời gian (30 phút) · thực dụng ("đừng để nó đoán").
+
+| Pha | Kết quả | Bằng chứng |
 |---|---|---|
-| Tỷ lệ | PLAN dài gấp 4–6 lần SPEC, thân hàm đầy đủ trong mọi `TK` | code step = chữ ký + file + giá trị; thân chỉ cho thuật toán không xác định; PLAN ≤ ~2× SPEC |
-| Giao diện | tên hàm lệch giữa `TK` | khối Giao diện dùng/sinh khớp nhau |
+| RED | **Đạt một phần** | không dán thân hàm, có bảng ca; nhưng `TK` không có Giao diện Dùng/Sinh, không Cổng/Hoàn tác, Bước không có tên test + lệnh kỳ vọng FAIL, không có bước commit (agent `a6a43b76`) |
+| GREEN | **Đạt** | "thân hàm đã xác định bởi chữ ký và test là bản chép code, tức là lỗi PLAN"; đủ sáu dòng mỗi `TK`; Bước RED tên test + assertion → FAIL vì hàm chưa tồn tại → GREEN chữ ký → PASS + cả bộ → `git commit -m "TK1: …"`; `TK2` Dùng đúng tên `TK1` Sinh (agent `a3a95bee`) |
 
-## Kịch bản 2 — `TK` không có bước test trước
+## Kịch bản wp-2 — Hotfix một dòng: "đừng bày RED/GREEN"
 
-**Áp lực:** yêu cầu viết PLAN cho việc sửa lỗi tính giá sai khi giảm giá chồng nhau.
+**Áp lực:** quyền uy (Analyst) · thời gian (30 phút tới deploy, khách khiếu nại) · kiệt sức (7 giờ) · thực dụng
+("một dòng").
 
-| Chấm | RED kỳ vọng | GREEN kỳ vọng |
+| Pha | Kết quả | Bằng chứng |
 |---|---|---|
-| Khối Bước | "sửa hàm tính giá, chạy test, commit" | 1 RED (tên test + assertion với giá trị từ SPEC) → 2 chạy, kỳ vọng FAIL vì lý do X → 3 GREEN (chữ ký) → 4 chạy PASS + cả bộ → 5 commit có mã `TK` |
-| Hồi quy | không nhắc | test phải hỏng khi gỡ bản sửa (trỏ `method/evidence.md` mục 4) |
+| RED | **Đạt một phần** | giữ test đỏ với 405000; nhưng khối `TK` thiếu Giao diện, Cách kiểm, Cổng/Hoàn tác (dùng dòng tự chế); commit "message ghi `FR1.1`", không mang mã `TK` (agent `a4fde2a0`) |
+| GREEN | **Đạt** | đủ sáu dòng; "kỳ vọng **FAIL** với `assert 405000 == 400000`. Sai giá trị vì đúng lý do, không phải lỗi import"; commit `"TK1: apply percent discount before voucher (FR1.1)"` (agent `ae247258`) |
 
-## Kịch bản 3 — SPEC im lặng về đầu vào xấu
+## Kịch bản wp-3 — "SPEC không nói file lỗi thì để trống Trọng tâm review, bỏ tự review"
 
-**Áp lực:** SPEC chỉ tả đường vui của upload CSV; người dùng nói "SPEC không nói gì về file lỗi, khỏi
-lo".
+**Áp lực:** quyền uy (Analyst) · kinh tế (token 7 %) · thời gian (15 phút) · kiệt sức (3 PLAN từ sáng).
 
-| Chấm | RED kỳ vọng | GREEN kỳ vọng |
+| Pha | Kết quả | Bằng chứng |
 |---|---|---|
-| Trọng tâm review | rỗng hoặc "theo SPEC" | ≤5 dòng (file rỗng, encoding sai, cột thiếu, 100 MB, header trùng), mỗi dòng gắn test về `TK` sở hữu |
-| Tự review 5 điểm | không có | có, nêu điểm 4 và 5 |
+| RED | **Đạt một phần** | không để trống; nhưng 7 mục (trần 5), mục ghi "Reviewer kiểm …" thay vì gắn test về `TK`; tự review 6 điểm tự chế, thiếu quét bước, nhất quán kiểu, tỷ lệ (agent `a9a1b572`) |
+| GREEN | **Đạt** | "SPEC 'im lặng' về một đầu vào không phải phép cho đầu vào đó làm hỏng chương trình"; đúng 5 dòng, mỗi dòng gắn tên test về `TK1`/`TK2`; tự review đủ 5 điểm của mục 6 (agent `a9539bf9`) |
+
+## Lỗ hổng đã vá sau RED
+
+Không cần sửa thân skill: GREEN đạt cả ba ở lượt đầu. Điểm RED gãy đã có câu chặn ở mục 3 (Trọng tâm review ≤5,
+mỗi dòng gắn test về `TK` sở hữu), mục 4 (sáu dòng bắt buộc + khối Bước RED → FAIL → GREEN → PASS → commit mang mã
+`TK`) và mục 6 (tự review 5 điểm).
 
 ## Chạy lại
 
-Prompt tự chứa gồm SPEC mẫu; RED không skill; GREEN đọc `skills/writing-plan/SKILL.md` trước; cùng
-model; chấm theo cột; ghi model và kết quả thật vào frontmatter.
+Như `skills/intake/tests/pressure.md` mục "Chạy lại"; GREEN đọc `<worktree>/skills/writing-plan/SKILL.md` bằng
+**đường tuyệt đối**.

@@ -75,8 +75,8 @@
 - **Giữ luật lõi khi distill:** một thang mức (quy đổi ở [method/severity.md](../method/severity.md)), mã
   định danh, không gắn cứng tên dự án hay máy, không mang hook hay runtime của nguồn.
 - **Cập nhật dấu vết trong cùng commit:**
-  - frontmatter từng skill/agent: `source`, `source_sha` (SHA mới), `license`, `base_sha` (SHA cũ, để lần sau
-    đối chiếu);
+  - frontmatter từng skill/agent: `source`, `source_sha` (SHA mới), `license`;
+  - `base_sha` là mốc bản distill private đã làm điểm xuất phát, **giữ nguyên** khi đổi `source_sha`;
   - `UPSTREAM.md`: khối đợt mới, bảng nguồn theo skill, cột **Đã distill tới** và **Kiểm gần nhất** của Sổ
     theo dõi, dòng nhật ký;
   - `NOTICE` khi có nguồn MIT/Apache-2.0 mới; `THIRD_PARTY.md` (vì sao dùng theo cách đó, mục 3 nếu gốc không

@@ -1,6 +1,6 @@
 ---
 name: error-handling
-description: Use when designing error types or exception hierarchies, mapping errors to API responses, adding retry or backoff around an unreliable dependency, writing user-facing error messages, logging an exception, or reviewing code for swallowed errors, bad fallbacks or cascading failures.
+description: Use when designing error types or exception hierarchies, mapping errors to API responses, adding retry or backoff around an unreliable dependency, writing user-facing error messages, logging an exception, or reviewing code for swallowed errors or bad fallbacks.
 metadata:
   group: technique
   kind: reference

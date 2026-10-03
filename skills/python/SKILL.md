@@ -1,6 +1,6 @@
 ---
 name: python
-description: Use when writing, reviewing, or refactoring Python code, designing a Python package or module, setting up Python tooling (uv, ruff, mypy, pytest), or writing and reviewing pytest tests — fixtures, mocks, parametrization, async tests, coverage.
+description: Use when writing, reviewing, or refactoring Python code, designing a Python package or module, setting up Python tooling (uv, ruff, mypy, pytest), or writing and reviewing pytest tests — fixtures, mocks, parametrization, async tests.
 metadata:
   group: technique
   kind: reference

@@ -32,7 +32,7 @@ cách đó, các nguồn **chỉ lấy ý**, và danh sách file **phải viết
 | caveman (`JuliusBrussee/caveman`) | Apache-2.0 | Không cài, chỉ lấy lối viết gọn | Luồng gọn giữa agent → `token-economy` |
 | Nguồn văn phong (BLUF, Minto/SCQ, plain language, Google dev style, Diátaxis, Microsoft style, NN/g, hướng dẫn prompting Anthropic) | nhiều loại (phạm vi công cộng, CC BY, CC BY-SA, giữ bản quyền) | Giấy phép từng trang chưa đọc hết — chỉ lấy ý là an toàn dù giả định sai | Kết luận trước, ma trận độ dài, danh sách cấm kèm cách làm thay → `response-style` |
 
-## 3. Nguồn private — phải viết lại trước khi công khai
+## 3. Nguồn private — file lấy từ đó phải viết lại trước khi công khai
 
 Bộ skill quy trình private (gốc private, **không giấy phép**) chỉ dùng được khi repo còn private. Cờ
 `rewrite_before_public: true` đặt ở **cấp skill** (frontmatter `SKILL.md`); bảng dưới ghi đúng file nào cần
@@ -40,13 +40,19 @@ viết lại để không phải viết lại cả skill.
 
 | Skill | File phải viết lại | Nguồn private |
 |---|---|---|
-| `adr` | `SKILL.md` (cả skill) | `adr-writer` |
-| `bug-triage` | `SKILL.md` (cả skill; `tests/pressure.md` tự viết, giữ được) | `bug-triager` |
-| `database-migrations` | `references/rehearsal.md` (`SKILL.md` chỉ trỏ tới, giữ được) | `migration-rehearsal` |
-| `closing-sprint` | `references/preflight.md`, `references/release-notes.md` | `preflight-gate`, `release-notes-writer` |
 
-Trước khi công khai: viết lại các file trên từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
-`source`/`license` và dòng tương ứng ở `UPSTREAM.md`.
+Bảng hiện trống: không skill nào mang cờ `true` (bất biến cờ ↔ bảng vẫn được `tests/test_provenance.py` kiểm).
+
+Đã viết lại từ danh sách ý (`TK10.2`–`TK10.8`) có mang một số câu chữ nguồn; 8-gram bằng 0 sau khi loại stoplist 45 cụm chung (trước khi loại: còn cụm trùng ở 5/7 đích); chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo). Dòng đã rời bảng: `closing-sprint`
+(`references/release-notes.md`, `references/preflight.md`), `bug-triage` (`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`), `roles/executor/qa.md`
+(bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill đó ghi nguồn ý
+dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).
+
+Quy tắc cho file MỚI về sau: file nào lấy từ nguồn private không giấy phép thì thêm một dòng vào bảng trên và đặt
+cờ `true` ở skill; trước khi công khai, viết lại từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
+`source`/`license` và dòng tương ứng ở `UPSTREAM.md`, rồi chuyển dòng sang danh sách "đã viết lại" ở trên. Các file đã
+liệt kê ở trên vẫn phải viết lại thật sự trước khi công khai (`CO2`); bảng trên trống vì cờ giữ `false`, không vì việc
+đã xong.
 
 ## 4. Công cụ chỉ gọi
 
