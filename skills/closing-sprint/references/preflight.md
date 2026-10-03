@@ -52,7 +52,7 @@ Analyst tự đối chiếu, ghi bằng chứng `file:dòng` hoặc lệnh. Dòn
 | 3 | Không còn phát hiện mức Chặn nào chưa xử lý; phát hiện Phải sửa nào để treo đều có câu đồng ý của người dùng, chép nguyên văn | có Chặn chưa xử lý; Phải sửa bị treo mà không có câu đồng ý | tay |
 | 4 | Nên sửa hoãn đã thành `CO` có chủ + mốc, kèm dòng `RQ-` trong REQUESTS | `CO` thiếu chủ hoặc mốc, hoặc không có dòng sổ | tay |
 | 5 | Sprint sửa lỗi: test hồi quy có vòng gỡ sửa → hỏng → đặt lại → đạt | chỉ có lần đạt | tay |
-| 6 | Không thêm skip/xfail, không tắt test, không nới linter, không hạ coverage (`method/conventions.md` mục 4) | diff chạm cấu hình kiểm mà không có `TK` riêng có lý do | tay (đọc diff file cấu hình test/lint) |
+| 6 | Không thêm skip/xfail, không tắt test, không nới linter, không hạ coverage (`method/conventions.md` mục 4) | diff file test thêm marker skip/xfail/only, xoá hay comment test; hoặc diff chạm cấu hình kiểm mà không có `TK` riêng có lý do | tay (grep diff file test tìm marker, đọc diff file test bị xoá và file cấu hình test/lint) |
 | 7 | Diff không chứa secret | có secret → **Không đạt** và điều kiện dừng (b): báo ngay để xoay vòng khoá | tay + công cụ quét secret của dự án nếu có |
 | 8 | CHANGELOG chỉ thêm mục; VERSION không đổi | mục cũ bị sửa hay xoá; version tự tăng | tay (diff hai file) |
 | 9 | REPORT đủ mục; mục "Cách dùng, đã đổi gì, cách hoàn tác" có đủ ba phần | thiếu mục; một trong ba phần trống | máy (`heading-missing`, chỉ tiêu đề) + tay (nội dung) |
