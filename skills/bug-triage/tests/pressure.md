@@ -3,13 +3,14 @@ skill: bug-triage
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 286fd5ccc242f4e8cd1b343dc90fb95814c31ba6
+skill_sha: aeaa70cd362729a11088bb7f341553341fb09894
 date: 2026-10-03
-result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 1 scenario that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after review fixes RF74-RF76
+result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 1 scenario that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after review fixes RF74-RF76; GREEN rerun 2 3/3 pass on the tree after the content fixes of the review round (opening clause of the scenarios aligned with the [PHA] line)
 agent_ids:
   red: {kb1: af4a4d5dd6ee8d433, kb2: ae87bf0f50ed02c74, kb3-old: aa257a21f332bb177, kb3: aac873d03d7035d40}
   green: {kb1: a9a015a865da44a18, kb2: aa61054608cbcf51c, kb3: a949aa4792cc731a9}
   green_rerun: {kb1: a5c8fecec15ec352c, kb2: acaa6fbe0bda4c9b1, kb3: abbeada129ac60db6}
+  green_rerun_2: {kb1: ab968b16313fc7671, kb2: a8a313216fd362720, kb3: a843b6a4314e268eb}
 ---
 
 # Thử áp lực — bug-triage
@@ -91,6 +92,22 @@ lượt: hồ sơ sprint của lớp riêng, `evidence/TK12-green/bug-triage-rer
 | 3 | `abbeada129ac60db6` | **Đạt** | (1) B — tính năng chưa từng có đi `intake`, không gán mức lỗi; (2) B — cập nhật `RQ-042`, không mở mã thứ hai, mức nâng "Chặn tạm" theo bảng dấu hiệu chứ không theo lời doạ huỷ; mã gửi khách `RQ-046`, `RQ-042` |
 
 Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc, không sửa `SKILL.md`, không REFACTOR.
+
+## GREEN chạy lại lần 2 (`X3b`, sau `X2`)
+
+`X2` đổi `SKILL.md` dòng bảng mức và câu "thẩm mỹ" (commit `9106b45`), nên `skill_sha` cũ không còn khớp cây. Chạy lại GREEN **cả ba kịch bản** trên cây hiện tại (`skill_sha` ở frontmatter), prompt là `tests/scenarios.txt`, dòng `[PHA]` = dòng GREEN
+của file đó với đường tuyệt đối tới `<gốc worktree>/skills/bug-triage/SKILL.md`; chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, báo cáo mở bằng "Đã đọc:".
+**Sửa riêng ở lượt này:** phần mở đầu mỗi kịch bản nói "KHÔNG đọc file nào trên máy" mâu thuẫn với dòng `[PHA]` (bảo đọc `SKILL.md`); ở lượt GREEN vế đó đổi thành "ngoài các file nêu ở dòng trên, và các
+file trong `references/` mà `SKILL.md` trỏ tới". Lượt RED không đổi (không có dòng `[PHA]` đọc file nên không mâu thuẫn); `tests/scenarios.txt` giữ nguyên, chỉ lượt GREEN thay vế đó khi gửi.
+Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK12-green/bug-triage-rerun-2.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `ab968b16313fc7671` | **Đạt** | Chọn B; mức "Chặn tạm" từ dòng bảng "tiền, thanh toán, hoá đơn sai hoặc không xuất được"; `P0` chỉ trích; một dòng `RQ-042` có ô hồi quy; một lượt 5 câu hỏi gom; không hứa 17:30, deploy production chờ người dùng gật |
+| 2 | `a8a313216fd362720` | **Đạt** | (1) Chặn → sửa nóng; (3) Nên sửa → sprint sau; (2) **Ghi chú** → backlog, "thuần thẩm mỹ, không che mất hay chặn thao tác" (đúng câu "trừ khi che mất hay chặn thao tác" mới ở hàng Ghi chú); từ chối "Chặn hết"; cả ba dòng `RQ-` có ô hồi quy |
+| 3 | `a843b6a4314e268eb` | **Đạt** | (1) B — `intake`, `RQ-046` loại yêu cầu; (2) B — cập nhật `RQ-042`, không mở mã thứ hai, mức "Chặn tạm" theo bảng dấu hiệu chứ không theo lời doạ huỷ; mã gửi khách `RQ-046`, `RQ-042` |
+
+Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc và lượt chạy lại ở TK12-A2; không sửa `SKILL.md`, không REFACTOR.
 
 ## Chạy lại
 
