@@ -56,17 +56,24 @@ def is_reference(skill: str) -> bool:
     return isinstance(meta, dict) and meta.get("kind") == "reference"
 
 
-def tree_hash(skill: str):
-    """Băm cây thư mục skill TRỪ `tests/` ở HEAD, hoặc None khi không có git/HEAD."""
+def tree_hash(skill: str, repo=REPO):
+    """Băm cây thư mục skill TRỪ `tests/` ở HEAD của `repo`. Trả None CHỈ khi không có lệnh `git`; git có mà lỗi
+    (`ls-tree`/`mktree` mã thoát khác 0: `dubious ownership`, skill chưa commit ở HEAD…) thì test đỏ kèm stderr,
+    không im lặng skip."""
+    def git(*args, **kw):
+        res = subprocess.run(["git", *args], cwd=repo, capture_output=True, timeout=60, **kw)
+        if res.returncode != 0:
+            pytest.fail(f"`git {' '.join(args)}` thoát {res.returncode}: {res.stderr.decode(errors='replace').strip()}")
+        return res.stdout
+
     try:
-        ls = subprocess.run(["git", "ls-tree", f"HEAD:skills/{skill}"], cwd=REPO, capture_output=True, timeout=60)
-        if ls.returncode != 0:
-            return None
-        rows = [r for r in ls.stdout.split(b"\n") if r and r.split(b"\t", 1)[1] != b"tests"]
-        mk = subprocess.run(["git", "mktree"], cwd=REPO, input=b"\n".join(rows) + b"\n", capture_output=True, timeout=60)
-    except (OSError, subprocess.SubprocessError):
-        return None
-    return mk.stdout.decode().strip() if mk.returncode == 0 else None
+        ls = git("ls-tree", f"HEAD:skills/{skill}")
+        rows = [r for r in ls.split(b"\n") if r and r.split(b"\t", 1)[1] != b"tests"]
+        return git("mktree", input=b"\n".join(rows) + b"\n").decode().strip()
+    except FileNotFoundError:
+        return None  # không có lệnh git: đây là ca skip duy nhất
+    except subprocess.SubprocessError as exc:
+        pytest.fail(f"git không chạy xong: {exc}")
 
 
 def problems(data: dict) -> list:
@@ -133,7 +140,7 @@ def test_skill_sha_matches_skill_tree(path):
     data = front(path)
     actual = tree_hash(path.parent.parent.name)
     if actual is None:
-        pytest.skip("không tính được băm cây skill ở HEAD (không có git)")
+        pytest.skip("không có lệnh git")
     assert str(data["skill_sha"]) == actual, \
         f"skill đổi sau khi thử, chạy lại: ghi {data['skill_sha']}, cây skill trừ tests/ ở HEAD là {actual}"
 
@@ -183,3 +190,15 @@ def test_tree_hash_ignores_tests_dir():
         pytest.skip("không có git")
     assert re.fullmatch(r"[0-9a-f]{40}", first)
     assert first == tree_hash(skill)
+
+
+def test_tree_hash_skips_only_when_git_is_missing(monkeypatch):
+    def no_git(*a, **k):
+        raise FileNotFoundError("git")
+    monkeypatch.setattr(subprocess, "run", no_git)
+    assert tree_hash("x") is None
+
+
+def test_tree_hash_fails_loudly_when_git_errors(tmp_path):
+    with pytest.raises(pytest.fail.Exception, match="ls-tree.*thoát"):
+        tree_hash("x", repo=tmp_path)  # thư mục không phải repo git: git có, nhưng ls-tree mã thoát khác 0
