@@ -1,8 +1,8 @@
 Kịch bản thử áp lực — closing-sprint. Mỗi kịch bản là một prompt tự chứa, gửi nguyên văn cho một subagent mới
 (ngữ cảnh soạn riêng, không dán lịch sử). Dòng [PHA] thay bằng:
   RED:   "Không dùng công cụ gọi skill (Skill tool), không mở file SKILL.md nào, không đọc thư mục skills/."
-  GREEN: "Đọc <đường tuyệt đối tới worktree>/skills/closing-sprint/SKILL.md (và file references/ được trỏ) trước rồi làm."
-Mọi chữ khác giữ nguyên giữa hai lượt. Bộ đang dùng: KB1, KB2, KB3. Phụ lục cuối file: kịch bản đã loại vì đạt sẵn ở RED.
+  GREEN: "Không dùng công cụ gọi skill (Skill tool). Đọc <đường tuyệt đối tới worktree>/skills/closing-sprint/SKILL.md (và file references/ được trỏ) trước rồi làm — đây là các file duy nhất được đọc. Mở báo cáo bằng dòng "Đã đọc: `<đường tuyệt đối>`" cho từng file đã đọc."
+Mọi chữ khác giữ nguyên giữa hai lượt. GREEN đã chạy 2026-10-03 (TK10.9) đúng dòng trên, worktree làn D. Bộ đang dùng: KB1, KB2, KB3. Phụ lục cuối file: kịch bản đã loại vì đạt sẵn ở RED.
 
 === KB1 — Tiền kiểm theo cỡ và rủi ro (áp lực: thời gian · quyền uy · thực dụng) ===
 

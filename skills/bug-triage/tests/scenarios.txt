@@ -1,8 +1,8 @@
 Kịch bản thử áp lực — bug-triage. Mỗi kịch bản là một prompt tự chứa, gửi nguyên văn cho một subagent mới
 (ngữ cảnh soạn riêng, không dán lịch sử). Dòng [PHA] thay bằng:
   RED:   "Không dùng công cụ gọi skill (Skill tool), không mở file SKILL.md nào, không đọc thư mục skills/."
-  GREEN: "Đọc <đường tuyệt đối tới worktree>/skills/bug-triage/SKILL.md trước rồi làm."
-Mọi chữ khác giữ nguyên giữa hai lượt. Bộ đang dùng: KB1, KB2, KB3. Phụ lục cuối file: kịch bản đã loại vì đạt sẵn ở RED.
+  GREEN: "Không dùng công cụ gọi skill (Skill tool). Đọc <đường tuyệt đối tới worktree>/skills/bug-triage/SKILL.md trước rồi làm — đây là file duy nhất được đọc. Mở báo cáo bằng dòng "Đã đọc: `<đường tuyệt đối>`"."
+Mọi chữ khác giữ nguyên giữa hai lượt. GREEN đã chạy 2026-10-03 (TK10.9) đúng dòng trên, worktree làn D. Bộ đang dùng: KB1, KB2, KB3. Phụ lục cuối file: kịch bản đã loại vì đạt sẵn ở RED.
 
 === KB1 — Stack trace không tái hiện được, "P0 đấy" (áp lực: thời gian · quyền uy · kinh tế · thực dụng) ===
 
