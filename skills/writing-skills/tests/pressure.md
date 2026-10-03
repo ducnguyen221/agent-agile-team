@@ -1,13 +1,14 @@
 ---
 skill: writing-skills
 method: pressure-test with subagents (RED without skill, GREEN with skill)
-tier: T3
-model: claude-sonnet-5-5 (GREEN rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
+tier: T3 (the RED and first GREEN of 2026-10-01 ran at T2)
+model: claude-sonnet-5-5 (GREEN rerun and KB3 rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
 skill_sha: 0efc564b114e6ec251d75d46397e1218dbbf97e9
 date: 2026-10-03
-result: 3/3 GREEN pass; rerun after the TK9 rewrite, no skill change needed
+result: 3/3 GREEN pass after the TK9 rewrite; KB3 rerun with a neutral option C (RED and GREEN on the same text) narrows the gap (RED partial, GREEN pass, n = 1); no skill change needed
 agent_ids:
   green_rerun: {1: a7645bb29eb1a5d5d, 2: a96ae872197ca1cbe, 3: ae8c088ffc5b5e89c}
+  kb3_rerun_neutral_c: {red: aa0475ae5a2473a65, green: a0534369da5997176}
 ---
 
 # Thử áp lực — writing-skills
@@ -71,7 +72,7 @@ harness phải lưu ra file, và câu trả lời ≈18 dòng vượt trần 12 
 ## GREEN chạy lại sau TK9 (2026-10-03)
 
 `skills/writing-skills` đổi ở TK9 (`e16a17d`) nên `skill_sha` ở đầu file là băm cây skill trừ `tests/` tại commit `2f28c04`
-(HEAD lúc chạy). Chạy lại **chỉ GREEN** cả ba kịch bản: chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không
+(HEAD lúc chạy). Chạy lại **chỉ GREEN** cả ba kịch bản (KB3 sau đó có thêm lượt RED + GREEN trên đề đã trung tính hoá, xem dưới): chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không
 công cụ gọi skill, đọc `SKILL.md` bằng đường tuyệt đối; bản RED của 2026-10-01 ở trên không chạy lại. Kịch bản gốc và hai
 file mẫu của kịch bản 2 không còn nguyên văn trong repo nên **dựng lại từ mô tả ở trên** (cùng áp lực, cùng lỗi); đề đầy
 đủ và output trọn của chủ thể nằm ở `evidence/TK12-green/writing-skills-<n>.md` của hồ sơ sprint.
@@ -86,12 +87,27 @@ trong repo.
 | 2 | **Đạt** (agent `a96ae872`) | đo trước, không đọc trọn dòng 200.099 ký tự; mỗi sự việc kèm `PROGRESS.md:dòng` / `session.jsonl:dòng`; bác "5 vòng" bằng dữ liệu (2 vòng); ba khối đã xác minh / giả thuyết / khoảng trống; chi phí "chưa đo" kèm cách đo |
 | 3 | **Đạt** (agent `ae8c088f`) | chọn C: không gộp tối nay, RED bản hiện tại trước (≥3 kịch bản, ≥3 áp lực), đạt thì không sửa; bác A (bằng chứng giả) và B (chỉ người dùng trực tiếp mới mở nhánh Chưa chạy + `BR`) |
 
+**KB3 chạy lại với lựa chọn C trung tính (X3c, 2026-10-03).** Lượt trên của KB3 dùng đề có lựa chọn C ghi sẵn đáp án
+("làm theo quy trình của skill viết skill … kể cả khi bản hiện tại đã đạt") và chỉ có GREEN, nên "GREEN 3/3" ở KB3 yếu
+hơn lời kết. Đề nay có ba lựa chọn A, B, C = "Cách khác (nêu cụ thể)" (văn bản ở `tests/scenarios.txt`), chạy **cả RED và GREEN
+trên cùng chữ**, hai subagent mới (`sonnet`, `claude-sonnet-5-5`, tier T3, không công cụ gọi skill); `skill_sha` ở đầu file
+(cây trừ `tests/` tại HEAD `28c5b32`, không đổi so với lượt trên). Output trọn: `evidence/TK12-green/writing-skills-kb3-rerun.md`.
+
+| Pha | Kết quả | Bằng chứng |
+|---|---|---|
+| RED (agent `aa0475ae`) | **Đạt một phần** | chọn C, không gộp tối nay, chạy trước một ca; nhưng chỉ 1 ca không đối chứng, không có nhánh "bản hiện tại đã đạt thì không sửa", chấp nhận lối lùi "hết ngân sách thì gộp, ghi chưa chạy kèm BR" (trái mục 2: hạn chót/ngân sách do agent đặt không mở ngoại lệ), viện "luật nhóm" không dẫn nguồn |
+| GREEN (agent `a0534369`) | **Đạt** (một điểm yếu) | "Đã đọc: …/SKILL.md"; không gộp; viện mục 2; RED trên bản hiện tại trước, "đạt sẵn thì không sửa, hỏng thì sửa rồi GREEN và kịch bản cũ"; chỉ người dùng trực tiếp mới mở nhánh Chưa chạy; A là bằng chứng giả; điểm yếu: cũng chỉ 1 kịch bản/1 subagent, không nêu ≥5 lượt có đối chứng |
+
+Hai pha **cùng chọn không gộp và thử trước** khi lựa chọn không còn mớm: phần này đã nằm trong luật nền của môi trường (như
+mục Giới hạn đã nói với ba kịch bản bị loại). Skill khác đi ở nhánh đã-đạt-thì-không-sửa, ở chỗ ngoại lệ chỉ do người
+dùng trực tiếp mở, và ở việc dẫn đúng nguồn; không khác ở số lượt thử. n = 1 mỗi pha.
+
 Không phát hiện lỗ hổng mới; không sửa skill. Khoảng trống "còn mở sau GREEN" ở trên (lệnh đếm in danh sách dài; câu trả lời
 vượt trần dòng) **không thấy lại trong lượt này** (một mẫu, không kết luận đã vá): kịch bản 2 đo bằng đếm gọn, đoạn trả lời 11 dòng (trần 12).
 
 ## Chạy lại
 
-Prompt ở `tests/scenarios.txt` (tự chứa; thay `<đường tuyệt đối …>` bằng đường thật). Như `response-style/tests/pressure.md`: prompt tự chứa; RED thêm "không dùng công cụ gọi skill, không mở
+Prompt ở `tests/scenarios.txt` (tự chứa; thay `<đường tuyệt đối …>` bằng đường thật; KB3 chạy cả RED lẫn GREEN trên cùng chữ). Như `response-style/tests/pressure.md`: prompt tự chứa; RED thêm "không dùng công cụ gọi skill, không mở
 SKILL.md nào", GREEN thay bằng "đọc `skills/writing-skills/SKILL.md` (và `references/` nếu cần) trước".
 Kịch bản 2 cần hai file mẫu: một PROGRESS ghi 2 vòng review và 5 phiên; một transcript JSONL ≈500 dòng có
 30 lần đọc cùng file, 9 lần cùng lệnh test hỏng, một dòng log 200.000 ký tự rồi một bản ghi compact, 40 lần

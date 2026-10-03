@@ -126,7 +126,7 @@ chi tiết RED và GREEN ở chính tệp. `date` 2026-10-01 là lần chạy Đ
 | [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
-| [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 2/2 discriminating scenarios GREEN pass | 2026-10-03 |
+| [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | wq-2 GREEN pass, wq-1 GREEN partial (regraded: code format `RF-A`), RED 0/2 pass | 2026-10-03 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
