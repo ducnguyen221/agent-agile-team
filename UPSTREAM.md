@@ -208,7 +208,7 @@ không giấy phép, phải viết lại trước khi công khai (danh sách fil
 | `python` | `affaan-m/ECC` — `skills/python-patterns/`, `skills/python-testing/` | `c70874fa` | `3599962a` | MIT | chép |
 | `fastapi` | `affaan-m/ECC` — `skills/fastapi-patterns/` | `c70874fa` | `3599962a` | MIT | chép |
 | `postgres` | `affaan-m/ECC` — `skills/postgres-patterns/` (phần mẫu từ `supabase/agent-skills`) | `c70874fa` | `3599962a` | MIT | chép |
-| `database-migrations` | `affaan-m/ECC` — `skills/database-migrations/`; bộ quy trình private — `migration-rehearsal` (gốc private, không giấy phép) | `c70874fa` · `4c0fdc57` | `3599962a` | MIT; không giấy phép (`references/rehearsal.md`) | chép; private (1 file) |
+| `database-migrations` | `affaan-m/ECC` — `skills/database-migrations/`; ý từ bộ quy trình private — `migration-rehearsal` (gốc private, không giấy phép): `references/rehearsal.md` viết lại phòng sạch từ danh sách ý (`TK10.4`), không mở bản gốc | `c70874fa` · — | `3599962a` | MIT; không giấy phép (chỉ lấy ý, `references/rehearsal.md`) | chép; ý (1 file) |
 | `api-design` | `affaan-m/ECC` — `skills/api-design/` | `c70874fa` | `3599962a` | MIT | chép |
 | `error-handling` | `affaan-m/ECC` — `skills/error-handling/` | `c70874fa` | `3599962a` | MIT | chép |
 | `deployment` | `affaan-m/ECC` — `skills/deployment-patterns/`, `skills/docker-patterns/` | `c70874fa` | `3599962a` | MIT | chép |
