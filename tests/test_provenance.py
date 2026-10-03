@@ -178,7 +178,7 @@ def test_catalog_detects_missing_row():
     assert "obra/superpowers-lab" not in catalog_sources(mutated)
 
 
-# Số đo trùng câu chữ nguồn (8-gram) chỉ đúng kèm điều kiện đo (X7, RF của re-review lần 2): số 0 có được SAU KHI loại
+# Số đo trùng câu chữ nguồn (8-gram) chỉ đúng kèm điều kiện đo (vòng sửa cuối, từ re-review lần 2): số 0 có được SAU KHI loại
 # stoplist 45 cụm chung; không loại thì còn cụm trùng ở 5/7 đích. Câu nêu số đo phải mang điều kiện; metadata vào băm
 # (`skills/**`) thì không nêu số đo, vì đổi chữ ở đó đổi `skill_sha` và buộc chạy lại thử nghiệm.
 GRAM_CLAIM = re.compile(r"8-gram|overlap 0", re.I)
@@ -225,7 +225,7 @@ def test_8gram_claim_check_catches_each_kind_of_bad_claim(tmp_path):
 
 
 # THIRD_PARTY mục 3: file đã liệt kê là "đã viết lại từ danh sách ý, còn mang câu chữ nguồn" thì VẪN phải viết lại thật
-# sự trước khi công khai (`CO2`); câu "không cần viết lại lần nữa" cho chúng mâu thuẫn với lời đó (X7, lỗi a).
+# sự trước khi công khai (`CO2`); câu "không cần viết lại lần nữa" cho chúng mâu thuẫn với lời đó (vòng sửa cuối, lỗi a của re-review lần 2).
 NO_REWRITE_NEEDED = "không cần viết lại lần nữa"
 MUST_REWRITE = "phải viết lại thật sự trước khi công khai"
 

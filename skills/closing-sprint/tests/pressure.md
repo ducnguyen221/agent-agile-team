@@ -130,7 +130,7 @@ Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK
 
 Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc và hai lượt chạy lại trước; không sửa `SKILL.md`, không REFACTOR.
 
-## GREEN chạy lại lần 4 (`X7`, sau khi bỏ số đo 8-gram khỏi metadata)
+## GREEN chạy lại lần 4 (vòng sửa cuối, sau khi bỏ số đo 8-gram khỏi metadata)
 
 Re-review lần 2 chỉ ra số đo "8-gram 0" nêu thiếu điều kiện (số 0 chỉ có sau khi loại stoplist 45 cụm chung); phần nằm trong metadata đi vào băm (dòng `source:` của `SKILL.md`, chú thích đầu `references/preflight.md` và `references/release-notes.md`) được bỏ số đo, nên `skill_sha` cũ không còn khớp cây. `description` và thân skill không đổi. Chạy lại GREEN **cả ba kịch bản** trên cây hiện tại (`skill_sha` ở frontmatter, HEAD `0c8bd5a`), prompt là `tests/scenarios.txt`, dòng `[PHA]` = dòng GREEN của file đó với đường tuyệt đối tới `<gốc worktree>/skills/closing-sprint/SKILL.md`; chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, báo cáo mở bằng "Đã đọc:". Phép thay vế mở đầu như mục "Chạy lại" (chỉ lượt GREEN); `tests/scenarios.txt` giữ nguyên.
 Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK12-green/closing-sprint-rerun-after-rereview2.md`.
