@@ -5,42 +5,43 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: a7d8807c40b16c2d83af5b34151fb7188c3b9926
 date: 2026-10-03
-result: pass 6/6
+result: pass 5/6, 3 partial, 1 fail
+agent_ids:
+  questions: aaa480af25c9fbdd6
+  answers: aa30d8d2d0e51b138
 ---
 
-Đã đọc: `<gốc worktree>\skills\worktrees\SKILL.md`
+Đã đọc: `<gốc worktree>\skills\worktrees\SKILL.md` (và các file trong `references/` mà `SKILL.md` trỏ tới, nếu có)
 
 # Thử truy xuất — worktrees
 
-> **Kết luận:** 6/6 câu Đạt (ngưỡng ≥5/6). Skill ngắn, chỉ có `SKILL.md`; chủ thể trỏ đúng ở cả năm câu tình huống
-> và nhận ra câu ranh giới thuộc `running-sprint`. Chỗ thiếu: không có dòng nói thẳng "mỗi Implementer một worktree và nhánh
-> riêng" cho trường hợp làm song song, chủ thể phải suy.
+> **Kết luận:** 5/6 câu Đạt (ngưỡng ≥4/5 câu tình huống và câu ranh giới): câu 1, 3, 5 chỉ Đạt một phần, câu 2 Đạt, **câu 4 Không đạt vì thiếu nội dung** ("already checked out").
+> Câu ranh giới (câu 6) trỏ đúng `closing-sprint`. Skill chỉ có `SKILL.md` (không `references/`); chủ thể đọc một lần, không bịa, và đánh dấu rõ chỗ nào là suy luận
+> (câu 3: không dùng `--force` là suy từ luật commit tạm, không phải câu chữ của skill). Chủ thể ghi sai số mục baseline là "mục 3" (đúng là mục 4, tiêu đề đúng); chấm theo tiêu đề.
 
-Sáu câu hỏi do một agent **chưa đọc** skill soạn (chỉ biết `description` và lĩnh vực); nguyên văn và loại câu ở
-`questions.md` trong hồ sơ sprint của lớp riêng (`docs/plans/2026-10-03-agent-agile-team-wave-2/evidence/TK11-retrieval/`).
-Dòng "Đã đọc" chép từ bài trả lời của chủ thể, đoạn đầu đường dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng; nguyên văn ở hồ sơ sprint của lớp riêng.
-Cột "Mục kỳ vọng" do người chấm ghi **trước khi** mở bài trả lời của chủ thể. Câu 6 là câu ranh giới: đáp án của
-người soạn (`running-sprint`) đã được người chấm đối chiếu với `description` và mục 2 của `running-sprint` (giao việc
-theo `TK`, ghi vai · tier · model vào PROGRESS) và nhận là đúng. Câu 5 người chấm chấp nhận hai đường: mục 5 và 6 của
-skill này (chỉ tới menu kết thúc), hoặc `closing-sprint` là nơi có menu merge, PR, giữ.
+Sáu câu hỏi do một agent **chưa đọc** skill soạn (chỉ biết `description` và lĩnh vực, kèm danh sách chủ đề của bộ cũ để không lặp); lượt này là **bộ câu mới** chạy lại sau khi `X2` đổi nội dung skill
+(chạy lại theo giao thức rerun-2). Cột "Mục kỳ vọng" do người chấm ghi vào file nháp **trước khi** giao chủ thể (mtime file nháp 2026-10-03 21:40:39 +0700 (21:40:39,62), sớm hơn lệnh giao chủ thể đầu tiên); mục kỳ vọng ghi theo cây MỚI.
+Câu 6 là câu ranh giới, đáp án do người soạn nêu và người chấm đối chiếu với `description` của skill đáp.
+Nguyên văn câu hỏi của người soạn, file nháp kỳ vọng, output TRỌN của chủ thể (đường dẫn thư mục người dùng giữ nguyên ở đó, còn ở đây lược thành `<gốc worktree>` vì repo chặn tên người dùng)
+và số lượt công cụ: hồ sơ sprint của lớp riêng, `evidence/TK12-green/worktrees-retrieval-rerun-2.md`.
 
-Cách chấm "một phần": mục chủ thể trỏ có câu trả lời dùng được cho quyết định mà câu hỏi đặt ra thì Đạt, phần
-chi tiết phụ còn thiếu ghi ở mục cuối; chỉ Không đạt khi skill không có đáp án dùng được cho quyết định đó.
+Cách chấm "một phần": mục chủ thể trỏ có câu trả lời dùng được cho quyết định mà câu hỏi đặt ra thì Đạt, phần chi tiết phụ còn thiếu ghi trong ngoặc và ở mục cuối; chỉ Không đạt khi skill không có đáp án dùng được.
+Ngưỡng: ≥4/5 câu tình huống Đạt và câu ranh giới Đạt. `result` ghi cả số "một phần".
 
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
-| 1 | Đang code dở nhánh `feature/billing` trên checkout chính thì có việc sửa gấp phải làm riêng. Tách một chỗ làm việc cô lập bằng lệnh nào? | `SKILL.md` › 2. Bước 1 — tạo không gian tách biệt (1b; + 1. Bước 0) | `SKILL.md` › 2. Bước 1 (1a rồi 1b) | Đạt |
-| 2 | Sắp thực thi một brief TK có nhiều file, muốn chắc chắn không đụng vào thay đổi chưa commit của checkout hiện tại. Cần chuẩn bị gì trước? | `SKILL.md` › 1. Bước 0 + 2. Bước 1 + 4. Bước 3 — baseline sạch | `SKILL.md` › 1. Bước 0, 2. Bước 1, 4. Bước 3 | Đạt |
-| 3 | Ba implementer cùng làm trên một repo song song, thường ghi đè lên nhau. Nên cấp mỗi người chỗ làm việc ra sao? | `SKILL.md` › 1 (tạo khi nhiều Implementer song song) + 2 (1b) | `SKILL.md` › 1. Bước 0, 2. Bước 1 | Đạt (một phần: skill chỉ nêu điều kiện kích hoạt, "mỗi người một worktree" là suy ra) |
-| 4 | Việc xong và đã gộp, còn thư mục worktree `../repo-wt-fix12` cùng nhánh tạm. Dọn thế nào mà không mất công việc chưa gộp? | `SKILL.md` › 6. Dọn khi xong | `SKILL.md` › 6. Dọn khi xong (+ 5) | Đạt (một phần: không có lệnh xoá nhánh tạm) |
-| 5 | Worktree xong nhưng nhánh còn chưa gộp, chưa chắc nên giữ, gộp hay mở PR. Lựa chọn nào an toàn và khi nào chọn? | `SKILL.md` › 5 và 6 (chỉ tới `closing-sprint`); chấp nhận mục khác: skill `closing-sprint` | mục khác: `closing-sprint` (từ `SKILL.md` › 5) | Đạt |
-| 6 | PLAN đã qua Cổng 1, điều phối cần chia TK cho các agent, ghi vai và tier, theo dõi PROGRESS. Quy trình điều phối đó là gì? | mục khác: skill `running-sprint` | mục khác: `running-sprint` | Đạt |
+| 1 | Vừa tạo worktree cho TK5 để chạy brief, chạy bộ test trước khi sửa thì đã đỏ 3 test; không biết có sẵn từ nhánh gốc hay do worktree tạo sai. Xử lý thế nào trước khi giao implementer? | `SKILL.md` › 4. Bước 3 — baseline sạch (hỏng → ghi tên test vào PROGRESS; có sẵn không chặn TK thì làm tiếp, chặn thì `BR`); cách phân biệt nguồn lỗi không có | `SKILL.md` › "3. Bước 3 — baseline sạch" (số mục ghi nhầm, tiêu đề đúng = mục 4); › 1. Bước 0 | Đạt (một phần: có luật ghi PROGRESS và phân nhánh chặn/không chặn; chủ thể nói thẳng skill không có cách so với nhánh gốc để biết lỗi có sẵn hay do tạo sai) |
+| 2 | Định đặt worktree ở `.worktrees/` trong repo. Git có coi thư mục này là chưa theo dõi và `git add .` có kéo vào commit không? Cần ignore gì trước? | `SKILL.md` › 2. Bước 1, mục 1b (`git check-ignore -q`, chưa bỏ qua thì thêm `.gitignore` + commit trước) + › 7. Tra nhanh | `SKILL.md` › 2. Bước 1 (1b); › 7. Tra nhanh + bảng bào chữa | Đạt (chủ thể ghi skill không giải thích cơ chế untracked / `git add .`) |
+| 3 | `git worktree remove ../repo-wt-tk7` báo "contains modified or untracked files, use --force"; có vài file implementer chưa commit. Có nên thêm `--force` cho nhanh? | `SKILL.md` › 6. Dọn khi xong (+ › 5: cất việc dở bằng commit tạm, không `reset --hard`); skill không nhắc `--force` | `SKILL.md` › 6. Dọn khi xong; › 5. Luật git trong worktree | Đạt (một phần: kết luận "đừng `--force`, commit tạm trước" là suy luận của chủ thể từ mục 5 và 6, chủ thể ghi rõ không phải câu chữ của skill) |
+| 4 | `git worktree add ../repo-wt-tk9 sprint/spr-03` báo nhánh "is already checked out at" đường dẫn khác, hình như phiên agent cũ còn giữ. Nên làm gì? | `SKILL.md` › 5 và › 6 (chỉ nguyên tắc: không xoá worktree không phải của mình, không xoá nhánh chưa gộp); lỗi "already checked out" không có tên trong skill | `SKILL.md` › 1. Bước 0; › 6. Dọn khi xong; › 5. Luật git trong worktree (chủ thể: "skill không có đáp án") | **Không đạt (thiếu nội dung)**: chỉ rút được "đừng xoá worktree/nhánh không phải của mình"; cách xác định ai giữ, nối lại hay dọn không có |
+| 5 | Đã tạo worktree nhưng agent con vẫn thấy ở thư mục chính và sửa nhầm file ở đó. Kiểm tra isolation đúng chưa, và brief cho agent cần ghi gì để không lạc ra ngoài? | `SKILL.md` › 1. Bước 0 (lệnh dò `--git-dir` so `--git-common-dir`) + › 2 (đường dẫn tuyệt đối, không `cd` sang worktree khác); nội dung brief không có | `SKILL.md` › 1. Bước 0; › 2. Bước 1 | Đạt (một phần: có lệnh dò và "làm việc trong worktree bằng đường dẫn tuyệt đối"; không có mẫu brief cho agent con, chủ thể trỏ `running-sprint` mà không khẳng định nội dung) |
+| 6 | Sprint đã qua Cổng 2, nói "Đạt"; muốn chọn gộp main cục bộ / PR / giữ nhánh, rồi cập nhật spec sống, release notes và đóng sprint. Bước nào của quy trình làm tiếp? | mục khác: skill `closing-sprint` (`SKILL.md` › 5 chỉ tới nó) | mục khác: `closing-sprint` (từ `SKILL.md` › 5. Luật git trong worktree) | Đạt (ranh giới) |
 
 ## Thiếu nội dung / mâu thuẫn
 
-- `skills/worktrees/SKILL.md:35-38` (mục 1): chỉ nói "tạo worktree … khi nhiều Implementer làm song song". Không có quy tắc "mỗi Implementer một worktree và một nhánh
-  riêng, đặt tên theo `TK`" hay cách chia để các nhánh không chạm cùng tệp (câu 3). Đề xuất: một dòng ở mục 2 hoặc mục 7 (tra nhanh): song song thì mỗi Implementer một worktree
-  riêng, nhánh theo `TK`; việc chung tệp thì xếp tuần tự.
-- `skills/worktrees/SKILL.md:102-104` (mục 6): có `git worktree remove` và `prune`, không có lệnh xoá nhánh tạm đã gộp (câu 4). Đề xuất: thêm `git branch -d <nhánh>` (từ chối khi chưa
-  gộp, nên an toàn), nhắc không dùng `-D`.
+- **Thiếu nội dung (câu 4).** `skills/worktrees/SKILL.md` không có đường xử lý khi `git worktree add` báo nhánh "is already checked out at …": không nhắc `git worktree list` để tìm
+  ai giữ nhánh, không nói khi nào dùng lại worktree đó, khi nào dọn, khi nào tạo nhánh mới. Đề xuất (điều phối quyết, đổi `skill_sha`): thêm một dòng ở mục 7 (Tra nhanh): "nhánh đã checkout ở nơi khác →
+  `git worktree list` để tìm chủ; của mình thì dùng lại hoặc dọn theo mục 6; không phải của mình thì không xoá, tạo nhánh mới từ nó".
+- **Thiếu nội dung, nhẹ.** Mục 6 có `git worktree remove` nhưng không nói gì khi git từ chối vì còn file chưa commit (câu 3; chủ thể phải suy "đừng `--force`"); mục 4 không có cách phân biệt baseline đỏ có sẵn
+  hay do dựng sai (câu 1); không có mẫu brief cho agent con (câu 5). Các điểm từ lượt trước còn nguyên: không có lệnh xoá nhánh tạm sau gộp (`git branch -d`), không có dòng "mỗi Implementer một worktree và nhánh theo `TK`".
 - Không có mâu thuẫn trong tệp.
