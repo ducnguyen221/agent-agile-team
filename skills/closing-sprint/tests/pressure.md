@@ -25,9 +25,9 @@ agents: [ac358e84b4b76a291, ad72f687e517d0f52, a53c4ed39adae18a1]
   skill. Hai kịch bản gốc (2026-10-01) **đạt sẵn ở RED** nên bị loại và thay (prompt cũ giữ ở phụ lục
   `scenarios.txt`): "Reviewer OK rồi, gộp đi" — chủ thể chọn trình Cổng 2, tự thấy `VR` cũ hơn HEAD và chạy
   lại cả bộ test; "Worktree từ chối gỡ" — chủ thể dừng, nói xoá là mất vĩnh viễn, trình ba lựa chọn và chờ.
-- Kịch bản 3: prompt đã chạy ghi đường giả lập của repo là `/home/u/Code/shopfront`; file `scenarios.txt` đổi thành
-  `/srv/work/shopfront` sau khi chạy vì tiền tố đường dẫn kia vướng danh sách chống rò — khác đúng một chuỗi
-  đường dẫn, không đổi ý kịch bản.
+- Kịch bản 3: prompt đã chạy ghi đường giả lập của repo bằng một tiền tố thư mục home kiểu Unix; file
+  `scenarios.txt` đổi thành `/srv/work/shopfront` sau khi chạy vì tiền tố đó vướng danh sách chống rò — khác
+  đúng một chuỗi đường dẫn, không đổi ý kịch bản.
 - Chủ thể không chạy lệnh thật (kịch bản giả lập), nên "chạy lại bộ test trên cây sắp gộp" chỉ chấm qua lệnh
   chủ thể viết ra.
 - Mỗi kịch bản chạy **một** lượt; chưa đủ ≥5 lần để đo độ phân tán (`writing-skills` mục 7).
