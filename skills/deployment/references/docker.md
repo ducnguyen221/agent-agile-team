@@ -15,7 +15,8 @@
   đổi một dòng code không được làm cài lại toàn bộ phụ thuộc. Luôn có `.dockerignore`.
 - **Tiến trình chính nhận tín hiệu:** `CMD`/`ENTRYPOINT` dạng mảng JSON để ứng dụng là tiến trình số 1 và
   nhận `SIGTERM`; ứng dụng đóng kết nối, làm xong yêu cầu đang dở rồi mới thoát. Dạng chuỗi chạy qua shell
-  nuốt tín hiệu, container bị giết cứng sau thời gian chờ.
+  thường nuốt tín hiệu, container bị giết cứng sau thời gian chờ. Tiến trình số 1 còn bỏ qua `SIGTERM` nếu
+  ứng dụng không tự cài handler: cài handler, hoặc chạy init nhỏ (`--init`, `init: true` trong Compose, tini).
 - **Phụ thuộc khởi động:** `depends_on` với `condition: service_healthy`, kèm healthcheck **thật** trên CSDL
   (lệnh kiểm sẵn sàng của chính CSDL, không chỉ "cổng đã mở"); healthcheck có `start_period` đủ cho lần
   khởi động chậm nhất.
@@ -34,7 +35,7 @@
 
 | Mã thoát / dấu hiệu | Thường là | Kiểm tiếp |
 |---|---|---|
-| `137` | bị giết cứng: hết bộ nhớ, hoặc không thoát kịp sau `SIGTERM` | `docker inspect` xem cờ OOM; giới hạn bộ nhớ; dạng `CMD` (mục 1) |
+| `137` | bị giết cứng: hết bộ nhớ, hoặc không thoát kịp sau `SIGTERM` | `docker inspect` xem cờ OOM; giới hạn bộ nhớ; dạng `CMD` (mục 1); ứng dụng có handler `SIGTERM` không, có init không |
 | `143` | thoát theo `SIGTERM` bình thường | lệnh dừng có chủ đích hay do orchestrator |
 | `126` / `127` | lệnh không chạy được / không tìm thấy | đường dẫn, quyền chạy, kiến trúc image, kết thúc dòng của script |
 | `1` hoặc mã của ứng dụng | ứng dụng tự thoát vì lỗi | dòng lỗi **đầu tiên** trong log, cấu hình thiếu lúc khởi động |
