@@ -46,7 +46,7 @@ và dễ sinh hai bản sửa đá nhau.
    | Dịch vụ ngừng; luồng chính không ai dùng được; dữ liệu mất, hỏng hoặc lộ; tiền, thanh toán, hoá đơn sai hoặc không xuất được | Chặn | **Sửa nóng ngay** — mở sprint riêng, không chờ sprint đang chạy |
    | Phần lớn người dùng không đi hết được một luồng quan trọng, và cũng không có cách làm khác | Phải sửa | Sprint hiện tại nếu lỗi nằm trong phạm vi đã duyệt ở Cổng 1; ngoài phạm vi → mở sprint kế |
    | Chức năng phụ hỏng, hoặc chức năng chính hỏng nhưng có đường vòng dùng được | Nên sửa | Sprint sau |
-   | Thẩm mỹ (lệch bố cục, màu, chữ), ca biên hiếm không làm sai dữ liệu | Ghi chú | Backlog: dòng `RQ-` mới, chưa gán sprint |
+   | Thẩm mỹ thuần (lệch bố cục, màu, chữ — trừ khi che mất hay chặn thao tác thì xếp theo hàng chức năng ở trên), ca biên hiếm không làm sai dữ liệu | Ghi chú | Backlog: dòng `RQ-` mới, chưa gán sprint |
 
    Sửa nóng nghĩa là **làm ngay**, không phải bỏ cổng: cỡ vẫn định theo `method/sizing.md` (chạm dữ liệu,
    xác thực, thanh toán thì nâng cỡ và rủi ro), Cổng 1 vẫn có (rất nhỏ: "đạt theo lời giao").
@@ -77,7 +77,7 @@ và dễ sinh hai bản sửa đá nhau.
 | "Người báo nói `P0` rồi, cứ ghi theo" | nhãn ngoài chỉ được trích; mức xếp theo dấu hiệu và hậu quả |
 | "Sửa nhanh cho kịp giờ deploy, tái hiện sau" | bản vá đoán mò có thể che lỗi thành sai lặng; ghi `RQ-` + một lượt hỏi |
 | "Chưa tái hiện nên chưa đủ căn cứ xếp Chặn" | dấu hiệu chạm tiền/dữ liệu là đủ cho mức tạm; phân vân → mức nặng hơn |
-| "Lỗi thẩm mỹ nhưng ghi Nên sửa cho chắc" | thẩm mỹ là Ghi chú; nâng mức không lý do cũng làm hỏng thang |
+| "Lỗi thẩm mỹ nhưng ghi Nên sửa cho chắc" | thẩm mỹ thuần là Ghi chú; nâng mức không lý do cũng làm hỏng thang |
 | "Test hồi quy tính sau" | ô hồi quy trống thì sprint sửa không biết "xong" trông ra sao |
 
 ## 3. Điểm dừng
