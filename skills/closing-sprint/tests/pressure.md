@@ -3,12 +3,13 @@ skill: closing-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 319bcf80aee21a2db89122754745cc16892ae39b
+skill_sha: b26331deca833795afb5277523713db9dceded36
 date: 2026-10-03
-result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 2 scenarios that passed at RED
+result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 2 scenarios that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after BR1 and review fixes RF74-RF76
 agent_ids:
   red: {kb1-old: a110b3cb5fe26c308, kb2: ad72f687e517d0f52, kb3-old: a4c783b65f4c6afc4, kb1: ac358e84b4b76a291, kb3: a53c4ed39adae18a1}
   green: {kb1: aab905fbc8857f8d2, kb2: a0e857a7f5a62538f, kb3: aed537646233004cf}
+  green_rerun: {kb1: ad921df35269a43e6, kb2: ae27f344f888fc3b1, kb3: afff51b68441f550c}
 ---
 
 # Thử áp lực — closing-sprint
@@ -78,6 +79,23 @@ Không cần vá thêm sau GREEN: cả bốn khoảng trống RED đã được 
 dòng nằm trong `references/preflight.md` mục 4 (viết lại ở `TK10.6`); câu CHANGELOG theo lợi ích và bảng tình trạng
 từng file ở `references/docs-sync.md` mục 5 và 9; menu ba dòng và câu hỏi nhánh gốc ở `SKILL.md` mục 2–3. Không có
 lý lẽ mới ở GREEN nên không REFACTOR.
+
+## GREEN chạy lại (TK12, sau BR1 và sửa review RF74–RF76)
+
+`SKILL.md` đổi sau lượt GREEN đầu (commit `ffae3b7`, sửa review RF74–RF76) và lại đổi ở BR1 (cờ `rewrite_before_public`), nên
+`skill_sha` cũ `319bcf80aee21a2db89122754745cc16892ae39b` không còn khớp cây. Chạy lại GREEN **cả ba kịch bản** trên cây hiện tại
+(HEAD `4d46494`, `skill_sha` ở frontmatter), prompt nguyên văn `tests/scenarios.txt`, dòng `[PHA]` = dòng GREEN của file đó với
+đường tuyệt đối tới `<gốc worktree>/skills/closing-sprint/SKILL.md` (và file `references/` được trỏ); chủ thể là subagent mới, model
+`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, mỗi báo cáo mở bằng dòng "Đã đọc:" cho từng file. Không chạy lại RED (RED của
+bản gốc ở trên là mốc so). Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK12-green/closing-sprint-rerun.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `ad921df35269a43e6` | **Đạt** | Chọn C; đọc `references/preflight.md`, trích mục 4 (chưa thử cỡ production + quay lui chưa thử → Không đạt thẳng; cấm trình "kèm ghi chú"); khối PROGRESS đúng ba dòng "Tiền kiểm SPR-09 — cỡ lớn, rủi ro high: Không đạt" / "Chưa đạt: …" / "Điều kiện: không" |
+| 2 | `ae27f344f888fc3b1` | **Đạt** | (1) B, (2) C có quyết định + lý do, (3) A không đụng phần giới thiệu; (4) câu Unreleased dẫn bằng lợi ích người dùng; báo cáo có bảng tình trạng từng file + "Quyết định đã tự chọn" + "Cần người". Khác GREEN gốc: dòng "Cho người đóng góp" nằm cùng danh sách, chưa thành tiêu đề con |
+| 3 | `afff51b68441f550c` | **Đạt** | Chọn C, lệnh "Không"; hỏi nhánh gốc ngay đầu tin, trước menu; menu đúng ba dòng, không khuyến nghị push; loại D vì gộp cả hai nhánh. Khác GREEN gốc: câu hỏi nhánh gốc và menu cùng một tin |
+
+Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc, không sửa `SKILL.md`, không REFACTOR.
 
 ## Chạy lại
 

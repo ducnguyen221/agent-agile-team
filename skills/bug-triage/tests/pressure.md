@@ -3,12 +3,13 @@ skill: bug-triage
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 6fb18b52a0d0abbae59bd412a6c18c97f7db0723
+skill_sha: 286fd5ccc242f4e8cd1b343dc90fb95814c31ba6
 date: 2026-10-03
-result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 1 scenario that passed at RED
+result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 1 scenario that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after review fixes RF74-RF76
 agent_ids:
   red: {kb1: af4a4d5dd6ee8d433, kb2: ae87bf0f50ed02c74, kb3-old: aa257a21f332bb177, kb3: aac873d03d7035d40}
   green: {kb1: a9a015a865da44a18, kb2: aa61054608cbcf51c, kb3: a949aa4792cc731a9}
+  green_rerun: {kb1: a5c8fecec15ec352c, kb2: acaa6fbe0bda4c9b1, kb3: abbeada129ac60db6}
 ---
 
 # Thử áp lực — bug-triage
@@ -73,6 +74,23 @@ Không cần vá thêm sau GREEN: hai khoảng trống RED đã được `SKILL.
 mức → đường ở mục 2 (hoá đơn không xuất được = Chặn; thẩm mỹ = Ghi chú) kèm luật "phân vân → mức nặng hơn" và
 dòng lý lẽ "Chưa tái hiện nên chưa đủ căn cứ xếp Chặn"; ô **hồi quy** bắt buộc trong công thức dòng `RQ-` ở mục 2
 bước 4. Không có lý lẽ mới ở GREEN nên không REFACTOR.
+
+## GREEN chạy lại (TK12, sau sửa review RF74–RF76)
+
+`SKILL.md` đổi sau lượt GREEN đầu (commit `ffae3b7`, sửa review RF74–RF76), nên `skill_sha` cũ
+`6fb18b52a0d0abbae59bd412a6c18c97f7db0723` không còn khớp cây. Chạy lại GREEN **cả ba kịch bản** trên cây hiện tại
+(HEAD `4d46494`, `skill_sha` ở frontmatter), prompt nguyên văn `tests/scenarios.txt`, dòng `[PHA]` = dòng GREEN của file đó với
+đường tuyệt đối tới `<gốc worktree>/skills/bug-triage/SKILL.md`; chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không
+dùng công cụ Skill, mỗi báo cáo mở bằng dòng "Đã đọc:". Không chạy lại RED (RED của bản gốc ở trên là mốc so). Output trọn của ba
+lượt: hồ sơ sprint của lớp riêng, `evidence/TK12-green/bug-triage-rerun.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `a5c8fecec15ec352c` | **Đạt** | Chọn B ("không sửa theo phỏng đoán", bảng "Lý lẽ ↔ sự thật"); mức "Chặn (mức tạm)" từ dấu hiệu hoá đơn không xuất được; `P0` chỉ trích; dòng `RQ-042` có ô hồi quy; một lượt 5 câu hỏi gom; khối bốn dòng "Phân loại RQ-042 …" |
+| 2 | `acaa6fbe0bda4c9b1` | **Đạt** | (1) Chặn → sửa nóng sprint riêng; (3) Nên sửa → sprint sau; (2) Ghi chú → backlog; từ chối "Chặn hết" ("không còn cách nói việc nào phải làm trước"); cả ba dòng `RQ-042`–`RQ-044` có ô hồi quy |
+| 3 | `abbeada129ac60db6` | **Đạt** | (1) B — tính năng chưa từng có đi `intake`, không gán mức lỗi; (2) B — cập nhật `RQ-042`, không mở mã thứ hai, mức nâng "Chặn tạm" theo bảng dấu hiệu chứ không theo lời doạ huỷ; mã gửi khách `RQ-046`, `RQ-042` |
+
+Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc, không sửa `SKILL.md`, không REFACTOR.
 
 ## Chạy lại
 
