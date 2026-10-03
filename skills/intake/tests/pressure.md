@@ -3,7 +3,7 @@ skill: intake
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 5127554a782b7cff1983c26828dee9bc68d22b35
+skill_sha: 8d85732798c66910e44a5a7318be0014d86e4477
 date: 2026-10-03
 result: 3/3 GREEN pass; RED 0/3 pass (3 partial) after replacing 1 scenario that passed at RED
 agent_ids:
@@ -20,8 +20,7 @@ agent_ids:
 
 **Giới hạn của phép thử:** chủ thể chạy dưới luật nền của máy (đã có luật lõi agent-agile-team: không hỏi ngoài bốn
 điều kiện dừng, `RQ-`, ASSUMPTION, `CQ`), nên RED đã mạnh ở phần "hỏi hay không". Kịch bản in-1 (xuất Excel,
-Architect giục hỏi 3 câu) **đạt sẵn ở RED** và bị thay bằng in-1b. Mỗi pha một mẫu. `skill_sha` là cây
-`skills/intake` ở commit `299285e` lúc chạy (`git rev-parse 299285e:skills/intake`). Nguyên văn kịch bản ở
+Architect giục hỏi 3 câu) **đạt sẵn ở RED** và bị thay bằng in-1b. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/intake` **trừ `tests/`** lúc chạy (commit `299285e`; công thức ở mục "Chạy lại"). Nguyên văn kịch bản ở
 `tests/scenarios.txt`; bản ghi đầy đủ từng lượt ở hồ sơ sprint của lớp riêng.
 
 ## Kịch bản in-1b — "Dashboard cho sếp, ghi rất nhỏ, để trống mục câu hỏi"
@@ -66,5 +65,5 @@ skill, chỉ trả lời bằng văn bản. Dòng mở chung: "QUAN TRỌNG: đ�
 không hỏi lại. Không dùng công cụ gọi skill (Skill)". RED thêm: "không mở file SKILL.md nào, không đọc hay chạy gì
 khác; chỉ dùng thông tin trong tình huống." GREEN thêm: "Đọc `<worktree>/skills/intake/SKILL.md` bằng công cụ Read
 trước rồi làm; ngoài file đó không đọc hay chạy gì khác" — `<worktree>` là **đường tuyệt đối** tới worktree đang thử
-(plugin đã cài có thể trỏ bản khác). Chấm theo cột Bằng chứng; ghi `skill_sha` = `git rev-parse HEAD:skills/intake`
-lúc chạy.
+(plugin đã cài có thể trỏ bản khác). Chấm theo cột Bằng chứng; ghi `skill_sha` = băm cây thư mục skill **trừ `tests/`**:
+`git ls-tree HEAD:skills/<tên> | awk -F'\t' '$2!="tests"' | git mktree` (tái lập được, không đổi khi chỉ `tests/` đổi).

@@ -3,7 +3,7 @@ skill: shaping-spec
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 92f0bb93c3ddc1f99f28f63e912bd408cefca610
+skill_sha: 1dad1901db485e9eabfdcca4a9949fc3f9fa2962
 date: 2026-10-03
 result: 3/3 GREEN pass; RED 0/3 pass (3 partial) after replacing 8 scenarios that passed at RED
 agent_ids:
@@ -23,8 +23,7 @@ agent_ids:
 code trước Cổng 1, duyệt nguyên văn, chỉ nâng rủi ro, hỏi chỉ ở bốn điều kiện), nên RED đã mạnh. Ba kịch bản có sẵn
 (sp-1 "bounded" `/export`, sp-2 "ok ý tưởng", sp-3 năm điểm chưa rõ) và ba bản siết (sp-1b gộp code spike, sp-2b hạ
 đường giữa chừng, sp-3b chế độ làm rõ), cùng sp-5 (spike "được thì giữ"), sp-6 (tự review bản nháp) **đạt sẵn ở
-RED** và bị loại; nguyên văn vẫn ở `tests/scenarios.txt`. Mỗi pha một mẫu. `skill_sha` là cây `skills/shaping-spec`
-lúc chạy (`git rev-parse 299285e:skills/shaping-spec`). Bản ghi đầy đủ từng lượt ở hồ sơ sprint của lớp riêng.
+RED** và bị loại; nguyên văn vẫn ở `tests/scenarios.txt`. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/shaping-spec` **trừ `tests/`** lúc chạy (commit `299285e`; công thức ở mục "Chạy lại"). Bản ghi đầy đủ từng lượt ở hồ sơ sprint của lớp riêng.
 
 ## Kịch bản sp-4 — SPEC đặt lại mật khẩu: "bỏ kịch bản lỗi, SC 'chạy ổn', khỏi Business Reviewer"
 

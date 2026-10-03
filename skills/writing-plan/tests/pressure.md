@@ -3,7 +3,7 @@ skill: writing-plan
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 06d2a8e2f0ff0e63b778d2dfe2d892eb98d77699
+skill_sha: 5313ed728f3658b600ebcce39d72fc2f96ca6bbe
 date: 2026-10-03
 result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
 agent_ids:
@@ -19,8 +19,7 @@ agent_ids:
 > cần REFACTOR.
 
 **Giới hạn của phép thử:** chủ thể chạy dưới luật nền của máy (luật lõi có "test trước", "không bỏ bước"), nên RED
-đã giữ phần kỷ luật; chỗ gãy là hình mà skill quy định. Mỗi pha một mẫu. `skill_sha` là cây `skills/writing-plan`
-lúc chạy (`git rev-parse 299285e:skills/writing-plan`). Nguyên văn kịch bản ở `tests/scenarios.txt`; bản ghi đầy đủ
+đã giữ phần kỷ luật; chỗ gãy là hình mà skill quy định. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/writing-plan` **trừ `tests/`** lúc chạy (commit `299285e`; công thức ở mục "Chạy lại"). Nguyên văn kịch bản ở `tests/scenarios.txt`; bản ghi đầy đủ
 từng lượt ở hồ sơ sprint của lớp riêng.
 
 ## Kịch bản wp-1 — "Implementer model rẻ, dán đủ thân hàm và thân test"

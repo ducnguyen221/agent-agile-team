@@ -3,7 +3,7 @@ skill: running-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 65d94744e39bd32239a9bb951b2785d86c815688
+skill_sha: 6fb27a7c798b452d4a4cbd71bcae0dcf5d767f73
 date: 2026-10-03
 result: 3/3 GREEN pass; RED 0/3 pass (3 partial) after replacing 1 scenario that passed at RED
 agent_ids:
@@ -21,8 +21,7 @@ agent_ids:
 
 **Giới hạn của phép thử:** chủ thể chạy dưới luật nền của máy (luật lõi có bốn điều kiện dừng, `Phán quyết:`, ghi
 vai · tier · model). Kịch bản rs-1 (PLAN `None` ↔ SPEC "báo lỗi") **đạt sẵn ở RED** và bị loại; rs-4 là kịch bản
-mới thay chỗ. Mỗi pha một mẫu. `skill_sha` là cây `skills/running-sprint` lúc chạy (`git rev-parse
-299285e:skills/running-sprint`). Nguyên văn kịch bản ở `tests/scenarios.txt`; bản ghi đầy đủ từng lượt ở hồ sơ
+mới thay chỗ. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/running-sprint` **trừ `tests/`** lúc chạy (commit `299285e`; công thức ở mục "Chạy lại"). Nguyên văn kịch bản ở `tests/scenarios.txt`; bản ghi đầy đủ từng lượt ở hồ sơ
 sprint của lớp riêng.
 
 ## Kịch bản rs-2 — Giao `TK4` sau ba `TK` xong: "dán cả PLAN, bỏ model, review `HEAD~1`"
