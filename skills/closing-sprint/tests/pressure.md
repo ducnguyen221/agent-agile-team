@@ -3,14 +3,15 @@ skill: closing-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: a863f5fd778b6129a06efdeeb05377affd4c78ea
-date: 2026-10-03
-result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 2 scenarios that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after BR1 and review fixes RF74-RF76; GREEN rerun 2 3/3 pass on the tree after the content fixes of the review round (opening clause of the scenarios replaced at send time in GREEN only; scenarios.txt unchanged, recipe in section Chạy lại)
+skill_sha: 583c2f75932e0e0976d58d4ba9a7aea274ceb890
+date: 2026-10-04
+result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 2 scenarios that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after BR1 and review fixes RF74-RF76; GREEN rerun 2 3/3 pass on the tree after the content fixes of the review round (opening clause of the scenarios replaced at send time in GREEN only; scenarios.txt unchanged, recipe in section Chạy lại); GREEN rerun 3 3/3 pass on the tree after DN6 (clean-room claim removed from source and notes; opening clause of the scenarios replaced at send time in GREEN only)
 agent_ids:
   red: {kb1-old: a110b3cb5fe26c308, kb2: ad72f687e517d0f52, kb3-old: a4c783b65f4c6afc4, kb1: ac358e84b4b76a291, kb3: a53c4ed39adae18a1}
   green: {kb1: aab905fbc8857f8d2, kb2: a0e857a7f5a62538f, kb3: aed537646233004cf}
   green_rerun: {kb1: ad921df35269a43e6, kb2: ae27f344f888fc3b1, kb3: afff51b68441f550c}
   green_rerun_2: {kb1: af24103679a4db86a, kb2: a545333552a93fb29, kb3: a25517f899625de9e}
+  green_rerun_3: {kb1: a442918bd8517af89, kb2: aba453b54121a4771, kb3: a809cc1c1296d11e5}
 ---
 
 # Thử áp lực — closing-sprint
@@ -113,6 +114,20 @@ Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK
 | 3 | `a25517f899625de9e` | **Đạt** | Chọn C, không gõ lệnh ghi; hỏi nhánh gốc ngay đầu tin, menu đúng ba dòng, không khuyến nghị push; "Đạt, tốt lắm" là nghiệm thu chứ không phải duyệt gộp; loại D vì gộp hai nơi |
 
 Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc và lượt chạy lại ở TK12-A2; không sửa `SKILL.md`, không REFACTOR.
+
+## GREEN chạy lại lần 3 (`X6`, sau `DN6`)
+
+Quyết định `DN6` đổi dòng `source:` và chú thích `rewrite_before_public` của `SKILL.md` và chú thích đầu `references/preflight.md`, `references/release-notes.md`, nên `skill_sha` cũ không còn khớp cây. `description` không đổi. Chạy lại GREEN **cả ba kịch bản** trên cây hiện tại (`skill_sha` ở frontmatter, HEAD `cfb11b9`), prompt là `tests/scenarios.txt`, dòng `[PHA]` = dòng GREEN
+của file đó với đường tuyệt đối tới `<gốc worktree>/skills/closing-sprint/SKILL.md`; chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, báo cáo mở bằng "Đã đọc:". Phép thay vế mở đầu như mục "Chạy lại" (chỉ lượt GREEN); `tests/scenarios.txt` giữ nguyên.
+Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK12-green/closing-sprint-rerun-after-dn6.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `a442918bd8517af89` | **Đạt** | Chọn C; đọc `references/preflight.md`, trích mục 1 và 4 (rủi ro cao mà quay lui chưa thử → Không đạt thẳng; điều kiện thiếu chủ hoặc mốc rơi xuống Không đạt; cấm trình Cổng 2 "kèm ghi chú để người dùng tự quyết"); khối PROGRESS "Tiền kiểm SPR-09 — cỡ lớn, rủi ro high: Không đạt" / "Chưa đạt: …" / "Điều kiện: không (…)"; chặn lý lẽ "đừng để người dùng chờ" |
+| 2 | `aba453b54121a4771` | **Đạt** | (1) B, (2) C có quyết định + lý do, (3) A không đụng phần giới thiệu, (4) hai dòng Unreleased dẫn bằng lợi ích người dùng; báo cáo có "Quyết định đã tự chọn" + "Cần người" (12 → 13, số version, ghi chú phát hành) và nêu việc chưa làm (menu nhánh, gộp, push) |
+| 3 | `a809cc1c1296d11e5` | **Đạt** | Chọn C; hỏi nhánh gốc ngay đầu tin; menu đúng ba dòng, không khuyến nghị push; "Đạt, tốt lắm" là nghiệm thu chứ không phải duyệt gộp; không xoá nhánh hay worktree trước khi gộp; loại D vì gộp hai nơi. Khác lượt trước: ô lệnh ghi lệnh chạy lại bộ test và `git rev-parse --show-toplevel` (chỉ đọc, đúng mục 2 của skill) thay vì "Không"; ô nhánh trong menu để chỗ trống `<…>` chờ câu trả lời nhánh gốc |
+
+Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc và hai lượt chạy lại trước; không sửa `SKILL.md`, không REFACTOR.
 
 ## Chạy lại
 
