@@ -10,8 +10,8 @@ updated: 2026-10-04
 > **Kết luận:** cổng review chạy giữa bước thực thi và Cổng 2 trên một diff cụ thể: mỗi **khía cạnh** một reviewer
 > chạy song song, phát hiện được **gộp theo bằng chứng**, mỗi phát hiện Chặn / Phải sửa bị một agent thứ ba **thử bác
 > bỏ**, và cổng **đóng khi có chỗ không chạy được** — không bao giờ ghi Đạt cho một lượt review chưa chạy trọn.
-> Cổng này chia theo khía cạnh; muốn nhân đôi theo người cho việc rủi ro cao thì thêm
-> [dual-review](../roles/verifier/dual-review.md).
+> Cổng này chia theo khía cạnh; việc có `risk_tags` `rules`, `secret` hoặc `auth` **phải** cộng thêm
+> [dual-review](../roles/verifier/dual-review.md) (nhân đôi theo người).
 
 ## 1. Khi nào dùng
 
@@ -29,9 +29,12 @@ updated: 2026-10-04
 |---|---|---|
 | Đúng đắn và chất lượng | luôn | Tech Reviewer ([roles/verifier/tech-reviewer.md](../roles/verifier/tech-reviewer.md)) |
 | Thành ngữ và cạm bẫy theo ngôn ngữ | khi diff thuộc một ngôn ngữ chiếm đa số | agent reviewer theo ngôn ngữ trong `agents/` |
-| Bảo mật | khi `risk_tags` có vùng rủi ro ([sizing.md](sizing.md) mục 2) hoặc diff chạm xác thực, đầu vào từ ngoài, truy vấn dữ liệu, đường file, gọi ra ngoài, mật mã, secret | `security-reviewer` |
+| Bảo mật | khi `risk_tags` có vùng rủi ro ([sizing.md](sizing.md) mục 2) | `security-reviewer` |
 
-Cách kích bảo mật dựa trên `risk_tags` đã ghi từ Bước 1 — không dò từ khoá trong diff. Diff lẫn nhiều ngôn ngữ hoặc
+`risk_tags` đã ghi từ Bước 1 là nguồn chính để kích bảo mật — không dò từ khoá trong diff làm cách kích chính. Diff chạm
+xác thực, đầu vào từ ngoài, truy vấn dữ liệu, đường file, gọi ra ngoài, mật mã hay secret mà **chưa có nhãn** là dấu hiệu
+Bước 1 chấm thiếu: nâng cỡ, thêm nhãn, ghi `Phán quyết:`, rồi mới kích bảo mật ([preflight](../skills/closing-sprint/references/preflight.md)
+mục 2: hai ô trống không phải kẽ hở). Diff lẫn nhiều ngôn ngữ hoặc
 chỉ là tài liệu thì bỏ khía cạnh ngôn ngữ.
 
 **Pha 2 — review song song.** Các reviewer chạy cùng lúc, mỗi bên **không thấy** bên kia. Việc chờ đủ cả bộ trước khi
