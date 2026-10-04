@@ -111,7 +111,7 @@ kết quả vào PROGRESS:
 | Hồ sơ nhất quán | `scripts/check.py` trên thư mục sprint (và `--self` nếu sửa chính repo phương pháp): Đạt | **Chặn** nếu có mức Chặn/Phải sửa; Nên sửa → ghi `CO` |
 | Mốc còn tươi | commit, spec và toolchain hiện tại bằng mốc ghi trong `VR` (mục 3); working tree sạch hoặc diff chưa commit đã ghi | `VR` hết hạn → **Chưa chạy**, chạy lại |
 | Tài nguyên đủ để kiểm | đĩa, bộ nhớ, hạn mức công cụ đủ chạy phép kiểm; không đủ thì phép kiểm không chạy được | `VR` là **Chưa chạy** kèm giới hạn (mục 2), không phải Đạt |
-| Câu né (xem dưới) | tìm theo mẫu chữ trong báo cáo và PROGRESS | **Ghi chú → Phải sửa** tuỳ ngữ cảnh; chỉ cảnh báo, không tự chặn |
+| Câu né (xem dưới) | tìm theo mẫu chữ trong báo cáo và PROGRESS | người đọc gán **một** mức (Ghi chú hoặc Phải sửa) theo ngữ cảnh; chỉ cảnh báo, không tự chặn |
 
 **Câu né** là dấu hiệu việc kiểm bị cắt ngắn: "bỏ qua test lần này", "lỗi có từ trước", "để sau", "chắc chạy được", "chỉ
 là cảnh báo", "test chậm nên tắt". Tìm bằng mẫu chữ nên **có thể báo nhầm** — nhầm thì reviewer đọc ngữ cảnh và bỏ
