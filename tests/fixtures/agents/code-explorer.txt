@@ -1,0 +1,9 @@
+# Giao việc thăm dò (fixture cho agents/code-explorer.md)
+# Chạy trong thư mục gốc của worktree; code cần đọc là scripts/check.py.
+#
+# Khu vực: luồng kiểm tham chiếu chéo mã định danh của scripts/check.py.
+# Hỏi, trả lời bằng file:dòng đã mở ra đọc (số dòng theo công cụ đọc file):
+#   1. Chương trình bắt đầu chạy ở đâu (điểm vào)?
+#   2. Chỗ nào trong luồng tham chiếu chéo đọc khoá `links` của tài liệu để tìm tài liệu sở hữu một tiền tố mã?
+#   3. Chỗ nào báo phát hiện `xref-missing` (mã được nhắc tới nhưng không được định nghĩa)?
+# Kèm bản đồ ngắn: ai gọi ai từ điểm vào đến chỗ báo, và nhánh `xref-unresolved` khác `xref-missing` thế nào.
