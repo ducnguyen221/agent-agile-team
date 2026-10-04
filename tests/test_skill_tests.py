@@ -17,9 +17,18 @@ import _common as c
 
 # Ngày bắt đầu sprint wave-2: file thử có `date` từ ngày này trở đi phải mang `skill_sha` và `tier` (FR10.5).
 SPRINT_START = datetime.date(2026, 10, 3)
-# Bốn từ gốc của FR11.5 (`not run`, `pending`, `chưa chạy`, `dự kiến`) cộng các từ giữ chỗ hay gặp: `TBD`, `TODO`,
-# `N/A`, `none`, `false`, `null` (nguyên từ, để "nonexistent" không bị bắt oan).
-NOT_RUN = re.compile(r"not run|pending|chưa chạy|dự kiến|\b(?:tbd|todo|n/a|none|false|null)\b", re.I)
+# Lớp thứ hai (danh sách đen) cho tệp CHƯA CHẠY: bốn cụm gốc của FR11.5 (`not run`, `pending`, `chưa chạy`, `dự kiến`) chỉ tính
+# khi đứng ĐẦU đoạn đầu; các từ giữ chỗ `TBD`, `TODO`, `N/A`, `none`, `false`, `null` chỉ tính khi là CẢ đoạn đầu. Nhờ vậy
+# "3/3 pass, none partial" (kết quả thật) không bị chặn oan (RF168). Lớp thứ nhất là danh sách trắng bên dưới.
+NOT_RUN = re.compile(r"(?:not run|pending|chưa chạy|dự kiến)|(?:tbd|todo|n/a|none|false|null)\W*$", re.I)
+# Danh sách trắng (TK12.1, RF167): đoạn đầu của `result` phải bắt đầu bằng một trạng thái hợp lệ: số dạng `k/n`, `strict`,
+# `pass`/`passed`, `fail`/`failed`, `partial`, `Đạt`, `Không đạt`, `Một phần` (tập chốt từ giá trị thật của mọi
+# `tests/pressure.md`, `tests/retrieval.md`: `3/3 GREEN pass…`, `strict k/n…`); `model` phải bắt đầu bằng tên model
+# (`claude-<tên>` hoặc bí danh `sonnet`, `opus`, `haiku`, `fable`).
+RESULT_STATE = re.compile(r"(?:\d+/\d+|strict|pass(?:ed)?|fail(?:ed)?|partial|đạt|không đạt|một phần)(?!\w)", re.I)
+MODEL_NAME = re.compile(r"(?:claude-[a-z0-9][a-z0-9.-]*|sonnet|opus|haiku|fable)(?![\w.-])", re.I)
+MARKUP = re.compile(r"^[\s*`≥>=]+")  # dấu định dạng ở đầu giá trị ("**3/3** GREEN pass", "≥3/3 pass") không phải trạng thái
+STATE_ERROR = "không thuộc tập hợp lệ"
 SKILLS = sorted(p.parent.name for p in REPO.glob("skills/*/SKILL.md"))
 
 
@@ -88,6 +97,19 @@ def tree_hash(skill: str, repo=REPO):
         pytest.fail(f"git không chạy xong: {exc}")
 
 
+def state_problems(key: str, value: str) -> list:
+    """Lỗi của giá trị chuỗi `result`/`model`: không có trạng thái ở đầu, ghi chưa chạy, hoặc không thuộc tập hợp lệ."""
+    h = MARKUP.sub("", head(value))
+    # giá trị phải bắt đầu bằng chữ hoặc số và có ít nhất một chữ: bắt ".", "?", "…", "[]", "{}", "~", "0"
+    if not re.match(r"[^\W_]", h) or not re.search(r"[^\W\d_]", h):
+        return [f"`{key}` không có trạng thái ở đầu: {value!r}"]
+    if NOT_RUN.match(h):
+        return [f"`{key}` ghi chưa chạy: {h!r}"]
+    if not (RESULT_STATE if key == "result" else MODEL_NAME).match(h):
+        return [f"`{key}` {STATE_ERROR}: {h!r}"]
+    return []
+
+
 def problems(data: dict) -> list:
     """Lỗi của một file thử (không gồm so `skill_sha` với cây skill)."""
     found = []
@@ -99,11 +121,8 @@ def problems(data: dict) -> list:
             found.append(f"thiếu khoá `{key}`")
         elif not isinstance(value, str):
             found.append(f"`{key}` không phải chuỗi trạng thái: {value!r}")
-        elif not re.match(r"[^\W_]", head(value)) or not re.search(r"[^\W\d_]", head(value)):
-            # giá trị phải bắt đầu bằng chữ hoặc số và có ít nhất một chữ: bắt ".", "?", "…", "[]", "{}", "~", "0"
-            found.append(f"`{key}` không có trạng thái ở đầu: {value!r}")
-        elif NOT_RUN.search(head(value)):
-            found.append(f"`{key}` ghi chưa chạy: {head(value)!r}")
+        else:
+            found.extend(state_problems(key, value))
     day = data.get("date")
     try:
         day = day if isinstance(day, datetime.date) else datetime.date.fromisoformat(str(day))
@@ -220,6 +239,56 @@ def test_blank_key_in_frontmatter_is_caught(text):
 @pytest.mark.parametrize("value", [None, "", "  ", "None", "null", "TBD", "TODO", "N/A", "false", "(none)", "None;", "."])
 def test_empty_or_null_value_is_no_state(key, value):
     assert problems({**GOOD, key: value}), f"{key}={value!r} lọt máy kiểm"
+
+
+# Danh sách trắng (TK12.1, RF167/RF168): token đầu của `result`/`model` phải thuộc tập hợp lệ; danh sách đen chỉ còn là lớp
+# thứ hai. Giá trị lạ đỏ, kết quả thật (viết đúng sự thật) không bị chặn oan.
+INVALID_RESULTS = ["x", "a", "WIP", "wip", "?", "", "  ", "TBA", "TBC", "skipped", "skip", "chưa", "sẽ chạy", "đang chạy",
+                   "unknown", "n.a.", "NA", "nil", "placeholder", "N / A", "t.b.d.", "ok", "done", "passes", "3 of 3",
+                   "xpass", "failure", "green", "RED 0/3", "(x)", "- x", "x 3/3 pass"]
+INVALID_MODELS = ["x", "WIP", "?", "", "unknown", "TBA", "gpt", "model", "3/3", "pass", "claude", "sonnetx"]
+VALID_RESULTS = ["3/3 GREEN pass", "12/12 pass", "strict 6/6 (+0 partial, 0 fail) — at threshold", "pass 5/6", "pass", "fail 1/3",
+                 "partial", "Đạt", "Không đạt 2/6", "Một phần", "0/3 RED", "**3/3** GREEN pass", "`3/3` GREEN pass", "≥3/3 pass",
+                 "3/3 GREEN pass, none partial", "3/3 pass, 0 false positives", "6/6 pass, TODO list empty",
+                 "3/3 GREEN pass after RF-null fix", "PASS 3/3", "Failed 1/3", "3/3 pass after pending review", "3/3 pass, 0 flaky, none"]
+VALID_MODELS = ["claude-sonnet-5-5", "claude-sonnet-5-5 (all runs, same scenario text)", "sonnet", "opus", "haiku", "fable",
+                "claude-fable-5-1", "claude-opus-5-5; reviewer", "sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5"]
+
+
+@pytest.mark.parametrize("value", INVALID_RESULTS)
+def test_result_outside_the_valid_state_set_is_caught(value):
+    assert problems({**GOOD, "result": value}), f"result={value!r} lọt máy kiểm"
+
+
+@pytest.mark.parametrize("value", INVALID_MODELS)
+def test_model_outside_the_valid_name_set_is_caught(value):
+    assert problems({**GOOD, "model": value}), f"model={value!r} lọt máy kiểm"
+
+
+@pytest.mark.parametrize("value", ["x", "WIP", "TBA", "unknown", "skipped", "ok"])
+def test_unknown_word_gets_the_whitelist_message(value):
+    assert any(STATE_ERROR in p for p in problems({**GOOD, "result": value}))
+    assert any(STATE_ERROR in p for p in problems({**GOOD, "model": value}))
+
+
+@pytest.mark.parametrize("value", VALID_RESULTS)
+def test_real_style_result_is_not_blocked(value):
+    assert problems({**GOOD, "result": value}) == [], f"result={value!r} bị chặn oan"
+
+
+@pytest.mark.parametrize("value", VALID_MODELS)
+def test_real_style_model_is_not_blocked(value):
+    assert problems({**GOOD, "model": value}) == [], f"model={value!r} bị chặn oan"
+
+
+def test_every_real_result_and_model_passes_the_state_check():
+    """Chống chặn oan: mọi `result`/`model` thật của mọi tệp thử ở HEAD đều qua danh sách trắng (không chỉ qua `problems()` tổng)."""
+    assert len(TEST_FILES) >= 27
+    for path in TEST_FILES:
+        data = front(path)
+        for key in ("result", "model"):
+            assert not any(STATE_ERROR in p or "không có trạng thái" in p for p in problems({**GOOD, key: data[key]})), (
+                f"{path.relative_to(REPO).as_posix()}: {key}={str(data[key])[:60]!r} bị danh sách trắng chặn")
 
 
 @pytest.mark.parametrize("bad", ["2026-13-40", "hôm qua", ""])
