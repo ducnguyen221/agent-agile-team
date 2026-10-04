@@ -48,6 +48,10 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Điều kiện Đạt ghi trước ở file nháp được áp nguyên; việc câu hỏi nêu đích danh mà skill không có thì câu tính Một phần.
 - Skill không sửa thêm sau lượt này (giới hạn hai lượt của `TK13`); còn dưới ngưỡng thì điều phối ghi `CO`.
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+Kết quả đo trên bản trước `fix-1` (cây `695955ce1bdc7b72f86c01e79ec7e031fa9e7d95`, trừ `tests/`); `fix-1` chỉ đổi con trỏ chuẩn mã ở cuối `SKILL.md` (trỏ `method/standards/python.md`, bỏ vế "file này có khi gộp làn chuẩn") và thêm dòng "Nguồn" ở bốn tệp `references/`; không đổi nội dung trả lời. Không chạy lại (QA2, 2026-10-04, đối chiếu `git diff e6b2e60..a35b618 -- skills/python` bỏ `tests/`). `skill_sha` ở frontmatter đã là băm cây hiện tại; bảng và `result` giữ nguyên.
+
 ## Lịch sử
 
 Lượt `TK13` lần 1 (bộ câu độc lập đầu, ngày 2026-10-04, `skill_sha` 93927b63539f410932e88592bb6c6d1dac0ca10b, người soạn afbbece2a6f1f6a07, chủ thể a205edc92d607789a): `result` là `strict 3/7 (+4 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7`.

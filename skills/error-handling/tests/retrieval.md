@@ -51,6 +51,10 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Điều kiện Đạt ghi trước ở file nháp được áp nguyên; việc câu hỏi nêu đích danh mà skill không có thì câu tính Một phần.
 - Skill không sửa thêm sau lượt này (giới hạn hai lượt của `TK13`); còn dưới ngưỡng thì điều phối ghi `CO`.
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+Kết quả đo trên bản trước `fix-1` (cây `d4f984edecdded4a9e413109cf63259bd6e74f81`, trừ `tests/`); `fix-1` chỉ thêm dòng "Nguồn" ở `references/retry-and-user-messages.md`; không đổi nội dung trả lời. Không chạy lại (QA2, 2026-10-04, đối chiếu `git diff e6b2e60..a35b618 -- skills/error-handling` bỏ `tests/`). `skill_sha` ở frontmatter đã là băm cây hiện tại; bảng và `result` giữ nguyên.
+
 ## Lịch sử
 
 Lượt `TK13` lần 1 (bộ câu độc lập đầu, ngày 2026-10-04, `skill_sha` 9f2df9edee87ed4a035cd57aba80bfc16f0992a1, người soạn aa6e67850c8ecab8d, chủ thể af7524d4182f36ce3): `result` là `strict 4/7 (+3 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7`.

@@ -40,6 +40,10 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Phần phụ: tiêu chí CASCADE, RESTRICT, SET NULL (câu 5); đánh đổi `bigserial`, UUIDv4, UUIDv7 và kiểu `uuid` (câu 3); index ghép giúp bỏ bước sắp xếp (câu 2).
 - `description` hứa "troubleshooting a slow query" và "implementing Row Level Security": phần RLS đã có mục 3 của `references/patterns.md`; chữa truy vấn tổng hợp chậm bằng materialized view thì chưa có.
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+Kết quả đo trên bản trước `fix-1` (cây `caf5c46298f9e276bad693584455c26e7a1220e1`, trừ `tests/`); `fix-1` chỉ thêm dòng "Nguồn" ở `references/diagnostics.md`; không đổi nội dung trả lời. Không chạy lại (QA2, 2026-10-04, đối chiếu `git diff e6b2e60..a35b618 -- skills/postgres` bỏ `tests/`). `skill_sha` ở frontmatter đã là băm cây hiện tại; bảng và `result` giữ nguyên.
+
 ## Lịch sử
 
 Lượt `TK13` lượt 1 (bộ câu mới, 2026-10-04, `skill_sha` `963d141988d565844c46768b15bb0382b39cdf06`, `result`: strict 3/7 (+4 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7), chuyển xuống đây khi chạy bộ câu mới lần 2. Id hàng của bộ đó đổi thành `b1`… để không lẫn vào bảng chấm của lượt mới (id agent: người soạn `a054e00d335abdcb0`, chủ thể `a4592ce7b1250d1a0`); người soạn lần sau phải đọc cả ba bộ để không lặp. Các đề mục của khối này hạ hai bậc.
