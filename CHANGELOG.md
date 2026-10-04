@@ -5,7 +5,7 @@ version kiểm điều này).
 
 ## 0.3.0 (2026-10-05)
 
-Chưa phát hành. SPR-04 — nội dung Đợt 2 (phần mới), luật bậc việc đơn giản / phức tạp, sổ tập trung, quy tắc số phiên
+SPR-04 — nội dung Đợt 2 (phần mới), luật bậc việc đơn giản / phức tạp, sổ tập trung, quy tắc số phiên
 bản, viết lại phòng sạch 7 đích private, trả nợ máy kiểm của SPR-02. Mức MINOR theo `method/conventions.md` mục 4.1: thêm
 skill, agent và luật tương thích ngược, dự án cũ không phải sửa gì (phân vân → chọn mức cao hơn: chưa có thay đổi gãy nào).
 
