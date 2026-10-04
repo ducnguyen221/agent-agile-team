@@ -73,7 +73,8 @@ Ngày giờ cố định, "chờ 15 phút" không chờ thật (`page.clock`), t
 1. **Tái hiện trước khi sửa:** chạy lặp (`--repeat-each=10`) trên đúng tệp; không "thử xem có hết không".
 2. Tìm nguyên nhân theo bảng mục 5; sửa nguyên nhân, không tăng thời gian chờ để che.
 3. **Cách ly** (`test.fixme` hoặc `test.skip` có điều kiện) chỉ khi chưa sửa kịp và phải ghi **mã vấn đề, người giữ, mốc**;
-   test bị cách ly báo là **Chưa chạy**, không Đạt; không để cách ly vô thời hạn (thành `CO` nếu hoãn).
+   test bị cách ly báo là **Chưa chạy**, không Đạt; không để cách ly vô thời hạn (thành `CO` nếu hoãn). Cách ly **không**
+   dùng để đóng một `RF` hay làm `VR` Đạt (`method/standards/common/testing.md`).
 4. Test qua nhờ thử lại: ghi **chập chờn** thành phát hiện mức Nên sửa; chập chờn ở luồng chính là Phải sửa.
 5. Không hạ ngưỡng, không sửa cấu hình test để qua kiểm.
 
