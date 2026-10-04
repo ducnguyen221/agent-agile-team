@@ -38,6 +38,28 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Chỉ cách xử lý buổi họp chốt quyết định: skill gắn "duyệt" với Cổng 1, không có chỗ cho buổi họp riêng (câu 2, phụ); thư mục ADR khác mặc định (câu 3, phụ); chỗ gắn ADR vào PLAN ngoài "trỏ bằng số, đường file, mệnh đề" (câu 5, phụ).
 - `description` không hứa chỗ nào thân skill không có.
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. Thân `SKILL.md` đổi ở `fix-1` (mục 4 bước 3 chỉ cho ADR lập lúc PLAN; mục 4 bước 5 quyết định lộ giữa sprint; mục 4 bước 6 ADR `secret`/`auth`) và không đổi thêm ở `fix-2` (chỉ băm cây được ghi lại), nên chạy lại **trọn hai bộ câu** của tệp này (13 câu, chữ nguyên: bảng chính câu 1–7 và bộ cũ `c1`–`c6` ở mục Lịch sử). Chủ thể: một subagent mới (`claude-sonnet-5-5`, tier T3, `a498c9c2cf532f7af`), không dùng công cụ Skill, được đọc `SKILL.md` và tài liệu được trỏ (đọc thêm `method/sizing.md`, `method/process.md`), không mở `tests/`. Kỳ vọng ghi trước (`evidence/QA2/expected/adr-expected.md`, sha256 `edd4746c5de978c6f103fa92e064d0c8b1db882d75978bf86fe80259147ff616`, mtime 19:13:56, trước lượt giao); output trọn ở `evidence/QA2/adr-retrieval.md` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`).
+
+| Câu | Mục agent trỏ | Kết quả |
+|---|---|---|
+| `câu 1` | `SKILL.md` › 1, 2, 3 | Đạt |
+| `câu 2` | `SKILL.md` › 2, 4 (bước 3, 6), 5 | Đạt (phần phụ: buổi họp ngoài sprint không được nói tới; chủ thể dùng bước 6 mới: `security-review` đọc ADR `auth` trước khi `accepted`) |
+| `câu 3` | `SKILL.md` › 4 (bước 4), 6, 3 | Đạt (phần phụ: thư mục `docs/decisions/` khác `paths.adr_dir`) |
+| `câu 4` | `SKILL.md` › 1, 2, 4, 6 | Đạt |
+| `câu 5` | `SKILL.md` › 1, 4 | Đạt (phần phụ: vị trí cụ thể trong PLAN; chủ thể tự chấm Một phần, giữ Đạt theo thước chung như lượt trước) |
+| `câu 6` | `SKILL.md` › 1, 2, 6 | Một phần (đúng nơi; skill không nói thẳng quyết định "không làm" có đáng ADR) |
+| `câu 7` | `SKILL.md` › 1 "Không cần ADR"; đáp `api-design` | Đạt (ranh giới) |
+| `c1` | `SKILL.md` › 1, 2, 6 | Đạt (phần phụ: PR ngoài sprint; chủ thể tự chấm Một phần, giữ Đạt theo thước chung) |
+| `c2` | `SKILL.md` › 1, 4, 5 | Đạt |
+| `c3` | `SKILL.md` › 2, 4, 5, 6 | Đạt (phần phụ: áp lực hạn chót; chủ thể tự chấm Một phần, giữ Đạt theo thước chung như lượt trước) |
+| `c4` | `SKILL.md` › 1, 2, 4 | Đạt |
+| `c5` | `SKILL.md` › 4 (bước 4), 5, 6, 3 | Đạt |
+| `c6` | `SKILL.md` › 1 "Không cần ADR"; đáp `database-migrations` | Đạt (ranh giới) |
+
+Bảng chính (câu 1–7): 6 Đạt hẳn, 1 Một phần, 0 Không đạt, đúng bằng `result` ở frontmatter (`retrieval_result()` trên bảng chính không đổi nên giữ nguyên). Bộ cũ `c1`–`c6`: 6/6 Đạt hẳn. Giới hạn: n = 1; người chấm cùng họ mô hình với chủ thể (`CQ3`); ba câu (`câu 5`, `c1`, `c3`) chủ thể tự chấm Một phần nhưng người chấm giữ Đạt theo thước chung. Không câu nào hỏi riêng bước 5 mới (ADR lộ giữa sprint); bước 6 mới được chủ thể dùng ở `câu 2`.
+
 ## Lịch sử
 
 Lượt trước (bộ câu cũ, 2026-10-04, `skill_sha` `e51ac5cfa6684f45de70dddd469b1975496a4a62`, `result`: strict 6/6 (+0 partial, 0 fail) — at threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 6/6). Bộ câu cũ giữ nguyên bên dưới, id hàng đổi thành `c1`… để không lẫn vào bảng chấm của lượt mới; người soạn lần sau phải đọc cả hai bộ để không lặp. Dòng "Đã đọc" và đoạn thước chấm của lượt cũ không chép lại (thước chung ở trên).
