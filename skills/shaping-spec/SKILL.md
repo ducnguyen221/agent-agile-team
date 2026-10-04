@@ -38,7 +38,8 @@ nhẹ để khỏi viết SPEC thì đó chính là lúc chọn nhãn nặng.
 3. **Đánh giá phạm vi trước khi hỏi chi tiết:** lời giao chứa nhiều hệ con độc lập → tách sprint
    trước, mỗi sprint một SPEC; đừng tốn câu hỏi để tinh chỉnh một việc cần tách.
 4. **Đọc repo trước:** cấu trúc, tài liệu, commit gần đây, spec sống `FS-` liên quan. Theo khuôn có sẵn;
-   chỉ đề xuất cải thiện cục bộ ở chỗ việc này chạm, không refactor lan.
+   chỉ đề xuất cải thiện cục bộ ở chỗ việc này chạm, không refactor lan. Tính năng đã có mã mà chưa có spec sống:
+   rút hành vi hiện tại từ mã, caller và test — không từ docstring — theo `references/spec-mining.md`.
 
 ## 3. Hỏi thế nào — một câu mỗi tin hay gom `CQ`
 
@@ -67,7 +68,7 @@ Ngoài chế độ làm rõ, hỏi lẻ giữa Bước 2–5 là lỗi quy trìn
 | Kết luận | một câu: làm gì, cho ai, xong khi nào | người không chuyên đọc câu này là đủ |
 | Bối cảnh | vì sao; trỏ `RQ-`, `FS-`; số liệu có nguồn | 3–6 dòng |
 | `US` | "Là <ai>, tôi <muốn gì>, để <được gì>" + ưu tiên bằng chữ | mỗi `US` có ít nhất một `FR` |
-| `FR` | mỗi kịch bản `FRx.y` dạng **KHI <sự kiện> THÌ <hệ thống> <phản ứng>**; kịch bản là thứ đem đi kiểm | gồm cả đường lỗi, không chỉ đường vui |
+| `FR` | **một `FR` một hành vi**; mỗi kịch bản `FRx.y` dạng **KHI <sự kiện> THÌ <hệ thống> <phản ứng>**; kịch bản là thứ đem đi kiểm | gồm cả đường lỗi, không chỉ đường vui; một `FR` (hay một câu KHI…THÌ) chứa hai phản ứng khác nhau là hai hành vi — tách thành hai `FR`, vì mỗi hành vi cần `VR` riêng và delta Thêm / Sửa / Bỏ trỏ vào từng hành vi |
 | `SC` | đo được: lệnh/thao tác + ngưỡng | mỗi `SC` sẽ có ít nhất một `VR` ở REPORT |
 | Ngoài phạm vi | cái không làm đợt này | không bao giờ rỗng ở cỡ vừa trở lên |
 | `CQ` + ASSUMPTION | mục 3 | mỗi `CQ` có đề xuất |
