@@ -3,7 +3,7 @@ Copyright (c) 2026 Nguyễn Quang Đức (https://ducnguyen.vn). All rights rese
 
 Một nguồn được coi là "đã dùng" khi có file trong repo ghi `source` trỏ tới nó; khi đó thông báo bản
 quyền tương ứng ở đây là bắt buộc. Nguồn của từng skill và agent: UPSTREAM.md, mục "Bảng nguồn theo skill
-và agent". Nguồn chỉ lấy ý và phần phải viết lại trước khi công khai: THIRD_PARTY.md.
+và agent". Nguồn chỉ lấy ý và lịch sử viết lại phòng sạch: THIRD_PARTY.md.
 
 ------------------------------------------------------------------------------------------------------
 Nguồn MIT đã dùng ở Đợt 1 và Đợt 2 (giữ thông báo bản quyền và văn bản giấy phép MIT bên dưới)
