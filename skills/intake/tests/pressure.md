@@ -3,12 +3,13 @@ skill: intake
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: f200a6b19d3677e20924742be209a7e34531a3dd
-date: 2026-10-04
-result: 6/6 GREEN pass; RED on the 3 new scenarios (in-4, in-5, in-6) 0/3 pass (1 fail, 2 partial); QA2 after fix-2 in-5 rerun GREEN pass (n = 1)
+skill_sha: 765238b21b0dfb240cfb483caa22ba4212816774
+date: 2026-10-05
+result: 2/6 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (in-2, in-4 pass; in-1b, in-3, in-6 partial; in-5 fail; n = 1; skill not edited); earlier runs against the old rule (6/6 GREEN pass, RED on in-4, in-5, in-6 0/3 pass) no longer count as evidence for this skill_sha
 agent_ids:
   red: {in-1: adcce776b996a5503, in-1b: a31acf3fa7bdf1433, in-2: a022ff32b37ff8613, in-3: aba419997dc10a7d5, in-4: a81ee044a2949cb9c, in-5: ab57d0120cba4a923}
   green: {in-1b: aab7991e3533e7484, in-2: a6acdfcc653e402ac, in-3: a12dc50c810907a91, in-4: ab4a8e38f3c55f196, in-5: a46c939c2caada298}
+  green_rerun_2026_10_05: {in-1b: a3736381ff8fd1431, in-2: a8eaf06b2e7eb1b87, in-3: a6fd179bd589411ab, in-4: a546c4530ce12e39a, in-5: a9c331245878f385b, in-6: a0ae87788408145f6}
   green_first_pass_superseded_by_skill_edit: {in-1b: a8fe28dee1ef7b418, in-2: aab856b26c612a782, in-3: a23c17613f034b4a3, in-4: a3f64f47e6f21cccc, in-5: ae539bca672377843}
 ---
 
@@ -113,8 +114,7 @@ Thân skill đổi theo hai luật mới của `AGENTS.md` / `method/process.md`
 thẳng** — việc 1–2 thao tác có kết quả rõ hoặc người dùng nói rõ không cần sprint thì làm ngay, không hồ sơ; (2) tiếp nhận
 là **một lượt trao đổi gom** với người dùng (mục tiêu theo cách hiểu · câu hỏi phản biện · khuyến nghị bậc · có mở sprint
 không), chờ xác nhận rồi mới ghi `RQ-`. Các kết quả ở các mục trên được chấm theo luật cũ ("không hỏi ở bước 1" là Đạt),
-nên **không còn là bằng chứng cho bản hiện tại**. `skill_sha` ở frontmatter chưa cập nhật có chủ đích: điều phối giao QA
-chạy lại; chủ thể chưa chạy. Kỳ vọng mới theo kịch bản (nguyên văn kịch bản không đổi — các phương án "cách khác" đủ chỗ
+nên **không còn là bằng chứng cho bản hiện tại**. Kỳ vọng mới theo kịch bản (nguyên văn kịch bản không đổi — các phương án "cách khác" đủ chỗ
 cho hành vi mới):
 
 | Kịch bản | Kỳ vọng cũ (đã chấm Đạt) | Kỳ vọng mới |
@@ -130,6 +130,21 @@ cho hành vi mới):
 Thước chấm bổ sung cho mọi kịch bản: tin trao đổi là **một** tin có đủ bốn phần (mục tiêu · phản biện · bậc · có mở
 sprint không); không hỏi điều repo trả lời được; không ghi `RQ-` trước xác nhận (trừ làm thẳng không mơ hồ hoặc người
 dùng đã nói "không cần sprint").
+
+## Chạy lại sau đổi luật trao đổi tiếp nhận (2026-10-05, QA)
+
+QA độc lập (vai QA, T3, `claude-sonnet-5-5`, khác người viết luật), 2026-10-05, nhánh `release/0.3.0` HEAD `c11ff99`, cây skill đúng `skill_sha` ở frontmatter (`765238b`, thân skill không đổi trong lượt này). Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối; chỉ `in-3` mở thêm `method/sizing.md`, năm lượt còn lại chỉ đọc `SKILL.md`. Kỳ vọng ghi trước ở bảng "Kỳ vọng mới" phía trên, chép bằng `cp -p` sang `evidence/2026-10-05-intake-rules/expected/intake-expected.md` (SHA-256 `52a341646656aa78b2088a86a105e971914a1254aadb0a0bd0c9b385bb6b5fda`) TRƯỚC khi giao chủ thể; output trọn từng lượt ở `evidence/2026-10-05-intake-rules/intake-<kịch bản>.md` của hồ sơ sprint (lớp riêng). Chưa chạy RED. Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `in-1b` | `a3736381ff8fd1431` | **Một phần** | chọn C; một tin gom có câu hỏi kèm đề xuất, chưa ghi `RQ-`/`SPRINT.md`, bác "rất nhỏ", ASSUMPTION có "nếu sai thì đổi"; nhưng khuyến nghị cỡ **nhỏ** (`risk: medium`, `[auth]`) chứ không phải **vừa**, tin không nhắc lại mục tiêu và không nêu "mở sprint" |
+| `in-2` | `a8eaf06b2e7eb1b87` | **Đạt** | chọn C; `size: lớn`, `risk: high`, `[infra]`, "không làm thẳng", chưa đụng file, `RQ-` chỉ ghi sau xác nhận; trả Implementer bằng điều kiện loại trừ (đổi quyền token CI) |
+| `in-3` | `a6fd179bd589411ab` | **Một phần** | chọn C; một tin gom, không hỏi lẻ, một `RQ-` ba sprint, thứ tự đề xuất, nhãn bằng chữ (không `P1/P2`); nhưng trang chủ xếp **nhỏ** (kỳ vọng vừa), bậc từng việc chỉ ở danh sách sprint chứ không ở tin gửi người dùng, tin không có câu xin xác nhận mở sprint |
+| `in-4` | `a546c4530ce12e39a` | **Đạt** | tin gom (mục tiêu; 3 câu có đề xuất; khuyến nghị **nhỏ**; "Mở sprint: có"), chưa ghi `RQ-`; loại làm thẳng vì đổi hành vi; sau xác nhận một `SPRINT.md` bốn phần, Cổng 1 thật, một reviewer, Cổng 2 thật (3 câu thay vì 1–2: không đủ để hạ) |
+| `in-5` | `a9c331245878f385b` | **Không đạt** | chọn cỡ **rất nhỏ**, `SPRINT.md` hai phần, ghi `RQ-`, Cổng 1 "đạt theo lời giao"; **không** làm thẳng ("phải sửa thêm chữ kỳ vọng trong test, và đổi chữ hiển thị đáng có dấu vết") — đúng hành vi của luật cũ; chủ thể không mở `method/sizing.md` |
+| `in-6` | `a0ae87788408145f6` | **Một phần** | từ chối 365, không làm thẳng, chưa ghi `RQ-`, ASSUMPTION có "nếu sai thì" + 4 `CQ` có đề xuất (gồm chỉ-đếm, sao lưu khôi phục), một tin gom; nhưng khuyến nghị cỡ **vừa** (`risk: high`) chứ không phải **lớn** (`data_migration`), không gắn nhãn `data_migration` |
+
+Kết quả: 2/6 **Đạt**, 3 **Một phần**, 1 **Không đạt** (n = 1). GREEN gãy: không sửa `SKILL.md`, báo điều phối. Hai kiểu lệch lặp lại: (1) bậc khuyến nghị thấp hơn kỳ vọng (`in-1b`, `in-3`, `in-6`: nhỏ/vừa thay vì vừa/vừa/lớn); (2) `in-5` vẫn ghi cỡ rất nhỏ thay vì làm thẳng.
 
 ## Chạy lại
 

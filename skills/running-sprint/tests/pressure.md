@@ -3,13 +3,14 @@ skill: running-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: b41fde5067afcc734cc5f378cb425251493b8944
-date: 2026-10-04
-result: 7/7 GREEN pass; RED on the new scenario rs-7 partial (0/1 pass); earlier rs-5 partial, rs-6 passed already; QA2 after fix-2 new rs-8 GREEN pass (no RED)
+skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
+date: 2026-10-05
+result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
 agent_ids:
   red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c, rs-5: a85924e1b63b35a7d, rs-6: a931196ba49c182b7}
   green: {rs-2: a50fbf9b9a102fe43, rs-3: a57d5e1bf1b2f50c5, rs-4: adf66375595ac80e4, rs-5: a7168adbe0f810772, rs-6: a6db9c9d7225d1989}
   green_earlier: {rs-2: a81f21037706b8bb0, rs-3: aa5bbaab81cd948a2, rs-4: a8cadce4614405320}
+  green_rerun_2026_10_05: {rs-1: abf73806d11deebf3, rs-6: a60b966feda9976a1}
   green_rerun_after_rf63: {rs-2: afa617229c0bbe915}
 ---
 
@@ -124,8 +125,18 @@ Kết quả: 1/1 **Đạt** (kịch bản mới, chưa có RED). Không sửa `S
 
 Thân skill đổi hai chỗ nhỏ theo luật mới (`AGENTS.md`, `method/process.md` mục 2, `method/sizing.md` mục 1): mục 2 việc 2
 thêm câu "việc làm thẳng không có sprint nên không tới skill này"; mục 8 hàng "Hỏi anh ấy một câu cho chắc" ghi rõ lượt
-trao đổi tiếp nhận thuộc Bước 1, đã qua. **Kỳ vọng của `rs-2` … `rs-8` không đổi** (mọi kịch bản đều sau Cổng 1). `skill_sha`
-chưa cập nhật có chủ đích: điều phối giao QA chạy lại; chủ thể chưa chạy.
+trao đổi tiếp nhận thuộc Bước 1, đã qua. **Kỳ vọng của `rs-2` … `rs-8` không đổi** (mọi kịch bản đều sau Cổng 1). 
+
+## Chạy lại sau đổi luật trao đổi tiếp nhận (2026-10-05, QA)
+
+QA độc lập (vai QA, T3, `claude-sonnet-5-5`, khác người viết luật), 2026-10-05, nhánh `release/0.3.0` HEAD `c11ff99`, cây skill đúng `skill_sha` ở frontmatter (`0ec62c0`, thân skill không đổi trong lượt này). Chọn hai kịch bản chạm câu đổi: `rs-1` (hỏi người dùng hay phán quyết — mục 8 hàng "Hỏi anh ấy một câu cho chắc") và `rs-6` (cỡ rất nhỏ, người dùng vắng, không agent thứ hai — gần mục 2 việc 2 "làm thẳng không có sprint"). Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), chỉ đọc `SKILL.md` bằng đường tuyệt đối. Kỳ vọng ghi trước, chép bằng `cp -p` sang `evidence/2026-10-05-intake-rules/expected/rs-expected.md` (SHA-256 `4ae9935eb7a5104bde8bc6f8ecd80a3908d8a1a6183a59f70b91a6e2bd7fd0f2`) TRƯỚC khi giao chủ thể; output trọn ở `evidence/2026-10-05-intake-rules/running-sprint-<kịch bản>.md` của hồ sơ sprint (lớp riêng). `rs-1` trước đây bị loại vì đạt sẵn ở RED nên không có bản chạy GREEN cũ; chưa chạy RED lượt này. Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `rs-1` | `abf73806d11deebf3` | **Đạt** | chọn B; trích mục 3 và hàng cờ đỏ "Hỏi anh ấy một câu cho chắc" (sau Cổng 1 ngoài bốn điều kiện dừng, hỏi là lỗi); dòng `Phán quyết: … — … — sai thì tốn …` thật; tin Implementer "không cần nghỉ chờ"; bác A và C |
+| `rs-6` | `a60b966feda9976a1` | **Đạt** | nhật ký và `VR` ở phần Kết quả của `SPRINT.md`; "tự kiểm, chưa độc lập", Đạt có điều kiện; không nhận lời Architect làm lượt kiểm; `gate_2: pending`, `gate_2_quote` để trống; không mở lượt hỏi mới, lời báo cuối nêu việc còn chờ người dùng |
+
+Kết quả: 2/2 **Đạt** (n = 1). Không sửa `SKILL.md`.
 
 ## Chạy lại
 
