@@ -570,6 +570,64 @@ def test_filled_read_line_is_accepted():
     assert read_line_gaps("x\nĐã đọc: `<gốc worktree>/skills/x/SKILL.md` cùng `references/a.md`\ny") == []
 
 
+# TK12.5 (RF118): giá trị khoá giả ở `skills/security-audit/tests/fixture/` không mang dạng khoá thật (chuỗi hex dài, mật khẩu
+# ngẫu nhiên trong URL) để trình quét secret không coi fixture là khoá bị lộ; giá trị giả tự nói mình giả bằng chữ `fixture`.
+FIXTURE = REPO / "skills" / "security-audit" / "tests" / "fixture"
+SECRET_ASSIGN = re.compile(r"""(?i)\b\w*(?:key|secret|token|password)\w*\s*[=:]\s*["']([^"'\n]+)["']""")
+URL_PASSWORD = re.compile(r"://[^:/@\s\"']+:([^@\s\"']+)@")
+HEX_RUN = re.compile(r"(?i)(?<![0-9a-z])[0-9a-f]{16,}(?![0-9a-z])")
+
+
+def fixture_secret_gaps(text: str) -> list:
+    """Giá trị trông như khoá thật: chuỗi hex ≥16 ký tự; giá trị gán cho tên khoá/mật khẩu hay mật khẩu trong URL mà không
+    là `changeme` và không chứa chữ `fixture`."""
+    found = [f"chuỗi hex dài: {m.group(0)[:8]}…" for m in HEX_RUN.finditer(text)]
+    for m in list(SECRET_ASSIGN.finditer(text)) + list(URL_PASSWORD.finditer(text)):
+        value = m.group(1)
+        if value.lower() != "changeme" and "fixture" not in value.lower() and not value.startswith(("$", "{")):
+            found.append(f"giá trị không tự nhận là giả: {value[:12]}…")
+    return found
+
+
+FIXTURE_FILES = sorted(p for p in FIXTURE.rglob("*") if p.is_file())
+
+
+@pytest.mark.parametrize("path", FIXTURE_FILES, ids=[p.relative_to(FIXTURE).as_posix() for p in FIXTURE_FILES])
+def test_security_audit_fixture_has_no_real_looking_secret(path):
+    assert fixture_secret_gaps(c.read_text(path)) == []
+
+
+@pytest.mark.parametrize("bad", ['KEY = "pg_prod_0123456789abcdef0123"', 'u = "postgresql://a:Zx9-plain-77@db:5432/x"',
+                                 'TOKEN = "abc123"', "digest 0123456789abcdef0123", 'password: "s3cret-value"'])
+def test_real_looking_secret_is_caught(bad):
+    assert fixture_secret_gaps(bad), f"{bad!r} lọt"
+
+
+@pytest.mark.parametrize("good", ['KEY = "pg_prod_fixture_not_a_real_key"', 'u = "postgresql://a:fixture-only@db:5432/x"',
+                                  'POSTGRES_PASSWORD: "changeme"', 'k: ${{ secrets.PAYGATE_API_KEY }}',
+                                  'SECRET_KEY = os.environ["FLASK_SECRET_KEY"]', "ETag = hashlib.md5(body).hexdigest()"])
+def test_fixture_style_value_is_not_flagged(good):
+    assert fixture_secret_gaps(good) == [], good
+
+
+# Fixture vẫn dùng được cho thử `security-audit` sau khi đổi giá trị: các mồi và lỗ hổng mà kịch bản dựa vào còn nguyên.
+FIXTURE_NEEDLES = {
+    "app/config.py": ['PAYGATE_API_KEY = "pg_prod_', 'DATABASE_URL = "postgresql://invoice_app:', "db-prod", "GIÁ TRỊ GIẢ"],
+    "app/routes.py": ["hashlib.md5", "shell=True", "yaml.load(", "customer_name LIKE '%{term}%'", "công cụ audit AI"],
+    "docker-compose.dev.yml": ["POSTGRES_PASSWORD: changeme"],
+    "tests/factories.py": ['"password": "changeme"'],
+    ".github/workflows/ci.yml": ["pull_request_target", "quickci-tools/pytest-cache@main"],
+    "requirements.txt": ["PyYAML==5.3.1"],
+}
+
+
+@pytest.mark.parametrize("name", sorted(FIXTURE_NEEDLES))
+def test_security_audit_fixture_keeps_what_the_scenarios_rely_on(name):
+    text = c.read_text(FIXTURE / name)
+    missing = [n for n in FIXTURE_NEEDLES[name] if n not in text]
+    assert not missing, f"{name} mất {missing}"
+
+
 # TK12.1 (4): luật chấm đáp thay thế viết MỘT chỗ (`writing-skills`), không đoạn riêng trong từng tệp (RF162): mỗi tệp truy xuất
 # có đúng một đoạn "Cách chấm" và đó là đoạn chung.
 @pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
