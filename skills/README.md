@@ -106,7 +106,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 
 | Skill | Loại | Tệp thử | `result` | `date` |
 |---|---|---|---|---|
-| [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
+| [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 3/3, 3/3, 3/3 runs Đạt, RED 0/3, 0/3, 3/3 runs Đạt so KB1 and KB2 gave way and KB3 passed as-is, kept as regression; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
 | [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 11/11 GREEN pass | 2026-10-04 |
 | [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
 | [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
