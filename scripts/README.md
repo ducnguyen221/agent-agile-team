@@ -49,6 +49,7 @@ xuống dòng (LF/CRLF) của file đó; file mới ghi UTF-8 không BOM, LF.
 |---|---|---|
 | `AGENT_AGILE_TIERS` | `init.py` | Đường tới bảng tier → model ngoài repo ([`tiers/README.md`](../tiers/README.md) mục 2). Chưa đặt hoặc trỏ file không có → `init --sprint` in cảnh báo ra stderr (mã thoát không đổi), để Analyst xin chỉ định tier trong chat trước khi cần review PLAN |
 | `AGENT_AGILE_DENYLIST` | `check.py --self` | Đường tới danh sách từ cấm **ngoài repo** (hợp đồng ở [`tests/README.md`](../tests/README.md)). Thiếu, không đọc được hoặc rỗng → in `WARNING NOT_CONFIGURED` ra stderr, luật `leak-denylist` **Chưa chạy** (không tính là Đạt); mã thoát không vì thế mà đổi |
+| `AGENT_AGILE_LEDGER` | `check.py` | Mẫu đường file sổ tập trung của máy, chứa `{project}` (ví dụ `<kho-sổ>/{project}.md`; `~` đầu đường được mở rộng). **Chỉ dự án khai `ledger.project` trong `.agile.json` mới dùng**; không khai thì biến bị bỏ qua. Khai mà chưa đặt → Ghi chú `ledger-unconfigured`; thiếu `{project}` → `config-invalid` |
 
 ## Luật của `check`
 
@@ -89,6 +90,10 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `config-syntax` | Chặn | `.agile.json` không phải JSON — lỗi đầu vào, thoát 2 |
 | `config-invalid` | Phải sửa | `.agile.json` sai hình (gồm `paths.*` tuyệt đối hoặc chứa `..`, `sprint_dir` dùng placeholder ngoài `{date}`/`{slug}`, `id_width` không phải số nguyên ≥ 1), hoặc ngưỡng coverage khác 80 mà `coverage.reason` rỗng; `init`/`index` dùng chung bộ kiểm này (`_common.config_problems`) |
 | `config-public-root` | Chặn | `visibility: public` mà `artifact_root` (đường tuyệt đối) nằm trong gốc dự án |
+| `ledger-missing-row` | Phải sửa | Chỉ khi dự án khai `ledger.project`: sprint có `status` khác `done`/`dropped` (PROGRESS hoặc `SPRINT.md`) mà file sổ tập trung không có dòng mang mã sprint đó. Báo ở dòng `status` của hồ sơ sprint |
+| `ledger-stale` | Phải sửa | Dòng sổ lệch hồ sơ: trạng thái khác `status`, ngày không phải `YYYY-MM-DD` hoặc cũ hơn `updated`. So ngày theo ngày — hai lần đổi trong cùng một ngày chỉ bắt được qua trạng thái ([`method/process.md`](../method/process.md) mục 11) |
+| `ledger-unreadable` | Phải sửa | Chỉ khi dự án khai: file sổ (theo `AGENT_AGILE_LEDGER` với `{project}` đã thay) không tồn tại, không phải UTF-8, hoặc không có bảng cột đầu "Sprint"; chỉ đọc bảng ấy, nội dung khác của file sổ bị bỏ qua |
+| `ledger-unconfigured` | Ghi chú | Dự án khai `ledger.project` mà máy chưa đặt `AGENT_AGILE_LEDGER` — chưa đối chiếu được; không làm đỏ. Dự án không khai khoá thì không có phát hiện nào về sổ, kể cả khi máy đặt biến. Mẫu đường thiếu `{project}` báo `config-invalid` |
 | `leak-denylist` | Chặn | `--self`: file của repo (kể cả tên file) chứa từ cấm — mục chữ khớp nguyên từ, mục có ký tự đường dẫn khớp chuỗi con ([`tests/README.md`](../tests/README.md)); báo số thứ tự từ, không in lại từ |
 | `agents-md-budget` | Phải sửa | `--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 240 byte |
 

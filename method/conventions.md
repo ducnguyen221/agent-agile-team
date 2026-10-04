@@ -32,6 +32,7 @@ Lõi và công cụ đọc cấu hình trước, dùng mặc định sau.
 | Sổ SPRINTS | `paths.sprints` | `docs/plans/SPRINTS.md` |
 | Sổ SPECS + spec sống | `paths.specs` · `paths.feature_specs_dir` | `docs/specs/SPECS.md`, `docs/specs/<slug>.md` |
 | ADR | `paths.adr_dir` | `docs/architecture/adr/NNNN-<slug>.md` |
+| Sổ tập trung (tuỳ chọn) | `ledger.project` | rỗng = tắt; điền tên dự án trong sổ để bật ([process.md](process.md) mục 11); máy cấp mẫu đường kho sổ qua biến `AGENT_AGILE_LEDGER`, không ghi đường máy vào repo |
 | Thư mục tạm của sprint | — | `.tmp/` (trong `.gitignore`; xoá khi đóng sprint) |
 
 Mã hồ sơ sổ gốc: `RQ-` và `FS-` tối thiểu 3 chữ số, `SPR-` tối thiểu 2 (`id_width`). Repo **public** mà

@@ -19,6 +19,7 @@ khoá frontmatter, giá trị cho phép, tiêu đề bắt buộc, khuôn sổ g
 | `registry/SPECS.md` | `paths.specs` | Mục lục tính năng |
 | `registry/feature-spec.md` | `<paths.feature_specs_dir>/<slug>.md` | Spec sống của một tính năng |
 | `registry/SPRINTS.md` | `paths.sprints` | Sổ sprint theo timeline |
+| `registry/LEDGER.md` | file sổ tập trung trong kho sổ của máy (không thuộc repo dự án; `init` không dựng) | Sổ tập trung nhiều dự án, bật bằng `ledger.project` (mục 7); khi nào ghi: [`method/process.md`](../method/process.md) mục 11 |
 | `project/agile.json` | `.agile.json` ở gốc dự án | Cấu hình đường dẫn, coverage, chế độ hiển thị |
 
 **Giá trị trong mẫu là ví dụ hợp lệ**, không phải chỗ trống kiểu `<...>`: nhờ vậy `check` chạy được trên
@@ -216,3 +217,4 @@ kiểm định, `blocked` → vướng, `awaiting_gate_2` → chờ Cổng 2.
 | `id_width.request` · `.feature` · `.sprint` | `3` · `3` · `2` | Số chữ số tối thiểu của `RQ-` · `FS-` · `SPR-` |
 | `coverage.line_min_percent` | `80` | Ngưỡng coverage dòng cho code mới và code được sửa |
 | `coverage.reason` | `""` | Bắt buộc khác rỗng khi ngưỡng khác 80 |
+| `ledger.project` | `""` | **Công tắc sổ tập trung**: rỗng (hoặc không có khoá) = tắt, `check` không đọc sổ dù máy đặt biến; điền tên dự án (chữ, số, `.`, `_`, `-`) = bật. Máy cấp mẫu đường file sổ bằng biến môi trường `AGENT_AGILE_LEDGER` chứa `{project}` — đường máy không vào repo. Sai hình (không phải object, không phải chuỗi, có `/`, `\`, `..`) → `config-invalid`. Khuôn file sổ: `registry/LEDGER.md` |

@@ -260,3 +260,37 @@ Việc nâng cỡ giữa chừng (lộ rủi ro mới) thì chuyển sang bốn 
 | Cạn hạn mức tier (không tự hạ tier) | Thứ tự làm `TK`, tách `TK` con |
 | `CQ` gom ở Cổng 1 (một lần) | Hỏi lẻ từng câu giữa chừng |
 | Tư vấn gọi chéo hãng (chỉ tư vấn, người dùng quyết) | Tự chạy gọi chéo |
+
+## 11. Ghi sổ tại cổng
+
+Dự án muốn một **sổ tập trung** (một file Markdown mỗi dự án, nằm ngoài repo, nơi nhiều dự án cùng được xem trạng
+thái) thì bật bằng khoá `ledger.project` (tên dự án trong sổ) ở `.agile.json`; máy chỉ cấp **mẫu đường** kho sổ qua
+biến môi trường `AGENT_AGILE_LEDGER` (chứa `{project}`). Dự án không khai khoá thì mục này không áp và `check`
+không đọc sổ, kể cả khi máy đặt biến. Đường dẫn của máy không bao giờ vào file commit của repo. Khuôn file sổ:
+[templates/registry/LEDGER.md](../templates/registry/LEDGER.md).
+
+KHI một trong năm thời điểm dưới đây xảy ra THÌ cập nhật **hồ sơ sprint trước, sổ tập trung ngay sau, trong cùng
+lượt** — mỗi lần ghi trạng thái cụ thể kèm bằng chứng, không ghi "đang làm" chung chung:
+
+| Thời điểm | Ghi gì | Ở đâu | Bằng chứng |
+|---|---|---|---|
+| Mở sprint | `status: drafting`, ngày mở; thêm **dòng mới** trong sổ, link trỏ nhánh sprint | PROGRESS (hoặc `SPRINT.md`) + SPRINTS + dòng sổ | dòng sổ vừa thêm; `check` không báo `ledger-missing-row` |
+| Qua Cổng 1 | `in_progress`, `gate_1: approved` và câu duyệt nguyên văn | PROGRESS (hoặc `SPRINT.md`) + dòng sổ | `gate_1_quote` |
+| Quay lại bước 3 sau kiểm định **mà trạng thái đổi** | `in_progress` hoặc `blocked`, `review_round` mới; việc `RF` phải sửa còn mở | PROGRESS + dòng sổ | `RF` và `VR` của vòng vừa xong |
+| Cổng 2 | `awaiting_gate_2`, rồi `done` hoặc `dropped` theo lời người dùng; `verdict` | REPORT + PROGRESS + dòng sổ | `gate_2_quote`; kết quả trong REPORT |
+| Đóng sprint | trạng thái cuối; link đổi sang `main` hoặc SHA khi hồ sơ nằm trong repo | dòng sổ (cập nhật, không thêm dòng) | lệnh gộp hoặc commit vừa chạy |
+
+Dòng sổ có năm cột: `Sprint` · `Trạng thái` (đúng giá trị `status` của PROGRESS hoặc `SPRINT.md`) · `Cập nhật`
+(ngày `YYYY-MM-DD`, không cũ hơn `updated` của hồ sơ) · `Hồ sơ` (`<repo>:docs/plans/<slug>/<tài-liệu>.md`) ·
+`Link` bấm được. Hồ sơ **trong repo** → URL GitHub blob với `<ref>` là nhánh sprint khi đang mở, `main` hoặc SHA khi
+đã đóng. Hồ sơ **ngoài repo** → đường tương đối trong kho sổ tới thư mục plan. Visibility của repo chỉ khuyến nghị
+nơi đặt hồ sơ, không quyết hình link.
+
+`check` bắt lệch khi dự án đã khai: sprint đang mở (khác `done`, `dropped`) không có dòng → Phải sửa
+(`ledger-missing-row`); dòng lệch `status` hoặc ngày cũ hơn `updated` → Phải sửa (`ledger-stale`); file sổ không có,
+không đọc được UTF-8 hay không có bảng cột đầu "Sprint" → Phải sửa (`ledger-unreadable`); dự án khai mà máy chưa đặt
+mẫu đường → Ghi chú (`ledger-unconfigured`); mẫu đường thiếu `{project}` → Phải sửa (`config-invalid`).
+
+**Giới hạn đã biết:** `check` so ngày theo ngày — hai lần đổi trạng thái trong cùng một ngày chỉ bắt được qua
+trạng thái, không qua ngày; `check` không mở link để thử bấm và không đọc nội dung "kết quả" của dòng, nên người ghi
+chịu trách nhiệm link đúng và kết quả có bằng chứng. `init` và `index` chưa tự ghi dòng sổ (việc để lại).
