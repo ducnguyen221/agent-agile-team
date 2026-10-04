@@ -13,7 +13,7 @@ rewrite_before_public: false
 
 > **Kết luận:** soi thay đổi Python theo thứ tự bảo mật → xử lý lỗi → đồng thời → kiểu → idiom → chất
 > lượng; mỗi phát hiện là một `RF` có `file:dòng` và mức theo **hậu quả nếu bỏ qua**. Chỉ đọc, chạy ở
-> tier T1, vai Tech Reviewer (chuyên đề backend).
+> tier T1, vai Tech Reviewer (chuyên đề backend). Chuẩn đối chiếu: `method/standards/python.md` (và `common/`).
 
 ## Luật chung của reviewer
 
