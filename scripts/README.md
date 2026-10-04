@@ -76,11 +76,11 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `id-unknown-prefix` | Phải sửa | Mục được định nghĩa bằng tiền tố hai chữ cái ngoài bảng mã (`YC2`); không áp cho `skills/*/tests/` |
 | `id-wrong-doc` | Phải sửa | Mục định nghĩa bằng tiền tố của tài liệu khác (`BR1` trong PLAN) |
 | `id-list-lead` | Ghi chú | Bảng có cột đầu "Mã" mà dòng không trống ngay trên (bỏ qua comment) không có chữ in đậm — thiếu câu dẫn "tài liệu + nghĩa của mã" (`templates/README.md` mục 5); khối "Đang mở" do `index` sinh được miễn |
-| `xref-missing` | Phải sửa | Đang viết lại (`TK10`) |
+| `xref-missing` | Phải sửa | Một mã được viết ra (ngoài code span, khối code, comment, đích liên kết) nhưng tài liệu **giữ** tiền tố của nó chưa định nghĩa mã ấy. Nơi giữ mã: `US` `FR` `SC` `CQ` ở SPEC; `TK` `RK` `DN` ở PLAN; `BR` ở PROGRESS; `VR` `RF` `LN` `CO` ở REPORT; `SPRINT.md` giữ mọi mã của mình, spec sống giữ mã SPEC, tài liệu khác tìm nơi giữ qua `links`. "Đã định nghĩa" = tiêu đề, mục danh sách in đậm, hoặc hàng bảng (cột đầu "Mã") mở đầu bằng chính mã đó; khoảng `SC1–SC3` được khai triển. Sổ gốc không chịu luật này |
 | `xref-unresolved` | Ghi chú | Không tìm được tài liệu sở hữu qua `links` để đối chiếu |
-| `task-without-trace` | Phải sửa | Đang viết lại (`TK10`) |
-| `report-sc-without-vr` | Phải sửa | Đang viết lại (`TK10`) |
-| `report-fr-without-vr` | Phải sửa | Đang viết lại (`TK10`) |
+| `task-without-trace` | Phải sửa | Mỗi việc `TK` (định nghĩa bằng tiêu đề hoặc mục danh sách in đậm, không phải hàng bảng) phải có chính dòng định nghĩa nhắc `FR` hoặc `SC`, không thì báo; áp cho PLAN và `SPRINT.md`. Việc con (`TK2.3`) không nhắc được kế thừa nếu có việc cha hoặc tổ tiên gần nhất đã định nghĩa; việc cha đó tự phải qua luật này, việc cấp đỉnh không nhắc thì báo |
+| `report-sc-without-vr` | Phải sửa | `SC` cấp đỉnh (không có dấu chấm) của SPEC không nằm trên dòng định nghĩa của `VR` nào; `VR` là hàng bảng cột đầu "Mã" mở bằng `VR`, mã trong khoảng `SC1–SC3` tính đủ. SPEC của REPORT tìm qua `links.spec`, `SPRINT.md` tự là SPEC. Không có miễn trừ (`bỏ`, `NOT_APPLICABLE` đều không cứu) và luật chỉ thấy có hàng `VR`, không xét kết quả Đạt |
+| `report-fr-without-vr` | Phải sửa | Chỉ chạy cho REPORT, không chạy cho `SPRINT.md`. Mỗi `FR` của SPEC, gộp theo cấp đỉnh (`FR3.2` tính vào `FR3`), phải xuất hiện — hoặc có kịch bản con `FRn.m` xuất hiện — trên dòng định nghĩa của ít nhất một `VR`; vắng ở mọi `VR` thì báo, một lần cho mỗi `FR`. Miễn khi dòng định nghĩa ở SPEC mang trạng thái `bỏ` (dạng "(bỏ)" hoặc "— bỏ" cuối dòng), hoặc có `NOT_APPLICABLE` kèm lý do ở dòng đó hay ở một dòng REPORT nhắc tới `FR` ấy. Máy không xét từng kịch bản con |
 | `self-review` | Chặn | Một nhãn agent vừa giữ vai thực thi vừa giữ vai kiểm định trong `roles` |
 | `qa-not-independent` | Phải sửa | Có `VR` mà `qa` trùng nhãn `implementer`/`architect` không ghi "tự kiểm, chưa độc lập"; hoặc có ghi mà `verdict: pass` |
 | `roles-invalid` | Phải sửa | `roles` sai hình: vai lạ, tier ngoài `T1`–`T3`, thiếu nhãn agent |
