@@ -26,6 +26,9 @@ __pycache__/
 # Nháp tạm của agent — xoá cuối việc
 /.tmp/
 
+# Worktree làn của sprint — mỗi làn một thư mục con, không phải mã của repo
+/.worktrees/
+
 # Rác hệ điều hành và cấu hình riêng của từng máy
 .DS_Store
 Thumbs.db
