@@ -463,6 +463,12 @@ def test_tiny_two_part_sprint_is_clean(tmp_path):
     assert [f.render() for f in check.check_paths([tmp_path]).findings] == []
 
 
+def test_tiny_two_part_sprint_with_plan_word_in_heading_is_not_taken_for_four_parts(tmp_path):
+    """Tiêu đề chỉ *chứa* chữ plan ("Kế hoạch (plan)") không làm `SPRINT.md` hai phần bị đòi đủ bốn phần."""
+    put(tmp_path, "SPRINT.md", two_part_sprint().replace("## 1. Kế hoạch", "## 1. Kế hoạch (plan)", 1))
+    assert [f.render() for f in check.check_paths([tmp_path]).findings] == []
+
+
 def test_tiny_two_part_sprint_missing_result_is_flagged(tmp_path):
     put(tmp_path, "SPRINT.md", two_part_sprint(with_result=False))
     hits = [f for f in check.check_paths([tmp_path]).findings if f.rule == "heading-missing"]
@@ -629,6 +635,22 @@ def test_ledger_shape_errors_are_config_invalid(tmp_path, ledger):
     write_lf(root / ".agile.json", '{"schema": 1, "ledger": ' + ledger + "}")
     report = check.check_paths([root], env={})
     assert any(f.rule == "config-invalid" and "ledger" in f.message for f in report.findings), [f.render() for f in report.findings]
+
+
+@pytest.mark.parametrize("extra", [
+    {"paths": "docs"},
+    {"artifact_root": 5},
+    {"paths": {"sprint_dir": "C:/abs/{date}-{slug}"}},
+], ids=["paths-not-object", "artifact-root-not-string", "sprint-dir-absolute"])
+def test_malformed_config_with_declared_ledger_reports_config_invalid_without_traceback(tmp_path, extra):
+    """`.agile.json` sai hình mà dự án có khai sổ và máy đặt biến: chỉ `config-invalid`, thoát 1, không đối chiếu sổ, không traceback."""
+    root, env = ledger_project(tmp_path)
+    write_lf(root / ".agile.json", json.dumps({"schema": 1, "ledger": {"project": "order-desk"}, **extra}))
+    report = check.check_paths([root], env=env)
+    assert {f.rule for f in report.findings} == {"config-invalid"}, [f.render() for f in report.findings]
+    assert report.exit_code == 1
+    result = run_script("check.py", str(root), env=env)
+    assert result.returncode == 1 and "Traceback" not in result.stderr and "config-invalid" in result.stdout
 
 
 def test_ledger_closed_sprint_without_row_is_not_reported(tmp_path):
