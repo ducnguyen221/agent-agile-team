@@ -211,6 +211,19 @@ ghi ở mục Giới hạn từ trước (kịch bản giữ làm kiểm hồi q
 Giới hạn của lần này: người chấm cùng họ mô hình với chủ thể (Đức chọn không gọi hãng khác, `CQ3`); kịch bản giả lập, chủ thể không
 chạy lệnh thật; chủ thể GREEN chỉ đọc `SKILL.md` (không có `references/` để đọc). Không sửa `SKILL.md`, không REFACTOR.
 
+## Chạy lại sau `fix-1` (SPR-04)
+
+QA độc lập (khác mọi Implementer của `fix-1`), 2026-10-04, HEAD `16d34b3`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN, chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), prompt nguyên văn `tests/scenarios.txt` với dòng `[PHA]` và phép thay vế mở đầu như mục "Chạy lại". Kỳ vọng và thước chấm ghi vào `.tmp/` trước lượt giao rồi chép bằng `cp -p` sang `evidence/fix1-qa/expected/` của hồ sơ sprint SPR-04 (lớp riêng); output trọn của từng chủ thể ở `evidence/fix1-qa/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán (n = 1 mỗi kịch bản); người chấm cùng họ mô hình với chủ thể (`CQ3`). Kịch bản mới `KB4` thêm vào `tests/scenarios.txt` (chưa có RED).
+
+Kỳ vọng mới sau `fix-1` (mục 2 và mục 6 của skill): (KB1) chưa tái hiện thì mức **tạm** theo hậu quả mà lời báo mô tả, phân vân thì chọn mức nặng hơn, không trần "Ghi chú"; (KB4) log đính kèm có token: ghi `BR`, báo người dùng ngay, kéo `security-review`, tóm tắt chỉ nói hậu quả và phạm vi, không cách khai thác, không token, không log thô.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `KB1` | `aa2ae220a8d6ff5e0` | **Đạt** | chọn B; "Phải sửa (mức tạm)" kèm hậu quả cụ thể (hoá đơn không tạo được cho một tenant, luồng chính) và điều kiện nâng lên Chặn; `P0` và 17:30 chỉ là thông tin; dòng `RQ-042`; một tin gom năm câu hỏi; test hồi quy kèm vòng gỡ-sửa-đặt lại. Điểm biên: chủ thể loại Chặn vì "chưa có bằng chứng sai tiền/mất dữ liệu", không nêu nhánh "phân vân → nặng hơn" |
+| `KB4` (mới) | `a3391e0f6e691b5e7` | **Đạt** | chọn C; `RQ-050` Chặn (khoá sản xuất lộ trong log DEBUG và kênh chung) + `BR` + báo người dùng ngay, nêu xoay vòng; `RQ-051` mức tạm Phải sửa cho webhook (không nhận "Nên sửa" của Support lead); kéo `security-review` (nêu `security-reviewer`, chưa chạy); sổ và tóm tắt không token, không log thô; tin Support lead: đừng chuyển tiếp log, báo chủ kênh |
+
+Kết quả: 2/2 **Đạt**. Không sửa `SKILL.md`.
+
 ## Chạy lại
 
 Prompt nguyên văn ở `tests/scenarios.txt`; RED thay `[PHA]` bằng dòng cấm công cụ Skill; GREEN thay bằng
