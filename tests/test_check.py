@@ -52,6 +52,11 @@ def test_broken_case_is_caught_with_its_rule(tmp_path, case):
     # Ca về sổ tập trung: `ledger` = nội dung file sổ trong kho riêng ngoài thư mục dự án; `env` = biến máy,
     # `{store}` là đường kho. Mọi ca khác chạy với môi trường rỗng (máy có đặt biến sổ cũng không ảnh hưởng).
     store = tmp_path / "store"
+    if "ledger" in case or "env" in case:  # sổ tập trung đọc sprint theo mẫu `paths.sprint_dir`: đặt hồ sơ đúng chỗ
+        folder = root / "docs" / "plans" / "2026-02-01-export-orders"
+        folder.mkdir(parents=True)
+        for item in [p for p in root.iterdir() if p.name not in (".agile.json", "docs")]:
+            shutil.move(str(item), str(folder / item.name))
     if "ledger" in case:
         store.mkdir(parents=True, exist_ok=True)
         write_lf(store / "order-desk.md", case["ledger"])
@@ -513,7 +518,9 @@ ABSOLUTE_PATH = re.compile("|".join([r"[A-Za-z]:\\", "/" + "Us" + "ers/", "/" + 
 
 def ledger_project(tmp_path: Path, *, declared=True, row=None, ledger_text=None):
     """Dự án mẫu (sprint `SPR-03`, `verifying`, `updated: 2026-02-02`) + kho sổ riêng; trả (gốc dự án, env)."""
-    root = make_sprint(tmp_path)
+    root = tmp_path / "sprint"
+    folder = root / "docs" / "plans" / "2026-02-01-export-orders"  # đúng mẫu `paths.sprint_dir` mặc định
+    shutil.copytree(VALID, folder)
     cfg = {"schema": 1, "ledger": {"project": "order-desk"}} if declared else {"schema": 1}
     write_lf(root / ".agile.json", json.dumps(cfg))
     store = tmp_path / "store"
@@ -544,6 +551,18 @@ def test_ledger_declared_with_full_row_is_clean(tmp_path):
     root, env = ledger_project(tmp_path)
     report = check.check_paths([root], env=env)
     assert [f.render() for f in report.findings] == [] and report.exit_code == 0
+
+
+def test_ledger_reads_only_sprint_folders_matching_sprint_dir(tmp_path):
+    """Như `index.py`: sprint nằm theo mẫu `paths.sprint_dir`. Bản chép mẫu nằm chỗ khác trong repo (vendor, ví dụ) không
+    bị đòi dòng sổ."""
+    root, env = ledger_project(tmp_path)
+    source = (root / "docs" / "plans" / "2026-02-01-export-orders" / "PROGRESS.md").read_text(encoding="utf-8")
+    copy = root / "vendor" / "agile-example" / "PROGRESS.md"
+    copy.parent.mkdir(parents=True)
+    write_lf(copy, source.replace("SPR-03", "SPR-77"))
+    report = check.check_paths([root], env=env)
+    assert "ledger-missing-row" not in ledger_rules(report), [f.render() for f in report.findings]
 
 
 def test_ledger_missing_row_for_open_sprint(tmp_path):
@@ -613,14 +632,14 @@ def test_ledger_shape_errors_are_config_invalid(tmp_path, ledger):
 
 def test_ledger_closed_sprint_without_row_is_not_reported(tmp_path):
     root, env = ledger_project(tmp_path, row="| SPR-09 | done | 2026-02-02 | order-desk:x | y |")
-    progress = root / "PROGRESS.md"
+    progress = root / "docs" / "plans" / "2026-02-01-export-orders" / "PROGRESS.md"
     write_lf(progress, progress.read_text(encoding="utf-8").replace("status: verifying", "status: dropped", 1))
     assert "ledger-missing-row" not in ledger_rules(check.check_paths([root], env=env))
 
 
 def test_ledger_closed_sprint_with_row_is_still_compared(tmp_path):
     root, env = ledger_project(tmp_path, row="| SPR-03 | verifying | 2026-02-02 | order-desk:x | y |")
-    progress = root / "PROGRESS.md"
+    progress = root / "docs" / "plans" / "2026-02-01-export-orders" / "PROGRESS.md"
     write_lf(progress, progress.read_text(encoding="utf-8").replace("status: verifying", "status: done", 1))
     assert "ledger-stale" in ledger_rules(check.check_paths([root], env=env))
 

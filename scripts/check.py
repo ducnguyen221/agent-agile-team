@@ -857,19 +857,23 @@ class Engine:
         return rows
 
     def _ledger_sprints(self, root: Path, cfg: dict) -> list:
-        """Sprint của dự án (PROGRESS.md hoặc SPRINT.md có mã `SPR-`), bỏ thư mục thuộc dự án lồng bên trong."""
+        """Sprint của dự án: thư mục khớp `paths.sprint_dir` (như `index.py`), PROGRESS.md hoặc SPRINT.md có mã `SPR-`.
+        Bản chép mẫu nằm chỗ khác trong repo không bị đòi dòng sổ."""
         base = c.artifact_path(root, cfg, "")
         found = []
         if not base.is_dir():
             return found
-        for name in ("PROGRESS.md", "SPRINT.md"):
-            for path in _walk(base, name):
-                if any((p / c.CONFIG_NAME).is_file() for p in path.parents if p != base and base in p.parents):
+        pattern = cfg["paths"]["sprint_dir"].replace("{date}", "*").replace("{slug}", "*")
+        for folder in sorted(p for p in base.glob(pattern) if p.is_dir()):
+            for name in ("PROGRESS.md", "SPRINT.md"):
+                path = folder / name
+                if not path.is_file():
                     continue
                 doc = self.doc(path)
                 sprint = doc.data.get("sprint") if doc is not None and doc.kind in ("progress", "sprint") else None
                 if isinstance(sprint, str) and (c.parse_id(sprint) or ("", 0))[0] == "SPR":
                     found.append((sprint, doc))
+                break  # như index.py: PROGRESS.md trước, không có thì SPRINT.md
         return found
 
 
