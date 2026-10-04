@@ -41,6 +41,8 @@ rewrite_before_public: false
 - Index một phần có lợi khi phần dòng cần truy vấn **nhỏ** so với cả bảng (ví dụ vài phần trăm dòng đang hoạt động) hoặc
   khi muốn ràng buộc unique chỉ trên phần đó; truy vấn phải **chứa đúng điều kiện** của index (`deleted_at IS NULL`) thì
   planner mới dùng nó. Phần dòng gần bằng cả bảng thì index thường là đủ và ít bất ngờ hơn; đo bằng `EXPLAIN`.
+- Chia bảng chuỗi thời gian theo khoảng (phân vùng) để dọn bằng bỏ phân vùng thay cho `DELETE` hàng loạt: `references/patterns.md` mục 1.
+  Tìm chuỗi con (`LIKE '%…%'`, `ILIKE`, bỏ dấu) bằng `pg_trgm` + GIN, `unaccent`, index trên `lower(…)`: mục 2.
 - Mỗi khoá ngoại có index ở phía tham chiếu — không có thì `JOIN` và xoá dòng cha phải quét cả bảng con.
 - Cột dùng trong policy RLS có index.
 - Index có giá: mỗi lần ghi phải cập nhật mọi index. Index không được dùng (`idx_scan` gần 0 sau một chu kỳ
@@ -66,6 +68,7 @@ rewrite_before_public: false
   (muốn nhanh trên một khoá cố định: index biểu thức). Thuộc tính cần **khoá ngoại, ràng buộc unique, nối bảng hay thống
   kê nhiều** → tách thành cột hay bảng quan hệ. Cột `text` đang chứa chuỗi JSON: đổi sang `jsonb` là đổi kiểu trên bảng
   thật — làm theo `database-migrations` (cột mới, backfill theo lô, chuyển đọc), và đếm trước số dòng không phải JSON hợp lệ.
+- **`timestamp` → `timestamptz`:** `USING col AT TIME ZONE '<múi giờ đã dùng khi ghi>'`; sai múi giờ là lệch im lặng, nhiều nguồn ghi khác múi thì không đổi một câu: `references/patterns.md` mục 6.
 
 ## 4. Truy vấn và đồng thời
 
@@ -75,6 +78,8 @@ rewrite_before_public: false
   xác định và so bằng so sánh hàng: `WHERE (created_at, id) < ($1, $2) ORDER BY created_at DESC, id DESC LIMIT 50`,
   với index `(created_at DESC, id DESC)`; con trỏ trả cho client là cặp giá trị của dòng cuối. Con trỏ không nhảy tới
   "trang số N" — cần nhảy thì đó là yêu cầu cho `api-design`, đánh đổi bằng `OFFSET` có trần.
+- **Kiểm rồi ghi là đua:** `SELECT` kiểm điều kiện rồi `UPDATE`/`INSERT` ở câu sau để hai giao dịch cùng qua. Dùng câu nguyên tử (`UPDATE … WHERE qty > 0`),
+  ràng buộc, khoá dòng, hoặc mức cô lập cao kèm thử lại: `references/patterns.md` mục 4.
 - **Chèn theo lô:** `INSERT` nhiều dòng hoặc `COPY`; không chèn từng dòng trong vòng lặp.
 - **UPSERT:** `INSERT … ON CONFLICT (khoá) DO UPDATE SET col = EXCLUDED.col` — cần ràng buộc unique khớp khoá.
 - **Giao dịch ngắn:** không giữ khoá trong lúc gọi API ngoài hay chờ người dùng; đặt
@@ -95,10 +100,15 @@ WHERE id = (
 ) RETURNING *;
 ```
 
+Câu trên để việc kẹt ở `processing` nếu worker chết sau khi commit. Thuê hết hạn, đếm lần thử, người dọn, lấy theo lô, xử lý idempotent: `references/patterns.md` mục 5.
+
 ## 5. Bảo mật
 
 - Bảng nhiều tenant bật Row Level Security; policy gọi hàm thì bọc trong `SELECT` để tính **một lần** mỗi câu
   lệnh, không mỗi dòng — ví dụ theo Supabase: `USING ((SELECT auth.uid()) = user_id)`.
+- **Một role ứng dụng chung cho nhiều tenant:** truyền tenant vào từng giao dịch bằng `set_config('app.tenant_id', $1, true)` (không `SET` mức phiên: rò qua pool),
+  policy đọc `current_setting('app.tenant_id', true)`, `FORCE ROW LEVEL SECURITY`; role ứng dụng không phải superuser, không `BYPASSRLS` (cả hai bỏ qua RLS), không là chủ bảng. Chi tiết,
+  mẫu policy và cách test hai tenant: `references/patterns.md` mục 3.
 - Quyền tối thiểu: tài khoản ứng dụng không phải chủ bảng, không `GRANT ALL`; thu hồi quyền mặc định trên
   schema `public`.
 - Chuỗi kết nối đọc từ biến môi trường, không in ra log hay báo cáo. Chạm RLS, quyền, dữ liệu nhạy cảm → kéo
@@ -126,6 +136,7 @@ Mức gợi ý theo hậu quả nếu bỏ qua (`method/severity.md` mục 1).
 
 | Cần | Đọc |
 |---|---|
+| Phân vùng và dọn dữ liệu cũ; `pg_trgm`/`unaccent`; RLS nhiều tenant với một role chung; đua đọc-kiểm-ghi; hàng đợi bền (thuê hết hạn, lô); đổi `timestamp` sang `timestamptz` | `references/patterns.md` |
 | Đọc `EXPLAIN (ANALYZE, BUFFERS)`; truy vấn tìm khoá ngoại thiếu index, truy vấn chậm, bảng phình, index không dùng; cấu hình mẫu kết nối, timeout (`lock_timeout`), PgBouncer và cách tính số kết nối, giám sát | `references/diagnostics.md` |
 
 Liên quan: agent `database-reviewer` (review đầy đủ), `security-reviewer` (RLS, quyền); skill
