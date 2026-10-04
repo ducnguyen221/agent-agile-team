@@ -2,7 +2,7 @@
 title: Overview — what agent-agile-team is, how it works, how to install
 type: guide
 status: active
-updated: 2026-10-04
+updated: 2026-10-05
 ---
 
 # agent-agile-team — tổng quan
@@ -10,10 +10,10 @@ updated: 2026-10-04
 > **Kết luận:** agent-agile-team là một **phương pháp làm phần mềm cho đội AI agent**: bạn giao việc bằng lời
 > thường, trả lời đúng **hai lần** (duyệt kế hoạch, nghiệm thu kết quả), đội agent làm phần còn lại, ghi sổ,
 > và nhờ **agent khác** kiểm. Repo gồm luật lõi, 32 skill, 13 agent, bộ mẫu tài liệu và ba công cụ kiểm; cài
-> được trên Claude Code, Codex và Antigravity. Bản hiện tại `0.3.0-dev`, repo **private**.
+> được trên Claude Code, Codex và Antigravity. Bản hiện tại `0.3.0`, repo **private**.
 
 File này là nguồn cho trang giới thiệu <https://ducnguyen.vn/agent-agile-team/>. Số liệu và tên file khớp repo
-ở bản `0.3.0-dev`; đổi repo thì sửa file này cùng lượt. Người mới cài xong đọc tiếp [`GUIDE.md`](../GUIDE.md).
+ở bản `0.3.0`; đổi repo thì sửa file này cùng lượt. Người mới cài xong đọc tiếp [`GUIDE.md`](../GUIDE.md).
 
 ## 1. Định vị và lợi ích
 
@@ -33,7 +33,7 @@ Lợi ích cho người không chuyên:
 - **Việc nhỏ đi đường nhẹ.** Sửa một dòng chữ không cần bốn tài liệu; bậc việc quyết độ dày hồ sơ, không phải
   nghi thức.
 
-Con số của bản `0.3.0-dev`: **6** bước · **2** cổng người · **6** vai · **3** tier · **32** skill · **13** agent ·
+Con số của bản `0.3.0`: **6** bước · **2** cổng người · **6** vai · **3** tier · **32** skill · **13** agent ·
 **3** công cụ Python · **3** harness được hỗ trợ.
 
 ## 2. Tính năng
@@ -218,7 +218,8 @@ agent-agile-team/
 | `scripts/` | agent chạy trước mỗi cổng; bạn chỉ đọc dòng cuối |
 | `samples/order-desk/` | xem hồ sơ thật trông thế nào trước khi mở sprint đầu tiên |
 | `hosts/<harness>/README.md` | cài, kiểm, cập nhật, gỡ trên harness của bạn |
-| `docs/troubleshooting.md` | triệu chứng → nguyên nhân → cách xử lý khi cài và dùng lần đầu |
+| `docs/troubleshooting.md` | triệu chứng → nguyên nhân → cách xử lý khi cài, cập nhật và dùng lần đầu |
+| `docs/MIGRATION.md` | gặp tên skill cũ trong hồ sơ lịch sử; nâng cấp dự án từ bản `0.1`/`0.2` lên `0.3.0` |
 
 Tra nhanh:
 
@@ -234,8 +235,8 @@ Tra nhanh:
 | biết `check` báo lỗi gì, vì sao | `scripts/README.md` mục "Luật của `check`" |
 | sửa hay thêm skill | `skills/writing-skills/SKILL.md`, `skills/README.md` |
 | biết skill này lấy từ đâu, giấy phép gì | frontmatter của skill, `UPSTREAM.md`, `THIRD_PARTY.md` |
-| gặp tên skill cũ trong hồ sơ lịch sử | `docs/MIGRATION.md` |
-| cài rồi mà agent không biết luật | `docs/troubleshooting.md` |
+| gặp tên skill cũ trong hồ sơ lịch sử; nâng cấp từ bản cũ | `docs/MIGRATION.md` |
+| cài rồi mà agent không biết luật; cập nhật rồi mà skill vẫn cũ | `docs/troubleshooting.md` |
 
 ## 5. Hồ sơ một sprint
 
@@ -351,7 +352,10 @@ python3 ~/agent-agile-team/scripts/index.py .           # sinh lại khối "Đa
 agent-agile-team: thêm chức năng tra cứu đơn theo mã cho dự án này."* — và đọc tiếp [`GUIDE.md`](../GUIDE.md).
 
 Cập nhật: `git pull --ff-only` trong bản clone (Claude Code thêm `claude plugin marketplace update agent-agile-team`
-và `claude plugin update agent-agile-team@agent-agile-team`). Gỡ không xoá sổ gốc hay hồ sơ sprint của dự án.
+và `claude plugin update agent-agile-team@agent-agile-team` — thiếu hai lệnh này thì bản cài vẫn là skill cũ; Antigravity
+tạo liên kết cho skill mới thêm; Codex chạy lại script sinh luật). Gỡ không xoá sổ gốc hay hồ sơ sprint của dự án.
+Lên bản lớn hơn (ví dụ `0.2` → `0.3.0`): đọc [`docs/MIGRATION.md`](MIGRATION.md) mục 4 — hồ sơ cũ vẫn hợp lệ, có thứ
+mới để bật.
 
 ## 7. Câu hỏi thường gặp
 
@@ -385,8 +389,9 @@ reviewer là cho phần mềm.
 
 Trung thực về chỗ chưa tới:
 
-- **Repo private, giấy phép chưa chọn.** Người ngoài chưa clone được; chưa có bản phát hành, version đứng ở
-  `0.3.0-dev`.
+- **Repo private, giấy phép chưa chọn.** Người ngoài chưa clone được. `0.3.0` là bản đầu tiên mang số không có
+  hậu tố `-dev` (quy tắc ở `method/conventions.md` mục 4.1); chưa có Release công khai. Nâng cấp dự án đang dùng
+  bản `0.1`/`0.2`: [`docs/MIGRATION.md`](MIGRATION.md) mục 4.
 - **12/13 skill tham chiếu chưa đạt ngưỡng truy xuất** (chỉ `adr` đạt): agent tìm đúng chỗ nhưng nội dung còn
   thiếu để trả lời hẳn; đang bổ sung và sẽ đổi cách đo trước khi vá tiếp. Trong 91 câu thử chỉ 1 câu Không đạt.
 - **Tệp thử skill chạy trên một dòng model** (tier T3); kết quả có thể khác trên model khác.
