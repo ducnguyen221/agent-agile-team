@@ -4,7 +4,7 @@ description: Use when someone reports a defect - a crash, a stack trace, a log f
 metadata:
   group: process
   roles: [analyst]
-source: "concept: bug triage - reproduce first, grade by consequence, route by grade (rewritten from an idea list that kept some source wording; must be genuinely rewritten before public, see CO2 and RQ-021 in the owner private record)"
+source: "concept: bug triage - reproduce first, grade by consequence, route by grade (clean-room rewrite in SPR-04 TK10: old text removed first, new writer saw only a noun-phrase idea list; 8-gram 0 against both earlier versions)"
 source_sha: null
 license: none
 rewrite_before_public: false
