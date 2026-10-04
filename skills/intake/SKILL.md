@@ -61,6 +61,15 @@ Rà từng dòng; mỗi dòng kết thúc bằng một trong ba nhãn: **có** (
 Đã có thể tra từ repo thì **tra, không hỏi**. Chỉ điểm thuộc ý muốn của người dùng (mục đích, định
 nghĩa xong, phạm vi ngoài, ưu tiên) mới thành `CQ`.
 
+**Repo cho biết hệ thống đang làm gì, không cho biết nghiệp vụ đòi gì.** Luật nghiệp vụ, nghĩa vụ pháp lý hay hợp đồng,
+chính sách lưu giữ dữ liệu, giá, đối tượng dùng — không đọc ra từ mã. Một hằng trong mã (ví dụ `RETENTION_DAYS`) chỉ nói
+mã đó dùng nó cho việc gì, không phải chính sách cho việc khác. Điểm như vậy là `CQ` có đề xuất, hoặc ASSUMPTION đánh dấu
+"cần xác nhận" — không bao giờ ghi như điều đã tra được.
+
+**Tiêu chí xong phải quan sát được.** Lời giao "nhẹ hơn / nhanh hơn / dọn đi" chưa phải tiêu chí: đề xuất tiêu chí đo hay đếm
+được (số bản ghi bị chạm, lệnh kiểm, ngưỡng) trong `CQ` hoặc ASSUMPTION. Việc xoá hay ghi đè dữ liệu thì tiêu chí gồm cả
+**cách khôi phục** (sao lưu, chạy chỉ-đếm trước khi xoá thật).
+
 ## 3. ASSUMPTION và `CQ` — viết thế nào
 
 - **ASSUMPTION — <tên>:** <giả định> — nếu sai thì <đổi gì>. Mỗi giả định một dòng, trong SPEC mục
@@ -90,3 +99,5 @@ nghĩa xong, phạm vi ngoài, ưu tiên) mới thành `CQ`.
 | Hỏi một câu, chờ, hỏi câu nữa | gom hết vào `CQ`, hỏi một lần ở Cổng 1 |
 | Tech stack ghi "chưa rõ" dù repo có file cấu hình | tra file cấu hình trước; "chưa rõ" chỉ khi dự án mới |
 | Bỏ qua phạm vi ngoài | luôn có ít nhất một dòng "không làm đợt này", kể cả khi phải suy từ lời giao (ghi ASSUMPTION) |
+| Lấy hằng số trong mã làm chính sách nghiệp vụ | hằng là chứng cứ về mã, không về nghiệp vụ: `CQ` có đề xuất hoặc ASSUMPTION "cần xác nhận" |
+| Lời giao "dọn / nhẹ hơn / nhanh hơn" không có tiêu chí đo | đề xuất tiêu chí quan sát được; việc xoá dữ liệu thêm cách khôi phục |
