@@ -3,11 +3,21 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
-## 0.3.0-dev
+## 0.3.0 (2026-10-05)
 
 Chưa phát hành. SPR-04 — nội dung Đợt 2 (phần mới), luật bậc việc đơn giản / phức tạp, sổ tập trung, quy tắc số phiên
 bản, viết lại phòng sạch 7 đích private, trả nợ máy kiểm của SPR-02. Mức MINOR theo `method/conventions.md` mục 4.1: thêm
 skill, agent và luật tương thích ngược, dự án cũ không phải sửa gì (phân vân → chọn mức cao hơn: chưa có thay đổi gãy nào).
+
+- **Tiếp nhận và làm thẳng:** một tin gom nhắc mục tiêu, phản biện có đề xuất, bậc/rủi ro từng việc và hỏi mở sprint;
+  chờ xác nhận rồi mới ghi yêu cầu. Bậc làm thẳng không có hồ sơ; định nghĩa thao tác không đếm tự kiểm/test đi kèm,
+  giữ sàn cỡ cho sửa luồng/tính năng/rủi ro, cấm chia một mục tiêu để né sprint. Đồng bộ role, REQUESTS mẫu/sample,
+  sizing/process và hướng dẫn nâng cấp. Intake QA cùng model: baseline 2/6 → GREEN 6/6 (`n = 1`); thước `in-4` sửa sau
+  quan sát để tránh hỏi lại lời giao, giới hạn ghi trong file thử.
+- **Tài liệu và giới thiệu:** bổ sung lỗi cài/cập nhật, nâng cấp `0.1`/`0.2` → `0.3.0`, tổng quan và chuẩn hoá;
+  trang giới thiệu được quản lý ở repo riêng, ảnh quy trình PNG và nội dung theo hai luật mới. Gói này không chứa site.
+- **Model thử skill:** máy kiểm chấp nhận tên GPT có phiên bản, giữ chặn placeholder; test hồi quy GPT thấy đỏ trước
+  sửa và xanh sau sửa. Ba manifest đồng bộ `0.3.0`; không thay ngưỡng coverage hay config kiểm thử.
 
 - **Bậc việc** (`TK2`): việc **rất nhỏ** một `SPRINT.md` hai phần (Kế hoạch, Kết quả), việc **nhỏ** một `SPRINT.md`
   bốn phần, từ cỡ vừa bốn tài liệu; `init --tiny` và `init --size small`, mẫu `templates/sprint/SPRINT-tiny.md`, luật

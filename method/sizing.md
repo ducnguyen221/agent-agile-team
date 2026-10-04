@@ -33,6 +33,10 @@ trông ra sao, hay phải chọn giữa nhiều cách) không phải làm thẳn
 
 **Luật đi kèm bảng:**
 
+- **Một thao tác** là một thay đổi có nghĩa ở một chỗ hoặc một lệnh đã xác định. Đổi chữ hiển thị và chữ kỳ vọng
+  trong test đi kèm là hai thao tác; tự kiểm/chạy test đi kèm không tính thêm. Sàn cỡ vẫn áp: sửa hành vi một luồng
+  có sẵn là nhỏ, tính năng mới là vừa, vùng rủi ro là lớn. Không chia một mục tiêu thành nhiều lượt làm thẳng để
+  né sprint; đếm toàn bộ việc cần để mục tiêu xong, chỉ tách các mục tiêu độc lập.
 - **Phân vân giữa hai bậc → chọn bậc nặng hơn.** Nghi cần hơn 2 thao tác hay kết quả chưa rõ thì không phải làm
   thẳng; nghi có đổi hành vi hay hợp đồng thì không phải rất nhỏ; nghi hơn một luồng thì không phải nhỏ.
 - **Bậc được khuyến nghị, không tự quyết một chiều:** Analyst nêu bậc khuyến nghị và "có mở sprint không" trong

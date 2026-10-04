@@ -1,6 +1,6 @@
 ---
 name: intake
-description: Use when a user hands over a new request in plain words (feature, fix, change, question that implies work) and before any SPEC is written — to analyse it, hold one consolidated exchange with the user (restated goal, challenging questions, recommended size, sprint or direct action), then register it, size it, surface assumptions and collect remaining context into one list of clarification questions instead of asking piecemeal.
+description: Use when a user hands over a new request in plain words (feature, fix, change or question that implies work), when the intended result or scope is unclear, or when there is pressure to skip intake, understate risk, split a goal into direct actions or create sprint records for a clear local text change.
 metadata:
   group: process
   roles: [analyst]
@@ -15,7 +15,7 @@ rewrite_before_public: false
 
 > **Kết luận:** tiếp nhận là bước **một lượt trao đổi gom** giữa Analyst (T1) và người dùng: đọc và phân tích
 > đầu bài trước, rồi gửi **một tin** — mục tiêu theo cách hiểu · câu hỏi phản biện · khuyến nghị bậc (làm thẳng /
-> rất nhỏ / nhỏ / vừa / lớn) · có mở sprint không — chờ xác nhận, rồi mới ghi `RQ-` chi tiết nhất có thể, tách
+> rất nhỏ / nhỏ / vừa / lớn **cho từng việc, kèm lý do và nhãn rủi ro**) · có mở sprint không — chờ xác nhận, rồi mới ghi `RQ-`, tách
 > mục tiêu, định cỡ và rủi ro (chỉ nâng), ghi **ASSUMPTION**, gom điểm còn lại thành `CQ` cho Cổng 1. Hỏi lẻ
 > nhiều lượt ở bước này là lỗi quy trình; bỏ hẳn lượt trao đổi khi người dùng đã nói "không cần sprint" hoặc việc
 > là làm thẳng không mơ hồ.
@@ -24,12 +24,12 @@ rewrite_before_public: false
 
 | # | Việc | Ghi vào |
 |---|---|---|
-| 1 | **Đọc và phân tích** đầu bài: tra repo, sổ gốc, spec sống; rà 11 điểm thiếu ngữ cảnh (mục 2) — tra được thì tra, không hỏi | nháp của Analyst |
+| 1 | **Đọc và phân tích** đầu bài: tra repo, sổ gốc, spec sống; đọc `method/sizing.md` mục 1–2 và rà 11 điểm (mục 2) — tra được thì tra, không hỏi | nháp của Analyst |
 | 2 | **Một tin trao đổi gom** cho người dùng (mục 1.1): mục tiêu theo cách hiểu · câu hỏi phản biện · khuyến nghị bậc · có mở sprint không | chat |
 | 3 | **Chờ xác nhận.** Chưa xác nhận thì chưa `RQ-`, chưa sprint, chưa chạm mã. Người dùng chọn làm thẳng → làm ngay, kiểm, báo; hết bước | — |
 | 4 | Một dòng `RQ-` mới: ngày, tóm tắt một câu, trạng thái `mới`, **kèm câu trả lời của người dùng** (mục tiêu đã chốt, định nghĩa xong, phạm vi ngoài, bậc đã xác nhận) | sổ REQUESTS |
 | 5 | Tách mục tiêu: một mục tiêu = một sprint; nhiều mục tiêu → nhiều sprint cùng trỏ một `RQ-` | sổ SPRINTS (khi mở sprint) |
-| 6 | Định cỡ (bậc đã xác nhận) và rủi ro theo `method/sizing.md`; chạm vùng rủi ro → `risk: high`, cỡ tối thiểu lớn — rủi ro chỉ nâng, kể cả sau khi người dùng đã chọn bậc (báo lại một câu) | frontmatter SPEC |
+| 6 | Ghi bậc đã xác nhận và `risk_tags`; bất kỳ nhãn rủi ro nào ở bảng dưới → `risk: high`, `size: large`, kể cả sau xác nhận (báo lại một câu) | frontmatter SPEC |
 | 7 | Điểm còn lại ở 11 điểm → **ASSUMPTION** hoặc `CQ` (mục 3); rồi sang skill `shaping-spec`, không hỏi thêm lượt nào tới Cổng 1 | SPEC mục Câu hỏi cần làm rõ |
 
 Lời giao đã nêu rõ mục đích, ràng buộc và kết quả thì phản ánh lại trong tin trao đổi, không hỏi lại điều đã có.
@@ -44,15 +44,17 @@ Câu hỏi để chắc mình hiểu đúng (mỗi câu có đề xuất của t
   1. <mục tiêu — vì sao cần / kết quả trông ra sao> — đề xuất: …
   2. <định nghĩa xong — đo bằng gì> — đề xuất: …
   3. <phạm vi — cái gì không làm đợt này> — đề xuất: …
-Bậc việc tôi khuyến nghị: <làm thẳng / rất nhỏ / nhỏ / vừa / lớn> — vì <một dòng>; rủi ro nhìn thấy: <nhãn hoặc "không">.
-Có mở sprint không? Khuyến nghị: <có / không>. Anh xác nhận hoặc sửa, tôi mở yêu cầu ngay.
+Bậc từng việc: <tên việc>: <làm thẳng / rất nhỏ / nhỏ / vừa / lớn> — vì <dấu hiệu đo được>; risk: <normal/high>; risk_tags: <[] hoặc nhãn>.
+  <lặp dòng này cho mỗi mục tiêu; đề xuất thứ tự bằng Bắt buộc / Nên có / Có thì tốt>.
+Có mở sprint không? Khuyến nghị: <có / không; nếu có, bao nhiêu sprint>. Anh xác nhận hoặc sửa giúp.
 ```
 
 - **Câu hỏi phản biện lấy nguyên liệu từ 11 điểm** (mục 2): chỉ điểm thuộc **ý muốn người dùng** mà repo không trả
   lời được (mục tiêu, định nghĩa xong, phạm vi ngoài, ưu tiên) mới vào tin; điểm kỹ thuật tra được thì tra. Thường
   2–4 câu; ≥5 câu là chưa tra đủ hoặc lời giao chứa nhiều mục tiêu.
 - **Khuyến nghị bậc theo `method/sizing.md` mục 1**, kể cả điều kiện loại trừ của làm thẳng (vùng rủi ro, file luật,
-  secret, hành động không đảo ngược). Khuyến nghị "có mở sprint không" suy từ bậc: làm thẳng → không; từ rất nhỏ → có.
+  secret, hành động không đảo ngược). Bậc **từng việc** phải hiện trong tin gửi người dùng, không chỉ trong nháp/SPEC.
+  Đủ bốn phần = mục tiêu nhắc lại + phản biện có đề xuất + bậc từng việc/rủi ro + câu hỏi rõ có mở sprint không.
 - **Người dùng thắng:** họ đổi bậc hay chọn làm thẳng thì theo; nhưng rủi ro vẫn chỉ nâng, và mọi cổng xin phép khác
   (sửa file luật phải được gật, hành động không đảo ngược phải hỏi) vẫn giữ.
 - **Bỏ lượt trao đổi** khi: người dùng đã nói rõ "không cần sprint" / "làm luôn"; hoặc việc là **làm thẳng không mơ
@@ -66,10 +68,27 @@ Có mở sprint không? Khuyến nghị: <có / không>. Anh xác nhận hoặc 
 | Làm thẳng | 1–2 thao tác, kết quả rõ; hoặc người dùng nói rõ không cần sprint. Không áp khi chạm `risk_tags`, file luật, secret, hành động không đảo ngược — trừ khi người dùng nói rõ | **không hồ sơ**: không `RQ-`, không `SPRINT.md`, không dòng sổ | không cổng hồ sơ; tự kiểm bằng lệnh + kết quả mới chạy, báo trong lời trả lời; giữ Git và điều cấm, giữ mọi cổng xin phép khác |
 | Rất nhỏ | đổi chữ hoặc một chỗ — kể cả chữ kỳ vọng trong test đi kèm, số file chạm không quyết cỡ; không đổi hành vi, quyền; lời giao đã nêu rõ kết quả | một `SPRINT.md` hai phần **Kế hoạch** (mục tiêu, `SC`, `TK` trỏ `SC`) · **Kết quả** (`VR` mỗi `SC`) | "đạt theo lời giao" + trích lời giao; không mở lượt hỏi mới (`method/process.md` mục 9) · agent khác chạy nhanh, hoặc tự kiểm "chưa độc lập" (tối đa Đạt có điều kiện); Cổng 2 gộp lời báo cuối |
 | Nhỏ | sửa cục bộ một luồng có sẵn (hành vi đổi), một `FR`, không đổi hợp đồng / giao diện / schema | một `SPRINT.md` đủ bốn phần SPEC · PLAN · PROGRESS · REPORT | Cổng 1 thật (trình ngắn, chờ duyệt) · **một** reviewer khác người làm kiểm cả nghiệp vụ lẫn kỹ thuật; Cổng 2 thật |
-| Vừa · Lớn | tính năng hoặc luồng mới; đổi hợp đồng, schema; rủi ro cao | bốn file | đủ hai cổng; cả hai reviewer |
+| Vừa | tính năng, hành vi hay luồng mới; hoặc hơn một `FR` | bốn file | đủ hai cổng; Business Reviewer và Tech Reviewer |
+| Lớn | nhiều phần; đổi hợp đồng / giao diện / schema; hoặc bất kỳ nhãn rủi ro ở bảng dưới | bốn file + đổi hợp đồng / giao diện, ADR khi có quyết định kiến trúc, hoàn tác | đủ hai cổng; cả hai reviewer + chuyên đề |
 
-Phân vân giữa hai bậc → bậc nặng hơn; hạ cỡ chỉ ở Cổng 1 do người dùng. Hành vi đổi thì không phải rất nhỏ; cần
-hơn 2 thao tác hay kết quả chưa rõ thì không phải làm thẳng.
+**Thao tác** = một thay đổi có nghĩa ở một chỗ hoặc một lệnh đã xác định. Đổi chữ và sửa chữ kỳ vọng trong test
+đi kèm là hai thao tác; tự kiểm/chạy test đi kèm không tính thêm. Sửa hành vi một luồng có sẵn vẫn theo hàng **Nhỏ**;
+tính năng mới theo **Vừa**; rủi ro theo **Lớn** — số file hay số dòng không hạ các sàn này.
+Phân vân → bậc nặng hơn; hạ cỡ chỉ ở Cổng 1 do người dùng. Không chia một mục tiêu thành nhiều lần làm thẳng để
+né sprint: đếm toàn bộ việc cần để mục tiêu xong trước khi chọn bậc; chỉ tách những mục tiêu độc lập.
+
+| Chạm vùng | `risk_tags` | Bậc / chuyên đề |
+|---|---|---|
+| secret, token, cấu hình xác thực | `secret` | lớn / security |
+| xác thực, phân quyền, phiên | `auth` | lớn / security |
+| đầu vào ngoài: form, API công khai, upload, webhook | `external_input` | lớn / security (+ backend) |
+| API công khai, hợp đồng giữa dịch vụ | `public_api` | lớn / backend |
+| hạ tầng, deploy, hook, CI, quyền chạy | `infra` | lớn / security (+ backend) |
+| migration, schema, backfill, xoá dữ liệu | `data_migration` | lớn / data |
+| file luật dự án/môi trường, cấu hình harness | `rules` | lớn / security |
+
+Mọi hàng: `risk: high`, `size: large`. Chưa rõ có chạm vùng nào → đề xuất bậc nặng hơn và hỏi phản biện;
+không gắn nhãn tự chế như `security` vào `risk_tags`. `rules` / `secret` / `auth` cần hai Tech Reviewer độc lập.
 
 ## 2. Danh mục 11 điểm thiếu ngữ cảnh
 

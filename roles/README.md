@@ -9,7 +9,7 @@
 
 | Vai | Nhóm | Tier | Khoá `roles` | Thẻ |
 |---|---|---|---|---|
-| User | Người | — | — | không có thẻ: giao yêu cầu, quyết ở Cổng 1, Cổng 2, bốn điều kiện dừng, mốc sau vòng 3 |
+| User | Người | — | — | không có thẻ: giao yêu cầu, xác nhận một tin trao đổi tiếp nhận (mục tiêu, bậc từng việc, có mở sprint không), quyết ở Cổng 1, Cổng 2, bốn điều kiện dừng, mốc sau vòng 3 |
 | Analyst (kiêm Distiller, điều phối) | Thực thi | T1 | `analyst` | [executor/analyst.md](executor/analyst.md) |
 | Architect | Thực thi | T1 | `architect` | [executor/architect.md](executor/architect.md) |
 | Implementer | Thực thi | T2 | `implementer` | [executor/implementer.md](executor/implementer.md) |

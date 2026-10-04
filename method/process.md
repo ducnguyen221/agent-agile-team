@@ -25,7 +25,7 @@ cỡ việc theo [sizing.md](sizing.md). Gặp tên skill cũ trong hồ sơ l�
 
 | Bước | Tên | Ai làm | Tài liệu ra | Cổng |
 |---|---|---|---|---|
-| 1 | Tiếp nhận | Analyst (T1) | **một** tin trao đổi gom với người dùng; sau xác nhận: dòng `RQ-` trong REQUESTS (hoặc làm thẳng, không hồ sơ) | **lượt trao đổi tiếp nhận** — người dùng xác nhận mục tiêu, bậc, có mở sprint không; bỏ khi đã rõ (mục 2) |
+| 1 | Tiếp nhận | Analyst (T1) | **một** tin trao đổi gom với người dùng; sau xác nhận: dòng `RQ-` trong REQUESTS (hoặc làm thẳng, không hồ sơ) | Không phải cổng — lượt trao đổi tiếp nhận xác nhận mục tiêu, bậc từng việc, có mở sprint không; bỏ khi đã rõ (mục 2) |
 | 2 | SPEC rồi PLAN | Analyst (SPEC), Architect (PLAN), Tech Reviewer (review PLAN từ cỡ vừa) | SPEC, PLAN | **Cổng 1** — duyệt / điều chỉnh |
 | 3 | Thực thi | Implementer, QA, (Architect) theo từng `TK` | PROGRESS | cổng điều chỉnh nội bộ (không hỏi người) |
 | 4 | Kiểm định | Business Reviewer, Tech Reviewer — **agent khác** người làm (thêm reviewer thứ hai khi `risk_tags` có `rules`/`secret`/`auth`) | `VR`, `RF` | vòng lặp 3 ↔ 4 |
@@ -54,8 +54,8 @@ KHI người dùng giao một yêu cầu THÌ Analyst:
    - *Câu hỏi phản biện* — để hiểu đúng **mục tiêu** (vì sao cần, kết quả trông ra sao), **định nghĩa xong**
      (đo bằng gì), **phạm vi** (cái gì không làm); mỗi câu kèm đề xuất của agent. Chỉ hỏi điều thuộc ý muốn
      người dùng; điều tra được từ repo không hỏi.
-   - *Khuyến nghị bậc việc* — làm thẳng / rất nhỏ / nhỏ / vừa / lớn theo [sizing.md](sizing.md), kèm một dòng lý
-     do và rủi ro nhìn thấy (rủi ro chỉ nâng).
+   - *Khuyến nghị bậc cho từng việc* — làm thẳng / rất nhỏ / nhỏ / vừa / lớn theo [sizing.md](sizing.md), kèm
+     dấu hiệu đo được và rủi ro nhìn thấy của mỗi việc (rủi ro chỉ nâng); ghi ngay trong tin gửi người dùng.
    - *Có cần mở sprint không* — hỏi thẳng, kèm khuyến nghị suy từ bậc (làm thẳng → không; từ rất nhỏ → có).
 3. **Chờ người dùng xác nhận** (có thể đổi mục tiêu, bậc, hay quyết làm thẳng). Chưa có xác nhận thì chưa ghi
    `RQ-`, chưa mở sprint, chưa chạm mã.

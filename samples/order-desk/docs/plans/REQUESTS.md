@@ -8,7 +8,8 @@ updated: 2026-01-23
 
 # Sổ yêu cầu (REQUESTS)
 
-<!-- Một dòng mỗi yêu cầu chủ sản phẩm giao, theo timeline, MỚI NHẤT Ở TRÊN. Analyst ghi ngay khi tiếp nhận.
+<!-- Một dòng mỗi yêu cầu chủ sản phẩm giao, theo timeline, MỚI NHẤT Ở TRÊN. Analyst chờ xác nhận tin trao đổi
+     tiếp nhận rồi mới ghi; chép mục tiêu, định nghĩa xong, phạm vi ngoài và bậc đã chốt. Làm thẳng không ghi sổ.
      Mã RQ-NNN tăng dần, có gạch nối, KHÔNG tái dùng; lấy mã từ `next_id` rồi tăng `next_id` lên một.
      Trạng thái: mới · đang làm · xong · bỏ. Yêu cầu nhiều mục tiêu → nhiều sprint, ghi đủ ở cột Sprint. -->
 
