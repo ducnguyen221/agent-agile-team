@@ -5,7 +5,7 @@ model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
 skill_sha: f200a6b19d3677e20924742be209a7e34531a3dd
 date: 2026-10-04
-result: 6/6 GREEN pass; RED on the 3 new scenarios (in-4, in-5, in-6) 0/3 pass (1 fail, 2 partial)
+result: 6/6 GREEN pass; RED on the 3 new scenarios (in-4, in-5, in-6) 0/3 pass (1 fail, 2 partial); QA2 after fix-2 in-5 rerun GREEN pass (n = 1)
 agent_ids:
   red: {in-1: adcce776b996a5503, in-1b: a31acf3fa7bdf1433, in-2: a022ff32b37ff8613, in-3: aba419997dc10a7d5, in-4: a81ee044a2949cb9c, in-5: ab57d0120cba4a923}
   green: {in-1b: aab7991e3533e7484, in-2: a6acdfcc653e402ac, in-3: a12dc50c810907a91, in-4: ab4a8e38f3c55f196, in-5: a46c939c2caada298}
@@ -96,6 +96,16 @@ Ba kịch bản đầu (2026-10-03): không cần sửa thân skill, GREEN đạ
 "hành vi đổi thì không phải rất nhỏ"; "số file chạm không quyết cỡ"). Các điểm RED gãy ở đợt đầu đã có câu chặn ở mục 1 việc 2–3 (một
 `RQ-`, chạm vùng rủi ro → cỡ tối thiểu lớn), mục 3 (ASSUMPTION có "nếu sai thì"), mục 4 (cờ "một dòng ở cấu hình
 quyền, hook, CI"; "rất nhỏ nhưng chưa nêu kết quả") và mục 5 (luôn có dòng ngoài phạm vi).
+
+## Chạy lại sau `fix-2` (SPR-04, QA2)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối cùng `references/` và tài liệu được trỏ. Kỳ vọng và thước chấm ghi trước lượt giao rồi chép bằng `cp -p` sang `evidence/QA2/expected/` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`); output trọn của từng chủ thể ở `evidence/QA2/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED cho kịch bản mới (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`. Thân `SKILL.md` đổi ở `fix-2` đúng ở hàng "Rất nhỏ" của bảng cỡ (mục 1): Cổng 1 là "đạt theo lời giao" + trích lời giao, **không mở lượt hỏi mới** (`method/process.md` mục 9), thay vế cũ "người dùng vắng thì làm tiếp, không chờ". Chạy lại kịch bản có sẵn `in-5` (không viết kịch bản mới); GREEN đọc thêm `method/sizing.md`, `method/process.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `in-5` | `a6653da608530f5f4` | **Đạt** | cỡ rất nhỏ (`size: tiny`), một `SPRINT.md` hai phần Kế hoạch / Kết quả; Cổng 1 `gate_1_quote: "đạt theo lời giao: …"`, không dừng chờ, không hỏi ("chờ ở đây là lỗi quy trình"); kiểm định agent khác hoặc tự kiểm "chưa độc lập" trần Đạt có điều kiện; Cổng 2 gộp lời báo cuối, nghiệm thu ngầm; không `CQ` chặn |
+
+Kết quả: 1/1 **Đạt**. Không sửa `SKILL.md`.
 
 ## Chạy lại
 
