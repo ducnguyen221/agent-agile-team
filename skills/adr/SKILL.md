@@ -83,13 +83,15 @@ Trạng thái: proposed · Sprint: SPR-NN · Liên quan: ADR NNNN, PLAN mục <t
 1. Architect viết bản `proposed` trong lúc lập PLAN.
 2. ADR đi cùng PLAN vào review (Tech Reviewer từ cỡ vừa) **trước Cổng 1**; PLAN trỏ tới ADR bằng số, đường
    file và mệnh đề quyết định, không chép lại thân ADR.
-3. Người dùng duyệt ở Cổng 1 → đổi sang `accepted`. Chưa duyệt thì không code theo ADR đó.
+3. Với ADR lập lúc PLAN: người dùng duyệt ở Cổng 1 → đổi sang `accepted`. Chưa duyệt thì không code theo ADR đó.
 4. Khi phải đổi hướng: viết một ADR mới, ghi rõ nó thế chỗ ADR nào; ở ADR cũ chỉ sửa dòng trạng thái thành
    `superseded by NNNN`. **Không xoá, không sửa chữ** của bản cũ — lịch sử lý do là giá trị của ADR.
 5. **Quyết định lộ ra giữa sprint** (sau Cổng 1, khi đang thực thi hay kiểm định): viết ngay ADR ở trạng thái
-   `proposed`. Còn nằm trong phạm vi SPEC đã duyệt thì Analyst ghi `Phán quyết:` vào PROGRESS và đi tiếp; làm đổi
-   một `SC` hay chạm điều kiện dừng thì ghi `BR` và hỏi. ADR này **trình kèm Cổng 2**, người dùng duyệt thì mới
-   `accepted`; ADR chưa `accepted` không được ghi vào spec sống như quyết định đã chốt.
+   `proposed`. Chỉ khi quyết định còn **hoàn tác được trong chính sprint** và không đổi `SC` nào thì Analyst ghi
+   `Phán quyết:` vào PROGRESS và cho code đi tiếp theo ADR `proposed`. Quyết định khó hoàn tác (đúng bản chất của
+   ADR, mục 1) hoặc làm đổi một `SC` thì ghi `BR`, hỏi người dùng theo điều kiện dừng và **không code tiếp** cho
+   tới khi có câu trả lời. ADR này **trình kèm Cổng 2**, người dùng duyệt thì mới `accepted`; ADR chưa `accepted`
+   không được ghi vào spec sống như quyết định đã chốt.
 6. **ADR mang nhãn `secret` hoặc `auth`** (ở `risk_tags` của sprint): skill `security-review` đọc ADR đó **trước
    khi** nó được `accepted`; phát hiện nặng thì ADR ở lại `proposed`.
 
