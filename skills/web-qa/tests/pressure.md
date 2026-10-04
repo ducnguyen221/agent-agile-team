@@ -5,7 +5,7 @@ model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
 skill_sha: d2f210cb4221a21923a669fb97d06e097f6dd17a
 date: 2026-10-03
-result: discriminating scenarios RED 0/2 pass (2 partial); GREEN wq-1 partial (regraded 2026-10-03 with one ruler for both phases; fails only (d) code format), GREEN wq-2 pass; third scenario passes at RED and GREEN; skill unchanged, gap in section 9 recorded
+result: 2/3 GREEN pass (wq-1 partial, regraded 2026-10-03 with one ruler for both phases, fails only (d) code format; wq-2 and wq-3 pass); RED 0/2 pass (2 partial) on the discriminating scenarios, third scenario passes at RED and GREEN; skill unchanged, gap in section 9 recorded
 agent_ids:
   red: {wq-1: a4f6e319889cfedc7, wq-2: afbaae65d0a5b77b4, wq-3: a46df7133a9ee23f6}
   green: {wq-1: a311ca1d59a7d55c3, wq-2: a1a3ff179bc59c1b6, wq-3: a72968fb5112f0a36}

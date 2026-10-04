@@ -123,3 +123,40 @@ class Point(NamedTuple):
 
 Point(0, 0).distance(Point(3, 4))  # 5.0
 ```
+
+## 3. Ghép (composition) thay vì kế thừa nhiều tầng
+
+Cây kế thừa sâu, hay `isinstance` rải khắp nơi để rẽ nhánh theo lớp con, là dấu hiệu nên đổi sang **ghép**: một đối
+tượng *có* một thành phần (qua tham số), không *là* một biến thể của lớp khác.
+
+```python
+# Tránh: kế thừa để tái dùng hành vi, rồi rẽ nhánh bằng isinstance
+class Exporter: ...
+class CsvExporter(Exporter): ...
+class GzipCsvExporter(CsvExporter): ...
+if isinstance(exporter, GzipCsvExporter): ...
+
+# Nên: ghép các thành phần nhỏ, kiểu hoá bằng Protocol
+class Formatter(Protocol):
+    def format(self, rows: list[dict]) -> bytes: ...
+
+class Sink(Protocol):
+    def write(self, data: bytes) -> None: ...
+
+@dataclass
+class Exporter:
+    formatter: Formatter
+    sink: Sink
+
+    def export(self, rows: list[dict]) -> None:
+        self.sink.write(self.formatter.format(rows))
+```
+
+- Kế thừa dành cho quan hệ "là một" thật sự và ổn định; tái dùng hành vi thì ghép.
+- `Protocol` (mục 1.4) cho phép thay thành phần mà không bắt chúng chung lớp cha, nên refactor từng bước mà giữ
+  API công khai: giữ tên lớp và phương thức cũ, đổi bên trong sang ghép, test cũ chạy lại làm lưới an toàn.
+- `isinstance` để rẽ nhánh theo lớp con → chuyển hành vi vào phương thức của chính lớp con (đa hình), hoặc vào
+  thành phần được ghép.
+- Hai module cần biết nhau (`models` ↔ `services`) là một vòng phụ thuộc; cách gỡ ở
+  `packaging-and-tooling.md` mục 6.
+- Nguồn: tài liệu `typing.Protocol` (kiểu cấu trúc); "ưu tiên ghép hơn kế thừa" là nguyên tắc thiết kế chung.

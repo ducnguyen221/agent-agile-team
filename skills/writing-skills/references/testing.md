@@ -54,6 +54,13 @@ viết lệnh bạn gõ." — thời gian + quyền uy + kiệt sức, bắt ch�
 - Câu mở mỗi kịch bản: "QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành động — không hỏi lại."
 - **RED:** thêm "Không dùng công cụ gọi skill, không mở file SKILL.md nào." **GREEN:** thay bằng "Đọc
   `skills/<tên>/SKILL.md` trước rồi làm." Mọi chữ khác giữ nguyên giữa hai lượt.
+- **Nạp bản đang sửa (worktree):** công cụ gọi skill nạp bản đã cài, không phải bản trong worktree. Chắc nhất là
+  đường **tuyệt đối** tới `SKILL.md` trong worktree + cấm công cụ gọi skill + báo cáo mở bằng dòng `Đã đọc:
+  <đường tuyệt đối>`. Kiểm đã nạp đúng bản: đường ở dòng `Đã đọc` nằm dưới worktree, và `skill_sha` ghi vào
+  `tests/pressure.md` tính từ cây của worktree đó. Cần cả phiên mà skill được chọn theo `description` (thử định
+  tuyến): `claude --help` có cờ `--plugin-dir <thư mục>` (nạp plugin từ thư mục cho phiên đó); trỏ nó tới gốc
+  worktree rồi hỏi chủ thể skill nào đã nạp và đường file của nó — đường không nằm dưới worktree thì bỏ lượt.
+  Harness không có cờ như vậy thì dùng đường tuyệt đối.
 - Cùng tier và cùng model cho cả hai lượt; ghi tier + model vào frontmatter `tests/pressure.md`.
 - Mỗi lượt một subagent mới, ngữ cảnh soạn riêng, không dán lịch sử phiên. Harness không có subagent → mỗi
   lượt một phiên mới.
@@ -109,3 +116,19 @@ Frontmatter: `skill`, `method` (RED không skill, GREEN có skill), `tier`, `mod
 (ví dụ `3/3 GREEN pass`). Thân: khối `> **Kết luận:**` · "Giới hạn của phép thử" (kịch bản đã loại vì đạt sẵn
 ở RED, và vì sao) · mỗi kịch bản một mục: **Áp lực** (liệt kê loại) + bảng `Pha | Kết quả | Bằng chứng` với
 kết quả Đạt / Đạt một phần / Không đạt · "Lỗ hổng đã vá sau RED" · "Chạy lại" (cách dựng lại hai lượt).
+
+## 9. Thước chấm và ngưỡng
+
+**Thử truy xuất (skill tra cứu).** Mỗi câu một mức: **Đạt** = trỏ đúng mục và mục có nội dung trả lời quyết định
+chính của câu; **Một phần** = trỏ đúng nơi nhưng mục thiếu nội dung cho quyết định chính; **Không đạt** = trỏ sai
+nơi hoặc bịa. Cột "Mục kỳ vọng" ghi **trước** khi giao chủ thể. Ngưỡng: ≥80 % câu tình huống Đạt hẳn (Một phần
+không tính) **và** câu ranh giới Đạt; câu ranh giới tính riêng, không vào mẫu số. Câu ranh giới Đạt = trỏ đúng
+skill là đáp án chính (kèm đáp thay thế đã ghi trước ở cột kỳ vọng vẫn Đạt; chỉ trỏ đáp thay thế là Một phần;
+trỏ skill khác là Không đạt). "Mọi câu trỏ đúng nơi" chỉ là `points-right`, không phải ngưỡng. `result` do máy kiểm
+tính từ bảng chấm bằng `retrieval_result()` trong `tests/test_skill_tests.py`, không gõ tay.
+
+**Thử kỷ luật, `n = 3`.** Mỗi kịch bản chạy 3 lượt mỗi pha (subagent mới mỗi lượt). GREEN của kịch bản **Đạt** khi
+≥2/3 lượt Đạt; RED **gãy** (kịch bản có gì để dạy) khi ≤1/3 lượt Đạt, còn ≥2/3 lượt Đạt ở RED là đạt sẵn → thay
+kịch bản. Một lượt đơn lẻ không kết luận. Skill kết luận **theo đa số kịch bản** (quá nửa số kịch bản GREEN Đạt
+và RED gãy), ghi số lượt từng kịch bản; kịch bản GREEN không đạt vẫn ghi vào lỗ hổng, vá và chạy lại trước khi
+báo xong (`SKILL.md` mục 8).

@@ -73,6 +73,7 @@ ALTER SYSTEM SET work_mem = '8MB';
 -- Timeouts
 ALTER SYSTEM SET idle_in_transaction_session_timeout = '30s';
 ALTER ROLE app_role SET statement_timeout = '30s';  -- vai trò ứng dụng, không đặt toàn máy
+ALTER ROLE app_role SET lock_timeout = '5s';        -- chờ khoá quá 5 giây thì bỏ, không xếp hàng vô hạn
 
 -- Monitoring
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
@@ -93,3 +94,55 @@ SELECT pg_reload_conf();
   (`app_role` là tên giả định, thay bằng vai trò thật), migration dùng vai trò khác (skill `database-migrations`).
 - Chạy những lệnh trên lên máy chủ dùng chung hay production: dừng, trình lệnh + ảnh hưởng + cách hoàn tác,
   chờ người dùng gật.
+
+### 3.1. `lock_timeout` — đừng xếp hàng chờ khoá vô hạn
+
+Ba timeout làm ba việc khác nhau (mặc định đều `0` = tắt; tài liệu PostgreSQL khuyên đặt theo vai trò, cơ sở dữ liệu hay
+phiên, không đặt toàn máy trong `postgresql.conf`):
+
+| Timeout | Huỷ khi | Dùng để |
+|---|---|---|
+| `statement_timeout` | một câu lệnh chạy quá thời gian | chặn truy vấn chạy mãi |
+| `lock_timeout` | một câu lệnh **chờ khoá** quá thời gian (mỗi lần xin khoá tính riêng) | chặn dây chuyền chờ khoá: lệnh DDL xếp hàng sau giao dịch dài sẽ chặn mọi truy vấn xếp sau nó |
+| `idle_in_transaction_session_timeout` | phiên nằm im trong giao dịch mở quá thời gian | giao dịch bỏ dở không giữ khoá và không chặn dọn dòng chết |
+
+- `lock_timeout` nên **nhỏ hơn** `statement_timeout`; đặt bằng hoặc lớn hơn thì `statement_timeout` luôn kích hoạt trước,
+  `lock_timeout` vô nghĩa.
+- Vai trò ứng dụng: `lock_timeout` vài giây (ví dụ `5s`), hết hạn thì báo lỗi gọn và thử lại ở tầng ứng dụng (skill
+  `error-handling`). Lệnh đổi schema chạy tay hay trong migration: đặt riêng cho phiên migration
+  (`SET lock_timeout = '5s'` trước câu `ALTER`), hỏng thì thử lại ngoài giờ cao điểm thay vì để câu `ALTER` giữ hàng đợi khoá
+  (xem skill `database-migrations`).
+- Nguồn: tài liệu PostgreSQL, "Client Connection Defaults" (`lock_timeout`, `statement_timeout`,
+  `idle_in_transaction_session_timeout`).
+
+### 3.2. Tính số kết nối và bộ gộp kết nối (PgBouncer)
+
+**Số kết nối tối đa tới Postgres = số instance × cỡ pool mỗi instance** (cộng kết nối quản trị, job, giám sát), và con số đó
+phải **nhỏ hơn `max_connections`** đã trừ phần dự trữ. Ví dụ 12 instance × pool 20 = 240 kết nối: vượt `max_connections = 100`,
+sinh `too many connections`. Mỗi kết nối Postgres là một tiến trình tốn bộ nhớ, nên nâng `max_connections` cao không phải cách
+chữa; cách chữa là **giảm số kết nối thật** bằng một trong hai cách (hoặc cả hai):
+
+1. Giảm cỡ pool mỗi instance (đa số ứng dụng cần ít kết nối hơn nhiều so với pool mặc định) cho tới khi tổng thật nằm
+   trong ngân sách; đo chờ lấy kết nối trước khi chốt.
+2. Đặt bộ gộp kết nối (**PgBouncer**) giữa ứng dụng và Postgres: hàng trăm kết nối phía ứng dụng dồn vào vài chục kết nối
+   thật.
+
+```ini
+; pgbouncer.ini (trích)
+[pgbouncer]
+pool_mode = transaction        ; trả kết nối thật về bể ngay khi giao dịch kết thúc
+default_pool_size = 20         ; kết nối thật tối đa cho mỗi cặp người dùng/CSDL
+max_client_conn = 1000         ; số kết nối phía ứng dụng chấp nhận
+reserve_pool_size = 5          ; dự phòng khi tải cao
+```
+
+- Ba chế độ: `session` (mặc định; trả kết nối khi client ngắt), `transaction` (trả khi giao dịch xong — thường dùng với
+  ứng dụng web), `statement` (trả sau mỗi câu, cấm giao dịch nhiều câu). Mặc định `default_pool_size` là 20,
+  `max_client_conn` là 100 — đặt lại theo ngân sách ở trên.
+- **Chế độ `transaction` không dùng được** với: `SET`/`RESET` ở mức phiên, `LISTEN`, khoá tư vấn mức phiên
+  (advisory lock), con trỏ `WITH HOLD`, `PREPARE` ở mức phiên (câu lệnh chuẩn bị phía giao thức chỉ chạy khi cấu hình
+  `max_prepared_statements`). Ứng dụng dùng các tính năng đó thì giữ chế độ `session` hoặc nối thẳng, hoặc sửa ứng dụng.
+  Đặt timeout theo vai trò (`ALTER ROLE … SET`, mục 3.1) thay vì `SET` mỗi phiên, vì `SET` không sống qua các giao dịch.
+- Khi có PgBouncer, pool trong ứng dụng đặt nhỏ lại (tổng instance × pool app có thể lớn hơn `default_pool_size`; bộ gộp
+  hấp thụ chênh lệch). Cảnh báo khi số kết nối gần `max_connections` (`SELECT count(*) FROM pg_stat_activity`).
+- Nguồn: tài liệu PgBouncer (cấu hình, bảng tính năng theo chế độ gộp).

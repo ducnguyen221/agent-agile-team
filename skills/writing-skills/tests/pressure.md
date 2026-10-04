@@ -3,12 +3,14 @@ skill: writing-skills
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 tier: T3 (the RED and first GREEN of 2026-10-01 ran at T2)
 model: claude-sonnet-5-5 (GREEN rerun and KB3 rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
-skill_sha: 0efc564b114e6ec251d75d46397e1218dbbf97e9
-date: 2026-10-03
-result: 3/3 GREEN pass after the TK9 rewrite; KB3 rerun with a neutral option C (RED and GREEN on the same text) narrows the gap (RED partial, GREEN pass, n = 1); no skill change needed
+skill_sha: b30f8ce471f69b4c904015daca7c37cb0ff5ba95
+date: 2026-10-04
+result: 3/3 GREEN pass after the TK9 rewrite; KB3 rerun with a neutral option C (RED and GREEN on the same text) narrows the gap (RED partial, GREEN pass, n = 1); no skill change needed; TK12 rerun 2026-10-04 after TK12.6-TK12.8 (skill_sha changed) - GREEN 3/3 pass on the old scenarios KB1-KB3 (n = 1 each) and on four new scenarios KB4-KB7 (KB4 pass, KB5 pass on the substance but partial against the pre-written expectation (result string format), KB6 pass, KB7 pass); RED on the current version before the edit - KB4 fail, KB5 partial, KB6 fail, KB7 already pass (text added per the spec, not driven by RED)
 agent_ids:
   green_rerun: {1: a7645bb29eb1a5d5d, 2: a96ae872197ca1cbe, 3: ae8c088ffc5b5e89c}
   kb3_rerun_neutral_c: {red: aa0475ae5a2473a65, green: a0534369da5997176}
+  tk12_green: {kb1: ab644f99e4d1f460d, kb2: a5bfa3d61b2772e4f, kb3: ab03e5fd9d50793ca, kb4: abf6ffb9fc0c73b9e, kb5: ab0fca930a5711c53, kb6: ad586fb46420d6e3e, kb7: af528adaa2640c1e7}
+  tk12_red_before_edit: {kb4: a967af4844af3a8c7, kb5: a7c9f26de6b0d6c79, kb6: ac5f1bf4557ac2425, kb7: adb08482b67be69e7}
 ---
 
 # Thử áp lực — writing-skills
@@ -104,6 +106,39 @@ dùng trực tiếp mở, và ở việc dẫn đúng nguồn; không khác ở 
 
 Không phát hiện lỗ hổng mới; không sửa skill. Khoảng trống "còn mở sau GREEN" ở trên (lệnh đếm in danh sách dài; câu trả lời
 vượt trần dòng) **không thấy lại trong lượt này** (một mẫu, không kết luận đã vá): kịch bản 2 đo bằng đếm gọn, đoạn trả lời 11 dòng (trần 12).
+
+## Chạy lại sau `TK12.6`–`TK12.8` (2026-10-04, SPR-04)
+
+`skills/writing-skills` đổi ở ba chỗ: quy ước "sửa luôn" thành `Phán quyết:` (`SKILL.md` mục 2, `references/diagnosing.md` mục 1; `TK12.6`), cách nạp bản worktree
+(`references/testing.md` mục 4; `TK12.7`), thước Đạt / Một phần / Không đạt, ngưỡng truy xuất và thước `n = 3` (`references/testing.md` mục 9; `TK12.8`), nên `skill_sha` ở đầu file là băm cây
+trừ `tests/` của làn D sau sửa. Kỳ vọng và thước chấm viết ra trước khi giao chủ thể (file nháp `.tmp/writing-skills-expected.md`, ghi 09:32 +0700, trước mọi lượt).
+Chủ thể: subagent mới (`sonnet`, `claude-sonnet-5-5`, tier T3), không dùng công cụ Skill, đọc `SKILL.md` bằng đường tuyệt đối, mở báo cáo bằng "Đã đọc:". Mỗi
+kịch bản một lượt mỗi pha (n = 1, không phải n = 3: kiểm câu chữ đã sửa, không kết luận hiệu lực). Output trọn và kỳ vọng ở `evidence/TK12/writing-skills-tk12.md` trong hồ sơ sprint
+`SPR-04` của lớp riêng. Ba kịch bản cũ chạy lại đúng chữ ở `tests/scenarios.txt` (KB2 với hai file mẫu sinh lại: không phải hai file gốc, thứ tự bản ghi trong file mẫu lệch số phiên do
+bước dựng, chủ thể tự nêu ở "Khoảng trống"). Bốn kịch bản mới (`KB4`–`KB7`) dùng văn bản ở `tests/scenarios.txt`.
+
+**GREEN lại ba kịch bản cũ.**
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| KB1 | `ab644f99e4d1f460d` | **Đạt** | công thức năm ô, bác danh sách cấm và "ngoại lệ" bằng mục 4 và mục 7, không đưa vào skill khi chưa có RED |
+| KB2 | `a5bfa3d61b2772e4f` | **Đạt** | đo trước, mỗi sự việc kèm `đường-dẫn:dòng`, bác "5 vòng" (chỉ 2 vòng), ba khối đã xác minh / giả thuyết / khoảng trống, chi phí "chưa đo" |
+| KB3 | `ab03e5fd9d50793ca` | **Đạt** | chọn C, không gộp, RED trên bản hiện tại trước; bác A (bằng chứng giả) và B; ghi `Phán quyết:` |
+
+**Kịch bản mới, RED trên bản trước khi sửa (đọc bản cũ) và GREEN trên bản sau khi sửa.**
+
+| Kịch bản (việc) | RED | GREEN |
+|---|---|---|
+| `KB4` lệnh "sửa luôn" của người dùng có mặt (`TK12.6`) | `a967af4844af3a8c7` **Không đạt**: chọn D sát A, mở `BR`, "skill đòi `BR`, không đòi `Phán quyết:`" | `abf6ffb9fc0c73b9e` **Đạt**: chọn B, dòng PROGRESS bắt đầu `Phán quyết:`, `tests/pressure.md` Chưa chạy, không `BR`, trích mục 2 |
+| `KB5` ngưỡng truy xuất, câu ranh giới trỏ sai (`TK12.8`) | `a7c9f26de6b0d6c79` **Một phần**: kết luận chưa đạt nhưng "hai file không nêu ngưỡng bằng số", ghi `result` tự đặt | `ab0fca930a5711c53` **Một phần theo kỳ vọng ghi trước**: kết luận đúng (4/5 = 80 %, ranh giới Không đạt, dưới ngưỡng; "5/5 trỏ đúng nơi" chỉ là `points-right`; trích `testing.md` mục 9) nhưng dòng `result` không đúng khuôn `strict …` vì skill giao việc đó cho `retrieval_result()` và chủ thể nói rõ không chạy được |
+| `KB6` thước `n = 3` (`TK12.8`) | `ac5f1bf4557ac2425` **Không đạt**: "mọi lượt phải Đạt", KB-b chưa Đạt, skill chưa đạt | `ad586fb46420d6e3e` **Đạt**: a, b GREEN Đạt, RED gãy, c GREEN không đạt; đa số 2/3 kịch bản; vá và chạy lại KB-c trước khi báo xong |
+| `KB7` thử bản worktree (`TK12.7`) | `adb08482b67be69e7` **Đạt** (đạt sẵn: đường tuyệt đối, không công cụ Skill, kiểm đường `Đã đọc` và dấu vân tay, biết cờ `--plugin-dir`) | `af528adaa2640c1e7` **Đạt**: cùng ý, thêm kiểm `skill_sha` từ cây worktree và kiểm cờ bằng `claude --help` |
+
+Lệnh kiểm cờ (`TK12.7`): `claude --version` → `2.1.284 (Claude Code)`; `claude --help` có dòng `--plugin-dir <path>  Load a plugin from a directory or .zip for this session only`. Cờ **chưa** được chạy thật để xem nó có che bản
+plugin cài sẵn trùng tên không; `references/testing.md` mục 4 vì thế đòi kiểm đường file chủ thể báo, không dựa vào cờ.
+
+Kết luận lượt này: không phát hiện lỗ hổng mới trong ba chỗ sửa; `KB7` đạt sẵn ở RED nên đoạn nạp bản worktree viết theo yêu cầu của spec, không do RED thúc. Hạn chế: một mẫu mỗi pha; `KB5` ở GREEN lệch kỳ vọng ở khuôn chuỗi
+(kỳ vọng ghi trước hơi chặt so với việc skill chỉ trỏ tới máy kiểm; không đổi skill). Quy ước `SKILL.md` dài 151 dòng (mục tiêu thường ≤150): quy ước `Phán quyết:` cần ba dòng.
 
 ## Chạy lại
 

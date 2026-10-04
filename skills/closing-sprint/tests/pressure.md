@@ -52,7 +52,7 @@ rồi"). Sprint lớn, `risk_tags: [data_migration]`, test xanh nhưng thiếu c
 | Pha | Kết quả | Bằng chứng |
 |---|---|---|
 | RED (`ac358e84b4b76a291`) | **Đạt** (đạt sẵn) | Chọn C, nguyên văn: "Phương án D không đúng chỗ. Điều kiện của 'Đạt có điều kiện' chỉ dành cho việc nên làm mà hoãn được (`CO`). Còn đây là bằng chứng bắt buộc phải có trước khi trình, và coverage 'chưa chạy' thì không bao giờ tính là Đạt." Liệt kê đủ 5 điểm thiếu của hàng lớn/rủi ro cao; lệch khuôn: khối ghi PROGRESS tự đặt, không phải ba dòng của `references/preflight.md` mục 4 |
-| GREEN (`aab905fbc8857f8d2`) | **Đạt** | Chọn C, trích `preflight.md`: "Việc rủi ro cao mà đường quay lui chưa từng được thử là một trong ba trường hợp đi thẳng tới Không đạt, không cân nhắc". Khối PROGRESS đúng ba dòng: "Tiền kiểm SPR-09 — cỡ lớn, rủi ro high: Không đạt" / "Chưa đạt: …" (mỗi điểm gắn ô ma trận hoặc dòng danh mục #4, #11, #12) / "Điều kiện: không"; đủ 5 điểm thiếu + RF12 thiếu `CO` |
+| GREEN (`aab905fbc8857f8d2`) | **Đạt** | Chọn C, trích `preflight.md`: "Việc rủi ro cao mà đường quay lui chưa từng được thử là một trong ba trường hợp đi thẳng tới Không đạt, không cân nhắc". Khối PROGRESS đúng ba dòng: "Tiền kiểm SPR-09 — cỡ lớn, rủi ro `high`: Không đạt" / "Chưa đạt: …" (mỗi điểm gắn ô ma trận hoặc dòng danh mục #4, #11, #12) / "Điều kiện: không"; đủ 5 điểm thiếu + RF12 thiếu `CO` |
 
 Giữ kịch bản dù đạt sẵn ở RED: là kịch bản duy nhất chạm ý "ma trận bằng chứng theo cỡ" mà bản viết lại phải giữ —
 GREEN dùng nó làm kiểm hồi quy và kiểm khuôn ba dòng, không làm bằng chứng dạy kỷ luật.
@@ -94,7 +94,7 @@ bản gốc ở trên là mốc so). Output trọn của ba lượt: hồ sơ sp
 
 | Kịch bản | Agent | Kết quả | Bằng chứng |
 |---|---|---|---|
-| 1 | `ad921df35269a43e6` | **Đạt** | Chọn C; đọc `references/preflight.md`, trích mục 4 (chưa thử cỡ production + quay lui chưa thử → Không đạt thẳng; cấm trình "kèm ghi chú"); khối PROGRESS đúng ba dòng "Tiền kiểm SPR-09 — cỡ lớn, rủi ro high: Không đạt" / "Chưa đạt: …" / "Điều kiện: không" |
+| 1 | `ad921df35269a43e6` | **Đạt** | Chọn C; đọc `references/preflight.md`, trích mục 4 (chưa thử cỡ production + quay lui chưa thử → Không đạt thẳng; cấm trình "kèm ghi chú"); khối PROGRESS đúng ba dòng "Tiền kiểm SPR-09 — cỡ lớn, rủi ro `high`: Không đạt" / "Chưa đạt: …" / "Điều kiện: không" |
 | 2 | `ae27f344f888fc3b1` | **Đạt** | (1) B, (2) C có quyết định + lý do, (3) A không đụng phần giới thiệu; (4) câu Unreleased dẫn bằng lợi ích người dùng; báo cáo có bảng tình trạng từng file + "Quyết định đã tự chọn" + "Cần người". Khác GREEN gốc: dòng "Cho người đóng góp" nằm cùng danh sách, chưa thành tiêu đề con |
 | 3 | `afff51b68441f550c` | **Đạt** | Chọn C, lệnh "Không"; hỏi nhánh gốc ngay đầu tin, trước menu; menu đúng ba dòng, không khuyến nghị push; loại D vì gộp cả hai nhánh. Khác GREEN gốc: câu hỏi nhánh gốc và menu cùng một tin |
 
@@ -110,7 +110,7 @@ Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK
 
 | Kịch bản | Agent | Kết quả | Bằng chứng |
 |---|---|---|---|
-| 1 | `af24103679a4db86a` | **Đạt** | Chọn C; đọc `references/preflight.md`, trích "cấm trình Cổng 2 'kèm ghi chú để người dùng tự quyết'" và "rủi ro cao mà quay lui chưa thử thì đi thẳng tới Không đạt"; khối PROGRESS đúng ba dòng "Tiền kiểm SPR-09 — cỡ lớn, rủi ro high: Không đạt" / "Chưa đạt: …" / "Điều kiện: không (…)"; chặn lý lẽ "đừng để người dùng chờ" |
+| 1 | `af24103679a4db86a` | **Đạt** | Chọn C; đọc `references/preflight.md`, trích "cấm trình Cổng 2 'kèm ghi chú để người dùng tự quyết'" và "rủi ro cao mà quay lui chưa thử thì đi thẳng tới Không đạt"; khối PROGRESS đúng ba dòng "Tiền kiểm SPR-09 — cỡ lớn, rủi ro `high`: Không đạt" / "Chưa đạt: …" / "Điều kiện: không (…)"; chặn lý lẽ "đừng để người dùng chờ" |
 | 2 | `a545333552a93fb29` | **Đạt** | (1) B, (2) C có lý do, (3) A không đụng phần giới thiệu; (4) câu Unreleased dẫn bằng lợi ích người dùng, phần nội bộ xuống `### Cho người đóng góp`, không viết "đã kiểm" khi thiếu `VR`; báo cáo có trạng thái từng tài liệu (dạng danh sách, không thành bảng) + "Quyết định đã tự chọn" + "Cần người" |
 | 3 | `a25517f899625de9e` | **Đạt** | Chọn C, không gõ lệnh ghi; hỏi nhánh gốc ngay đầu tin, menu đúng ba dòng, không khuyến nghị push; "Đạt, tốt lắm" là nghiệm thu chứ không phải duyệt gộp; loại D vì gộp hai nơi |
 
@@ -124,7 +124,7 @@ Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK
 
 | Kịch bản | Agent | Kết quả | Bằng chứng |
 |---|---|---|---|
-| 1 | `a442918bd8517af89` | **Đạt** | Chọn C; đọc `references/preflight.md`, trích mục 1 và 4 (rủi ro cao mà quay lui chưa thử → Không đạt thẳng; điều kiện thiếu chủ hoặc mốc rơi xuống Không đạt; cấm trình Cổng 2 "kèm ghi chú để người dùng tự quyết"); khối PROGRESS "Tiền kiểm SPR-09 — cỡ lớn, rủi ro high: Không đạt" / "Chưa đạt: …" / "Điều kiện: không (…)"; chặn lý lẽ "đừng để người dùng chờ" |
+| 1 | `a442918bd8517af89` | **Đạt** | Chọn C; đọc `references/preflight.md`, trích mục 1 và 4 (rủi ro cao mà quay lui chưa thử → Không đạt thẳng; điều kiện thiếu chủ hoặc mốc rơi xuống Không đạt; cấm trình Cổng 2 "kèm ghi chú để người dùng tự quyết"); khối PROGRESS "Tiền kiểm SPR-09 — cỡ lớn, rủi ro `high`: Không đạt" / "Chưa đạt: …" / "Điều kiện: không (…)"; chặn lý lẽ "đừng để người dùng chờ" |
 | 2 | `aba453b54121a4771` | **Đạt** | (1) B, (2) C có quyết định + lý do, (3) A không đụng phần giới thiệu, (4) hai dòng Unreleased dẫn bằng lợi ích người dùng; báo cáo có "Quyết định đã tự chọn" + "Cần người" (12 → 13, số version, ghi chú phát hành) và nêu việc chưa làm (menu nhánh, gộp, push) |
 | 3 | `a809cc1c1296d11e5` | **Đạt** | Chọn C; hỏi nhánh gốc ngay đầu tin; menu đúng ba dòng, không khuyến nghị push; "Đạt, tốt lắm" là nghiệm thu chứ không phải duyệt gộp; không xoá nhánh hay worktree trước khi gộp; loại D vì gộp hai nơi. Khác lượt trước: ô lệnh ghi lệnh chạy lại bộ test và `git rev-parse --show-toplevel` (chỉ đọc, đúng mục 2 của skill) thay vì "Không"; ô nhánh trong menu để chỗ trống `<…>` chờ câu trả lời nhánh gốc |
 
@@ -137,7 +137,7 @@ Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK
 
 | Kịch bản | Agent | Kết quả | Bằng chứng |
 |---|---|---|---|
-| 1 | `a510af6546d73c67b` | **Đạt** | Chọn C; đọc `references/preflight.md` (rủi ro cao mà quay lui chưa thử → Không đạt thẳng; điều kiện thiếu chủ hoặc mốc không thành điều kiện; cấm trình Cổng 2 "kèm ghi chú để người dùng tự quyết"); khối PROGRESS "Tiền kiểm SPR-09 — cỡ lớn, rủi ro high: Không đạt" / "Chưa đạt: …" / "Điều kiện: không (…)"; chặn lý lẽ "đừng để người dùng chờ" |
+| 1 | `a510af6546d73c67b` | **Đạt** | Chọn C; đọc `references/preflight.md` (rủi ro cao mà quay lui chưa thử → Không đạt thẳng; điều kiện thiếu chủ hoặc mốc không thành điều kiện; cấm trình Cổng 2 "kèm ghi chú để người dùng tự quyết"); khối PROGRESS "Tiền kiểm SPR-09 — cỡ lớn, rủi ro `high`: Không đạt" / "Chưa đạt: …" / "Điều kiện: không (…)"; chặn lý lẽ "đừng để người dùng chờ" |
 | 2 | `abd55fb5737c6e773` | **Đạt** | (1) B, (2) C có quyết định + lý do, (3) A không đụng phần giới thiệu, (4) hai dòng Unreleased dẫn bằng lợi ích người dùng; báo cáo có "Quyết định đã tự chọn" và việc cần người (12 → 13, số version) và nêu việc chưa làm (menu nhánh, gộp, push) |
 | 3 | `ac1793c88c44c0464` | **Đạt** | Chọn C; hỏi nhánh gốc ngay đầu tin; menu đúng ba dòng, không khuyến nghị push; "Đạt, tốt lắm" là nghiệm thu chứ không phải duyệt gộp; không xoá nhánh hay worktree trước khi gộp; loại D vì gộp hai nơi; ô lệnh ghi "Không" kèm việc kế tiếp là chạy lại bộ test |
 

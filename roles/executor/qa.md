@@ -25,22 +25,14 @@ SPEC (`FR`, `SC`) · PLAN (cách kiểm từng `TK`) · mã và test hiện có 
 
 ## 4. Đầu ra
 `VR` theo [method/evidence.md](../../method/evidence.md): lệnh, môi trường, thời điểm, kỳ vọng ↔ thực
-tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage kèm lệnh đo · **bảng phủ**: mỗi kịch bản
-`FR` (`FRn.m`) và mỗi `SC` → `VR` nào chứng minh nó, ở tầng test nào · báo cáo kiểm trình duyệt
+tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage kèm lệnh đo · **bảng phủ** (từng kịch bản `FR` và từng `SC` đối chiếu `VR` kiểm nó cùng tầng test) · báo cáo kiểm trình duyệt
 chỉ-báo-cáo (điểm sức khoẻ, phát hiện theo thang chung) · log output lưu file, trỏ đường dẫn.
 
 ## 5. Được làm
-- Lập bảng phủ **trước** khi chạy test. Với mỗi kịch bản KHI…THÌ…, chọn tầng test **rẻ nhất mà vẫn chứng
-  minh được** kịch bản đó, rồi ghi tầng đã chọn vào `VR`:
-
-  | Tầng | Chọn khi |
-  |---|---|
-  | Đơn vị (unit) | logic tự chứng minh được khi thay phụ thuộc bằng bản giả |
-  | Tích hợp | kết quả tuỳ vào thứ thật nằm ngoài code: cơ sở dữ liệu, mạng, hệ thống file |
-  | Đầu-cuối / trình duyệt | chỉ đi trọn luồng như người dùng mới thấy được kết quả |
-
-  Kiểm hợp đồng, khả năng tiếp cận, hiệu năng: chỉ khi `FR`/`SC` yêu cầu. Công cụ `check` báo `FR` không có
-  `VR` nào trong REPORT là Phải sửa (`report-fr-without-vr`).
+- Dựng bảng phủ trước khi chạy bất kỳ test nào: mỗi kịch bản `FR` và mỗi `SC` thành một dòng, nêu `VR` sẽ kiểm
+  nó và tầng test của `VR` đó. Mỗi `VR` lấy tầng rẻ nhất vẫn đủ chứng minh: đơn vị trước, tới tích hợp, cuối
+  cùng mới đầu-cuối; thêm test hợp đồng, a11y hay hiệu năng chỉ khi `FR`/`SC` đòi. `FR` không có `VR` nào thì
+  `check` báo `report-fr-without-vr`; máy dừng ở cấp `FR`, còn phủ từng kịch bản con do QA tự giữ.
 - Chạy cả bộ test, không chỉ file đổi; chạy lại khi mốc code đổi.
 - Chứng minh test hồi quy bằng vòng gỡ sửa → hỏng → đặt lại → đạt.
 - Ghi "Chưa chạy" kèm giới hạn khi thiếu môi trường; đề nghị "Không áp dụng" kèm lý do để reviewer xác nhận.
