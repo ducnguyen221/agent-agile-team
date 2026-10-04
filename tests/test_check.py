@@ -327,3 +327,100 @@ def test_hint_uses_the_position_of_each_match(tmp_path):
     for rule in ("xref-missing", "id-bare-single-letter"):
         hits = [f for f in report.findings if f.rule == rule]
         assert sorted("code span" in f.message for f in hits) == [False, True], [f.render() for f in hits]
+
+
+# --- Bậc việc nhẹ: hợp đồng size × doc (FR7.4) ---------------------------------------------------------
+
+SAMPLE_TINY_FOUR_PARTS = REPO / "samples" / "order-desk" / "docs" / "plans" / "2026-01-20-fix-not-found-text" / "SPRINT.md"
+
+
+def two_part_sprint(size: str = "tiny", *, with_result: bool = True) -> str:
+    """Một `SPRINT.md` hai phần "Kế hoạch" / "Kết quả" (bậc rất nhỏ), dựng từ frontmatter của sprint mẫu."""
+    head = SAMPLE_TINY_FOUR_PARTS.read_text(encoding="utf-8").split("\n# ", 1)[0].replace("size: tiny", f"size: {size}", 1)
+    body = (
+        "\n# Sửa chữ báo lỗi — Sprint gộp (SPRINT)\n\n"
+        "> **Kết luận:** sửa chữ câu báo lỗi; chờ kiểm.\n\n"
+        "## 1. Kế hoạch\n\n"
+        "- **Mục tiêu:** câu báo lỗi ở màn hình tra đơn viết đúng chính tả.\n\n"
+        "Kế hoạch có 1 **success criterion** (SC) và 1 **task** (TK):\n\n"
+        "- **SC1 (chữ đúng):** test giao diện so khớp đúng câu \"Không tìm thấy đơn hàng\".\n"
+        "- **TK1 (sửa câu báo lỗi) → SC1:** Implementer · T2. Hoàn tác: `git revert`.\n"
+    )
+    if with_result:
+        body += (
+            "\n## 2. Kết quả\n\n"
+            "Kết quả có 1 **verification result** (VR):\n\n"
+            "| Mã | Kiểm cái gì | Lệnh / thao tác | Kết quả | Người kiểm |\n|---|---|---|---|---|\n"
+            "| VR1 (test câu báo lỗi) | SC1 | `pytest tests/test_ui.py` | Chưa chạy | Tech Reviewer · agent-d |\n\n"
+            "- **Nhật ký:** Implementer sửa câu báo lỗi.\n"
+        )
+    return head + "\n" + body
+
+
+def put(tmp_path: Path, name: str, text: str) -> Path:
+    path = tmp_path / name
+    write_lf(path, text)
+    return path
+
+
+def test_old_tiny_sprint_with_four_parts_stays_valid():
+    """Hồi quy: sprint rất nhỏ bốn phần của đợt trước vẫn qua."""
+    assert check.check_paths([SAMPLE_TINY_FOUR_PARTS]).findings == []
+
+
+def test_four_files_size_small_is_valid(tmp_path):
+    """Hồi quy: sprint nhỏ dựng bằng bốn file (cách cũ) vẫn hợp lệ."""
+    root = make_sprint(tmp_path)
+    for name in ("SPEC", "PLAN", "PROGRESS", "REPORT"):
+        path = root / f"{name}.md"
+        write_lf(path, path.read_text(encoding="utf-8").replace("size: medium", "size: small", 1))
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_tiny_two_part_sprint_is_clean(tmp_path):
+    put(tmp_path, "SPRINT.md", two_part_sprint())
+    assert [f.render() for f in check.check_paths([tmp_path]).findings] == []
+
+
+def test_tiny_two_part_sprint_missing_result_is_flagged(tmp_path):
+    put(tmp_path, "SPRINT.md", two_part_sprint(with_result=False))
+    hits = [f for f in check.check_paths([tmp_path]).findings if f.rule == "heading-missing"]
+    assert any("Kết quả" in f.message for f in hits), [f.render() for f in hits]
+
+
+def test_small_sprint_file_needs_four_parts(tmp_path):
+    put(tmp_path, "SPRINT.md", two_part_sprint("small"))
+    hits = [f for f in check.check_paths([tmp_path]).findings if f.rule == "heading-missing"]
+    missing = {w for w in ("SPEC", "PLAN", "PROGRESS", "REPORT") if any(f"'{w}'" in f.message for f in hits)}
+    assert missing == {"SPEC", "PLAN", "PROGRESS", "REPORT"}, [f.render() for f in hits]
+
+
+def test_sprint_file_at_medium_is_flagged_exactly_once(tmp_path):
+    text = SAMPLE_TINY_FOUR_PARTS.read_text(encoding="utf-8").replace("size: tiny", "size: medium", 1)
+    put(tmp_path, "SPRINT.md", text)
+    report = check.check_paths([tmp_path])
+    hits = [f for f in report.findings if f.rule == "sprint-size-mismatch"]
+    assert len(hits) == 1 and hits[0].level == "Phải sửa", [f.render() for f in report.findings]
+    assert report.exit_code == 1
+
+
+def test_sprint_file_at_large_is_flagged(tmp_path):
+    text = SAMPLE_TINY_FOUR_PARTS.read_text(encoding="utf-8").replace("size: tiny", "size: large", 1)
+    put(tmp_path, "SPRINT.md", text)
+    assert "sprint-size-mismatch" in rules_of(check.check_paths([tmp_path]))
+
+
+def test_four_files_size_tiny_is_flagged_once_per_folder(tmp_path):
+    root = make_sprint(tmp_path)
+    for name in ("SPEC", "PLAN", "PROGRESS", "REPORT"):
+        path = root / f"{name}.md"
+        write_lf(path, path.read_text(encoding="utf-8").replace("size: medium", "size: tiny", 1))
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "sprint-size-mismatch"]
+    assert len(hits) == 1, [f.render() for f in hits]
+
+
+def test_missing_size_key_is_not_reported_twice(tmp_path):
+    text = SAMPLE_TINY_FOUR_PARTS.read_text(encoding="utf-8").replace("size: tiny\n", "", 1)
+    put(tmp_path, "SPRINT.md", text)
+    rules = [f.rule for f in check.check_paths([tmp_path]).findings]
+    assert "frontmatter-key-missing" in rules and "sprint-size-mismatch" not in rules

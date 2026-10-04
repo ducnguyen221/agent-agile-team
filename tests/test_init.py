@@ -231,3 +231,48 @@ def test_missing_tiers_table_warns_only_for_a_sprint(tmp_path, capsys):
     assert "AGENT_AGILE_TIERS" not in capsys.readouterr().err
     assert init.main([str(tmp_path), "--date", DATE, *sprint], env={"AGENT_AGILE_TIERS": str(tmp_path / "none.json")}) == 0
     assert "AGENT_AGILE_TIERS" in capsys.readouterr().err
+
+
+# --- Bậc việc nhẹ: `--tiny`, `--size small` (FR7.4) -----------------------------------------------------
+
+
+def h2_of(path: Path) -> list:
+    return [line[3:].split(". ", 1)[-1].strip() for line in path.read_text(encoding="utf-8").split("\n") if line.startswith("## ")]
+
+
+def test_tiny_scaffold_is_the_two_part_template(tmp_path):
+    assert new_sprint(tmp_path, "fix-typo", "--tiny") == 0
+    folder = tmp_path / "docs" / "plans" / f"{DATE}-fix-typo"
+    assert [p.name for p in folder.iterdir()] == ["SPRINT.md"]
+    assert h2_of(folder / "SPRINT.md") == ["Kế hoạch", "Kết quả"]
+    data = c.parse_frontmatter((folder / "SPRINT.md").read_text(encoding="utf-8")).data
+    assert data["doc"] == "sprint" and data["size"] == "tiny" and data["status"] == "drafting"
+    assert [f.render() for f in check.check_paths([tmp_path]).findings if f.level in ("Chặn", "Phải sửa")] == []
+
+
+def test_size_small_scaffold_is_one_sprint_file_with_four_parts(tmp_path):
+    assert new_sprint(tmp_path, "tweak-flow", "--size", "small") == 0
+    folder = tmp_path / "docs" / "plans" / f"{DATE}-tweak-flow"
+    assert [p.name for p in folder.iterdir()] == ["SPRINT.md"]
+    assert h2_of(folder / "SPRINT.md") == ["SPEC", "PLAN", "PROGRESS", "REPORT"]
+    data = c.parse_frontmatter((folder / "SPRINT.md").read_text(encoding="utf-8")).data
+    assert data["doc"] == "sprint" and data["size"] == "small" and data["status"] == "drafting"
+    assert [f.render() for f in check.check_paths([tmp_path]).findings if f.level in ("Chặn", "Phải sửa")] == []
+
+
+def test_size_tiny_alone_equals_tiny_flag(tmp_path):
+    assert new_sprint(tmp_path, "fix-typo", "--size", "tiny") == 0
+    folder = tmp_path / "docs" / "plans" / f"{DATE}-fix-typo"
+    assert [p.name for p in folder.iterdir()] == ["SPRINT.md"] and h2_of(folder / "SPRINT.md") == ["Kế hoạch", "Kết quả"]
+
+
+def test_tiny_with_another_size_is_input_error(tmp_path):
+    assert init.main([str(tmp_path), "--sprint", "ok", "--title", "X", "--tiny", "--size", "small"]) == 2
+    assert files_of(tmp_path) == {}
+
+
+@pytest.mark.parametrize("size", ["medium", "large"])
+def test_medium_and_large_still_scaffold_four_files(tmp_path, size):
+    assert new_sprint(tmp_path, "big-work", "--size", size) == 0
+    folder = tmp_path / "docs" / "plans" / f"{DATE}-big-work"
+    assert sorted(p.name for p in folder.iterdir()) == ["PLAN.md", "PROGRESS.md", "REPORT.md", "SPEC.md"]

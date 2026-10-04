@@ -58,6 +58,8 @@
     {"rule": "frontmatter-key-missing", "exit": 1, "file": "notes/PLAN.md", "line": 1,
      "write": {"notes/PLAN.md": "---\ntitle: Kế hoạch viết tay\n---\n\n# Kế hoạch\n"}},
     {"rule": "frontmatter-value", "exit": 1, "file": "notes/SPRINTS.md", "line": 5,
-     "write": {"notes/SPRINTS.md": "---\nid: SPRINTS\ndoc: sprints\ntitle: Sprint ledger\nnext_id: SPR-1\nupdated: 2026-02-01\n---\n\n# Sổ sprint\n\n## Đang mở\n\n<!-- agile:open:start -->\nKhông có sprint nào đang mở.\n<!-- agile:open:end -->\n\n## Timeline\n"}}
+     "write": {"notes/SPRINTS.md": "---\nid: SPRINTS\ndoc: sprints\ntitle: Sprint ledger\nnext_id: SPR-1\nupdated: 2026-02-01\n---\n\n# Sổ sprint\n\n## Đang mở\n\n<!-- agile:open:start -->\nKhông có sprint nào đang mở.\n<!-- agile:open:end -->\n\n## Timeline\n"}},
+    {"rule": "sprint-size-mismatch", "exit": 1, "file": "SPEC.md",
+     "replace": ["size: medium", "size: tiny"]}
   ]
 }
