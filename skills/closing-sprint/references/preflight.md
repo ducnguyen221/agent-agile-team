@@ -27,9 +27,9 @@ Bậc theo [sizing.md](../../../method/sizing.md); rủi ro là `risk: normal` h
 | Bậc | `risk: normal` | `risk: high` |
 |---|---|---|
 | Rất nhỏ | `SPRINT.md` chia hai phần, Kế hoạch và Kết quả. Người làm được tự chạy phép kiểm nếu khai rõ "tự kiểm, chưa độc lập" — lúc đó trần kết luận là Đạt có điều kiện; phép kiểm do agent khác chạy mới mở đường tới Đạt. Chỉ xét các dòng "mọi bậc" | Không có ô này: rủi ro cao tự động thành cỡ lớn (`frontmatter-value` bắt lệch) |
-| Nhỏ | `SPRINT.md` bốn phần. Một reviewer khác người làm (Analyst chọn Business hay Tech theo phần việc chạm nhiều hơn, ghi `Phán quyết:`). Danh mục: "mọi bậc" và "từ nhỏ" | Không có ô này, như trên |
+| Nhỏ | `SPRINT.md` bốn phần. Một reviewer khác người làm, nhưng reviewer ấy xét **cả hai** lăng kính: khớp SPEC (nghiệp vụ) và kỹ thuật ([process.md](../../../method/process.md) mục 9); không chọn một lăng kính. Danh mục: "mọi bậc" và "từ nhỏ" | Không có ô này, như trên |
 | Vừa | Bốn tài liệu. Hai reviewer; review PLAN trước Cổng 1 đã ghi. Danh mục thêm các dòng "từ vừa" | Không có ô này, như trên |
-| Lớn | Bốn tài liệu cộng thêm theo cỡ: ADR cho quyết định kiến trúc, mục "Đổi hợp đồng / giao diện" trong SPEC, kế hoạch hoàn tác có lệnh. Hai reviewer, mỗi bên có phần không đánh giá. Danh mục đủ mọi dòng | Như ô bên cạnh, **cộng**: mỗi `risk_tags` có thẻ chuyên đề tương ứng đã kiểm; không `VR` nào Chưa chạy; phép kiểm chạy lại trên commit cuối; Phải sửa còn mở là Không đạt |
+| Lớn | Bốn tài liệu cộng thêm theo cỡ: ADR cho quyết định kiến trúc, mục "Đổi hợp đồng / giao diện" trong SPEC, kế hoạch hoàn tác có lệnh. Hai reviewer, mỗi bên có phần không đánh giá. Danh mục đủ mọi dòng | Như ô bên cạnh, **cộng**: mỗi `risk_tags` có thẻ chuyên đề tương ứng đã kiểm; không `VR` nào Chưa chạy; phép kiểm chạy lại trên commit cuối; Phải sửa còn mở là Không đạt; khi `risk_tags` có `rules`, `secret` hoặc `auth` thì **hai reviewer độc lập đã ký** ([dual-review.md](../../../roles/verifier/dual-review.md)) |
 
 Hai ô trống không phải kẽ hở để lách: ai gắn `risk: normal` cho việc chạm vùng rủi ro đang hạ cỡ trái luật
 (sizing.md mục 2); tiền kiểm gặp thì nâng cỡ và ghi `Phán quyết:`.
@@ -64,7 +64,7 @@ dòng áp dụng từ bậc ấy trở lên.
 | 12 | Ngưỡng coverage trong `.agile.json` không đổi, hoặc đổi có ghi lý do | máy: `config-invalid` | mọi bậc, khi có `.agile.json` |
 | 13 | Số đo coverage thật của code mới và code sửa đạt ngưỡng (mặc định 80 %) | tay: đọc báo cáo coverage | mọi bậc |
 | 14 | Diff cả nhánh không chứa secret, khoá, token | tay: đọc diff; việc mang nhãn `secret` thì xem cả thẻ security | mọi bậc |
-| 15 | CHANGELOG chỉ có dòng thêm; file version không đổi | tay: `git diff` của hai file | mọi bậc |
+| 15 | CHANGELOG chỉ có dòng thêm; file version không đổi, **trừ khi** người dùng đã quyết đổi (một `DN` đã được duyệt, hoặc lời duyệt trích nguyên văn) — khớp [conventions.md](../../../method/conventions.md) mục 4.1 | tay: `git diff` của hai file, đối chiếu với `DN` hay lời duyệt | mọi bậc |
 | 16 | Không còn nhãn thang mức cũ | máy: `old-scale-label` | mọi bậc |
 | 17 | `.agile.json` hợp lệ; `visibility: public` thì `artifact_root` nằm ngoài repo | máy: `config-syntax`, `config-invalid`, `config-public-root` | mọi bậc, khi có `.agile.json` |
 

@@ -24,9 +24,10 @@ SPEC (`FR`, `SC`) · PLAN (cách kiểm từng `TK`) · mã và test hiện có 
 án (ngưỡng coverage) · kịch bản kiểm trình duyệt (nếu có).
 
 ## 4. Đầu ra
-`VR` theo [method/evidence.md](../../method/evidence.md): lệnh, môi trường, thời điểm, kỳ vọng ↔ thực
-tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage kèm lệnh đo · **bảng phủ** (từng kịch bản `FR` và từng `SC` đối chiếu `VR` kiểm nó cùng tầng test) · báo cáo kiểm trình duyệt
-chỉ-báo-cáo (điểm sức khoẻ, phát hiện theo thang chung) · log output lưu file, trỏ đường dẫn.
+`VR` theo [method/evidence.md](../../method/evidence.md) (trường ở mục 1, thang kết quả ở mục 2): lệnh, môi trường,
+thời điểm, kỳ vọng ↔ thực tế, kết quả · số coverage kèm lệnh lấy số · **bảng phủ**, mỗi kịch bản `FR` và mỗi `SC` một dòng,
+ghi `VR` kiểm nó và tầng test của `VR` ấy · báo cáo kiểm trình duyệt chỉ-báo-cáo (điểm sức khoẻ, phát hiện theo thang chung) ·
+log output lưu file, trỏ đường dẫn.
 
 ## 5. Được làm
 - Dựng bảng phủ trước khi chạy bất kỳ test nào: mỗi kịch bản `FR` và mỗi `SC` thành một dòng, nêu `VR` sẽ kiểm
