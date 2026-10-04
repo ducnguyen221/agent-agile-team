@@ -1,9 +1,10 @@
 # Vite: plugin, HMR, pre-bundle, thư viện, SSR, mẫu hỏng
 
 > **Kết luận:** phần chi tiết của skill `frontend`. Trước khi chép cấu hình, kiểm phiên bản Vite của dự án
-> (stack mặc định: Vite 5): từ bản mới (nguồn nói v7 trở đi) bộ gói là Rolldown, khoá `rollupOptions` đổi
-> thành `rolldownOptions`, bộ nén mặc định đổi từ esbuild sang Oxc. Ở Vite 5, giữ `build.rollupOptions` và
-> `build.minify` mặc định.
+> (stack mặc định: Vite 5): từ **Vite 8** bộ gói mặc định là Rolldown, khoá `rollupOptions` đổi
+> thành `rolldownOptions`, bộ nén mặc định đổi từ esbuild sang Oxc (Vite 7 vẫn Rollup; trước đó Rolldown chỉ có ở gói
+> `rolldown-vite` riêng). Ở Vite 5 và 7, giữ `build.rollupOptions` và `build.minify` mặc định; đối chiếu tài liệu đúng
+> phiên bản của dự án.
 
 ## 1. Khoá cấu hình hay dùng
 

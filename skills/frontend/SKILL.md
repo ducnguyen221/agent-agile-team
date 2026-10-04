@@ -18,8 +18,9 @@ rewrite_before_public: false
 > build nên **luôn thử bản build** trước khi giao; tối ưu tải thì **đo trước** (bundle, chunk), rồi tách
 > route bằng `lazy`, rồi mới tới chia chunk tay. State ở tầng ứng dụng tách **state-server** khỏi state giao diện.
 
-ASSUMPTION stack: Vite 5 + React 18 + TypeScript. Nguồn viết cho Vite bản mới (từ v7 dùng Rolldown, khoá cấu
-hình đổi tên: `build.rollupOptions` ↔ `build.rolldownOptions`, bộ nén mặc định đổi từ esbuild sang Oxc): luôn
+ASSUMPTION stack: Vite 5 + React 18 + TypeScript. Nguồn viết cho Vite bản mới (từ **Vite 8** mặc định dùng Rolldown, khoá cấu
+hình đổi tên: `build.rollupOptions` ↔ `build.rolldownOptions`, bộ nén mặc định đổi từ esbuild sang Oxc; Vite 7 vẫn dùng
+Rollup, và trước Vite 8 Rolldown chỉ có ở gói `rolldown-vite` riêng): luôn
 đối chiếu tài liệu **đúng phiên bản của dự án** trước khi chép cấu hình.
 
 ## 1. Ranh giới với `react`
