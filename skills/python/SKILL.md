@@ -93,6 +93,8 @@ uv run --with pip-audit pip-audit        # audit lỗ hổng phụ thuộc
 - Commit `uv.lock`; CI chạy `uv sync --locked` để phụ thuộc không trôi.
 - Không sửa cấu hình ruff/mypy/pytest hay hạ ngưỡng coverage chỉ để qua kiểm.
 - Cấu hình đầy đủ `pyproject.toml`: `references/packaging-and-tooling.md`.
+- Chuẩn mã Python bắt buộc của dự án (kiểu, lint, định dạng, ngưỡng): `method/standards/python.md` — file này có
+  khi gộp làn chuẩn; chi tiết trong đó thắng skill này khi hai bên khác nhau.
 
 ## 4. Kiểm thử
 
@@ -106,12 +108,12 @@ uv run --with pip-audit pip-audit        # audit lỗ hổng phụ thuộc
 
 | Cần | Đọc |
 |---|---|
-| Type hint (cơ bản, kiểu dựng sẵn từ 3.9, `TypeVar`, `Protocol`), dataclass (+ kiểm hợp lệ), `NamedTuple` | `references/type-hints-and-dataclasses.md` |
+| Type hint (cơ bản, kiểu dựng sẵn từ 3.9, `TypeVar`, `Protocol`), dataclass (+ kiểm hợp lệ), `NamedTuple`; ghép thay vì kế thừa nhiều tầng | `references/type-hints-and-dataclasses.md` |
 | Bắt và nối ngoại lệ, cây ngoại lệ riêng, context manager (`@contextmanager`, `__enter__`/`__exit__`), decorator (hàm, có tham số, dạng lớp) | `references/errors-context-decorators.md` |
-| Comprehension vs generator; thread vs process vs asyncio; `__slots__`; ghép chuỗi hiệu quả | `references/generators-concurrency-performance.md` |
-| Bố cục `src/`, thứ tự import, export trong `__init__.py`, `pyproject.toml` đầy đủ (uv, ruff, mypy, pytest) | `references/packaging-and-tooling.md` |
+| Comprehension vs generator; thread vs process vs asyncio; `__slots__`; ghép chuỗi hiệu quả; `lru_cache`; đo bằng `cProfile`/`tracemalloc` | `references/generators-concurrency-performance.md` |
+| Bố cục `src/`, thứ tự import, export trong `__init__.py`, `pyproject.toml` đầy đủ (uv, ruff, mypy, pytest); `[project.scripts]` + `__main__.py` + `uv build`; gỡ vòng import | `references/packaging-and-tooling.md` |
 | Triết lý test, cấu trúc test pytest, assert, nên/không nên, lệnh chạy test | `references/testing.md` |
-| Fixture (scope, params, autouse, `conftest.py`), `parametrize`, marker | `references/testing-fixtures.md` |
+| Fixture (scope, params, autouse, `conftest.py`), `monkeypatch`, test phụ thuộc thứ tự chạy, `parametrize`, marker | `references/testing-fixtures.md` |
 | Mock/patch (`autospec`, `side_effect`, `PropertyMock`), test async | `references/testing-mocking-async.md` |
 | Test ngoại lệ, file tạm, bố cục thư mục test, lớp test, mẫu test API/DB, cấu hình pytest | `references/testing-organization.md` |
 
