@@ -1,9 +1,9 @@
 ---
 name: verify-before-done
 description: Use when about to say work is done, fixed, passing or ready, before marking a TK done, committing, opening a PR, moving to the next task, handing back to the coordinator, or accepting another agent success report, and whenever recording a VR.
-source: [obra/superpowers skills/verification-before-completion/SKILL.md]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d]
-license: [MIT]
+source: [obra/superpowers skills/verification-before-completion/SKILL.md, affaan-m/ECC skills/verification-loop/SKILL.md]
+source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, ef648e01899ba3e8dc6371642deaaf64b4477775]
+license: [MIT, MIT]
 rewrite_before_public: false
 metadata:
   group: verification
@@ -39,6 +39,9 @@ Bỏ một bước là đoán, không phải kiểm. Không chạy được (thi
 Dạng câu báo: `<lệnh>` → `<kết quả then chốt>` (mã thoát, số đạt/hỏng) · commit `<mốc>` · cây sạch/bẩn →
 `<tuyên bố>`.
 
+Báo xong một `TK` **có đổi mã** thì bước 2 là vòng sáu pha build · kiểu · lint · test · bảo mật · diff:
+`references/loop.md`.
+
 ## 3. Tuyên bố nào cần bằng chứng nào
 
 | Tuyên bố | Cần | Không đủ |
@@ -51,6 +54,7 @@ Dạng câu báo: `<lệnh>` → `<kết quả then chốt>` (mã thoát, số �
 | Agent khác làm xong | diff trong VCS + chạy lại phép kiểm | agent báo "thành công" |
 | Đạt yêu cầu | đối chiếu từng `FR`/`SC` (mục 6) | test xanh |
 | Coverage đạt ngưỡng | lệnh đo coverage + số | "đã viết thêm test" |
+| Sổ tập trung khớp hồ sơ (dự án khai `ledger.project`) | `check` **trên gốc dự án** (có `.agile.json`) mới chạy **sau khi ghi sổ**: không `ledger-stale`, không `ledger-missing-row` | lần `check` hôm qua, "chắc khớp", "ghi sổ lúc đóng sprint" |
 
 ## 4. Test hồi quy: vòng gỡ sửa → hỏng
 
@@ -70,6 +74,9 @@ Không gỡ được bản sửa an toàn (thay đổi lớn, nhiều file) → 
 - Implementer tự kiểm trước khi báo xong `TK` và ghi bằng chứng vào PROGRESS; `VR` dùng cho kiểm định do
   **agent khác** người làm chạy (QA hoặc reviewer). Cùng một agent → ghi "tự kiểm, chưa độc lập".
 - Mốc code, spec hoặc toolchain đổi → bằng chứng cũ hết hạn cho phần bị ảnh hưởng; chạy lại.
+- Dự án khai sổ tập trung: trước khi báo xong `TK` hay sẵn sàng Cổng 2, trạng thái và ngày ở dòng sổ phải khớp PROGRESS
+  (`method/process.md` mục 11). Chưa khớp → ghi sổ rồi chạy lại `check` **trên gốc dự án**, dẫn kết quả vào lời báo; không chạy được thì
+  phần sổ là Chưa chạy.
 - Output dài lưu `.tmp/` của sprint, trong tài liệu chỉ giữ dòng then chốt + đường dẫn.
 
 ## 6. Đạt yêu cầu ≠ test xanh
@@ -108,10 +115,18 @@ agent khác vào PROGRESS hay `VR`.
 | "Agent kia báo thành công" | Kiểm độc lập |
 | "Kiểm một phần là đủ" | Một phần không chứng minh cả phần |
 | "Diễn đạt khác nên luật không áp" | Tinh thần hơn câu chữ |
-| "Việc nhỏ, khỏi kiểm" | Việc rất nhỏ vẫn cần một lệnh + kết quả trong lời báo cuối |
+| "Việc nhỏ, khỏi kiểm" | Việc rất nhỏ vẫn cần một lệnh + kết quả **mới chạy** trong lời báo cuối; không có agent thứ hai thì `VR` ghi "tự kiểm, chưa độc lập" và kết luận tối đa **Đạt có điều kiện** |
 
 ## 10. Khi nào áp dụng
 
 **Luôn**, trước: mọi tuyên bố thành công hay hoàn thành dưới mọi cách diễn đạt · commit, push, mở PR ·
 đánh dấu `TK` xong trong PROGRESS · chuyển sang `TK` kế · giao tiếp việc cho agent khác hay nhận việc về ·
 ghi `VR` · trình Cổng 2.
+
+## 11. Đọc thêm
+
+- `references/loop.md` — sáu pha của vòng kiểm cho `TK` có đổi mã, mẫu báo cáo từng pha.
+- `method/evidence.md` mục 8 — cổng giao hàng: năm kiểm cơ học trước khi trình Cổng 2.
+- `method/review-gate.md` — cổng review chia theo khía cạnh, gộp theo bằng chứng, kiểm đối kháng.
+- `roles/verifier/dual-review.md` — việc có `risk_tags` là `rules`, `secret` hoặc `auth` phải có **hai** reviewer độc
+  lập cùng rubric, cả hai Đạt mới Đạt.

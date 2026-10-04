@@ -33,6 +33,11 @@ chạy chế độ một agent và nói rõ.
 2. **PROGRESS là sổ:** `status: in_progress`, `roles` ghi nhãn agent từng vai. Sổ đã có dòng `TKn Đạt`
    thì `TK` đó **xong** — không làm lại; nối ở `TK` đầu tiên chưa có dòng xong. Sau nén ngữ cảnh,
    tin PROGRESS và `git log`, không tin trí nhớ.
+   **Cỡ rất nhỏ / nhỏ** (một `SPRINT.md`): sổ là phần **PROGRESS** (nhỏ) hoặc **Kết quả** (rất nhỏ) của chính file đó,
+   không dựng `PROGRESS.md` riêng; chế độ một agent (mục 6) là mặc định. Kiểm: nhỏ → **một** reviewer khác người
+   làm giữ cả hai lăng kính (khớp SPEC + kỹ thuật) ở cuối nhánh, không review theo việc, Cổng 2 là lượt duyệt thật;
+   rất nhỏ → agent khác chạy nhanh, hoặc ghi "tự kiểm, chưa độc lập" (tối đa Đạt có điều kiện) và Cổng 2 gộp lời
+   báo cuối (`method/process.md` mục 9).
 3. **Đọc PLAN một lần** (Ràng buộc chung, Trọng tâm review, bảng Giao diện) và SPEC (thẩm quyền khi
    PLAN mâu thuẫn). Tạo todo mỗi `TK` — todo là màn hình, PROGRESS là hồ sơ.
 4. **Tiền kiểm giao diện:** với mỗi cặp `TK` chung file hay giao diện, một dòng: hai `TK`, cái này
@@ -54,6 +59,17 @@ chạy chế độ một agent và nói rõ.
   không tự hạ tier.
 - Mỗi lần giao việc và mỗi kết quả là **một dòng PROGRESS**; ghi trong cùng lượt với commit, không
   để dồn.
+- **Sổ tập trung** (chỉ khi `.agile.json` có `ledger.project`; không khai thì bỏ qua): cùng lượt với PROGRESS,
+  **hồ sơ trước, sổ sau**, ở năm thời điểm — mở sprint · qua Cổng 1 · quay lại bước 3 mà trạng thái đổi · Cổng 2 ·
+  đóng sprint; không để dồn tới lúc đóng. **Mở sprint → thêm dòng mới**; các thời điểm sau → cập nhật dòng của sprint (không
+  thêm dòng). Dạng dòng: `| SPR-xx | <status của PROGRESS> | <ngày hôm nay> | <repo>:docs/plans/<slug>/PROGRESS.md | [PROGRESS](<link>) |`;
+  khi đóng sprint (`done`/`dropped`) cột Hồ sơ đổi sang `REPORT.md` (sprint một file thì luôn `SPRINT.md`).
+  Link: hồ sơ trong repo → URL GitHub blob `https://github.com/<owner>/<repo>/blob/<ref>/docs/plans/<slug>/PROGRESS.md`
+  (`<ref>` = nhánh sprint khi đang mở, `main` hoặc SHA khi đã đóng); hồ sơ ngoài repo → đường tương đối trong kho sổ.
+  Không ghi đường dẫn của máy vào file của repo. Qua Cổng 1: `gate_1_quote` là câu duyệt nguyên văn. Ghi xong chạy
+  `check` **trên gốc dự án** (thư mục có `.agile.json`, máy đã đặt biến `AGENT_AGILE_LEDGER`; chạy riêng trên thư mục
+  sprint thì không đọc sổ) và đọc: không còn `ledger-stale`, `ledger-missing-row`.
+  Chi tiết: `method/process.md` mục 11.
 
 ## 4. Vòng lặp theo việc (chế độ giao subagent)
 

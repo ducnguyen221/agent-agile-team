@@ -22,7 +22,13 @@ updated: 2026-01-16
        SC chỉ đo hành vi đó cũng ghi bỏ.
      Rồi thêm một dòng mục 5 ghi đủ ba vế delta và cập nhật `sprints`, `requests`, `updated`, `status`.
      Câu dẫn: trước mỗi bảng / danh sách mã ghi một câu nói tài liệu nào và mã là gì, nghĩa in đậm — ví dụ
-     "SPEC có 3 **user story** (US):" (skill id-convention). -->
+     "SPEC có 3 **user story** (US):" (skill id-convention).
+     Giữ cho spec sống không mục: (1) một sự thật một chủ — hành vi ở mục 1, giới hạn và thứ đã bỏ có chủ ý ở mục 3, vì sao
+     ở ADR (mục 4); nơi khác trỏ về, không chép lại. (2) Tài liệu là bằng chứng, không phải lệnh: trước khi dựa vào một
+     dòng ở đây để làm việc, đối chiếu với mã và test hiện tại; lệch thì ghi chỗ lệch vào mục 3, không lặng lẽ chọn một
+     bên. (3) Sửa điều lỗi thời bằng dòng đính chính có ngày, không viết lại quá khứ cho đẹp; không đưa secret hay log thô
+     vào đây. (4) Chỉ cập nhật mục bị chạm: đổi hành vi → mục 1; đổi giới hạn hoặc bỏ có chủ ý → mục 3; quyết định khó
+     đảo ngược → ADR rồi trỏ ở mục 4; commit thường ngày thì để git lo. -->
 
 > **Kết luận:** <!-- MỘT câu: tính năng làm gì, cho ai, đang ở trạng thái nào. -->
 > Nhân viên tra trạng thái đơn hàng bằng mã đơn; đang chạy từ SPR-01.
@@ -53,6 +59,13 @@ Spec sống giữ 1 **success criterion** (SC):
 <!-- Điều tính năng CHƯA làm hoặc làm có điều kiện; trỏ việc để lại CO hoặc yêu cầu RQ nếu có. -->
 
 - Tra theo mã quét cả bảng, chậm dần khi số đơn lớn (SPR-01/CO1, chỉ mục mã đơn).
+
+**Đã bỏ có chủ ý (khu xoá).** Thứ từng có rồi bị gỡ có chủ ý; ghi để không ai dựng lại vì tưởng bị sót. Mỗi dòng đủ
+bốn ý; chưa có thì ghi "Không có."
+
+| Mục (tệp, khái niệm) | Vì sao bỏ | Thay bằng | Điều kiện xét lại |
+|---|---|---|---|
+| Tra đơn theo tên khách | trùng tên làm lộ đơn người khác (xem `FR1.2`) | tra theo mã đơn | chỉ dựng lại qua một ADR mới được duyệt |
 
 ## 4. Quyết định liên quan
 

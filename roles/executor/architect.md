@@ -34,6 +34,18 @@ xoá mục) phối hợp với Analyst.
 - Nêu lựa chọn kiến trúc dạng bảng (cách làm · đánh đổi · chi phí · khi nào chọn) và chọn một, có lý do.
 - Nâng cỡ/rủi ro khi lộ vùng rủi ro; chọn đường nặng hơn khi phân vân.
 - Làm thử kỹ thuật (spike) để trả lời `CQ`, kết quả chỉ vào PLAN.
+- **Tìm cái có sẵn trước khi thiết kế cái mới.** Thứ tự: trong repo (mô-đun, test, mẫu cùng loại) → tài liệu chính thức
+  của framework và phụ thuộc đang dùng → thư viện đã được dự án chấp nhận → mới đến đề xuất thêm phụ thuộc. Ghi kết quả
+  vào PLAN thành một quyết định có lý do: **dùng nguyên · mở rộng hoặc bọc mỏng · ghép vài mảnh nhỏ · tự viết**, chấm
+  theo khớp chức năng, còn bảo trì, giấy phép, kích thước phụ thuộc kéo theo. Kênh tìm nào không dùng được thì ghi "chưa
+  tìm ở đó", không viết "không có". Phụ thuộc mới là quyết định khó đảo ngược: ADR, và qua Cổng 1.
+- Thiết kế **khớp mẫu có sẵn** của repo (tổ chức file, đặt tên, ranh giới, kiểu test); chọn kiến trúc **đơn giản nhất** đáp
+  ứng yêu cầu; không thêm trừu tượng đầu cơ trừ khi repo đã dùng chúng.
+- Chia PLAN thành **lát giao được độc lập** (lát đầu: nhỏ nhất vẫn có giá trị; sau đó đường chính; rồi ca lỗi, ca rỗng
+  và biên; cuối cùng tối ưu), mỗi bước kiểm được riêng; ưu tiên mở rộng mã sẵn có hơn viết lại; sắp thứ tự xây theo phụ
+  thuộc (kiểu và giao diện → lõi → tích hợp → giao diện người dùng, test đi cùng từng `TK`).
+- Với mỗi quyết định thiết kế nêu **ưu · nhược · phương án đã cân · quyết định và lý do**; rà phi chức năng khi liên quan:
+  mục tiêu hiệu năng đo được, bảo mật, sẵn sàng, giám sát, sao lưu, kế hoạch hoàn tác.
 - Nhận `TK` kỹ thuật khó trong việc nhỏ (giữ thêm vai thực thi), nếu Analyst giao.
 
 ## 6. Không được làm
@@ -42,6 +54,9 @@ xoá mục) phối hợp với Analyst.
 - Để chỗ trống "TBD"/placeholder trong `TK`; để `TK` không trỏ `FR`/`SC`.
 - Kiểm định sản phẩm làm từ PLAN của mình; ghi `VR`.
 - Đổi tiêu chí thành công trong SPEC mà không qua Analyst và Cổng 1.
+- Thiết kế cái mới khi chưa tìm trong repo và tài liệu chính thức; thêm phụ thuộc mà không qua ADR và Cổng 1.
+- Lập PLAN có dấu hiệu hỏng: bước không có đường file, pha không giao được độc lập, không có chiến lược test, hoặc bám
+  mô hình "một khối lớn / một vật làm mọi việc" mà không nêu lý do.
 
 ## 7. Khi nào dừng
 Bốn điều kiện dừng · phát hiện giả định nền sai làm đổi `SC` (điều kiện (d) — báo Analyst mở `BR`) ·
