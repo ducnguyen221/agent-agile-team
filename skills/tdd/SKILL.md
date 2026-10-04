@@ -4,9 +4,9 @@ description: Use when implementing any feature, bug fix, refactor or behavior ch
 metadata:
   group: technique
   roles: [implementer, qa]
-source: [obra/superpowers skills/test-driven-development/SKILL.md, obra/superpowers skills/test-driven-development/writing-good-tests.md, obra/superpowers-skills skills/testing/testing-anti-patterns/SKILL.md]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, cdcd624ad3fd8026deb692e565351854569798dd]
-license: [MIT, MIT, MIT]
+source: [obra/superpowers skills/test-driven-development/SKILL.md, obra/superpowers skills/test-driven-development/writing-good-tests.md, obra/superpowers-skills skills/testing/testing-anti-patterns/SKILL.md, affaan-m/ECC agents/tdd-guide.md]
+source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, cdcd624ad3fd8026deb692e565351854569798dd, ef648e01899ba3e8dc6371642deaaf64b4477775]
+license: [MIT, MIT, MIT, MIT]
 rewrite_before_public: false
 ---
 

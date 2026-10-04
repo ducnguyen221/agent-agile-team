@@ -4,10 +4,10 @@ description: Use when a user hands over a new request in plain words (feature, f
 metadata:
   group: process
   roles: [analyst]
-source: "affaan-m/ECC skills/prompt-optimizer (missing-context checklist, via local distill); method/process.md step 1"
-source_sha: c70874fae9eb0e5ad0365beb7e2955899fd1d30f
+source: ["affaan-m/ECC skills/prompt-optimizer (missing-context checklist, via local distill); method/process.md step 1", "affaan-m/ECC skills/intent-driven-development, skills/product-capability (business rules not readable from code; observable acceptance criteria)"]
+source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, ef648e01899ba3e8dc6371642deaaf64b4477775]
 base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: MIT
+license: [MIT, MIT]
 rewrite_before_public: false
 ---
 

@@ -4,9 +4,9 @@ description: Use when a request has been registered and a SPEC must be written b
 metadata:
   group: process
   roles: [analyst, architect]
-source: obra/superpowers skills/brainstorming/SKILL.md
-source_sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
-license: MIT
+source: [obra/superpowers skills/brainstorming/SKILL.md, affaan-m/ECC agents/spec-miner.md]
+source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, ef648e01899ba3e8dc6371642deaaf64b4477775]
+license: [MIT, MIT]
 rewrite_before_public: false
 ---
 

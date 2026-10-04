@@ -9,7 +9,7 @@
 
 ## Sprint
 
-Sổ tập trung ghi mỗi dòng một **sprint** (SPR); cột Trạng thái dùng đúng giá trị `status` của PROGRESS hoặc SPRINT, cột Cập nhật là ngày ghi dòng (`YYYY-MM-DD`, không cũ hơn `updated` của hồ sơ), cột Hồ sơ là `<repo>:docs/plans/<slug>/<tài-liệu>.md`, cột Link là liên kết bấm được:
+Sổ tập trung ghi mỗi dòng một **sprint** (SPR); cột Trạng thái dùng đúng giá trị `status` của PROGRESS hoặc SPRINT, cột Cập nhật là ngày ghi dòng (`YYYY-MM-DD`, không cũ hơn `updated` của hồ sơ), cột Hồ sơ là `<repo>:docs/plans/<slug>/<tài-liệu>.md` (`<tài-liệu>` là `PROGRESS.md` khi sprint đang mở, `REPORT.md` khi đã `done`/`dropped`, `SPRINT.md` với sprint một file), cột Link là liên kết bấm được:
 
 - hồ sơ **trong repo** → URL GitHub blob `https://github.com/<owner>/<repo>/blob/<ref>/docs/plans/<slug>/<tài-liệu>.md` (`<ref>` là nhánh sprint khi đang mở; `main` hoặc SHA khi đã đóng);
 - hồ sơ **ngoài repo** → đường tương đối tính từ thư mục chứa file sổ này tới thư mục plan.

@@ -319,13 +319,17 @@ lượt** — mỗi lần ghi trạng thái cụ thể kèm bằng chứng, khô
 | Qua Cổng 1 | `in_progress`, `gate_1: approved` và câu duyệt nguyên văn | PROGRESS (hoặc `SPRINT.md`) + dòng sổ | `gate_1_quote` |
 | Quay lại bước 3 sau kiểm định **mà trạng thái đổi** | `in_progress` hoặc `blocked`, `review_round` mới; việc `RF` phải sửa còn mở | PROGRESS + dòng sổ | `RF` và `VR` của vòng vừa xong |
 | Cổng 2 | `awaiting_gate_2`, rồi `done` hoặc `dropped` theo lời người dùng; `verdict` | REPORT + PROGRESS + dòng sổ | `gate_2_quote`; kết quả trong REPORT |
-| Đóng sprint | trạng thái cuối; link đổi sang `main` hoặc SHA khi hồ sơ nằm trong repo | dòng sổ (cập nhật, không thêm dòng) | lệnh gộp hoặc commit vừa chạy |
+| Đóng sprint | trạng thái cuối; cột Hồ sơ đổi sang `REPORT.md`; link đổi sang `main` hoặc SHA khi hồ sơ nằm trong repo | dòng sổ (cập nhật, không thêm dòng) | lệnh gộp hoặc commit vừa chạy |
 
 Dòng sổ có năm cột: `Sprint` · `Trạng thái` (đúng giá trị `status` của PROGRESS hoặc `SPRINT.md`) · `Cập nhật`
-(ngày `YYYY-MM-DD`, không cũ hơn `updated` của hồ sơ) · `Hồ sơ` (`<repo>:docs/plans/<slug>/<tài-liệu>.md`) ·
+(ngày `YYYY-MM-DD`, không cũ hơn `updated` của hồ sơ) · `Hồ sơ` (`<repo>:docs/plans/<slug>/<tài-liệu>.md`; `<tài-liệu>` là `PROGRESS.md` khi sprint đang mở, `REPORT.md` khi đã
+`done`/`dropped`, và luôn `SPRINT.md` với sprint một file) ·
 `Link` bấm được. Hồ sơ **trong repo** → URL GitHub blob với `<ref>` là nhánh sprint khi đang mở, `main` hoặc SHA khi
 đã đóng. Hồ sơ **ngoài repo** → đường tương đối trong kho sổ tới thư mục plan. Visibility của repo chỉ khuyến nghị
 nơi đặt hồ sơ, không quyết hình link.
+
+**Chạy `check` trên gốc dự án** (thư mục có `.agile.json`); `check` đọc sprint theo `paths.sprint_dir`. Chạy riêng trên thư mục
+sprint thì không thấy `.agile.json` nên **không đọc sổ** — kết quả không có phát hiện về sổ chưa phải là sổ khớp.
 
 `check` bắt lệch khi dự án đã khai: sprint đang mở (khác `done`, `dropped`) không có dòng → Phải sửa
 (`ledger-missing-row`); dòng lệch `status` hoặc ngày cũ hơn `updated` → Phải sửa (`ledger-stale`); file sổ không có,

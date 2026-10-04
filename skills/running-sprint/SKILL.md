@@ -61,12 +61,14 @@ chạy chế độ một agent và nói rõ.
   để dồn.
 - **Sổ tập trung** (chỉ khi `.agile.json` có `ledger.project`; không khai thì bỏ qua): cùng lượt với PROGRESS,
   **hồ sơ trước, sổ sau**, ở năm thời điểm — mở sprint · qua Cổng 1 · quay lại bước 3 mà trạng thái đổi · Cổng 2 ·
-  đóng sprint; không để dồn tới lúc đóng. Cập nhật dòng của sprint (không thêm dòng):
-  `| SPR-xx | <status của PROGRESS> | <ngày hôm nay> | <repo>:docs/plans/<slug>/PROGRESS.md | [PROGRESS](<link>) |`.
+  đóng sprint; không để dồn tới lúc đóng. **Mở sprint → thêm dòng mới**; các thời điểm sau → cập nhật dòng của sprint (không
+  thêm dòng). Dạng dòng: `| SPR-xx | <status của PROGRESS> | <ngày hôm nay> | <repo>:docs/plans/<slug>/PROGRESS.md | [PROGRESS](<link>) |`;
+  khi đóng sprint (`done`/`dropped`) cột Hồ sơ đổi sang `REPORT.md` (sprint một file thì luôn `SPRINT.md`).
   Link: hồ sơ trong repo → URL GitHub blob `https://github.com/<owner>/<repo>/blob/<ref>/docs/plans/<slug>/PROGRESS.md`
   (`<ref>` = nhánh sprint khi đang mở, `main` hoặc SHA khi đã đóng); hồ sơ ngoài repo → đường tương đối trong kho sổ.
   Không ghi đường dẫn của máy vào file của repo. Qua Cổng 1: `gate_1_quote` là câu duyệt nguyên văn. Ghi xong chạy
-  `check` của repo (máy đã đặt biến `AGENT_AGILE_LEDGER`) và đọc: không còn `ledger-stale`, `ledger-missing-row`.
+  `check` **trên gốc dự án** (thư mục có `.agile.json`, máy đã đặt biến `AGENT_AGILE_LEDGER`; chạy riêng trên thư mục
+  sprint thì không đọc sổ) và đọc: không còn `ledger-stale`, `ledger-missing-row`.
   Chi tiết: `method/process.md` mục 11.
 
 ## 4. Vòng lặp theo việc (chế độ giao subagent)
