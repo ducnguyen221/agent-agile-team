@@ -53,13 +53,13 @@ sau hai sprint.
 | Đường dẫn | Mục đích |
 |---|---|
 | `AGENTS.md` | Luật lõi nạp đầu phiên (ngân sách ≤120 dòng, ≤10 KB) |
-| `method/` | Quy trình, cỡ việc, thang mức, bằng chứng, quy ước |
+| `method/` | Quy trình, cỡ việc, thang mức, bằng chứng, quy ước, cổng review; `standards/` là các chuẩn code |
 | `roles/` · `tiers/` | Thẻ vai (thực thi, kiểm định, chuyên đề); định nghĩa tier và hợp đồng bảng tier |
 | `skills/` · `agents/` | Skill để phẳng (`skills/<tên>/SKILL.md`); agent (chỉ đọc, riêng `build-fixer` được sửa — T2) |
 | `templates/` | Mẫu tài liệu sprint, sổ gốc, cấu hình dự án |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; test; dự án mẫu kèm kết quả kỳ vọng |
 | `hosts/` | Cài và nạp theo từng harness, điểm cắm của lớp riêng |
-| `docs/` | Bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa |
+| `docs/` | Bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa; xử lý sự cố; cập nhật từ nguồn gốc |
 
 ## Ghi nhận
 
