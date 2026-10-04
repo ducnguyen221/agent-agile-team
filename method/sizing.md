@@ -79,12 +79,14 @@ Bảng có 5 hàng — mỗi hàng một **luồng** ở cột đầu:
 |---|---|---|---|---|
 | Thêm tính năng (hành vi chưa có) | **Vừa** — luôn có hành vi hay luồng mới | viết test mới cho hành vi mới, thấy nó hỏng **đúng lý do**, rồi mới viết mã | Cổng 1 và Cổng 2 đủ | `intake` → `shaping-spec` → `writing-plan` → `running-sprint` + `tdd` → `code-review` |
 | Đổi hành vi có sẵn (chạy đúng nhưng muốn khác) | **Nhỏ** — một luồng, một `FR`, không đổi hợp đồng; **Vừa** khi đổi nhiều hơn một `FR` | sửa **test hiện có** cho khớp hành vi mới rồi đổi mã tới khi đạt; sửa test trước là điểm phân biệt đổi hành vi với sửa lỗi | Cổng 1 và Cổng 2 thật (trình ngắn) | `intake`, `shaping-spec` (delta **Sửa** cho spec sống), `tdd`, `code-review` |
-| Sửa lỗi (hành vi sai, hồi quy) | **Nhỏ** — sửa lỗi là đổi hành vi nên không xuống Rất nhỏ; lỗi chạm vùng rủi ro (mục 2) thì **Lớn** | tái hiện lỗi thành **test hỏng** (test hồi quy) rồi sửa; chứng minh bằng vòng gỡ sửa → hỏng → đặt lại ([evidence.md](evidence.md) mục 4) | Cổng 1 và Cổng 2 thật | `bug-triage` (chấm mức, định tuyến) → `debugging` → `tdd` → `verify-before-done` |
+| Sửa lỗi (hành vi sai, hồi quy) | lỗi **hành vi** (logic, hồi quy): **Nhỏ** — đổi hành vi nên không xuống Rất nhỏ; lỗi **chữ hay nhãn** không đổi hành vi (câu báo sai chính tả, nhãn nút): **Rất nhỏ** theo mục 1; lỗi chạm vùng rủi ro (mục 2): **Lớn** | lỗi hành vi: tái hiện thành **test hỏng** (test hồi quy) rồi sửa; lỗi chữ: sửa rồi chạy lại phép kiểm hiện có; chứng minh bằng vòng gỡ sửa → hỏng → đặt lại ([evidence.md](evidence.md) mục 4) | Cổng 1 và Cổng 2 thật | `bug-triage` (chấm mức, định tuyến) → `debugging` → `tdd` → `verify-before-done` |
 | Tái cấu trúc (giữ hành vi, đổi cấu trúc) | theo **phạm vi đụng tới**: **Nhỏ** khi một mô-đun cục bộ; **Vừa** khi nhiều mô-đun hoặc đổi giao diện nội bộ; **Lớn** khi chạm hợp đồng bên ngoài | xác nhận test liên quan **đang xanh trước khi chạm mã**; thiếu thì viết test mô tả hành vi hiện tại; đổi từng bước nhỏ, chạy lại sau mỗi bước; diff phải trung tính về hành vi | như cỡ đã chọn | `tdd`, `code-review` (kể cả tìm hàm trùng lặp), `verify-before-done` |
 | Dựng bản đầu từ tài liệu thiết kế | **Lớn** | đọc tài liệu, trích phạm vi, quyết định đã khoá và danh sách tính năng; cắt thành **lát dọc mỏng** (một đường chạy hết đầu–cuối trước, không làm hết lớp này rồi mới tới lớp kia) | Cổng 1 và Cổng 2 đủ; mỗi lát một mục tiêu nên **một sprint một lát**, cùng trỏ về một `RQ-` | `intake`, `shaping-spec`, `writing-plan`, `adr` |
 
 Luật đi kèm:
 
+- **Số file dự kiến là dấu hiệu phụ, không phải tiêu chí cứng:** một đến hai file nghiêng về Rất nhỏ / Nhỏ, nhiều hơn năm file
+  nghiêng về Vừa; hành vi, hợp đồng và rủi ro (mục 1–2) vẫn quyết cỡ, số file chạm không quyết.
 - **Luồng không hạ cỡ.** Cột "cỡ tối thiểu" là sàn; mục 1 (phân vân chọn bậc nặng hơn) và mục 2 (rủi ro chỉ nâng)
   vẫn quyết cỡ cuối cùng. Việc chạm vùng rủi ro nào ở mục 2 cũng thành cỡ lớn, bất kể luồng.
 - **Cổng 2 là nghiệm thu sau REPORT**, không đặt trước từng lần commit. Commit nằm trong bước thực thi theo từng
