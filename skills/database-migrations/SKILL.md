@@ -23,6 +23,9 @@ rewrite_before_public: false
 ## 1. Nguyên tắc
 
 1. **Mọi thay đổi là một migration** — không sửa tay DB production; không có dấu vết, không lặp lại được.
+   Ngoại lệ duy nhất: gỡ trạng thái hỏng của công cụ (cờ dirty của golang-migrate) hoặc khôi phục dữ liệu sau
+   lệnh sai — theo runbook đã ghi và được người dùng gật (`references/django-golang-migrate.md`,
+   `references/postgres-safe-ddl.md` mục 8).
 2. **Production chỉ đi tới** — "hoàn tác" ở production là một migration tới mới; bản `downgrade` dùng cho
    môi trường phát triển và diễn tập.
 3. **Schema và dữ liệu tách riêng** — không trộn DDL với cập nhật dữ liệu trong một migration.
@@ -36,6 +39,8 @@ rewrite_before_public: false
 - [ ] Có cả `upgrade` và `downgrade`, hoặc ghi rõ "không đảo ngược được" kèm lý do.
 - [ ] Không khoá toàn bảng trên bảng lớn (dùng thao tác đồng thời).
 - [ ] Cột mới cho phép rỗng hoặc có mặc định (không thêm `NOT NULL` không mặc định vào bảng đã có dữ liệu).
+- [ ] Khoá ngoại trên bảng đã có dữ liệu: `NOT VALID` → dọn dòng mồ côi → `VALIDATE`; đổi kiểu cột: đã đếm dòng
+      không ép được kiểu (`references/postgres-safe-ddl.md` mục 6, 7).
 - [ ] Index trên bảng đã có tạo bằng `CONCURRENTLY`.
 - [ ] Backfill là migration riêng: chia lô, idempotent, chạy tiếp được khi đứt, có log tiến độ.
 - [ ] Đã thử trên bản sao dữ liệu cỡ production (rủi ro cao: diễn tập đủ — mục 5).
@@ -96,9 +101,9 @@ import model ORM hiện hành vào migration — model đổi theo thời gian, 
 
 | Cần | Đọc |
 |---|---|
-| DDL an toàn trên Postgres: thêm/bỏ/đổi tên cột, index đồng thời, backfill bảng lớn theo lô | [references/postgres-safe-ddl.md](references/postgres-safe-ddl.md) |
+| DDL an toàn trên Postgres: thêm/bỏ/đổi tên cột, index đồng thời, backfill bảng lớn theo lô, khoá ngoại + dòng mồ côi, đổi kiểu với dữ liệu hỏng, khôi phục sau `UPDATE` sai | [references/postgres-safe-ddl.md](references/postgres-safe-ddl.md) |
 | Diễn tập trên bản sao, đo khoá/độ trễ, runbook production, tiêu chí huỷ | [references/rehearsal.md](references/rehearsal.md) |
-| Django, golang-migrate | [references/django-golang-migrate.md](references/django-golang-migrate.md) |
+| Django, golang-migrate (trạng thái dirty và `force`, trùng số phiên bản, quy ước đánh số) | [references/django-golang-migrate.md](references/django-golang-migrate.md) |
 | Prisma, Drizzle, Kysely (Node) | [references/orm-tooling-node.md](references/orm-tooling-node.md) |
 
 Thiết kế schema, index, truy vấn Postgres: skill `postgres`. Review migration chuyên đề dữ liệu: agent

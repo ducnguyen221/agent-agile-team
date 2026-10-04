@@ -43,10 +43,13 @@ Không đổi tên trực tiếp ở production. Đi theo mở rộng → thu h�
 ALTER TABLE users ADD COLUMN display_name TEXT;
 -- Bước 2 (migration 002, dữ liệu): backfill theo lô (mục 5)
 UPDATE users SET display_name = username WHERE display_name IS NULL;  -- bảng nhỏ; bảng lớn dùng mục 5
--- Bước 3: deploy mã đọc/ghi cả hai cột
--- Bước 4 (migration 003): ngừng ghi cột cũ, rồi bỏ nó
+-- Bước 3: deploy mã đọc/ghi cả hai cột, rồi deploy bản chỉ đọc/ghi cột mới (mã không còn tham chiếu `username`)
+-- Bước 4 (migration 003, ở lần deploy SAU bước 3 — mục 4): bỏ cột cũ
 ALTER TABLE users DROP COLUMN username;
 ```
+
+Bước 4 không chạy cùng lúc với việc ngừng ghi cột cũ: bỏ cột chỉ sau khi bản deploy không còn tham chiếu nó đã
+chạy ổn (mục 4).
 
 ## 4. Bỏ cột an toàn
 
@@ -90,3 +93,73 @@ END $$;
 
 Điều kiện `WHERE normalized_email IS NULL` làm vòng lặp **idempotent**: dừng giữa chừng rồi chạy lại vẫn
 đúng. Bảng nóng: thêm khoảng nghỉ giữa các lô, theo dõi lag replica và khoá (`rehearsal.md`).
+
+## 6. Thêm khoá ngoại lên bảng đã có dữ liệu (có thể có dòng mồ côi)
+
+```sql
+SET lock_timeout = '5s';   -- ADD FOREIGN KEY giữ khoá ghi ngắn trên CẢ HAI bảng; không chờ khoá vô hạn
+ALTER TABLE orders ADD CONSTRAINT fk_orders_warehouse
+  FOREIGN KEY (warehouse_id) REFERENCES warehouses (id) NOT VALID;   -- bỏ qua quét dòng cũ
+
+-- Dòng mồ côi: có warehouse_id nhưng bảng cha không có dòng tương ứng
+SELECT o.id, o.warehouse_id
+FROM orders o LEFT JOIN warehouses w ON w.id = o.warehouse_id
+WHERE o.warehouse_id IS NOT NULL AND w.id IS NULL;
+
+-- Sau khi dọn xong (migration dữ liệu riêng, mục 5):
+ALTER TABLE orders VALIDATE CONSTRAINT fk_orders_warehouse;
+CREATE INDEX CONCURRENTLY idx_orders_warehouse_id ON orders (warehouse_id);
+```
+
+- `NOT VALID` bỏ quét dòng cũ nhưng **vẫn kiểm mọi lần ghi sau đó**: dòng mới trỏ vào cha không tồn tại bị từ
+  chối, nên báo đội ứng dụng trước khi thêm.
+- `VALIDATE CONSTRAINT` quét cả bảng nhưng chỉ giữ khoá `SHARE UPDATE EXCLUSIVE` trên bảng con và `ROW SHARE`
+  trên bảng cha (không chặn đọc/ghi thường) — khác với `ADD FOREIGN KEY` trực tiếp, vốn giữ `SHARE ROW
+  EXCLUSIVE` suốt lúc quét.
+- Dòng mồ côi là **quyết định nghiệp vụ**, không phải của migration: đặt `NULL` (nếu cột cho phép), trỏ về một
+  bản ghi cha "không rõ", tạo lại bản ghi cha thiếu, hoặc xoá. Chốt với người dùng, rồi sửa bằng migration dữ
+  liệu chia lô; ghi số dòng mồ côi trước và sau vào báo cáo.
+- Postgres **không** tự tạo index trên cột khoá ngoại phía bảng con; thiếu nó thì mỗi lần xoá hay đổi dòng ở
+  bảng cha quét cả bảng con. Dựng bằng `CONCURRENTLY` (mục 2).
+
+## 7. Đổi kiểu cột khi dữ liệu có thể không hợp lệ (ví dụ `TEXT` → `JSONB`)
+
+`ALTER COLUMN … TYPE` thường ghi lại cả bảng và giữ `ACCESS EXCLUSIVE`; một dòng không ép được kiểu làm cả
+lệnh hỏng giữa chừng. Bảng lớn, ghi liên tục: không đổi tại chỗ, đi qua mở rộng → chuyển → thu hẹp
+(`SKILL.md` mục 3) với cột mới `payload_jsonb`, và **đo số dòng hỏng trước khi viết backfill**:
+
+```sql
+-- PostgreSQL 16+: kiểm tra chuỗi có hợp lệ cho kiểu đích mà không ném lỗi
+SELECT count(*) FROM events WHERE NOT pg_input_is_valid(payload, 'jsonb');
+-- Bản cũ hơn: hàm bọc bắt lỗi ép kiểu
+CREATE FUNCTION try_jsonb(t text) RETURNS jsonb LANGUAGE plpgsql IMMUTABLE AS $$
+BEGIN RETURN t::jsonb; EXCEPTION WHEN others THEN RETURN NULL; END $$;
+SELECT count(*) FROM events WHERE payload IS NOT NULL AND try_jsonb(payload) IS NULL;
+```
+
+- Xử lý dòng hỏng là **quyết định chốt với người dùng**: chép sang bảng cách ly kèm `id` (để sửa hoặc huỷ
+  sau), để cột mới `NULL`, hoặc bọc nguyên chuỗi thành một giá trị JSON (`to_jsonb(payload)`). Không bỏ dòng
+  hỏng đi mà không ghi lại.
+- Backfill duyệt theo **khoá chính tăng dần** (`WHERE id > :last_id ORDER BY id LIMIT :batch`) rồi chỉ ép các
+  dòng hợp lệ; đừng dùng `WHERE cột_mới IS NULL` làm điều kiện lặp — dòng hỏng không bao giờ được điền nên vòng
+  lặp không kết thúc. Mẫu theo khoá chính: `django-golang-migrate.md` mục 1.
+- Diễn tập (xem `rehearsal.md`) phải chạy trên bản sao có đúng dòng hỏng của production; tập dữ liệu sạch
+  không chứng minh gì cho phần này.
+
+## 8. Khôi phục sau một lệnh `UPDATE` sai
+
+Nguyên tắc: **không sửa chồng lên dữ liệu sai bằng một `UPDATE` đoán mò**; dừng, xác định phạm vi, lấy lại giá
+trị cũ từ nguồn đáng tin, rồi đưa về bằng migration dữ liệu.
+
+1. Còn trong giao dịch chưa `COMMIT` → `ROLLBACK`, xong. Phòng từ đầu: chạy `UPDATE` hàng loạt trong `BEGIN`,
+   so số dòng bị đổi với con số dự tính, chỉ `COMMIT` khi khớp.
+2. Đã `COMMIT`: dừng ghi thêm vào bảng nếu có thể, ghi lại thời điểm và câu lệnh đã chạy, báo người dùng.
+3. Có bản chụp trước khi sửa (`CREATE TABLE users_bak AS SELECT id, <cột sẽ đổi> FROM users WHERE <cùng điều
+   kiện>` — việc nên làm trước mọi cập nhật hàng loạt) → lấy giá trị cũ từ đó.
+4. Không có bản chụp → khôi phục theo thời điểm (point-in-time recovery: bản sao lưu gốc + WAL đã lưu, dừng ở
+   `recovery_target_time` ngay trước lệnh sai) vào **một máy riêng**, không bao giờ khôi phục đè lên production;
+   đọc giá trị cũ của các dòng bị đổi từ máy đó.
+5. Đưa giá trị cũ về production bằng migration dữ liệu chia lô, idempotent (mục 5), chỉ sửa dòng mà giá trị hiện
+   tại **vẫn bằng giá trị sai** do lệnh đó sinh ra — dòng người dùng đã sửa hợp lệ sau đó thì giữ nguyên.
+6. Chạy trên dữ liệu thật là hành động không đảo ngược: runbook (phạm vi, câu lệnh, cách kiểm) trình người dùng
+   gật trước. Kiểm sau cùng: số dòng và tổng kiểm trên cột liên quan khớp với bản cũ.
