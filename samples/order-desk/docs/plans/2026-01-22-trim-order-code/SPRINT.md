@@ -60,7 +60,7 @@ PLAN có 1 **task** (TK):
 |---|---|---|---|
 | TK1 (cắt khoảng trắng mã đơn) | Implementer · T2 · model-x | Đạt | `pytest tests/test_lookup.py` → 1 passed |
 
-- **2026-01-20 10:00 +07** — Implementer thêm bước cắt khoảng trắng; test xanh.
+- **2026-01-22 10:00 +07** — Implementer thêm bước cắt khoảng trắng; test xanh.
 - **Vướng mắc:** Không có.
 
 ## 4. REPORT
