@@ -56,6 +56,15 @@ Không cần sửa thân skill: GREEN đạt cả ba ở lượt đầu. Điểm
 mỗi dòng gắn test về `TK` sở hữu), mục 4 (sáu dòng bắt buộc + khối Bước RED → FAIL → GREEN → PASS → commit mang mã
 `TK`) và mục 6 (tự review 5 điểm).
 
+## Lượt RED `wp-4` (`SPR-04`, `TK5.5`) — bỏ qua, đã đạt
+
+Kịch bản `wp-4` ("chia theo lớp, test dồn cuối", yêu cầu của Analyst) chạy RED trên bản hiện tại của skill (chủ thể `sonnet`,
+đọc `SKILL.md` bằng đường tuyệt đối, cấm công cụ gọi skill; agent `a2e94729834ba1ff4`, kỳ vọng ghi trước khi giao): chủ thể từ
+chối "dồn test cuối", cắt 5 `TK` theo lát giao được độc lập, mỗi `TK` có test và cách kiểm riêng, trỏ `FR`, đánh dấu rủi ro webhook
+và tiền, có Trọng tâm review ≤5. **Đạt sẵn → không sửa skill, không thêm kịch bản**: `skill_sha` và `result` ở frontmatter giữ
+nguyên. Chủ thể chạy dưới luật nền nên lượt này không chứng minh skill một mình giữ được kỷ luật; nó chỉ cho thấy không có lỗ
+hổng mới để vá. Output trọn: hồ sơ sprint `SPR-04`, `evidence/TK4/pressure-red-tk5.md` (hồ sơ riêng của chủ repo).
+
 ## Chạy lại
 
 Như `skills/intake/tests/pressure.md` mục "Chạy lại"; GREEN đọc `<worktree>/skills/writing-plan/SKILL.md` bằng
