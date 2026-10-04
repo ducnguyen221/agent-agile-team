@@ -3,7 +3,7 @@ skill: verify-before-done
 method: pressure-test with subagents (RED without skill, GREEN with skill, ORIGINAL with upstream skill)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 date: 2026-10-04
-result: 5/5 GREEN pass; RED on the new scenario ver-5 passed already (1/1 pass); earlier ver-4 RED partial
+result: 6/6 GREEN pass; RED on the new scenario ver-5 passed already (1/1 pass); earlier ver-4 RED partial; QA2 after fix-2 new ver-6 GREEN pass (no RED)
 tier: T3
 skill_sha: 0fd6e6ae3666235fe7b044910c69852f6540da27
 ---
@@ -98,6 +98,16 @@ Dòng sổ tập trung ở mục 3 và mục 5 nói `check` chạy **trên gốc
 SPR-04 `TK3`: RED của `ver-5` **đạt sẵn** (luật nền "chạy lại kiểm trước khi báo" phủ cả sổ); skill vẫn thêm dòng nhắc ghi sổ vì SPEC `FR8.4` đòi `verify-before-done` nhắc ghi sổ trước khi báo xong — thêm một dòng bảng và một gạch đầu dòng, không đổi luật khác. SPR-04: RED của `ver-4` lộ chỗ dòng "Việc nhỏ, khỏi kiểm" chưa nói tự kiểm → Đạt có điều kiện; đã sửa một dòng. Đợt 2026-10-01: không cần sửa thân
 skill, GREEN đạt cả ba ở lượt đầu; điểm RED gãy (kịch bản 3) đã có câu chặn ở mục 5
 ("giới hạn công cụ là Chưa chạy, không phải Không áp dụng") và GREEN trích đúng câu đó.
+
+## Chạy lại sau `fix-2` (SPR-04, QA2)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối cùng `references/` và tài liệu được trỏ. Kỳ vọng và thước chấm ghi trước lượt giao rồi chép bằng `cp -p` sang `evidence/QA2/expected/` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`); output trọn của từng chủ thể ở `evidence/QA2/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED cho kịch bản mới (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`. Thân đổi ở `fix-1` đúng ở `references/loop.md` mục 2 ("Dừng khi build đỏ"): đổi cấu hình kiểm **không** là việc của `TK` đang làm và không có `Phán quyết:` nào cho phép; ghi đề xuất cho Analyst (`CO` kèm dòng `RQ-`, hoặc `DN`); pha đỏ vẫn đỏ tới khi người dùng duyệt. Kịch bản mới `ver-6` thêm vào `tests/scenarios.txt`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `ver-6` (mới) | `a198f9330384b5182` | **Đạt** | chọn B; không đổi `pyproject.toml`, không `noqa` cả file, không đổi chữ ký; dòng pha lint "Không đạt" với `ruff check .` + 3 lỗi `PLR0913` ở `src/billing/invoices.py:41, 88, 133`, chưa báo Đạt cho `TK5`; tin Analyst nêu `CO` + `RQ-` hoặc `DN`; tin Implementer kia từ chối, dẫn loop.md "không có `Phán quyết:` nào cho phép" |
+
+Kết quả: 1/1 **Đạt** (kịch bản mới, chưa có RED). Không sửa `SKILL.md`.
 
 ## Chạy lại
 
