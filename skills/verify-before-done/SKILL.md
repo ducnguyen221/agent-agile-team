@@ -39,6 +39,9 @@ Bỏ một bước là đoán, không phải kiểm. Không chạy được (thi
 Dạng câu báo: `<lệnh>` → `<kết quả then chốt>` (mã thoát, số đạt/hỏng) · commit `<mốc>` · cây sạch/bẩn →
 `<tuyên bố>`.
 
+Báo xong một `TK` **có đổi mã** thì bước 2 là vòng sáu pha build · kiểu · lint · test · bảo mật · diff:
+`references/loop.md`.
+
 ## 3. Tuyên bố nào cần bằng chứng nào
 
 | Tuyên bố | Cần | Không đủ |
@@ -119,3 +122,11 @@ agent khác vào PROGRESS hay `VR`.
 **Luôn**, trước: mọi tuyên bố thành công hay hoàn thành dưới mọi cách diễn đạt · commit, push, mở PR ·
 đánh dấu `TK` xong trong PROGRESS · chuyển sang `TK` kế · giao tiếp việc cho agent khác hay nhận việc về ·
 ghi `VR` · trình Cổng 2.
+
+## 11. Đọc thêm
+
+- `references/loop.md` — sáu pha của vòng kiểm cho `TK` có đổi mã, mẫu báo cáo từng pha.
+- `method/evidence.md` mục 8 — cổng giao hàng: năm kiểm cơ học trước khi trình Cổng 2.
+- `method/review-gate.md` — cổng review chia theo khía cạnh, gộp theo bằng chứng, kiểm đối kháng.
+- `roles/verifier/dual-review.md` — việc có `risk_tags` là `rules`, `secret` hoặc `auth` phải có **hai** reviewer độc
+  lập cùng rubric, cả hai Đạt mới Đạt.
