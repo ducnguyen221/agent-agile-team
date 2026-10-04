@@ -76,7 +76,7 @@ kết luận chung ở REPORT, mục "Phát hiện của reviewer".
 
 | Cách hỏng | Dấu hiệu | Thuốc |
 |---|---|---|
-| Vòng vô tận | reviewer cứ tìm ra lỗi mới sau mỗi lần sửa | trần 3 vòng, rồi hỏi người dùng |
+| Vòng vô tận | reviewer cứ tìm ra lỗi mới sau mỗi lần sửa | mốc 3 vòng (không trần cứng), rồi hỏi người dùng |
 | Reviewer dễ dãi | cả hai Đạt hết | brief ghi "việc của bạn là tìm vấn đề"; rubric có điều kiện cụ thể |
 | Trôi sang phong cách | cờ toàn là sở thích | rubric chỉ điều kiện xác định |
 | Sửa lỗi này sinh lỗi kia | lỗi mới xuất hiện sau vòng sửa | reviewer mới mỗi vòng bắt hồi quy |

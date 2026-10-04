@@ -185,6 +185,7 @@ def test_old_scale_label_inside_a_sentence(tmp_path, text):
     "Critical thinking và low-level API không phải nhãn mức.",
     "Đặt mức cao hơn cho việc này là hợp lý; ưu tiên thấp nhất vẫn làm.",
     "Độ tin cậy cao, confidence interval hẹp, confidence là gì?",
+    "Báo cáo ghi confidence: 8/10 và confidence = 0.9 (không phải ngưỡng so sánh).",
     "Mức rủi ro của việc này do người dùng quyết.",
     "Bảng quy đổi ghi `CRITICAL` → Chặn và `[HIGH]` → Phải sửa.",
     "Hàm `highlight()` trả về giá trị thấp nhất.",

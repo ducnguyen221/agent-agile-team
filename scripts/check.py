@@ -151,7 +151,7 @@ OLD_FIELD = re.compile(
 OLD_SRC_WORD = re.compile(r"(?<![\w/\-.])(CRITICAL|HIGH|MEDIUM|LOW)(?![\w/\-])")
 OLD_SRC_BRACKET = re.compile(
     r"^\s*(?:[-*+>]\s+)*\[(CRITICAL|HIGH|MEDIUM|LOW|BLOCK|WARN|INFO|NOTE|Critical|Important|Minor|Warning)\]")
-OLD_SRC_CONFIDENCE = re.compile(r"(?i)\bconfidence\s*(?:≥|>=|>|=|:)\s*[0-9]+")
+OLD_SRC_CONFIDENCE = re.compile(r"(?i)\bconfidence\s*(?:≥|>=|>)\s*[0-9]+")
 SELF_CHECK = "tự kiểm, chưa độc lập"
 NOT_APPLICABLE = "NOT_APPLICABLE"
 # NOT_APPLICABLE chỉ miễn khi có lý do theo sau (một chữ sau dấu nối tuỳ chọn).
