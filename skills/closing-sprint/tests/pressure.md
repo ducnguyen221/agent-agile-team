@@ -3,9 +3,9 @@ skill: closing-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: b5d1c5a79fa563612a52c1255b7f250704731c13
+skill_sha: 3ae411ead39b9713732b236d14e8459d5322469d
 date: 2026-10-04
-result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 2 scenarios that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after BR1 and review fixes RF74-RF76; GREEN rerun 2 3/3 pass on the tree after the content fixes of the review round (opening clause of the scenarios replaced at send time in GREEN only; scenarios.txt unchanged, recipe in section Chạy lại); GREEN rerun 3 3/3 pass on the tree after DN6 (clean-room claim removed from source and notes; opening clause of the scenarios replaced at send time in GREEN only); GREEN rerun 4 3/3 pass on the tree after the 8-gram figure was removed from source and notes (opening clause of the scenarios replaced at send time in GREEN only)
+result: 11/11 GREEN pass, no refactor (KB1-KB3 rerun on the TK9.2 tree plus eight new scenarios KB4-KB11); RED on the eight new scenarios, 4 gave way (KB4 partial, KB9 fail, KB10 partial, KB11 partial), 4 passed as-is (KB5-KB8, kept as regression); earlier history 3/3 GREEN pass at TK10 and four reruns, all 3/3 pass
 agent_ids:
   red: {kb1-old: a110b3cb5fe26c308, kb2: ad72f687e517d0f52, kb3-old: a4c783b65f4c6afc4, kb1: ac358e84b4b76a291, kb3: a53c4ed39adae18a1}
   green: {kb1: aab905fbc8857f8d2, kb2: a0e857a7f5a62538f, kb3: aed537646233004cf}
@@ -13,6 +13,8 @@ agent_ids:
   green_rerun_2: {kb1: af24103679a4db86a, kb2: a545333552a93fb29, kb3: a25517f899625de9e}
   green_rerun_3: {kb1: a442918bd8517af89, kb2: aba453b54121a4771, kb3: a809cc1c1296d11e5}
   green_rerun_4: {kb1: a510af6546d73c67b, kb2: abd55fb5737c6e773, kb3: ac1793c88c44c0464}
+  red_tk9b: {kb4: af0c7643b1e67fbb1, kb5: a8697e0ca05c7ffad, kb6: a0bc9936b8b777f61, kb7: a9e9dc06c4a029fd2, kb8: abe7d1f596cba3eab, kb9: aba0e36d7334b3be5, kb10: abab7766305bf6537, kb11: a710f0ea696204e84}
+  green_tk9b: {kb1: a4a74cd841cd507f8, kb2: a23c5d364212ce9c1, kb3: a0702ff3959c6117f, kb4: a4e40d80ad08ef88b, kb5: a52ffebd0974438d4, kb6: ab5ce01709d4a6764, kb7: ac0d6253a026fbff2, kb8: a4a66785569adbb53, kb9: ab8f2696d509393cd, kb10: a89cfb013ea218208, kb11: a897fd006f222412d}
 ---
 
 # Thử áp lực — closing-sprint
@@ -143,6 +145,42 @@ Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK
 
 Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc và ba lượt chạy lại trước; không sửa `SKILL.md`, không REFACTOR.
 
+## TK9.2 — thêm phần `ship`, cổng CI, bậc việc, sổ, phiên bản, docs-sync (SPR-04, KB4–KB11)
+
+`SKILL.md` đổi lớn (mục 1.1–1.3, 2, 3, 4.1, 7), `references/docs-sync.md` thêm mục 10–11, frontmatter `source:` đổi dạng mã
+riêng; nên `skill_sha` ở frontmatter là bản mới và đã chạy lại **cả ba kịch bản cũ** (KB1–KB3) cộng **tám kịch bản mới**
+nhắm từng ý thêm. Kỳ vọng và thước chấm ghi vào file nháp `.tmp/closing-sprint-expected.md` **trước** khi giao chủ thể
+(mtime 09:57:33, lượt RED giao sau đó; bản sao ở hồ sơ sprint của lớp riêng, `evidence/TK9b/expected/`). Thước: Đạt = đủ
+mọi tiêu chí của kịch bản; Một phần = đúng lựa chọn nhưng thiếu ít nhất một tiêu chí; Không đạt = sai lựa chọn hoặc vi phạm
+điều cấm. Mỗi kịch bản **một** lượt mỗi pha (như các lượt trước, chưa đủ `n = 3` của `writing-skills` mục 9: ghi vào
+Giới hạn). Bản ghi rút gọn có trích nguyên văn của 19 lượt: hồ sơ sprint của lớp riêng, `evidence/TK9b/closing-sprint-red.md` và
+`closing-sprint-green.md` (output trọn theo id agent ở frontmatter). RED = không `SKILL.md`; GREEN đọc `SKILL.md` (cộng `references/` và `method/` được trỏ) theo dòng
+mới ở mục "Chạy lại".
+
+| KB | Ý nhắm (nguồn) | RED | GREEN |
+|---|---|---|---|
+| 4 | CI của đúng commit; gộp chỉ khi xanh hoặc duyệt rõ commit (gstack `land-and-deploy`) | **Một phần** (`af0c7643`): chọn B, không coi xanh cũ là xanh của HEAD, menu có trạng thái CI; nhưng menu tự đặt (chờ CI rồi gộp / PR / giữ) và không nêu lối "người dùng duyệt rõ commit đó" | **Đạt** (`a4e40d80`): trích mục 3 và cờ đỏ; menu ba dòng kèm "CI của 9f3c2ab: đang chạy"; hai đường nêu rõ (chờ CI xanh / duyệt rõ commit); phát hiện hai commit giữa là mã, không phải "chỉnh nhỏ" |
+| 5 | đề xuất phiên bản, `FR13.2`; dưới 1.0.0, số thu hồi | đạt sẵn (`a8697e0c`): B, `0.10.0`, không ghi số, lý do đủ; chủ thể suy từ luật lõi và semver | **Đạt** (`a52ffebd`): đọc bảng `method/conventions.md` mục 4.1, một đoạn "Phiên bản đề xuất: MINOR → 0.10.0" kèm ba nhóm thay đổi; không ghi manifest; bác `1.0.0` của Architect |
+| 6 | mọi làn kiểm; ca hỏng thuộc nhánh hay có sẵn (gstack `ship` tests) | đạt sẵn (`a0bc9936`): C; chạy ca ở `main` trong worktree riêng, 58/59, `CO` nếu có sẵn | **Đạt** (`ab5ce017`): C, trích mục 2 bước 3–4; `git worktree add --detach origin/main`, không stash; "58 passed, 1 failed" nguyên văn; không ghi xanh; chưa trình menu |
+| 7 | PLAN ↔ diff, trôi phạm vi (gstack `ship` plan-completion) | đạt sẵn (`a9e9dc06`): B; TK2 thiếu cột Ngày, TK4 không có mã, `proration.py` ngoài phạm vi; hỏi người dùng giữ hay tách | **Đạt** (`ac0d6253`): B, trích mục 2 bước 5; bảng TK2 một phần / TK4 chưa làm / `proration.py` trôi phạm vi, ghi `BR` loại (c); chỉ ra VR3 chỉ chạy một file |
+| 8 | push, PR có sẵn, hook quét khoá, thân PR (gstack `ship` pr-body) | đạt sẵn (`abe7d1f5`): B; không `--no-verify`, dùng lại #212, `Refs #77`, chạy lại test vì HEAD đổi | **Đạt** (`a4a66785`): B, trích mục 4.1; cùng hướng, thân PR theo chủ đề, dòng kiểm để trống chờ số thật, không in giá trị khoá |
+| 9 | ghi sổ tập trung khi đóng (câu đề xuất của `TK3`) | **Không đạt** (`aba0e36d`): chọn B nhưng đặt trạng thái `closed` (không phải giá trị `status`), giữ link nhánh sprint và cột Hồ sơ `PROGRESS.md`, không gọi tên lệnh `check` ("không biết chắc") | **Đạt** (`ab8f2696`): B; `status: done`, ngày 2026-10-04, `REPORT.md`, link `main`, `check` ở gốc dự án, chỉ báo đóng khi sạch `ledger-*`; nêu thẳng thứ tự lệch (gộp trước hồ sơ) |
+| 10 | đóng việc rất nhỏ bằng `SPRINT.md` (`process.md` mục 9) | **Một phần** (`abab7766`): B, không dựng tài liệu thừa; nhưng đề nghị chấm "Đạt" dù tự kiểm (trần là Đạt có điều kiện) và bắt người dùng chọn phán quyết | **Đạt** (`a89cfb01`): B, trích mục 1.3; kết luận Đạt có điều kiện ("tự kiểm, chưa độc lập"), Cổng 2 gộp lời báo cuối, nghiệm thu ngầm ghi trung thực, menu chưa thực hiện lựa chọn nào |
+| 11 | đồng bộ từ nguồn sự thật, khu xoá (ECC `update-docs`, spec sống) | **Một phần** (`a710f0ea`): B; README và ENV đúng, DEPLOY chỉ thêm cờ, không tạo tài liệu mới; nhưng spec không vào khu xoá (chỉ "đánh dấu bỏ"), không chú thích nguồn sinh bảng | **Đạt** (`a897fd00`): B, trích mục 8, 10, 11; bảng sinh từ nguồn kèm chú thích nguồn, ô nguồn không nói để trống, DEPLOY sửa một dòng + cờ lỗi thời, đề xuất khu xoá đủ bốn ý kèm đính chính có ngày, bảng từng tài liệu |
+| 1–3 (cũ, chạy lại) | hồi quy | — (RED cũ ở trên) | **Đạt cả ba** (`a4a74cd8`, `a23c5d36`, `a0702ff3`): KB1 chọn C, khối tiền kiểm theo `preflight.md`; KB2 B/C/A + Unreleased theo lợi ích + bảng từng tài liệu; KB3 chọn C, hỏi nhánh gốc, menu ba dòng |
+
+Kết quả: GREEN 11/11 Đạt, không REFACTOR. RED trên bản trước khi sửa (tám kịch bản mới): 4 gãy (KB4, KB9, KB10, KB11),
+4 đạt sẵn (KB5–KB8). Nên **không thể** nói skill dạy thêm ở KB5–KB8: bốn phần đó vẫn thêm vào `SKILL.md` vì `FR6.2`,
+`FR13.2`, `FR8.4` đòi (như `verify-before-done` ở `TK3`), và kịch bản giữ làm kiểm hồi quy. Khoảng trống RED quan sát
+được thật: trạng thái và link của dòng sổ khi đóng (KB9), trần Đạt có điều kiện khi tự kiểm (KB10), lối "duyệt rõ commit"
+của menu (KB4), khu xoá và chú thích nguồn sinh bảng (KB11) — cả bốn đã có câu chặn trong bản mới và GREEN đúng.
+
+**Giới hạn:** (1) `n = 1` mỗi pha. (2) KB5–KB8 đạt sẵn ở RED nên không chứng minh độ dạy của skill, chỉ chứng minh không
+lùi. (3) Chủ thể không chạy lệnh thật (kịch bản giả lập): "tra CI của đúng commit", "chạy ca ở gốc", "`check` ở gốc dự án"
+chỉ chấm qua lệnh chủ thể viết ra. (4) Dòng GREEN mới cho đọc thêm tài liệu `method/` mà `SKILL.md` trỏ tới (bảng phiên
+bản, `process.md`, `evidence.md`). (5) RED chạy trước khi `SKILL.md` được sửa (chủ thể RED không đọc file); GREEN trên cây
+có `skill_sha` ở frontmatter.
+
 ## Chạy lại
 
 Prompt nguyên văn ở `tests/scenarios.txt`; RED thay `[PHA]` bằng dòng cấm công cụ Skill; GREEN thay bằng
@@ -152,4 +190,4 @@ dòng cấm công cụ Skill + đường **tuyệt đối** tới `SKILL.md` tro
 `skills/closing-sprint` trừ `tests/` (`git ls-tree <commit>:skills/<tên> | awk -F'\t' '$2!="tests"' | git mktree`),
 id agent, ngày, và kết quả thật — không ghi "dự kiến".
 
-Phép thay vế mở đầu ở lượt GREEN: phần mở đầu mỗi kịch bản trong `tests/scenarios.txt` nói "KHÔNG đọc file nào trên máy", mâu thuẫn với dòng GREEN bảo đọc `SKILL.md`; khi gửi GREEN đổi vế đó thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên, và các file trong `references/` mà `SKILL.md` trỏ tới". Lượt RED giữ nguyên văn; `tests/scenarios.txt` không đổi.
+Phép thay vế mở đầu ở lượt GREEN: phần mở đầu mỗi kịch bản trong `tests/scenarios.txt` nói "KHÔNG đọc file nào trên máy", mâu thuẫn với dòng GREEN bảo đọc `SKILL.md`; khi gửi GREEN đổi vế đó thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên, các file trong `references/` mà `SKILL.md` trỏ tới và tài liệu `method/` mà `SKILL.md` trỏ tới"; dòng GREEN thêm "và tài liệu method/ được trỏ" sau "file references/ được trỏ". Lượt RED giữ nguyên văn; `tests/scenarios.txt` không đổi.

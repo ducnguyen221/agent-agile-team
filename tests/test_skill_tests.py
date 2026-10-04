@@ -365,7 +365,7 @@ def test_retrieval_result_is_computed_from_its_table(path):
     assert str(front(path)["result"]) == retrieval_result(c.read_text(path))
 
 
-README_ROW = re.compile(r"^\| \[(?P<skill>[a-z-]+)\]\([^)]*\) \| [^|]+ \| `(?P<file>[a-z]+\.md)` \| (?P<result>.*) \| (?P<date>[0-9-]+) \|$")
+README_ROW = re.compile(r"^\| \[(?P<skill>[a-z0-9-]+)\]\([^)]*\) \| [^|]+ \| `(?P<file>[a-z]+\.md)` \| (?P<result>.*) \| (?P<date>[0-9-]+) \|$")
 
 
 def readme_status_rows():
@@ -679,7 +679,7 @@ def test_local_grading_paragraph_is_caught():
 # dấu code kèm tên ngắn trong ngoặc: `TK10` (viết lại phòng sạch), theo AGENTS.md mục "Mã định danh" (RF164).
 PRIVATE_CODE = re.compile(r"\b(?:(?:SPR|RQ|FS)-\d+|(?:CO|RF|TK|DN|BR|VR|CQ)\d+(?:\.\d+)?)\b")
 # Skill đang nợ dòng `source:` mà làn khác sở hữu SKILL.md: ghi lý do; test dưới đỏ khi hết nợ để người sửa gỡ dòng này.
-SOURCE_CODE_DEBT = {"closing-sprint": "SKILL.md thuộc làn C (TK9.2); sửa `source:` ở lượt chạy lại của làn đó"}
+SOURCE_CODE_DEBT = {}
 
 
 def source_code_gaps(entries) -> list:
@@ -705,9 +705,10 @@ def test_skill_source_private_codes_carry_a_name_in_code(skill):
     assert source_code_gaps(source_entries(skill)) == []
 
 
-@pytest.mark.parametrize("skill", sorted(SOURCE_CODE_DEBT))
-def test_source_code_debt_is_still_owed(skill):
-    assert source_code_gaps(source_entries(skill)), f"`{skill}` hết nợ: gỡ nó khỏi SOURCE_CODE_DEBT"
+def test_source_code_debt_is_still_owed():
+    # vòng lặp thay vì parametrize: danh sách nợ rỗng (hết nợ) là trạng thái bình thường, parametrize rỗng sẽ thành ca skip
+    for skill in sorted(SOURCE_CODE_DEBT):
+        assert source_code_gaps(source_entries(skill)), f"`{skill}` hết nợ: gỡ nó khỏi SOURCE_CODE_DEBT"
 
 
 @pytest.mark.parametrize("bad", ["rewrite in SPR-04 TK10: old text", "see CO2 and RQ-021", "`TK10` rewrite", "`CO2`(x)", "`RQ-021` ()",

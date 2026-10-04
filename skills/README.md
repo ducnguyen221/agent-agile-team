@@ -107,7 +107,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | Skill | Loại | Tệp thử | `result` | `date` |
 |---|---|---|---|---|
 | [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
-| [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
+| [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 11/11 GREEN pass | 2026-10-04 |
 | [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
 | [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
@@ -117,22 +117,26 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [debugging](debugging/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [deployment](deployment/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/6 (+0 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-04 |
+| [e2e-testing](e2e-testing/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [fastapi](fastapi/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
+| [frontend](frontend/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [github-ops](github-ops/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [postgres](postgres/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/6 (+0 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-04 |
 | [python](python/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/6 (+0 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-04 |
+| [react](react/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [tdd](tdd/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
 | [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/6 (+0 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-04 |
-| [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after 1 REFACTOR round | 2026-10-01 |
+| [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
 | [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 5/5 GREEN pass | 2026-10-04 |
-| [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 2/3 GREEN pass (wq-1 partial: fails only code format `RF-A`; wq-2, wq-3 pass); RED 0/2 pass (2 partial) on the discriminating scenarios | 2026-10-03 |
+| [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass on the final tree (wq-1 to wq-3 rerun plus new wq-4 to wq-6) | 2026-10-04 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
-| [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
+| [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 8/8 GREEN pass | 2026-10-04 |
 | [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after the TK9 rewrite; TK12 rerun: GREEN 3/3 on the old scenarios and on 4 new ones (KB5 partial against the expectation) | 2026-10-04 |
 
 Agent reviewer chuyên đề: [agents/README.md](../agents/README.md). Gặp tên cũ trong hồ sơ lịch sử:
