@@ -1,105 +1,94 @@
+
 # Diễn tập migration
 
-<!-- Nguồn ý: bộ skill quy trình private, `migration-rehearsal` (không giấy phép). Viết lại từ danh sách ý có mang một số
-     câu chữ nguồn (`TK10.4`); chưa đạt quy trình phòng sạch, phải viết lại
-     thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo). -->
+> **Kết luận:** lần chạy đầu tiên của một migration nặng hoặc rủi ro cao không được rơi vào dữ liệu thật. Cần
+> sẵn ba thứ: **số đo** các bảng bị chạm, **một buổi diễn tập** trên bản sao dựng lại từ bản lưu và có cỡ ngang
+> production, cùng **runbook** ghi giá trị cụ thể, ngưỡng dừng và lệnh hoàn tác. Kết quả diễn tập được
+> ghi thành `VR` để reviewer và người dùng đối chiếu.
 
-> **Kết luận:** trước khi xin chạy thật bất kỳ migration nào từ rủi ro vừa trở lên, chạy thử nó trọn vẹn trên
-> **một bản sao có lượng dữ liệu như production** và ghi lại các số đo ở mục 2 bước 4; đường lùi được viết và
-> review **trước** đường tiến; runbook production nêu **tiêu chí huỷ** bằng con số và từng bước hoàn tác. Dữ liệu chỉ đi một chiều: chạy ở production rồi
-> thì "hoàn tác" là một migration tiến mới — vì thế mọi bất ngờ phải lộ ra ở buổi diễn tập, không ở buổi thật.
+## 1. Khi nào phải diễn tập
 
-**Dùng khi:** thêm hoặc sửa file migration, với bất kỳ công cụ nào (Alembic, Flyway, Knex, Prisma, SQL thuần);
-lệnh `ALTER`/`DROP`/`CREATE INDEX`, đổi khoá ngoại, đổi kiểu cột; mọi script ghi lại dữ liệu hàng loạt (lấp
-cột mới, chữa dữ liệu sai).
-**Không dùng khi:** thay đổi không đụng tới nơi lưu dữ liệu, hoặc việc chỉ là đọc — xem cấu trúc bảng, chạy báo cáo.
+Cỡ lớn hoặc `risk_tags` có `data_migration` (`method/sizing.md`): đổi kiểu cột, bỏ cột, backfill trên bảng
+hay bị ghi, thêm ràng buộc lên bảng đã có dữ liệu, dựng index trên bảng lớn. Migration nhỏ, bảng nhỏ, thêm
+cột cho phép rỗng thì kiểm cú pháp và chạy trên môi trường phát triển là đủ; ghi lý do bỏ diễn tập vào PLAN.
 
-## 1. Đầu vào
+## 2. Số liệu đầu vào
 
-- File migration (cả hướng tiến và hướng lùi) và script backfill nếu có.
-- **Số liệu thật của các bảng bị chạm** (số dòng, dung lượng kể cả index), lấy bằng một truy vấn chạy ngay lúc
-  chuẩn bị, trên staging hay bản sao; con số nhớ được hay ghi trong tài liệu cũ không dùng. Ví dụ trên Postgres (số dòng là ước lượng từ thống kê, đủ để chọn chiến lược):
+Với **mỗi bảng bị chạm**, ghi:
 
-  ```sql
-  SELECT relname,
-         n_live_tup                                     AS approx_rows,
-         pg_size_pretty(pg_total_relation_size(relid))  AS size_with_indexes
-  FROM pg_stat_user_tables
-  WHERE relname IN ('orders', 'order_items');
-  ```
+- số dòng ước lượng;
+- dung lượng **gồm cả index** (không chỉ dữ liệu bảng);
+- tốc độ ghi hiện tại nếu bảng đang nhận ghi liên tục.
 
-- Hành vi khoá của engine với **từng** lệnh trong migration (tra tài liệu engine đúng phiên bản đang chạy).
-- Hệ thống được phép chậm hay ngừng lúc nào: có khung bảo trì hay phải phục vụ liên tục, giờ nào ít truy cập
-  nhất, và có bản sao chỉ-đọc nào phải bám kịp máy chính hay không.
+Đo bằng truy vấn **chỉ-đọc** trên bản sao đọc hoặc trên chính bản sao diễn tập, không chạy lên node chính
+đang phục vụ người dùng. Ví dụ trên Postgres:
 
-## 2. Các bước
+```sql
+SELECT relname,
+       n_live_tup AS rows_estimate,
+       pg_size_pretty(pg_total_relation_size(relid)) AS total_size
+FROM pg_stat_user_tables
+WHERE relname IN ('orders', 'order_items');
+```
 
-1. **Phân loại** thay đổi và rủi ro (`method/sizing.md`):
+Số ước lượng đủ để chọn đường; cần chính xác (ví dụ để chia lô) thì đếm thật trên bản sao.
 
-   | Loại | Ví dụ | Rủi ro |
-   |---|---|---|
-   | Thêm | bảng mới, cột cho phép rỗng, index dựng đồng thời | thấp |
-   | Sửa tại chỗ | đổi kiểu, thêm ràng buộc, backfill | vừa — **cao** khi backfill bảng nóng hoặc đổi kiểu bảng lớn |
-   | Phá huỷ | bỏ cột/bảng, xoá dữ liệu, biến đổi làm mất thông tin | cao |
+## 3. Phân loại và đường lùi
 
-   Rủi ro cao → `risk: high`, `risk_tags` có `data_migration`, cỡ lớn, kéo thẻ chuyên đề dữ liệu.
-2. **Đường lùi trước.** Viết `downgrade` (hoặc script đảo) và review nó **trước** khi duyệt đường tiến.
-   Không đảo được → ghi `DN` cho người dùng chấp nhận rõ, kèm cách cứu thay thế (bản sao lưu đã khôi phục
-   thử, bảng giữ bản dữ liệu cũ tới mốc hẹn).
-3. **Ước lượng tác động** không đụng dữ liệu thật: in SQL sẽ chạy (chạy khô, ví dụ `alembic upgrade head
-   --sql`), `EXPLAIN` cho truy vấn chọn dòng của backfill, đối chiếu loại khoá từng lệnh với cỡ bảng.
-4. **Diễn tập** trên bản sao khôi phục từ bản sao lưu gần nhất, hoặc bản sao cỡ tương đương với dữ liệu cá
-   nhân đã che. Chạy **tiến → kiểm dữ liệu → lùi → tiến lại**, tốt nhất khi có tải giả lập. Đo:
+1. Phân loại thay đổi theo `method/sizing.md` mục 2; thay đổi nào cũng chạm `data_migration` thì cỡ tối thiểu
+   là lớn.
+2. **Viết và cho review đường lùi trước khi viết migration tới.** Đường lùi là lệnh cụ thể (migration lùi,
+   hoặc migration tới bù), không phải câu "khôi phục từ bản sao lưu". Có bước **không đảo ngược** thì nói
+   thẳng, và bước đó chỉ chạy khi người dùng gật.
+3. Ước lượng tác động bằng **chạy khô** (in SQL sẽ chạy, kế hoạch thực thi, số dòng bị chạm) trước khi chạy
+   thật trên bản sao.
 
-   - **Thời gian** từng bước, so với cửa sổ cho phép.
-   - **Khoá và lag replica** — đặt `lock_timeout` ngắn để lệnh tự bỏ thay vì xếp hàng chặn mọi truy vấn sau
-     nó; theo dõi trong lúc chạy:
+## 4. Diễn tập
 
-     ```sql
-     SET lock_timeout = '3s';
-     -- phiên khác, lặp lại trong lúc migration chạy:
-     SELECT a.pid, l.mode, l.relation::regclass AS rel, now() - a.query_start AS running_for
-     FROM pg_locks l JOIN pg_stat_activity a USING (pid)
-     WHERE NOT l.granted;
-     SELECT application_name, replay_lag FROM pg_stat_replication;  -- trên primary
-     ```
+Điều kiện: dựng bản sao bằng cách **khôi phục** bản lưu mới nhất; phiên bản và cấu hình quan trọng của máy
+cơ sở dữ liệu giống production; khối lượng dữ liệu cũng ngang. Bản thu nhỏ cho số đo đẹp nhưng sai.
 
-   - **Lỗi ứng dụng** trong lúc chạy (log, tỉ lệ lỗi của tải giả lập).
-   - **Dữ liệu khớp**: số dòng và tổng then chốt trước ↔ sau, sau cả chiều lùi.
+Chạy đúng trình tự sẽ chạy ở production, và ghi lại:
 
-   Ghi số đo vào `VR` kèm lệnh nguyên văn, phiên bản engine, nguồn và cỡ bản sao.
-5. **Kế hoạch backfill:** lô cố định; idempotent (điều kiện chọn dòng chưa xử lý, chạy lại không ghi đúp);
-   nghỉ giữa các lô; log tiến độ "đã xử lý / tổng"; chạy tiếp được sau khi đứt; ngưỡng tự dừng (lag hay tỉ
-   lệ lỗi vượt mức đã đo ở bước 4). Mẫu lô cho Postgres: `postgres-safe-ddl.md` mục 5.
-6. **Runbook production**, mỗi mục có giá trị cụ thể, không "theo dõi cẩn thận":
-   kiểm trước (sao lưu mới **đã khôi phục thử**, đủ đĩa, không job nặng trùng giờ) · lệnh chính xác theo thứ
-   tự · bảng theo dõi (chỉ số, ngưỡng) · **tiêu chí huỷ** (ví dụ "khoá chờ > 5 s hoặc lag > 30 s thì dừng ở
-   lô hiện tại") · bước hoàn tác · ai cần báo trước và sau.
-   Ai ký runbook tuỳ mức rủi ro: mức vừa cần thẻ chuyên đề dữ liệu mà Tech Reviewer kéo vào; mức cao thì ngoài
-   thẻ đó còn phải có một người trực vận hành, do chính người dùng chọn.
+| Đo | Ghi |
+|---|---|
+| Thời gian | tổng và từng bước, tính bằng giây |
+| Khoá | loại khoá, bảng nào, giữ bao lâu; truy vấn khác có bị chờ không |
+| Dung lượng | tăng thêm của bảng, index và nhật ký ghi trước (WAL) |
+| Tải | CPU, I/O, độ trễ của một truy vấn mẫu chạy song song |
+| Đường lùi | chạy thử cả đường lùi, đo như trên |
 
-## 3. Đầu ra
+**Backfill:** chia theo lô cỡ cố định, mỗi lô là một giao dịch ngắn; **idempotent** (chạy lại không làm hỏng
+dữ liệu đã chuyển); có điểm tiếp (lưu khoá lô cuối đã xong) để đứt giữa chừng thì chạy tiếp; có log tiến độ.
+Diễn tập phải cắt ngang một lần giữa chừng để chứng minh chạy tiếp được.
 
-- **Báo cáo diễn tập** thành `VR`:
+Kiểm sau cùng: số dòng và tổng kiểm trên cột liên quan khớp với trước khi chạy; ứng dụng bản cũ và bản mới
+đều đọc được schema ở mỗi bước (nguyên tắc 6 của skill `database-migrations`).
 
-  ```text
-  Diễn tập <migration> trên <bản sao: nguồn, cỡ, ngày khôi phục> — <engine + phiên bản>
-  Tiến: <thời gian> · lag replica tối đa <…> · khoá chờ lâu nhất <…> · lỗi ứng dụng <…>
-  Lùi: <thời gian> · dữ liệu khớp trước ↔ sau: <số dòng, tổng then chốt>
-  Kết quả: Đạt | Không đạt — <vì sao>
-  ```
+## 5. Runbook production
 
-- Cặp tiến / lùi đã được review, trỏ commit.
-- Runbook gắn vào PLAN; phần hoàn tác chép tóm tắt vào REPORT mục "Cách dùng, đã đổi gì, cách hoàn tác".
-- Chạy trên production là hành động không đảo ngược — điều kiện dừng (a): chỉ làm khi người dùng gật,
-  sau Cổng 2.
+Sinh từ kết quả diễn tập, với **giá trị cụ thể**, không để chỗ trống:
 
-## 4. Điểm dừng
+- thứ tự lệnh, và người chạy từng bước;
+- thời gian dự kiến mỗi bước (lấy từ số đo, cộng biên an toàn đã ghi rõ);
+- **ngưỡng dừng** dạng số: ví dụ khoá giữ quá N giây, độ trễ truy vấn vượt M mili giây, lỗi vượt K lần;
+- **lệnh hoàn tác** cho từng bước, đã chạy thử ở mục 4;
+- cách theo dõi trong lúc chạy và điều gì chứng tỏ bước xong.
 
-| Tình huống | Mức | Làm |
-|---|---|---|
-| Migration một chiều (không có đường lùi) mà chưa có `DN` người dùng đồng ý bằng chữ | Chặn | `BR`, trình `DN` kèm cách cứu thay thế |
-| Khoá trên bảng nóng kéo dài quá cửa sổ cho phép | Chặn | đổi sang cách trực tuyến: bảng bóng, công cụ đổi schema trực tuyến, hoặc chia nhỏ lệnh |
-| Backfill không idempotent hoặc không chạy tiếp được | Phải sửa | sửa điều kiện chọn dòng và log tiến độ, diễn tập lại |
-| Rủi ro cao, chưa có buổi chạy thử nào | Chặn | chưa được trình Cổng 2: chạy thử trên bản sao, ghi `VR`, rồi mới trình |
-| Không có bản sao để diễn tập | — | `VR` ghi Chưa chạy kèm giới hạn, báo Analyst; không thay bằng "chạy thử trên production" |
+Runbook đi cùng PLAN vào review. Reviewer chuyên đề dữ liệu (`database-reviewer`) đọc runbook, không chỉ đọc
+mã migration.
+
+## 6. Đầu ra
+
+**Báo cáo diễn tập** ghi vào REPORT thành một `VR`: lệnh, môi trường (phiên bản, cỡ bản sao, commit), các số
+đo ở mục 4, kết quả Đạt hoặc Không đạt kèm lý do, và giới hạn (bản sao khác production ở điểm nào). `VR` do
+agent khác người viết migration chạy hoặc kiểm lại.
+
+## 7. Dừng
+
+- Việc diễn tập đòi chạm **dữ liệu thật** (khôi phục bản sao chứa dữ liệu người dùng, hay chạy lên môi trường
+  đang phục vụ): dừng, ghi `BR`, hỏi người dùng; che hoặc ẩn danh dữ liệu cá nhân nếu được cho phép.
+- **Không có bản sao** cỡ production để diễn tập: dừng, không chạy thay bằng bản thu nhỏ rồi coi như đạt. Ghi
+  `VR` là Chưa chạy; người dùng quyết tạo bản sao hoặc chấp nhận rủi ro bằng văn bản.
+- Đo thấy khoá hay thời gian vượt ngưỡng dừng đã định: quay lại thiết kế (chia lô nhỏ hơn, đổi cách làm),
+  không nới ngưỡng cho vừa số đo.

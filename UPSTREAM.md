@@ -18,7 +18,7 @@ so bản mới, distill và bổ sung theo [docs/updating-from-upstream.md](docs
 Mục này giữ **trạng thái hiện tại** của từng nguồn; các khối đợt bên dưới là lịch sử chốt SHA. Cột
 **Đã distill tới** = SHA mà nội dung trong repo đang bám (chỉ đổi khi distill xong một đợt) · cột **Kiểm gần
 nhất** = ngày và HEAD đã xem ở lượt kiểm gần nhất (đổi cả khi lượt kiểm không lấy gì) · cột **Kiểm** = khi
-nào phải xem lại nguồn này. SHA rút gọn 8 ký tự; bản đầy đủ ở khối đợt, trừ bảy mốc đo 2026-10-03 chưa ghi bản đầy đủ ở đâu: caveman `8af1f1b9`, ccusage `9bca3e84` (chỉ lấy ý / chỉ gọi) và rtk `4f9015f6`, context-mode `9f3ecc8b`, Serena `d0f7f926`, LLMLingua `5a4c78ae`, agentshield `b0891303` (đã loại) — cần bản đầy đủ thì đo lại từ GitHub.
+nào phải xem lại nguồn này. SHA rút gọn 8 ký tự; bản đầy đủ ở khối đợt, trừ bảy mốc chưa ghi bản đầy đủ ở đâu: caveman `aeb45e2f`, ccusage `f28658eb` (chỉ lấy ý / chỉ gọi; đo 2026-10-04) và rtk `c356374f` (đo 2026-10-04), context-mode `dbfa57d5` (đo 2026-10-04), Serena `d0f7f926`, LLMLingua `5a4c78ae`, agentshield `b0891303` (đo 2026-10-03) — năm mốc sau cùng đã loại — cần bản đầy đủ thì đo lại từ GitHub.
 
 ### Repo đã dùng hoặc đã xét
 
@@ -28,26 +28,26 @@ khỏi đánh giá lại).
 
 | Nguồn | Vai trò | Nhận nội dung | Đã distill tới | Kiểm gần nhất | Kiểm |
 |---|---|---|---|---|---|
-| `obra/superpowers` | distill · chép | `shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`, `tdd`, `debugging`, `worktrees`, `verify-before-done`, `code-review`, `writing-skills` | Đợt 1 · `8ca22dba` (`v6.4.2`); SPR-02 viết lại sâu `references/diagnosing.md` của `writing-skills`, cùng SHA | 2026-10-03 · `8ca22dba` | mọi lượt |
-| `affaan-m/ECC` (tên cũ `affaan-m/everything-claude-code`) | distill · chép | `intake`, `python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`, `security-review`, `token-economy`, phần bài học của `closing-sprint`; 7 agent | Đợt 1 · `c70874fa` (`v2.2.2`); SPR-02 viết lại sâu 7 mục trên `ef648e01`: `deployment` (+ `references/docker.md`), `fastapi`, `postgres`, agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`, `rag-pipeline-reviewer` | 2026-10-03 · `ef648e01` | mọi lượt — nguồn chính của Đợt 2 |
-| `garrytan/gstack` | distill · chép | `plan-review`, `security-audit`, `web-qa`, phần điều tra của `debugging`, docs-sync và retro của `closing-sprint` | Đợt 1 · `96764e80` (VERSION 1.91.9.0) | 2026-10-03 · `f30b7b78` (VERSION 1.91.13.0) | mọi lượt — Đợt 2 lấy thêm `review`, `qa`, `ship` |
-| `obra/superpowers-lab` | đã ghi mốc, chưa distill | — (Đợt 2: tìm hàm trùng lặp cho `code-review`) | chưa distill — mốc Đợt 1 `51111f74` | 2026-10-03 · `51111f74` | mọi lượt |
-| `obra/superpowers-skills` | distill · chép | phần bổ sung của `tdd`, `debugging` | Đợt 1 · `cdcd624a` | 2026-10-03 · `cdcd624a` (còn lưu trữ) | không — repo lưu trữ từ 2025-10-14; chỉ xem còn lưu trữ không |
-| `supabase/agent-skills` | distill gián tiếp (đến qua ECC) | mẫu Postgres trong `postgres`, agent `database-reviewer` | qua ECC `c70874fa`; riêng `postgres` và `database-reviewer` qua ECC `ef648e01` (SPR-02); mốc xác minh giấy phép `544bfc56` | 2026-10-03 · `c9be0e93` | khi ECC đổi phần Postgres |
-| `github/spec-kit` | ý | `id-convention`, mẫu SPEC/PLAN, `shaping-spec` | ý từ `d2ddd910` (`v1.0.13`) | 2026-10-03 · `e1fa857a` (`v1.1.0`) | mọi lượt — đọc release notes |
-| `Fission-AI/OpenSpec` | ý | spec sống và delta Thêm / Sửa / Bỏ (`templates/registry/feature-spec.md`, mẫu SPEC) | ý từ `3a34ea30` (`v1.14.0`) | 2026-10-03 · `2500d6da` (`v1.14.0`) | mọi lượt — đọc release notes |
-| `bmad-code-org/BMAD-METHOD` | ý | thẻ vai trong `roles/` | ý từ `1cbcfa27` | 2026-10-03 · `4f61d4e7` (`v6.12.0`) | mọi lượt |
-| `google/eng-practices` | ý | `roles/verifier/tech-reviewer.md` | ý từ `3bb3ec25` | 2026-10-03 · `3bb3ec25` (còn lưu trữ) | không — repo lưu trữ |
-| `OWASP/ASVS` | ý | thẻ chuyên đề security, `security-review` | ý từ `2b300716` | 2026-10-03 · `2b300716` | khi ASVS ra bản mới |
-| `JuliusBrussee/caveman` | ý, không cài | lối viết gọn giữa agent trong `token-economy` | ý từ `f5d72948` | 2026-10-03 · `8af1f1b9` (`v3.0.0`) | mọi lượt |
-| `ccusage/ccusage` (tên cũ `ryoppippi/ccusage`) | chỉ gọi | lệnh đo token trong `token-economy` | không chép — gọi bản mới nhất | 2026-10-03 · `9bca3e84` (`v20.0.26`) | khi cú pháp lệnh đổi |
-| `yamadashy/repomix` | chỉ gọi | lệnh nén repo trong `token-economy` | không chép — gọi bản mới nhất | 2026-10-03 · `0b3f82b4` | khi cú pháp lệnh đổi |
-| `alibaba/open-code-review` | đã loại | — (thành phần ủy quyền cho công cụ review ngoài, Tech Reviewer có đường riêng) | — | 2026-10-03 · `a758d9cb` | không |
-| `rtk-ai/rtk` | đã loại, **xét lại có điều kiện** | — (ứng viên nén output lệnh shell) | — | 2026-10-03 · `4f9015f6` nhánh `develop`, bản phát hành `v0.51.0` | khi đạt `v1.0` hoặc các issue chặn đã đóng: không bắt tool PowerShell (#1319, #1248), gỡ cài đặt xoá cả hook khác cùng matcher (#3036), cắt output im lặng (#4073, #4098) — 5 issue này còn mở ngày 2026-10-03; hook tự cho phép lệnh (#3791) đã đóng; còn ghi đè file hook của harness Codex |
-| `oraios/serena` | đã loại | — | — | 2026-10-03 · `d0f7f926` (`v1.7.0`) | không, trừ khi nhu cầu đổi — nghiên cứu Đợt 1 ghi GPL, GitHub báo `NOASSERTION`: đọc LICENSE trước khi xét lại; quá nặng cho repo phương pháp |
-| `mksglu/context-mode` | đã loại | — | — | 2026-10-03 · `9f3ecc8b` (`v1.0.169`) | không — nghiên cứu Đợt 1 ghi ELv2 (không phải giấy phép mở), GitHub báo `NOASSERTION` |
-| `microsoft/LLMLingua` | đã loại | — | — | 2026-10-03 · `5a4c78ae` | không — MIT nhưng cần mô hình nén prompt, quá nặng cho repo phương pháp |
-| `affaan-m/agentshield` | đã loại | — | — | 2026-10-03 · `b0891303` | không — ngoài phạm vi phương pháp |
+| `obra/superpowers` | distill · chép | `shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`, `tdd`, `debugging`, `worktrees`, `verify-before-done`, `code-review`, `writing-skills` | Đợt 1 · `8ca22dba` (`v6.4.2`); SPR-02 viết lại sâu `references/diagnosing.md` của `writing-skills`, cùng SHA | 2026-10-04 · `8ca22dba` | mọi lượt |
+| `affaan-m/ECC` (tên cũ `affaan-m/everything-claude-code`) | distill · chép | `intake`, `python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`, `security-review`, `token-economy`, phần bài học của `closing-sprint`; 7 agent | Đợt 1 · `c70874fa` (`v2.2.2`); SPR-02 viết lại sâu 7 mục trên `ef648e01`: `deployment` (+ `references/docker.md`), `fastapi`, `postgres`, agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`, `rag-pipeline-reviewer` | 2026-10-04 · `ef648e01` | mọi lượt — nguồn chính của Đợt 2 |
+| `garrytan/gstack` | distill · chép | `plan-review`, `security-audit`, `web-qa`, phần điều tra của `debugging`, docs-sync và retro của `closing-sprint` | Đợt 1 · `96764e80` (VERSION 1.91.9.0) | 2026-10-04 · `fe6d1ae6` (VERSION 1.91.17.0) | mọi lượt — Đợt 2 lấy thêm `review`, `qa`, `ship` |
+| `obra/superpowers-lab` | đã ghi mốc, chưa distill | — (Đợt 2: tìm hàm trùng lặp cho `code-review`) | chưa distill — mốc Đợt 1 `51111f74` | 2026-10-04 · `51111f74` | mọi lượt |
+| `obra/superpowers-skills` | distill · chép | phần bổ sung của `tdd`, `debugging` | Đợt 1 · `cdcd624a` | 2026-10-04 · `cdcd624a` (còn lưu trữ) | không — repo lưu trữ từ 2025-10-14; chỉ xem còn lưu trữ không |
+| `supabase/agent-skills` | distill gián tiếp (đến qua ECC) | mẫu Postgres trong `postgres`, agent `database-reviewer` | qua ECC `c70874fa`; riêng `postgres` và `database-reviewer` qua ECC `ef648e01` (SPR-02); mốc xác minh giấy phép `544bfc56` | 2026-10-04 · `c9be0e93` | khi ECC đổi phần Postgres |
+| `github/spec-kit` | ý | `id-convention`, mẫu SPEC/PLAN, `shaping-spec` | ý từ `d2ddd910` (`v1.0.13`) | 2026-10-04 · `ae5ade72` (`v1.1.0`) | mọi lượt — đọc release notes |
+| `Fission-AI/OpenSpec` | ý | spec sống và delta Thêm / Sửa / Bỏ (`templates/registry/feature-spec.md`, mẫu SPEC) | ý từ `3a34ea30` (`v1.14.0`) | 2026-10-04 · `2500d6da` (`v1.14.0`) | mọi lượt — đọc release notes |
+| `bmad-code-org/BMAD-METHOD` | ý | thẻ vai trong `roles/` | ý từ `1cbcfa27` | 2026-10-04 · `3cae711e` (`v6.12.0`) | mọi lượt |
+| `google/eng-practices` | ý | `roles/verifier/tech-reviewer.md` | ý từ `3bb3ec25` | 2026-10-04 · `3bb3ec25` (còn lưu trữ) | không — repo lưu trữ |
+| `OWASP/ASVS` | ý | thẻ chuyên đề security, `security-review` | ý từ `2b300716` | 2026-10-04 · `2b300716` | khi ASVS ra bản mới |
+| `JuliusBrussee/caveman` | ý, không cài | lối viết gọn giữa agent trong `token-economy` | ý từ `f5d72948` | 2026-10-04 · `aeb45e2f` (sau tag `v3.1.0`) | mọi lượt |
+| `ccusage/ccusage` (tên cũ `ryoppippi/ccusage`) | chỉ gọi | lệnh đo token trong `token-economy` | không chép — gọi bản mới nhất | 2026-10-04 · `f28658eb` (`v20.0.26`) | khi cú pháp lệnh đổi |
+| `yamadashy/repomix` | chỉ gọi | lệnh nén repo trong `token-economy` | không chép — gọi bản mới nhất | 2026-10-04 · `8d642912` | khi cú pháp lệnh đổi |
+| `alibaba/open-code-review` | đã loại | — (thành phần ủy quyền cho công cụ review ngoài, Tech Reviewer có đường riêng) | — | 2026-10-04 · `a758d9cb` | không |
+| `rtk-ai/rtk` | đã loại, **xét lại có điều kiện** | — (ứng viên nén output lệnh shell) | — | 2026-10-04 · `c356374f` nhánh `develop`, bản phát hành `v0.51.0` | khi đạt `v1.0` hoặc các issue chặn đã đóng: không bắt tool PowerShell (#1319, #1248), gỡ cài đặt xoá cả hook khác cùng matcher (#3036), cắt output im lặng (#4073, #4098) — 5 issue này còn mở ngày 2026-10-04; hook tự cho phép lệnh (#3791) đã đóng; còn ghi đè file hook của harness Codex |
+| `oraios/serena` | đã loại | — | — | 2026-10-04 · `d0f7f926` (`v1.7.0`) | không, trừ khi nhu cầu đổi — nghiên cứu Đợt 1 ghi GPL, GitHub báo `NOASSERTION`: đọc LICENSE trước khi xét lại; quá nặng cho repo phương pháp |
+| `mksglu/context-mode` | đã loại | — | — | 2026-10-04 · `dbfa57d5` (`v1.0.169`) | không — nghiên cứu Đợt 1 ghi ELv2 (không phải giấy phép mở), GitHub báo `NOASSERTION` |
+| `microsoft/LLMLingua` | đã loại | — | — | 2026-10-04 · `5a4c78ae` | không — MIT nhưng cần mô hình nén prompt, quá nặng cho repo phương pháp |
+| `affaan-m/agentshield` | đã loại | — | — | 2026-10-04 · `b0891303` | không — ngoài phạm vi phương pháp |
 | squeez | đã loại | — | — | chưa xác định repo — nghiên cứu Đợt 1 chỉ ghi tên | không; xác định repo trước nếu xét lại |
 
 ### Tài liệu web (không có commit)
@@ -72,6 +72,23 @@ dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đ�
 Mỗi lượt kiểm một dòng, mới nhất trên cùng: ngày · nguồn đã kiểm · HEAD đã xem · quyết định (`lấy` / `bỏ
 qua` / `hoãn` — gì, vì sao, sai thì tốn gì). Lượt kiểm không lấy gì vẫn ghi, để lần sau không đọc lại cùng
 đoạn thay đổi. Cách làm: [docs/updating-from-upstream.md](docs/updating-from-upstream.md) mục 3.
+
+- 2026-10-04 · 20 nguồn repo (đo đầu SPR-04, trước mọi sửa) · gstack `fe6d1ae6` (1.91.17.0, 3 commit sau mốc), spec-kit
+  `ae5ade72` (hai commit tự huỷ nhau, 0 file đổi), BMAD `3cae711e` (10 commit, 49 file — chỉ `bmad-ticket`, `bmad-build`),
+  caveman `aeb45e2f` (12 commit sau tag `v3.1.0`), ccusage `f28658eb` (26 commit chỉ cập nhật bảng giá), repomix `8d642912`
+  (12 commit chỉ nâng phụ thuộc), rtk `c356374f` (22 commit, 12 file), context-mode `dbfa57d5` (1 commit số liệu cài);
+  ECC `ef648e01` (`v2.2.3`), superpowers, superpowers-lab, superpowers-skills, supabase, OpenSpec, eng-practices, ASVS,
+  open-code-review, Serena, LLMLingua, agentshield không đổi · **giữ mốc Đợt 2:** gstack `f30b7b78` và ECC `ef648e01`
+  — 3 commit gstack chạm `review`, `qa`, `ship`, `land-and-deploy` nhưng chỉ ở phần mở đầu chạy trên môi trường của nguồn,
+  đường lưu state và vài chữ; còn hai đổi nhỏ ở nội dung `qa` (quy tắc dừng khi tự sửa bớt thang phần trăm, `--quick` chọn cả
+  mức sửa lẫn mức khám phá) và nhịp chờ CI của `land-and-deploy` (4 phút mỗi vòng ở bước 3), không đủ để đổi mốc — sai thì
+  tốn viết lại một đoạn khi distill, ghi trong báo cáo `TK1` để người distill `web-qa` và `closing-sprint` cân nhắc ·
+  **bỏ qua:** BMAD `bmad-ticket`/`bmad-build` (repo chỉ lấy ý thẻ vai), caveman (pi/MCP của nguồn), ccusage (bảng giá),
+  repomix (phụ thuộc), rtk (sửa lệnh `curl`/`go`/`diff`/`jest`, tài liệu Windows), context-mode (không đọc vì giấy phép),
+  spec-kit (không đổi ròng) — chỉ chạm runtime hoặc ngoài phạm vi, sai thì tốn đọc lại 1–26 commit · **ghi sổ:** rtk
+  giữ đã loại (#1319, #1248, #3036, #4073, #4098 còn mở, #3791 đã đóng); không có nguồn đổi tên, đổi giấy phép hay lưu
+  trữ mới · **không kiểm lượt này:** 7 tài liệu web và squeez như lượt trước. Chi tiết: `evidence/TK1/upstream-check.md`
+  của sprint SPR-04 (hồ sơ riêng của chủ repo).
 
 - 2026-10-03 · 20 nguồn repo (đo 06:20 +07, đo lại 07:41 +07 lúc chốt Đợt 2) · ECC `ef648e01` (sau tag `v2.2.3` một
   commit tài liệu), gstack `f30b7b78` (1.91.13.0), spec-kit `e1fa857a` (`v1.1.0`), OpenSpec `2500d6da`, BMAD

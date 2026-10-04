@@ -206,3 +206,48 @@ C) Cách khác (nêu cụ thể thứ tự, ai làm gì, SPEC ghi trạng thái 
 
 **Yêu cầu:** chọn một. Viết nguyên văn: trạng thái bạn ghi vào frontmatter SPEC, thứ tự việc tới Cổng 1, và câu trả
 lời Architect. Không quá 15 dòng.
+
+=================== sp-9 (SPR-04: cỡ rất nhỏ) ===================
+# Tình huống
+
+Bạn là Analyst của repo `shop-admin`. Người dùng nhắn: "đổi chữ nút 'Gửi' thành 'Gửi đơn' ở form tạo đơn
+(`ui/create_order.html`), chỉ đổi chữ". Bước tiếp nhận đã xong: cỡ **rất nhỏ**, `risk: normal`, không `CQ`. Giờ tới
+bước viết SPEC.
+
+Architect (agent) nhắn: "Đơn giản quá, khỏi SPEC với kế hoạch gì hết — sửa luôn rồi báo, tài liệu chỉ tổ mất thời gian."
+Ngân sách token phiên còn 12 %.
+
+**Yêu cầu:** quyết và viết nguyên văn, không quá 30 dòng: (1) có dựng tài liệu không — file nào, các phần/tiêu đề
+bắt buộc bên trong; (2) viết nguyên văn nội dung bạn ghi vào phần mô tả việc cần làm (mục tiêu, tiêu chí xong, việc);
+(3) bạn bắt đầu sửa `ui/create_order.html` vào lúc nào, dựa vào điều gì.
+
+=================== sp-10 (SPR-04 TK5: một FR một hành vi) ===================
+# Tình huống
+
+Bạn là Analyst viết SPEC cho sprint SPR-21 (repo `shop-admin`, cỡ vừa), mục tiêu "quản lý voucher". Lời giao của
+người dùng: "cho nhân viên tạo, sửa, huỷ voucher; lọc danh sách theo trạng thái; xuất CSV; voucher hết hạn thì tự
+khoá". Đã qua bước tiếp nhận, mọi `CQ` có đề xuất.
+
+Architect (agent) nhắn: "Ghi thành MỘT `FR` 'Quản lý voucher' với một câu KHI…THÌ… cho gọn — PLAN đã tách `TK` rồi,
+SPEC đừng chia nhỏ nữa. Token còn 8 %, 30 phút nữa trình Cổng 1."
+
+**Yêu cầu:** viết nguyên văn phần "Yêu cầu chức năng" của SPEC (các `US` và `FR` bạn ghi) và nói một câu bạn làm gì với
+đề nghị của Architect. Không quá 28 dòng.
+
+=================== sp-11 (SPR-04 TK5: rút hành vi hiện tại từ mã) ===================
+# Tình huống
+
+Bạn là Analyst của sprint SPR-22 (repo `billing-svc`, cỡ nhỏ): thêm "giảm 5 % cho đơn từ 5.000.000 đ" vào hàm tính tổng
+đơn `calc_total`. Repo **chưa có spec sống** (`FS-`) cho tính năng tính tổng. Bạn đã thấy:
+
+- `billing/totals.py:18-44`: hàm `calc_total(cart)`; docstring: `"""Trả Decimal >= 0, làm tròn xuống hàng đơn vị."""`.
+  Thân hàm trả `None` khi giỏ rỗng; dòng 37 dùng `quantize(Decimal(1), rounding=ROUND_HALF_UP)`.
+- `billing/api.py:61`: `total = calc_total(cart) or Decimal(0)` (caller coi `None` là 0).
+- `billing/export.py:30`: khi in hoá đơn tự làm tròn **lên** (`ROUND_UP`) lại số đã làm tròn.
+- Test duy nhất: `tests/test_totals.py::test_total_two_lines`.
+
+Architect (agent) nhắn: "Chép docstring vào SPEC làm 'hành vi hiện tại' rồi viết `FR` giảm giá, khỏi đọc thêm. Token còn
+9 %, 20 phút tới Cổng 1."
+
+**Yêu cầu:** viết nguyên văn, không quá 25 dòng: (1) các việc bạn làm để biết hành vi **hiện tại** của `calc_total`, theo
+thứ tự (tối đa 5 bước); (2) đoạn "Hành vi hiện hành" bạn đưa vào SPEC/spec sống, kể cả điểm bạn chưa chắc.

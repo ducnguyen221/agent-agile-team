@@ -54,7 +54,8 @@ SPEC có 1 **user story** (US):
 
 ## 3. Yêu cầu chức năng
 
-<!-- Mỗi FR trỏ ít nhất một US. Mỗi kịch bản là một FRx.y viết dạng KHI … THÌ …; kịch bản là thứ đem đi kiểm.
+<!-- Mỗi FR trỏ ít nhất một US. Một FR một hành vi: nhiều phản ứng khác nhau thì tách thành nhiều FR. Mỗi kịch bản
+     là một FRx.y viết dạng KHI … THÌ …; kịch bản là thứ đem đi kiểm.
      Delta so với spec sống: FR đổi hành vi đang có ghi "(sửa FS-001/FR1.2)", FR bỏ hành vi đang có ghi
      "(bỏ FS-001/FR1.2)" ở cuối dòng; FR không ghi gì là Thêm. Bước 5 gộp vào spec sống theo đúng delta này. -->
 

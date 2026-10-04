@@ -1,0 +1,87 @@
+# Fixture review tổng quát (agents/code-reviewer.md)
+# Phạm vi review: toàn bộ diff dưới đây. Không có kho git để chạy lệnh git.
+# Khi báo vị trí: ghi `code-reviewer.txt:<dòng>` với số dòng của CHÍNH file này (như công cụ đọc file hiển thị).
+# Các test đi kèm nằm cuối diff.
+diff --git a/orders/service.py b/orders/service.py
+new file mode 100644
+--- /dev/null
++++ b/orders/service.py
+@@ -0,0 +1,56 @@
++import logging
++import random
++import time
++from pathlib import Path
++
++import requests
++
++from orders.auth import check_hash
++
++logger = logging.getLogger(__name__)
++EXPORT_DIR = Path("/srv/exports")
++
++
++def find_orders(conn, customer_id, status):
++    """Danh sách đơn của khách theo trạng thái (status do người dùng chọn trên giao diện)."""
++    query = f"SELECT id, total FROM orders WHERE customer_id = {customer_id} AND status = '{status}'"
++    return conn.execute(query).fetchall()
++
++
++def login(conn, username, password):
++    user = conn.execute("SELECT id, pw_hash FROM users WHERE name = ?", (username,)).fetchone()
++    logger.info("login attempt user=%s password=%s", username, password)
++    if user is None:
++        return None
++    return user[0] if check_hash(password, user[1]) else None
++
++
++def fetch_rate(currency):
++    last_error = None
++    for attempt in range(3):
++        try:
++            resp = requests.get("https://rates.internal.example/v1/" + currency, timeout=5)
++            resp.raise_for_status()
++            return resp.json()["rate"]
++        except requests.RequestException as err:
++            last_error = err
++            time.sleep(0.5 * (2 ** attempt) + random.random() * 0.1)
++    raise RuntimeError("rate service unavailable") from last_error
++
++
++def read_export(name):
++    with open(EXPORT_DIR / name, "rb") as handle:
++        return handle.read()
++
++
++def apply_discount(total_cents, percent):
++    if not 0 <= percent <= 100:
++        raise ValueError("percent must be between 0 and 100")
++    return total_cents - (total_cents * percent) // 100
++
++
++def summarize(orders):
++    by_status = {}
++    for order in orders:
++        by_status.setdefault(order["status"], []).append(order["id"])
++    return {status: sorted(ids) for status, ids in by_status.items()}
+diff --git a/tests/test_service.py b/tests/test_service.py
+new file mode 100644
+--- /dev/null
++++ b/tests/test_service.py
+@@ -0,0 +1,17 @@
++import pytest
++
++from orders.service import apply_discount, summarize
++
++
++def test_discount_basic():
++    assert apply_discount(10_000, 10) == 9_000
++
++
++def test_discount_rejects_out_of_range():
++    with pytest.raises(ValueError):
++        apply_discount(10_000, 101)
++
++
++def test_summarize_groups_and_sorts():
++    orders = [{"id": 3, "status": "paid"}, {"id": 1, "status": "paid"}, {"id": 2, "status": "new"}]
++    assert summarize(orders) == {"paid": [1, 3], "new": [2]}

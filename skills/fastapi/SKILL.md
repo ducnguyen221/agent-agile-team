@@ -1,6 +1,6 @@
 ---
 name: fastapi
-description: Use when building, extending, or reviewing a FastAPI service — routers, Pydantic request and response schemas, dependency injection, async endpoints calling a database or external service, authentication and authorization, error envelopes, OpenAPI docs, tests with dependency overrides, or production settings.
+description: Use when building, extending, or reviewing a FastAPI service — routers, Pydantic request and response schemas, dependency injection, async endpoints calling a database or external service, background tasks, streaming responses, authentication and authorization, error envelopes, OpenAPI docs, tests with dependency overrides, or production settings.
 metadata:
   group: technique
   kind: reference
@@ -67,6 +67,10 @@ app/
 - **Async:** `async def` chỉ dùng thư viện async (`httpx.AsyncClient`, SQLAlchemy async). Buộc phải dùng thư
   viện đồng bộ → khai route bằng `def` thường (FastAPI chạy nó trong threadpool) hoặc bọc lời gọi chặn; không
   bao giờ gọi chặn trực tiếp trong `async def`.
+- **Tác vụ nền và luồng:** `BackgroundTasks` chỉ cho việc nhẹ chạy sau response, cùng tiến trình, mất được —
+  đăng ký **sau** commit, truyền giá trị thuần, không dùng lại phiên CSDL của request; việc nặng hay không được
+  mất → hàng đợi riêng + `202` kèm mã việc. Response dài trả bằng generator `async` qua `StreamingResponse`, kiểm
+  quyền và tham số **trước** `yield` đầu (`references/background-and-streaming.md`).
 - **Service và transaction:** route mỏng; service giữ transaction, bắt `IntegrityError` rồi ném lỗi miền.
   Trùng dữ liệu dựa vào **ràng buộc unique của CSDL** — truy vấn kiểm trước rồi chèn là đua; route dịch lỗi
   trùng thành `409` (skill `api-design`).
@@ -89,6 +93,7 @@ Mức gợi ý theo hậu quả nếu bỏ qua (`method/severity.md` mục 1); r
 | Dependency xác thực bỏ qua được, không kiểm chữ ký hay hạn | ai cũng vào được | Chặn |
 | `allow_origins=["*"]` cùng `allow_credentials=True` | Starlette trả lại đúng `Origin` của request kèm credentials (cả preflight) → trang web nào cũng đọc được response đã đăng nhập | Chặn |
 | Đổi kiểu `sub` không bọc lỗi → `500` thay vì `401` | token rác làm lỗi máy chủ, nhiễu giám sát | Phải sửa |
+| Việc nặng hay không được mất chạy bằng `BackgroundTasks`; truyền phiên CSDL của request vào việc nền | việc mất khi tiến trình chết, phiên đã đóng, lỗi chỉ hiện ở log | Phải sửa |
 | Gọi CSDL hay HTTP đồng bộ trong `async def` | một request chậm chặn cả vòng sự kiện | Phải sửa |
 | Kiểm trùng bằng truy vấn trước, không có ràng buộc unique | hai request cùng lúc tạo bản trùng | Phải sửa |
 | Ghi đè test nhắm sai dependency | test xanh mà không kiểm gì | Phải sửa |
@@ -102,7 +107,8 @@ Mức gợi ý theo hậu quả nếu bỏ qua (`method/severity.md` mục 1); r
 | Cần | Đọc |
 |---|---|
 | `create_app` + lifespan + CORS, cấu hình pydantic-settings, tách schema Pydantic, dependency `get_db` / `get_current_user` | `references/app-schemas-dependencies.md` |
-| Endpoint async có phân trang, tầng service + transaction, lớp lỗi + exception handler, tuỳ biến `app.openapi`, fixture test ghi đè dependency, phản mẫu | `references/routes-errors-openapi-testing.md` |
+| Tác vụ nền (`BackgroundTasks` hay hàng đợi), endpoint `202` cho việc dài, `StreamingResponse`, SSE | `references/background-and-streaming.md` |
+| Endpoint async có phân trang, tầng service + transaction, lớp lỗi + exception handler (kể cả lỗi validate/framework, request id), tuỳ biến `app.openapi`, `operation_id`/tag/ví dụ, dependency đọc header (tenant), fixture test ghi đè dependency, phản mẫu | `references/routes-errors-openapi-testing.md` |
 
 ## 6. Checklist bảo mật
 

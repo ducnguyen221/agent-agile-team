@@ -33,8 +33,9 @@ Cập nhật hay mở rộng skill/agent: quay lại nguồn gốc trong `UPSTRE
 
 **Dừng và hỏi chỉ khi:** (a) hành động không đảo ngược, (b) chạm bảo mật/secret, (c) tác động ra ngoài
 phạm vi/worktree đã giao, (d) PLAN hỏng — giả định sai làm đổi tiêu chí thành công. Ghi `BR`, hỏi.
-Ngoài đó, hỏi là lỗi. Việc **rất nhỏ**: một file `SPRINT.md`; Cổng 1 = "đạt theo lời giao" + trích lời
-giao; Cổng 2 gộp vào lời báo cuối. Bằng chứng = lệnh + kết quả **mới chạy** hoặc `file:dòng`; Chưa chạy
+Ngoài đó, hỏi là lỗi. Việc **nhỏ** và **rất nhỏ** dùng một file `SPRINT.md` (bậc ở `method/sizing.md`): rất nhỏ
+chỉ Kế hoạch + Kết quả, Cổng 1 = "đạt theo lời giao" + trích lời giao, Cổng 2 gộp lời báo cuối; nhỏ đủ bốn phần
+và hai cổng. Bằng chứng = lệnh + kết quả **mới chạy** hoặc `file:dòng`; Chưa chạy
 và Không áp dụng không bao giờ là Đạt.
 
 ## Vai và tier

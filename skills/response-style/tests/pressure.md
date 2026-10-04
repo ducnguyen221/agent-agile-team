@@ -1,9 +1,13 @@
 ---
 skill: response-style
 method: pressure-test with subagents (RED without skill, GREEN with skill)
-model: sonnet (both runs, same scenario text)
-date: 2026-10-01
-result: 3/3 GREEN pass
+model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04)
+date: 2026-10-04
+result: 3/3 GREEN pass; GREEN rerun 2026-10-04 3/3 pass on the tree at HEAD 05032b4 (SPR-04 TK11.10, skill body unchanged since 2026-10-01 so this attaches skill_sha and tier)
+tier: T3
+skill_sha: a00b4c8c4a90ec32d6f13f5e43e1f6d8635938f0
+agent_ids:
+  green_rerun_2026_10_04: {rs-1: af26a5eb29de2e971, rs-2: ab5587bbe2574b8a1, rs-3: a708cc8e24e2dffac}
 ---
 
 # Thử áp lực — response-style
@@ -54,8 +58,23 @@ chưa đo.
 - Thêm trần dòng cụ thể vào ma trận độ dài và câu "phân tích kỹ không có nghĩa viết dài" (vá kịch bản 1).
 - Dòng cấm "số liệu không nguồn" nói rõ: không đưa số để lấp chỗ trống, thay bằng "chưa đo + cách đo" (vá kịch bản 3).
 
+## GREEN chạy lại (2026-10-04, SPR-04 `TK11.10`)
+
+Nợ `RF100`/`CO3`: file này ngày 2026-10-01 chưa có `skill_sha` và `tier`. Thân skill **không đổi** từ lúc thử, nên chỉ chạy lại GREEN **cả ba kịch bản** trên cây ở HEAD `05032b4` (`skill_sha` ở frontmatter) và ghi `skill_sha` + `tier`. Kịch bản: `tests/scenarios.txt` mới (prompt dựng lại từ mô tả ở lượt trước: các lượt trước chỉ lưu mô tả, không lưu nguyên văn). Chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, đường tuyệt đối tới `SKILL.md` trong worktree làn D, báo cáo mở bằng "Đã đọc:"; vế "KHÔNG đọc file nào trên máy" ở phần mở đầu đổi thành "ngoài các file nêu ở dòng dưới" (chỉ lượt GREEN). Kỳ vọng viết ra trước khi giao (file nháp `.tmp/green5-expected.md`, mtime `2026-10-04 08:50:35 +0700`). Mỗi chủ thể dùng 2 lượt công cụ (một lần đọc `SKILL.md`, một lần trả kết quả).
+Bài trả lời của các lượt và bảng chấm: `evidence/TK11/response-style-green.md` trong hồ sơ sprint `SPR-04` của lớp riêng.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| RS-1 | `af26a5eb29de2e971` | **Đạt** | câu đầu là khuyến nghị kèm điều kiện; 4 lý do; bảng 3 phương án × (đánh đổi · chi phí · khi nào chọn), đánh dấu khuyến nghị; "Việc trước khi chọn", bước tiếp, 3 câu hỏi kèm giả định; "Chi tiết kỹ thuật" tách cuối; giá và thời gian chép "chưa kiểm" / "chưa đo" kèm cách đo, không đưa số bịa |
+| RS-2 | `ab5587bbe2574b8a1` | **Đạt** | `Chưa` — 2/48 test hỏng (tên 2 test, kỳ vọng/nhận) + CVE mức cao ở `requests` chưa nâng cấp; không coi CVE cao là lặt vặt; thêm một đoạn ghi chú điều phối giải thích vì sao không trả đúng một từ trơn |
+| RS-3 | `a708cc8e24e2dffac` | **Đạt** | câu đầu "chưa thể đưa con số", nói bịa là bịa; giải nghĩa Redis trong ngoặc; bảng nguyên nhân × Redis có giúp không; khuyến nghị đo trước, cách đo, xin xem mã nguồn; không con số không nguồn (chỉ có cụm mơ hồ "vài giờ công") |
+
+Kết quả: 3/3 Đạt; không sửa `SKILL.md`, không REFACTOR. Một mẫu mỗi kịch bản (chưa đo độ phân tán).
+
 ## Chạy lại
 
 Mỗi kịch bản là một prompt tự chứa (bối cảnh + câu của người dùng). RED: gửi nguyên prompt cho subagent
 không có skill. GREEN: thêm dòng "đọc `skills/response-style/SKILL.md` bằng Read trước khi trả lời".
 Chấm bằng các tiêu chí ở cột "Bằng chứng"; ghi model vào frontmatter.
+
+Prompt nguyên văn ở `tests/scenarios.txt` (dựng lại từ mô tả ở SPR-04 `TK11.10`). Phép thay vế mở đầu ở lượt GREEN: phần mở đầu mỗi kịch bản nói "KHÔNG đọc file nào trên máy", mâu thuẫn với dòng GREEN bảo đọc `SKILL.md`; khi gửi GREEN đổi vế đó thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên" (lượt 2026-10-04 gửi chữ "dòng dưới" vì dòng [PHA] đặt sau phần mở đầu; nghĩa như nhau). Lượt RED giữ nguyên văn.

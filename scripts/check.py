@@ -8,7 +8,8 @@ Cách chạy:
 Mã thoát: 0 = Đạt (không có Chặn/Phải sửa) · 1 = Không đạt · 2 = lỗi đầu vào (đường dẫn không có, file
 không đọc được, frontmatter ngoài tập con YAML, `.agile.json` hỏng).
 
-Biến môi trường: `AGENT_AGILE_DENYLIST` — đường tới danh sách từ cấm ngoài repo (chỉ `--self` dùng).
+Biến môi trường: `AGENT_AGILE_DENYLIST` — đường tới danh sách từ cấm ngoài repo (chỉ `--self` dùng);
+`AGENT_AGILE_LEDGER` — mẫu đường file sổ tập trung, chứa `{project}` (chỉ dự án khai `ledger.project` mới dùng).
 Hợp đồng luật: `templates/README.md`; mô tả từng luật: `scripts/README.md`.
 """
 
@@ -37,6 +38,7 @@ RULES: dict[str, tuple[str, str]] = {
     "frontmatter-value": (PHAI, "giá trị khoá sai miền hoặc mâu thuẫn"),
     "doc-unknown": (GHI, "khoá `doc` có nhưng không thuộc loại đã biết — chỉ áp luật chung"),
     "heading-missing": (PHAI, "thiếu tiêu đề cấp 2 bắt buộc"),
+    "sprint-size-mismatch": (PHAI, "hình tài liệu không khớp `size`: `SPRINT.md` ở cỡ vừa/lớn, hoặc bốn file ở cỡ rất nhỏ"),
     "conclusion-missing": (PHAI, "thiếu khối `> **Kết luận:**` trước tiêu đề cấp 2 đầu tiên"),
     "id-bare-single-letter": (PHAI, "mã một chữ cái + số ngoài dấu code (trừ T1/T2/T3)"),
     "id-unknown-prefix": (PHAI, "định nghĩa mục bằng tiền tố hai chữ cái ngoài bảng mã"),
@@ -51,10 +53,14 @@ RULES: dict[str, tuple[str, str]] = {
     "qa-not-independent": (PHAI, "QA trùng nhãn với implementer/architect mà không khai tự kiểm, hoặc khai tự kiểm mà verdict là pass"),
     "roles-invalid": (PHAI, "`roles` sai hình: vai lạ, tier ngoài T1–T3, thiếu nhãn agent"),
     "gate-invalid": (PHAI, "cổng đã kết luận mà thiếu thời điểm/câu nguyên văn, hoặc trạng thái vượt cổng"),
-    "old-scale-label": (PHAI, "nhãn thang mức cũ ngoài bảng quy đổi `method/severity.md`"),
+    "old-scale-label": (PHAI, "nhãn thang mức cũ (kiểu nguồn trong câu, hoặc tiếng Việt kiểu cũ) ngoài bảng quy đổi `method/severity.md`"),
     "config-syntax": (CHAN, "`.agile.json` không phải JSON hợp lệ (lỗi đầu vào → thoát 2)"),
     "config-invalid": (PHAI, "`.agile.json` sai hình hoặc đổi ngưỡng coverage không ghi lý do"),
     "config-public-root": (CHAN, "`visibility: public` mà `artifact_root` nằm trong gốc dự án"),
+    "ledger-missing-row": (PHAI, "dự án khai sổ tập trung mà sổ không có dòng cho sprint đang mở"),
+    "ledger-stale": (PHAI, "dòng sổ lệch `status` hoặc ngày cũ hơn `updated` của PROGRESS/SPRINT"),
+    "ledger-unreadable": (PHAI, "file sổ không có, không đọc được UTF-8 hoặc không có bảng cột đầu 'Sprint'"),
+    "ledger-unconfigured": (GHI, "dự án khai sổ tập trung mà máy chưa đặt mẫu đường `AGENT_AGILE_LEDGER`"),
     "leak-denylist": (CHAN, "`--self`: file của repo chứa từ trong danh sách cấm"),
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
 }
@@ -109,12 +115,15 @@ REQUIRED_HEADINGS = {
     "progress": ("Bảng trạng thái việc", "Nhật ký", "Vướng mắc", "Vòng kiểm định hiện tại"),
     "report": ("Tóm tắt cho người không chuyên", "Kết quả kiểm định", "Phát hiện của reviewer", "Rủi ro còn lại",
                "Cách dùng, đã đổi gì, cách hoàn tác", "Bài học", "Việc để lại", "Review & Retro", "Cổng 2"),
-    "sprint": ("SPEC", "PLAN", "PROGRESS", "REPORT"),
+    "sprint": ("SPEC", "PLAN", "PROGRESS", "REPORT"),  # bốn phần; cỡ rất nhỏ còn nhận hai phần (SPRINT_TINY_HEADINGS)
     "feature": ("Hành vi hiện hành", "Tiêu chí đang giữ", "Giới hạn đã biết", "Quyết định liên quan", "Lịch sử sprint"),
     "requests": ("Đang mở", "Timeline"),
     "sprints": ("Đang mở", "Timeline"),
     "specs": ("Đang mở", "Danh mục"),
 }
+
+SPRINT_TINY_HEADINGS = ("Kế hoạch", "Kết quả")  # `SPRINT.md` cỡ rất nhỏ: hai phần; bốn phần cũ vẫn hợp lệ
+SPRINT_FOUR = REQUIRED_HEADINGS["sprint"]
 
 CODE = re.compile(r"(?<![\w/\-])([A-Z]{2})([0-9]+(?:\.[0-9]+)*)(?![\w\-])")
 CODE_AT_START = re.compile(r"([A-Z]{2})([0-9]+(?:\.[0-9]+)*)(?![\w\-])")
@@ -129,7 +138,20 @@ NUMBERING = re.compile(r"^[0-9]+(?:\.[0-9]+)*\.?\s+")
 # Nhãn của mười thang cũ trong bảng quy đổi `method/severity.md` mục 4 (chỉ nhãn mức, không nhãn kết luận).
 OLD_CELL = {"critical", "high", "medium", "low", "important", "minor", "warning", "nit", "nit:"}
 OLD_CELL_UPPER = {"BLOCK", "WARN", "INFO", "NOTE", "Block"}
-OLD_FIELD = re.compile(r"(?i)\b(?:severity|mức)\s*:\s*\**\s*(critical|high|medium|low|important|minor)\b")
+# Nhãn tiếng Việt kiểu cũ (ngoài bốn mức Chặn / Phải sửa / Nên sửa / Ghi chú) — chỉ xét ở chỗ đứng của một nhãn mức.
+OLD_VI = ("cao", "trung bình", "thấp", "nghiêm trọng", "quan trọng", "nhẹ")
+OLD_CELL_VI = set(OLD_VI)
+# Nhãn tiếng Việt kiểu cũ chỉ bị bắt ở cột mà tiêu đề NÓI LÀ mức của phát hiện; "Mức chắc chắn", "Mức rủi ro" là
+# thang khác, "Cao" ở đó là giá trị hợp lệ.
+SEVERITY_HEADERS_VI = {"mức", "mức độ", "mức nghiêm trọng", "độ nghiêm trọng"}
+OLD_FIELD = re.compile(
+    r"(?i)\b(?:severity|mức)\**\s*:\s*\**\s*(critical|high|medium|low|important|minor|" + "|".join(OLD_VI) + r")\b")
+# Nhãn kiểu nguồn nằm trong câu: chữ HOA nguyên từ (chữ thường như "high-level", "low-code" không trúng), nhãn trong
+# ngoặc vuông đầu dòng (kể cả sau gạch đầu dòng hay dấu trích dẫn) và ngưỡng "confidence ≥ 80".
+OLD_SRC_WORD = re.compile(r"(?<![\w/\-.])(CRITICAL|HIGH|MEDIUM|LOW)(?![\w/\-])")
+OLD_SRC_BRACKET = re.compile(
+    r"^\s*(?:[-*+>]\s+)*\[(CRITICAL|HIGH|MEDIUM|LOW|BLOCK|WARN|INFO|NOTE|Critical|Important|Minor|Warning)\]")
+OLD_SRC_CONFIDENCE = re.compile(r"(?i)\bconfidence\s*(?:≥|>=|>)\s*[0-9]+")
 SELF_CHECK = "tự kiểm, chưa độc lập"
 NOT_APPLICABLE = "NOT_APPLICABLE"
 # NOT_APPLICABLE chỉ miễn khi có lý do theo sau (một chữ sau dấu nối tuỳ chọn).
@@ -319,9 +341,11 @@ def prefix(code: str) -> str:
 
 
 class Engine:
-    def __init__(self):
+    def __init__(self, env=None):
+        self.env = os.environ if env is None else env
         self.cache: dict = {}
         self.configs: dict = {}
+        self.size_flagged: set = set()  # thư mục sprint bốn file đã báo `sprint-size-mismatch` (một lần mỗi thư mục)
         self.report = Report()
 
     def doc(self, path: Path) -> Doc | None:
@@ -354,6 +378,7 @@ class Engine:
         if doc.kind is None or doc.fm is None:
             return
         self.frontmatter_rules(doc)
+        self.size_rules(doc)
         self.heading_rules(doc)
         self.id_rules(doc)
         self.lead_rule(doc)
@@ -369,6 +394,7 @@ class Engine:
         skill_tests = any(parts[i] == "skills" and parts[i + 2] == "tests" for i in range(len(parts) - 2))
         severity_table = len(parts) >= 2 and parts[-2:] == ("method", "severity.md")
         level_columns: list = []
+        vi_columns: list = []
         in_table = False
         for idx, line in enumerate(doc.masked):
             for m in BARE.finditer(line):
@@ -377,32 +403,48 @@ class Engine:
                              f"mã trần '{m.group(0)}' — dùng tiền tố hai chữ cái đúng tài liệu hoặc viết bằng chữ" + doc.hint(idx, m.start(), m.group(0)))
             cells = c.table_cells(line)
             level_cells: list = []
+            vi_cells: list = []
             if cells is None:
-                in_table, level_columns = False, []
+                in_table, level_columns, vi_columns = False, [], []
             elif not in_table:  # hàng tiêu đề: nhớ cột mức/severity
                 in_table = True
                 level_columns = [i for i, cell in enumerate(cells) if _is_level_header(cell)]
+                vi_columns = [i for i, cell in enumerate(cells) if cell.strip("*_ ").casefold() in SEVERITY_HEADERS_VI]
             else:
                 level_cells = [cells[i] for i in level_columns if i < len(cells)]
+                vi_cells = [cells[i] for i in vi_columns if i < len(cells)]
             if not severity_table:
-                self._old_scale(doc, idx, line, level_cells)
+                self._old_scale(doc, idx, line, level_cells, vi_cells, quoting=skill_tests)
         if not skill_tests:
             for d in doc.defs:
                 if prefix(d.code) not in c.OWNER:
                     self.add(doc.path, d.line, "id-unknown-prefix", f"'{d.code}' dùng tiền tố '{prefix(d.code)}' ngoài bảng mã")
 
-    def _old_scale(self, doc: Doc, idx: int, line: str, cells: list) -> None:
-        """Nhãn thang cũ: chỉ ở ô thuộc cột mức/severity của bảng, hoặc sau "Mức:"/"Severity:" trong dòng."""
+    def _old_scale(self, doc: Doc, idx: int, line: str, cells: list, vi_cells: list = (), *, quoting: bool = False) -> None:
+        """Nhãn thang cũ ở bốn chỗ: ô thuộc cột mức/severity của bảng; sau "Mức:"/"Severity:" trong dòng; nhãn kiểu
+        nguồn trong câu (`CRITICAL`, `[HIGH]` đầu dòng, `confidence ≥ 80`). Chữ thường ngoài hai chỗ đầu không xét.
+        `quoting` (file thử của skill chép nguyên văn đầu ra chủ thể thử): bỏ nhãn kiểu nguồn trong câu, giữ ô cột mức."""
         for cell in cells:
             bare = cell.strip("*_ ")
             if bare.casefold() in OLD_CELL or bare in OLD_CELL_UPPER:
-                self.add(doc.path, doc.line_no(idx), "old-scale-label",
-                         f"nhãn thang cũ '{bare}' — dùng Chặn / Phải sửa / Nên sửa / Ghi chú")
+                self._old_scale_hit(doc, idx, bare)
                 return
-        m = OLD_FIELD.search(line)
+        for cell in vi_cells:
+            bare = cell.strip("*_ ")
+            if bare.casefold() in OLD_CELL_VI:
+                self._old_scale_hit(doc, idx, bare)
+                return
+        m = OLD_FIELD.search(line) or (None if quoting else OLD_SRC_BRACKET.search(line) or OLD_SRC_WORD.search(line))
         if m:
-            self.add(doc.path, doc.line_no(idx), "old-scale-label",
-                     f"nhãn thang cũ '{m.group(1)}' — dùng Chặn / Phải sửa / Nên sửa / Ghi chú")
+            self._old_scale_hit(doc, idx, m.group(1))
+            return
+        m = None if quoting else OLD_SRC_CONFIDENCE.search(line)
+        if m:
+            self._old_scale_hit(doc, idx, m.group(0), "ngưỡng điểm của nguồn")
+
+    def _old_scale_hit(self, doc: Doc, idx: int, label: str, what: str = "nhãn thang cũ") -> None:
+        self.add(doc.path, doc.line_no(idx), "old-scale-label",
+                 f"{what} '{label}' — dùng Chặn / Phải sửa / Nên sửa / Ghi chú")
 
     # -- frontmatter --
 
@@ -538,6 +580,33 @@ class Engine:
         if doc.kind == "sprint" and status == "done" and data.get("gate_2") in (None, "pending"):
             self.add(doc.path, doc.key_line("status"), "gate-invalid", "status: done nhưng gate_2 chưa có kết luận")
 
+    # -- hình tài liệu theo cỡ --
+
+    def size_rules(self, doc: Doc) -> None:
+        """`size × doc`: `SPRINT.md` chỉ ở cỡ rất nhỏ/nhỏ; bốn file chỉ từ cỡ nhỏ trở lên. Thiếu/sai `size` đã có luật khác."""
+        size = doc.data.get("size")
+        if not isinstance(size, str):
+            return
+        if doc.kind == "sprint" and size in ("medium", "large"):
+            self.add(doc.path, doc.key_line("size"), "sprint-size-mismatch",
+                     f"SPRINT.md ở cỡ {size} — cỡ vừa/lớn dùng bốn file SPEC · PLAN · PROGRESS · REPORT (method/sizing.md)")
+        elif doc.kind in ("spec", "plan", "progress", "report") and size == "tiny":
+            folder = doc.path.resolve().parent
+            if folder not in self.size_flagged:
+                self.size_flagged.add(folder)
+                self.add(doc.path, doc.key_line("size"), "sprint-size-mismatch",
+                         "cỡ rất nhỏ dùng một file SPRINT.md, không dựng bốn file (method/sizing.md); nâng cỡ lên nhỏ nếu giữ bốn file")
+
+    def required_headings(self, doc: Doc, headings: list) -> tuple:
+        """Tiêu đề bắt buộc; `SPRINT.md` cỡ rất nhỏ (hoặc cỡ chưa rõ) nhận hai phần "Kế hoạch" · "Kết quả" hoặc bốn phần cũ."""
+        if doc.kind != "sprint":
+            return REQUIRED_HEADINGS[doc.kind]
+        size = doc.data.get("size")
+        if size in ("small", "medium", "large"):
+            return SPRINT_FOUR
+        four_part = any(w.casefold() in h for w in SPRINT_FOUR[:3] for h in headings)
+        return SPRINT_FOUR if four_part else SPRINT_TINY_HEADINGS
+
     # -- tiêu đề --
 
     def heading_rules(self, doc: Doc) -> None:
@@ -548,7 +617,7 @@ class Engine:
             if line.startswith("## "):
                 first_h2 = min(first_h2, idx)
                 headings.append(NUMBERING.sub("", doc.raw[idx][3:].strip()).casefold())
-        for phrase in REQUIRED_HEADINGS[doc.kind]:
+        for phrase in self.required_headings(doc, headings):
             if not any(phrase.casefold() in h for h in headings):
                 self.add(doc.path, h1, "heading-missing", f"thiếu tiêu đề cấp 2 chứa '{phrase}'")
         if doc.kind == "spec" and doc.data.get("size") in ("medium", "large") and not any("truy vết" in h for h in headings):
@@ -719,6 +788,93 @@ class Engine:
             if target == base or base in target.parents:
                 self.add(path, 1, "config-public-root",
                          f"visibility: public nhưng artifact_root '{cfg['artifact_root']}' nằm trong gốc dự án — hồ sơ nội bộ sẽ lên repo công khai")
+        if not any("ledger" in problem for problem in problems):
+            self.check_ledger(root, cfg, path)
+
+    # -- sổ tập trung (FR8) --
+
+    def check_ledger(self, root: Path, cfg: dict, config_path: Path) -> None:
+        """Chỉ chạy khi dự án khai `ledger.project`; không khai thì 0 phát hiện dù máy có đặt mẫu đường."""
+        project = c.ledger_project(cfg)
+        if project is None:
+            return
+        pattern = self.env.get(c.LEDGER_ENV, "")
+        if not pattern:
+            self.add(config_path, 1, "ledger-unconfigured",
+                     f"dự án khai ledger.project '{project}' nhưng máy chưa đặt {c.LEDGER_ENV} — chưa đối chiếu được sổ tập trung")
+            return
+        ledger = c.ledger_path(pattern, project)
+        if ledger is None:
+            self.add(config_path, 1, "config-invalid", f"{c.LEDGER_ENV} phải chứa {{project}} (nơi thay tên dự án)")
+            return
+        rows = self._ledger_rows(ledger, config_path)
+        if rows is None:
+            return
+        for sprint_id, doc in self._ledger_sprints(root, cfg):
+            status, updated = doc.data.get("status"), doc.data.get("updated")
+            row = rows.get(sprint_id)
+            if row is None:
+                if status not in ("done", "dropped"):
+                    self.add(doc.path, doc.key_line("status"), "ledger-missing-row",
+                             f"{sprint_id} đang '{status}' mà sổ tập trung chưa có dòng (method/process.md mục 11)")
+                continue
+            row_status, row_date = row
+            if row_status != status:
+                self.add(doc.path, doc.key_line("status"), "ledger-stale",
+                         f"{sprint_id}: sổ ghi trạng thái '{row_status}', hồ sơ ghi '{status}'")
+            if not DATE.fullmatch(row_date):
+                self.add(doc.path, doc.key_line("updated"), "ledger-stale",
+                         f"{sprint_id}: ngày trong sổ '{row_date}' không phải YYYY-MM-DD")
+            elif isinstance(updated, str) and DATE.fullmatch(updated) and row_date < updated:
+                self.add(doc.path, doc.key_line("updated"), "ledger-stale",
+                         f"{sprint_id}: sổ ghi ngày {row_date}, hồ sơ cập nhật {updated}")
+
+    def _ledger_rows(self, ledger: Path, config_path: Path):
+        """`{mã sprint: (trạng thái, ngày)}` từ bảng có cột đầu "Sprint" (dòng đầu thắng); lỗi → báo và trả `None`."""
+        try:
+            text = c.read_text(ledger)
+        except (OSError, UnicodeDecodeError) as exc:
+            kind = "không tồn tại" if not ledger.exists() else f"không đọc được dạng UTF-8 ({type(exc).__name__})"
+            self.add(config_path, 1, "ledger-unreadable", f"file sổ {kind}: {ledger.name}")
+            return None
+        rows: dict = {}
+        found = in_table = False
+        for line in c.mask_markdown(text.split("\n")):
+            cells = c.table_cells(line)
+            if cells is None:
+                in_table = False
+            elif not in_table:
+                in_table = cells[0].strip("*_ ").casefold() == "sprint"
+                found = found or in_table
+            elif not c.is_separator_row(cells) and len(cells) >= 3:
+                key = cells[0].strip("*_` ")
+                if c.parse_id(key) is not None:
+                    rows.setdefault(key, (cells[1].strip("*_` "), cells[2].strip("*_` ")))
+        if not found:
+            self.add(config_path, 1, "ledger-unreadable",
+                     f"file sổ {ledger.name} không có bảng cột đầu 'Sprint' (mẫu: templates/registry/LEDGER.md)")
+            return None
+        return rows
+
+    def _ledger_sprints(self, root: Path, cfg: dict) -> list:
+        """Sprint của dự án: thư mục khớp `paths.sprint_dir` (như `index.py`), PROGRESS.md hoặc SPRINT.md có mã `SPR-`.
+        Bản chép mẫu nằm chỗ khác trong repo không bị đòi dòng sổ."""
+        base = c.artifact_path(root, cfg, "")
+        found = []
+        if not base.is_dir():
+            return found
+        pattern = cfg["paths"]["sprint_dir"].replace("{date}", "*").replace("{slug}", "*")
+        for folder in sorted(p for p in base.glob(pattern) if p.is_dir()):
+            for name in ("PROGRESS.md", "SPRINT.md"):
+                path = folder / name
+                if not path.is_file():
+                    continue
+                doc = self.doc(path)
+                sprint = doc.data.get("sprint") if doc is not None and doc.kind in ("progress", "sprint") else None
+                if isinstance(sprint, str) and (c.parse_id(sprint) or ("", 0))[0] == "SPR":
+                    found.append((sprint, doc))
+                break  # như index.py: PROGRESS.md trước, không có thì SPRINT.md
+        return found
 
 
 # --- Quét đường dẫn ------------------------------------------------------------------------------------
@@ -732,8 +888,8 @@ def _walk(root: Path, pattern: str):
         yield path
 
 
-def check_paths(paths) -> Report:
-    engine = Engine()
+def check_paths(paths, env=None) -> Report:
+    engine = Engine(env)
     for raw in paths:
         path = Path(raw)
         if path.is_dir():
@@ -991,7 +1147,7 @@ def main(argv=None, env=None) -> int:
             print("WARNING NOT_CONFIGURED: AGENT_AGILE_DENYLIST chưa đặt, file không đọc được hoặc rỗng — "
                   "luật leak-denylist Chưa chạy (không phải Đạt).", file=sys.stderr)
     else:
-        report = check_paths(args.paths)
+        report = check_paths(args.paths, env)
     for error in report.errors:
         print(f"{error} [lỗi đầu vào]")
     for finding in report.findings:

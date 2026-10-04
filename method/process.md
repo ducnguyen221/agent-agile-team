@@ -2,7 +2,7 @@
 title: Process — six steps, two human gates
 type: method
 status: active
-updated: 2026-10-01
+updated: 2026-10-04
 ---
 
 # Quy trình: sáu bước, hai cổng người
@@ -146,7 +146,9 @@ tier** ([tiers/README.md](../tiers/README.md)).
   không bao giờ giữ cùng lúc vai thực thi và vai kiểm định cho cùng một sản phẩm
   ([roles/README.md](../roles/README.md)).
 - Business Reviewer kiểm **đáp ứng yêu cầu** (`US`/`FR`/`SC`); Tech Reviewer kiểm **kỹ thuật** (code,
-  test, bảo mật, dữ liệu, backend, frontend) và kéo thẻ chuyên đề khi rủi ro cao.
+  test, bảo mật, dữ liệu, backend, frontend) và kéo thẻ chuyên đề khi rủi ro cao. Cỡ nhỏ: **một** reviewer
+  khác người làm giữ cả hai lăng kính; cỡ rất nhỏ: tự kiểm có ghi "chưa độc lập" hoặc agent khác chạy nhanh
+  (mục 9).
 - Mỗi phát hiện là một `RF` mang một mức: Chặn / Phải sửa / Nên sửa / Ghi chú, có bằng chứng
   (`file:dòng` hoặc lệnh + kết quả). Reviewer được trả **0 phát hiện** và **phải** ghi phần mình không
   đánh giá.
@@ -169,6 +171,47 @@ Chọn: (1) làm tiếp — bao nhiêu vòng nữa? (2) dừng & bàn giao — p
 
 Người dùng chọn **làm tiếp** (ghi số vòng thêm) hoặc **dừng & bàn giao** (sang bước 5, phần còn mở
 thành `CO`). Đây là mốc hỏi hợp lệ thứ ba ngoài hai cổng và bốn điều kiện dừng.
+
+### 6.1 Thiết kế vòng lặp — khi giao agent chạy lặp
+
+Vòng 3 ↔ 4 ở trên là một vòng lặp có người canh. Mục này áp khi sprint giao cho agent một vòng **tự chạy lặp**: "sửa tới
+khi test xanh", canh CI cho tới khi xanh, một việc định kỳ. Nền: máy đo được "còn cách đích bao xa" và mài về
+không; **đích có đúng không, có nên đổi hay dừng** là phán đoán của người, vì máy không đứng ra ngoài vòng để nghi ngờ
+đích của nó. Giao phán đoán, nghiệm thu hay công tắc cuối cho vòng là bỏ phản hồi bậc cao — nó chạy nhanh và mạnh tới
+một đích chưa ai hỏi.
+
+1. **Có đáng dựng vòng không — thiếu một điều kiện là không dựng.** Việc lặp lại đủ thường để bù công dựng · kiểm
+   được bằng máy · ngân sách token chịu nổi · agent có công cụ thật sự chạy và thấy kết quả. Việc làm một lần thì
+   làm tay.
+2. **Đích máy quyết được có/không.** "Làm cho tốt" không phải đích. Viết đích kèm **điều cấm** ("không xoá hay làm yếu
+   test, không hạ coverage") — chỉ có tiêu chí xong mà không có điều cấm là giấy phép gian lận (đích bị lách khi nó
+   thành thước đo). Ưu tiên đối chiếu với **sự thật bên ngoài** (mẫu vàng, tổng nguồn, số của hệ khác) hơn là khẳng
+   định của chính mã. Phép thử: đọc đích cho người ngoài lĩnh vực — họ chạy một lệnh và biết xong chưa không?
+3. **Ba vai: lập kế hoạch · làm · chấm.** Người chấm **độc lập** với người làm (khớp luật "người làm không tự
+   chấm"), chấm bằng quy tắc xác định (test, lệnh đối chiếu, kiểm kiểu), không bằng "trông ổn". Người làm **không được
+   sửa tiêu chí nghiệm thu** để qua: tiêu chí đổi là đổi `SC` và là điều kiện dừng (d) ở mục 5.
+4. **Giảm chấn.** Trần số vòng và điểm dừng cứng; hết trần thì báo người (mục 6: khuyến nghị 3 vòng). Phản hồi âm không
+   giảm chấn thì dao động, đốt token tại chỗ.
+5. **Làm hết các câu hỏi trước khi chạy.** Agent chạy lặp sẽ không dừng giữa đêm để hỏi; nó chạy tới cùng với đáp án
+   đoán. Mọi điều chưa rõ gom thành `CQ` và hỏi một lần ở Cổng 1 (mục 3).
+6. **Đưa lên từng nấc.** Chạy tay một lần (buộc phải nói rõ người chấm quyết thế nào) → đóng gói thành quy trình hoặc
+   subagent → mới tới chạy tự động theo lịch.
+
+**Rà một vòng trước khi cho chạy — trúng một dòng là gửi trả:**
+
+| Cách hỏng | Câu hỏi rà | Thuốc |
+|---|---|---|
+| Đích là câu đúng nhưng chung chung → quay vô tận | đích có máy quyết được không? | thay bằng điều kiện kết quả quyết được |
+| "Kiểm" viết thành "xem có ổn không" → agent tự nói ổn rồi dừng | người chấm có là bị cáo? chấm bằng "trông đúng" hay quy tắc xác định? | đối chiếu + mã thoát + người chấm độc lập |
+| Chỉ chặn bằng "mọi test xanh" → agent xoá test | có điều cấm đi cùng tiêu chí xong không? | tiêu chí xong **cộng** điều cấm |
+| Trông chờ agent hỏi giữa chừng | có chỗ nào "đợi chạy tới đó mới hỏi"? | hỏi hết trước khi chạy |
+| Tài liệu nền phình và cũ → vòng càng nhanh càng sai | tài liệu agent dựa vào còn mới không? ai giữ? | giữ tài liệu ngắn, rà định kỳ |
+
+**Ba vạch đỏ — vi phạm một là không được tự chạy:** (1) **phán đoán ở lại với người** — ô "xong" và nghiệm thu do người
+bật, vòng là thợ, không phải người nghiệm thu; (2) **trách nhiệm không chuyển** — thứ mà sai là không gánh nổi
+(gộp nhầm nhánh chính, phát hành nhầm, chuyển nhầm tiền) thì không giao quyền tự động, khớp điều kiện dừng ở mục 5;
+(3) vòng càng "tự cải tiến, tự viết lại luật của mình" thì người duyệt phải càng **chặt**, không lỏng — máy nhanh quá
+để chặn sau, nên phán đoán của người nằm **trước** hành động như một cổng cứng, không phải miếng vá sau.
 
 ## 7. Bước 5 — REPORT và Cổng 2
 
@@ -217,10 +260,16 @@ mở REPORT cũ.
 - Bài học đánh dấu **quan trọng** THÌ **chỉ đề xuất** nâng thành luật, skill hoặc bước quy trình, kèm lý
   do và chi phí; người dùng quyết. Agent không tự sửa luật hay tự tạo skill từ bài học.
 
-## 9. Việc rất nhỏ — cổng "đạt theo lời giao"
+## 9. Việc nhẹ — cỡ rất nhỏ và cỡ nhỏ dùng một file
 
-KHI cỡ **rất nhỏ** (đổi chữ, một dòng, không đổi hành vi) THÌ:
-- Bốn tài liệu gộp thành một file `SPRINT.md` có đủ bốn phần.
+Hai cỡ nhẹ dùng **một** file `SPRINT.md` (bảng cỡ và dấu hiệu đo được: [sizing.md](sizing.md) mục 1); phân vân giữa
+hai bậc thì chọn bậc nặng hơn.
+
+**Cỡ rất nhỏ** (đổi chữ hoặc một chỗ, không đổi hành vi hay quyền, lời giao đã nêu rõ kết quả) — "có kế hoạch
+rồi làm cho hoàn thiện":
+- `SPRINT.md` có **hai** phần: "Kế hoạch" (lời giao, mục tiêu, tiêu chí xong `SC`, việc `TK` trỏ `SC`) và "Kết
+  quả" (nhật ký ngắn, `VR` cho mỗi `SC`, cách hoàn tác). Không SPEC / PLAN riêng. `SPRINT.md` bốn phần của
+  sprint cũ vẫn hợp lệ.
 - **Cổng 1** không mở lượt hỏi mới: khi lời giao của người dùng đã nêu rõ kết quả, ghi
   `gate_1: approved`, `gate_1_at` là thời điểm giao, `gate_1_quote` là **trích nguyên văn** lời giao với
   tiền tố "đạt theo lời giao: …". Lời giao chưa nêu rõ kết quả thì không phải việc rất nhỏ — nâng cỡ.
@@ -231,7 +280,16 @@ KHI cỡ **rất nhỏ** (đổi chữ, một dòng, không đổi hành vi) TH�
 - Luật "người làm không tự chấm" vẫn áp: `VR` do agent khác chạy, hoặc ghi rõ "tự kiểm, chưa độc lập"
   và kết luận chỉ được là **Đạt có điều kiện**.
 
-Giữ đủ hai cổng về mặt hồ sơ, không thêm lượt hỏi về mặt con người.
+**Cỡ nhỏ** (sửa cục bộ một luồng có sẵn, một `FR`, không đổi hợp đồng / giao diện / schema, không có quyết định
+kiến trúc):
+- `SPRINT.md` đủ **bốn** phần SPEC · PLAN · PROGRESS · REPORT, mỗi phần ngắn (một `FR`, một hai `SC`, vài `TK`).
+- **Cổng 1 là lượt duyệt thật**: trình tóm tắt ngắn, chờ người dùng duyệt rồi mới làm (mục 3). **Cổng 2 cũng thật**
+  (mục 7).
+- **Một** reviewer (agent khác người làm) kiểm cả nghiệp vụ lẫn kỹ thuật, một vòng ngắn; vòng sửa và điều kiện
+  dừng như mục 5–6.
+
+Giữ đủ hai cổng về mặt hồ sơ ở cả hai bậc; riêng cỡ rất nhỏ không thêm lượt hỏi về mặt con người.
+Việc nâng cỡ giữa chừng (lộ rủi ro mới) thì chuyển sang bốn file ở cỡ vừa/lớn, ghi `Phán quyết:`.
 
 ## 10. Khi nào được hỏi người dùng — bảng tra nhanh
 
@@ -243,3 +301,41 @@ Giữ đủ hai cổng về mặt hồ sơ, không thêm lượt hỏi về mặ
 | Cạn hạn mức tier (không tự hạ tier) | Thứ tự làm `TK`, tách `TK` con |
 | `CQ` gom ở Cổng 1 (một lần) | Hỏi lẻ từng câu giữa chừng |
 | Tư vấn gọi chéo hãng (chỉ tư vấn, người dùng quyết) | Tự chạy gọi chéo |
+
+## 11. Ghi sổ tại cổng
+
+Dự án muốn một **sổ tập trung** (một file Markdown mỗi dự án, nằm ngoài repo, nơi nhiều dự án cùng được xem trạng
+thái) thì bật bằng khoá `ledger.project` (tên dự án trong sổ) ở `.agile.json`; máy chỉ cấp **mẫu đường** kho sổ qua
+biến môi trường `AGENT_AGILE_LEDGER` (chứa `{project}`). Dự án không khai khoá thì mục này không áp và `check`
+không đọc sổ, kể cả khi máy đặt biến. Đường dẫn của máy không bao giờ vào file commit của repo. Khuôn file sổ:
+[templates/registry/LEDGER.md](../templates/registry/LEDGER.md).
+
+KHI một trong năm thời điểm dưới đây xảy ra THÌ cập nhật **hồ sơ sprint trước, sổ tập trung ngay sau, trong cùng
+lượt** — mỗi lần ghi trạng thái cụ thể kèm bằng chứng, không ghi "đang làm" chung chung:
+
+| Thời điểm | Ghi gì | Ở đâu | Bằng chứng |
+|---|---|---|---|
+| Mở sprint | `status: drafting`, ngày mở; thêm **dòng mới** trong sổ, link trỏ nhánh sprint | PROGRESS (hoặc `SPRINT.md`) + SPRINTS + dòng sổ | dòng sổ vừa thêm; `check` không báo `ledger-missing-row` |
+| Qua Cổng 1 | `in_progress`, `gate_1: approved` và câu duyệt nguyên văn | PROGRESS (hoặc `SPRINT.md`) + dòng sổ | `gate_1_quote` |
+| Quay lại bước 3 sau kiểm định **mà trạng thái đổi** | `in_progress` hoặc `blocked`, `review_round` mới; việc `RF` phải sửa còn mở | PROGRESS + dòng sổ | `RF` và `VR` của vòng vừa xong |
+| Cổng 2 | `awaiting_gate_2`, rồi `done` hoặc `dropped` theo lời người dùng; `verdict` | REPORT + PROGRESS + dòng sổ | `gate_2_quote`; kết quả trong REPORT |
+| Đóng sprint | trạng thái cuối; cột Hồ sơ đổi sang `REPORT.md`; link đổi sang `main` hoặc SHA khi hồ sơ nằm trong repo | dòng sổ (cập nhật, không thêm dòng) | lệnh gộp hoặc commit vừa chạy |
+
+Dòng sổ có năm cột: `Sprint` · `Trạng thái` (đúng giá trị `status` của PROGRESS hoặc `SPRINT.md`) · `Cập nhật`
+(ngày `YYYY-MM-DD`, không cũ hơn `updated` của hồ sơ) · `Hồ sơ` (`<repo>:docs/plans/<slug>/<tài-liệu>.md`; `<tài-liệu>` là `PROGRESS.md` khi sprint đang mở, `REPORT.md` khi đã
+`done`/`dropped`, và luôn `SPRINT.md` với sprint một file) ·
+`Link` bấm được. Hồ sơ **trong repo** → URL GitHub blob với `<ref>` là nhánh sprint khi đang mở, `main` hoặc SHA khi
+đã đóng. Hồ sơ **ngoài repo** → đường tương đối trong kho sổ tới thư mục plan. Visibility của repo chỉ khuyến nghị
+nơi đặt hồ sơ, không quyết hình link.
+
+**Chạy `check` trên gốc dự án** (thư mục có `.agile.json`); `check` đọc sprint theo `paths.sprint_dir`. Chạy riêng trên thư mục
+sprint thì không thấy `.agile.json` nên **không đọc sổ** — kết quả không có phát hiện về sổ chưa phải là sổ khớp.
+
+`check` bắt lệch khi dự án đã khai: sprint đang mở (khác `done`, `dropped`) không có dòng → Phải sửa
+(`ledger-missing-row`); dòng lệch `status` hoặc ngày cũ hơn `updated` → Phải sửa (`ledger-stale`); file sổ không có,
+không đọc được UTF-8 hay không có bảng cột đầu "Sprint" → Phải sửa (`ledger-unreadable`); dự án khai mà máy chưa đặt
+mẫu đường → Ghi chú (`ledger-unconfigured`); mẫu đường thiếu `{project}` → Phải sửa (`config-invalid`).
+
+**Giới hạn đã biết:** `check` so ngày theo ngày — hai lần đổi trạng thái trong cùng một ngày chỉ bắt được qua
+trạng thái, không qua ngày; `check` không mở link để thử bấm và không đọc nội dung "kết quả" của dòng, nên người ghi
+chịu trách nhiệm link đúng và kết quả có bằng chứng. `init` và `index` chưa tự ghi dòng sổ (việc để lại).

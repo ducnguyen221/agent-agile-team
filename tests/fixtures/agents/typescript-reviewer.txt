@@ -1,0 +1,60 @@
+# Fixture review TypeScript (agents/typescript-reviewer.md)
+# Phạm vi review: toàn bộ diff dưới đây. Không có kho git, không có package.json hay tsconfig để chạy công cụ;
+# giả định `strict` và `noUncheckedIndexedAccess` đang bật.
+# Khi báo vị trí: ghi `typescript-reviewer.txt:<dòng>` với số dòng của CHÍNH file này (như công cụ đọc file hiển thị).
+diff --git a/src/jobs/reports.ts b/src/jobs/reports.ts
+new file mode 100644
+--- /dev/null
++++ b/src/jobs/reports.ts
+@@ -0,0 +1,51 @@
++import { exec } from "node:child_process";
++import { readFile } from "node:fs/promises";
++
++export interface Settings {
++  theme: "light" | "dark";
++  pageSize: number;
++}
++
++const DEFAULTS: Settings = { theme: "light", pageSize: 20 };
++
++export interface ReportRequest {
++  title: string;
++  format: string;
++}
++
++export function convertReport(req: ReportRequest, done: (err: Error | null) => void): void {
++  exec(`pandoc ${req.title}.md -o ${req.title}.${req.format}`, (err) => done(err));
++}
++
++export async function sendReceipts(ids: string[], send: (id: string) => Promise<void>): Promise<number> {
++  ids.forEach(async (id) => {
++    await send(id);
++  });
++  return ids.length;
++}
++
++export async function loadSettings(path: string): Promise<Settings> {
++  let settings: Settings = DEFAULTS;
++  try {
++    settings = JSON.parse(await readFile(path, "utf8")) as Settings;
++  } catch (e) {}
++  return settings;
++}
++
++export function firstId(ids: string[]): string {
++  if (ids.length === 0) {
++    throw new Error("ids must not be empty");
++  }
++  return ids[0]!;
++}
++
++export function parsePort(value: unknown): number {
++  if (typeof value !== "string" && typeof value !== "number") {
++    throw new TypeError("port must be a string or number");
++  }
++  const port = Number(value);
++  if (!Number.isInteger(port) || port < 1 || port > 65535) {
++    throw new RangeError(`invalid port: ${String(value)}`);
++  }
++  return port;
++}

@@ -36,7 +36,11 @@ rewrite_before_public: false
 | khoảng thời gian trên bảng chuỗi thời gian chèn theo thứ tự | BRIN | `CREATE INDEX idx ON t USING brin (col)` |
 | chỉ đọc vài cột | bao phủ | `CREATE INDEX idx ON t (email) INCLUDE (name)` |
 | chỉ một phần dòng được truy vấn (xoá mềm, trạng thái) | một phần | `CREATE INDEX idx ON t (email) WHERE deleted_at IS NULL` |
+| danh sách theo khách mới nhất trước, chỉ dòng chưa xoá | ghép + một phần | `CREATE INDEX idx ON orders (customer_id, created_at DESC) WHERE deleted_at IS NULL` |
 
+- Index một phần có lợi khi phần dòng cần truy vấn **nhỏ** so với cả bảng (ví dụ vài phần trăm dòng đang hoạt động) hoặc
+  khi muốn ràng buộc unique chỉ trên phần đó; truy vấn phải **chứa đúng điều kiện** của index (`deleted_at IS NULL`) thì
+  planner mới dùng nó. Phần dòng gần bằng cả bảng thì index thường là đủ và ít bất ngờ hơn; đo bằng `EXPLAIN`.
 - Mỗi khoá ngoại có index ở phía tham chiếu — không có thì `JOIN` và xoá dòng cha phải quét cả bảng con.
 - Cột dùng trong policy RLS có index.
 - Index có giá: mỗi lần ghi phải cập nhật mọi index. Index không được dùng (`idx_scan` gần 0 sau một chu kỳ
@@ -57,16 +61,27 @@ rewrite_before_public: false
 - Ràng buộc nằm trong CSDL, không chỉ trong code: khoá chính, khoá ngoại có `ON DELETE` chọn có chủ đích,
   `NOT NULL`, `UNIQUE`, `CHECK`. Ứng dụng kiểm trước rồi chèn là đua — ràng buộc mới là chốt cuối.
 - Định danh `lowercase_snake_case`, không tên hoa thường lẫn lộn trong nháy kép.
+- **`jsonb` hay bảng riêng:** `jsonb` hợp với thuộc tính **thưa, thay đổi theo bản ghi, ít khi nối hay ràng buộc** (thẻ, cấu
+  hình, dữ liệu thô từ ngoài); lọc bằng `@>` với index GIN (`USING gin (col)`), lấy khoá lồng bằng `col -> 'a' ->> 'b'`
+  (muốn nhanh trên một khoá cố định: index biểu thức). Thuộc tính cần **khoá ngoại, ràng buộc unique, nối bảng hay thống
+  kê nhiều** → tách thành cột hay bảng quan hệ. Cột `text` đang chứa chuỗi JSON: đổi sang `jsonb` là đổi kiểu trên bảng
+  thật — làm theo `database-migrations` (cột mới, backfill theo lô, chuyển đọc), và đếm trước số dòng không phải JSON hợp lệ.
 
 ## 4. Truy vấn và đồng thời
 
 - Chọn đúng cột cần, không `SELECT *` trong code chạy thật. Truy vấn luôn tham số hoá.
 - **Phân trang con trỏ:** `WHERE id > $1 ORDER BY id LIMIT 20` nhảy thẳng qua index; `OFFSET` lớn phải đọc
-  rồi bỏ mọi dòng phía trước.
+  rồi bỏ mọi dòng phía trước. Khoá sắp xếp **không duy nhất** (ví dụ `created_at`) thì ghép thêm khoá chính để thứ tự
+  xác định và so bằng so sánh hàng: `WHERE (created_at, id) < ($1, $2) ORDER BY created_at DESC, id DESC LIMIT 50`,
+  với index `(created_at DESC, id DESC)`; con trỏ trả cho client là cặp giá trị của dòng cuối. Con trỏ không nhảy tới
+  "trang số N" — cần nhảy thì đó là yêu cầu cho `api-design`, đánh đổi bằng `OFFSET` có trần.
 - **Chèn theo lô:** `INSERT` nhiều dòng hoặc `COPY`; không chèn từng dòng trong vòng lặp.
 - **UPSERT:** `INSERT … ON CONFLICT (khoá) DO UPDATE SET col = EXCLUDED.col` — cần ràng buộc unique khớp khoá.
 - **Giao dịch ngắn:** không giữ khoá trong lúc gọi API ngoài hay chờ người dùng; đặt
-  `idle_in_transaction_session_timeout` để giao dịch bỏ dở không giữ khoá mãi.
+  `idle_in_transaction_session_timeout` để giao dịch bỏ dở không giữ khoá mãi, và `lock_timeout` (nhỏ hơn
+  `statement_timeout`) để câu lệnh không xếp hàng chờ khoá vô hạn (`references/diagnostics.md` mục 3.1).
+- **Số kết nối:** tổng = số instance × cỡ pool, phải nhỏ hơn `max_connections`; vượt thì giảm pool hoặc đặt PgBouncer
+  chứ không nâng `max_connections` (`references/diagnostics.md` mục 3.2).
 - **Thứ tự khoá nhất quán:** cập nhật nhiều dòng thì khoá theo cùng thứ tự (`ORDER BY id FOR UPDATE`) để
   không deadlock.
 - **Hàng đợi việc:** worker lấy việc bằng `FOR UPDATE SKIP LOCKED` để không tranh cùng dòng:
@@ -111,7 +126,7 @@ Mức gợi ý theo hậu quả nếu bỏ qua (`method/severity.md` mục 1).
 
 | Cần | Đọc |
 |---|---|
-| Đọc `EXPLAIN (ANALYZE, BUFFERS)`; truy vấn tìm khoá ngoại thiếu index, truy vấn chậm, bảng phình, index không dùng; cấu hình mẫu kết nối, timeout, giám sát | `references/diagnostics.md` |
+| Đọc `EXPLAIN (ANALYZE, BUFFERS)`; truy vấn tìm khoá ngoại thiếu index, truy vấn chậm, bảng phình, index không dùng; cấu hình mẫu kết nối, timeout (`lock_timeout`), PgBouncer và cách tính số kết nối, giám sát | `references/diagnostics.md` |
 
 Liên quan: agent `database-reviewer` (review đầy đủ), `security-reviewer` (RLS, quyền); skill
 `database-migrations`, `fastapi`, `python`, `api-design`, `security-review`.

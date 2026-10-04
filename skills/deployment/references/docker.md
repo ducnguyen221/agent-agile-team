@@ -87,7 +87,7 @@ Mức gợi ý theo hậu quả nếu bỏ qua (`method/severity.md` mục 1).
 | Dữ liệu lưu trong container, không có volume | container là tạm — tạo lại là mất dữ liệu | volume có tên | Chặn khi là dữ liệu thật |
 | Chạy bằng root | lỗ hổng ứng dụng thành quyền root trong container | tạo và dùng người dùng không phải root | Phải sửa |
 | Image nền `:latest` hay không ghim | build hôm nay khác hôm qua; hoàn tác về "bản cũ" không chắc là bản cũ | ghim phiên bản, production ghim digest | Phải sửa |
-| `CMD` dạng chuỗi qua shell | không nhận `SIGTERM`, yêu cầu dở bị cắt khi deploy | `CMD` dạng mảng JSON | Phải sửa |
+| `CMD` dạng chuỗi qua shell, hoặc tiến trình ứng dụng làm PID 1 mà không xử lý tín hiệu | không nhận `SIGTERM` (PID 1 bỏ qua tín hiệu không có handler), yêu cầu dở bị cắt rồi bị `SIGKILL` (mã thoát 137) khi deploy | `CMD` dạng mảng JSON và bật init (`init: true` trong compose, `docker run --init`, hoặc `tini` làm entrypoint) để tín hiệu được chuyển tiếp và tiến trình con được thu dọn | Phải sửa |
 | `depends_on` không chờ healthcheck | ứng dụng khởi động trước CSDL, lỗi kết nối lúc khởi động | `condition: service_healthy` + healthcheck thật | Nên sửa |
 | Chép cả repo một lớp trước khi cài phụ thuộc | mỗi lần build cài lại từ đầu | chép lockfile, cài, rồi mới chép mã | Nên sửa |
 | Một container chạy nhiều dịch vụ | không co giãn, không khởi động lại riêng được | mỗi container một tiến trình | Nên sửa |

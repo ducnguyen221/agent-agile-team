@@ -6,7 +6,7 @@ sprint: SPR-02
 request: RQ-002
 feature: FS-001
 status: in_progress
-size: tiny
+size: small
 risk: normal
 risk_tags: []
 review_round: 0
@@ -27,23 +27,25 @@ updated: 2026-01-20
 
 # Tên mục tiêu sprint — Sprint gộp (SPRINT)
 
-<!-- CHỈ dùng cho cỡ RẤT NHỎ (đổi chữ, một dòng, không đổi hành vi). Rủi ro cao thì không bao giờ là rất nhỏ —
-     dùng bốn tài liệu riêng. Bốn phần dưới đây là bốn tài liệu SPEC → PLAN → PROGRESS → REPORT thu gọn;
-     vẫn đủ hai cổng và vẫn do agent KHÁC người làm kiểm.
+<!-- CHỈ dùng cho cỡ NHỎ: sửa cục bộ một luồng có sẵn, một FR, không đổi hợp đồng / giao diện / schema, không có
+     quyết định kiến trúc. Bốn phần dưới đây là bốn tài liệu SPEC → PLAN → PROGRESS → REPORT thu gọn; Cổng 1 và
+     Cổng 2 là lượt duyệt thật. MỘT reviewer (agent KHÁC người làm) kiểm cả nghiệp vụ lẫn kỹ thuật.
+     Phân vân giữa nhỏ và vừa → chọn vừa. Rủi ro cao (`risk: high`) là lớn, không bao giờ nhỏ.
+     Cỡ rất nhỏ dùng mẫu SPRINT-tiny.md (hai phần); cỡ vừa/lớn dùng bốn file.
      Câu dẫn: trước mỗi bảng / danh sách mã ghi một câu nói tài liệu nào và mã là gì, nghĩa in đậm — ví dụ
-     "SPEC có 3 **user story** (US):" (skill id-convention). -->
+     "PLAN có 1 **task** (TK):" (skill id-convention). -->
 
 > **Kết luận:** <!-- MỘT câu, viết lại khi đóng: làm gì, đạt hay không. -->
-> Sửa chính tả câu báo lỗi ở màn hình tra đơn; chờ kiểm.
+> Tra đơn bỏ qua khoảng trắng thừa quanh mã đơn; chờ kiểm.
 
 ## 1. SPEC
 
 <!-- Bối cảnh một dòng · một FR có kịch bản · một SC đo được · ngoài phạm vi · CQ (thường "Không có."). -->
 
-- **Bối cảnh:** RQ-002 (lỗi chính tả màn hình tra đơn), tính năng FS-001 (tra cứu đơn hàng).
-- **FR1.1 (câu đúng chính tả):** KHI mã đơn không tồn tại THÌ màn hình hiện "Không tìm thấy đơn hàng".
-- **SC1 (chữ đúng):** test giao diện so khớp đúng câu trên.
-- **Ngoài phạm vi:** đổi bố cục màn hình.
+- **Bối cảnh:** RQ-002 (tra đơn thất bại khi dán mã có khoảng trắng), tính năng FS-001 (tra cứu đơn hàng).
+- **FR1.1 (bỏ khoảng trắng thừa):** KHI mã đơn có khoảng trắng đầu hoặc cuối THÌ tra cứu cắt chúng rồi tìm đơn.
+- **SC1 (tra được):** test đơn vị: mã " DH-1001 " trả đúng đơn DH-1001.
+- **Ngoài phạm vi:** đổi định dạng mã đơn; đổi bố cục màn hình.
 - **Câu hỏi cần làm rõ:** Không có.
 
 ## 2. PLAN
@@ -52,7 +54,7 @@ updated: 2026-01-20
 
 PLAN có 1 **task** (TK):
 
-- **TK1 (sửa câu báo lỗi) → FR1.1, SC1:** Implementer · T2 thực thi. Cách kiểm: test giao diện xanh.
+- **TK1 (cắt khoảng trắng mã đơn) → FR1.1, SC1:** Implementer · T2 thực thi. Cách kiểm: test đơn vị xanh.
   Hoàn tác: `git revert`.
 
 ## 3. PROGRESS
@@ -62,25 +64,23 @@ PLAN có 1 **task** (TK):
 
 | Việc | Vai · tier · model | Trạng thái | Bằng chứng |
 |---|---|---|---|
-| TK1 (sửa câu báo lỗi) | Implementer · T2 · model-x | Đạt | `pytest tests/test_ui.py` → 1 passed |
+| TK1 (cắt khoảng trắng mã đơn) | Implementer · T2 · model-x | Đạt | `pytest tests/test_lookup.py` → 1 passed |
 
-- **2026-01-20 10:00 +07** — Implementer sửa câu báo lỗi; test xanh.
+- **2026-01-20 10:00 +07** — Implementer thêm bước cắt khoảng trắng; test xanh.
 - **Vướng mắc:** Không có.
 
 ## 4. REPORT
 
 <!-- Kết quả kiểm (VR) do agent khác chạy · phát hiện (RF) + mức · cách hoàn tác · bài học (LN) và việc để lại
-     (CO) nếu có · Cổng 2: câu nguyên văn + thời điểm, cũng ghi vào frontmatter. Việc rất nhỏ nghiệm thu ngầm
-     (người dùng không phản đối trong lượt báo cuối) thì ghi trung thực:
-     gate_2: pass · gate_2_at: <thời điểm> · gate_2_quote: "nghiệm thu ngầm — không phản đối tới <thời điểm>". -->
+     (CO) nếu có · Cổng 2: câu nguyên văn + thời điểm, cũng ghi vào frontmatter. -->
 
 REPORT có 1 **verification result** (VR):
 
 | Mã | Kiểm cái gì | Lệnh / thao tác | Kết quả | Người kiểm |
 |---|---|---|---|---|
-| VR1 (test câu báo lỗi) | SC1 | `pytest tests/test_ui.py` | Chưa chạy | Tech Reviewer · agent-d |
+| VR1 (test tra mã có khoảng trắng) | SC1 | `pytest tests/test_lookup.py` | Chưa chạy | Tech Reviewer · agent-d |
 
 - **Phát hiện:** chưa kiểm.
-- **Cách dùng / đã đổi gì / hoàn tác:** câu báo lỗi trong `ui/orders.html`; hoàn tác bằng `git revert`.
+- **Cách dùng / đã đổi gì / hoàn tác:** hàm tra đơn trong `orders/lookup.py`; hoàn tác bằng `git revert`.
 - **Bài học · việc để lại:** Không có.
-- **Cổng 2:** chờ nghiệm thu (khi đóng: câu nguyên văn, hoặc "nghiệm thu ngầm — không phản đối tới <thời điểm>").
+- **Cổng 2:** chờ nghiệm thu (khi đóng: câu nguyên văn của người dùng).

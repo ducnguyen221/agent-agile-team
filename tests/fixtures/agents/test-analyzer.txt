@@ -1,0 +1,82 @@
+# Fixture phân tích test (agents/test-analyzer.md)
+# Phạm vi: toàn bộ diff dưới đây (code mới + test mới). Không có kho git; không chạy được pytest trên nó.
+# Khi báo vị trí: ghi `test-analyzer.txt:<dòng>` với số dòng của CHÍNH file này (như công cụ đọc file hiển thị).
+diff --git a/billing/invoice.py b/billing/invoice.py
+new file mode 100644
+--- /dev/null
++++ b/billing/invoice.py
+@@ -0,0 +1,38 @@
++from datetime import datetime, timezone
++
++
++class RefundExhausted(Exception):
++    """Không còn tiền để hoàn cho hoá đơn này."""
++
++
++def late_fee(amount_cents, days_late):
++    """Phí trễ hạn: 0 trong 5 ngày ân hạn; sau đó 1,5% mỗi tuần (làm tròn lên tuần), trần 20% số tiền."""
++    if amount_cents < 0:
++        raise ValueError("amount_cents must be >= 0")
++    if days_late <= 5:
++        return 0
++    weeks = (days_late - 5 + 6) // 7
++    fee = amount_cents * 15 * weeks // 1000
++    return min(fee, amount_cents * 20 // 100)
++
++
++def is_overdue(due_at):
++    return datetime.now(timezone.utc) > due_at
++
++
++def format_invoice_number(prefix, seq):
++    return f"{prefix}-{seq:06d}"
++
++
++def refund_amount(paid_cents, refunded_cents, requested_cents):
++    """Số tiền hoàn: không vượt phần còn lại, không hoàn số không/âm, hết tiền thì báo RefundExhausted."""
++    if requested_cents <= 0:
++        raise ValueError("requested_cents must be positive")
++    remaining = paid_cents - refunded_cents
++    if remaining <= 0:
++        raise RefundExhausted(f"nothing left to refund (paid={paid_cents}, refunded={refunded_cents})")
++    return min(requested_cents, remaining)
++
++
++def get_label(invoice):
++    return invoice["label"]
+diff --git a/tests/test_invoice.py b/tests/test_invoice.py
+new file mode 100644
+--- /dev/null
++++ b/tests/test_invoice.py
+@@ -0,0 +1,31 @@
++import time
++from datetime import datetime, timedelta, timezone
++
++from billing.invoice import format_invoice_number, is_overdue, late_fee, refund_amount
++
++
++def test_late_fee_zero_inside_grace():
++    assert late_fee(10_000, 3) == 0
++    assert late_fee(10_000, 5) == 0
++
++
++def test_late_fee_charges_after_grace():
++    assert late_fee(10_000, 30) >= 0
++
++
++def test_is_overdue_after_deadline():
++    due = datetime.now(timezone.utc) + timedelta(milliseconds=5)
++    time.sleep(0.01)
++    assert is_overdue(due)
++
++
++def test_invoice_number_pads_sequence():
++    assert format_invoice_number("INV", 42) == "INV-000042"
++
++
++def test_invoice_number_does_not_truncate_wide_sequence():
++    assert format_invoice_number("INV", 1234567) == "INV-1234567"
++
++
++def test_invoice_number_keeps_prefix_verbatim():
++    assert format_invoice_number("inv/vn", 7) == "inv/vn-000007"

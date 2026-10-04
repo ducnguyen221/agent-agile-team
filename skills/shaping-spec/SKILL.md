@@ -4,9 +4,9 @@ description: Use when a request has been registered and a SPEC must be written b
 metadata:
   group: process
   roles: [analyst, architect]
-source: obra/superpowers skills/brainstorming/SKILL.md
-source_sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
-license: MIT
+source: [obra/superpowers skills/brainstorming/SKILL.md, affaan-m/ECC agents/spec-miner.md]
+source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, ef648e01899ba3e8dc6371642deaaf64b4477775]
+license: [MIT, MIT]
 rewrite_before_public: false
 ---
 
@@ -38,7 +38,8 @@ nhẹ để khỏi viết SPEC thì đó chính là lúc chọn nhãn nặng.
 3. **Đánh giá phạm vi trước khi hỏi chi tiết:** lời giao chứa nhiều hệ con độc lập → tách sprint
    trước, mỗi sprint một SPEC; đừng tốn câu hỏi để tinh chỉnh một việc cần tách.
 4. **Đọc repo trước:** cấu trúc, tài liệu, commit gần đây, spec sống `FS-` liên quan. Theo khuôn có sẵn;
-   chỉ đề xuất cải thiện cục bộ ở chỗ việc này chạm, không refactor lan.
+   chỉ đề xuất cải thiện cục bộ ở chỗ việc này chạm, không refactor lan. Tính năng đã có mã mà chưa có spec sống:
+   rút hành vi hiện tại từ mã, caller và test — không từ docstring — theo `references/spec-mining.md`.
 
 ## 3. Hỏi thế nào — một câu mỗi tin hay gom `CQ`
 
@@ -67,7 +68,7 @@ Ngoài chế độ làm rõ, hỏi lẻ giữa Bước 2–5 là lỗi quy trìn
 | Kết luận | một câu: làm gì, cho ai, xong khi nào | người không chuyên đọc câu này là đủ |
 | Bối cảnh | vì sao; trỏ `RQ-`, `FS-`; số liệu có nguồn | 3–6 dòng |
 | `US` | "Là <ai>, tôi <muốn gì>, để <được gì>" + ưu tiên bằng chữ | mỗi `US` có ít nhất một `FR` |
-| `FR` | mỗi kịch bản `FRx.y` dạng **KHI <sự kiện> THÌ <hệ thống> <phản ứng>**; kịch bản là thứ đem đi kiểm | gồm cả đường lỗi, không chỉ đường vui |
+| `FR` | **một `FR` một hành vi**; mỗi kịch bản `FRx.y` dạng **KHI <sự kiện> THÌ <hệ thống> <phản ứng>**; kịch bản là thứ đem đi kiểm | gồm cả đường lỗi, không chỉ đường vui; một `FR` (hay một câu KHI…THÌ) chứa hai phản ứng khác nhau là hai hành vi — tách thành hai `FR`, vì mỗi hành vi cần `VR` riêng và delta Thêm / Sửa / Bỏ trỏ vào từng hành vi |
 | `SC` | đo được: lệnh/thao tác + ngưỡng | mỗi `SC` sẽ có ít nhất một `VR` ở REPORT |
 | Ngoài phạm vi | cái không làm đợt này | không bao giờ rỗng ở cỡ vừa trở lên |
 | `CQ` + ASSUMPTION | mục 3 | mỗi `CQ` có đề xuất |
@@ -92,6 +93,10 @@ Reviewer (agent khác) đọc một lượt trước khi Architect viết PLAN �
 - **Chỉ duyệt đúng giai đoạn đang trình:** duyệt ý tưởng ≠ duyệt SPEC; duyệt SPEC ≠ duyệt PLAN; duyệt
   PLAN ≠ nghiệm thu. Một lời "ok" không được suy thành phép làm bước sau; nối lại ở giai đoạn chưa
   xong sớm nhất.
+- **Cỡ rất nhỏ / nhỏ không dựng file SPEC và PLAN riêng**, mà viết vào một `SPRINT.md`. Rất nhỏ (`init --tiny`): hai
+  phần **Kế hoạch** (mục tiêu, `SC`, `TK` trỏ `SC`) và **Kết quả**; Cổng 1 = "đạt theo lời giao" (trích nguyên văn
+  lời giao vào `gate_1_quote`), ghi xong mới sửa. Nhỏ (`init --size small`): đủ bốn phần SPEC · PLAN · PROGRESS ·
+  REPORT, phần SPEC vẫn theo mục 5 (`FR` KHI…THÌ, `SC` đo được, ngoài phạm vi); Cổng 1 là lượt duyệt thật.
 - SPEC xong → skill `writing-plan` (Architect). Spike xong → báo cáo khuyến nghị; muốn giữ code là
   yêu cầu mới, phân loại lại.
 - Trình Cổng 1 theo lời trình chuẩn của `method/process.md` mục 3 — sau khi có cả SPEC và PLAN, trừ
@@ -101,7 +106,7 @@ Reviewer (agent khác) đọc một lượt trước khi Architect viết PLAN �
 
 | Ý nghĩ | Thực tế |
 |---|---|
-| "Đơn giản quá, khỏi cần SPEC" | cỡ rất nhỏ vẫn có `SPRINT.md` đủ bốn phần; cổng là lời duyệt, không phải độ dài tài liệu |
+| "Đơn giản quá, khỏi cần SPEC" | cỡ rất nhỏ vẫn có **một** `SPRINT.md` hai phần: **Kế hoạch** (mục tiêu, `SC` đo được, `TK` trỏ `SC`) rồi **Kết quả**; cỡ nhỏ có `SPRINT.md` đủ bốn phần; cổng là lời duyệt, không phải độ dài tài liệu |
 | "Gọi là bounded cho nhanh" | với tay lấy nhãn để bớt việc chính là phân vân — chọn đường nặng |
 | "Hiểu kiểu app này rồi, bounded thôi" | bounded đo trên repo: không có luồng sẵn để sửa thì là architectural |
 | "Spike chạy được, giữ code luôn" | đầu ra của spike là câu trả lời; giữ code là yêu cầu mới |

@@ -41,6 +41,14 @@ Green (v2) ← traffic
 
 - **Được:** hoàn tác tức thì (chuyển về blue), cắt chuyển gọn.
 - **Mất:** gấp đôi hạ tầng trong lúc deploy.
+- **Phiên đăng nhập và trạng thái trong bộ nhớ:** nếu phiên lưu trong bộ nhớ từng instance, chuyển sang green làm
+  người dùng văng đăng nhập (sticky session không cứu được: lưu lượng đổi hẳn sang môi trường khác). Chuẩn bị **trước
+  khi chuyển**: đưa phiên ra kho dùng chung (Redis hay CSDL, có hạn dùng) hoặc dùng token tự chứa ký số mà cả hai bản
+  cùng kiểm được; kiểm bản mới đọc được phiên do bản cũ ghi và ngược lại (định dạng phiên/khoá ký là một phần "tương thích
+  hai chiều" như schema). Đọc theo nguyên tắc tiến trình không giữ trạng thái của twelve-factor app.
+- **Giữ bản blue sau khi chuyển:** không dỡ ngay; giữ chạy (đã nhận 0 lưu lượng) trong cửa sổ quan sát đã ghi ở điều kiện huỷ
+  (thường vài giờ tới một ngày; nêu con số trong kế hoạch), vì đó là đường quay lại tức thì. Chuyển về blue vẫn là hoàn tác
+  production: theo `SKILL.md` mục 4. Hạ tầng gấp đôi nên đặt hạn dỡ blue, rồi dỡ.
 - **Dùng khi:** dịch vụ quan trọng, không chấp nhận sự cố.
 
 ## 3. Canary

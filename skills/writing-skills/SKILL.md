@@ -51,7 +51,8 @@ KHÔNG CÓ SKILL — HAY LẦN SỬA SKILL — NÀO KHI CHƯA THẤY PHÉP THỬ
   sửa gì. Hỏng → sửa, chạy GREEN cùng kịch bản, chạy lại kịch bản cũ của skill để chắc không lùi.
 - "Đọc lại thấy rõ" không phải phép thử. `tests/pressure.md` chỉ ghi kết quả đã chạy; GREEN "dự kiến" là bịa.
 - Hạn chót do agent khác đặt không mở ngoại lệ: báo trễ + lý do. Người dùng trực tiếp bảo gộp khi chưa thử →
-  làm theo, ghi `tests/pressure.md` là **Chưa chạy** và ghi `BR`; Chưa chạy không bao giờ là Đạt.
+  làm theo — lệnh trong phạm vi đã duyệt là phán quyết, không phải vướng mắc: ghi `tests/pressure.md` là
+  **Chưa chạy** và một dòng `Phán quyết:` vào PROGRESS, không mở `BR`; Chưa chạy không bao giờ là Đạt.
 - Một skill một lúc: viết → thử → xong rồi mới sang skill kế. Không viết hàng loạt rồi "thử sau cho gọn".
 
 ## 3. Chu trình RED → GREEN → REFACTOR
@@ -60,8 +61,8 @@ KHÔNG CÓ SKILL — HAY LẦN SỬA SKILL — NÀO KHI CHƯA THẤY PHÉP THỬ
    câu biện hộ. Kịch bản đạt sẵn ở RED → không có gì để dạy: thay kịch bản, hoặc bỏ phần skill định viết cho nó.
 2. **GREEN:** viết **tối thiểu** để chặn đúng lỗi đã thấy; chạy lại cùng kịch bản, cùng tier và model, có skill.
 3. **REFACTOR:** lý lẽ mới → câu phủ định tường minh + dòng bảng lý lẽ + cờ đỏ + triệu chứng vào
-   `description`; chạy lại tới khi hết lý lẽ mới. Khuôn kịch bản, bảy loại áp lực, cách chạy, meta-test, khuôn
-   `tests/pressure.md`: `references/testing.md`.
+   `description`; chạy lại tới khi hết lý lẽ mới. Khuôn kịch bản, bảy loại áp lực, cách chạy (kể cả nạp bản
+   worktree), meta-test, thước chấm và ngưỡng, khuôn `tests/pressure.md`: `references/testing.md`.
 
 ## 4. Chọn dạng câu theo kiểu lỗi
 

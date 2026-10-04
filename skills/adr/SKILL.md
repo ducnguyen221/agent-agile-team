@@ -1,11 +1,11 @@
 ---
 name: adr
-description: Use when about to commit to a technical choice that is costly to reverse or spans many parts of a system - picking the database, framework, hosting platform or login model, reshaping data or a service contract, adding a dependency between services, dropping a technology - or when a large task must record design choices, a reviewer wants a decision record, or an accepted decision is overturned.
+description: Use when a technical decision will be hard to undo or will touch several parts of a system - platform, framework, datastore, auth model, a changed contract or data model, a new cross-service dependency - when a large-size task needs its design choices written down, or when an accepted decision is being replaced.
 metadata:
   group: technique
   kind: reference
   roles: [architect]
-source: "concept: architecture decision records - short, numbered, at least two real options, superseded not edited (rewritten from an idea list that kept some source wording; must be genuinely rewritten before public, see CO2 and RQ-021 in the owner private record)"
+source: "concept: architecture decision records - short, numbered, at least two real options, superseded not edited (clean-room rewrite: old text removed first, new writer saw only a noun-phrase idea list; task `TK10` (clean-room rewrite), sprint `SPR-04` (method wave 3))"
 source_sha: null
 license: none
 rewrite_before_public: false
@@ -13,93 +13,95 @@ rewrite_before_public: false
 
 # Ghi quyết định kiến trúc (ADR)
 
-> **Kết luận:** ADR là **một trang** ghi một quyết định khó đảo ngược: bối cảnh, một câu quyết định, **ít
-> nhất hai lựa chọn thật** trong bảng bốn cột, hệ quả. Số bốn chữ số tăng dần, không cấp lại; trạng thái
-> `proposed` → `accepted` khi người dùng duyệt ở cổng; PLAN **trỏ** tới ADR chứ không chép. Muốn lật một quyết
-> định đã chốt: viết bản mới; bản cũ giữ nguyên chữ và file, chỉ nhận nhãn `superseded by` trỏ sang bản mới.
+> **Kết luận:** một ADR dài một trang và chỉ nói về **một** quyết định bền: đang giải vấn đề gì, đã cân những
+> phương án thật nào, vì sao chọn, và sẽ phải trả giá gì về sau. Mỗi ADR có số riêng, đứng trong thư mục ADR của dự án, được review cùng PLAN
+> trước Cổng 1. Quyết định đổi thì viết ADR mới thay thế; ADR cũ giữ nguyên chữ, chỉ đổi trạng thái.
 
-## 1. Khi nào
+## 1. Khi nào viết
 
-| Viết ADR | Không viết ADR — làm gì thay |
+Viết ADR khi **một** trong các điều sau đúng:
+
+- Một lựa chọn đắt để rút lại: nền tảng chạy, framework, nơi lưu dữ liệu, cách đăng nhập.
+- Đổi hợp đồng giữa các phần, hoặc đổi mô hình dữ liệu.
+- Tạo phụ thuộc mới giữa hai phần vốn độc lập, hoặc bỏ một công nghệ đang dùng.
+- Việc cỡ lớn (`method/sizing.md`): PLAN phải có ít nhất một ADR; nếu thật sự không có quyết định nào cần
+  ghi thì PLAN nói thẳng điều đó và nêu lý do.
+- Một ADR đã chấp nhận nay bị thay.
+
+**Không cần ADR:** đổi cục bộ sửa lại trong một sprint là xong; chọn thư viện nhỏ thay được trong một buổi;
+quy ước đặt tên hay định dạng; lỗi sửa mà không đổi cấu trúc. Phép thử: quay lại sau ba tháng mà tốn công
+đáng kể thì cần ADR, không tốn thì không.
+
+## 2. Nội dung một ADR
+
+| Phần | Phải có |
 |---|---|
-| Cách xác thực người dùng; nơi lưu dữ liệu; framework hay nền tảng để chạy | Refactor không đổi kiến trúc → mô tả trong `TK` của PLAN |
-| Thêm phụ thuộc giữa các service; bỏ một công nghệ đang dùng | Đổi luật, quy trình làm việc → file luật của dự án |
-| Đổi mô hình dữ liệu hay hợp đồng giữa các phần | Đổi một endpoint / một schema đơn thuần → mục "Đổi hợp đồng / giao diện" của SPEC (skill `api-design`); chỉ thêm ADR khi đằng sau có một lựa chọn kiến trúc |
-| Sprint cỡ **lớn** — mặc định phải có ADR; sprint lớn mà thật sự không chọn gì về kiến trúc thì PLAN nói thẳng điều đó trong một câu (luật ở `method/sizing.md`, `method/conventions.md` mục 3) | Lựa chọn tương đương, dễ đổi lại (tên thư viện tiện ích, kiểu đặt tên) → dòng `Phán quyết:` trong PROGRESS |
-| Reviewer đòi ADR; cuộc tranh luận thiết kế cần được chốt lại thành chữ | — |
+| Tiêu đề | một **mệnh đề quyết định** ("Dùng Postgres làm kho chính"), không phải chủ đề ("Về cơ sở dữ liệu") |
+| Bối cảnh | vấn đề đang giải, ràng buộc thật (kỹ thuật, nhân lực, thời hạn, chi phí), ai chịu ảnh hưởng |
+| Lựa chọn | **tối thiểu hai**; mỗi lựa chọn một dòng: cách làm · đánh đổi · khi nào hợp. "Giữ nguyên hiện trạng" là một lựa chọn hợp lệ và thường phải có mặt |
+| Quyết định | một câu nói đã chọn gì, rồi lý do **bám vào ràng buộc** đã liệt kê ở Bối cảnh, không bám sở thích |
+| Hệ quả | việc nào thành dễ · việc nào thành khó · thứ gì bị đóng khuôn từ nay; kèm **đường lùi** nếu chọn sai và giá của đường lùi đó |
+| Trạng thái | `proposed` · `accepted` · `superseded by NNNN` |
+| Liên kết | sprint (`SPR-`) sinh ra nó, PLAN, ADR liên quan |
 
-Phép thử nhanh: nếu sáu tháng sau có người hỏi "sao hồi đó lại chọn thế này?" mà câu trả lời tốn hơn một
-buổi để dựng lại, thì đó là ADR.
+Lựa chọn chỉ có một, hoặc các lựa chọn khác là hình nộm ("làm dở", "không làm gì cả" mà không phân tích) thì
+chưa phải quyết định mà là lời biện hộ: quay lại tìm phương án thật.
 
-## 2. Đầu vào
-
-- **Mệnh đề quyết định** — sẽ thành tiêu đề ("Dùng hàng đợi bền cho thông báo", không phải "Về hàng đợi").
-- **Bối cảnh:** vấn đề cần quyết, ràng buộc (kỹ thuật, chi phí, pháp lý, thời hạn), ai và cái gì chịu ảnh hưởng.
-- **Ít nhất hai lựa chọn**, mỗi lựa chọn có đánh đổi, chi phí, rủi ro; "giữ nguyên hiện trạng" là lựa chọn hợp lệ.
-- **Lựa chọn được chọn và lý do** — lý do trỏ về ràng buộc ở bối cảnh, không phải sở thích.
-- **Hệ quả:** cái gì dễ hơn, cái gì khó hơn, điều gì từ nay cố định (muốn đổi phải có ADR mới).
-
-## 3. Các bước
-
-1. **Lấy số:** xem thư mục ADR, lấy số lớn nhất + 1, viết đủ bốn chữ số (`0007`). Số đã cấp không bao giờ cấp
-   lại, kể cả khi bản nháp bị bỏ.
-2. **Đặt file:** `docs/architecture/adr/NNNN-<slug>.md` — dự án đổi thư mục qua `paths.adr_dir` của
-   `.agile.json`. Slug tiếng Anh, chữ thường, nối bằng gạch (`0007-durable-notification-queue`).
-3. **Viết theo khuôn** (mục 4), trạng thái `proposed`. Dài quá một trang → đẩy chi tiết sang phụ lục hay tài
-   liệu thiết kế riêng, ADR chỉ trỏ tới.
-4. **Review cùng PLAN:** Tech Reviewer đọc ADR trong lượt review PLAN (skill `plan-review`). ADR chuyển
-   `accepted` khi người dùng duyệt PLAN ở Cổng 1; quyết định nảy ra giữa sprint thì trình kèm Cổng 2.
-5. **Nối dây:** PLAN trỏ ADR bằng số + đường + câu quyết định — không chép bối cảnh hay bảng. Dự án có mục lục
-   ADR (ví dụ `README.md` trong thư mục ADR) thì thêm một dòng: số · tiêu đề · trạng thái · ngày.
-6. **Thay thế:** ADR mới ghi "Thay thế: NNNN" ở phần đầu. ADR cũ chỉ đổi dòng trạng thái thành
-   `superseded by MMMM`; thân giữ nguyên, file không xoá — lịch sử lý do là thứ ADR sinh ra để giữ.
-
-## 4. Khuôn
+Khuôn một trang:
 
 ```markdown
-# NNNN — <mệnh đề quyết định>
+# NNNN. <mệnh đề quyết định>
 
-- **Trạng thái:** proposed | accepted | superseded by MMMM
-- **Ngày:** YYYY-MM-DD · **Người viết:** <vai · tier> · **Sprint:** SPR-xx
-- **Thay thế:** <NNNN | không>
+Trạng thái: proposed · Sprint: SPR-NN · Liên quan: ADR NNNN, PLAN mục <tên>
 
 ## Bối cảnh
+<vấn đề, ràng buộc, bên chịu ảnh hưởng>
 
-<vấn đề cần quyết; ràng buộc; ai và cái gì chịu ảnh hưởng>
+## Lựa chọn
+| Cách làm | Đánh đổi | Khi nào hợp |
+|---|---|---|
 
 ## Quyết định
-
-<một câu khẳng định, ví dụ: "Thông báo đi qua hàng đợi bền; dịch vụ gửi đọc từ hàng đợi.">
-
-## Lựa chọn đã cân nhắc
-
-| Cách làm | Đánh đổi & rủi ro | Chi phí / công sức | Khi nào nên chọn |
-|---|---|---|---|
-| <A> (chọn) | … | … | … |
-| <B> | … | … | … |
-| Giữ nguyên hiện trạng | … | … | … |
+<một câu> — vì <ràng buộc nào>.
 
 ## Hệ quả
-
 - Dễ hơn: …
-- Khó hơn / mất đi: …
-- Từ nay cố định: <điều không mở lại nếu không có ADR mới>
-- Việc kéo theo: <việc trong PLAN hay dòng sổ yêu cầu>
-
-## Liên kết
-
-SPEC và PLAN của SPR-xx · ADR liên quan · tài liệu ngoài (nếu có)
+- Khó hơn: …
+- Bị cố định: …
+- Quay lại: <các bước + chi phí>
 ```
 
-Bảng lựa chọn dùng đúng bốn cột của bảng lựa chọn trong luật lõi, để người đọc ADR và người đọc lời trình
-cổng thấy cùng một hình.
+## 3. Đánh số và nơi đặt
+
+- Thư mục lấy từ `paths.adr_dir` trong `.agile.json` (mặc định `docs/architecture/adr`); tên file
+  `NNNN-<slug>.md`, slug tiếng Anh ngắn. Đừng viết cứng đường dẫn khi đã có cấu hình.
+- Số bốn chữ số: lấy số lớn nhất đang có trong thư mục rồi cộng một. **Không tái dùng** số, kể cả khi ADR
+  bị bỏ dở; số trống chỉ là số trống.
+
+## 4. Vòng đời
+
+1. Architect viết bản `proposed` trong lúc lập PLAN.
+2. ADR đi cùng PLAN vào review (Tech Reviewer từ cỡ vừa) **trước Cổng 1**; PLAN trỏ tới ADR bằng số, đường
+   file và mệnh đề quyết định, không chép lại thân ADR.
+3. Người dùng duyệt ở Cổng 1 → đổi sang `accepted`. Chưa duyệt thì không code theo ADR đó.
+4. Khi phải đổi hướng: viết một ADR mới, ghi rõ nó thế chỗ ADR nào; ở ADR cũ chỉ sửa dòng trạng thái thành
+   `superseded by NNNN`. **Không xoá, không sửa chữ** của bản cũ — lịch sử lý do là giá trị của ADR.
 
 ## 5. Điểm dừng
 
-| Gặp | Làm |
+- Quyết định chạm secret, xác thực hay dữ liệu thật → điều kiện dừng (b) hoặc (a) của `method/process.md`;
+  ADR chỉ ghi hướng, không thay cho việc hỏi người dùng.
+- Hai lựa chọn ngang nhau mà cần người dùng chọn → ghi thành `DN` trong PLAN, không tự chốt trong ADR.
+- Quyết định đã `accepted` nhưng mã đang làm khác đi → không sửa ADR cho khớp mã; mở ADR thay thế hoặc sửa
+  mã.
+
+## 6. Lỗi hay gặp
+
+| Lỗi | Sửa |
 |---|---|
-| Chỉ có một lựa chọn thật — bảng lựa chọn thành màn diễn | bổ sung phương án thật (giữ hiện trạng cũng tính), hoặc nêu tên ràng buộc đã loại hết các phương án kia |
-| Quyết định liên quan tới an ninh hệ thống, thông tin cá nhân hay việc cấp quyền truy cập | trước khi chuyển sang `accepted`, để reviewer chuyên đề bảo mật đọc qua (skill `security-review`); nhãn tương ứng phải có trong `risk_tags` của sprint |
-| Quyết định làm đổi `SC` của sprint đang chạy | PLAN hỏng — điều kiện dừng (d): `BR`, báo Analyst |
-| Thực hiện quyết định không đảo ngược được (xoá dữ liệu, gỡ dịch vụ đang chạy) | điều kiện dừng (a): chỉ làm khi người dùng gật |
-| Muốn sửa nội dung một ADR đã `accepted` | không sửa — viết ADR mới thay thế (mục 3 bước 6) |
+| ADR viết **sau** khi code xong, chỉ để hợp thức hoá | viết khi còn chọn được; ghi lựa chọn đã bỏ là gì |
+| Tiêu đề là chủ đề, không phải quyết định | đổi thành mệnh đề: ai làm gì |
+| Chỉ một lựa chọn | thêm "giữ nguyên" và ít nhất một phương án khác |
+| Hệ quả chỉ nêu ưu điểm | bắt buộc ghi mặt khó hơn và cách quay lại |
+| Sửa ADR cũ cho khớp thực tế mới | ADR mới thay thế, cũ đổi trạng thái |
+| Mỗi lần đổi nhỏ đều thành ADR | quay lại mục 1, áp phép thử ba tháng |

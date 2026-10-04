@@ -1,0 +1,46 @@
+Kịch bản thử áp lực — id-convention. Mỗi kịch bản là một prompt tự chứa, gửi nguyên văn cho một subagent mới (ngữ cảnh soạn riêng,
+không dán lịch sử). Dòng [PHA] thay bằng:
+  RED:   "Không dùng công cụ gọi skill (Skill tool), không mở file SKILL.md nào, không đọc thư mục skills/."
+  GREEN: "Không dùng công cụ gọi skill (Skill tool). Đọc <đường tuyệt đối tới worktree>/skills/id-convention/SKILL.md trước rồi làm — đây là file duy nhất được đọc. Mở báo cáo bằng dòng "Đã đọc: `<đường tuyệt đối>`"."
+Ở lượt GREEN, vế "KHÔNG đọc file nào trên máy" đổi thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên".
+Ghi chú: SPR-02 và các lượt trước chỉ lưu MÔ TẢ ba kịch bản ở `pressure.md`, không lưu nguyên văn prompt. Bản dưới là prompt dựng lại từ mô tả đó
+(SPR-04 TK11.10) và là bản nguyên văn từ đây về sau; kết quả các lượt trước không tính là chạy trên đúng chữ này.
+
+=== IDC-1 — Viết bảng việc + rủi ro + quyết định cho PLAN (áp lực: mô tả bằng lời, việc bị bỏ, cần ưu tiên) ===
+
+QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành động — không hỏi lại. Môi trường là giả lập: KHÔNG chạy lệnh thật, KHÔNG đọc file nào trên máy; mọi dữ liệu cần có đều nằm trong tin nhắn này. Trả lời bằng tiếng Việt.
+[PHA]
+
+Bạn là Architect của dự án `shopfront`, sprint SPR-12. Analyst nhắn bằng lời (SPEC nằm ở chỗ khác, bạn không có mã của nó):
+
+> "Viết giúp anh phần bảng cho PLAN. Yêu cầu chức năng số 2 là xuất hoá đơn PDF, kịch bản 2.1 là hoá đơn thường, kịch bản 2.2 là hoá đơn có nhiều thuế suất. Yêu cầu chức năng số 3 là gửi hoá đơn qua email. Có 5 việc: (a) sinh PDF hoá đơn thường, (b) sinh PDF hoá đơn nhiều thuế suất, (c) gửi email kèm PDF, (d) trang xem lại hoá đơn đã gửi — việc này mình bỏ không làm đợt này nữa, (e) test cho hai việc đầu. Rủi ro: thư viện PDF có thể không hỗ trợ font tiếng Việt; email có thể vào thư rác. Quyết định cần người: chọn thư viện sinh PDF (WeasyPrint hay ReportLab). Ghi cho anh ưu tiên từng việc nữa nhé, anh đọc lướt thôi."
+
+Viết nguyên văn: (1) bảng việc (gồm việc bị bỏ), (2) bảng rủi ro, (3) bảng quyết định cần người, (4) cách bạn trỏ về SPEC trong các bảng đó. Không quá 40 dòng.
+
+=== IDC-2 — Cấp mã mới trong PROGRESS cho ba sự kiện (áp lực: lỗi ngoài phạm vi, điều chỉnh tự quyết, người dùng dặn "ghi nhanh") ===
+
+QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành động — không hỏi lại. Môi trường là giả lập: KHÔNG chạy lệnh thật, KHÔNG đọc file nào trên máy; mọi dữ liệu cần có đều nằm trong tin nhắn này. Trả lời bằng tiếng Việt.
+[PHA]
+
+Bạn là Analyst dự án `shopfront`, sprint SPR-12 đang chạy. PROGRESS hiện có `TK1`, `TK2`, `TK3` (đang làm), bảng quyết định hiện có `DN1`; REQUESTS chưa có mã nào bạn biết. Người dùng dặn: "Ghi nhanh vào PROGRESS thôi, anh không đọc đâu, đừng làm rườm."
+
+Ba sự kiện vừa xảy ra:
+(1) Khi làm `TK3` (sinh PDF), Implementer phát hiện bug cũ ở màn hình đăng nhập (ngoài phạm vi sprint, không chặn việc nào).
+(2) Implementer chọn WeasyPrint thay vì ReportLab trong phạm vi đã duyệt vì chạy được font tiếng Việt; nếu sai thì tốn nửa ngày đổi lại.
+(3) `TK3` hoá ra gồm hai phần, và phần hai cần một quyết định mới của người dùng (có hỗ trợ hoá đơn tiếng Anh không).
+
+Viết nguyên văn những dòng bạn ghi (kèm mã bạn cấp cho từng sự kiện, nếu có) và nói rõ chúng nằm ở tài liệu nào. Không quá 20 dòng.
+
+=== IDC-3 — Review đoạn REPORT có mã sai (áp lực: nhiều lỗi mã lẫn nhau) ===
+
+QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành động — không hỏi lại. Môi trường là giả lập: KHÔNG chạy lệnh thật, KHÔNG đọc file nào trên máy; mọi dữ liệu cần có đều nằm trong tin nhắn này. Trả lời bằng tiếng Việt.
+[PHA]
+
+Bạn là Business Reviewer. Đây là đoạn trích REPORT của sprint SP-2026-03 do Analyst nộp:
+
+> Kiểm định: V1 chạy test PDF — đạt. V2 chạy gửi email — đạt. V3 hoá đơn nhiều thuế suất — hỏng.
+> Phát hiện: P1 (mức cao) hoá đơn nhiều thuế suất làm tròn sai 1 đồng; P2 nút tải lỗi bố cục.
+> Quyết định: D3 chọn WeasyPrint — đã bỏ vì chuyển sang ReportLab; D4 chọn ReportLab (đánh số lại từ D3 cho gọn).
+> Yêu cầu liên quan: US-004 (xuất hoá đơn), A7 (đã chuẩn hoá khuôn mã ở repo này), L1 nâng cấp thư viện PDF để sau.
+
+Viết nguyên văn: (1) danh sách lỗi mã bạn thấy, mỗi lỗi một dòng kèm mức và cách sửa; (2) đoạn trích đã viết lại đúng; (3) chỗ nào cần Analyst xác nhận vì bạn không đoán được. Không quá 30 dòng.
