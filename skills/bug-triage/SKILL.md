@@ -40,9 +40,10 @@ Ghi đủ ba thứ, theo đúng chữ của kết quả quan sát được:
 Log hoặc stack trace dài: lưu ra file ở thư mục tạm của sprint và trỏ đường dẫn; trong tóm tắt chỉ giữ dòng
 then chốt. Che mọi secret và dữ liệu người dùng trước khi lưu.
 
-**Chưa tái hiện được:** gán mức **tạm** theo hậu quả mà bằng chứng đang có (log, ảnh, lời kể kèm dấu vết) thật
-sự chứng minh; không có bằng chứng nào thì mức tối đa là Ghi chú. Việc đầu tiên của đường xử lý là tái hiện.
-Không được đoán một nguyên nhân rồi sửa thử.
+**Chưa tái hiện được:** gán mức **tạm** theo hậu quả mà chính lời báo lỗi mô tả (mất dữ liệu thì xét như mất dữ
+liệu, dù chưa ai thấy nó xảy ra). Phân vân giữa hai mức thì lấy mức **nặng hơn** ([severity.md](../../method/severity.md)
+mục 1); hạ mức chỉ sau khi tái hiện cho thấy hậu quả nhẹ hơn. Việc đầu tiên của đường xử lý là tái hiện, và không
+sửa gì trước khi tái hiện xong. Không được đoán một nguyên nhân rồi sửa thử.
 
 ## 3. Chấm mức và chọn đường
 
@@ -53,12 +54,15 @@ với hậu quả đã tái hiện.
 | Mức | Dấu hiệu hậu quả | Đường xử lý |
 |---|---|---|
 | **Chặn** | mất hay hỏng dữ liệu, lỗ hổng bảo mật, sai tiền, hệ thống ngừng chạy với người dùng | **hotfix** — mở sprint riêng ngay |
-| **Phải sửa** | hành vi sai ở luồng chính hay nhánh phụ có người chịu, hợp đồng không khớp | **sprint này** nếu còn chỗ trong mục tiêu, nếu không thì sprint kế đã được mở |
+| **Phải sửa** | hành vi sai ở luồng chính hay nhánh phụ có người chịu, hợp đồng không khớp | **sprint đang chạy** chỉ khi lỗi nằm trong phạm vi SPEC đã qua Cổng 1; ngoài phạm vi thì **sprint kế** |
 | **Nên sửa** | khó chịu, có cách tránh dễ dàng, không mất gì | **sprint sau** |
 | **Ghi chú** | chưa rõ ảnh hưởng, hiếm, hoặc chỉ là quan sát | **backlog** |
 
 - Thang chỉ có nghĩa khi mức nặng hiếm: nếu lỗi nào cũng được Chặn thì hotfix thành việc hằng ngày và không còn
   báo động được gì. Mỗi lần chấm Chặn, viết ra hậu quả cụ thể khớp một dòng ở cột dấu hiệu.
+- **Ranh giới sprint đang chạy:** lỗi Phải sửa ngoài phạm vi SPEC đã duyệt không được nhét vào sprint đang chạy
+  chỉ vì còn thời gian; xếp sang sprint kế. Nếu sửa nó buộc đổi một `SC` của sprint đang chạy thì ghi `BR` và hỏi
+  người dùng, vì phạm vi đã duyệt ở Cổng 1 thay đổi.
 - **Vùng nâng cỡ** (`method/sizing.md` mục 2): lỗi chạm secret, xác thực hay phân quyền, thanh toán, hoặc
   dữ liệu bị đổi bất ngờ thì ghi `risk_tags`, `risk: high`, cỡ tối thiểu **lớn** — dù diff sửa chỉ một dòng.
 - **Hotfix không bỏ Cổng 1.** Đường khẩn chỉ rút ngắn thời gian chờ, không bỏ bước duyệt: vẫn có SPEC/PLAN
@@ -87,6 +91,9 @@ và kết quả ghi vào `VR`. Người phân loại không tự sửa rồi t�
 
 Dừng và hỏi người dùng (ghi `BR`) khi:
 
+- lỗi **là** việc lộ secret, lộ dữ liệu cá nhân hay một lỗ hổng bảo mật: ghi `BR` và báo người dùng ngay
+  (điều kiện dừng (b) của `AGENTS.md`), kéo skill `security-review`; bản tóm tắt ghi vào sổ chỉ nói hậu quả và
+  phạm vi ảnh hưởng, **không** mô tả cách khai thác, và không dán secret hay dữ liệu thật vào đó;
 - để tái hiện phải đụng secret, hoặc phải dùng dữ liệu thật của người dùng (điều kiện dừng (b));
 - lỗi chỉ tái hiện được bằng hành động không đảo ngược trên môi trường thật (điều kiện dừng (a));
 - đã làm hết cách hợp lý mà vẫn không tái hiện được và lỗi đang mang mức Chặn tạm: người dùng cần quyết thêm
