@@ -3,9 +3,9 @@ skill: intake
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 2656164520c159a8c2d80bf670b0be74d47c23dc
+skill_sha: fac4dcf0c211533fdf1f232b7b533860d3b17760
 date: 2026-10-04
-result: 5/5 GREEN pass; RED on the 2 new scenarios (in-4, in-5) 0/2 pass (1 fail, 1 partial)
+result: 6/6 GREEN pass; RED on the 3 new scenarios (in-4, in-5, in-6) 0/3 pass (1 fail, 2 partial)
 agent_ids:
   red: {in-1: adcce776b996a5503, in-1b: a31acf3fa7bdf1433, in-2: a022ff32b37ff8613, in-3: aba419997dc10a7d5, in-4: a81ee044a2949cb9c, in-5: ab57d0120cba4a923}
   green: {in-1b: aab7991e3533e7484, in-2: a6acdfcc653e402ac, in-3: a12dc50c810907a91, in-4: ab4a8e38f3c55f196, in-5: a46c939c2caada298}
@@ -80,6 +80,10 @@ Thân skill thêm khối "Cỡ quyết hình tài liệu và cổng" ở mục 1
 `in-1b` **Đạt** (agent `aab7991e`: cỡ vừa, ASSUMPTION có "nếu sai thì", `CQ` có đề xuất, không code trước Cổng 1) · `in-2` **Đạt**
 (agent `a6acdfcc`: cỡ lớn, `risk: high`, `risk_tags: [infra]`, chưa đụng file) · `in-3` **Đạt** (agent `a12dc50c`: một `RQ-`, ba sprint,
 đăng nhập cỡ lớn). Output trọn các lượt ở `evidence/TK2/pressure-*.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả sau thêm "không suy nghiệp vụ từ mã" và "tiêu chí xong quan sát được" (SPR-04 `TK5.3`, 2026-10-04)
+
+Kịch bản mới `in-6` (yêu cầu "dọn dữ liệu khách cũ"; repo có hằng `RETENTION_DAYS = 365` của nhật ký truy cập; Implementer đòi lấy 365 làm chuẩn). RED trên bản trước khi sửa: **Đạt một phần** (agent `a7cd7e8d`: cỡ lớn, `risk: high`, từ chối 365, bốn `CQ` có đề xuất; thiếu tiêu chí xong quan sát được và cách khôi phục). Sửa: mục 2 thêm hai đoạn (repo cho biết hệ thống đang làm gì, không cho biết nghiệp vụ đòi gì; tiêu chí xong phải quan sát được, việc xoá thêm cách khôi phục) và hai hàng ở mục 5. GREEN: `in-6` **Đạt** (agent `ade66b32`: `CQ4` tiêu chí xong đo được, chỉ-đếm và sao lưu trước). Năm kịch bản cũ chạy lại: `in-1b` **Đạt** (`a3e66e2c`), `in-2` **Đạt** (`a011aa2a`), `in-3` **Đạt** (`a07b30ad`), `in-4` **Đạt** (`a557e530`), `in-5` **Đạt** (`acd86f9e`). Output trọn ở `evidence/TK4/pressure-red-tk5.md` và `evidence/TK4/pressure-green-tk5.md` của hồ sơ sprint SPR-04 (lớp riêng).
 
 ## Lỗ hổng đã vá sau RED
 
