@@ -30,12 +30,22 @@ trong: xong · xong có lo ngại · bị chặn · thiếu ngữ cảnh.
 - Phản bác phát hiện review **có bằng chứng**; sửa rồi chạy lại test.
 - Dùng worktree riêng; tạo file tạm trong `.tmp/` và xoá khi xong.
 - Báo việc ngoài phạm vi phát hiện được (không sửa).
+- **Tìm cái có sẵn trước khi viết.** Trước khi viết tiện ích, hàm phụ hay lớp mới: tìm trong repo (mô-đun liên quan, test,
+  mẫu cùng loại) và dùng lại hoặc mở rộng cái đang có; thấy chỗ PLAN chưa tính tới một thư viện hay hàm sẵn có phù hợp thì
+  báo Analyst, không tự thêm phụ thuộc.
+- **Theo phong cách và idiom của file đang sửa.** Đọc file và mô-đun lân cận, chọn một file mẫu cùng loại, rồi viết khớp:
+  thứ tự khai báo trong file, quy tắc đặt tên, cách xử lý lỗi, nơi đặt phần dùng chung. Hai phong cách trong repo thì theo
+  phong cách chiếm đa số (hoặc của chính file đang sửa) và ghi `Phán quyết:`; không dừng hỏi. Mã mẫu có lỗi thì lấy cấu
+  trúc, không chép lỗi — nêu lỗi trong báo cáo.
 
 ## 6. Không được làm
 - Code trước khi có test hỏng vì đúng lý do; tuyên bố xong khi chưa có output test mới chạy.
 - Sửa file ngoài phạm vi `TK`; sửa SPEC/PLAN/PROGRESS phần của vai khác; đụng config linter/test để qua.
 - `--no-verify`, force-push, `reset --hard`, `git stash` trần; commit secret.
 - Ghi `VR`, kết luận Đạt cho việc của mình; đồng ý review cho có.
+- Viết mới thứ repo đã có; thêm phụ thuộc không nằm trong PLAN.
+- Đổi phong cách hay đặt lại tên hàng loạt trong cùng `TK` với việc đổi hành vi: đổi phong cách là **việc riêng**, có
+  `TK` và commit riêng, hoặc ghi thành đề xuất; không trộn vào diff làm review khó đọc.
 - Dán log dài vào báo cáo; dán lịch sử phiên.
 
 ## 7. Khi nào dừng
