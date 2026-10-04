@@ -26,7 +26,7 @@ cỡ việc theo [sizing.md](sizing.md). Gặp tên skill cũ trong hồ sơ l�
 | 1 | Tiếp nhận | Analyst | dòng `RQ-` trong REQUESTS | không |
 | 2 | SPEC rồi PLAN | Analyst (SPEC), Architect (PLAN), Tech Reviewer (review PLAN từ cỡ vừa) | SPEC, PLAN | **Cổng 1** — duyệt / điều chỉnh |
 | 3 | Thực thi | Implementer, QA, (Architect) theo từng `TK` | PROGRESS | cổng điều chỉnh nội bộ (không hỏi người) |
-| 4 | Kiểm định | Business Reviewer, Tech Reviewer — **agent khác** người làm | `VR`, `RF` | vòng lặp 3 ↔ 4 |
+| 4 | Kiểm định | Business Reviewer, Tech Reviewer — **agent khác** người làm (thêm reviewer thứ hai khi `risk_tags` có `rules`/`secret`/`auth`) | `VR`, `RF` | vòng lặp 3 ↔ 4 |
 | 5 | REPORT | Analyst | REPORT | **Cổng 2** — nghiệm thu |
 | 6 | Bài học | Analyst (kiêm Distiller) | `LN` + nơi lưu bài học | không |
 
@@ -149,6 +149,9 @@ tier** ([tiers/README.md](../tiers/README.md)).
   test, bảo mật, dữ liệu, backend, frontend) và kéo thẻ chuyên đề khi rủi ro cao. Cỡ nhỏ: **một** reviewer
   khác người làm giữ cả hai lăng kính; cỡ rất nhỏ: tự kiểm có ghi "chưa độc lập" hoặc agent khác chạy nhanh
   (mục 9).
+- `risk_tags` có `rules`, `secret` hoặc `auth` (mọi cỡ) → kiểm định kỹ thuật theo
+  [roles/verifier/dual-review.md](../roles/verifier/dual-review.md): **hai** reviewer độc lập, cùng rubric,
+  cả hai Đạt mới Đạt. Một reviewer là chưa đủ cho các vùng này.
 - Mỗi phát hiện là một `RF` mang một mức: Chặn / Phải sửa / Nên sửa / Ghi chú, có bằng chứng
   (`file:dòng` hoặc lệnh + kết quả). Reviewer được trả **0 phát hiện** và **phải** ghi phần mình không
   đánh giá.

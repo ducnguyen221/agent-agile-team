@@ -49,6 +49,9 @@ KHI việc chạm **một** trong các vùng sau THÌ ghi nhãn vào `risk_tags`
 
 Cấu hình đổi quyền, hook hay workflow thực thi **không được** xếp rất nhỏ dù diff một dòng (và `risk: high` buộc cỡ lớn).
 
+Ba nhãn `rules`, `secret`, `auth` kéo thêm một luật nữa: kiểm định kỹ thuật bắt buộc **hai reviewer độc lập** cùng rubric,
+cả hai Đạt mới Đạt ([roles/verifier/dual-review.md](../roles/verifier/dual-review.md)) — cộng với thẻ chuyên đề security ở bảng trên.
+
 ## 3. Sprint = một mục tiêu
 
 - Một sprint phục vụ đúng một mục tiêu đã "định hình": biết làm gì, biết thế nào là xong, biết giới hạn

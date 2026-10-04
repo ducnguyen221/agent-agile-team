@@ -157,7 +157,9 @@ Chặn/Phải sửa chưa sửa hay chưa gác lại có phán quyết.
 1. Gói diff **cả nhánh**: `MERGE_BASE=$(git merge-base <nhánh chính> HEAD)` → gói như 4.3. Giao
    Tech Reviewer (agent khác, T1) theo skill `code-review` phần yêu cầu review, kèm đường dẫn PLAN +
    SPEC, mục **Trọng tâm review** nguyên văn, và con trỏ tới các dòng `Phán quyết:` và `Nên sửa hoãn`
-   để reviewer cân lại. Business Reviewer kiểm `US`/`FR`/`SC` song song.
+   để reviewer cân lại. Business Reviewer kiểm `US`/`FR`/`SC` song song. `risk_tags` có `rules`/`secret`/`auth` →
+   kiểm định kỹ thuật theo `roles/verifier/dual-review.md`: giao **hai** Tech Reviewer độc lập (cùng gói, không
+   thấy nhau), cả hai Đạt mới Đạt; vòng sửa chạy lại cả hai bằng agent mới.
 2. Phát hiện → **một** lượt sửa với danh sách đầy đủ (không một agent mỗi phát hiện — mỗi agent dựng
    lại ngữ cảnh và chạy lại bộ test; một phiên thật tốn hơn toàn bộ các `TK` cộng lại), rồi **một**
    re-review phạm vi hẹp. Đây là một vòng, tăng `review_round`. Khuyến nghị 3 vòng; hết vòng 3 còn

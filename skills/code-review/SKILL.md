@@ -25,7 +25,7 @@ rewrite_before_public: false
 |---|---|---|
 | có diff / PR / "xem thay đổi của tôi" / trước commit | **A. Review diff** | mục 2 |
 | không có diff — "tìm lỗi ở X", "sao hỏng" | **B. Săn lỗi** | mục 3 |
-| chạm xác thực · secret · thanh toán · dữ liệu cá nhân · phân quyền · phạm vi nhiều khách · API công khai · migration · hạ tầng | **C. Nâng cấp bảo mật** | mục 4 — bắt buộc, **chồng lên** A hoặc B |
+| chạm xác thực · secret · thanh toán · dữ liệu cá nhân · phân quyền · phạm vi nhiều khách · API công khai · migration · hạ tầng · file luật (`rules`) | **C. Nâng cấp bảo mật** | mục 4 — bắt buộc, **chồng lên** A hoặc B |
 | "nhìn xấu", khoảng cách, bố cục | thiết kế, không phải review mã | công cụ thiết kế nếu môi trường có; không bịa reviewer |
 | tài liệu, onboarding, trải nghiệm CLI | DX | tự đọc như người mới và báo; không có reviewer riêng |
 | còn ở giai đoạn PLAN, chưa có code | review PLAN | skill `plan-review` |
@@ -104,6 +104,8 @@ Chạm vùng ở Bước 0 → `risk: high`, cỡ **lớn** (`method/sizing.md` 
 1. Chạy A bình thường.
 2. **Rồi** lượt bảo mật — không tuỳ chọn, không thay bằng tổng quát: skill `security-review` +
    agent `security-reviewer`; cần soát cả repo (OWASP, STRIDE, khảo cổ secret) thêm `security-audit`.
+   `risk_tags` có `rules`, `secret` hoặc `auth` → lượt kiểm kỹ thuật chạy theo `roles/verifier/dual-review.md`:
+   hai reviewer độc lập cùng rubric, cả hai Đạt mới Đạt (cộng thêm, không thay lượt bảo mật).
 3. Báo đã nâng cấp gì và vì sao, để người dùng gác ở **Cổng 2** trước khi phát hành.
 
 ## 5. Yêu cầu review — brief cho reviewer
