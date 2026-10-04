@@ -3,7 +3,7 @@ skill: closing-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: d8935235ce007e3624ef07497cca99961449f0b9
+skill_sha: c4695c088595211bbaa130c770c31291339ae784
 date: 2026-10-04
 result: 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 2/3, 2/3, 3/3 runs Đạt, RED 0/3, 0/3, 0/3 runs Đạt so all three gave way; the grader is the same model family as the subjects, CQ3); earlier single-run history, 11/11 GREEN pass, no refactor (KB1-KB3 rerun on the TK9.2 tree plus eight new scenarios KB4-KB11); RED on the eight new scenarios, 4 gave way (KB4 partial, KB9 fail, KB10 partial, KB11 partial), 4 passed as-is (KB5-KB8, kept as regression); earlier history 3/3 GREEN pass at TK10 and four reruns, all 3/3 pass
 agent_ids:
