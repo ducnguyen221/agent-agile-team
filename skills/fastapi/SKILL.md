@@ -1,6 +1,6 @@
 ---
 name: fastapi
-description: Use when building, extending, or reviewing a FastAPI service — routers, Pydantic request and response schemas, dependency injection, async endpoints calling a database or external service, background tasks, streaming responses, authentication and authorization, error envelopes, OpenAPI docs, tests with dependency overrides, or production settings.
+description: Use when building, extending, or reviewing a FastAPI service — routers, Pydantic request and response schemas, dependency injection, async endpoints calling a database or external service, background tasks, streaming responses, file uploads, authentication and authorization, error envelopes, OpenAPI docs, tests with dependency overrides, or production settings.
 metadata:
   group: technique
   kind: reference
@@ -63,7 +63,7 @@ app/
   client hay credential trong handler.
 - **Xác thực:** giải mã token với danh sách thuật toán cố định, kiểm hạn, issuer, audience; trường `sub` có thể
   thiếu hay sai kiểu (chuỗi ↔ số, UUID hỏng) — bắt mọi lỗi giải mã **và** lỗi đổi kiểu, trả `401` kèm
-  `WWW-Authenticate`. Phân quyền là dependency riêng nhận người dùng đã xác thực, trả `403`.
+  `WWW-Authenticate`. Phân quyền là dependency riêng nhận người dùng đã xác thực, trả `403` (theo vai, scope: `references/uploads-and-authorization.md`).
 - **Async:** `async def` chỉ dùng thư viện async (`httpx.AsyncClient`, SQLAlchemy async). Buộc phải dùng thư
   viện đồng bộ → khai route bằng `def` thường (FastAPI chạy nó trong threadpool) hoặc bọc lời gọi chặn; không
   bao giờ gọi chặn trực tiếp trong `async def`.
@@ -80,7 +80,7 @@ app/
   chính) để không sót hay lặp dòng giữa các trang.
 - **OpenAPI:** tuỳ biến bằng cách **gán** hàm vào `app.openapi`; khai response lỗi cho từng route.
 - **Test:** ghi đè đúng hàm mà `Depends` tham chiếu (ví dụ `get_db`), xoá ghi đè sau mỗi test; test qua client
-  ASGI, không mở cổng thật.
+  ASGI, không mở cổng thật (session CSDL giả, cô lập dữ liệu: `references/testing-db-and-production.md`).
 
 ## 4. Lỗi hay gặp khi viết và review
 
@@ -108,6 +108,8 @@ Mức gợi ý theo hậu quả nếu bỏ qua (`method/severity.md` mục 1); r
 |---|---|
 | `create_app` + lifespan + CORS, cấu hình pydantic-settings, tách schema Pydantic, dependency `get_db` / `get_current_user` | `references/app-schemas-dependencies.md` |
 | Tác vụ nền (`BackgroundTasks` hay hàng đợi), endpoint `202` cho việc dài, `StreamingResponse`, SSE | `references/background-and-streaming.md` |
+| Nhận file `UploadFile` + trường `Form`, chặn file quá cỡ hay sai loại, phân quyền theo vai và scope (`Security`, `SecurityScopes`), vì sao Swagger hiện nút Authorize | `references/uploads-and-authorization.md` |
+| Fixture `test_session` (SQLite in-memory), cô lập dữ liệu giữa test, người dùng giả, event loop và lifespan khi test; IP thật sau Nginx (`--proxy-headers`, `--forwarded-allow-ips`), `GZipMiddleware`, tắt `/docs` ở production | `references/testing-db-and-production.md` |
 | Endpoint async có phân trang, tầng service + transaction, lớp lỗi + exception handler (kể cả lỗi validate/framework, request id), tuỳ biến `app.openapi`, `operation_id`/tag/ví dụ, dependency đọc header (tenant), fixture test ghi đè dependency, phản mẫu | `references/routes-errors-openapi-testing.md` |
 
 ## 6. Checklist bảo mật
@@ -127,7 +129,7 @@ Mức gợi ý theo hậu quả nếu bỏ qua (`method/severity.md` mục 1); r
 - [ ] Endpoint danh sách luôn phân trang, có trần
 - [ ] Canh truy vấn N+1; eager loading có chủ đích
 - [ ] Đường async dùng client HTTP, CSDL async; client dùng chung, không tạo mới mỗi request
-- [ ] Chỉ bật nén sau khi đo cỡ payload và chi phí CPU
+- [ ] Chỉ bật nén sau khi đo cỡ payload và chi phí CPU (`GZipMiddleware`, IP thật sau proxy, tắt `/docs`: `references/testing-db-and-production.md`)
 - [ ] Cache đọc ổn định và đắt, có cách vô hiệu hoá tường minh
 
 ## 8. Xem thêm
