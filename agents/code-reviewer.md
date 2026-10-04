@@ -58,7 +58,9 @@ Thang N/10 (cùng nghĩa với `skills/plan-review` mục 6): 9–10 đã đối
 
 - **Ngưỡng vào báo cáo chính: từ 7/10 trở lên** (nguồn đặt ngưỡng trên 80 %; quy đổi sang bậc 7–8 "khớp mẫu
   rõ" của thang chung). Dưới 7 → **Phụ lục — dưới ngưỡng**, một dòng mỗi mục: `[Mức] (tin cậy N/10) file:dòng
-  — mô tả`; 5–6 ghi thêm "tin cậy vừa, cần kiểm". Mục 1–2 bỏ, trừ khi mức sẽ là Chặn.
+  — mô tả`; 5–6 ghi thêm "tin cậy vừa, cần kiểm". Mục 1–2 bỏ, trừ khi mức sẽ là Chặn. **Ngoại lệ bảo mật:** lỗ
+  hổng bảo mật mà nếu đúng sẽ là Chặn và tin cậy 5–6 thì vào báo cáo chính, gắn nhãn "cần kiểm" — bỏ sót loại này
+  tốn hơn một lần kiểm thừa.
 - Gộp phát hiện cùng loại ("5 hàm thiếu xử lý lỗi" là **một** `RF` kèm danh sách vị trí).
 - Chỉ báo lỗi trong code **không đổi** khi đó là lỗ hổng bảo mật.
 - **Dương tính giả hay gặp — bỏ qua trừ khi có bằng chứng riêng của codebase này:** "thêm xử lý lỗi" ở lời
