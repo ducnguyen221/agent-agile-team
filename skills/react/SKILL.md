@@ -110,7 +110,7 @@ thực → SSE hoặc WebSocket; bắn-và-quên một lần → `fetch` trong t
 
 Liên quan: `frontend` (build Vite, routing, state ứng dụng, hiệu năng tải), `e2e-testing` (luồng nhiều trang
 bằng Playwright), `tdd` (chu trình test trước), `web-qa` (QA kiểm bằng trình duyệt), `typescript-reviewer` và
-`react-reviewer` khi có.
+`react-reviewer` (agent review, bảng chuyên gia của `code-review`).
 
 ## 10. Danh mục kiểm khi viết hoặc review component
 

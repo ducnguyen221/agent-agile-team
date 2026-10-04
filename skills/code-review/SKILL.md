@@ -71,6 +71,14 @@ thứ lượt tổng quát không thấy:
 | `try/except`, fallback, đường lỗi, `.get()` mặc định | `silent-failure-hunter` |
 | comment có thể đã lệch code | `comment-analyzer` |
 | pipeline RAG, vector store, chunking | `rag-pipeline-reviewer` |
+| TypeScript / JavaScript ngoài mức tầm thường | `typescript-reviewer` |
+| `.tsx` / `.jsx`, hook, ranh giới server/client của React hay Next.js | `react-reviewer` (chạy cạnh `typescript-reviewer`) |
+| thêm hay sửa hành vi có test đi kèm; nghi test rỗng, nhánh lỗi chưa phủ, test chập chờn | `test-analyzer` |
+| cần một lượt tổng quát mà không có chuyên gia hợp, hoặc làm lượt đầu trước khi kéo chuyên gia | `code-reviewer` |
+
+`code-reviewer` và brief `references/reviewer.md` (mục 5) là **hai cách giao cùng một lượt tổng quát**, chọn một cho mỗi
+diff: brief `reviewer.md` khi review toàn nhánh đối chiếu PLAN/SPEC và Trọng tâm review; agent `code-reviewer` khi cần lượt
+tổng quát nhanh trên một diff mà không soạn brief riêng. Chuyên gia khi diff nằm trọn trong một vùng chúng phủ.
 
 Diff **thêm hàm mới** ở vùng hay mọc bản sao (tiện ích, định dạng, kiểm hợp lệ, đường dẫn, đổi lỗi thành chuỗi):
 thêm bước tìm hàm trùng ý theo [references/duplicates.md](references/duplicates.md) — grep và đọc thân, không giao
