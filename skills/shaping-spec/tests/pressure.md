@@ -3,9 +3,9 @@ skill: shaping-spec
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: a3a85908d7a7ba4e3933df8098b713b7e370e9d3
+skill_sha: bbf3854f8327e80797da47f4817c6452dc5f8825
 date: 2026-10-04
-result: 4/4 GREEN pass; RED on the new scenario sp-9 partial (0/1 pass)
+result: 6/6 GREEN pass; RED on the new scenarios sp-9, sp-10, sp-11 partial (0/3 pass)
 agent_ids:
   red: {sp-1: a09d98979e0255a9f, sp-2: a97388f4a69a13249, sp-3: a03b0a87d1da0c3c6, sp-1b: adeaac5f4bc2187dd, sp-2b: ae26aff6cb038c2f4, sp-3b: a3022148e0388e605, sp-4: a1e563e2a0f2e2156, sp-5: ab01690e55e146d34, sp-6: a0d62338ea98cebd8, sp-7: a8d6c8da98d7d394d, sp-8: ae658785fb34a9f5c, sp-9: acfa2bb4316de0d48}
   green: {sp-4: a6d60637bf060002a, sp-7: ae44c59420457130c, sp-8: aa401469f811a9628, sp-9: a524b67097743b188}
@@ -70,6 +70,10 @@ Mục 8 (cờ đỏ) và mục 7 (thêm bullet cỡ rất nhỏ / nhỏ) đổi.
 được viết lại phân biệt: rất nhỏ hai phần, nhỏ bốn phần, phần SPEC vẫn theo mục 5. Chạy lại cả bốn: `sp-4` **Đạt** (agent `a6d60637`: `FR` KHI…THÌ
 gồm đường lỗi, `in_review`) · `sp-7` **Đạt** (agent `ae44c594`: Bounded, nhỏ, `FR1.1`–`FR1.5`, `SC1`–`SC3`) · `sp-8` **Đạt** (agent `aa401469`:
 `in_review`, Business Reviewer đọc trước khi chốt PLAN) · `sp-9` **Đạt**. Output trọn ở `evidence/TK2/pressure-*.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả sau thêm "một `FR` một hành vi" và `references/spec-mining.md` (SPR-04 `TK5.2`, 2026-10-04)
+
+Hai kịch bản mới, tình huống ở `tests/scenarios.txt`: `sp-10` (Architect đòi gộp bốn việc voucher thành một `FR`) và `sp-11` (rút hành vi hiện tại của `calc_total` khi repo chưa có spec sống, Architect đòi chép docstring). RED trên bản trước khi sửa: cả hai **Đạt một phần** (agent `a2cf8f8c`: `FR1` "Tạo/sửa/huỷ" nhồi ba hành vi; agent `a073618d`: đối chiếu đúng nhưng thiếu `file:dòng` đủ và mốc commit). Sửa: mục 5 thêm "một `FR` một hành vi", mục 2 bước 4 trỏ `references/spec-mining.md` (mới), mẫu SPEC thêm một câu. GREEN: `sp-10` **Đạt** (agent `a0832d86`: sáu `FR`), `sp-11` **Đạt** (agent `a142a52f`, đọc cả `spec-mining.md`; lượt đầu `a6935cbd` bị giới hạn không mở file đó, không dùng để chấm). Bốn kịch bản cũ chạy lại: `sp-4` **Đạt** (`a6f2bf82`), `sp-7` **Đạt** (`ace237fa`), `sp-8` **Đạt** (`a3baa1e2`), `sp-9` **Đạt** (`a89b4d8a`). Output trọn ở `evidence/TK4/pressure-red-tk5.md` và `evidence/TK4/pressure-green-tk5.md` của hồ sơ sprint SPR-04 (lớp riêng).
 
 ## Lỗ hổng đã vá sau RED
 
