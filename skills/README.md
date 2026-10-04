@@ -132,7 +132,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 5/5 GREEN pass | 2026-10-04 |
-| [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 2/3 GREEN pass (wq-1 partial: fails only code format `RF-A`; wq-2, wq-3 pass); RED 0/2 pass (2 partial) on the discriminating scenarios | 2026-10-03 |
+| [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass on the final tree (wq-1 to wq-3 rerun plus new wq-4 to wq-6) | 2026-10-04 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
