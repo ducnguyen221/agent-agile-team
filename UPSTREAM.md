@@ -178,11 +178,11 @@ cột đích; **hoãn** = sang "Đợt 3 — dự kiến". Câu nguồn trái lu
 | `affaan-m/ECC` skill kỹ thuật | browser-qa, click-path-audit | `skills/web-qa` (giữ "chỉ báo cáo") | đã làm (`TK8.4`) |
 | `affaan-m/ECC` rules | `rules/common` (coding-style, testing, security, git-workflow, code-review, development-workflow, agents), `rules/python`, `rules/typescript`, `rules/react` | `method/standards/common/` (7 file), `method/standards/python.md`, `typescript.md`, `react.md` — ngưỡng coverage giữ 80 %; không nạp vào `AGENTS.md` | đã làm (`TK6`) |
 | `affaan-m/ECC` rules | `rules/web` | `method/standards/web.md` | đã làm (`TK6.5`) |
-| `affaan-m/ECC` lệnh | code-review, review-pr | `skills/code-review` | đã làm (`TK9.1`) |
+| `affaan-m/ECC` lệnh | code-review, review-pr | `skills/code-review` (chỉ đối chiếu; chưa có câu nào được chép vào skill — khớp dòng `code-review` ở bảng nguồn) | đã đối chiếu, chưa chép (`TK9.1`) |
 | `affaan-m/ECC` lệnh | test-coverage | `roles/executor/qa.md` mục 9 (cách đo và ghi coverage) | đã làm (`TK9.3`) |
 | `affaan-m/ECC` lệnh | update-docs | `skills/closing-sprint/references/docs-sync.md` mục 10 | đã làm (`TK9.2`) |
 | `affaan-m/ECC` lệnh | plan, checkpoint, quality-gate | đã thay bằng `method/process.md` mục 3 và 7 và `method/evidence.md` mục 8 | đã thay |
-| `affaan-m/ECC` lệnh | plan-prd, prp-* | — | hoãn (Đợt 3) |
+| `affaan-m/ECC` lệnh | plan-prd, prp-* | `skills/shaping-spec`, `skills/writing-plan` (lý do ở dòng `plan-prd`, `prp-*` mục lấy/bỏ: trùng SPEC/PLAN/`running-sprint`; `prp-commit`, `prp-pr` là hành động ra ngoài, thuộc cổng người) | đã thay |
 | `affaan-m/ECC` khác | 24 hook, continuous-learning, loop / multi / tmux / devfleet | — (runtime của nguồn; quyết định Bỏ ở `SPR-02`) | bỏ qua |
 | `garrytan/gstack` | `review` | `skills/code-review` (bước "sửa + test hồi quy là một lựa chọn", ý bằng chứng nơi gọi); checklist Pass 1/2 chưa lấy | đã làm một phần (`TK9.1`); phần còn lại hoãn |
 | `garrytan/gstack` | `qa` | `skills/web-qa` (ranh giới và nhiệm vụ khám phá, cách đếm điểm, phát lại đúng bước, kiểm lại sau sửa; bỏ vòng tự sửa) | đã làm (`TK8.4`) |

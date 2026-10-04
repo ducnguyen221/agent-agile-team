@@ -26,8 +26,10 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
   có `tests/pressure.md`: 3 kịch bản thử áp lực, chạy bằng subagent không có skill (ghi lỗi) rồi có skill
   (phải đạt). Cách viết: skill `writing-skills`, `references/testing.md`.
 - Skill **tham chiếu kỹ thuật** (`metadata.kind: reference`) không kiểm áp lực mà kiểm **truy xuất** (agent
-  tìm đúng mục khi cần): bắt buộc có `tests/retrieval.md` đạt ngưỡng truy xuất — `skills/writing-skills/references/testing.md`
-  mục 9 (≥80 % câu tình huống Đạt hẳn **và** câu ranh giới Đạt).
+  tìm đúng mục khi cần): bắt buộc có `tests/retrieval.md` đã chạy. Ngưỡng truy xuất là **mục tiêu kiểm** —
+  `skills/writing-skills/references/testing.md` mục 9 (≥80 % câu tình huống Đạt hẳn **và** câu ranh giới Đạt);
+  chưa phải skill nào cũng đạt. Skill dưới ngưỡng ghi trạng thái ở mục 4 (cột `below threshold`) và còn việc để lại
+  (bổ sung nội dung rồi chạy lại); đừng đọc "có tệp thử" thành "đã đạt ngưỡng".
 - `security-audit`, `web-qa` là skill **chỉ báo cáo** (không sửa gì); kịch bản thật cần cả một repo hoặc
   trình duyệt dựng sẵn, nên thử áp lực bằng prompt tự chứa (đã chạy ở SPR-02, xem mục 4).
 - Frontmatter của `pressure.md`/`retrieval.md`: `result` và `model` là kết quả đã chạy (không phải `not run`/
