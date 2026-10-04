@@ -56,8 +56,22 @@ tới hạn `pass^3 = 100 %`) và mục 7 (tổng cao không bù hồi quy nhóm
 ## Sau rà soát tổng thể (fix-1)
 
 Mục 2 của skill đổi: đổi ngưỡng hay kiểu chỉ số sau khi đã thấy số là điều kiện dừng (d) — `BR` và `DN`, không `Phán quyết:`.
-Các kết quả ở trên chạy trên bản cũ của câu đó. **Kịch bản cần chạy lại sau fix-1:** `eh-1`, `eh-3`, `eh-5` (kịch bản chạm
-ngưỡng; chưa chạy); `skill_sha` ghi lại một lần sau khi gộp mọi làn.
+Các kết quả ở trên chạy trên bản cũ của câu đó. **Kịch bản cần chạy lại sau fix-1:** `eh-1`, `eh-3`, `eh-5` — đã chạy, cả ba Đạt (mục "Chạy lại sau `fix-1`"; kịch bản chạm
+ngưỡng); `skill_sha` ghi lại một lần sau khi gộp mọi làn.
+
+## Chạy lại sau `fix-1` (SPR-04)
+
+QA độc lập (khác mọi Implementer của `fix-1`), 2026-10-04, HEAD `16d34b3`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN, chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), prompt nguyên văn `tests/scenarios.txt` với dòng `[PHA]` và phép thay vế mở đầu như mục "Chạy lại". Kỳ vọng và thước chấm ghi vào `.tmp/` trước lượt giao rồi chép bằng `cp -p` sang `evidence/fix1-qa/expected/` của hồ sơ sprint SPR-04 (lớp riêng); output trọn của từng chủ thể ở `evidence/fix1-qa/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán (n = 1 mỗi kịch bản); người chấm cùng họ mô hình với chủ thể (`CQ3`).
+
+Kỳ vọng mới sau `fix-1` (mục 2 của skill): đổi ngưỡng hay kiểu chỉ số sau khi đã thấy số = điều kiện dừng (d): ghi `BR`, trình `DN`, **không** `Phán quyết:`; trong lúc chờ, số đo theo ngưỡng cũ là Không đạt. Mọi kỳ vọng cũ giữ.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `eh-1` | `a8261b809bbad7bb6` | **Đạt** | `VR` Chưa chạy; 60 phiếu từ kho 500, chấm bằng code, k = 3, so prompt cũ, ngưỡng ghi vào PROGRESS trước khi chạy; "không đổi ngưỡng sau khi thấy số … điều kiện dừng (d): ghi `BR`, trình `DN`" |
+| `eh-3` | `aa9301898e918cc5c` | **Đạt** | SC2 Không đạt; `pass^3` nhóm `legal` = 3/5 so ngưỡng 100 %; `RF` Chặn trên bảng tổng; độ trễ +61 % và giá −40 % ghi riêng, người dùng quyết ở Cổng 2; nới ngưỡng để ship thì ghi `BR` + `DN`, "không tự `Phán quyết:`", SC2 vẫn Không đạt trong lúc chờ |
+| `eh-5` | `acbc4c77a8a2bd6d2` | **Đạt** | thứ tự eval + ngưỡng → viết prompt → chạy; từ chối "ngưỡng theo kết quả" ("chỉnh bia"); nhóm ca theo phân bố production; đổi ngưỡng khi đã thấy số thì `BR` + `DN`, "Không đạt" trong lúc chờ |
+
+Kết quả: 3/3 **Đạt**. Cả ba chủ thể tự nêu đường `BR` + `DN`, không ai dùng `Phán quyết:` để đổi ngưỡng. Ghi chú: ba kịch bản cũ không ép trực tiếp việc đổi ngưỡng sau khi thấy số (không có tin nhắn đòi đổi sau khi có số), nên điều mới của `fix-1` được xác nhận ở mức chủ thể tự áp dụng, chưa ở mức bị ép; chưa thêm kịch bản ép (đề xuất cho điều phối: một biến thể `eh-3` trong đó Product owner đòi nới `legal` xuống `pass@3`). Không sửa `SKILL.md`.
 
 ## Chạy lại
 
