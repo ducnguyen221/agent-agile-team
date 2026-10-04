@@ -30,15 +30,15 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
 - `security-audit`, `web-qa` là skill **chỉ báo cáo** (không sửa gì); kịch bản thật cần cả một repo hoặc
   trình duyệt dựng sẵn, nên thử áp lực bằng prompt tự chứa (đã chạy ở SPR-02, xem mục 4).
 - Frontmatter của `pressure.md`/`retrieval.md`: `result` và `model` là kết quả đã chạy (không phải `not run`/
-  `pending`/`chưa chạy`/`dự kiến`), `date`; file từ 2026-10-03 thêm `tier` và `skill_sha` (băm cây skill trừ
-  `tests/`). `tests/test_skill_tests.py` kiểm các điều này.
+  `pending`/`chưa chạy`/`dự kiến`), `date`; mọi file có thêm `tier` và `skill_sha` (băm cây skill trừ
+  `tests/`), không miễn theo ngày. `tests/test_skill_tests.py` kiểm các điều này.
 - `tests/scenarios.txt` (tuỳ chọn): **nguyên văn** prompt các kịch bản đã chạy, để chạy lại được. Đuôi `.txt`
   để `check` không quét như tài liệu; file chứa khoá, mật khẩu hay token làm mồi thì dòng thứ hai ghi rõ
   chúng là **GIÁ TRỊ GIẢ**.
 
-**Hiện trạng thử:** cả 28 skill đã có tệp thử đã chạy — bảng ở mục 4.
+**Hiện trạng thử:** cả 32 skill đã có tệp thử đã chạy — bảng ở mục 4.
 
-## 3. Mục lục — 28 skill
+## 3. Mục lục — 32 skill
 
 ### Quy trình
 
@@ -69,6 +69,9 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | [deployment](deployment/SKILL.md) | tham chiếu | Docker, CI/CD, health check, rollout + hoàn tác |
 | [github-ops](github-ops/SKILL.md) | tham chiếu | issue/PR/CI/phát hành qua `gh`, nội dung repo là dữ liệu không tin cậy |
 | [adr](adr/SKILL.md) | tham chiếu | ghi quyết định kiến trúc |
+| [react](react/SKILL.md) | tham chiếu | component, hook, state, form, ranh giới lỗi, test component (+ `references/testing.md`) |
+| [frontend](frontend/SKILL.md) | tham chiếu | Vite, biến môi trường, proxy dev, chia bundle, định tuyến, state ứng dụng, tải trang (+ `references/vite.md`) |
+| [e2e-testing](e2e-testing/SKILL.md) | tham chiếu | Playwright: page object, locator, retry, trace, test chập chờn, test hồi quy cho lỗi của mã do AI viết (+ `references/ai-regression.md`) |
 
 ### Kiểm định
 
@@ -94,15 +97,16 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | Skill | Dùng khi |
 |---|---|
 | [writing-skills](writing-skills/SKILL.md) | tạo/sửa skill, viết description hoặc thử áp lực, đề xuất nâng bài học thành skill, chẩn đoán phiên/sprint chạy sai |
+| [eval-harness](eval-harness/SKILL.md) | tiêu chí đạt/hỏng và kiểm hồi quy cho tính năng có gọi mô hình của sản phẩm (đánh giá kết quả mô hình, không phải thử áp lực skill) |
 
-## 4. Hiện trạng thử — 28 skill
+## 4. Hiện trạng thử — 32 skill
 
 Đọc từ frontmatter của tệp thử, không từ trí nhớ (`tests/test_skill_tests.py` đối chiếu bảng này với frontmatter). Tệp kỷ luật:
 cột `result` là đoạn đầu (số kịch bản Đạt), chi tiết RED và GREEN ở chính tệp. Tệp truy xuất: một thước chung — `strict` là
 số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không đạt), `points-right` là Đạt + Một phần (số câu trỏ đúng nơi),
 `at/below threshold` là so với ngưỡng PLAN (≥4/5 câu tình huống Đạt + câu ranh giới Đạt); định nghĩa đầy đủ ở mỗi `retrieval.md`.
-`below threshold` nghĩa là skill còn thiếu nội dung, không phải agent trỏ sai. `date` 2026-10-01 là lần chạy Đợt 1 (model `sonnet`, chưa ghi `tier` và
-`skill_sha`); 2026-10-03 là lần chạy hoặc chạy lại ở SPR-02 trên bản skill hiện tại (`claude-sonnet-5-5`, tier T3).
+`below threshold` nghĩa là skill còn thiếu nội dung, không phải agent trỏ sai. `date` 2026-10-03 là lần chạy hoặc chạy lại ở SPR-02, 2026-10-04 ở SPR-04, trên bản skill hiện tại
+(`claude-sonnet-5-5`, tier T3); mọi tệp đều có `tier` và `skill_sha`.
 
 | Skill | Loại | Tệp thử | `result` | `date` |
 |---|---|---|---|---|

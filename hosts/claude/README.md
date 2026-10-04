@@ -1,6 +1,6 @@
 # Dùng agent-agile-team với Claude Code
 
-> **Kết luận:** cài plugin để có 28 skill và 7 agent reviewer; thêm một dòng `@import` tới `AGENTS.md` vào
+> **Kết luận:** cài plugin để có 32 skill và 13 agent (chỉ đọc, riêng `build-fixer` được sửa — T2); thêm một dòng `@import` tới `AGENTS.md` vào
 > file luật cấp người dùng để luật lõi có mặt ở **mọi** phiên. Áp cho Claude Code ở terminal, IDE và tab
 > **Code** của ứng dụng Claude.
 

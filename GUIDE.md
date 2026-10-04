@@ -10,7 +10,8 @@ Chưa cài: xem [`INSTALL.md`](INSTALL.md). Luật đầy đủ: [`method/proces
 
 - **Sprint** = một mục tiêu (một tính năng, một lần sửa lỗi, một đợt chỉnh), dài ngắn tùy việc, không đo theo
   tuần. Mỗi sprint có một thư mục với bốn tài liệu: SPEC (làm gì), PLAN (làm thế nào), PROGRESS (đang tới
-  đâu), REPORT (kết quả). Việc rất nhỏ gộp cả bốn vào một file `SPRINT.md`.
+  đâu), REPORT (kết quả). Việc **rất nhỏ** chỉ cần một file `SPRINT.md` hai phần (Kế hoạch, Kết quả); việc **nhỏ** một
+  `SPRINT.md` đủ bốn phần; từ cỡ vừa mới dùng bốn tài liệu.
 - **Sổ gốc** — ba file sống lâu của dự án: REQUESTS (mọi yêu cầu theo thời gian, mã `RQ-001`…), SPRINTS
   (mọi sprint, mã `SPR-01`…), SPECS (mọi tính năng đang chạy, mã `FS-001`…). Đầu mỗi sổ có khối "Đang mở" để
   agent tra nhanh.
