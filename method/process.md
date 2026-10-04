@@ -238,6 +238,7 @@ Kiểm định: <k/m SC có VR Đạt; VR Chưa chạy/Không áp dụng: … (l
 Phát hiện còn mở: <RFk (tên) — mức — xử lý> (hoặc "không")
 Việc để lại: <COk (tên) — chủ — mốc> (hoặc "không")
 Cách dùng / đã đổi gì / hoàn tác: <một dòng mỗi ý>; REPORT: <đường dẫn>
+Phiên bản đề xuất: <MAJOR | MINOR | PATCH> → <số>, vì <thay đổi nặng nhất> (hoặc "không áp dụng") — bảng ở conventions.md mục 4.1
 Anh kết luận: Đạt / Đạt có điều kiện (kèm điều kiện) / Không đạt (kèm lý do)
 ```
 
