@@ -108,11 +108,11 @@ chạy lại hai kịch bản phân biệt (wq-1, wq-2) trên bản cuối.
 sửa, 5.1 kết quả cuối so với lời hứa của nhãn, 6–7 một nhóm mỗi phát hiện và cách tính nhóm chưa kiểm, 7.1 tiếp cận, 9 khuôn
 mã, 10 luật 12–13), nên `skill_sha` ở frontmatter là bản cuối và đã chạy lại **cả ba kịch bản nền** (wq-1 đến wq-3) cộng **ba
 kịch bản mới** trên bản cuối. Kỳ vọng và thước chấm ghi vào file nháp `.tmp/web-qa-expected.md` **trước** khi giao chủ thể
-(mtime 10:11:49; bản sao ở hồ sơ sprint của lớp riêng, `evidence/TK8b/expected/`). Thước như thước nền (Đạt = đủ tiêu chí ·
+(mtime 10:11:49; bản sao ở hồ sơ sprint của lớp riêng, `evidence/TK9b/expected/`). Thước như thước nền (Đạt = đủ tiêu chí ·
 Một phần · Không đạt). Công cụ trình duyệt của chủ thể: máy chủ MCP Playwright của harness, nạp qua ToolSearch (dùng được,
 không phải "Chưa chạy"). Mỗi kịch bản **một** lượt mỗi pha, chạy tuần tự (một trình duyệt dùng chung); máy chủ tĩnh cục bộ
-cho `tests/fixture/` ở `127.0.0.1:8765`, cổng 8766 không có dịch vụ cho wq-3; cả hai đã tắt. Output trọn của các lượt: hồ sơ
-sprint của lớp riêng, `evidence/TK8b/web-qa-red.md`, `web-qa-green-interim.md`, `web-qa-green-final.md`.
+cho `tests/fixture/` ở `127.0.0.1:8765`, cổng 8766 không có dịch vụ cho wq-3; cả hai đã tắt. Bản ghi rút gọn có trích nguyên văn: hồ sơ
+sprint của lớp riêng, `evidence/TK9b/web-qa-runs.md` (output trọn theo id agent ở frontmatter).
 
 | Kịch bản | Ý nhắm | RED | GREEN (bản cuối) |
 |---|---|---|---|

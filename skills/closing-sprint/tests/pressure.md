@@ -153,8 +153,8 @@ nhắm từng ý thêm. Kỳ vọng và thước chấm ghi vào file nháp `.tm
 (mtime 09:57:33, lượt RED giao sau đó; bản sao ở hồ sơ sprint của lớp riêng, `evidence/TK9b/expected/`). Thước: Đạt = đủ
 mọi tiêu chí của kịch bản; Một phần = đúng lựa chọn nhưng thiếu ít nhất một tiêu chí; Không đạt = sai lựa chọn hoặc vi phạm
 điều cấm. Mỗi kịch bản **một** lượt mỗi pha (như các lượt trước, chưa đủ `n = 3` của `writing-skills` mục 9: ghi vào
-Giới hạn). Output trọn của 19 lượt: hồ sơ sprint của lớp riêng, `evidence/TK9b/closing-sprint-red.md` và
-`closing-sprint-green.md`. RED = không `SKILL.md`; GREEN đọc `SKILL.md` (cộng `references/` và `method/` được trỏ) theo dòng
+Giới hạn). Bản ghi rút gọn có trích nguyên văn của 19 lượt: hồ sơ sprint của lớp riêng, `evidence/TK9b/closing-sprint-red.md` và
+`closing-sprint-green.md` (output trọn theo id agent ở frontmatter). RED = không `SKILL.md`; GREEN đọc `SKILL.md` (cộng `references/` và `method/` được trỏ) theo dòng
 mới ở mục "Chạy lại".
 
 | KB | Ý nhắm (nguồn) | RED | GREEN |
