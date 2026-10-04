@@ -91,6 +91,14 @@ Khi viết hay sửa bất kỳ test nào, mock hay hàm phụ cho test: đọc
 - Mã chỉ test dùng nằm trong tiện ích test, không nằm trong lớp sản phẩm.
 - Hiểu tác dụng phụ của phụ thuộc trước khi mock nó.
 
+**Ca biên bắt buộc có test** — không phải "để sau", cũng không phải chờ trả lời `CQ` mới viết: rỗng hoặc thiếu (null, chuỗi rỗng,
+danh sách rỗng) · sai kiểu · biên giá trị (nhỏ nhất, lớn nhất, ngay hai phía biên) · khoảng trắng đầu, cuối và liên tiếp ·
+ký tự đặc biệt (Unicode, tiếng Việt có dấu, emoji, ký tự điều khiển, ký tự riêng của SQL hay shell) · đường lỗi (mạng, cơ sở
+dữ liệu, tệp) · truy cập đồng thời · dữ liệu lớn khi hiệu năng là yêu cầu. Chọn nhóm áp được cho đơn vị đang làm. PLAN hay SPEC
+im lặng về một ca biên thì **vẫn viết test** cho hành vi an toàn tối thiểu (không sập, không nuốt lỗi, không phá dữ liệu) và
+ghi ASSUMPTION về kết quả mong muốn; chỉ phần mong muốn chưa chốt mới thành `CQ`. Lời "ba test là đủ, ca biên để sau" không
+phải phép bỏ.
+
 **Coverage** là điều kiện cần, không đủ: ngưỡng mặc định 80 % dòng cho mã mới và mã sửa, dự án chỉnh qua
 `.agile.json` kèm lý do (`method/conventions.md` mục 1). Không hạ ngưỡng, không `skip`/`xfail` để xanh.
 Test Python cụ thể (fixture, parametrize, mock, async): skill `python`, `references/testing.md`.
