@@ -47,8 +47,12 @@ KHÔNG CÓ SKILL — HAY LẦN SỬA SKILL — NÀO KHI CHƯA THẤY PHÉP THỬ
 
 - Viết skill trước khi chạy RED → bỏ bản đó, chạy RED, viết lại từ lỗi quan sát được. Không giữ làm "tham
   khảo", không "chỉnh dần" trong lúc thử.
-- Sửa skill đang dùng: chạy RED trên **bản hiện tại** với kịch bản dụ đúng lỗi mới. Bản hiện tại đã đạt → không
-  sửa gì. Hỏng → sửa, chạy GREEN cùng kịch bản, chạy lại kịch bản cũ của skill để chắc không lùi.
+- Sửa skill đang dùng, đúng thứ tự — bỏ một bước là hỏng quy trình:
+  1. RED trên **bản hiện tại**, kịch bản dụ đúng lỗi mới.
+  2. Đã đạt → không sửa gì, dừng. Hỏng → sửa tối thiểu.
+  3. GREEN cùng kịch bản (cùng tier, model).
+  4. Chạy lại kịch bản cũ của skill, chắc không lùi.
+  5. Xong 1–4 mới gộp hoặc báo xong; RED hỏng rồi gộp luôn là bỏ bước 3–4.
 - "Đọc lại thấy rõ" không phải phép thử. `tests/pressure.md` chỉ ghi kết quả đã chạy; GREEN "dự kiến" là bịa.
 - Hạn chót do agent khác đặt không mở ngoại lệ: báo trễ + lý do. Người dùng trực tiếp bảo gộp khi chưa thử →
   làm theo — lệnh trong phạm vi đã duyệt là phán quyết, không phải vướng mắc: ghi `tests/pressure.md` là
@@ -79,14 +83,12 @@ Phân loại lỗi RED **trước** khi viết; dạng chặn được lỗi nà
   dòng"). Ngoại lệ thật thì viết thành câu điều kiện riêng có dấu hiệu quan sát được.
 - **Miễn trừ không khoanh được phạm vi.** "Giới hạn này không áp cho khối code" vẫn làm agent bớt khối code;
   phần phải miễn thì tái cấu trúc để luật không chạm tới.
-- Cấm trên lỗi hình dạng phản tác dụng: dưới động cơ cạnh tranh, agent mặc cả với "đừng X" và trong phép thử
-  câu chữ của nguồn, nhánh cấm sinh nhiều nội dung thừa **hơn** cả nhánh không hướng dẫn. Người duyệt đòi
-  "danh sách cấm cho chắc" cho lỗi hình dạng → viết công thức, trả lời bằng bảng trên và kết quả RED.
+- Cấm trên lỗi hình dạng phản tác dụng: agent mặc cả với "đừng X"; trong phép thử của nguồn, nhánh cấm sinh nội dung
+  thừa **hơn** nhánh không hướng dẫn. Người duyệt đòi "danh sách cấm cho chắc" → viết công thức, trả lời bằng bảng trên và kết quả RED.
 - Giọng cho skill kỷ luật: câu khẳng định dứt khoát ("luôn", "không bao giờ", "không ngoại lệ"), bắt cam kết
   (chọn A/B/C, nói ra skill đang dùng), nêu chuẩn chung ("thiếu Y là hỏng"). Không dùng giọng lấy lòng.
 
-**Micro-test câu chữ** trước khi chạy kịch bản đầy đủ: ngữ cảnh thật, **có nhánh đối chứng không hướng dẫn**,
-≥5 lần mỗi biến thể, đọc tay mọi chỗ gắn cờ, độ phân tán là thước đo (`references/testing.md` mục 7).
+**Micro-test câu chữ** trước kịch bản đầy đủ: ngữ cảnh thật, **nhánh đối chứng không hướng dẫn**, ≥5 lần mỗi biến thể (`references/testing.md` mục 7).
 
 ## 5. `description` và frontmatter
 
@@ -110,12 +112,10 @@ description: Use when a diff, branch or finished task needs review before merge,
 
 - Khối nạp mọi phiên (trong `AGENTS.md`) ≤200 từ; `SKILL.md` thường ≤150 dòng; tra cứu >100 dòng → `references/`;
   công cụ tái dùng → `scripts/`. Đo bằng đếm từ/dòng, không ước.
-- Trỏ skill khác bằng **tên** (`skill debugging`), không nạp cưỡng bức bằng cú pháp import, không chép lại nội
-  dung skill khác. Một ví dụ tốt, một ngôn ngữ. Sơ đồ chỉ cho điểm quyết định không hiển nhiên; việc tuyến
-  tính dùng danh sách đánh số.
-- Script đi kèm gọi **qua trình thông dịch** (`python scripts/x.py`, `bash scripts/x.sh`), không gọi đường trần
-  (đóng gói có thể mất bit chạy; Windows không chạy file không đuôi); ưu tiên Python thư viện chuẩn để chạy cả
-  Windows và macOS.
+- Trỏ skill khác bằng **tên** (`skill debugging`), không nạp cưỡng bức bằng cú pháp import, không chép nội dung skill
+  khác. Một ví dụ tốt, một ngôn ngữ. Sơ đồ chỉ cho điểm quyết định không hiển nhiên; việc tuyến tính: danh sách đánh số.
+- Script đi kèm gọi **qua trình thông dịch** (`python scripts/x.py`, `bash scripts/x.sh`), không gọi đường trần (đóng
+  gói mất bit chạy; Windows không chạy file không đuôi); ưu tiên Python thư viện chuẩn, chạy cả Windows lẫn macOS.
 - Không chuyện kể ("phiên hôm X ta thấy…"), không đường dẫn máy, không tên người hay dự án riêng. Hướng dẫn
   chính thức của Anthropic: <https://code.claude.com/docs/en/skills> — chỉ trỏ, không chép.
 
@@ -132,7 +132,7 @@ description: Use when a diff, branch or finished task needs review before merge,
 | "Đã nháp sẵn rồi, tạo luôn cho người dùng vui" | agent chỉ đề xuất; nháp không phải bằng chứng tái dùng |
 | "Một lần chạy đạt là đủ" | một mẫu nói dối; ≥5 lần và có đối chứng |
 
-**Cờ đỏ — dừng, quay lại mục 2:** sửa skill khi chưa có RED · viết hàng loạt skill · `tests/pressure.md` có
+**Cờ đỏ — dừng, quay lại mục 2:** sửa skill khi chưa có RED · RED hỏng rồi gộp luôn · viết hàng loạt skill · `tests/pressure.md` có
 chữ "dự kiến" · `description` kể bước làm ("then", "first", "steps") · hướng dẫn hình dạng mở đầu bằng "KHÔNG".
 
 ## 8. Trước khi báo xong
@@ -147,5 +147,5 @@ chữ "dự kiến" · `description` kể bước làm ("then", "first", "steps"
 ## 9. Khi một phiên hay sprint chạy sai
 
 "Sao lâu / tốn / làm thừa / bỏ plan", hay skill không kích hoạt → `references/diagnosing.md`: mỗi phát hiện
-kèm `đường-dẫn:dòng` hoặc bị loại; số lấy từ file; đo trước khi đọc; tách đã xác minh ↔ giả thuyết ↔ khoảng
-trống. Kết quả thành `LN` ứng viên cho bước 6; sửa skill đi lại mục 2.
+kèm `đường-dẫn:dòng` hoặc bị loại; số lấy từ file; đo trước khi đọc; tách đã xác minh ↔ giả thuyết ↔ khoảng trống.
+Kết quả thành `LN` ứng viên; sửa skill đi lại mục 2.
