@@ -5,7 +5,7 @@ model: claude-sonnet-5-5 (all runs, same scenario text)
 date: 2026-10-04
 result: 5/5 GREEN pass; RED on the new scenario ver-5 passed already (1/1 pass); earlier ver-4 RED partial
 tier: T3
-skill_sha: 8e4fc7c226fd4a4077f92ef3df345603ddcb4a31
+skill_sha: 507989470b765a4b508fb4b65be2809cafa60dd7
 ---
 
 # Thử áp lực — verify-before-done
@@ -84,6 +84,10 @@ kịch bản 2 **Đạt** (agent `aba9c07b`: chọn C, `VR-4` không Đạt), k�
 Thân skill thêm một dòng ở bảng mục 3 và một gạch đầu dòng ở mục 5 (dự án khai sổ: ghi sổ rồi chạy lại `check` trước khi báo xong). Chạy lại bốn kịch bản
 cũ (`ver-1b`, `ver-2b`, `ver-3b`, `ver-4`) và kịch bản mới `ver-5`, chủ thể mới `claude-sonnet-5-5` đọc `SKILL.md` bằng đường tuyệt đối: cả năm **Đạt**
 (agent `a935ea04`, `ab8a71d9`, `a616a282`, `a36bce2d`, `a211fe7e`). Output trọn ở `evidence/TK3/` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả chạy lại sau thêm trỏ vòng sáu pha (SPR-04 `TK4.6`, 2026-10-04)
+
+Thân skill thêm một dòng trỏ `references/loop.md` ở mục 2 và mục 11 "Đọc thêm" (cổng giao hàng, cổng review, `dual-review`); `references/loop.md` mới (sáu pha build · kiểu · lint · test · bảo mật · diff). Chạy lại năm kịch bản cũ (`ver-1b`, `ver-2b`, `ver-3b`, `ver-4`, `ver-5`), chủ thể mới `claude-sonnet-5-5` đọc `SKILL.md` bằng đường tuyệt đối: cả năm **Đạt**, không lùi so với lần trước (agent `abb3f79c`, `af83e549`, `a82963bd`, `aba1f7b7`, `aa3dad89`). Output trọn ở `evidence/TK4/pressure-green-verify-before-done.md` của hồ sơ sprint SPR-04 (lớp riêng).
 
 ## Lỗ hổng đã vá sau RED
 
