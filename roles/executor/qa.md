@@ -25,11 +25,14 @@ SPEC (`FR`, `SC`) · PLAN (cách kiểm từng `TK`) · mã và test hiện có 
 
 ## 4. Đầu ra
 `VR` theo [method/evidence.md](../../method/evidence.md): lệnh, môi trường, thời điểm, kỳ vọng ↔ thực
-tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage kèm lệnh đo · **bảng phủ** (đang viết lại — `TK10`) · báo cáo kiểm trình duyệt
+tế, Đạt / Không đạt / Chưa chạy / Không áp dụng · số coverage kèm lệnh đo · **bảng phủ** (từng kịch bản `FR` và từng `SC` đối chiếu `VR` kiểm nó cùng tầng test) · báo cáo kiểm trình duyệt
 chỉ-báo-cáo (điểm sức khoẻ, phát hiện theo thang chung) · log output lưu file, trỏ đường dẫn.
 
 ## 5. Được làm
-- Bảng phủ: đang viết lại (`TK10`).
+- Dựng bảng phủ trước khi chạy bất kỳ test nào: mỗi kịch bản `FR` và mỗi `SC` thành một dòng, nêu `VR` sẽ kiểm
+  nó và tầng test của `VR` đó. Mỗi `VR` lấy tầng rẻ nhất vẫn đủ chứng minh: đơn vị trước, tới tích hợp, cuối
+  cùng mới đầu-cuối; thêm test hợp đồng, a11y hay hiệu năng chỉ khi `FR`/`SC` đòi. `FR` không có `VR` nào thì
+  `check` báo `report-fr-without-vr`; máy dừng ở cấp `FR`, còn phủ từng kịch bản con do QA tự giữ.
 - Chạy cả bộ test, không chỉ file đổi; chạy lại khi mốc code đổi.
 - Chứng minh test hồi quy bằng vòng gỡ sửa → hỏng → đặt lại → đạt.
 - Ghi "Chưa chạy" kèm giới hạn khi thiếu môi trường; đề nghị "Không áp dụng" kèm lý do để reviewer xác nhận.
