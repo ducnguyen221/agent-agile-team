@@ -124,7 +124,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [github-ops](github-ops/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [postgres](postgres/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/7 (+4 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [python](python/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/6 (+0 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-04 |
-| [react](react/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
+| [react](react/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/7 (+4 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [tdd](tdd/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
 | [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/6 (+0 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-04 |
 | [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
