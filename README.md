@@ -1,15 +1,18 @@
 # agent-agile-team
 
-> **Status: private pre-release (`0.3.0-dev`).** Installable on Claude Code, Codex and Antigravity; not
+> **Status: private, version `0.3.0`.** Installable on Claude Code, Codex and Antigravity; not
 > published. Vietnamese version: [README.vi.md](README.vi.md). Skill bodies and method documents are written
 > in Vietnamese; frontmatter is English.
 
-An agile method for AI agent teams. One person gives the request in plain words and answers at exactly
-two gates; a team of agents does the rest and records it.
+An agile method for AI agent teams. One person gives the request in plain words, confirms one consolidated
+intake exchange (goal, size, whether to open a sprint) and answers at exactly two gates; a team of agents does
+the rest and records it.
 
-- **One process, six steps, two human gates:** intake → spec + plan (**Gate 1:** approve or adjust) →
+- **One process, six steps, two human gates:** intake (one consolidated exchange: restated goal, challenging
+  questions, recommended size, sprint or direct action) → spec + plan (**Gate 1:** approve or adjust) →
   execute ↔ verify (loop, three rounds recommended) → report (**Gate 2:** pass / conditional pass / fail) →
-  lessons. Agents stop to ask only in four named cases; asking anywhere else is a process error.
+  lessons. A one-or-two-step job with a clear result, or one the user says needs no sprint, is done directly
+  with no paperwork. Agents stop to ask only in four named cases; asking anywhere else is a process error.
 - **Roles by tier, not by model name:** Analyst, Architect, Implementer, QA, Business Reviewer, Tech
   Reviewer; tiers `T1` thinking · `T2` execution · `T3` chores and test runs. **Whoever does the work never
   grades it.**

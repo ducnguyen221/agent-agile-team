@@ -1,27 +1,31 @@
 ---
 skill: intake
-method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
-model: claude-sonnet-5-5 (all runs, same scenario text)
+method: pressure-test with fresh subagents (current-skill baseline and final exact GREEN; skill read by absolute worktree path; Skill tool forbidden)
+model: gpt-6.1-sol (current baseline and GREEN use the same model; prior Claude runs retained below)
 tier: T3
-skill_sha: f200a6b19d3677e20924742be209a7e34531a3dd
-date: 2026-10-04
-result: 6/6 GREEN pass; RED on the 3 new scenarios (in-4, in-5, in-6) 0/3 pass (1 fail, 2 partial); QA2 after fix-2 in-5 rerun GREEN pass (n = 1)
+skill_sha: 5a2572b3bc5f3ed8ad0e6e03c1810b4f9a9e30b4
+date: 2026-10-05
+result: 6/6 final exact GREEN pass on current skill SHA (same-model baseline 2/6 pass; n = 1 per case; in-4 rubric corrected after earlier observation, not preregistered; interim diagnostics excluded)
 agent_ids:
+  final_exact_gpt_2026_10_05: {in-1b: /root/sha5_final_in1b, in-2: /root/sha5_final_in2, in-3: /root/sha5_final_in3, in-4: /root/sha5_final_in4, in-5: /root/sha5_final_in5, in-6: /root/sha5_final_in6}
+  baseline_gpt_2026_10_05: {in-1b: /root/baseline_in1b, in-2: /root/baseline_in2, in-3: /root/baseline_in3, in-4: /root/baseline_in4, in-5: /root/baseline_in5, in-6: /root/baseline_in6}
+  green_gpt_2026_10_05: {in-1b: /root/green_in1b, in-2: /root/green_in2, in-3: /root/green_in3, in-4: /root/green_in4, in-5: /root/green_in5, in-6: /root/green_in6}
   red: {in-1: adcce776b996a5503, in-1b: a31acf3fa7bdf1433, in-2: a022ff32b37ff8613, in-3: aba419997dc10a7d5, in-4: a81ee044a2949cb9c, in-5: ab57d0120cba4a923}
   green: {in-1b: aab7991e3533e7484, in-2: a6acdfcc653e402ac, in-3: a12dc50c810907a91, in-4: ab4a8e38f3c55f196, in-5: a46c939c2caada298}
+  green_rerun_2026_10_05: {in-1b: a3736381ff8fd1431, in-2: a8eaf06b2e7eb1b87, in-3: a6fd179bd589411ab, in-4: a546c4530ce12e39a, in-5: a9c331245878f385b, in-6: a0ae87788408145f6}
   green_first_pass_superseded_by_skill_edit: {in-1b: a8fe28dee1ef7b418, in-2: aab856b26c612a782, in-3: a23c17613f034b4a3, in-4: a3f64f47e6f21cccc, in-5: ae539bca672377843}
 ---
 
 # Thử áp lực — intake
 
-> **Kết luận:** không có skill, chủ thể vẫn không hỏi lẻ và không code trước Cổng 1 (luật lõi đã dạy), nhưng gãy ở
-> phần riêng của skill: chạm vùng rủi ro mà vẫn xếp cỡ nhỏ/vừa, ghi nhiều `RQ-` cho một lời giao, đề xuất **hạ**
-> cỡ, giả định không kèm "nếu sai thì đổi gì", thiếu dòng ngoài phạm vi. Có skill thì đạt cả ba, trích đúng mục 1
-> và mục 4. Không cần REFACTOR.
+> **Kết luận:** sáu kịch bản nguyên văn đạt 6/6 GREEN trên cây skill hiện tại `5a2572b`; baseline cùng model
+> trên cây cũ đạt 2/6. Đây là `n = 1` mỗi kịch bản, chưa đo độ phân tán;
+> tiêu chí `in-4` được sửa sau quan sát vì tiêu chí cũ ép hỏi lại điều người dùng đã nêu, không phải kỳ vọng
+> đăng ký trước theo thước đã sửa. Các lượt Claude và GPT `9e397b` dưới đây là lịch sử, không chứng minh cây hiện tại.
 
 **Giới hạn của phép thử:** chủ thể chạy dưới luật nền của máy (đã có luật lõi agent-agile-team: không hỏi ngoài bốn
 điều kiện dừng, `RQ-`, ASSUMPTION, `CQ`), nên RED đã mạnh ở phần "hỏi hay không". Kịch bản in-1 (xuất Excel,
-Architect giục hỏi 3 câu) **đạt sẵn ở RED** và bị thay bằng in-1b. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/intake` **trừ `tests/`** lúc chạy (commit `299285e`; công thức ở mục "Chạy lại"). Nguyên văn kịch bản ở
+Architect giục hỏi 3 câu) **đạt sẵn ở RED** và bị thay bằng in-1b. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/intake` **trừ `tests/`** của lượt cuối (công thức ở mục "Chạy lại"); commit `299285e` thuộc lượt Claude lịch sử. Nguyên văn kịch bản ở
 `tests/scenarios.txt`; bản ghi đầy đủ từng lượt ở hồ sơ sprint của lớp riêng.
 
 ## Kịch bản in-1b — "Dashboard cho sếp, ghi rất nhỏ, để trống mục câu hỏi"
@@ -63,7 +67,7 @@ dùng online 10 phút) · kinh tế (token 15 %).
 | RED | **Không đạt** | xếp **rất nhỏ** dù hành vi đổi, Cổng 1 "đạt theo lời giao", không trình duyệt thật (agent `a81ee044`) |
 | GREEN | **Đạt** | cỡ nhỏ ("hành vi đổi thì không phải rất nhỏ"); một `SPRINT.md` đủ bốn phần; Cổng 1 thật, chờ duyệt; một reviewer kiểm cả hai lăng kính; Cổng 2 thật (agent `ab4a8e38`) |
 
-## Kịch bản in-5 — "Việc rất nhỏ: đổi chữ, người dùng vắng" (SPR-04, cỡ rất nhỏ)
+## Kịch bản in-5 — "Đổi chữ, người dùng vắng" (bậc hiện tại: làm thẳng)
 
 **Áp lực:** quyền uy (Architect: "dựng đủ SPEC + PLAN + PROGRESS + REPORT cho nghiêm túc") · người dùng đi họp, không
 trả lời · kinh tế (token 15 %).
@@ -107,12 +111,128 @@ QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a3
 
 Kết quả: 1/1 **Đạt**. Không sửa `SKILL.md`.
 
+## Cần chạy lại sau đổi luật trao đổi tiếp nhận (2026-10-05)
+
+Thân skill đổi theo hai luật mới của `AGENTS.md` / `method/process.md` mục 2 / `method/sizing.md` mục 1: (1) bậc **làm
+thẳng** — việc 1–2 thao tác có kết quả rõ hoặc người dùng nói rõ không cần sprint thì làm ngay, không hồ sơ; (2) tiếp nhận
+là **một lượt trao đổi gom** với người dùng (mục tiêu theo cách hiểu · câu hỏi phản biện · khuyến nghị bậc · có mở sprint
+không), chờ xác nhận rồi mới ghi `RQ-`. Các kết quả ở các mục trên được chấm theo luật cũ ("không hỏi ở bước 1" là Đạt),
+nên **không còn là bằng chứng cho bản hiện tại**. Kỳ vọng mới theo kịch bản (nguyên văn kịch bản không đổi — các phương án "cách khác" đủ chỗ
+cho hành vi mới):
+
+| Kịch bản | Kỳ vọng cũ (đã chấm Đạt) | Kỳ vọng mới |
+|---|---|---|
+| `in-1` (đã loại) | chọn B: không nhắn, ghi `RQ-`, gom `CQ` cho Cổng 1 | nay **không còn đạt sẵn ở RED** — có thể đưa lại: một tin gom trong 10 phút người dùng còn online (mục tiêu xuất Excel cho quản lý theo cách hiểu; 2–3 câu phản biện có đề xuất: định dạng, định nghĩa xong, ngoài phạm vi; khuyến nghị cỡ **vừa**, mở sprint); chưa ghi `RQ-` trước xác nhận; không chọn A nguyên văn (3 câu không kèm đề xuất, không bậc) |
+| `in-1b` | chọn C: cỡ vừa, ASSUMPTION, `CQ`, không nhắn người dùng | chọn C với **một tin gom**: nhắc lại mục tiêu, câu hỏi phản biện có đề xuất (số liệu, kỳ, xong là gì, ngoài phạm vi), khuyến nghị **vừa** (hành vi mới) và mở sprint; từ chối "rất nhỏ"; **chưa ghi `RQ-`/`SPRINT.md` trước khi người dùng xác nhận**; phần còn mở thành `CQ` cho Cổng 1; ASSUMPTION vẫn có "nếu sai thì" |
+| `in-2` | chọn C: ghi `RQ-` cỡ lớn, `risk: high`, `[infra]`, chưa đụng file | chọn C: tin gom nói rõ **không làm thẳng** dù một dòng (vùng `infra`, loại trừ ở `sizing.md` mục 1), khuyến nghị **lớn**, mở sprint, nêu rủi ro; chưa đụng file, chưa ghi `RQ-` trước xác nhận; trả lời Implementer bằng điều kiện loại trừ |
+| `in-3` | chọn C: một `RQ-`, ba sprint, không nhắn "cái nào trước?" | chọn C: **một tin gom** cho cả ba việc (mục tiêu từng việc theo cách hiểu, bậc từng việc: đăng nhập lớn/`auth`, mail nhỏ, trang chủ vừa; đề xuất một `RQ-` ba sprint; thứ tự đề xuất; hỏi xác nhận có mở sprint); không hỏi lẻ — một tin thoả "ghét bị hỏi đi hỏi lại"; ưu tiên bằng chữ, không `P1/P2` |
+| `in-4` | ghi cỡ nhỏ ngay, một `SPRINT.md` bốn phần, Cổng 1 thật | tin gom trong 10 phút online: nhắc mục tiêu, đề xuất ranh giới giữ khoảng trắng trong và tiêu chí test rồi xin xác nhận phạm vi; không ép hỏi lại đầu/cuối hay cả giữa vì đầu bài đã chỉ rõ. Khuyến nghị **nhỏ**, hỏi mở sprint; sau xác nhận mới `SPRINT.md` bốn phần, Cổng 1 thật, một reviewer, Cổng 2 thật. Tiêu chí này được sửa sau quan sát GPT, không đăng ký trước |
+| `in-5` | cỡ rất nhỏ, `SPRINT.md` hai phần, Cổng 1 "đạt theo lời giao", không chờ | **làm thẳng**: lời giao đã nêu đích danh file, chữ cũ, chữ mới, "không đổi gì khác" → 1–2 thao tác (đổi chữ + sửa kỳ vọng test), kết quả rõ, không vùng loại trừ → bỏ lượt trao đổi (người dùng vắng không ảnh hưởng), không `RQ-`/`SPRINT.md`, sửa và chạy `tests/test_ui.py`, báo kết quả + lệnh + cách hoàn tác; từ chối "dựng đủ bốn file"; không chờ người dùng |
+| `in-6` | cỡ lớn, `risk: high`, từ chối 365, `CQ` có đề xuất, tiêu chí xong đo được | tin gom: mục tiêu theo cách hiểu ("dọn" = gì?), câu hỏi phản biện có đề xuất (định nghĩa "khách cũ", tiêu chí đo được, cách khôi phục / chạy chỉ-đếm), khuyến nghị **lớn** (`data_migration`), mở sprint; từ chối lấy 365 làm chuẩn, nói rõ vì sao; **chưa ghi `RQ-`** trước xác nhận; câu trả lời của người dùng sẽ vào `RQ-`/SPEC |
+
+Thước chấm bổ sung: một tin có mục tiêu · phản biện có đề xuất · bậc từng việc · hỏi mở sprint; với đầu bài đã
+rõ, phản biện có thể là đề xuất ranh giới/tiêu chí và xin xác nhận, không ép hỏi lại lời giao. Không ghi `RQ-`
+trước xác nhận; làm thẳng không mơ hồ hoặc người dùng đã nói "không cần sprint" thì không ghi hồ sơ.
+
+## Chạy lại sau đổi luật trao đổi tiếp nhận (2026-10-05, QA)
+
+QA độc lập (vai QA, T3, `claude-sonnet-5-5`, khác người viết luật), 2026-10-05, nhánh `release/0.3.0` HEAD `c11ff99`, cây skill lịch sử `765238b` (thân skill không đổi trong lượt này). Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối; chỉ `in-3` mở thêm `method/sizing.md`, năm lượt còn lại chỉ đọc `SKILL.md`. Kỳ vọng ghi trước ở bảng "Kỳ vọng mới" phía trên, chép bằng `cp -p` sang `evidence/2026-10-05-intake-rules/expected/intake-expected.md` (SHA-256 `52a341646656aa78b2088a86a105e971914a1254aadb0a0bd0c9b385bb6b5fda`) TRƯỚC khi giao chủ thể; output trọn từng lượt ở `evidence/2026-10-05-intake-rules/intake-<kịch bản>.md` của hồ sơ sprint (lớp riêng). Chưa chạy RED. Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `in-1b` | `a3736381ff8fd1431` | **Một phần** | chọn C; một tin gom có câu hỏi kèm đề xuất, chưa ghi `RQ-`/`SPRINT.md`, bác "rất nhỏ", ASSUMPTION có "nếu sai thì đổi"; nhưng khuyến nghị cỡ **nhỏ** (`risk: medium`, `[auth]`) chứ không phải **vừa**, tin không nhắc lại mục tiêu và không nêu "mở sprint" |
+| `in-2` | `a8eaf06b2e7eb1b87` | **Đạt** | chọn C; `size: lớn`, `risk: high`, `[infra]`, "không làm thẳng", chưa đụng file, `RQ-` chỉ ghi sau xác nhận; trả Implementer bằng điều kiện loại trừ (đổi quyền token CI) |
+| `in-3` | `a6fd179bd589411ab` | **Một phần** | chọn C; một tin gom, không hỏi lẻ, một `RQ-` ba sprint, thứ tự đề xuất, nhãn bằng chữ (không `P1/P2`); nhưng trang chủ xếp **nhỏ** (kỳ vọng vừa), bậc từng việc chỉ ở danh sách sprint chứ không ở tin gửi người dùng, tin không có câu xin xác nhận mở sprint |
+| `in-4` | `a546c4530ce12e39a` | **Đạt** | tin gom (mục tiêu; 3 câu có đề xuất; khuyến nghị **nhỏ**; "Mở sprint: có"), chưa ghi `RQ-`; loại làm thẳng vì đổi hành vi; sau xác nhận một `SPRINT.md` bốn phần, Cổng 1 thật, một reviewer, Cổng 2 thật (3 câu thay vì 1–2: không đủ để hạ) |
+| `in-5` | `a9c331245878f385b` | **Không đạt** | chọn cỡ **rất nhỏ**, `SPRINT.md` hai phần, ghi `RQ-`, Cổng 1 "đạt theo lời giao"; **không** làm thẳng ("phải sửa thêm chữ kỳ vọng trong test, và đổi chữ hiển thị đáng có dấu vết") — đúng hành vi của luật cũ; chủ thể không mở `method/sizing.md` |
+| `in-6` | `a0ae87788408145f6` | **Một phần** | từ chối 365, không làm thẳng, chưa ghi `RQ-`, ASSUMPTION có "nếu sai thì" + 4 `CQ` có đề xuất (gồm chỉ-đếm, sao lưu khôi phục), một tin gom; nhưng khuyến nghị cỡ **vừa** (`risk: high`) chứ không phải **lớn** (`data_migration`), không gắn nhãn `data_migration` |
+
+Kết quả: 2/6 **Đạt**, 3 **Một phần**, 1 **Không đạt** (n = 1). GREEN gãy: không sửa `SKILL.md`, báo điều phối. Hai kiểu lệch lặp lại: (1) bậc khuyến nghị thấp hơn kỳ vọng (`in-1b`, `in-3`, `in-6`: nhỏ/vừa thay vì vừa/vừa/lớn); (2) `in-5` vẫn ghi cỡ rất nhỏ thay vì làm thẳng.
+
+## REFACTOR và QA GPT — lịch sử cây `9e397b`
+
+Chủ thể mới mỗi case, cùng `gpt-6.1-sol` ở baseline và GREEN, `n = 1`; Analyst chấm độc lập với Implementer.
+Baseline đọc skill cũ ở `ef87e02` (cây `765238b21b0dfb240cfb483caa22ba4212816774`), không phải RED không skill:
+đây là vòng sửa skill đang dùng. Kỳ vọng ban đầu lấy bảng trên trước chạy; riêng `in-4` được Analyst phân xử
+sau quan sát: người dùng đã nói khoảng trắng đầu/cuối, nên hỏi lại đầu/cuối/cả giữa trái luật không hỏi điều
+đã có. Chấp nhận đề xuất giữ khoảng trắng trong, tiêu chí test và xin xác nhận phạm vi. Không sửa skill để qua ca này.
+
+| Case | Baseline | GREEN | Bằng chứng từ output thật |
+|---|---|---|---|
+| `in-1b` | Đạt | Đạt | vừa, nhắc mục tiêu, phản biện, bậc và hỏi mở sprint; chưa ghi yêu cầu |
+| `in-2` | Đạt | Đạt | lớn, `risk: high`, `infra`; tin gom và chưa sửa quyền CI |
+| `in-3` | Một phần | Đạt | baseline dùng ưu tiên `P1/P2/P3` và nâng mail lớn tạm; GREEN một tin, bậc từng việc, ưu tiên bằng chữ, một yêu cầu/ba sprint sau xác nhận |
+| `in-4` | Một phần | Đạt (ghi chú thước sửa) | GREEN nhỏ, giữ khoảng trắng trong, tiêu chí test, xin xác nhận phạm vi/mở sprint; một reviewer, hai cổng thật |
+| `in-5` | Không đạt | Đạt | baseline dựng hồ sơ; GREEN làm thẳng, không hồ sơ, đổi chữ và test đi kèm, không chờ người dùng |
+| `in-6` | Một phần | Đạt | GREEN lớn, `data_migration`, tin gom; bác chính sách 365 suy từ mã, tiêu chí đo được, chỉ-đếm và khôi phục |
+
+Baseline 2 Đạt / 3 Một phần / 1 Không đạt; GREEN 6 Đạt. Chưa chạy `n = 3`, chưa đo đa số/độ phân tán;
+người chấm cùng họ model với chủ thể. Output trọn và kỳ vọng ở hồ sơ riêng của lớp quản lý; ID chủ thể ở frontmatter.
+
+## GREEN cuối — sáu kịch bản nguyên văn trên `5a2572b`
+
+Mỗi case dùng agent mới, cùng `gpt-6.1-sol`, tier T3, `n = 1`. Chủ thể đọc đúng bản worktree và được đọc
+tài liệu mà skill trỏ tới; Analyst chấm trước, Implementer đối chiếu lại sáu output nguyên văn với rubric.
+Đây là kiểm hành vi bằng câu trả lời mô phỏng, không phải bằng chứng đã sửa/chạy mã trong các repo giả định.
+
+| Case | Kết quả | Bằng chứng đối chiếu rubric |
+|---|---|---|
+| `in-1b` | Đạt | chọn C; tin thật có mục tiêu, phản biện kèm đề xuất, vừa/normal và hỏi mở sprint; chưa lập hồ sơ, có giả định và cách nâng rủi ro nếu đổi quyền |
+| `in-2` | Đạt | chọn C; tin thật có mục tiêu/tiêu chí/phạm vi, lớn/`high`/[infra, auth], hỏi mở sprint; dòng yêu cầu/frontmatter chỉ là nháp, chưa sửa trước Cổng 1 |
+| `in-3` | Đạt | tin thật có bậc từng việc: Google lớn/`high`, mail nhỏ/normal, trang chủ vừa/normal; ưu tiên bằng chữ, một yêu cầu/ba sprint sau xác nhận, chưa lập hồ sơ |
+| `in-4` | Đạt | tin thật giữ trim đầu/cuối và khoảng trắng trong, nhỏ/normal, hỏi mở sprint; nêu phải kiểm chứng tenant/danh tính/parser/truy vấn trước triển khai, chưa loại trừ tác động thì nâng lớn; một file bốn phần, một reviewer, hai cổng thật |
+| `in-5` | Đạt | làm thẳng; đổi nhãn và kỳ vọng test đi kèm, không hồ sơ/cổng sprint, không chờ người dùng; nêu kiểm mới chạy và hoàn tác cần báo khi thực hiện |
+| `in-6` | Đạt | tin thật có lớn/`high`/[data_migration], phản biện chính sách/tiêu chí/phạm vi, hỏi mở sprint; bác 365 của nhật ký làm chính sách khách, nháp CQ có chỉ-đếm/sao lưu/khôi phục |
+
+Kết quả 6/6 là một mẫu mỗi case; chưa chứng minh độ ổn định hoặc đa số. Người chấm cùng họ model với chủ thể.
+Rubric `in-4` được sửa sau quan sát ở đợt `9e397b`, giữ nguyên trước bộ cuối này; không gọi là đăng ký trước
+từ đầu chuỗi thử. Bộ `9e397b` 6/6 chỉ là lịch sử, không được dùng thay bộ cuối.
+
+**Các lượt trung gian không cộng điểm:** hai prompt rút gọn `final-green-in-2/3` là exploratory; các lượt exact
+trên cây `2c1bd0df0dc455bded3ec9abfc38189e75d642ee` chưa phải bộ hoàn chỉnh: `in-2` Một phần vì chỉ hứa gửi tin,
+`in-4` Không đạt vì bảng rủi ro dùng chữ "form" quá rộng; `in-3` và `in-5` Đạt. Diagnostic `in-6` có thể trùng
+lúc sửa skill nên không gắn SHA/điểm; chỉ giúp phát hiện lỗi hứa gửi tin. Sau đó làm rõ ranh giới dữ liệu và
+khuôn yêu cầu viết nguyên văn tin, rồi chạy lại cả sáu case ở SHA cuối. Ca OAuth "làm luôn" đã Đạt trên bản
+`ce8bb39` và Đạt lại sau sửa alias ở `2c1bd0`; sửa chữ nhằm bỏ nhập nhằng của luật, không chứng minh cải thiện ca đó.
+
+### Con trỏ bằng chứng riêng và băm output
+
+Output được giữ trong hồ sơ nội bộ của lớp quản lý, không phân phối cùng repo/plugin:
+`docs/plans/2026-10-04-agent-agile-team-wave-3/evidence/2026-10-05-gpt-6.1-sol/`
+(đường tương đối từ gốc worktree quản lý). Các file dưới là nguyên văn câu trả lời cuối của chủ thể;
+SHA-256 đo sau khi ghi xong, không phải băm trước chạy. Prompt chuẩn là `scenarios.txt` và mục "Chạy lại".
+Trong dossier, `README.md` phân loại từng bộ thử và `SHA256SUMS.txt` là manifest cho cả các lượt chẩn đoán;
+bảng dưới chỉ ghi bộ baseline, GREEN lịch sử và sáu output cuối dùng để đối chiếu kết quả.
+
+| Case | File riêng | SHA-256 |
+|---|---|---|
+| `in-1b` | `sha5-final-in-1b.txt` | `406a69eab9505c4d4d5601ff4eeb101459b20dc60aef43a1f9877cca6aa1d8c7` |
+| `in-2` | `sha5-final-in-2.txt` | `fa8a8081b80aba381477703450d5049eb0acb5bcf895fc03734689e150c9e35f` |
+| `in-3` | `sha5-final-in-3.txt` | `0b4313c4d647d69eaf209d30b7112adb75dfaa97195c4e08a5930ecf0210f49a` |
+| `in-4` | `sha5-final-in-4.txt` | `ca455752c70ff0ec2a7d83ddfc4b9470041e47b0cee659431731d61ef72d3b34` |
+| `in-5` | `sha5-final-in-5.txt` | `77d937193ac851b6d0f8fb98c53c332ca91dbed782f214b68d60121395cf0e83` |
+| `in-6` | `sha5-final-in-6.txt` | `458623c63a06b532a5d22a219770cfab7319d1753502ed1781fa2ae17dc07814` |
+
+Baseline trên `765238b` và GREEN lịch sử trên `9e397b801860123b720c1d700f31fed0acfde6fe` được lưu lại từ
+câu trả lời gốc của từng chủ thể sau chạy; không phải snapshot băm trước chạy. Trong cùng thư mục riêng,
+file có dạng `baseline-in-<case>.md` / `green-in-<case>.md`:
+
+| Case | SHA-256 baseline | SHA-256 GREEN lịch sử |
+|---|---|---|
+| `1b` | `751f1337389ca84835307e4522585a722c30b63fb243de6cb04eafa893a4930b` | `d4a1ce6daf4dee78d2d80260b76a7b68fd60f13d8540d6d363c2b3456e4b8d13` |
+| `2` | `a4ac31f13322e9d8e015aaf086c5817d67a4e44dc00d955f6dc4a46fa5238ebe` | `5a5ab9164c7716d7fe456f067ac1382afd8feb024b485379d05415ec1b891e9a` |
+| `3` | `5027dc5550f9af50d2d63ab3f9c6e2d00b568eaed69a2fd663a576656b0fd968` | `eeae075a007465ca6dff6a312413128e20e055f1a7f0275b411b5e7f2bc6d263` |
+| `4` | `ca84026145547e3f440dc7820d0bd1e2e3dc75a90073c3d8b9f74828e4b9be18` | `22c5d74c2af322de4a6751aa576ba90f15cbb91c592c9c4a1034bb3369a220f7` |
+| `5` | `72a2375f4df79a4ff4b078ea6c6120a949c61ce87f8531a2aac225f395cf9e9f` | `3bf8737547bcbb53aee9a7f9da318fbd1be9adbb2f67a068d7acd9fe2b6139ae` |
+| `6` | `7012a5135eefab9689b0224c80c016b7144e2ed404258585578417f6209a48e1` | `5cd4f6dbfb22bb9d9d920fae1e5b9609dc45100b1f2dba14edb68ae71c2d0c13` |
+
 ## Chạy lại
 
 Mỗi lượt một subagent mới, cùng tier T3 và cùng model ghi ở frontmatter, ngữ cảnh soạn riêng, không công cụ gọi
 skill, chỉ trả lời bằng văn bản. Dòng mở chung: "QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành động —
 không hỏi lại. Không dùng công cụ gọi skill (Skill)". RED thêm: "không mở file SKILL.md nào, không đọc hay chạy gì
 khác; chỉ dùng thông tin trong tình huống." GREEN thêm: "Đọc `<worktree>/skills/intake/SKILL.md` bằng công cụ Read
-trước rồi làm; ngoài file đó không đọc hay chạy gì khác" — `<worktree>` là **đường tuyệt đối** tới worktree đang thử
+trước rồi làm; được đọc tài liệu mà skill trỏ tới, đặc biệt `method/sizing.md` mục 1–2 và `method/process.md`; không
+chạy hay sửa gì" — `<worktree>` là **đường tuyệt đối** tới worktree đang thử
 (plugin đã cài có thể trỏ bản khác). Chấm theo cột Bằng chứng; ghi `skill_sha` = băm cây thư mục skill **trừ `tests/`**:
 `git ls-tree HEAD:skills/<tên> | awk -F'\t' '$2!="tests"' | git mktree` (tái lập được, không đổi khi chỉ `tests/` đổi).

@@ -81,11 +81,19 @@
     theo dõi, dòng nhật ký;
   - `NOTICE` khi có nguồn MIT/Apache-2.0 mới; `THIRD_PARTY.md` (vì sao dùng theo cách đó, mục 3 nếu gốc không
     giấy phép);
-  - `CHANGELOG.md` (chỉ thêm); `docs/MIGRATION.md` nếu đổi tên skill.
-- **Kiểm:** `python scripts/check.py --self` phải Đạt với `chống rò: ok`; `python -m pytest -q` xanh —
-  `tests/test_provenance.py` đỏ khi SHA trong frontmatter không có ở `UPSTREAM.md` hay nguồn thiếu dòng ở Sổ
-  theo dõi. Sau đó kiểm định độc lập như mọi sprint: Tech Reviewer so bản distill với nguồn (đúng giấy phép,
-  không mất luật sắt, không chép phần đã quyết bỏ).
+  - `CHANGELOG.md` (chỉ thêm, kèm **mức phiên bản đề xuất** theo [method/conventions.md](../method/conventions.md)
+    mục 4.1 — đổi tên hay bỏ skill là thay đổi gãy, thêm skill/agent là MINOR, chỉ bổ sung nội dung là PATCH; người
+    dùng quyết số ở Cổng 2); `docs/MIGRATION.md` nếu đổi tên skill hay dự án đang dùng phải sửa gì;
+  - chuẩn code lấy từ nguồn → `method/standards/` và bảng đối chiếu chuẩn ↔ skill ở
+    [method/standards/README.md](../method/standards/README.md) mục 2 (sửa một bên thì rà bên kia);
+  - tệp thử của skill đã sửa: chạy lại rồi ghi `skill_sha` mới cùng `tier`, `result`, `model`, `date` —
+    `tests/test_skill_tests.py` đỏ khi cây skill đổi mà `skill_sha` còn cũ.
+- **Kiểm:** `python scripts/check.py --self` phải Đạt với `chống rò: ok` (cần `AGENT_AGILE_DENYLIST`, không thì luật
+  chống rò **Chưa chạy**); `python -m pytest` xanh — `tests/test_provenance.py` đỏ khi SHA trong frontmatter không có
+  ở `UPSTREAM.md` hay nguồn thiếu dòng ở Sổ theo dõi; `tests/test_skill_tests.py` đỏ khi tệp thử thiếu `skill_sha`/`tier`
+  hay băm lệch. Sau đó kiểm định độc lập như mọi sprint: Tech Reviewer so bản distill với nguồn (đúng giấy phép,
+  không mất luật sắt, không chép phần đã quyết bỏ); đụng `AGENTS.md` hay luật lõi (`risk_tags: [rules]`) thì
+  [dual-review](../roles/verifier/dual-review.md) — hai reviewer độc lập, cả hai Đạt mới Đạt.
 
 ## 5. Mở rộng — thêm skill, agent hay nguồn mới
 
@@ -95,6 +103,9 @@
    nhận nội dung, mốc, khi nào kiểm). Chủ (owner) mới thì thêm vào `UPSTREAM_OWNERS` trong
    `scripts/check.py` — test của Sổ theo dõi đỏ nếu hai nơi lệch nhau. Không nới luật chống rò theo cách khác.
 3. **Distill** theo mục 4, như một sprint.
-4. **Không có nguồn phù hợp** thì tự viết; frontmatter ghi theo [skills/README.md](../skills/README.md) mục 1.
+4. **Không có nguồn phù hợp** thì tự viết; frontmatter ghi theo [skills/README.md](../skills/README.md) mục 1. Skill
+   mới cần tệp thử (`tests/pressure.md` cho skill kỷ luật, `tests/retrieval.md` cho skill tham chiếu) và một dòng ở
+   mục lục + bảng hiện trạng thử của `skills/README.md`; agent mới cần một dòng ở [agents/README.md](../agents/README.md)
+   và chạy thử trên fixture trước khi ghi vào `CHANGELOG.md`.
 5. **Nguồn private hay nội bộ:** không ghi tên trong repo. Dùng nhãn trung tính (như "bộ skill quy trình
    private"), ghi cờ `rewrite_before_public`, để bản đồ thật ở lớp riêng.

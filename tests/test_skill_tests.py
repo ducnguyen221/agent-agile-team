@@ -22,9 +22,13 @@ NOT_RUN = re.compile(r"(?:not run|pending|chưa chạy|dự kiến)|(?:tbd|todo|
 # Danh sách trắng (TK12.1, RF167): đoạn đầu của `result` phải bắt đầu bằng một trạng thái hợp lệ: số dạng `k/n`, `strict`,
 # `pass`/`passed`, `fail`/`failed`, `partial`, `Đạt`, `Không đạt`, `Một phần` (tập chốt từ giá trị thật của mọi
 # `tests/pressure.md`, `tests/retrieval.md`: `3/3 GREEN pass…`, `strict k/n…`); `model` phải bắt đầu bằng tên model
-# (`claude-<tên>` hoặc bí danh `sonnet`, `opus`, `haiku`, `fable`).
+# (`claude-<tên>`, GPT có major 1–99 + minor 0–99 tuỳ chọn và đúng một family (hoặc gpt-5.5), bí danh Claude).
+# Đây là hợp đồng hình tên của metadata, không phải kiểm registry/runtime; không khoá vào danh sách version hiện tại.
 RESULT_STATE = re.compile(r"(?:\d+/\d+|strict|pass(?:ed)?|fail(?:ed)?|partial|đạt|không đạt|một phần)(?!\w)", re.I)
-MODEL_NAME = re.compile(r"(?:claude-[a-z0-9][a-z0-9.-]*|sonnet|opus|haiku|fable)(?![\w.-])", re.I)
+MODEL_NAME = re.compile(
+    r"(?:claude-[a-z0-9][a-z0-9.-]*|gpt-(?:[1-9][0-9]?(?:\.(?:[0-9]|[1-9][0-9]))?-(?:sol|astra|terra|luna)|5\.5)|sonnet|opus|haiku|fable)(?=\s|$)",
+    re.I,
+)
 MARKUP = re.compile(r"^[\s*`≥>=]+")  # dấu định dạng ở đầu giá trị ("**3/3** GREEN pass", "≥3/3 pass") không phải trạng thái
 STATE_ERROR = "không thuộc tập hợp lệ"
 SKILLS = sorted(p.parent.name for p in REPO.glob("skills/*/SKILL.md"))
@@ -243,13 +247,19 @@ def test_empty_or_null_value_is_no_state(key, value):
 INVALID_RESULTS = ["x", "a", "WIP", "wip", "?", "", "  ", "TBA", "TBC", "skipped", "skip", "chưa", "sẽ chạy", "đang chạy",
                    "unknown", "n.a.", "NA", "nil", "placeholder", "N / A", "t.b.d.", "ok", "done", "passes", "3 of 3",
                    "xpass", "failure", "green", "RED 0/3", "(x)", "- x", "x 3/3 pass"]
-INVALID_MODELS = ["x", "WIP", "?", "", "unknown", "TBA", "gpt", "model", "3/3", "pass", "claude", "sonnetx"]
+INVALID_MODELS = ["x", "WIP", "?", "", "unknown", "TBA", "gpt", "model", "3/3", "pass", "claude", "sonnetx",
+                  "gpt-", "gpt-placeholder", "gpt-TBD", "gpt-unknown", "gpt-6.1-solx?",
+                  "gpt-6.1-placeholder", "gpt-6.1-tbd", "gpt-6.1-unknown", "gpt-6.1-solx", "gpt-999",
+                  "gpt-999-sol", "gpt-0-sol", "gpt-6.1.2-sol", "gpt-6.1-sol-astra", "gpt-6.1-solterra"]
 VALID_RESULTS = ["3/3 GREEN pass", "12/12 pass", "strict 6/6 (+0 partial, 0 fail) — at threshold", "pass 5/6", "pass", "fail 1/3",
                  "partial", "Đạt", "Không đạt 2/6", "Một phần", "0/3 RED", "**3/3** GREEN pass", "`3/3` GREEN pass", "≥3/3 pass",
                  "3/3 GREEN pass, none partial", "3/3 pass, 0 false positives", "6/6 pass, TODO list empty",
                  "3/3 GREEN pass after RF-null fix", "PASS 3/3", "Failed 1/3", "3/3 pass after pending review", "3/3 pass, 0 flaky, none"]
 VALID_MODELS = ["claude-sonnet-5-5", "claude-sonnet-5-5 (all runs, same scenario text)", "sonnet", "opus", "haiku", "fable",
-                "claude-fable-5-1", "claude-opus-5-5; reviewer", "sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5"]
+                "claude-fable-5-1", "claude-opus-5-5; reviewer", "sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5",
+                "gpt-6.1-sol", "gpt-6-astra (RED and GREEN, same scenario text)", "gpt-5.6-sol; reviewer",
+                "gpt-6-sol", "gpt-6-luna", "gpt-5.6-terra", "gpt-5.6-luna", "gpt-5.5",
+                "gpt-7-sol", "gpt-10.1-astra (synthetic future ID, format only)"]
 
 
 @pytest.mark.parametrize("value", INVALID_RESULTS)

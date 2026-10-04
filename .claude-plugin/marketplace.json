@@ -1,6 +1,6 @@
 {
   "name": "agent-agile-team",
-  "description": "Agile method for AI agent teams: six steps, two human gates, tiered roles, sprint templates, skills and three document tools. Private pre-release.",
+  "description": "Agile method for AI agent teams: six steps, two human gates, tiered roles, sprint templates, skills and three document tools. Private distribution.",
   "owner": {
     "name": "Nguyễn Quang Đức",
     "email": "ducnguyen.ams@gmail.com"
@@ -9,7 +9,7 @@
     {
       "name": "agent-agile-team",
       "description": "Six-step agile process for AI agent teams: tiered role cards, no self-grading, sprint and registry templates, 32 skills, 13 agents (read-only, except the file-editing `build-fixer`, T2) and three document tools (init, check, index).",
-      "version": "0.3.0-dev",
+      "version": "0.3.0",
       "source": "./",
       "license": "UNLICENSED",
       "author": {
