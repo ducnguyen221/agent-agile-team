@@ -108,6 +108,9 @@ và pull request. Cấu hình pipeline đầy đủ: skill `deployment`. Chia sh
 Liên quan: `react` (test component, MSW), `web-qa` (QA chỉ báo cáo), `tdd`, `debugging` (tìm nguyên nhân test
 hỏng), `bug-triage` (đường xử lý lỗi), `verify-before-done`, `deployment` (CI/CD).
 
+Chuẩn mã bắt buộc của dự án (mục Kiểm thử): `method/standards/web.md`, `typescript.md`, `common/testing.md` — chuẩn giữ
+luật ngắn, skill giữ mẫu; hai bên trái nhau là lỗi tài liệu (`method/standards/README.md`).
+
 ## 11. Danh mục kiểm
 
 - [ ] mỗi test độc lập: dựng và dọn dữ liệu riêng, chạy được một mình

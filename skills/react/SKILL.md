@@ -112,6 +112,9 @@ Liên quan: `frontend` (build Vite, routing, state ứng dụng, hiệu năng t�
 bằng Playwright), `tdd` (chu trình test trước), `web-qa` (QA kiểm bằng trình duyệt), `typescript-reviewer` và
 `react-reviewer` (agent review, bảng chuyên gia của `code-review`).
 
+Chuẩn mã bắt buộc của dự án (component, hook, test, kiểu): `method/standards/react.md`, `typescript.md`, `web.md` — chuẩn
+giữ luật ngắn, skill giữ mẫu; hai bên trái nhau là lỗi tài liệu (`method/standards/README.md`).
+
 ## 10. Danh mục kiểm khi viết hoặc review component
 
 - [ ] giá trị suy ra được không bị lưu thành state
