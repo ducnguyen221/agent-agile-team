@@ -2,7 +2,7 @@
 
 Mốc SHA và ngày của từng nguồn, cùng bảng nguồn theo từng skill và agent, ở [UPSTREAM.md](UPSTREAM.md);
 thông báo bản quyền phải mang theo ở [NOTICE](NOTICE). File này ghi **vì sao** mỗi nguồn được dùng theo
-cách đó, các nguồn **chỉ lấy ý**, và danh sách file **phải viết lại trước khi công khai**.
+cách đó, các nguồn **chỉ lấy ý**, và lịch sử viết lại phòng sạch (hiện không còn file nào phải viết lại).
 
 ## 1. Nguồn chép được (MIT) — đã dùng ở Đợt 1 và Đợt 2
 
@@ -51,6 +51,10 @@ nằm trong đợt này. Dòng đã rời bảng: `closing-sprint` (`references/
 `bug-triage` (`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`),
 `roles/executor/qa.md` (bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill
 đó ghi nguồn ý dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).
+
+Cách đo 8-gram: loại stoplist cụm chung (mỗi cụm chung ghép thành một token), rồi đếm chuỗi 8 từ liên tiếp (N = 8) của
+bản mới trùng với mỗi trong hai mốc (gốc private và bản trước đó), tính cả `description` ở frontmatter; công cụ đo nằm
+ở hồ sơ của chủ repo, ngoài repo này.
 
 Quy tắc cho file MỚI về sau: file nào lấy từ nguồn private không giấy phép thì thêm một dòng vào bảng trên và đặt
 cờ `true` ở skill; file đó phải viết lại thật sự trước khi công khai: viết lại từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
