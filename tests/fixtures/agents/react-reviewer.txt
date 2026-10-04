@@ -1,0 +1,75 @@
+# Fixture review React (agents/react-reviewer.md)
+# Phạm vi review: toàn bộ diff dưới đây. Không có kho git, không có package.json hay cấu hình lint để chạy công cụ;
+# giả định React 18, App Router không dùng, `comments[].html` đến từ người dùng cuối qua API.
+# Khi báo vị trí: ghi `react-reviewer.txt:<dòng>` với số dòng của CHÍNH file này (như công cụ đọc file hiển thị).
+diff --git a/src/ui/Comments.tsx b/src/ui/Comments.tsx
+new file mode 100644
+--- /dev/null
++++ b/src/ui/Comments.tsx
+@@ -0,0 +1,66 @@
++import { useEffect, useState } from "react";
++
++type Comment = { id: string; author: string; html: string };
++
++export function CommentList({ comments }: { comments: Comment[] }) {
++  return (
++    <ul>
++      {comments.map((c) => (
++        <li key={c.id}>
++          <strong>{c.author}</strong>
++          <div dangerouslySetInnerHTML={{ __html: c.html }} />
++        </li>
++      ))}
++    </ul>
++  );
++}
++
++export function LiveCount({ endpoint }: { endpoint: string }) {
++  const [count, setCount] = useState(0);
++  useEffect(() => {
++    setInterval(async () => {
++      const res = await fetch(endpoint);
++      const body: { count: number } = await res.json();
++      setCount(body.count);
++    }, 5000);
++  }, []);
++  return <span>{count}</span>;
++}
++
++export function ReplyToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
++  return (
++    <div className="reply-toggle" onClick={onToggle}>
++      {open ? "Hide reply" : "Reply"}
++    </div>
++  );
++}
++
++const NAV = ["Home", "Orders", "Settings"] as const;
++
++export function NavBar() {
++  return (
++    <nav>
++      <ul>
++        {NAV.map((label, i) => (
++          <li key={i}>{label}</li>
++        ))}
++      </ul>
++    </nav>
++  );
++}
++
++export function SearchBox({ onSearch }: { onSearch: (query: string) => void }) {
++  const [query, setQuery] = useState("");
++  return (
++    <form
++      onSubmit={(e) => {
++        e.preventDefault();
++        onSearch(query.trim());
++      }}
++    >
++      <label htmlFor="q">Search</label>
++      <input id="q" name="q" value={query} onChange={(e) => setQuery(e.target.value)} />
++      <button type="submit">Go</button>
++    </form>
++  );
++}
