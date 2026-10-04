@@ -76,11 +76,11 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `id-unknown-prefix` | Phải sửa | Mục được định nghĩa bằng tiền tố hai chữ cái ngoài bảng mã (`YC2`); không áp cho `skills/*/tests/` |
 | `id-wrong-doc` | Phải sửa | Mục định nghĩa bằng tiền tố của tài liệu khác (`BR1` trong PLAN) |
 | `id-list-lead` | Ghi chú | Bảng có cột đầu "Mã" mà dòng không trống ngay trên (bỏ qua comment) không có chữ in đậm — thiếu câu dẫn "tài liệu + nghĩa của mã" (`templates/README.md` mục 5); khối "Đang mở" do `index` sinh được miễn |
-| `xref-missing` | Phải sửa | Mã treo: một dòng (ngoài dấu code) nhắc mã mục như `FR`, `TK`, `VR` mà nơi giữ tiền tố đó không định nghĩa mã ấy. Nơi giữ là chính file khi file là `SPRINT.md` hoặc đúng loại tài liệu của tiền tố (mã của SPEC thì spec sống cũng giữ); còn lại là file mà `links` trỏ tới (`links.spec`, `links.plan`…). Một mã được tính là đã định nghĩa khi nó mở đầu ô thứ nhất của dòng bảng có cột đầu tên "Mã", mở đầu một tiêu đề, hoặc mở đầu một gạch đầu dòng in đậm. Không áp cho ba sổ gốc |
+| `xref-missing` | Phải sửa | Đang viết lại (`TK10`) |
 | `xref-unresolved` | Ghi chú | Không tìm được tài liệu sở hữu qua `links` để đối chiếu |
-| `task-without-trace` | Phải sửa | Việc mồ côi, trong PLAN hoặc `SPRINT.md`: `TK` định nghĩa ở tiêu đề hay gạch đầu dòng in đậm mà chính dòng đó không nhắc `FR`/`SC` nào. Việc con (`TK1.1`) không nhắc thì kế thừa việc cha gần nhất có định nghĩa (`TK1`, rồi lên tiếp), chỉ báo khi không còn việc cha; việc cha thiếu truy vết bị báo riêng. `TK` trong dòng bảng không xét |
-| `report-sc-without-vr` | Phải sửa | Tiêu chí chưa kiểm, trong REPORT hoặc `SPRINT.md`: `SC` cấp đầu (không có dấu chấm) định nghĩa ở SPEC — tìm qua `links.spec`, hoặc ngay trong `SPRINT.md` — mà không dòng `VR` nào nhắc. Dòng `VR` = dòng bảng có cột đầu "Mã" mở bằng `VR`; báo ở dòng `VR` đầu tiên (chưa có `VR` thì ở dòng đầu thân file). Không có miễn trừ |
-| `report-fr-without-vr` | Phải sửa | Yêu cầu chưa kiểm, chỉ trong REPORT: `FRn` của SPEC không có dòng `VR` nào nhắc `FRn` hay một kịch bản `FRn.m` (một kịch bản là đủ). Miễn khi dòng định nghĩa `FRn` ở SPEC kết thúc bằng trạng thái `bỏ` ("(bỏ)", "— bỏ"), hoặc có `NOT_APPLICABLE` kèm lý do — ở dòng định nghĩa trong SPEC hay ở bất kỳ dòng nào của REPORT nhắc `FRn` |
+| `task-without-trace` | Phải sửa | Đang viết lại (`TK10`) |
+| `report-sc-without-vr` | Phải sửa | Đang viết lại (`TK10`) |
+| `report-fr-without-vr` | Phải sửa | Đang viết lại (`TK10`) |
 | `self-review` | Chặn | Một nhãn agent vừa giữ vai thực thi vừa giữ vai kiểm định trong `roles` |
 | `qa-not-independent` | Phải sửa | Có `VR` mà `qa` trùng nhãn `implementer`/`architect` không ghi "tự kiểm, chưa độc lập"; hoặc có ghi mà `verdict: pass` |
 | `roles-invalid` | Phải sửa | `roles` sai hình: vai lạ, tier ngoài `T1`–`T3`, thiếu nhãn agent |
