@@ -63,6 +63,8 @@ Bốn cỡ việc quyết độ dày tài liệu và độ sâu kiểm định; 
 
 - Chạm secret, xác thực, đầu vào từ ngoài, API công khai, hạ tầng, migration dữ liệu hay file luật → nhãn
   `risk_tags`, cỡ tối thiểu là **lớn**, dù diff chỉ một dòng.
+- **Phân vân giữa hai cỡ → chọn cỡ nặng hơn**: nghi có đổi hành vi hay hợp đồng thì không phải rất nhỏ
+  ([`method/sizing.md`](../method/sizing.md) mục 1).
 - `init --tiny` và `init --size small` dựng đúng hình hồ sơ; `check` báo khi hồ sơ không khớp cỡ.
 
 ### 2.3 Vai và tier — giao việc theo năng lực, không theo tên model
@@ -99,7 +101,8 @@ Kết luận Đạt chỉ đến từ bằng chứng **mới chạy** do agent *
 - Reviewer nhận ngữ cảnh soạn riêng, không dán lịch sử phiên; được trả 0 phát hiện nhưng phải ghi phần không
   đánh giá.
 - Một thang mức chung cho mọi phát hiện: **Chặn / Phải sửa / Nên sửa / Ghi chú**; một thang kết luận: **Đạt /
-  Đạt có điều kiện / Không đạt**. Thang cũ của mọi nguồn quy về một bảng duy nhất.
+  Đạt có điều kiện / Không đạt**. Thang cũ của mọi nguồn quy về một bảng duy nhất. Reviewer phân vân giữa hai
+  mức → chọn mức **nặng hơn** và nói rõ vì sao ([`method/severity.md`](../method/severity.md)).
 - Việc chạm file luật, secret hay xác thực → `dual-review`: hai reviewer độc lập cùng rubric, cả hai Đạt mới Đạt.
 - Từ cỡ vừa: cổng review bốn pha — review song song theo khía cạnh, gộp theo bằng chứng, kiểm đối kháng từng
   phát hiện Chặn / Phải sửa, và **lỗi thì đóng** (khía cạnh nào không chạy thì không ghi Đạt).
