@@ -33,7 +33,7 @@ Lời giao đã nêu rõ mục đích, ràng buộc và kết quả thì phản 
 
 | Cỡ | Dấu hiệu đo được | Tài liệu | Cổng 1 · kiểm định |
 |---|---|---|---|
-| Rất nhỏ | đổi chữ hoặc một chỗ — kể cả chữ kỳ vọng trong test đi kèm, số file chạm không quyết cỡ; không đổi hành vi, quyền; lời giao đã nêu rõ kết quả | một `SPRINT.md` hai phần **Kế hoạch** (mục tiêu, `SC`, `TK` trỏ `SC`) · **Kết quả** (`VR` mỗi `SC`) | "đạt theo lời giao" + trích lời giao; người dùng vắng thì làm tiếp, không chờ · agent khác chạy nhanh, hoặc tự kiểm "chưa độc lập" (tối đa Đạt có điều kiện); Cổng 2 gộp lời báo cuối |
+| Rất nhỏ | đổi chữ hoặc một chỗ — kể cả chữ kỳ vọng trong test đi kèm, số file chạm không quyết cỡ; không đổi hành vi, quyền; lời giao đã nêu rõ kết quả | một `SPRINT.md` hai phần **Kế hoạch** (mục tiêu, `SC`, `TK` trỏ `SC`) · **Kết quả** (`VR` mỗi `SC`) | "đạt theo lời giao" + trích lời giao; không mở lượt hỏi mới (`method/process.md` mục 9) · agent khác chạy nhanh, hoặc tự kiểm "chưa độc lập" (tối đa Đạt có điều kiện); Cổng 2 gộp lời báo cuối |
 | Nhỏ | sửa cục bộ một luồng có sẵn (hành vi đổi), một `FR`, không đổi hợp đồng / giao diện / schema | một `SPRINT.md` đủ bốn phần SPEC · PLAN · PROGRESS · REPORT | Cổng 1 thật (trình ngắn, chờ duyệt) · **một** reviewer khác người làm kiểm cả nghiệp vụ lẫn kỹ thuật; Cổng 2 thật |
 | Vừa · Lớn | tính năng hoặc luồng mới; đổi hợp đồng, schema; rủi ro cao | bốn file | đủ hai cổng; cả hai reviewer |
 
