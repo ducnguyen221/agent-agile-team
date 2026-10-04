@@ -52,7 +52,8 @@ skill, agent và luật tương thích ngược, dự án cũ không phải sử
   `postgres`, `github-ops`, `database-migrations`, `error-handling`, `fastapi`, `python`, `worktrees`, `deployment`) thử truy
   xuất bằng bộ câu mới do QA độc lập soạn, kỳ vọng ghi trước khi đọc skill, hai lượt: lượt 1 thấy 12/13 skill dưới ngưỡng (chỉ
   `adr` đạt; không câu nào Không đạt — skill thiếu nội dung, agent không bịa), `references/` được bổ sung có nguồn rồi chạy lại
-  bộ câu mới ở lượt 2; định tuyến 21 câu (12 câu ranh giới, đủ 5 cặp dễ nhầm) đối chiếu danh mục 49 mục; `n = 3` cho 5 skill
+  bộ câu mới ở lượt 2, kết quả vẫn 12/13 skill dưới ngưỡng (chỉ `adr` đạt) — để lại sang sprint sau, đổi cách đo trước khi vá
+  tiếp; định tuyến 21 câu (12 câu ranh giới, đủ 5 cặp dễ nhầm) đối chiếu danh mục 49 mục; `n = 3` cho 5 skill
   (`writing-skills`, `closing-sprint`, `bug-triage`, `security-audit`, `web-qa`).
 - **Quy tắc số phiên bản** (`TK15`): `method/conventions.md` mục 4.1 (MAJOR · MINOR · PATCH, bốn điều đi kèm); agent đề xuất
   mức tăng kèm lý do ở Cổng 2, người dùng quyết.
