@@ -86,6 +86,12 @@ Trạng thái: proposed · Sprint: SPR-NN · Liên quan: ADR NNNN, PLAN mục <t
 3. Người dùng duyệt ở Cổng 1 → đổi sang `accepted`. Chưa duyệt thì không code theo ADR đó.
 4. Khi phải đổi hướng: viết một ADR mới, ghi rõ nó thế chỗ ADR nào; ở ADR cũ chỉ sửa dòng trạng thái thành
    `superseded by NNNN`. **Không xoá, không sửa chữ** của bản cũ — lịch sử lý do là giá trị của ADR.
+5. **Quyết định lộ ra giữa sprint** (sau Cổng 1, khi đang thực thi hay kiểm định): viết ngay ADR ở trạng thái
+   `proposed`. Còn nằm trong phạm vi SPEC đã duyệt thì Analyst ghi `Phán quyết:` vào PROGRESS và đi tiếp; làm đổi
+   một `SC` hay chạm điều kiện dừng thì ghi `BR` và hỏi. ADR này **trình kèm Cổng 2**, người dùng duyệt thì mới
+   `accepted`; ADR chưa `accepted` không được ghi vào spec sống như quyết định đã chốt.
+6. **ADR mang nhãn `secret` hoặc `auth`** (ở `risk_tags` của sprint): skill `security-review` đọc ADR đó **trước
+   khi** nó được `accepted`; phát hiện nặng thì ADR ở lại `proposed`.
 
 ## 5. Điểm dừng
 
