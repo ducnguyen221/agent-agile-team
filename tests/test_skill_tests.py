@@ -539,6 +539,37 @@ def test_retrieval_cell_notes_without_partial_are_not_blocked(fine):
     retrieval_result(_table(fine, "Đạt"))
 
 
+# TK12.2 (RF135): tệp truy xuất có dòng "Đã đọc:" liệt kê tệp chủ thể đã mở thật (ít nhất `SKILL.md`), không dòng rỗng hay lược.
+READ_LINE = re.compile(r"(?m)^Đã đọc: (?P<files>.+)$")
+
+
+def read_line_gaps(text: str) -> list:
+    m = READ_LINE.search(text)
+    if m is None:
+        return ["thiếu dòng 'Đã đọc:'"]
+    files = m.group("files")
+    if "SKILL.md" not in files:
+        return ["dòng 'Đã đọc:' không nêu SKILL.md"]
+    if not re.search(r"`[^`]*SKILL\.md`", files):
+        return ["đường SKILL.md ở dòng 'Đã đọc:' không nằm trong dấu code"]
+    return []
+
+
+@pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
+def test_retrieval_file_lists_what_was_read(path):
+    assert read_line_gaps(c.read_text(path)) == []
+
+
+@pytest.mark.parametrize("bad", ["không có dòng nào", "Đã đọc: ", "Đã đọc: skills/x/references/a.md", "Đã đọc: skills/x/SKILL.md",
+                                 "Đọc: `skills/x/SKILL.md`"])
+def test_missing_or_hollow_read_line_is_caught(bad):
+    assert read_line_gaps(bad), f"{bad!r} lọt"
+
+
+def test_filled_read_line_is_accepted():
+    assert read_line_gaps("x\nĐã đọc: `<gốc worktree>/skills/x/SKILL.md` cùng `references/a.md`\ny") == []
+
+
 # TK12.1 (4): luật chấm đáp thay thế viết MỘT chỗ (`writing-skills`), không đoạn riêng trong từng tệp (RF162): mỗi tệp truy xuất
 # có đúng một đoạn "Cách chấm" và đó là đoạn chung.
 @pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
@@ -590,7 +621,7 @@ def test_source_code_debt_is_still_owed(skill):
 
 
 @pytest.mark.parametrize("bad", ["rewrite in SPR-04 TK10: old text", "see CO2 and RQ-021", "`TK10` rewrite", "`CO2`(x)", "`RQ-021` ()",
-                                 "`RF164` (a)", "TK11.2 (name)", "`TK11.2 (name)"])
+                                 "`RF164` (a)", "TK11.2 (name)", "`TK11.2 (name)", "TK10` (name)", "RQ-021` (x y)"])
 def test_source_code_without_code_span_or_name_is_caught(bad):
     assert source_code_gaps([bad]), f"{bad!r} lọt"
 
@@ -647,7 +678,8 @@ def write_skill(repo, kind: str, body: str):
 
 
 def git(repo, *args):
-    ident = ["-c", "user.name=t", "-c", "user.email=t@example.com"]
+    # Cô lập khỏi cấu hình toàn máy (RF134): không ký commit, không chạy hook của máy (`core.hooksPath`).
+    ident = ["-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "commit.gpgsign=false", "-c", "core.hooksPath="]
     res = subprocess.run(["git", *ident, *args], cwd=repo, capture_output=True)
     assert res.returncode == 0, res.stderr.decode(errors="replace")
 
@@ -665,6 +697,24 @@ def git_repo(path, kind: str):
     git(path, "init", "-q")
     commit_all(path, "init")
     return path
+
+
+def test_temp_repo_ignores_machine_wide_git_config(tmp_path, monkeypatch):
+    """TK12.2 (RF134): repo git tạm không dùng cấu hình git toàn máy. Cấu hình toàn máy giả ở đây bắt ký commit (`gpgsign`,
+    chương trình ký không có thật) và trỏ `core.hooksPath` tới hook `pre-commit` luôn thất bại; commit trong repo tạm vẫn phải qua."""
+    hooks = tmp_path / "hooks"
+    hooks.mkdir()
+    hook = hooks / "pre-commit"
+    hook.write_bytes(b"#!/bin/sh\nexit 1\n")
+    hook.chmod(0o755)
+    cfg = tmp_path / "global.gitconfig"
+    cfg.write_text(f"[commit]\n\tgpgsign = true\n[gpg]\n\tprogram = /nonexistent/sign\n[core]\n\thooksPath = {hooks.as_posix()}\n",
+                   encoding="utf-8")
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(cfg))
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    (tmp_path / "r").mkdir()
+    repo = git_repo(tmp_path / "r", "discipline")  # đỏ nếu `git()` để cấu hình toàn máy chen vào commit
+    assert tree_hash("x", repo) is not None
 
 
 def test_tree_hash_ignores_only_the_tests_dir(tmp_path):
