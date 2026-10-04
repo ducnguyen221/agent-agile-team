@@ -598,13 +598,14 @@ class Engine:
                          "cỡ rất nhỏ dùng một file SPRINT.md, không dựng bốn file (method/sizing.md); nâng cỡ lên nhỏ nếu giữ bốn file")
 
     def required_headings(self, doc: Doc, headings: list) -> tuple:
-        """Tiêu đề bắt buộc; `SPRINT.md` cỡ rất nhỏ (hoặc cỡ chưa rõ) nhận hai phần "Kế hoạch" · "Kết quả" hoặc bốn phần cũ."""
+        """Tiêu đề bắt buộc; `SPRINT.md` cỡ rất nhỏ (hoặc cỡ chưa rõ) nhận hai phần "Kế hoạch" · "Kết quả" hoặc bốn phần cũ
+        (nhận ra bốn phần khi có tiêu đề **bắt đầu** bằng SPEC/PLAN/PROGRESS, không phải chỉ chứa chữ đó)."""
         if doc.kind != "sprint":
             return REQUIRED_HEADINGS[doc.kind]
         size = doc.data.get("size")
         if size in ("small", "medium", "large"):
             return SPRINT_FOUR
-        four_part = any(w.casefold() in h for w in SPRINT_FOUR[:3] for h in headings)
+        four_part = any(h.startswith(w.casefold()) for w in SPRINT_FOUR[:3] for h in headings)  # bắt đầu bằng SPEC/PLAN/PROGRESS (đã bỏ số thứ tự)
         return SPRINT_FOUR if four_part else SPRINT_TINY_HEADINGS
 
     # -- tiêu đề --
@@ -788,7 +789,7 @@ class Engine:
             if target == base or base in target.parents:
                 self.add(path, 1, "config-public-root",
                          f"visibility: public nhưng artifact_root '{cfg['artifact_root']}' nằm trong gốc dự án — hồ sơ nội bộ sẽ lên repo công khai")
-        if not any("ledger" in problem for problem in problems):
+        if not problems:  # cấu hình sai hình thì không đối chiếu sổ (như `index`/`init` dừng ở `config_problems`)
             self.check_ledger(root, cfg, path)
 
     # -- sổ tập trung (FR8) --

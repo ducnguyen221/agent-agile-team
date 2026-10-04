@@ -76,6 +76,15 @@ def test_every_rule_has_a_broken_case():
     assert set(check.RULES) - SELF_ONLY <= covered, set(check.RULES) - SELF_ONLY - covered
 
 
+def test_every_rule_has_a_row_in_scripts_readme():
+    """`check.py` tự khai mô tả từng luật ở `scripts/README.md`: mọi mã trong `RULES` phải có hàng ở bảng luật, đúng mức."""
+    text = (REPO / "scripts" / "README.md").read_text(encoding="utf-8")
+    rows = set(re.findall(r"^\| `([a-z0-9-]+)` \|", text, re.M))
+    assert set(check.RULES) <= rows, sorted(set(check.RULES) - rows)
+    for code, (level, _) in check.RULES.items():
+        assert re.search(rf"^\| `{code}` \| {level} \|", text, re.M), f"{code}: mức ở README khác RULES ({level})"
+
+
 def test_rule_levels_use_the_single_scale():
     assert {level for level, _ in check.RULES.values()} <= {"Chặn", "Phải sửa", "Nên sửa", "Ghi chú"}
 
@@ -463,6 +472,12 @@ def test_tiny_two_part_sprint_is_clean(tmp_path):
     assert [f.render() for f in check.check_paths([tmp_path]).findings] == []
 
 
+def test_tiny_two_part_sprint_with_plan_word_in_heading_is_not_taken_for_four_parts(tmp_path):
+    """Tiêu đề chỉ *chứa* chữ plan ("Kế hoạch (plan)") không làm `SPRINT.md` hai phần bị đòi đủ bốn phần."""
+    put(tmp_path, "SPRINT.md", two_part_sprint().replace("## 1. Kế hoạch", "## 1. Kế hoạch (plan)", 1))
+    assert [f.render() for f in check.check_paths([tmp_path]).findings] == []
+
+
 def test_tiny_two_part_sprint_missing_result_is_flagged(tmp_path):
     put(tmp_path, "SPRINT.md", two_part_sprint(with_result=False))
     hits = [f for f in check.check_paths([tmp_path]).findings if f.rule == "heading-missing"]
@@ -629,6 +644,22 @@ def test_ledger_shape_errors_are_config_invalid(tmp_path, ledger):
     write_lf(root / ".agile.json", '{"schema": 1, "ledger": ' + ledger + "}")
     report = check.check_paths([root], env={})
     assert any(f.rule == "config-invalid" and "ledger" in f.message for f in report.findings), [f.render() for f in report.findings]
+
+
+@pytest.mark.parametrize("extra", [
+    {"paths": "docs"},
+    {"artifact_root": 5},
+    {"paths": {"sprint_dir": "C:/abs/{date}-{slug}"}},
+], ids=["paths-not-object", "artifact-root-not-string", "sprint-dir-absolute"])
+def test_malformed_config_with_declared_ledger_reports_config_invalid_without_traceback(tmp_path, extra):
+    """`.agile.json` sai hình mà dự án có khai sổ và máy đặt biến: chỉ `config-invalid`, thoát 1, không đối chiếu sổ, không traceback."""
+    root, env = ledger_project(tmp_path)
+    write_lf(root / ".agile.json", json.dumps({"schema": 1, "ledger": {"project": "order-desk"}, **extra}))
+    report = check.check_paths([root], env=env)
+    assert {f.rule for f in report.findings} == {"config-invalid"}, [f.render() for f in report.findings]
+    assert report.exit_code == 1
+    result = run_script("check.py", str(root), env=env)
+    assert result.returncode == 1 and "Traceback" not in result.stderr and "config-invalid" in result.stdout
 
 
 def test_ledger_closed_sprint_without_row_is_not_reported(tmp_path):
