@@ -31,8 +31,9 @@ trước — dùng chế độ ống dẫn báo lỗi của shell (`set -o pipef
 output chứ không chỉ vài dòng cuối. Output dài lưu ra `.tmp/` của sprint, trong tài liệu chỉ giữ dòng then chốt.
 
 **Dừng khi build đỏ, nhưng ghi đủ.** Pha đỏ không được che bằng cách sửa lệnh kiểm: không hạ ngưỡng coverage, không
-tắt luật lint, không xoá hay làm yếu test, không `--no-verify`. Muốn đổi cấu hình kiểm phải là việc riêng, có `Phán
-quyết:` hoặc hỏi người dùng nếu chạm điều kiện dừng.
+tắt luật lint, không xoá hay làm yếu test, không `--no-verify`. Đổi cấu hình kiểm **không** là việc của `TK` này và
+không có `Phán quyết:` nào cho phép nó (ngoài phạm vi đã duyệt): ghi đề xuất cho Analyst (`CO` kèm dòng `RQ-`, hoặc `DN`
+trình ở Cổng); pha đỏ vẫn là đỏ cho tới khi người dùng duyệt.
 
 ## 3. Mẫu báo cáo vòng kiểm
 
