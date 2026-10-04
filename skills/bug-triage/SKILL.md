@@ -73,6 +73,10 @@ Mở một dòng `RQ-` mới ở sổ REQUESTS: mã lấy từ `next_id` rồi t
 3. **Vùng nghi ngờ** (chỉ là điểm bắt đầu để điều tra, không phải kết luận) và **đường xử lý** đã chọn.
 4. **Hồi quy:** trước đây từng chạy đúng không; nếu có thì mốc (commit, bản phát hành) gần nhất còn đúng.
 
+Hai trường hợp không mở dòng mới. Báo cáo hoá ra **không phải lỗi** (hệ chạy đúng như SPEC, hay là đề nghị
+đổi hành vi) thì không chấm mức: chuyển sang đường yêu cầu của skill `intake`. Lỗi **trùng một `RQ-` đang mở**
+thì cập nhật dòng cũ (thêm bước tái hiện, đổi mức nếu hậu quả khác), không cấp mã thứ hai.
+
 ## 5. Bàn giao sang sửa
 
 Sprint sửa mở ra theo đường đã chọn, rồi đi `debugging` (tìm gốc) → `tdd` (test hỏng trước, sửa sau).
