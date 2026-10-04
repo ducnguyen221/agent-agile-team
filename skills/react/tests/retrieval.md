@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: f906c1e9de32a9ed19830f51fd8b6739a7f82236
 date: 2026-10-04
-result: "strict 6/7 (+1 partial, 0 fail) — at threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); points-right 7/7"
+result: "strict 6/7 (+1 partial, 0 fail) — at threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:
   questions: a6d062c7d2ac47870
   answers: a35641bc293940465
