@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parent.parent
 SCRIPTS = REPO / "scripts"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
@@ -37,3 +39,13 @@ def run_script(name: str, *args: str, env: dict | None = None, cwd: Path | None 
         stdin=subprocess.DEVNULL,
         timeout=120,
     )
+
+
+LEDGER_ENV = "AGENT_AGILE_LEDGER"
+
+
+@pytest.fixture(autouse=True)
+def _no_machine_ledger(monkeypatch):
+    """Máy của chủ có thể đặt `AGENT_AGILE_LEDGER`; test không về sổ phải chạy như máy không đặt (tránh đỏ giả).
+    Test về sổ tự đặt biến qua `monkeypatch` hay tham số `env` của `run_script`."""
+    monkeypatch.delenv(LEDGER_ENV, raising=False)

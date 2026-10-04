@@ -1,12 +1,14 @@
 """`check.py` trên tài liệu sprint: bộ sạch thoát 0, mỗi ca hỏng cố ý bị bắt đúng mã luật (SC4)."""
 
 import json
+import os
+import re
 import shutil
 from pathlib import Path
 
 import pytest
 
-from conftest import FIXTURES, REPO, run_script, write_lf
+from conftest import FIXTURES, LEDGER_ENV, REPO, run_script, write_lf
 import check
 
 VALID = FIXTURES / "valid"
@@ -47,7 +49,14 @@ def test_valid_fixture_is_clean():
 def test_broken_case_is_caught_with_its_rule(tmp_path, case):
     root = make_sprint(tmp_path)
     apply_case(root, case)
-    report = check.check_paths([root])
+    # Ca về sổ tập trung: `ledger` = nội dung file sổ trong kho riêng ngoài thư mục dự án; `env` = biến máy,
+    # `{store}` là đường kho. Mọi ca khác chạy với môi trường rỗng (máy có đặt biến sổ cũng không ảnh hưởng).
+    store = tmp_path / "store"
+    if "ledger" in case:
+        store.mkdir(parents=True, exist_ok=True)
+        write_lf(store / "order-desk.md", case["ledger"])
+    env = {k: v.replace("{store}", store.as_posix()) for k, v in case.get("env", {}).items()}
+    report = check.check_paths([root], env=env)
     hits = [f for f in report.findings if f.rule == case["rule"]]
     rendered = [f.render() for f in report.findings]
     assert hits, f"không bắt được {case['rule']}: {rendered}"
@@ -424,3 +433,195 @@ def test_missing_size_key_is_not_reported_twice(tmp_path):
     put(tmp_path, "SPRINT.md", text)
     rules = [f.rule for f in check.check_paths([tmp_path]).findings]
     assert "frontmatter-key-missing" in rules and "sprint-size-mismatch" not in rules
+
+
+# --- Sổ tập trung (FR8, SC10) ---------------------------------------------------------------------------
+
+LEDGER_STORE = FIXTURES / "ledger"
+LEDGER_TABLE_HEAD = "| Sprint | Trạng thái | Cập nhật | Hồ sơ | Link |\n|---|---|---|---|---|\n"
+URL_PATTERN = re.compile(r"https://github\.com/[\w.-]+/[\w.-]+/blob/[\w./-]+/docs/plans/[\w.-]+/[\w.-]+\.md")
+# Đường tuyệt đối của máy (ổ đĩa kiểu Windows, thư mục người dùng, thư mục home Unix); ghép từ mảnh để file test
+# không tự chứa chuỗi bị `--self` coi là đường máy.
+ABSOLUTE_PATH = re.compile("|".join([r"[A-Za-z]:\\", "/" + "Us" + "ers/", "/" + "ho" + "me/"]))
+
+
+def ledger_project(tmp_path: Path, *, declared=True, row=None, ledger_text=None):
+    """Dự án mẫu (sprint `SPR-03`, `verifying`, `updated: 2026-02-02`) + kho sổ riêng; trả (gốc dự án, env)."""
+    root = make_sprint(tmp_path)
+    cfg = {"schema": 1, "ledger": {"project": "order-desk"}} if declared else {"schema": 1}
+    write_lf(root / ".agile.json", json.dumps(cfg))
+    store = tmp_path / "store"
+    shutil.copytree(LEDGER_STORE, store)
+    if row is not None:
+        write_lf(store / "order-desk.md", "# Sổ\n\n## Sprint\n\n" + LEDGER_TABLE_HEAD + row + "\n")
+    if ledger_text is not None:
+        write_lf(store / "order-desk.md", ledger_text)
+    return root, {LEDGER_ENV: f"{store.as_posix()}/{{project}}.md"}
+
+
+def ledger_rules(report) -> dict:
+    return {f.rule: f for f in report.findings if f.rule.startswith("ledger-") or f.rule == "config-invalid"}
+
+
+def test_ledger_off_when_project_not_declared_even_if_machine_sets_the_variable(tmp_path):
+    root, env = ledger_project(tmp_path, declared=False)
+    (tmp_path / "store" / "order-desk.md").unlink()  # kho sổ không có file cũng không sao: sổ tắt
+    report = check.check_paths([root], env=env)
+    assert [f.render() for f in report.findings] == [] and report.exit_code == 0
+    write_lf(root / ".agile.json", json.dumps({"schema": 1, "ledger": {"project": ""}}))  # khoá rỗng cũng là tắt
+    assert check.check_paths([root], env=env).findings == []
+    write_lf(root / ".agile.json", json.dumps({"schema": 1}))
+    assert check.check_paths([root], env={LEDGER_ENV: "không-có-placeholder.md"}).findings == []
+
+
+def test_ledger_declared_with_full_row_is_clean(tmp_path):
+    root, env = ledger_project(tmp_path)
+    report = check.check_paths([root], env=env)
+    assert [f.render() for f in report.findings] == [] and report.exit_code == 0
+
+
+def test_ledger_missing_row_for_open_sprint(tmp_path):
+    root, env = ledger_project(tmp_path, row="| SPR-09 | verifying | 2026-02-02 | order-desk:x | y |")
+    report = check.check_paths([root], env=env)
+    hit = ledger_rules(report)["ledger-missing-row"]
+    assert hit.level == "Phải sửa" and hit.path.name == "PROGRESS.md" and "SPR-03" in hit.message
+    assert report.exit_code == 1
+
+
+def test_ledger_stale_status(tmp_path):
+    root, env = ledger_project(tmp_path, row="| SPR-03 | in_progress | 2026-02-02 | order-desk:x | y |")
+    report = check.check_paths([root], env=env)
+    hit = ledger_rules(report)["ledger-stale"]
+    assert hit.level == "Phải sửa" and "in_progress" in hit.message and "verifying" in hit.message
+    assert report.exit_code == 1
+
+
+def test_ledger_stale_date_older_than_updated(tmp_path):
+    root, env = ledger_project(tmp_path, row="| SPR-03 | verifying | 2026-02-01 | order-desk:x | y |")
+    report = check.check_paths([root], env=env)
+    hit = ledger_rules(report)["ledger-stale"]
+    assert "2026-02-01" in hit.message and "2026-02-02" in hit.message and report.exit_code == 1
+    newer = ledger_project(tmp_path / "n", row="| SPR-03 | verifying | 2026-03-01 | order-desk:x | y |")
+    assert check.check_paths([newer[0]], env=newer[1]).findings == []  # ngày mới hơn `updated` là bình thường
+
+
+def test_ledger_date_must_be_iso(tmp_path):
+    root, env = ledger_project(tmp_path, row="| SPR-03 | verifying | hôm qua | order-desk:x | y |")
+    assert "ledger-stale" in ledger_rules(check.check_paths([root], env=env))
+
+
+def test_ledger_unreadable_file_missing_not_utf8_or_without_table(tmp_path):
+    root, env = ledger_project(tmp_path)
+    (tmp_path / "store" / "order-desk.md").unlink()
+    report = check.check_paths([root], env=env)
+    assert ledger_rules(report)["ledger-unreadable"].level == "Phải sửa" and report.exit_code == 1
+    (tmp_path / "store" / "order-desk.md").write_bytes(b"\xff\xfe\x00bad")
+    assert "ledger-unreadable" in ledger_rules(check.check_paths([root], env=env))
+    write_lf(tmp_path / "store" / "order-desk.md", "# Sổ\n\nKhông có bảng nào.\n\n| Mục | Giá trị |\n|---|---|\n| a | b |\n")
+    assert "ledger-unreadable" in ledger_rules(check.check_paths([root], env=env))
+
+
+def test_ledger_declared_but_machine_has_no_pattern_is_a_note(tmp_path):
+    root, _ = ledger_project(tmp_path)
+    report = check.check_paths([root], env={})
+    hit = ledger_rules(report)["ledger-unconfigured"]
+    assert hit.level == "Ghi chú" and "AGENT_AGILE_LEDGER" in hit.message
+    assert report.exit_code == 0  # Ghi chú không làm đỏ
+    assert "ledger-unconfigured" in ledger_rules(check.check_paths([root], env={LEDGER_ENV: ""}))
+
+
+def test_ledger_pattern_without_project_placeholder_is_config_invalid(tmp_path):
+    root, _ = ledger_project(tmp_path)
+    report = check.check_paths([root], env={LEDGER_ENV: (tmp_path / "store" / "order-desk.md").as_posix()})
+    hit = ledger_rules(report)["config-invalid"]
+    assert hit.level == "Phải sửa" and "{project}" in hit.message and report.exit_code == 1
+
+
+@pytest.mark.parametrize("ledger", ['"x"', "5", '{"project": 5}', '{"project": "a/b"}', '{"project": "..\\\\x"}', '{"project": "../x"}'])
+def test_ledger_shape_errors_are_config_invalid(tmp_path, ledger):
+    root = make_sprint(tmp_path)
+    write_lf(root / ".agile.json", '{"schema": 1, "ledger": ' + ledger + "}")
+    report = check.check_paths([root], env={})
+    assert any(f.rule == "config-invalid" and "ledger" in f.message for f in report.findings), [f.render() for f in report.findings]
+
+
+def test_ledger_closed_sprint_without_row_is_not_reported(tmp_path):
+    root, env = ledger_project(tmp_path, row="| SPR-09 | done | 2026-02-02 | order-desk:x | y |")
+    progress = root / "PROGRESS.md"
+    write_lf(progress, progress.read_text(encoding="utf-8").replace("status: verifying", "status: dropped", 1))
+    assert "ledger-missing-row" not in ledger_rules(check.check_paths([root], env=env))
+
+
+def test_ledger_closed_sprint_with_row_is_still_compared(tmp_path):
+    root, env = ledger_project(tmp_path, row="| SPR-03 | verifying | 2026-02-02 | order-desk:x | y |")
+    progress = root / "PROGRESS.md"
+    write_lf(progress, progress.read_text(encoding="utf-8").replace("status: verifying", "status: done", 1))
+    assert "ledger-stale" in ledger_rules(check.check_paths([root], env=env))
+
+
+def test_ledger_ignores_sprints_of_a_nested_project(tmp_path):
+    root, env = ledger_project(tmp_path)
+    nested = root / "sub" / "other"
+    shutil.copytree(VALID, nested)
+    write_lf(nested / ".agile.json", json.dumps({"schema": 1}))
+    progress = nested / "PROGRESS.md"
+    write_lf(progress, progress.read_text(encoding="utf-8").replace("sprint: SPR-03", "sprint: SPR-77", 1))
+    assert "ledger-missing-row" not in ledger_rules(check.check_paths([root / ".agile.json"], env=env))
+
+
+def test_ledger_cli_reads_the_variable_from_the_environment(tmp_path):
+    root, env = ledger_project(tmp_path, row="| SPR-09 | verifying | 2026-02-02 | order-desk:x | y |")
+    result = run_script("check.py", str(root), env=env)
+    assert result.returncode == 1 and "[ledger-missing-row]" in result.stdout
+    clean = run_script("check.py", str(root), env={LEDGER_ENV: ""})
+    assert "[ledger-unconfigured]" in clean.stdout and clean.returncode == 0
+
+
+def test_machine_ledger_variable_never_leaks_into_ordinary_tests():
+    assert LEDGER_ENV not in os.environ
+
+
+# --- Link của dòng sổ (FR8.3) ----------------------------------------------------------------------------
+
+
+def _ledger_rows(text: str) -> list:
+    rows, in_table = [], False
+    for line in text.splitlines():
+        cells = [x.strip() for x in line.strip().strip("|").split("|")] if line.startswith("|") else None
+        if cells is None:
+            in_table = False
+        elif cells[0] == "Sprint":
+            in_table = True
+        elif in_table and cells[0].startswith("SPR-"):
+            rows.append(cells)
+    return rows
+
+
+def test_ledger_fixture_links_are_clickable_and_machine_free():
+    text = (LEDGER_STORE / "order-desk.md").read_text(encoding="utf-8")
+    rows = _ledger_rows(text)
+    assert len(rows) == 2 and not ABSOLUTE_PATH.search(text)
+    relative = urls = 0
+    for _sprint, _status, _day, doc, link in rows:
+        assert re.fullmatch(r"[a-z0-9-]+:docs/plans/[\w.-]+/[A-Z]+\.md", doc)
+        target = re.fullmatch(r"\[[^\]]+\]\(([^)]+)\)", link).group(1)
+        if target.startswith("https://"):
+            assert URL_PATTERN.fullmatch(target), target
+            assert doc.split(":", 1)[1] in target
+            urls += 1
+        else:
+            assert (LEDGER_STORE / target).is_file(), target  # đường tương đối trỏ file có thật trong kho sổ
+            assert not Path(target).is_absolute()
+            relative += 1
+    assert (relative, urls) == (1, 1)
+
+
+def test_ledger_template_has_the_sprint_table_and_no_machine_paths():
+    path = REPO / "templates" / "registry" / "LEDGER.md"
+    text = path.read_text(encoding="utf-8")
+    assert "| Sprint | Trạng thái | Cập nhật | Hồ sơ | Link |" in text
+    assert not ABSOLUTE_PATH.search(text) and "~/" not in text
+    example = [line for line in text.splitlines() if line.startswith("| SPR-")]  # dòng ví dụ nằm trong comment HTML
+    assert len(example) == 2 and not any(ABSOLUTE_PATH.search(line) for line in example)
+    assert any(URL_PATTERN.search(line) for line in example)  # một dòng URL, một dòng tương đối
+    assert check.check_paths([path]).findings == []

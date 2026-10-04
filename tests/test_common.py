@@ -6,6 +6,7 @@ không đoán.
 
 import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -296,3 +297,30 @@ def test_balanced_closing_line_does_not_join_an_odd_opener():
     lines = ['khối `Write-Host "`nTên"` lẻ', "dòng sau `a` P1 rồi `b` P2", "(c) `P3`"]
     found = set(re.findall(r"P[0-9]", "\n".join(c.mask_markdown(lines))))
     assert found == {"P1", "P2"}
+
+
+# --- Sổ tập trung: khoá `ledger` (FR8.2) ---------------------------------------------------------------
+
+
+def test_ledger_key_is_in_default_config_and_template_and_off_by_default():
+    assert c.DEFAULT_CONFIG["ledger"] == {"project": ""}
+    assert c.ledger_project(c.DEFAULT_CONFIG) is None  # khoá rỗng = tắt
+
+
+def test_ledger_project_reads_declared_name_only():
+    assert c.ledger_project(c.merge_config({"ledger": {"project": "order-desk"}})) == "order-desk"
+    assert c.ledger_project(c.merge_config({})) is None
+    assert c.ledger_project({}) is None
+
+
+def test_ledger_path_replaces_placeholder_and_rejects_pattern_without_it():
+    assert c.ledger_path("/store/{project}/LOG.md", "order-desk") == Path("/store/order-desk/LOG.md")
+    assert c.ledger_path("/store/LOG.md", "order-desk") is None
+    assert c.ledger_path("", "order-desk") is None
+
+
+def test_config_problems_ledger_shape():
+    assert c.config_problems(c.merge_config({"ledger": {"project": "order-desk"}})) == []
+    for bad in ("x", 5, None, {"project": 5}, {"project": "a/b"}, {"project": "a" + chr(92) + "b"}, {"project": ".."}, {"project": "../x"}):
+        problems = c.config_problems(c.merge_config({"ledger": bad}))
+        assert any("ledger" in p for p in problems), (bad, problems)

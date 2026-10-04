@@ -1,5 +1,5 @@
 {
-  "_doc": "Ca hỏng cố ý cho check.py. Mỗi ca chép fixtures/valid/ sang thư mục tạm, áp đúng một thay đổi (replace: thay lần xuất hiện đầu tiên của old bằng new; write: ghi file mới), chạy check và đòi đúng mã luật + mã thoát. Mỗi luật của check có ít nhất một ca.",
+  "_doc": "Ca hỏng cố ý cho check.py. Mỗi ca chép fixtures/valid/ sang thư mục tạm, áp đúng một thay đổi (replace: thay lần xuất hiện đầu tiên của old bằng new; write: ghi file mới), chạy check và đòi đúng mã luật + mã thoát. Mỗi luật của check có ít nhất một ca. Ca về sổ tập trung thêm `ledger` (nội dung file sổ trong kho riêng) và `env` (biến máy; `{store}` = đường kho).",
   "cases": [
     {"rule": "frontmatter-syntax", "exit": 2, "file": "PLAN.md", "line": 16,
      "replace": ["roles:\n  architect: [T1, agent-b]", "roles:\n  - role: architect"]},
@@ -60,6 +60,20 @@
     {"rule": "frontmatter-value", "exit": 1, "file": "notes/SPRINTS.md", "line": 5,
      "write": {"notes/SPRINTS.md": "---\nid: SPRINTS\ndoc: sprints\ntitle: Sprint ledger\nnext_id: SPR-1\nupdated: 2026-02-01\n---\n\n# Sổ sprint\n\n## Đang mở\n\n<!-- agile:open:start -->\nKhông có sprint nào đang mở.\n<!-- agile:open:end -->\n\n## Timeline\n"}},
     {"rule": "sprint-size-mismatch", "exit": 1, "file": "SPEC.md",
-     "replace": ["size: medium", "size: tiny"]}
+     "replace": ["size: medium", "size: tiny"]},
+    {"rule": "ledger-missing-row", "exit": 1, "file": "PROGRESS.md",
+     "write": {".agile.json": "{\"schema\": 1, \"ledger\": {\"project\": \"order-desk\"}}"},
+     "env": {"AGENT_AGILE_LEDGER": "{store}/{project}.md"},
+     "ledger": "# Sổ\n\n## Sprint\n\n| Sprint | Trạng thái | Cập nhật | Hồ sơ | Link |\n|---|---|---|---|---|\n| SPR-09 | verifying | 2026-02-02 | order-desk:docs/plans/x/PROGRESS.md | y |\n"},
+    {"rule": "ledger-stale", "exit": 1, "file": "PROGRESS.md",
+     "write": {".agile.json": "{\"schema\": 1, \"ledger\": {\"project\": \"order-desk\"}}"},
+     "env": {"AGENT_AGILE_LEDGER": "{store}/{project}.md"},
+     "ledger": "# Sổ\n\n## Sprint\n\n| Sprint | Trạng thái | Cập nhật | Hồ sơ | Link |\n|---|---|---|---|---|\n| SPR-03 | in_progress | 2026-02-02 | order-desk:docs/plans/x/PROGRESS.md | y |\n"},
+    {"rule": "ledger-unreadable", "exit": 1, "file": ".agile.json",
+     "write": {".agile.json": "{\"schema\": 1, \"ledger\": {\"project\": \"order-desk\"}}"},
+     "env": {"AGENT_AGILE_LEDGER": "{store}/{project}.md"},
+     "ledger": "# Sổ không có bảng sprint\n"},
+    {"rule": "ledger-unconfigured", "exit": 0, "file": ".agile.json",
+     "write": {".agile.json": "{\"schema\": 1, \"ledger\": {\"project\": \"order-desk\"}}"}}
   ]
 }

@@ -36,7 +36,10 @@ DEFAULT_CONFIG: dict = {
     },
     "id_width": {"request": 3, "feature": 3, "sprint": 2},
     "coverage": {"line_min_percent": 80, "reason": ""},
+    "ledger": {"project": ""},  # tên dự án trong sổ tập trung; rỗng = tắt (`method/process.md` mục 11)
 }
+LEDGER_ENV = "AGENT_AGILE_LEDGER"  # mẫu đường kho sổ của máy, chứa `{project}`; dự án không khai khoá thì bị bỏ qua
+_LEDGER_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 
 # Mã mục: tiền tố → loại tài liệu sở hữu (`templates/README.md` mục 5).
 OWNER = {
@@ -570,7 +573,30 @@ def config_problems(cfg: dict) -> list[str]:
         problems.append("coverage.line_min_percent phải là số nguyên 0–100")
     elif pct != 80 and not str(cov.get("reason") or "").strip():
         problems.append(f"coverage.line_min_percent = {pct} khác 80 mà coverage.reason rỗng")
+    ledger = cfg.get("ledger")
+    if not isinstance(ledger, dict):
+        problems.append("ledger phải là object, ví dụ {\"project\": \"ten-du-an\"}")
+    else:
+        project = ledger.get("project", "")
+        if not isinstance(project, str):
+            problems.append("ledger.project phải là chuỗi (rỗng = tắt sổ tập trung)")
+        elif project and (not _LEDGER_NAME.fullmatch(project) or ".." in project):
+            problems.append(f"ledger.project: '{project}' chỉ gồm chữ, số, '.', '_', '-' (không có dấu gạch chéo, không có '..')")
     return problems
+
+
+def ledger_project(cfg: dict) -> str | None:
+    """Tên dự án trong sổ tập trung nếu dự án khai khoá `ledger.project` (khác rỗng), ngược lại `None` = sổ tắt."""
+    ledger = cfg.get("ledger") if isinstance(cfg, dict) else None
+    project = ledger.get("project") if isinstance(ledger, dict) else None
+    return project if isinstance(project, str) and project.strip() else None
+
+
+def ledger_path(pattern: str, project: str) -> Path | None:
+    """Đường file sổ từ mẫu của máy; mẫu rỗng hoặc thiếu `{project}` → `None`. `~` ở đầu được mở rộng."""
+    if not pattern or "{project}" not in pattern:
+        return None
+    return Path(pattern.replace("{project}", project)).expanduser()
 
 
 def find_config(start: Path) -> dict:

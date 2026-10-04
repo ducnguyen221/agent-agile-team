@@ -8,7 +8,8 @@ Cách chạy:
 Mã thoát: 0 = Đạt (không có Chặn/Phải sửa) · 1 = Không đạt · 2 = lỗi đầu vào (đường dẫn không có, file
 không đọc được, frontmatter ngoài tập con YAML, `.agile.json` hỏng).
 
-Biến môi trường: `AGENT_AGILE_DENYLIST` — đường tới danh sách từ cấm ngoài repo (chỉ `--self` dùng).
+Biến môi trường: `AGENT_AGILE_DENYLIST` — đường tới danh sách từ cấm ngoài repo (chỉ `--self` dùng);
+`AGENT_AGILE_LEDGER` — mẫu đường file sổ tập trung, chứa `{project}` (chỉ dự án khai `ledger.project` mới dùng).
 Hợp đồng luật: `templates/README.md`; mô tả từng luật: `scripts/README.md`.
 """
 
@@ -56,6 +57,10 @@ RULES: dict[str, tuple[str, str]] = {
     "config-syntax": (CHAN, "`.agile.json` không phải JSON hợp lệ (lỗi đầu vào → thoát 2)"),
     "config-invalid": (PHAI, "`.agile.json` sai hình hoặc đổi ngưỡng coverage không ghi lý do"),
     "config-public-root": (CHAN, "`visibility: public` mà `artifact_root` nằm trong gốc dự án"),
+    "ledger-missing-row": (PHAI, "dự án khai sổ tập trung mà sổ không có dòng cho sprint đang mở"),
+    "ledger-stale": (PHAI, "dòng sổ lệch `status` hoặc ngày cũ hơn `updated` của PROGRESS/SPRINT"),
+    "ledger-unreadable": (PHAI, "file sổ không có, không đọc được UTF-8 hoặc không có bảng cột đầu 'Sprint'"),
+    "ledger-unconfigured": (GHI, "dự án khai sổ tập trung mà máy chưa đặt mẫu đường `AGENT_AGILE_LEDGER`"),
     "leak-denylist": (CHAN, "`--self`: file của repo chứa từ trong danh sách cấm"),
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
 }
@@ -323,7 +328,8 @@ def prefix(code: str) -> str:
 
 
 class Engine:
-    def __init__(self):
+    def __init__(self, env=None):
+        self.env = os.environ if env is None else env
         self.cache: dict = {}
         self.configs: dict = {}
         self.size_flagged: set = set()  # thư mục sprint bốn file đã báo `sprint-size-mismatch` (một lần mỗi thư mục)
@@ -752,6 +758,89 @@ class Engine:
             if target == base or base in target.parents:
                 self.add(path, 1, "config-public-root",
                          f"visibility: public nhưng artifact_root '{cfg['artifact_root']}' nằm trong gốc dự án — hồ sơ nội bộ sẽ lên repo công khai")
+        if not any("ledger" in problem for problem in problems):
+            self.check_ledger(root, cfg, path)
+
+    # -- sổ tập trung (FR8) --
+
+    def check_ledger(self, root: Path, cfg: dict, config_path: Path) -> None:
+        """Chỉ chạy khi dự án khai `ledger.project`; không khai thì 0 phát hiện dù máy có đặt mẫu đường."""
+        project = c.ledger_project(cfg)
+        if project is None:
+            return
+        pattern = self.env.get(c.LEDGER_ENV, "")
+        if not pattern:
+            self.add(config_path, 1, "ledger-unconfigured",
+                     f"dự án khai ledger.project '{project}' nhưng máy chưa đặt {c.LEDGER_ENV} — chưa đối chiếu được sổ tập trung")
+            return
+        ledger = c.ledger_path(pattern, project)
+        if ledger is None:
+            self.add(config_path, 1, "config-invalid", f"{c.LEDGER_ENV} phải chứa {{project}} (nơi thay tên dự án)")
+            return
+        rows = self._ledger_rows(ledger, config_path)
+        if rows is None:
+            return
+        for sprint_id, doc in self._ledger_sprints(root, cfg):
+            status, updated = doc.data.get("status"), doc.data.get("updated")
+            row = rows.get(sprint_id)
+            if row is None:
+                if status not in ("done", "dropped"):
+                    self.add(doc.path, doc.key_line("status"), "ledger-missing-row",
+                             f"{sprint_id} đang '{status}' mà sổ tập trung chưa có dòng (method/process.md mục 11)")
+                continue
+            row_status, row_date = row
+            if row_status != status:
+                self.add(doc.path, doc.key_line("status"), "ledger-stale",
+                         f"{sprint_id}: sổ ghi trạng thái '{row_status}', hồ sơ ghi '{status}'")
+            if not DATE.fullmatch(row_date):
+                self.add(doc.path, doc.key_line("updated"), "ledger-stale",
+                         f"{sprint_id}: ngày trong sổ '{row_date}' không phải YYYY-MM-DD")
+            elif isinstance(updated, str) and DATE.fullmatch(updated) and row_date < updated:
+                self.add(doc.path, doc.key_line("updated"), "ledger-stale",
+                         f"{sprint_id}: sổ ghi ngày {row_date}, hồ sơ cập nhật {updated}")
+
+    def _ledger_rows(self, ledger: Path, config_path: Path):
+        """`{mã sprint: (trạng thái, ngày)}` từ bảng có cột đầu "Sprint" (dòng đầu thắng); lỗi → báo và trả `None`."""
+        try:
+            text = c.read_text(ledger)
+        except (OSError, UnicodeDecodeError) as exc:
+            kind = "không tồn tại" if not ledger.exists() else f"không đọc được dạng UTF-8 ({type(exc).__name__})"
+            self.add(config_path, 1, "ledger-unreadable", f"file sổ {kind}: {ledger.name}")
+            return None
+        rows: dict = {}
+        found = in_table = False
+        for line in c.mask_markdown(text.split("\n")):
+            cells = c.table_cells(line)
+            if cells is None:
+                in_table = False
+            elif not in_table:
+                in_table = cells[0].strip("*_ ").casefold() == "sprint"
+                found = found or in_table
+            elif not c.is_separator_row(cells) and len(cells) >= 3:
+                key = cells[0].strip("*_` ")
+                if c.parse_id(key) is not None:
+                    rows.setdefault(key, (cells[1].strip("*_` "), cells[2].strip("*_` ")))
+        if not found:
+            self.add(config_path, 1, "ledger-unreadable",
+                     f"file sổ {ledger.name} không có bảng cột đầu 'Sprint' (mẫu: templates/registry/LEDGER.md)")
+            return None
+        return rows
+
+    def _ledger_sprints(self, root: Path, cfg: dict) -> list:
+        """Sprint của dự án (PROGRESS.md hoặc SPRINT.md có mã `SPR-`), bỏ thư mục thuộc dự án lồng bên trong."""
+        base = c.artifact_path(root, cfg, "")
+        found = []
+        if not base.is_dir():
+            return found
+        for name in ("PROGRESS.md", "SPRINT.md"):
+            for path in _walk(base, name):
+                if any((p / c.CONFIG_NAME).is_file() for p in path.parents if p != base and base in p.parents):
+                    continue
+                doc = self.doc(path)
+                sprint = doc.data.get("sprint") if doc is not None and doc.kind in ("progress", "sprint") else None
+                if isinstance(sprint, str) and (c.parse_id(sprint) or ("", 0))[0] == "SPR":
+                    found.append((sprint, doc))
+        return found
 
 
 # --- Quét đường dẫn ------------------------------------------------------------------------------------
@@ -765,8 +854,8 @@ def _walk(root: Path, pattern: str):
         yield path
 
 
-def check_paths(paths) -> Report:
-    engine = Engine()
+def check_paths(paths, env=None) -> Report:
+    engine = Engine(env)
     for raw in paths:
         path = Path(raw)
         if path.is_dir():
@@ -1024,7 +1113,7 @@ def main(argv=None, env=None) -> int:
             print("WARNING NOT_CONFIGURED: AGENT_AGILE_DENYLIST chưa đặt, file không đọc được hoặc rỗng — "
                   "luật leak-denylist Chưa chạy (không phải Đạt).", file=sys.stderr)
     else:
-        report = check_paths(args.paths)
+        report = check_paths(args.paths, env)
     for error in report.errors:
         print(f"{error} [lỗi đầu vào]")
     for finding in report.findings:
