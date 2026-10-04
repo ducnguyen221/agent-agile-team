@@ -52,6 +52,9 @@ Hai bẫy quan trọng hơn chi tiết cấu hình: (1) **kiểu không tự đ�
 `react/jsx-runtime`...), nếu không bị gói vào thư viện và người dùng dính lỗi trùng runtime. Khai `formats`
 (`es`, `cjs`) và `fileName` rõ ràng.
 
+Đây là chế độ cho **thư viện npm** (phụ thuộc đồng hành ngoại trừ). Widget nhúng bằng một thẻ `<script>` ngược lại: định dạng `iife`, gói luôn React,
+CSS đi cùng, mount vào phần tử bên ngoài chỉ định: `references/delivery.md` mục 2.
+
 ## 6. Chia chunk (`manualChunks`)
 
 Dạng đối tượng gom gói theo nhóm (`react-vendor: ["react", "react-dom"]`). Dạng hàm chia theo `id` (`node_modules/react`

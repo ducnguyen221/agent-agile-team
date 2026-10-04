@@ -59,6 +59,8 @@ hình đổi tên: `build.rollupOptions` ↔ `build.rolldownOptions`, bộ nén 
   token, URL cơ sở dữ liệu, khoá riêng phải ở **server** sau một API.
 - Bẫy `loadEnv(mode, root, "")`: tiền tố rỗng nạp **mọi** biến, kể cả secret của máy build, và `define` có thể nhúng
   chúng vào client. Tương tự `envPrefix: ""` là lỗi mức **Chặn**.
+- Cần **một bản build chạy ở nhiều môi trường** (staging, production khác URL API): đừng nhúng URL bằng `VITE_*`; đọc cấu hình lúc chạy
+  từ tệp không băm (`references/delivery.md` mục 5).
 - Thứ tự nạp tệp: `.env`, `.env.local`, `.env.[mode]`, `.env.[mode].local`; tệp sau đè tệp trước, tệp `*.local`
   dành cho giá trị riêng của máy và không commit. Trong mã client đọc `import.meta.env.VITE_*` cùng các giá trị
   dựng sẵn `MODE`, `BASE_URL`, `DEV`, `PROD`, `SSR`.
@@ -85,6 +87,8 @@ hình đổi tên: `build.rollupOptions` ↔ `build.rolldownOptions`, bộ nén 
   (nghe `0.0.0.0`) và, sau reverse proxy, `server.hmr.clientPort` đúng cổng ngoài.
 - **Monorepo:** gói ngoài gốc dự án bị chặn phục vụ; mở bằng `server.fs.allow`.
 - Cache pre-bundle cũ gây lỗi "ma" sau khi đổi nhánh hay vá phụ thuộc: xoá `node_modules/.vite`.
+- **Cookie phiên qua proxy** (`Set-Cookie`, `cookieDomainRewrite`, vì sao nên gọi `/api` cùng nguồn gốc) và việc `server.cors` không sửa CORS của
+  backend: `references/delivery.md` mục 3.
 
 ## 7. Hiệu năng tải: đo → tách → trì hoãn
 
@@ -95,6 +99,7 @@ hình đổi tên: `build.rollupOptions` ↔ `build.rolldownOptions`, bộ nén 
 3. **Chia chunk tay (`manualChunks`):** hạng cuối. Gom phụ thuộc lớn ổn định vào vài chunk "vendor"; **không**
    một chunk mỗi gói (tạo hàng trăm file nhỏ).
 4. Dòng danh sách dài: ảo hoá (`react`, mục 7); ảnh và phông: nén, định kích thước, tải lười.
+   Nạp trước route kế tiếp (rê chuột/focus gọi cùng `import()`), tránh nhịp trắng khi chuyển route lazy: `references/delivery.md` mục 4.
 5. Không đưa `@vitejs/plugin-legacy` mặc định (phình bundle khoảng 40 % theo nguồn, phục vụ ít người): chỉ khi
    số liệu truy cập chứng minh cần.
 6. Dev chậm: `vite --profile`, thao tác, rồi nạp `.cpuprofile` vào Speedscope để tìm plugin ngốn thời gian;
@@ -107,7 +112,8 @@ hình đổi tên: `build.rollupOptions` ↔ `build.rolldownOptions`, bộ nén 
 - Mỗi route lazy có `Suspense` và error boundary **riêng**: một route hỏng không kéo sập khung.
 - **Chunk cũ sau khi triển khai:** bản build mới đổi tên (băm) file, người đang mở tab xin file cũ đã mất → lỗi
   khi tải route lazy. Vite không giải quyết sẵn. Hai cách giảm nhẹ: giữ file cũ của `dist/assets/` thêm một
-  khoảng thời gian; bắt lỗi import động trong router và **tải lại trang** một lần.
+  khoảng thời gian; bắt lỗi import động (`vite:preloadError`) và **tải lại trang** một lần. Cả hai chỉ hiệu quả nếu header cache đúng:
+  `index.html` `no-cache`, `assets/*` băm `immutable` (chi tiết, mã mẫu: `references/delivery.md` mục 1).
 - Đổi route: đưa focus về vùng nội dung và cập nhật tiêu đề trang (tiếp cận: thẻ `frontend` mục 9).
 
 ## 9. State ở tầng ứng dụng
@@ -127,6 +133,7 @@ Một nguồn sự thật cho mỗi mẩu dữ liệu; Context + `useReducer` đ
 | Cần | Đọc |
 |---|---|
 | Danh sách plugin cần biết, viết plugin riêng, HMR API, pre-bundle, chế độ thư viện (`build.lib`), SSR externals, bảng tham chiếu nhanh, mẫu hỏng | `references/vite.md` |
+| Chunk cũ sau triển khai (header cache theo loại tệp, `vite:preloadError`); widget nhúng bằng một thẻ `<script>` (IIFE tự chứa, Shadow DOM, mount vào phần tử ngoài chỉ định); proxy dev với cookie và CORS; nạp trước route; cấu hình lúc chạy cho nhiều môi trường | `references/delivery.md` |
 
 Liên quan: `react`, `e2e-testing`, `deployment` (Dockerfile nhiều tầng, máy chủ tĩnh), `security-review`
 (secret trong bundle), `error-handling`.
@@ -138,4 +145,4 @@ Liên quan: `react`, `e2e-testing`, `deployment` (Dockerfile nhiều tầng, má
 - [ ] source map production tắt (hoặc có đường đẩy sang công cụ theo dõi lỗi)
 - [ ] đã chạy `vite build` + `vite preview`, không chỉ chạy dev
 - [ ] route nặng đã `lazy`; có số đo bundle trước ↔ sau
-- [ ] có xử lý chunk cũ sau triển khai (giữ file cũ hoặc tải lại trang)
+- [ ] có xử lý chunk cũ sau triển khai (giữ file cũ hoặc tải lại trang) và header cache đúng (`index.html` `no-cache`, tệp băm `immutable`)
