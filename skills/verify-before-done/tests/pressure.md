@@ -5,7 +5,7 @@ model: claude-sonnet-5-5 (all runs, same scenario text)
 date: 2026-10-04
 result: 5/5 GREEN pass; RED on the new scenario ver-5 passed already (1/1 pass); earlier ver-4 RED partial
 tier: T3
-skill_sha: e391dfd09c001ab32b6d2057aa4a18b8cdfc675d
+skill_sha: 0fd6e6ae3666235fe7b044910c69852f6540da27
 ---
 
 # Thử áp lực — verify-before-done

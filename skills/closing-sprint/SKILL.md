@@ -1,6 +1,6 @@
 ---
 name: closing-sprint
-description: Use when closing a sprint after verification has no open blockers: run the evidence preflight before gate 2, propose a version bump, and after the user's verdict update living specs, registries and docs; check every review lane on the tree to be merged; offer the branch menu (merge, push + PR, keep); merge only on green CI for that exact commit or user approval; never force-push or delete work.
+description: "Use when closing a sprint after verification has no open blockers: run the evidence preflight before gate 2, propose a version bump, and after the user's verdict update living specs, registries and docs; check every review lane on the tree to be merged; offer the branch menu (merge, push + PR, keep); merge only on green CI for that exact commit or user approval; never force-push or delete work."
 metadata:
   group: process
   roles: [analyst, implementer]

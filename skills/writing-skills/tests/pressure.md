@@ -3,7 +3,7 @@ skill: writing-skills
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 tier: T3 (the RED and first GREEN of 2026-10-01 ran at T2)
 model: claude-sonnet-5-5 (GREEN rerun and KB3 rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
-skill_sha: 151fd15f04b860da2f3b5b1ff72a5bd82615923c
+skill_sha: 5c5200b97d8568024d69118e3d734b4102ce3b80
 date: 2026-10-04
 result: 3/3 GREEN pass on KB3 at n = 3 after the TK13 fix (round 2, 2026-10-04, skill_sha changed; round 1 on the pre-fix text was 1/3) and RED 0/3 pass (RED breaks, kept from round 1, same prompt, not rerun); rerun n = 1 each on the fixed text - KB1 pass, KB2 pass, KB4 pass, KB5 partial against the pre-written expectation (result string format, same as TK12), KB6 pass, KB7 partial (no --plugin-dir flag named; TK12 had pass; the pre-fix text gave 1 pass 2 partial on three reruns, so not shown to be a regression); earlier - round 1 KB3 n = 3 (TK13) 1/3 GREEN pass, 0/3 RED pass; TK12 rerun GREEN 3/3 on KB1-KB3 and KB4-KB7 (KB5 partial against the expectation); n = 1 runs 3/3 GREEN pass after the TK9 rewrite
 agent_ids:

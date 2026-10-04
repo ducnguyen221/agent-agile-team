@@ -3,7 +3,7 @@ skill: frontend
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: b21afba3c0c6a291e82dd356c58d7f84557d1153
+skill_sha: 590495c11913dcaa057f68ce40da5878cbf8a8d7
 date: 2026-10-04
 result: "strict 2/7 (+5 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

@@ -3,7 +3,7 @@ skill: e2e-testing
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 79da4c4c006fa1c0c10dd518b2888e8395f9c9a1
+skill_sha: f3812f458c8616e4fe94c25a883a77569dd2f42b
 date: 2026-10-04
 result: "strict 2/7 (+5 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

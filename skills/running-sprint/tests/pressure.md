@@ -3,7 +3,7 @@ skill: running-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: f9021ec5d542031d0d8f8befc969a3cd718ccc50
+skill_sha: b41fde5067afcc734cc5f378cb425251493b8944
 date: 2026-10-04
 result: 6/6 GREEN pass; RED on the new scenario rs-7 partial (0/1 pass); earlier rs-5 partial, rs-6 passed already
 agent_ids:

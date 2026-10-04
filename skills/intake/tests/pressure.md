@@ -3,7 +3,7 @@ skill: intake
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 3065ecc1a1f18f79c6039ade5c21b8e9e75a62e7
+skill_sha: f200a6b19d3677e20924742be209a7e34531a3dd
 date: 2026-10-04
 result: 6/6 GREEN pass; RED on the 3 new scenarios (in-4, in-5, in-6) 0/3 pass (1 fail, 2 partial)
 agent_ids:

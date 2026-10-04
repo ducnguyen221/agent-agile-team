@@ -3,7 +3,7 @@ skill: eval-harness
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: ed0c5acfae81f743768a256af6c66968ea7fd2ab
+skill_sha: 9984331d80d04758d982e10cc57f873a5cee6a25
 date: 2026-10-04
 result: 8/8 GREEN pass, no refactor; RED 7/8 passed as-is (eh-3 partial), so the skill was written from the distillation brief (FR6.3), not from an observed gap, and GREEN is not worse than RED on any scenario
 agent_ids:

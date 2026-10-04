@@ -1,6 +1,6 @@
 ---
 name: database-migrations
-description: Use when a database schema or the data inside it has to change: new or reshaped tables, columns, keys, indexes and constraints; a backfill or one-off data repair; a schema change that must not cause downtime; migration tooling and its CI/CD steps, Rails included; a unique index over rows that may be duplicated; a migration under review; or any run against production-scale data.
+description: "Use when a database schema or the data inside it has to change: new or reshaped tables, columns, keys, indexes and constraints; a backfill or one-off data repair; a schema change that must not cause downtime; migration tooling and its CI/CD steps, Rails included; a unique index over rows that may be duplicated; a migration under review; or any run against production-scale data."
 metadata:
   group: technique
   kind: reference

@@ -3,7 +3,7 @@ skill: fastapi
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 106f8cfa723b59644608d79b925fcd82bf73e5c3
+skill_sha: 5ae03c3fd39ba1562d3dafa636d3c27215584ada
 date: 2026-10-04
 result: "strict 2/7 (+5 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

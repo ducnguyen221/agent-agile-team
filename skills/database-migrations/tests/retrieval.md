@@ -3,7 +3,7 @@ skill: database-migrations
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 02ef1834a07ef26038d97be948c25f9822bacb0a
+skill_sha: 983c9af08719aa5a8119257f78c6c8a893dba15e
 date: 2026-10-04
 result: "strict 2/7 (+5 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

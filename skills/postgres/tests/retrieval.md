@@ -3,7 +3,7 @@ skill: postgres
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: caf5c46298f9e276bad693584455c26e7a1220e1
+skill_sha: 6c9c5c180155648d31cee60d878c995d95555748
 date: 2026-10-04
 result: "strict 4/7 (+2 partial, 1 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 6/7"
 agent_ids:

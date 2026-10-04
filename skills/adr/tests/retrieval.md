@@ -3,7 +3,7 @@ skill: adr
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: e51ac5cfa6684f45de70dddd469b1975496a4a62
+skill_sha: dd528ce6aa2e9bb2c9a7e8fbe3c3efe144ed7853
 date: 2026-10-04
 result: "strict 6/7 (+1 partial, 0 fail) — at threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

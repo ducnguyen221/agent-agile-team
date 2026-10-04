@@ -3,7 +3,7 @@ skill: deployment
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: f5f164854884d51d591cdc80afb9427b1fb067dd
+skill_sha: af08fdd03541395a3f060c1213913aa5bb88847f
 date: 2026-10-04
 result: "strict 5/7 (+2 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

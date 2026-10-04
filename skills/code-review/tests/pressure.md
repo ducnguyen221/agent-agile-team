@@ -3,7 +3,7 @@ skill: code-review
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: a3338da712b3ac8a845a3f5c9d3c066632995cbc
+skill_sha: bc0f64a61db9471783a3f3e82c511734c6a23161
 date: 2026-10-04
 result: 6/6 GREEN pass; RED on the three new scenarios 1/3 pass as-is (cr-4 partial, cr-5 partial, cr-6 pass at RED); GREEN rerun of the three 2026-10-01 scenarios cr-1 to cr-3 3/3 pass on the tree after the TK9.1 edits
 agent_ids:
