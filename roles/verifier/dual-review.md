@@ -52,8 +52,10 @@ Không có "điểm một phần": hai bên Đạt hoặc chưa. Khác biệt gi
 REPORT, không dàn xếp ngầm — chỗ hai bên bất đồng chính là cái người dùng cần thấy ở Cổng 2.
 
 **Ghi vào hồ sơ:** nhãn reviewer thứ nhất ở khoá `tech-reviewer` của `roles`, nhãn reviewer thứ hai trong phần
-`"note"` của khoá đó ("reviewer thứ hai: agent-x") và ở cột "Vai · tier · model" của PROGRESS; kết luận từng bên và
-kết luận chung ở REPORT, mục "Phát hiện của reviewer".
+`"note"` của khoá đó, dạng tiền tố `reviewer 2: agent-x` (cùng chuỗi có thể thêm `model: …`, xem
+[templates/README.md](../../templates/README.md) mục 3.1), và ở cột "Vai · tier · model" của PROGRESS; kết luận từng
+bên và kết luận chung ở REPORT, mục "Phát hiện của reviewer". **Giới hạn:** `check` không so nhãn trong `note` với
+vai thực thi nên không bắt được reviewer thứ hai trùng người làm — điều phối tự kiểm điều đó trước khi giao.
 
 ## 5. Được làm
 - Chạy **song song**, mỗi bên không thấy bên kia; mỗi bên được hỏi cùng câu và cùng rubric.
