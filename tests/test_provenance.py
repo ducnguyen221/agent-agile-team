@@ -181,7 +181,9 @@ def test_catalog_detects_missing_row():
 # Số đo trùng câu chữ nguồn (8-gram) chỉ đúng kèm điều kiện đo (vòng sửa cuối, từ re-review lần 2): số 0 có được SAU KHI loại
 # stoplist 45 cụm chung; không loại thì còn cụm trùng ở 5/7 đích. Câu nêu số đo phải mang điều kiện; metadata vào băm
 # (`skills/**`) thì không nêu số đo, vì đổi chữ ở đó đổi `skill_sha` và buộc chạy lại thử nghiệm.
-GRAM_CLAIM = re.compile(r"8-gram|overlap 0", re.I)
+GRAM_CLAIM = re.compile(r"\b\d+[- ]?gram\b|\bn-gram\b|overlap\s*0|trùng\s+0\s+cụm|\b0\s+trùng", re.I)
+# Điều kiện đo: câu phải nói đã LOẠI stoplist (không chỉ có chữ `stoplist` gần đó, như "không dùng stoplist").
+GRAM_CONDITION = re.compile(r"loại\s+(?:bỏ\s+)?stoplist", re.I)
 GRAM_SUFFIXES = {".md", ".json", ".txt", ".yml", ".yaml"}
 
 
@@ -198,9 +200,9 @@ def gram_claim_problems(root=REPO) -> list:
         text = c.read_text(path)
         for m in GRAM_CLAIM.finditer(text):
             line = text.count("\n", 0, m.start()) + 1
-            if parts[0] == "skills":
+            if parts[0] == "skills" and len(parts) >= 3:  # `skills/<tên>/**` vào băm; `skills/README.md` thì không
                 found.append(f"{rel.as_posix()}:{line}: metadata vào băm không được nêu số đo 8-gram")
-            elif "stoplist" not in text[m.start():m.start() + 200].lower():
+            elif not GRAM_CONDITION.search(text[m.start():m.start() + 200]):
                 found.append(f"{rel.as_posix()}:{line}: số đo 8-gram thiếu điều kiện (loại stoplist 45 cụm chung)")
     return sorted(set(found))  # một dòng nêu cả '8-gram' và 'overlap 0' chỉ báo một lần
 
@@ -226,13 +228,13 @@ def test_8gram_claim_check_catches_each_kind_of_bad_claim(tmp_path):
 
 # THIRD_PARTY mục 3: file đã liệt kê là "đã viết lại từ danh sách ý, còn mang câu chữ nguồn" thì VẪN phải viết lại thật
 # sự trước khi công khai (`CO2`); câu "không cần viết lại lần nữa" cho chúng mâu thuẫn với lời đó (vòng sửa cuối, lỗi a của re-review lần 2).
-NO_REWRITE_NEEDED = "không cần viết lại lần nữa"
+NO_REWRITE_NEEDED = re.compile(r"không\s+cần\s+viết\s+lại", re.I)  # mọi cách viết, không chỉ "… lần nữa"
 MUST_REWRITE = "phải viết lại thật sự trước khi công khai"
 
 
 def third_party_contradictions(text: str) -> list:
-    if MUST_REWRITE in text and NO_REWRITE_NEEDED in text:
-        return [f"THIRD_PARTY.md vừa ghi '{MUST_REWRITE}' vừa ghi '{NO_REWRITE_NEEDED}'"]
+    if MUST_REWRITE in text and NO_REWRITE_NEEDED.search(text):
+        return [f"THIRD_PARTY.md vừa ghi '{MUST_REWRITE}' vừa ghi 'không cần viết lại'"]
     return []
 
 
@@ -243,6 +245,45 @@ def test_third_party_does_not_excuse_the_listed_files_from_rewriting():
 
 
 def test_third_party_contradiction_check_catches_the_old_sentence():
-    old = f"7 đích: {MUST_REWRITE}. Các file đã liệt kê ở trên {NO_REWRITE_NEEDED}."
+    old = f"7 đích: {MUST_REWRITE}. Các file đã liệt kê ở trên không cần viết lại lần nữa."
     assert len(third_party_contradictions(old)) == 1
+    assert third_party_contradictions(f"7 đích: {MUST_REWRITE}.") == []
+
+
+# TK12.1 (3): phép kiểm số đo nhận MỌI cách viết của phép so (RF171), điều kiện phải là "loại stoplist" chứ không chỉ có chữ
+# `stoplist` gần đó, và `skills/README.md` (không thuộc cây của skill nào, không vào băm) không bị coi là metadata vào băm.
+@pytest.mark.parametrize("phrase", ["8-gram 0", "8 gram 0", "8gram bằng 0", "n-gram 0", "6-gram", "trùng 0 cụm", "overlap 0",
+                                    "overlap  0", "8-GRAM", "0 trùng"])
+def test_gram_claim_matches_every_spelling(phrase):
+    assert GRAM_CLAIM.search(phrase), f"{phrase!r} lọt"
+
+
+@pytest.mark.parametrize("phrase", ["programmatic", "diagram 8", "gram", "đã đo trùng câu chữ"])
+def test_gram_claim_does_not_match_unrelated_words(phrase):
+    assert not GRAM_CLAIM.search(phrase), f"{phrase!r} bị bắt oan"
+
+
+def test_gram_claim_needs_the_stoplist_condition_not_just_the_word(tmp_path):
+    (tmp_path / "CHANGELOG.md").write_text("Viết lại; 8-gram 0, không dùng stoplist\n", encoding="utf-8")
+    (tmp_path / "THIRD_PARTY.md").write_text("n-gram bằng 0 sau khi loại stoplist 45 cụm chung\n", encoding="utf-8")
+    (tmp_path / "UPSTREAM.md").write_text("8 gram: trùng 0 cụm\n", encoding="utf-8")
+    found = gram_claim_problems(tmp_path)
+    assert any("CHANGELOG.md:1" in f for f in found), found
+    assert any("UPSTREAM.md:1" in f for f in found), found
+    assert not any("THIRD_PARTY.md" in f for f in found), found
+
+
+def test_skills_readme_is_not_metadata_in_the_hash(tmp_path):
+    (tmp_path / "skills").mkdir()
+    (tmp_path / "skills" / "README.md").write_text("8-gram 0 trùng\n", encoding="utf-8")
+    found = gram_claim_problems(tmp_path)
+    assert len(found) == 1 and "thiếu điều kiện" in found[0] and "metadata vào băm" not in found[0], found
+    (tmp_path / "skills" / "README.md").write_text("8-gram bằng 0 sau khi loại stoplist 45 cụm chung\n", encoding="utf-8")
+    assert gram_claim_problems(tmp_path) == []
+
+
+@pytest.mark.parametrize("sentence", ["Các file ở trên không cần viết lại lần nữa.", "Các file ở trên không cần viết lại nữa.",
+                                      "Các file ở trên không  cần  viết lại.", "Các file ở trên Không Cần Viết Lại."])
+def test_third_party_contradiction_check_catches_every_wording(sentence):
+    assert len(third_party_contradictions(f"7 đích: {MUST_REWRITE}. {sentence}")) == 1, sentence
     assert third_party_contradictions(f"7 đích: {MUST_REWRITE}.") == []

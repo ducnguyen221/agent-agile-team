@@ -5,7 +5,7 @@ metadata:
   group: technique
   kind: reference
   roles: [architect]
-source: "concept: architecture decision records - short, numbered, at least two real options, superseded not edited (clean-room rewrite in SPR-04 TK10: old text removed first, new writer saw only a noun-phrase idea list)"
+source: "concept: architecture decision records - short, numbered, at least two real options, superseded not edited (clean-room rewrite: old text removed first, new writer saw only a noun-phrase idea list; task `TK10` (clean-room rewrite), sprint `SPR-04` (method wave 3))"
 source_sha: null
 license: none
 rewrite_before_public: false

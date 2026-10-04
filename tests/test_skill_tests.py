@@ -308,6 +308,7 @@ def test_new_file_needs_sha_and_tier_but_old_file_does_not():
 RETRIEVAL_FILES = [p for p in TEST_FILES if p.name == "retrieval.md"]
 RETRIEVAL_IDS = [p.relative_to(REPO).as_posix() for p in RETRIEVAL_FILES]
 RETRIEVAL_ROW = re.compile(r"^\| \d+ \|")
+PARTIAL_WORD = re.compile(r"một[\s-]*phần|\bpartial\b|\b1\s*phần|mot\s*phan|\bnửa\b", re.I)
 RETRIEVAL_RULE = (
     "Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính "
     "của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho "
@@ -328,8 +329,9 @@ def retrieval_result(text: str) -> str:
         if len(cells) != 5:
             raise ValueError(f"hàng bảng không đủ 5 cột: {line[:60]!r}")
         verdict, is_boundary = cells[4], cells[2].startswith("mục khác:")
-        if verdict.startswith("Đạt") and re.search(r"một\s*phần", verdict, re.I):
-            # mọi cách viết "Đạt … một phần" (`Đạt (một phần`, `Đạt một phần`, `Đạt/Một phần`, `Đạt — một phần`…) đều mơ hồ
+        if verdict.startswith("Đạt") and PARTIAL_WORD.search(verdict):
+            # mọi cách viết "Đạt … một phần" (`Đạt (một phần`, `Đạt một phần`, `Đạt/Một phần`, `Đạt — một phần`, `Đạt (partial)`,
+            # `Đạt (1 phần)`, `Đạt (mot phan)`, `Đạt nửa`…) đều mơ hồ
             raise ValueError(f"ô `Đạt … một phần` mơ hồ, ghi Đạt hoặc Một phần: {verdict[:40]!r}")
         kind = ("fail" if verdict.startswith("Không đạt") else "partial" if verdict.startswith("Một phần")
                 else "pass" if verdict.startswith("Đạt") else None)
@@ -347,7 +349,7 @@ def retrieval_result(text: str) -> str:
     total = situations + boundary
     ok = pass_situations * 5 >= situations * 4 and pass_boundary == 1
     return (f"strict {grades['pass']}/{total} (+{grades['partial']} partial, {grades['fail']} fail) — "
-            f"{'at' if ok else 'below'} threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); "
+            f"{'at' if ok else 'below'} threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); "
             f"points-right {grades['pass'] + grades['partial']}/{total}")
 
 
@@ -521,6 +523,121 @@ def test_retrieval_result_rejects_ambiguous_or_unreadable_tables():
         retrieval_result(_table("Pass", "Đạt"))
     with pytest.raises(ValueError, match="1 câu ranh giới"):
         retrieval_result(_table("Đạt").replace("mục khác:", "mục:"))
+
+
+# TK12.1 (2): ô `Đạt` mà nói còn thiếu bằng tiếng Anh hoặc biến thể (RF170) cũng mơ hồ, như `result` truy xuất đã viết tiếng Anh.
+@pytest.mark.parametrize("ambiguous", ["Đạt (partial)", "Đạt (Partial credit)", "Đạt, partial", "Đạt (1 phần)", "Đạt (một-phần)",
+                                       "Đạt (mot phan)", "Đạt nửa", "Đạt (nửa)", "Đạt (PARTIAL: thiếu mẫu)"])
+def test_retrieval_cell_with_english_or_variant_partial_is_ambiguous(ambiguous):
+    with pytest.raises(ValueError, match="mơ hồ"):
+        retrieval_result(_table(ambiguous, "Đạt"))
+
+
+@pytest.mark.parametrize("fine", ["Đạt (kèm phần phụ thiếu mẫu)", "Đạt (trỏ đúng; mục có ví dụ)", "Đạt — kèm chú thích",
+                                  "Đạt (partitioned table, 1 phụ lục)", "Một phần (partial: thiếu mẫu)", "Không đạt (partial hay không?)"])
+def test_retrieval_cell_notes_without_partial_are_not_blocked(fine):
+    retrieval_result(_table(fine, "Đạt"))
+
+
+# TK12.1 (4): luật chấm đáp thay thế viết MỘT chỗ (`writing-skills`), không đoạn riêng trong từng tệp (RF162): mỗi tệp truy xuất
+# có đúng một đoạn "Cách chấm" và đó là đoạn chung.
+@pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
+def test_retrieval_file_has_no_local_grading_paragraph(path):
+    text = c.read_text(path)
+    assert text.count("Cách chấm") == 1, "tệp có đoạn chấm riêng ngoài đoạn chung (RETRIEVAL_RULE)"
+    assert not re.search(r"(?im)^[^|\n]*đáp (?:án )?thay thế[^|\n]*(?:Một phần|Đạt)", text), "luật chấm đáp thay thế viết riêng trong tệp"
+
+
+def test_local_grading_paragraph_is_caught():
+    two = RETRIEVAL_RULE + "\n\nCách chấm riêng cho câu ranh giới: đáp thay thế đã chấp nhận trước là Một phần.\n"
+    assert two.count("Cách chấm") == 2
+    assert re.search(r"(?im)^[^|\n]*đáp (?:án )?thay thế[^|\n]*(?:Một phần|Đạt)", two)
+
+
+# TK12.1 (5): mã của hồ sơ riêng (`CO`, `RQ`, `RF`, `TK`, `DN`, `BR`, `VR`, `CQ`, `SPR`) trong `source:` của skill phải nằm trong
+# dấu code kèm tên ngắn trong ngoặc: `TK10` (viết lại phòng sạch), theo AGENTS.md mục "Mã định danh" (RF164).
+PRIVATE_CODE = re.compile(r"\b(?:(?:SPR|RQ|FS)-\d+|(?:CO|RF|TK|DN|BR|VR|CQ)\d+(?:\.\d+)?)\b")
+# Skill đang nợ dòng `source:` mà làn khác sở hữu SKILL.md: ghi lý do; test dưới đỏ khi hết nợ để người sửa gỡ dòng này.
+SOURCE_CODE_DEBT = {"closing-sprint": "SKILL.md thuộc làn C (TK9.2); sửa `source:` ở lượt chạy lại của làn đó"}
+
+
+def source_code_gaps(entries) -> list:
+    """Mã hồ sơ riêng trong các chuỗi `source:` không ở dạng `CODE` (tên ngắn)."""
+    found = []
+    for entry in entries:
+        text = str(entry)
+        for m in PRIVATE_CODE.finditer(text):
+            wrapped = text[max(m.start() - 1, 0):m.start()] == "`" and text[m.end():m.end() + 1] == "`"
+            named = re.match(r"` \([^()]{2,}\)", text[m.end():]) is not None
+            if not (wrapped and named):
+                found.append(m.group(0))
+    return found
+
+
+def source_entries(skill: str) -> list:
+    value = front(REPO / "skills" / skill / "SKILL.md").get("source") or []
+    return value if isinstance(value, list) else [value]
+
+
+@pytest.mark.parametrize("skill", [s for s in SKILLS if s not in SOURCE_CODE_DEBT])
+def test_skill_source_private_codes_carry_a_name_in_code(skill):
+    assert source_code_gaps(source_entries(skill)) == []
+
+
+@pytest.mark.parametrize("skill", sorted(SOURCE_CODE_DEBT))
+def test_source_code_debt_is_still_owed(skill):
+    assert source_code_gaps(source_entries(skill)), f"`{skill}` hết nợ: gỡ nó khỏi SOURCE_CODE_DEBT"
+
+
+@pytest.mark.parametrize("bad", ["rewrite in SPR-04 TK10: old text", "see CO2 and RQ-021", "`TK10` rewrite", "`CO2`(x)", "`RQ-021` ()",
+                                 "`RF164` (a)", "TK11.2 (name)", "`TK11.2 (name)"])
+def test_source_code_without_code_span_or_name_is_caught(bad):
+    assert source_code_gaps([bad]), f"{bad!r} lọt"
+
+
+@pytest.mark.parametrize("good", ["`TK10` (clean-room rewrite task) in `SPR-04` (wave 3)", "`CO2` (before-public rewrite) and `RQ-021` (same)",
+                                  "affaan-m/ECC skills/api-design/SKILL.md", "concept: ISO/IEC/IEEE 29148 requirement identifiers",
+                                  "concept: BLUF (US Army AR 25-50)", "`TK11.2` (second item)"])
+def test_source_code_in_the_right_form_is_not_blocked(good):
+    assert source_code_gaps([good]) == []
+
+
+# TK12.1 (6): nhãn mức viết thường kiểu nguồn (`high`, `critical`) trong tệp thử phải nằm trong dấu code, không để trần (RF136, RF165).
+BARE_LEVEL = re.compile(r"(?<![\w`])(?:high|critical)(?![\w`])")
+
+
+def bare_level_labels(text: str) -> list:
+    out = []
+    for no, line in enumerate(text.splitlines(), 1):
+        stripped = re.sub(r"`[^`]*`", "", line)
+        out.extend(f"{no}: {m.group(0)}" for m in BARE_LEVEL.finditer(stripped))
+    return out
+
+
+@pytest.mark.parametrize("path", TEST_FILES, ids=IDS)
+def test_test_file_level_labels_are_in_code_spans(path):
+    assert bare_level_labels(c.read_text(path)) == []
+
+
+def test_bare_level_label_is_caught_and_code_span_is_not():
+    assert bare_level_labels("cỡ lớn, rủi ro high: Không đạt") == ["1: high"]
+    assert bare_level_labels("mức critical còn mở") == ["1: critical"]
+    assert bare_level_labels("cỡ lớn, rủi ro `high`: Không đạt\nhighlight, criticality") == []
+    assert bare_level_labels("`risk: high` và mức `critical`") == []
+
+
+# TK12.1 (7): `result` của tệp truy xuất viết tiếng Anh như `result` của `pressure.md`, không chứa mã hồ sơ riêng (RF166, RF164).
+def test_retrieval_result_is_in_english_without_private_codes():
+    sample = retrieval_result(_table("Đạt", "Đạt", "Đạt", "Đạt", "Đạt"))
+    assert sample == ("strict 6/6 (+0 partial, 0 fail) — at threshold (≥4/5 scenario questions strict pass and the boundary "
+                      "question strict pass); points-right 6/6")
+    assert not re.search(r"[À-ỹ]", sample) and not PRIVATE_CODE.search(sample)
+
+
+@pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
+def test_real_retrieval_result_has_no_vietnamese_or_private_code(path):
+    result = str(front(path)["result"])
+    assert not re.search(r"[À-ỹ]", result) and not PRIVATE_CODE.search(result), result
 
 
 def write_skill(repo, kind: str, body: str):

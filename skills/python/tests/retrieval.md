@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: 93927b63539f410932e88592bb6c6d1dac0ca10b
 date: 2026-10-04
-result: "strict 6/6 (+0 partial, 0 fail) — at threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); points-right 6/6"
+result: "strict 6/6 (+0 partial, 0 fail) — at threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 6/6"
 agent_ids:
   questions: "bộ câu cũ giữ nguyên, không soạn mới"
   answers: a26cd825a62c1e64e

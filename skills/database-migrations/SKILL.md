@@ -5,7 +5,7 @@ metadata:
   group: technique
   kind: reference
   roles: [implementer, tech-reviewer]
-source: [affaan-m/ECC skills/database-migrations/SKILL.md, "concept: migration rehearsal on a production-sized copy (references/rehearsal.md, clean-room rewrite in SPR-04 TK10: old text removed first, new writer saw only a noun-phrase idea list)"]
+source: [affaan-m/ECC skills/database-migrations/SKILL.md, "concept: migration rehearsal on a production-sized copy (references/rehearsal.md, clean-room rewrite: old text removed first, new writer saw only a noun-phrase idea list; task `TK10` (clean-room rewrite), sprint `SPR-04` (method wave 3))"]
 source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, null]
 base_sha: 3599962a013653191c41676021c7e7dc519ee351
 license: [MIT, none]
