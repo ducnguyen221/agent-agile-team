@@ -40,7 +40,9 @@ chỉ là tài liệu thì bỏ khía cạnh ngôn ngữ.
 **Pha 2 — review song song.** Các reviewer chạy cùng lúc, mỗi bên **không thấy** bên kia. Việc chờ đủ cả bộ trước khi
 gộp là có chủ đích: các reviewer độc lập hay báo trúng cùng một dòng, nên phải có đủ bộ mới gộp được. Mỗi reviewer:
 
-- chỉ báo vấn đề **chắc là có thật**; không chắc thì mức tối đa Ghi chú ([severity.md](severity.md) mục 1);
+- chỉ báo vấn đề **chắc là có thật**; không chắc thì mức tối đa Ghi chú ([severity.md](severity.md) mục 1) — trừ lỗ hổng
+  bảo mật mà nếu đúng là Chặn: tin cậy 5–6 vẫn vào danh sách chính với nhãn "cần kiểm", giữ mức để pha 4 kiểm đối kháng
+  (`agents/code-reviewer.md`);
 - mỗi `RF` mang mức, `file:dòng`, **đoạn mã hoặc vị trí chính xác**, và với Chặn / Phải sửa thêm **chứng minh hậu quả**
   (vì sao nó là lỗi thật); thiếu bằng chứng hay chứng minh thì hạ mức hoặc bỏ;
 - được trả **0 phát hiện** và phải ghi phần không đánh giá ([evidence.md](evidence.md) mục 7);
