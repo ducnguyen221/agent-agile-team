@@ -94,3 +94,30 @@ gật). Archive hồ sơ không có nghĩa đã kiểm trên production.
 - `VR` do QA chạy chỉ tính là độc lập khi nhãn `qa` khác nhãn `implementer`/`architect` của cùng sản
   phẩm. Trùng nhãn → mỗi `VR` ghi "tự kiểm, chưa độc lập"; kết luận của sprint tối đa **Đạt có điều
   kiện** cho tới khi agent khác chạy lại.
+
+## 8. Cổng giao hàng — kiểm cơ học trước khi trình Cổng 2
+
+Review (agent khác đọc, chấm) và **cổng giao hàng** là hai lớp khác nhau, chồng lên nhau. Review chấm chất lượng nội
+dung — đúng, đủ, trung thực. Cổng giao hàng chỉ kiểm **sự thật máy kiểm được**: lệnh chạy ra mã thoát nào, hồ sơ có
+nhất quán không, một câu "né" có xuất hiện không. Không suy luận, không đoán ý. Giống cổng của hệ CI: không tin lời
+tự báo, chỉ tin thứ đo được. Cổng này là **luật văn bản**, không cần hook hay thành phần chạy nền nào.
+
+KHI sắp trình Cổng 2 (và trước khi đánh dấu một `TK` là xong) THÌ người điều phối (hoặc QA) chạy đủ năm kiểm sau, ghi
+kết quả vào PROGRESS:
+
+| Kiểm | Cách kiểm cơ học | Trúng thì |
+|---|---|---|
+| Lệnh kiểm của dự án | build, test cả bộ, lint, kiểm kiểu vừa chạy **trên đúng mốc đang giao**; mã thoát 0 (vòng gỡ sửa → hỏng của mục 4 cho test hồi quy) | **Chặn** — chưa trình Cổng 2 |
+| Hồ sơ nhất quán | `scripts/check.py` trên thư mục sprint (và `--self` nếu sửa chính repo phương pháp): Đạt | **Chặn** nếu có mức Chặn/Phải sửa; Nên sửa → ghi `CO` |
+| Mốc còn tươi | commit, spec và toolchain hiện tại bằng mốc ghi trong `VR` (mục 3); working tree sạch hoặc diff chưa commit đã ghi | `VR` hết hạn → **Chưa chạy**, chạy lại |
+| Tài nguyên đủ để kiểm | đĩa, bộ nhớ, hạn mức công cụ đủ chạy phép kiểm; không đủ thì phép kiểm không chạy được | `VR` là **Chưa chạy** kèm giới hạn (mục 2), không phải Đạt |
+| Câu né (xem dưới) | tìm theo mẫu chữ trong báo cáo và PROGRESS | **Ghi chú → Phải sửa** tuỳ ngữ cảnh; chỉ cảnh báo, không tự chặn |
+
+**Câu né** là dấu hiệu việc kiểm bị cắt ngắn: "bỏ qua test lần này", "lỗi có từ trước", "để sau", "chắc chạy được", "chỉ
+là cảnh báo", "test chậm nên tắt". Tìm bằng mẫu chữ nên **có thể báo nhầm** — nhầm thì reviewer đọc ngữ cảnh và bỏ
+cảnh báo; cổng này **không bao giờ tự chặn chỉ vì câu né**. Còn câu né mà đúng là một phép kiểm bị bỏ thì xử như câu "đỏ"
+ở mục 5.
+
+**Giới hạn.** Cổng cơ học chứng minh hồ sơ **nhất quán** và lệnh **đã chạy**, không chứng minh nội dung **đúng**.
+Mọi `VR` vẫn cần agent khác chạy (mục 7); cổng giao hàng không thay review, và review không thay cổng — cái này bắt thói
+quen cắt ngắn, cái kia bắt lỗi nghĩa. Hai lớp chồng nhau mới thành phòng thủ nhiều tầng.
