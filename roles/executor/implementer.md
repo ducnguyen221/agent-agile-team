@@ -55,4 +55,6 @@ không tự giả định được (trạng thái "thiếu ngữ cảnh", nêu r
 ## 8. Skill dùng
 `tdd` (+ `references/good-tests.md`) · `debugging` · `verify-before-done` · `code-review` (phần tiếp
 nhận) · `worktrees` · `python` · `fastapi` · `postgres` · `error-handling` · `github-ops` ·
-`database-migrations` · `response-style` · `id-convention` · `token-economy`.
+`database-migrations` · `response-style` · `id-convention` · `token-economy`. Chuẩn code của ngôn ngữ đang viết:
+[method/standards/](../../method/standards/README.md) (chuẩn chung `common/` + `python.md` / `typescript.md` / `react.md` /
+`web.md`); chuẩn **không** nạp vào `AGENTS.md`, đọc khi viết ngôn ngữ đó.

@@ -16,6 +16,7 @@
 | QA | Thực thi | T3 | `qa` | [executor/qa.md](executor/qa.md) |
 | Business Reviewer | Kiểm định | T1 | `business-reviewer` | [verifier/business-reviewer.md](verifier/business-reviewer.md) |
 | Tech Reviewer | Kiểm định | T1 | `tech-reviewer` | [verifier/tech-reviewer.md](verifier/tech-reviewer.md) |
+| Dual Review (hai reviewer độc lập cùng rubric, cho việc có `risk_tags` `rules` / `secret` / `auth`) | Kiểm định | T1 | `tech-reviewer` (+ lời ghi reviewer thứ hai ở `note`) | [verifier/dual-review.md](verifier/dual-review.md) |
 | Chuyên đề security · data · backend · frontend | Kiểm định | T1 | `<tên>-specialist` | [verifier/specialists/](verifier/specialists/) |
 
 ## Luật chung cho mọi vai
@@ -35,5 +36,5 @@
   [skills/id-convention](../skills/id-convention/SKILL.md), và tiết kiệm ngữ cảnh theo
   [skills/token-economy](../skills/token-economy/SKILL.md).
 
-Tên skill trong các thẻ là tên trong repo này; skill chưa có trong đợt hiện tại thì thẻ vẫn giữ tên để
-đợt distill sau điền đúng chỗ.
+Tên skill trong các thẻ là tên trong repo này (thư mục `skills/`); tên agent ở mục "Skill dùng" của thẻ chuyên đề
+là tên file trong [agents/](../agents/README.md).
