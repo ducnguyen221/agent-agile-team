@@ -27,7 +27,7 @@
 - **QA cũng phải độc lập với người làm:** nhãn `qa` khác nhãn `implementer` và `architect`. Nếu trùng
   (việc **rất nhỏ**, một agent kiêm), mỗi `VR` ghi "tự kiểm, chưa độc lập" và kết luận tối đa là **Đạt có
   điều kiện** cho tới khi agent khác chạy lại. Cỡ nhỏ trở lên không tự kiểm: cỡ nhỏ có **một** reviewer khác
-  người làm; `qa` trùng nhãn người làm ở cỡ đó là lỗi `qa-not-independent` (`check` báo khi `VR` không ghi tự kiểm).
+  người làm; `qa` trùng nhãn người làm ở cỡ đó là lỗi (`check` chỉ bắt khi `VR` không ghi tự kiểm; ghi tự kiểm ở cỡ nhỏ trở lên vẫn là Phải sửa, do người đọc hồ sơ bắt).
 - Trong việc nhỏ và rất nhỏ, một agent được giữ **nhiều vai thực thi**; Analyst luôn là điều phối.
 - Vai được giao theo **tier**, không theo tên model ([tiers/README.md](../tiers/README.md)); model thực
   tế ghi vào PROGRESS khi giao việc.

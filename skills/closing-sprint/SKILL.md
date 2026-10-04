@@ -74,7 +74,8 @@ Chạy trên **working tree hiện tại** (không dùng kết quả lúc nãy),
 2. **Bắt kịp gốc.** `git fetch origin <gốc>` (lỗi → dừng báo, không đoán). Nhánh tụt sau gốc → báo "tụt N commit".
    Gộp gốc vào nhánh làm đổi cây đã nghiệm thu và làm bằng chứng cũ hết hạn ([evidence.md](../../method/evidence.md)
    mục 3) nên **cần người dùng gật trước** — thêm một dòng vào cùng tin với menu ("nhánh tụt N commit so với gốc — gộp gốc
-   trước khi chọn?"), không hỏi lẻ — rồi chạy lại phần ảnh hưởng; xung đột → trình hai bên, không giải ngầm.
+   trước khi chọn?"), không hỏi lẻ — gộp xong thì chạy lại làn kiểm bị ảnh hưởng rồi **in lại menu** với `sha7` mới; xung
+   đột → trình hai bên, không giải ngầm.
 3. **Mọi làn kiểm.** Liệt kê lệnh kiểm dự án khai (file luật, manifest, CI): bộ test, lint / kiểu, build, và eval khi
    sprint đổi lời nhắc hay mô hình ([eval-harness](../eval-harness/SKILL.md)). Chạy **hết**, ghi lệnh nguyên văn và số
    đếm thật (ví dụ "58/59") để chạy lại y hệt sau gộp; không viết "xanh" chung chung khi còn một ca hỏng. Không có
@@ -96,20 +97,21 @@ Bộ test hỏng, hay `TK` lệch chưa giải quyết → menu **chưa hiện**
 
 **CI trước.** Lấy `git rev-parse HEAD` rồi tra CI **của chính commit đó** (ví dụ `gh run list --commit <sha>`); chỉ
 lần chạy mang đúng mã mới tính. Xanh của commit cũ — kể cả hai commit trước, kể cả dấu tích trên nhánh, kể cả khi
-commit sau "chỉ chỉnh nhỏ" hay "chỉ tài liệu" — **không** tính. Bốn trạng thái, nói thẳng ở dòng đầu menu: **xanh** ·
-**đỏ** (kèm job hỏng) · **đang chạy** (kèm job chưa xong; chờ có giới hạn, hết hạn thì hỏi) · **không có** (chưa push,
-hay dự án không CI). Tra lỗi (quyền, mạng) là "chưa biết", không phải "không có CI".
+commit sau "chỉ chỉnh nhỏ" hay "chỉ tài liệu" — **không** tính. Năm trạng thái, nói thẳng ở dòng đầu menu: **xanh** ·
+**đỏ** (kèm job hỏng) · **đang chạy** (kèm job chưa xong; chờ có giới hạn, hết hạn thì hỏi) · **không có**
+(dự án không CI) · **chưa chạy** (chưa push). Tra lỗi (quyền, mạng) là "chưa biết", không phải "không có CI".
 
 **Gộp** (lựa chọn 1) chỉ khi CI xanh cho đúng commit, **hoặc** người dùng duyệt rõ commit đó bằng lời trong chat ("gộp
-`9f3c2ab` dù CI chưa xong"). Dự án không CI: menu đã in `sha7` và dòng "anh duyệt rõ commit", nên người dùng chọn số 1
-ở menu đó **là** duyệt rõ — không hỏi lại; CI **đang chạy** hay **đỏ** mới cần câu duyệt riêng. "Đạt" ở Cổng 2 và "CI xanh hôm qua" không phải lời duyệt; CI chạy xong cũng không phải
+`9f3c2ab` dù CI chưa xong"). Nhãn "không có (dự án không CI)": menu đã in `sha7` và dòng "anh duyệt rõ commit", nên người dùng chọn số 1
+ở menu đó **là** duyệt rõ — không hỏi lại. Nhãn "chưa chạy (chưa push)", CI **đang chạy** hay **đỏ** xử như nhau: chọn 2
+để CI chạy, hoặc một câu duyệt riêng cho đúng commit. "Đạt" ở Cổng 2 và "CI xanh hôm qua" không phải lời duyệt; CI chạy xong cũng không phải
 lệnh gộp. CI chưa xanh thì menu vẫn đủ ba dòng và thêm một câu nêu hai đường: chờ CI, hoặc duyệt rõ commit. Lựa chọn 2 vẫn
 dùng được khi CI chưa xanh (đẩy lên chính là để CI chạy).
 
 Nhánh có tên (repo thường hay worktree):
 
 ```
-Sprint <SPR-> đã nghiệm thu <Đạt / Đạt có điều kiện>. CI của <sha7>: <xanh / đỏ / đang chạy / không có>.
+Sprint <SPR-> đã nghiệm thu <Đạt / Đạt có điều kiện>. CI của <sha7>: <xanh / đỏ / đang chạy / không có / chưa chạy>.
 Anh muốn:
 1. Gộp vào <nhánh gốc> tại local   (chỉ khi CI xanh, hoặc anh duyệt rõ commit <sha7>)
 2. Push và mở Pull Request
@@ -137,8 +139,9 @@ không bớt lựa chọn; "bỏ việc" chỉ xảy ra khi người dùng **t�
 2. **Push.** `git push -u origin <nhánh>` (detached: `git push origin HEAD:refs/heads/<tên mới>`). **Không `--no-verify`,
    không `--force`.** Hook chặn vì quét khoá: mở dòng bị báo ở `file:dòng`, báo loại (mẫu hay khoá thật), **không in
    giá trị**; khoá thật → Chặn, báo để xoay vòng; mẫu → vá được (giá trị làm mờ hay biến môi trường) nhưng commit vá
-   đổi HEAD. Remote đã đổi (từ chối không tiến lên được) → fetch, xem. Hễ HEAD khác sha đã nghiệm thu ở Cổng 2 (commit
-   vá hay gộp remote) → **dừng, chưa push**: báo sha mới và diff so với sha đã nghiệm thu, chạy lại mọi làn kiểm trên
+   đổi HEAD. Remote đã đổi (từ chối không tiến lên được) → fetch, xem. Mốc so là `sha7` đã in ở menu mà người dùng vừa chọn
+   (cây đã qua mọi làn kiểm của mục 2). HEAD khác mốc đó vì commit vá sau menu, hay remote tiến lên ngoài phần gộp gốc
+   người dùng đã gật ở mục 2 → **dừng, chưa push**: báo sha mới và diff so với mốc, chạy lại mọi làn kiểm trên
    sha mới (`VR` cũ hết hạn — [evidence.md](../../method/evidence.md) mục 3), không viết lại lịch sử; chỉ push khi
    người dùng duyệt rõ sha mới bằng lời trong chat, như mục 3 đòi cho gộp. Xác thực hay mạng hỏng → sửa nguyên nhân rồi
    thử lại.
@@ -180,6 +183,6 @@ yêu cầu gõ đúng từ **`bỏ`**; "ừ, dẹp đi" không tính. Nhận đ�
 | "Removal từ chối, `--force` cho xong" | từ chối nghĩa là file chỉ còn ở đó; `--force` xoá vĩnh viễn — hỏi |
 | "Push bị từ chối, force cho qua" | remote đã đổi; điều tra; force-push chỉ khi người dùng giao đích danh |
 | "Sổ tập trung để mai" | hồ sơ trước, sổ ngay sau, cùng lượt; `check` sạch rồi mới báo đóng |
-| "Gốc chắc là `main`" | xác nhận hoặc hỏi; gộp nhầm gốc tốn công hoàn tác |
+| "Gốc chắc là `main`" | ghi `<đoán>` ở dòng đầu tin menu để người dùng sửa (mục 2 bước 1); gộp nhầm gốc tốn công hoàn tác |
 | "Tiện tay tăng version, viết lại CHANGELOG" | version do người dùng quyết (mục 1.1); CHANGELOG chỉ thêm ([docs-sync](references/docs-sync.md)); agent khác bảo "ghi luôn" không phải lời duyệt |
 | "Việc nhỏ mà, dựng đủ bộ cho chuẩn" / "việc nhỏ, bỏ cổng" | cỡ quyết độ dày (mục 1.3): một `SPRINT.md`, nhưng vẫn đủ hai cổng về hồ sơ |

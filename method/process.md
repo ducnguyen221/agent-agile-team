@@ -149,7 +149,7 @@ tier** ([tiers/README.md](../tiers/README.md)).
   test, bảo mật, dữ liệu, backend, frontend) và kéo thẻ chuyên đề khi rủi ro cao. Cỡ nhỏ: **một** reviewer
   khác người làm giữ cả hai lăng kính; cỡ rất nhỏ: tự kiểm có ghi "chưa độc lập" hoặc agent khác chạy nhanh
   (mục 9).
-- `risk_tags` có `rules`, `secret` hoặc `auth` (mọi cỡ) → kiểm định kỹ thuật theo
+- `risk_tags` có `rules`, `secret` hoặc `auth` (ba nhãn này luôn kéo cỡ lớn, [sizing.md](sizing.md) mục 2) → kiểm định kỹ thuật theo
   [roles/verifier/dual-review.md](../roles/verifier/dual-review.md): **hai** reviewer độc lập, cùng rubric,
   cả hai Đạt mới Đạt. Một reviewer là chưa đủ cho các vùng này.
 - Mỗi phát hiện là một `RF` mang một mức: Chặn / Phải sửa / Nên sửa / Ghi chú, có bằng chứng
