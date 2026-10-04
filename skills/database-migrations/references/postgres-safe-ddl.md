@@ -163,3 +163,59 @@ trị cũ từ nguồn đáng tin, rồi đưa về bằng migration dữ liệu
    tại **vẫn bằng giá trị sai** do lệnh đó sinh ra — dòng người dùng đã sửa hợp lệ sau đó thì giữ nguyên.
 6. Chạy trên dữ liệu thật là hành động không đảo ngược: runbook (phạm vi, câu lệnh, cách kiểm) trình người dùng
    gật trước. Kiểm sau cùng: số dòng và tổng kiểm trên cột liên quan khớp với bản cũ.
+
+## 9. Thêm unique index khi dữ liệu có thể đã trùng
+
+Dựng unique index trên bảng đã có dữ liệu mà có dòng trùng thì **thất bại** — và nếu dùng `CONCURRENTLY` thì để lại index
+`INVALID` (mục 2). Thứ tự: tìm trùng → quyết giữ/bỏ → dọn → chặn trùng mới → dựng index → kiểm hợp lệ.
+
+1. **Tìm và đo.** Chuẩn hoá đúng cách unique sẽ so (ví dụ không phân biệt hoa thường thì so `lower(email)`; khoảng trắng
+   thừa; `NULL` — mặc định Postgres coi các `NULL` là khác nhau nên không đụng unique, muốn coi `NULL` là trùng thì
+   `NULLS NOT DISTINCT` ở bản có hỗ trợ):
+
+```sql
+SELECT lower(email) AS email_chuan, count(*) AS so_dong, min(id) AS id_nho_nhat, max(id) AS id_lon_nhat
+FROM users GROUP BY lower(email) HAVING count(*) > 1 ORDER BY so_dong DESC;
+```
+
+2. **Chọn dòng giữ — quyết định nghiệp vụ**, không phải của migration (như dòng mồ côi ở mục 6): thường giữ dòng mới cập nhật nhất
+   (hoặc đầy đủ nhất), nhưng hai dòng có thể mang dữ liệu khác nhau (đơn hàng gắn vào cả hai, hồ sơ khác nhau). Chốt quy tắc với
+   chủ dữ liệu trước; dòng cần **gộp** (không chỉ xoá) thì chuyển bảng con trỏ vào dòng bị bỏ sang dòng giữ trước khi xoá.
+3. **Lưu bản sao rồi mới xoá:**
+
+```sql
+CREATE TABLE users_dedup_removed AS            -- bản lưu dòng bị bỏ, để khôi phục nếu quy tắc sai
+SELECT u.* FROM users u
+WHERE u.id IN (SELECT id FROM (SELECT id, row_number() OVER (PARTITION BY lower(email) ORDER BY updated_at DESC, id) AS rn
+                                FROM users) r WHERE r.rn > 1);
+-- xoá theo lô (mục 5), từng lô kiểm số dòng bị xoá bằng số dòng đã dự tính
+DELETE FROM users WHERE id IN (SELECT id FROM users_dedup_removed WHERE id > :last_id ORDER BY id LIMIT 5000);
+```
+
+   (mẫu `row_number()` đã chạy thử trên SQLite — logic chọn dòng giữ: cùng nhóm, `updated_at` mới nhất, hoà thì `id` nhỏ nhất.)
+4. **Chặn trùng mới trước hoặc song song:** nếu ứng dụng vẫn ghi trùng được thì dọn xong trùng lại xuất hiện. Đưa ứng dụng
+   sang cách ghi chuẩn hoá (`INSERT … ON CONFLICT`, `lower()` khi lưu) **trước** khi dựng index; tài liệu Postgres cảnh báo khi dựng
+   unique index đồng thời, ràng buộc đã có hiệu lực với giao dịch khác từ lượt quét thứ hai — vi phạm có thể báo ở truy vấn
+   khác ngay cả khi dựng cuối cùng thất bại.
+5. **Dựng index đồng thời:**
+
+```sql
+SET lock_timeout = '5s';
+CREATE UNIQUE INDEX CONCURRENTLY uq_users_email_lower ON users (lower(email));
+-- kiểm hợp lệ: không được còn index INVALID
+SELECT indexrelid::regclass FROM pg_index WHERE NOT indisvalid;
+-- INVALID → DROP INDEX CONCURRENTLY uq_users_email_lower; dọn nốt dòng trùng còn sót; dựng lại (hoặc REINDEX INDEX CONCURRENTLY)
+```
+
+6. **Muốn thành ràng buộc `UNIQUE`** (ví dụ để làm đích cho khoá ngoại): dựng index trước rồi gắn —
+   `ALTER TABLE users ADD CONSTRAINT uq_users_email UNIQUE USING INDEX uq_users_email_lower;` — thao tác nhanh, không chặn
+   ghi lâu (tài liệu Postgres dùng đúng cách này). Điều kiện: index unique, b-tree thường, **không** một phần (`WHERE`) và
+   **không** biểu thức (`lower(...)`) — index theo biểu thức giữ nguyên là index unique, không gắn được thành ràng buộc; muốn
+   ràng buộc thì lưu cột đã chuẩn hoá (cột sinh sẵn hay lưu sẵn chữ thường) rồi đánh index trên cột đó.
+7. Trong Alembic: tách thành các revision (dọn dữ liệu, rồi dựng index trong khối autocommit như mục 4 của `SKILL.md` với
+   `unique=True, postgresql_concurrently=True`); `downgrade` chỉ `DROP INDEX`, **không** khôi phục dòng đã xoá (dùng
+   bảng lưu ở bước 3). Bảng lưu giữ đến khi hết cửa sổ khôi phục đã thoả thuận rồi mới bỏ (migration riêng).
+
+Nguồn: tài liệu PostgreSQL (`CREATE INDEX` — mục CONCURRENTLY: hai lượt quét, index `INVALID` khi thất bại, lưu ý unique;
+`ALTER TABLE` — `ADD table_constraint_using_index`). Câu chọn dòng giữ đã chạy thử logic trên SQLite; các lệnh `CONCURRENTLY`
+chưa chạy trên Postgres thật trong lượt này.

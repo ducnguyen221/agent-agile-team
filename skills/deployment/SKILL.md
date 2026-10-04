@@ -1,6 +1,6 @@
 ---
 name: deployment
-description: Use when containerizing an app, writing or reviewing a Dockerfile or compose file, setting up a CI/CD pipeline, adding health checks or probes, choosing a rollout strategy (rolling, blue-green, canary), planning a rollback, validating environment config, debugging a container, or preparing a production release.
+description: Use when containerizing an app, writing or reviewing a Dockerfile or compose file, setting up a CI/CD pipeline (including multi-service), adding health checks or probes, choosing a rollout strategy (rolling, blue-green, canary), planning a rollback or roll-forward, validating environment config, debugging a container, or preparing a production release.
 metadata:
   group: technique
   kind: reference
@@ -32,7 +32,7 @@ rewrite_before_public: false
 - Rolling và canary để **hai bản cùng đọc ghi một CSDL**: schema phải hợp với cả hai — mở rộng trước, chuyển
   dữ liệu, thu hẹp ở đợt sau (skill `database-migrations`). Không đạt điều đó → blue-green có khoảng bảo trì,
   hoặc tách thay đổi schema ra một lần deploy riêng.
-- Phân vân giữa hai chiến lược → chọn cái hoàn tác nhanh hơn.
+- Phân vân giữa hai chiến lược → chọn cái hoàn tác nhanh hơn. Sau sự cố, quay lui hay vá tiến: `references/roll-forward-and-multi-service-ci.md` mục 1.
 
 Sơ đồ lưu lượng từng chiến lược: `references/deployment-strategies.md`.
 
@@ -109,6 +109,7 @@ Mức là gợi ý theo **hậu quả nếu bỏ qua**; quyết cuối theo `met
 | Dockerfile nhiều tầng (Node.js, Go, Python/Django), nên và không nên; chọn base slim/alpine/distroless; quyền ghi khi `USER` không root | `references/dockerfiles.md` |
 | Pipeline GitHub Actions, các chặng pipeline + quét Trivy, endpoint health, probe Kubernetes + `terminationGracePeriodSeconds`/`preStop`/`maxUnavailable`, cấu hình twelve-factor + kiểm, lệnh hoàn tác, điều tra `CrashLoopBackOff` | `references/cicd-health-config.md` |
 | Luật Docker/Compose, debug theo mã thoát, lỗi hay gặp, harness kiểm trình cài đặt cô lập | `references/docker.md` |
+| Vá tiến hay quay lui sau sự cố (tiêu chí, ngưỡng, hạn chót), cột `NOT NULL` đã thêm mà bản mới hỏng; pipeline nhiều dịch vụ: chỉ build dịch vụ đổi, ma trận theo dịch vụ, cache Docker theo dịch vụ, song song hoá job | `references/roll-forward-and-multi-service-ci.md` |
 | Stack Compose cho dev; mạng, volume, bảo mật container | `references/docker-compose-dev.md`, `references/docker-network-volume-security.md` |
 
 Liên quan: skill `github-ops` (workflow CI), `security-review` và agent `security-reviewer` (secret, CVE,

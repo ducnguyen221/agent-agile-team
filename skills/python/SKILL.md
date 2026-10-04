@@ -1,6 +1,6 @@
 ---
 name: python
-description: Use when writing, reviewing, or refactoring Python code, designing a Python package or module, setting up Python tooling (uv, ruff, mypy, pytest), or writing and reviewing pytest tests — fixtures, mocks, parametrization, async tests.
+description: Use when writing, reviewing, or refactoring Python code, designing a Python package or module, setting up or migrating Python tooling (uv, ruff, mypy, pytest, multi-version CI), choosing dataclass vs pydantic vs TypedDict, limiting async concurrency, or writing and reviewing pytest tests — fixtures, mocks, parametrization, async tests.
 metadata:
   group: technique
   kind: reference
@@ -92,7 +92,9 @@ uv run --with pip-audit pip-audit        # audit lỗ hổng phụ thuộc
 
 - Commit `uv.lock`; CI chạy `uv sync --locked` để phụ thuộc không trôi.
 - Không sửa cấu hình ruff/mypy/pytest hay hạ ngưỡng coverage chỉ để qua kiểm.
-- Cấu hình đầy đủ `pyproject.toml`: `references/packaging-and-tooling.md`.
+- Cấu hình đầy đủ `pyproject.toml`: `references/packaging-and-tooling.md`. Chuyển từ `requirements.txt`/`pip-tools`
+  sang uv, cache uv trong CI, kiểm nhiều phiên bản Python (ma trận CI, `nox`, `tox`):
+  `references/uv-migration-and-multiversion-ci.md`.
 - Chuẩn mã Python bắt buộc của dự án (kiểu, lint, định dạng, ngưỡng): `method/standards/python.md` — file này có
   khi gộp làn chuẩn; chi tiết trong đó thắng skill này khi hai bên khác nhau.
 
@@ -112,6 +114,8 @@ uv run --with pip-audit pip-audit        # audit lỗ hổng phụ thuộc
 | Bắt và nối ngoại lệ, cây ngoại lệ riêng, context manager (`@contextmanager`, `__enter__`/`__exit__`), decorator (hàm, có tham số, dạng lớp) | `references/errors-context-decorators.md` |
 | Comprehension vs generator; thread vs process vs asyncio; `__slots__`; ghép chuỗi hiệu quả; `lru_cache`; đo bằng `cProfile`/`tracemalloc` | `references/generators-concurrency-performance.md` |
 | Bố cục `src/`, thứ tự import, export trong `__init__.py`, `pyproject.toml` đầy đủ (uv, ruff, mypy, pytest); `[project.scripts]` + `__main__.py` + `uv build`; gỡ vòng import | `references/packaging-and-tooling.md` |
+| Chọn `dataclass` / `TypedDict` / pydantic / `attrs`; `Literal` + union phân biệt + `match` kiểm đủ nhánh; parse `dict` thô theo trường `type`; async nhiều URL với `Semaphore`, giới hạn tốc độ, timeout | `references/data-modeling-and-async-limits.md` |
+| Chuyển `requirements.txt`/`pip-tools` sang `pyproject.toml` + `uv.lock`; cache uv trong GitHub Actions; ma trận nhiều phiên bản Python (`nox`, `tox`, `uv python install`); code chạy được ở Python 3.9 (`match`, `X \| Y`, `from __future__ import annotations`) | `references/uv-migration-and-multiversion-ci.md` |
 | Triết lý test, cấu trúc test pytest, assert, nên/không nên, lệnh chạy test | `references/testing.md` |
 | Fixture (scope, params, autouse, `conftest.py`), `monkeypatch`, test phụ thuộc thứ tự chạy, `parametrize`, marker | `references/testing-fixtures.md` |
 | Mock/patch (`autospec`, `side_effect`, `PropertyMock`), test async | `references/testing-mocking-async.md` |

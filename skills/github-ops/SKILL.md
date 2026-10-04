@@ -86,7 +86,8 @@ for n in 12 15 18; do gh issue comment "$n" --body "Bạn gửi giúp các bư�
 Kiểm từng PR: `gh pr checks <số>` (thêm `--required` để chỉ xem check bắt buộc; mã thoát 8 = còn check đang
 chạy) · `gh pr view <số> --json mergeable,reviewDecision,updatedAt` · tuổi và
 lần hoạt động cuối · PR >5 ngày chưa ai review → nêu trong báo cáo · PR cộng đồng phải có test và theo quy
-ước repo.
+ước repo. Người bị chờ review, thread chưa giải quyết, auto-merge, báo xung đột, đổi nhánh đích, đồng bộ fork →
+`references/pr-and-issue-queries.md`.
 
 Chỉ một trong nhiều check đỏ: lọc theo trường `bucket` (`pass`/`fail`/`pending`/`skipping`/`cancel`); `link`
 là đường tới log của check.
@@ -158,6 +159,8 @@ tự tăng version**, **không ghi đè CHANGELOG** — chỉ thêm mục dướ
    (bản thử nghiệm thêm `--prerelease`). Muốn người dùng xem bản phát hành trên GitHub trước khi công bố: thêm
    `--draft` (vẫn là ghi — cần được giao); `--verify-tag` làm lệnh dừng nếu tag chưa có trên remote;
    `--generate-notes --notes-start-tag v<trước>` nhờ GitHub sinh ghi chú (kèm người đóng góp) rồi sửa tay.
+5. Bản đã công bố mà sai (tag, ghi chú, thiếu file): `gh release edit` / `gh release upload`, có phần không sửa
+   được → `references/release-and-alerts.md`.
 
 ## 7. Cảnh báo bảo mật
 
@@ -168,7 +171,8 @@ gh pr list --label "dependencies" --json number,title    # PR cập nhật phụ
 ```
 
 - Cảnh báo mức cao của nhà cung cấp → quy về **Chặn** (lỗ hổng bảo mật) và báo ngay; secret bị lộ → báo để
-  xoay vòng khoá, không in lại giá trị.
+  xoay vòng khoá, không in lại giá trị. Đóng cảnh báo là false positive kèm lý do, và việc cần ghi nhận trước khi
+  xoay khoá → `references/release-and-alerts.md`.
 - Gói bị ảnh hưởng nằm ở `dependency.package` và `dependency.manifest_path`; bản vá đầu tiên ở
   `security_advisory.vulnerabilities[].first_patched_version`. Cảnh báo mở lâu → nêu số ngày mở trong báo cáo.
 - PR bump có CI đỏ: xem `gh pr checks <số>` rồi `gh run view <run-id> --log-failed` — test hỏng do bản mới hay
@@ -178,7 +182,14 @@ gh pr list --label "dependencies" --json number,title    # PR cập nhật phụ
   người dùng cho phép, **không bao giờ tự gộp**.
 - Kiểm cảnh báo mới ít nhất mỗi tuần nếu dự án giao việc theo dõi.
 
-## 8. Tự kiểm trước khi báo xong
+## 8. Đọc gì khi nào
+
+| Cần | Đọc |
+|---|---|
+| Một PR kẹt (người bị chờ review, thread chưa giải quyết, auto-merge, báo xung đột sau rebase), đổi nhánh đích của PR, đồng bộ fork, số liệu issue (đếm đóng, thời gian xử lý, im lặng lâu), quét nhiều repo của tổ chức | `references/pr-and-issue-queries.md` |
+| Sửa bản phát hành đã công bố (ghi chú, tiêu đề, tag, file đính kèm, bản bất biến); đóng cảnh báo secret-scanning với lý do, ghi nhận trước khi xoay khoá | `references/release-and-alerts.md` |
+
+## 9. Tự kiểm trước khi báo xong
 
 - Issue đã phân loại có mức và loại; bug cần làm đã có `RQ-`.
 - Không PR nào >7 ngày mà không có review hoặc comment (hoặc đã nêu trong báo cáo).

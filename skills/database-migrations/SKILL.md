@@ -1,6 +1,6 @@
 ---
 name: database-migrations
-description: Use when creating or altering tables, columns, indexes or constraints, writing a data backfill or data-fix script, planning a zero-downtime schema change, setting up migration tooling, reviewing a migration, or before a migration runs against production-sized or production data.
+description: Use when creating or altering tables, columns, indexes or constraints, writing a data backfill or data-fix script, planning a zero-downtime schema change, setting up migration tooling or a migration CI/CD step (including Rails), adding a unique index over possibly duplicate rows, reviewing a migration, or before a migration runs against production-sized or production data.
 metadata:
   group: technique
   kind: reference
@@ -101,7 +101,8 @@ import model ORM hiện hành vào migration — model đổi theo thời gian, 
 
 | Cần | Đọc |
 |---|---|
-| DDL an toàn trên Postgres: thêm/bỏ/đổi tên cột, index đồng thời, backfill bảng lớn theo lô, khoá ngoại + dòng mồ côi, đổi kiểu với dữ liệu hỏng, khôi phục sau `UPDATE` sai | [references/postgres-safe-ddl.md](references/postgres-safe-ddl.md) |
+| DDL an toàn trên Postgres: thêm/bỏ/đổi tên cột, index đồng thời, backfill bảng lớn theo lô, khoá ngoại + dòng mồ côi, đổi kiểu với dữ liệu hỏng, khôi phục sau `UPDATE` sai, **unique index khi dữ liệu có dòng trùng** (mục 9) | [references/postgres-safe-ddl.md](references/postgres-safe-ddl.md) |
+| Gắn migration vào pipeline CI/CD (kiểm trong PR, staging, production có duyệt), ai được chạy ở production, tài khoản CSDL riêng; Rails (`rails db:migrate`, `strong_migrations`, `disable_ddl_transaction!`) | [references/pipeline-and-rails.md](references/pipeline-and-rails.md) |
 | Diễn tập trên bản sao, đo khoá/độ trễ, runbook production, tiêu chí huỷ | [references/rehearsal.md](references/rehearsal.md) |
 | Django, golang-migrate (trạng thái dirty và `force`, trùng số phiên bản, quy ước đánh số) | [references/django-golang-migrate.md](references/django-golang-migrate.md) |
 | Prisma, Drizzle, Kysely (Node) | [references/orm-tooling-node.md](references/orm-tooling-node.md) |

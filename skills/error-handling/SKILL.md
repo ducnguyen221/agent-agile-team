@@ -1,6 +1,6 @@
 ---
 name: error-handling
-description: Use when designing error types or exception hierarchies, mapping errors to API responses, adding retry or backoff around an unreliable dependency, writing user-facing error messages, logging an exception, or reviewing code for swallowed errors or bad fallbacks.
+description: Use when designing error types or exception hierarchies, mapping errors to API responses, adding retry or backoff around an unreliable dependency, writing user-facing error messages, logging an exception, setting timeouts or bulkheads, shaping validation errors, handling failed long-running tasks, or reviewing code for swallowed errors or bad fallbacks.
 metadata:
   group: technique
   kind: reference
@@ -41,6 +41,9 @@ rewrite_before_public: false
 - Chỉ retry lỗi **thoáng qua** (5xx, mạng chập chờn), backoff mũ + jitter, có trần lần thử; **không bao
   giờ** retry 4xx. Retry ở một tầng; dependency hỏng kéo dài → ngắt mạch; mỗi mã lỗi có lớp và cờ "thử lại
   được" trong **một** bảng (`references/retry-and-user-messages.md` mục 4–5).
+- Timeout: một hạn chót ở tầng ngoài cùng, tầng trong nhỏ hơn phần còn lại; mỗi dependency một bulkhead riêng
+  (`references/timeouts-validation-and-long-tasks.md` mục 1). Lỗi nhập liệu trả `details` theo trường, không lộ tài
+  khoản có tồn tại (mục 2); tác vụ dài có trạng thái `failed` và nhịp tim (mục 3) cùng tệp đó.
 - Việc chạy qua hàng đợi: lỗi vĩnh viễn không retry, trần số lần nhận rồi chuyển sang hàng chờ lỗi có cảnh báo
   (`references/retry-and-user-messages.md` mục 6).
 - Dịch mã lỗi sang câu cho người dùng qua **một** bảng tra.
@@ -101,6 +104,7 @@ Secret lọt vào log hay response là phát hiện mức **Chặn**; báo để
 |---|---|
 | Python: phân cấp ngoại lệ + handler toàn cục FastAPI; Go: lỗi sentinel, bọc `%w`, `errors.Is` ở handler | `references/python-go-patterns.md` |
 | Retry có backoff + jitter + điều kiện retry (Python và TypeScript); bảng tra câu báo lỗi cho người dùng; phân loại mã lỗi + cờ thử lại được; retry một tầng, retry budget, ngắt mạch; hàng đợi, thông điệp độc, hàng chờ lỗi | `references/retry-and-user-messages.md` |
+| Timeout từng tầng và truyền hạn chót, bulkhead (trần đồng thời riêng cho mỗi dependency), cách chọn ngưỡng ngắt mạch; `details` theo trường cho lỗi nhập liệu, câu báo lỗi tiếng Việt, không lộ tài khoản có tồn tại (quên mật khẩu, đăng ký trùng email); tác vụ dài: trạng thái `failed`, nhịp tim phát hiện chết im lặng, thông báo người dùng, cho thử lại hay không | `references/timeouts-validation-and-long-tasks.md` |
 | TypeScript: lớp `AppError` (bẫy prototype chain), kiểu `Result`, handler lỗi Next.js/Express có `ZodError`, React `ErrorBoundary` | `references/typescript-patterns.md` |
 
 Liên quan: skill `python`, `fastapi`, `api-design`, `debugging` (truy lỗi lan tầng). Rà lỗi nuốt im lặng,

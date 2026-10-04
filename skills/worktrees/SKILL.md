@@ -1,6 +1,6 @@
 ---
 name: worktrees
-description: Use when starting work on a task that needs isolation from the current checkout, before executing a plan or a task brief, when several implementers work in parallel on one repo, or when finishing work and deciding how to clean up a worktree.
+description: Use when starting work on a task that needs isolation from the current checkout, before executing a plan or a task brief, when several implementers work in parallel on one repo, merging parallel task branches, creating a worktree from a tag or a PR branch, or when finishing work and deciding how to clean up a worktree.
 metadata:
   group: technique
   kind: reference
@@ -60,7 +60,7 @@ repo. Chưa muốn đụng file dùng chung (ví dụ đang ở nhánh chính kh
 `.git/info/exclude` (cục bộ, không commit), và đưa vào `.gitignore` ở nhánh làm việc.
 
 ```bash
-git worktree add .worktrees/<tên-thư-mục> -b <nhánh>
+git worktree add .worktrees/<tên-thư-mục> -b <nhánh> [<điểm-xuất-phát>]   # mặc định: nhánh hiện tại; tag/SHA: xem references
 ```
 
 **Tên nhánh.** Theo quy ước của dự án nếu có; chưa có thì `<loại>/<mã-việc>-<mô-tả-ngắn>` bằng chữ thường và dấu
@@ -69,8 +69,11 @@ Luật của git: không khoảng trắng, không `..`, không ký tự `~ ^ : ?
 hai nhánh không được lồng nhau (đã có `sprint/spr-04` thì không tạo được `sprint/spr-04/d` — dùng `sprint/spr-04-d`).
 Tên thư mục worktree nên là dạng phẳng (thay `/` bằng `-`) để khỏi sinh thư mục con.
 
+Xuất phát từ tag hay SHA (hotfix, xem bản cũ) → `references/integration-and-special-cases.md` mục 2.
+
 **Nhiều agent song song:** mỗi agent **một worktree và một nhánh riêng** (git từ chối checkout cùng một nhánh ở hai
-worktree), phạm vi file không giao nhau, mỗi agent nhận **đường dẫn tuyệt đối** worktree của mình. Không ai chạy
+worktree), phạm vi file không giao nhau (hai nhánh vẫn sửa chung một file thì xung đột lộ lúc gộp, xử lý ở
+`references/integration-and-special-cases.md` mục 1), mỗi agent nhận **đường dẫn tuyệt đối** worktree của mình. Không ai chạy
 `git checkout -b` trong thư mục dùng chung của người khác — index và cây làm việc là của từng worktree.
 
 Từ đây làm việc **trong** thư mục worktree đó bằng đường dẫn tuyệt đối; không `cd` sang worktree khác.
@@ -170,3 +173,12 @@ git worktree prune                      # dọn entry trỏ tới thư mục đ�
 | "`git worktree add` nhanh hơn tìm công cụ native" | Bỏ qua công cụ native là lỗi số một: tạo trạng thái ma harness không quản lý được |
 | "Thư mục worktree chắc đã bị bỏ qua" | Chạy `git check-ignore`. Thư mục chưa bỏ qua sẽ bị commit cả cây |
 | "Không gian mới tinh, baseline để sau" | Baseline bẩn làm mọi lỗi sau đó mơ hồ — chạy ngay |
+
+## 8. Đọc gì khi nào
+
+| Cần | Đọc |
+|---|---|
+| Hai worktree cùng sửa một file; gộp các nhánh task vào nhánh tích hợp (thứ tự, merge hay rebase, xung đột) | `references/integration-and-special-cases.md` mục 1 |
+| Tạo worktree/nhánh từ tag hay SHA; đưa hotfix về `main` | `references/integration-and-special-cases.md` mục 2 |
+| Submodule và Git LFS trong worktree phụ (khởi tạo, vì sao tăng dung lượng, cách giảm) | `references/integration-and-special-cases.md` mục 3 |
+| Xem hay chạy thử một nhánh PR rồi gỡ mà không để lại nhánh cục bộ (`--detach`) | `references/integration-and-special-cases.md` mục 4 |
