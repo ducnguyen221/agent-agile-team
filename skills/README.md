@@ -135,7 +135,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | discriminating scenarios RED 0/2 pass (2 partial); GREEN wq-1 partial (fails only code format `RF-A`), wq-2 pass | 2026-10-03 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
-| [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
+| [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
 | [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 8/8 GREEN pass | 2026-10-04 |
 | [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after the TK9 rewrite | 2026-10-03 |
 
