@@ -51,6 +51,7 @@ Dạng câu báo: `<lệnh>` → `<kết quả then chốt>` (mã thoát, số �
 | Agent khác làm xong | diff trong VCS + chạy lại phép kiểm | agent báo "thành công" |
 | Đạt yêu cầu | đối chiếu từng `FR`/`SC` (mục 6) | test xanh |
 | Coverage đạt ngưỡng | lệnh đo coverage + số | "đã viết thêm test" |
+| Sổ tập trung khớp hồ sơ (dự án khai `ledger.project`) | `check` mới chạy **sau khi ghi sổ**: không `ledger-stale`, không `ledger-missing-row` | lần `check` hôm qua, "chắc khớp", "ghi sổ lúc đóng sprint" |
 
 ## 4. Test hồi quy: vòng gỡ sửa → hỏng
 
@@ -70,6 +71,9 @@ Không gỡ được bản sửa an toàn (thay đổi lớn, nhiều file) → 
 - Implementer tự kiểm trước khi báo xong `TK` và ghi bằng chứng vào PROGRESS; `VR` dùng cho kiểm định do
   **agent khác** người làm chạy (QA hoặc reviewer). Cùng một agent → ghi "tự kiểm, chưa độc lập".
 - Mốc code, spec hoặc toolchain đổi → bằng chứng cũ hết hạn cho phần bị ảnh hưởng; chạy lại.
+- Dự án khai sổ tập trung: trước khi báo xong `TK` hay sẵn sàng Cổng 2, trạng thái và ngày ở dòng sổ phải khớp PROGRESS
+  (`method/process.md` mục 11). Chưa khớp → ghi sổ rồi chạy lại `check`, dẫn kết quả vào lời báo; không chạy được thì
+  phần sổ là Chưa chạy.
 - Output dài lưu `.tmp/` của sprint, trong tài liệu chỉ giữ dòng then chốt + đường dẫn.
 
 ## 6. Đạt yêu cầu ≠ test xanh

@@ -3,9 +3,9 @@ skill: running-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 50e6b5dd2f906765e0e0d4e13766bc8e86e123fe
+skill_sha: d2be803f549dbcdf5de5f65ec8d91bfb3bd78bd8
 date: 2026-10-04
-result: 5/5 GREEN pass; RED on the 2 new scenarios (rs-5, rs-6) 1/2 pass (rs-5 partial, rs-6 passed already)
+result: 6/6 GREEN pass; RED on the new scenario rs-7 partial (0/1 pass); earlier rs-5 partial, rs-6 passed already
 agent_ids:
   red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c, rs-5: a85924e1b63b35a7d, rs-6: a931196ba49c182b7}
   green: {rs-2: a50fbf9b9a102fe43, rs-3: a57d5e1bf1b2f50c5, rs-4: adf66375595ac80e4, rs-5: a7168adbe0f810772, rs-6: a6db9c9d7225d1989}
@@ -73,6 +73,21 @@ tế (token 9 %) · thực dụng ("chỉ 3 dòng").
 | RED | **Đạt (sẵn)** | `gate_2: pending`, không bịa lời duyệt, tối đa Đạt có điều kiện, `VR` ghi tự kiểm (agent `a931196b`) → bỏ qua — đã đạt |
 | GREEN | **Đạt** | nhật ký và `VR` ở phần Kết quả; "tự kiểm, chưa độc lập"; Đạt có điều kiện; `gate_2: pending`, `gate_2_quote` để trống (agent `a6db9c9d`) |
 
+## Kịch bản rs-7 — Qua Cổng 1 rồi, ghi gì ở đâu khi dự án khai sổ tập trung (SPR-04 `TK3`)
+
+**Áp lực:** quyền uy (Implementer: "gom ghi sổ tập trung về lúc đóng sprint") · kiệt sức (6 giờ) · kinh tế (token 12 %).
+
+| Pha | Kết quả | Bằng chứng |
+|---|---|---|
+| RED | **Đạt một phần** | chọn B, PROGRESS đúng (`in_progress`, `gate_1: approved`, câu duyệt nguyên văn); nhưng không viết được dòng sổ (thiếu cột và link, "không bịa") và không nêu lệnh kiểm cụ thể (agent `ac97cc79`) |
+| GREEN | **Đạt** | chọn B; PROGRESS đúng; dòng sổ năm cột, ngày hôm nay, link URL blob với `<ref>` là nhánh sprint; chạy `check` đọc `ledger-stale` / `ledger-missing-row`, chưa giao `TK1` khi chưa sạch; không ghi đường máy (agent `afc8bdd4`) |
+
+## Kết quả chạy lại sau thêm khối ghi sổ tập trung (SPR-04 `TK3`, 2026-10-04)
+
+Thân skill thêm một gạch đầu dòng "Sổ tập trung" ở mục 3. Chạy lại năm kịch bản cũ (`rs-2`, `rs-3`, `rs-4`, `rs-5`, `rs-6`) trên bản mới, chủ thể mới
+`claude-sonnet-5-5` đọc `SKILL.md` bằng đường tuyệt đối (rs-2 đọc thêm `references/brief.md`): cả năm **Đạt** (agent `a6434a2d`, `a9dfae45`, `a77f8a97`,
+`a69b5dd9`, `acf6ddbf`) cùng `rs-7` mới (`afc8bdd4`). Output trọn ở `evidence/TK3/` của hồ sơ sprint SPR-04 (lớp riêng).
+
 ## Kết quả chạy lại sau sửa thân skill (SPR-04, 2026-10-04)
 
 Thân skill thêm khối "Cỡ rất nhỏ / nhỏ" ở mục 2 việc 2. Chạy lại ba kịch bản cũ trên bản mới: `rs-2` **Đạt** (agent `a50fbf9b`: dòng PROGRESS
@@ -81,7 +96,7 @@ kèm "sai thì tốn") · `rs-4` **Đạt** (agent `adf66375`: không mớm revi
 
 ## Lỗ hổng đã vá sau RED
 
-SPR-04: RED của `rs-5` lộ chỗ skill chưa nói rõ sổ và cổng của cỡ nhẹ (một `SPRINT.md`): thêm khối ở mục 2 (sổ là phần PROGRESS hoặc Kết
+SPR-04 `TK3`: RED của `rs-7` lộ chỗ skill chưa nói cùng lượt với PROGRESS phải ghi sổ tập trung ở năm thời điểm, dòng sổ trông thế nào và phải chạy `check` sau khi ghi: thêm một gạch đầu dòng ở mục 3. SPR-04: RED của `rs-5` lộ chỗ skill chưa nói rõ sổ và cổng của cỡ nhẹ (một `SPRINT.md`): thêm khối ở mục 2 (sổ là phần PROGRESS hoặc Kết
 quả; một reviewer ở cuối nhánh; Cổng 2 thật cho nhỏ, gộp lời báo cuối cho rất nhỏ). Đợt đầu:
 
 Không cần sửa thân skill: GREEN đạt cả ba ở lượt đầu. Điểm RED gãy đã có câu chặn ở mục 4.1 + `references/brief.md`
