@@ -157,6 +157,72 @@ def test_old_scale_only_in_severity_columns(tmp_path):
     assert rules_of(check.check_paths([tmp_path])) == {"old-scale-label"}
 
 
+@pytest.mark.parametrize("text", [
+    "Lỗi này là CRITICAL nên phải sửa ngay.",
+    "Mức độ HIGH được chấp nhận tạm thời.",
+    "[HIGH] SQL ghép chuỗi ở dòng 12",
+    "- [CRITICAL] khoá nằm trong mã nguồn",
+    "> [MEDIUM] thiếu kiểm tra đầu vào",
+    "Chỉ báo khi confidence ≥ 80 trên thang nguồn.",
+    "Lọc theo confidence >= 80 rồi gộp.",
+    "**Mức:** Cao — phải sửa trước khi giao.",
+    "Severity: Thấp, bỏ qua được.",
+    "- Mức: Trung bình",
+    "Mức: Nghiêm trọng",
+])
+def test_old_scale_label_inside_a_sentence(tmp_path, text):
+    (tmp_path / "a.md").write_text(text + "\n", encoding="utf-8")
+    assert rules_of(check.check_paths([tmp_path])) == {"old-scale-label"}, text
+
+
+@pytest.mark.parametrize("text", [
+    "Dựng workflow high-level cho việc low-code, cỡ medium-sized.",
+    "Critical thinking và low-level API không phải nhãn mức.",
+    "Đặt mức cao hơn cho việc này là hợp lý; ưu tiên thấp nhất vẫn làm.",
+    "Độ tin cậy cao, confidence interval hẹp, confidence là gì?",
+    "Mức rủi ro của việc này do người dùng quyết.",
+    "Bảng quy đổi ghi `CRITICAL` → Chặn và `[HIGH]` → Phải sửa.",
+    "Hàm `highlight()` trả về giá trị thấp nhất.",
+    "Thư mục HIGHLIGHTS và LOWER_CASE_NAME không phải nhãn.",
+    "Đầu ra: mức Chặn / Phải sửa / Nên sửa / Ghi chú.",
+])
+def test_lowercase_words_and_core_scale_are_not_old_labels(tmp_path, text):
+    (tmp_path / "a.md").write_text(text + "\n", encoding="utf-8")
+    assert check.check_paths([tmp_path]).findings == [], text
+
+
+def test_source_style_labels_in_skill_test_records_are_quotes_of_subject_output(tmp_path):
+    """File thử của skill chép nguyên văn đầu ra của chủ thể thử (pha Gốc, RED): nhãn kiểu nguồn trong câu ở đó
+    là trích dẫn, không báo; cùng câu trong thân skill thì báo. Ô cột mức vẫn báo ở mọi nơi."""
+    tests_dir = tmp_path / "skills" / "demo" / "tests"
+    tests_dir.mkdir(parents=True)
+    quote = "Gốc: hồi quy CRITICAL, [HIGH] ở dòng 3, confidence ≥ 80.\n"
+    (tests_dir / "pressure.md").write_text(quote, encoding="utf-8")
+    assert check.check_paths([tests_dir]).findings == []
+    (tmp_path / "skills" / "demo" / "SKILL.md").write_text(quote, encoding="utf-8")
+    assert rules_of(check.check_paths([tmp_path / "skills" / "demo" / "SKILL.md"])) == {"old-scale-label"}
+    (tests_dir / "pressure.md").write_text("| Mã | Mức |\n|---|---|\n| RF1 | CRITICAL |\n", encoding="utf-8")
+    assert rules_of(check.check_paths([tests_dir])) == {"old-scale-label"}
+
+
+def test_old_vietnamese_label_in_level_column(tmp_path):
+    (tmp_path / "a.md").write_text(
+        "| Mã | Phát hiện | Mức |\n|---|---|---|\n| RF1 (x) | y | Trung bình |\n", encoding="utf-8")
+    assert rules_of(check.check_paths([tmp_path])) == {"old-scale-label"}
+    (tmp_path / "a.md").write_text(
+        "| Mã | Phát hiện | Mức |\n|---|---|---|\n| RF1 (x) | y | Phải sửa |\n", encoding="utf-8")
+    assert check.check_paths([tmp_path]).findings == []
+    (tmp_path / "a.md").write_text(  # thang khác (chắc chắn, rủi ro): "Cao" là giá trị hợp lệ
+        "| Mã | Mức chắc chắn | Mức rủi ro |\n|---|---|---|\n| RF1 | Cao | Thấp |\n", encoding="utf-8")
+    assert check.check_paths([tmp_path]).findings == []
+    (tmp_path / "a.md").write_text(
+        "| Mã | Mức độ |\n|---|---|\n| RF1 | Nghiêm trọng |\n", encoding="utf-8")
+    assert rules_of(check.check_paths([tmp_path])) == {"old-scale-label"}
+    (tmp_path / "a.md").write_text(  # cột không phải cột mức: "Cao" là giá trị thường
+        "| Việc | Độ cao |\n|---|---|\n| Tra đơn | Cao |\n", encoding="utf-8")
+    assert check.check_paths([tmp_path]).findings == []
+
+
 def test_not_applicable_needs_a_reason(tmp_path):
     root = make_sprint(tmp_path)
     _add_fr2(root, "### FR2 — Lọc theo ngày (→ US1)")

@@ -53,7 +53,7 @@ RULES: dict[str, tuple[str, str]] = {
     "qa-not-independent": (PHAI, "QA trùng nhãn với implementer/architect mà không khai tự kiểm, hoặc khai tự kiểm mà verdict là pass"),
     "roles-invalid": (PHAI, "`roles` sai hình: vai lạ, tier ngoài T1–T3, thiếu nhãn agent"),
     "gate-invalid": (PHAI, "cổng đã kết luận mà thiếu thời điểm/câu nguyên văn, hoặc trạng thái vượt cổng"),
-    "old-scale-label": (PHAI, "nhãn thang mức cũ ngoài bảng quy đổi `method/severity.md`"),
+    "old-scale-label": (PHAI, "nhãn thang mức cũ (kiểu nguồn trong câu, hoặc tiếng Việt kiểu cũ) ngoài bảng quy đổi `method/severity.md`"),
     "config-syntax": (CHAN, "`.agile.json` không phải JSON hợp lệ (lỗi đầu vào → thoát 2)"),
     "config-invalid": (PHAI, "`.agile.json` sai hình hoặc đổi ngưỡng coverage không ghi lý do"),
     "config-public-root": (CHAN, "`visibility: public` mà `artifact_root` nằm trong gốc dự án"),
@@ -138,7 +138,20 @@ NUMBERING = re.compile(r"^[0-9]+(?:\.[0-9]+)*\.?\s+")
 # Nhãn của mười thang cũ trong bảng quy đổi `method/severity.md` mục 4 (chỉ nhãn mức, không nhãn kết luận).
 OLD_CELL = {"critical", "high", "medium", "low", "important", "minor", "warning", "nit", "nit:"}
 OLD_CELL_UPPER = {"BLOCK", "WARN", "INFO", "NOTE", "Block"}
-OLD_FIELD = re.compile(r"(?i)\b(?:severity|mức)\s*:\s*\**\s*(critical|high|medium|low|important|minor)\b")
+# Nhãn tiếng Việt kiểu cũ (ngoài bốn mức Chặn / Phải sửa / Nên sửa / Ghi chú) — chỉ xét ở chỗ đứng của một nhãn mức.
+OLD_VI = ("cao", "trung bình", "thấp", "nghiêm trọng", "quan trọng", "nhẹ")
+OLD_CELL_VI = set(OLD_VI)
+# Nhãn tiếng Việt kiểu cũ chỉ bị bắt ở cột mà tiêu đề NÓI LÀ mức của phát hiện; "Mức chắc chắn", "Mức rủi ro" là
+# thang khác, "Cao" ở đó là giá trị hợp lệ.
+SEVERITY_HEADERS_VI = {"mức", "mức độ", "mức nghiêm trọng", "độ nghiêm trọng"}
+OLD_FIELD = re.compile(
+    r"(?i)\b(?:severity|mức)\**\s*:\s*\**\s*(critical|high|medium|low|important|minor|" + "|".join(OLD_VI) + r")\b")
+# Nhãn kiểu nguồn nằm trong câu: chữ HOA nguyên từ (chữ thường như "high-level", "low-code" không trúng), nhãn trong
+# ngoặc vuông đầu dòng (kể cả sau gạch đầu dòng hay dấu trích dẫn) và ngưỡng "confidence ≥ 80".
+OLD_SRC_WORD = re.compile(r"(?<![\w/\-.])(CRITICAL|HIGH|MEDIUM|LOW)(?![\w/\-])")
+OLD_SRC_BRACKET = re.compile(
+    r"^\s*(?:[-*+>]\s+)*\[(CRITICAL|HIGH|MEDIUM|LOW|BLOCK|WARN|INFO|NOTE|Critical|Important|Minor|Warning)\]")
+OLD_SRC_CONFIDENCE = re.compile(r"(?i)\bconfidence\s*(?:≥|>=|>|=|:)\s*[0-9]+")
 SELF_CHECK = "tự kiểm, chưa độc lập"
 NOT_APPLICABLE = "NOT_APPLICABLE"
 # NOT_APPLICABLE chỉ miễn khi có lý do theo sau (một chữ sau dấu nối tuỳ chọn).
@@ -381,6 +394,7 @@ class Engine:
         skill_tests = any(parts[i] == "skills" and parts[i + 2] == "tests" for i in range(len(parts) - 2))
         severity_table = len(parts) >= 2 and parts[-2:] == ("method", "severity.md")
         level_columns: list = []
+        vi_columns: list = []
         in_table = False
         for idx, line in enumerate(doc.masked):
             for m in BARE.finditer(line):
@@ -389,32 +403,48 @@ class Engine:
                              f"mã trần '{m.group(0)}' — dùng tiền tố hai chữ cái đúng tài liệu hoặc viết bằng chữ" + doc.hint(idx, m.start(), m.group(0)))
             cells = c.table_cells(line)
             level_cells: list = []
+            vi_cells: list = []
             if cells is None:
-                in_table, level_columns = False, []
+                in_table, level_columns, vi_columns = False, [], []
             elif not in_table:  # hàng tiêu đề: nhớ cột mức/severity
                 in_table = True
                 level_columns = [i for i, cell in enumerate(cells) if _is_level_header(cell)]
+                vi_columns = [i for i, cell in enumerate(cells) if cell.strip("*_ ").casefold() in SEVERITY_HEADERS_VI]
             else:
                 level_cells = [cells[i] for i in level_columns if i < len(cells)]
+                vi_cells = [cells[i] for i in vi_columns if i < len(cells)]
             if not severity_table:
-                self._old_scale(doc, idx, line, level_cells)
+                self._old_scale(doc, idx, line, level_cells, vi_cells, quoting=skill_tests)
         if not skill_tests:
             for d in doc.defs:
                 if prefix(d.code) not in c.OWNER:
                     self.add(doc.path, d.line, "id-unknown-prefix", f"'{d.code}' dùng tiền tố '{prefix(d.code)}' ngoài bảng mã")
 
-    def _old_scale(self, doc: Doc, idx: int, line: str, cells: list) -> None:
-        """Nhãn thang cũ: chỉ ở ô thuộc cột mức/severity của bảng, hoặc sau "Mức:"/"Severity:" trong dòng."""
+    def _old_scale(self, doc: Doc, idx: int, line: str, cells: list, vi_cells: list = (), *, quoting: bool = False) -> None:
+        """Nhãn thang cũ ở bốn chỗ: ô thuộc cột mức/severity của bảng; sau "Mức:"/"Severity:" trong dòng; nhãn kiểu
+        nguồn trong câu (`CRITICAL`, `[HIGH]` đầu dòng, `confidence ≥ 80`). Chữ thường ngoài hai chỗ đầu không xét.
+        `quoting` (file thử của skill chép nguyên văn đầu ra chủ thể thử): bỏ nhãn kiểu nguồn trong câu, giữ ô cột mức."""
         for cell in cells:
             bare = cell.strip("*_ ")
             if bare.casefold() in OLD_CELL or bare in OLD_CELL_UPPER:
-                self.add(doc.path, doc.line_no(idx), "old-scale-label",
-                         f"nhãn thang cũ '{bare}' — dùng Chặn / Phải sửa / Nên sửa / Ghi chú")
+                self._old_scale_hit(doc, idx, bare)
                 return
-        m = OLD_FIELD.search(line)
+        for cell in vi_cells:
+            bare = cell.strip("*_ ")
+            if bare.casefold() in OLD_CELL_VI:
+                self._old_scale_hit(doc, idx, bare)
+                return
+        m = OLD_FIELD.search(line) or (None if quoting else OLD_SRC_BRACKET.search(line) or OLD_SRC_WORD.search(line))
         if m:
-            self.add(doc.path, doc.line_no(idx), "old-scale-label",
-                     f"nhãn thang cũ '{m.group(1)}' — dùng Chặn / Phải sửa / Nên sửa / Ghi chú")
+            self._old_scale_hit(doc, idx, m.group(1))
+            return
+        m = None if quoting else OLD_SRC_CONFIDENCE.search(line)
+        if m:
+            self._old_scale_hit(doc, idx, m.group(0), "ngưỡng điểm của nguồn")
+
+    def _old_scale_hit(self, doc: Doc, idx: int, label: str, what: str = "nhãn thang cũ") -> None:
+        self.add(doc.path, doc.line_no(idx), "old-scale-label",
+                 f"{what} '{label}' — dùng Chặn / Phải sửa / Nên sửa / Ghi chú")
 
     # -- frontmatter --
 
