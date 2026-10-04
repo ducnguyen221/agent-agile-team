@@ -570,6 +570,38 @@ def test_filled_read_line_is_accepted():
     assert read_line_gaps("x\nĐã đọc: `<gốc worktree>/skills/x/SKILL.md` cùng `references/a.md`\ny") == []
 
 
+# TK12.8: `writing-skills` ghi thước chấm và ngưỡng mà máy kiểm tính theo (`retrieval_result()`), kèm thước `n = 3`; TK12.6: một quy ước
+# "sửa luôn" (`Phán quyết:`) ở cả hai chỗ.
+WS = REPO / "skills" / "writing-skills"
+
+
+def writing_skills_gaps(testing: str, skill: str, diagnosing: str) -> list:
+    gaps = []
+    for needle in ("**Đạt**", "**Một phần**", "**Không đạt**", "≥80 %", "retrieval_result()", "`n = 3`", "≥2/3", "≤1/3", "đa số kịch bản"):
+        if needle not in testing:
+            gaps.append(f"testing.md thiếu {needle}")
+    for name, text in (("SKILL.md", skill), ("diagnosing.md", diagnosing)):
+        if "Phán quyết:" not in text:
+            gaps.append(f"{name} thiếu quy ước `Phán quyết:` cho lệnh 'sửa luôn'")
+    if re.search(r"Chưa chạy[^.|]*ghi `BR`|ghi `BR`[^.|]*Chưa chạy", skill + diagnosing):
+        gaps.append("còn quy ước ghi `BR` cho lệnh 'sửa luôn'")
+    return gaps
+
+
+def test_writing_skills_states_the_grading_rule_and_one_convention():
+    gaps = writing_skills_gaps(c.read_text(WS / "references" / "testing.md"), c.read_text(WS / "SKILL.md"),
+                               c.read_text(WS / "references" / "diagnosing.md"))
+    assert gaps == []
+
+
+def test_writing_skills_gaps_are_caught():
+    ok_testing = "**Đạt** **Một phần** **Không đạt** ≥80 % retrieval_result() `n = 3` ≥2/3 ≤1/3 đa số kịch bản"
+    assert writing_skills_gaps(ok_testing, "Phán quyết: x", "Phán quyết: y") == []
+    assert len(writing_skills_gaps(ok_testing.replace("≥80 %", ""), "Phán quyết: x", "Phán quyết: y")) == 1
+    assert len(writing_skills_gaps(ok_testing, "ghi Chưa chạy và ghi `BR`", "Phán quyết: y")) == 2
+    assert any("BR" in g for g in writing_skills_gaps(ok_testing, "Phán quyết: x. Chưa chạy, ghi `BR`", "Phán quyết: y"))
+
+
 # TK12.5 (RF118): giá trị khoá giả ở `skills/security-audit/tests/fixture/` không mang dạng khoá thật (chuỗi hex dài, mật khẩu
 # ngẫu nhiên trong URL) để trình quét secret không coi fixture là khoá bị lộ; giá trị giả tự nói mình giả bằng chữ `fixture`.
 FIXTURE = REPO / "skills" / "security-audit" / "tests" / "fixture"
