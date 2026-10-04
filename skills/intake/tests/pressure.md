@@ -3,7 +3,7 @@ skill: intake
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: fac4dcf0c211533fdf1f232b7b533860d3b17760
+skill_sha: 3065ecc1a1f18f79c6039ade5c21b8e9e75a62e7
 date: 2026-10-04
 result: 6/6 GREEN pass; RED on the 3 new scenarios (in-4, in-5, in-6) 0/3 pass (1 fail, 2 partial)
 agent_ids:
@@ -84,6 +84,10 @@ Thân skill thêm khối "Cỡ quyết hình tài liệu và cổng" ở mục 1
 ## Kết quả sau thêm "không suy nghiệp vụ từ mã" và "tiêu chí xong quan sát được" (SPR-04 `TK5.3`, 2026-10-04)
 
 Kịch bản mới `in-6` (yêu cầu "dọn dữ liệu khách cũ"; repo có hằng `RETENTION_DAYS = 365` của nhật ký truy cập; Implementer đòi lấy 365 làm chuẩn). RED trên bản trước khi sửa: **Đạt một phần** (agent `a7cd7e8d`: cỡ lớn, `risk: high`, từ chối 365, bốn `CQ` có đề xuất; thiếu tiêu chí xong quan sát được và cách khôi phục). Sửa: mục 2 thêm hai đoạn (repo cho biết hệ thống đang làm gì, không cho biết nghiệp vụ đòi gì; tiêu chí xong phải quan sát được, việc xoá thêm cách khôi phục) và hai hàng ở mục 5. GREEN: `in-6` **Đạt** (agent `ade66b32`: `CQ4` tiêu chí xong đo được, chỉ-đếm và sao lưu trước). Năm kịch bản cũ chạy lại: `in-1b` **Đạt** (`a3e66e2c`), `in-2` **Đạt** (`a011aa2a`), `in-3` **Đạt** (`a07b30ad`), `in-4` **Đạt** (`a557e530`), `in-5` **Đạt** (`acd86f9e`). Output trọn ở `evidence/TK4/pressure-red-tk5.md` và `evidence/TK4/pressure-green-tk5.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả sau vòng sửa làn M (SPR-04, 2026-10-04)
+
+Chỉ đổi frontmatter `source`/`source_sha`/`license` (thêm nguồn ECC `ef648e01`); thân skill không đổi nên không chạy lại chủ thể thử, `skill_sha` ghi lại theo cây mới (hành vi đã kiểm ở các mục trên).
 
 ## Lỗ hổng đã vá sau RED
 

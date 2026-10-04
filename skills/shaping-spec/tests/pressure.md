@@ -3,7 +3,7 @@ skill: shaping-spec
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: bbf3854f8327e80797da47f4817c6452dc5f8825
+skill_sha: 6956eb770afd4e1e9ec3df30acd17cf53c883869
 date: 2026-10-04
 result: 6/6 GREEN pass; RED on the new scenarios sp-9, sp-10, sp-11 partial (0/3 pass)
 agent_ids:
@@ -74,6 +74,10 @@ gồm đường lỗi, `in_review`) · `sp-7` **Đạt** (agent `ae44c594`: Boun
 ## Kết quả sau thêm "một `FR` một hành vi" và `references/spec-mining.md` (SPR-04 `TK5.2`, 2026-10-04)
 
 Hai kịch bản mới, tình huống ở `tests/scenarios.txt`: `sp-10` (Architect đòi gộp bốn việc voucher thành một `FR`) và `sp-11` (rút hành vi hiện tại của `calc_total` khi repo chưa có spec sống, Architect đòi chép docstring). RED trên bản trước khi sửa: cả hai **Đạt một phần** (agent `a2cf8f8c`: `FR1` "Tạo/sửa/huỷ" nhồi ba hành vi; agent `a073618d`: đối chiếu đúng nhưng thiếu `file:dòng` đủ và mốc commit). Sửa: mục 5 thêm "một `FR` một hành vi", mục 2 bước 4 trỏ `references/spec-mining.md` (mới), mẫu SPEC thêm một câu. GREEN: `sp-10` **Đạt** (agent `a0832d86`: sáu `FR`), `sp-11` **Đạt** (agent `a142a52f`, đọc cả `spec-mining.md`; lượt đầu `a6935cbd` bị giới hạn không mở file đó, không dùng để chấm). Bốn kịch bản cũ chạy lại: `sp-4` **Đạt** (`a6f2bf82`), `sp-7` **Đạt** (`ace237fa`), `sp-8` **Đạt** (`a3baa1e2`), `sp-9` **Đạt** (`a89b4d8a`). Output trọn ở `evidence/TK4/pressure-red-tk5.md` và `evidence/TK4/pressure-green-tk5.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả sau vòng sửa làn M (SPR-04, 2026-10-04)
+
+Chỉ đổi frontmatter `source`/`source_sha`/`license` (thêm nguồn ECC `ef648e01`); thân skill không đổi nên không chạy lại chủ thể thử, `skill_sha` ghi lại theo cây mới (hành vi đã kiểm ở các mục trên).
 
 ## Lỗ hổng đã vá sau RED
 

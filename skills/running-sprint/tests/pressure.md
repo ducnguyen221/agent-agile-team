@@ -3,7 +3,7 @@ skill: running-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: d2be803f549dbcdf5de5f65ec8d91bfb3bd78bd8
+skill_sha: f9021ec5d542031d0d8f8befc969a3cd718ccc50
 date: 2026-10-04
 result: 6/6 GREEN pass; RED on the new scenario rs-7 partial (0/1 pass); earlier rs-5 partial, rs-6 passed already
 agent_ids:
@@ -93,6 +93,10 @@ Thân skill thêm một gạch đầu dòng "Sổ tập trung" ở mục 3. Ch�
 Thân skill thêm khối "Cỡ rất nhỏ / nhỏ" ở mục 2 việc 2. Chạy lại ba kịch bản cũ trên bản mới: `rs-2` **Đạt** (agent `a50fbf9b`: dòng PROGRESS
 vai · tier · model · BASE; brief trỏ PLAN mục `TK4`; diff từ BASE, không `HEAD~1`) · `rs-3` **Đạt** (agent `a57d5e1b`: Analyst phân xử, `Phán quyết:`
 kèm "sai thì tốn") · `rs-4` **Đạt** (agent `adf66375`: không mớm reviewer, `Nên sửa` → `CO`). Output trọn ở `evidence/TK2/pressure-*.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả chạy lại sau vòng sửa làn M (SPR-04, 2026-10-04)
+
+Mục 3 sổ tập trung: mở sprint thì **thêm dòng mới**, các thời điểm sau cập nhật dòng; cột Hồ sơ là `PROGRESS.md` khi đang mở, `REPORT.md` khi đóng; `check` chạy **trên gốc dự án**. Chạy lại sáu kịch bản (`rs-2` … `rs-7`, chủ thể mới `claude-sonnet-5-5` đọc `SKILL.md` bằng đường tuyệt đối): cả sáu **Đạt** (agent `a7baf535`, `a6758e9b`, `a10204393`, `ad88f48e`, `a93fc3ff`, `ac5061d7`); `rs-7` cập nhật dòng `SPR-12` (không thêm dòng), cột Hồ sơ trỏ `PROGRESS.md`, chạy `check` trên gốc dự án. Output trọn ở `evidence/TK4/fix-green.md` của hồ sơ sprint SPR-04 (lớp riêng).
 
 ## Lỗ hổng đã vá sau RED
 

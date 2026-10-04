@@ -3,7 +3,7 @@ skill: tdd
 method: pressure-test with subagents (RED without skill, GREEN with skill, ORIGINAL with upstream skill)
 model: claude-sonnet-5-5 (SPR-04 reruns and td-4); sonnet (runs of 2026-10-01), same scenario text
 tier: T3
-skill_sha: fad047f54f46c3b86d2cf9797277548e8e9f9049
+skill_sha: 994537299f230a89077baa002e24a5bcccdd2766
 date: 2026-10-04
 result: 4/4 GREEN pass; RED on the new scenario td-4 partial (0/1 pass); the three earlier scenarios passed already at RED (2026-10-01), GREEN not worse than original on 3/3
 ---
@@ -54,6 +54,10 @@ sức (22:00, 9 giờ).
 ## Kết quả sau thêm danh sách ca biên bắt buộc có test (SPR-04 `TK5.4`, 2026-10-04)
 
 Kịch bản mới `td-4` ("ba test là đủ, ca biên để sau" cho `slugify`; PLAN im lặng về ca biên). RED trên bản trước khi sửa: **Đạt một phần** (agent `abaceb8b`: bốn test vui, đẩy mọi ca biên sang `CQ`, không test nào cho rỗng, dấu cách liền, Unicode, ký tự đặc biệt). Sửa: mục 3 thêm đoạn "Ca biên bắt buộc có test" (tám nhóm; PLAN im lặng thì vẫn test hành vi an toàn tối thiểu và ghi ASSUMPTION; "ca biên để sau" không phải phép bỏ). GREEN: `td-4` **Đạt** (agent `a4cbcd2d`: chín test gồm rỗng, `None`, dấu cách liền và đầu/cuối, Unicode có dấu, emoji, ký tự SQL/shell). Ba kịch bản cũ chạy lại (chủ thể mới `claude-sonnet-5-5`): `tdd-1b` **Đạt** (`ad3bab9a`), `tdd-2b` **Đạt** (`a7c0a8ad`), `tdd-3b` **Đạt** (`a7169a28`). Lần chạy này cũng ghi `skill_sha` cho kịch bản của 2026-10-01 (thay nợ chạy GREEN lại). Output trọn ở `evidence/TK4/pressure-red-tk5.md` và `evidence/TK4/pressure-green-tk5.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả sau vòng sửa làn M (SPR-04, 2026-10-04)
+
+Chỉ đổi frontmatter `source`/`source_sha`/`license` (thêm nguồn ECC `ef648e01`); thân skill không đổi nên không chạy lại chủ thể thử, `skill_sha` ghi lại theo cây mới (hành vi đã kiểm ở các mục trên).
 
 ## Lỗ hổng đã vá sau RED
 

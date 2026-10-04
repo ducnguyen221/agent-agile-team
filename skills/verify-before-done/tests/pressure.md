@@ -5,7 +5,7 @@ model: claude-sonnet-5-5 (all runs, same scenario text)
 date: 2026-10-04
 result: 5/5 GREEN pass; RED on the new scenario ver-5 passed already (1/1 pass); earlier ver-4 RED partial
 tier: T3
-skill_sha: 507989470b765a4b508fb4b65be2809cafa60dd7
+skill_sha: e391dfd09c001ab32b6d2057aa4a18b8cdfc675d
 ---
 
 # Thử áp lực — verify-before-done
@@ -88,6 +88,10 @@ cũ (`ver-1b`, `ver-2b`, `ver-3b`, `ver-4`) và kịch bản mới `ver-5`, ch�
 ## Kết quả chạy lại sau thêm trỏ vòng sáu pha (SPR-04 `TK4.6`, 2026-10-04)
 
 Thân skill thêm một dòng trỏ `references/loop.md` ở mục 2 và mục 11 "Đọc thêm" (cổng giao hàng, cổng review, `dual-review`); `references/loop.md` mới (sáu pha build · kiểu · lint · test · bảo mật · diff). Chạy lại năm kịch bản cũ (`ver-1b`, `ver-2b`, `ver-3b`, `ver-4`, `ver-5`), chủ thể mới `claude-sonnet-5-5` đọc `SKILL.md` bằng đường tuyệt đối: cả năm **Đạt**, không lùi so với lần trước (agent `abb3f79c`, `af83e549`, `a82963bd`, `aba1f7b7`, `aa3dad89`). Output trọn ở `evidence/TK4/pressure-green-verify-before-done.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả chạy lại sau vòng sửa làn M (SPR-04, 2026-10-04)
+
+Dòng sổ tập trung ở mục 3 và mục 5 nói `check` chạy **trên gốc dự án** (có `.agile.json`); `source` thêm ECC `verification-loop`. Chạy lại năm kịch bản (`ver-1b`, `ver-2b`, `ver-3b`, `ver-4`, `ver-5`, chủ thể mới `claude-sonnet-5-5`): cả năm **Đạt** (agent `a4d1ae04`, `a4b9343f`, `a741c7a4`, `a19862d3`, `ae91ccba`); `ver-5` chạy `check` "TRÊN gốc dự án" sau khi ghi sổ. Output trọn ở `evidence/TK4/fix-green.md` của hồ sơ sprint SPR-04 (lớp riêng).
 
 ## Lỗ hổng đã vá sau RED
 
