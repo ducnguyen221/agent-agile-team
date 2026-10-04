@@ -46,7 +46,8 @@ rồi thêm dòng `@~/agent-agile-team/AGENTS.md` vào `~/.claude/CLAUDE.md` đ�
 ## Sprint đầu tiên
 
 [GUIDE.md](GUIDE.md) dẫn người mới đi một sprint; [`samples/order-desk/`](samples/README.md) là một dự án
-sau hai sprint.
+sau hai sprint. Tổng quan cả repo cho người mới (tính năng, cách hoạt động, cấu trúc, cài đặt):
+[docs/OVERVIEW.md](docs/OVERVIEW.md) — cũng là trang web <https://ducnguyen.vn/agent-agile-team/>.
 
 ## Cấu trúc
 
@@ -59,7 +60,7 @@ sau hai sprint.
 | `templates/` | Mẫu tài liệu sprint, sổ gốc, cấu hình dự án |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; test; dự án mẫu kèm kết quả kỳ vọng |
 | `hosts/` | Cài và nạp theo từng harness, điểm cắm của lớp riêng |
-| `docs/` | Bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa; xử lý sự cố; cập nhật từ nguồn gốc |
+| `docs/` | Tổng quan repo; bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa; xử lý sự cố; cập nhật từ nguồn gốc |
 
 ## Ghi nhận
 
