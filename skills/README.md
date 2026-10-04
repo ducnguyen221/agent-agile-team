@@ -129,7 +129,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/6 (+0 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-04 |
 | [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
 | [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
-| [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); skill unchanged | 2026-10-04 |
 | [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 5/5 GREEN pass | 2026-10-04 |
 | [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass on the final tree (wq-1 to wq-3 rerun plus new wq-4 to wq-6) | 2026-10-04 |
