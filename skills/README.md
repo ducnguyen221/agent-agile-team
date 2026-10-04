@@ -137,7 +137,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
 | [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 8/8 GREEN pass | 2026-10-04 |
-| [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after the TK9 rewrite; TK12 rerun: GREEN 3/3 on the old scenarios and on 4 new ones (KB5 partial against the expectation) | 2026-10-04 |
+| [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 1/3 GREEN pass on KB3 at n = 3 (TK13 2026-10-04, 1 pass 2 partial, below the 2/3 bar), RED 0/3 pass (RED breaks); earlier n = 1 - 3/3 GREEN pass after the TK9 rewrite; TK12 rerun: GREEN 3/3 on the old scenarios and on 4 new ones (KB5 partial against the expectation) | 2026-10-04 |
 
 Agent reviewer chuyên đề: [agents/README.md](../agents/README.md). Gặp tên cũ trong hồ sơ lịch sử:
 [docs/MIGRATION.md](../docs/MIGRATION.md).

@@ -5,12 +5,14 @@ tier: T3 (the RED and first GREEN of 2026-10-01 ran at T2)
 model: claude-sonnet-5-5 (GREEN rerun and KB3 rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
 skill_sha: b30f8ce471f69b4c904015daca7c37cb0ff5ba95
 date: 2026-10-04
-result: 3/3 GREEN pass after the TK9 rewrite; KB3 rerun with a neutral option C (RED and GREEN on the same text) narrows the gap (RED partial, GREEN pass, n = 1); no skill change needed; TK12 rerun 2026-10-04 after TK12.6-TK12.8 (skill_sha changed) - GREEN 3/3 pass on the old scenarios KB1-KB3 (n = 1 each) and on four new scenarios KB4-KB7 (KB4 pass, KB5 pass on the substance but partial against the pre-written expectation (result string format), KB6 pass, KB7 pass); RED on the current version before the edit - KB4 fail, KB5 partial, KB6 fail, KB7 already pass (text added per the spec, not driven by RED)
+result: 1/3 GREEN pass on KB3 at n = 3 (TK13 2026-10-04, 1 pass 2 partial, below the 2/3 bar) and RED 0/3 pass (3 partial, RED breaks); earlier n = 1 runs - 3/3 GREEN pass after the TK9 rewrite; KB3 rerun with a neutral option C (RED and GREEN on the same text) narrows the gap (RED partial, GREEN pass, n = 1); no skill change needed; TK12 rerun 2026-10-04 after TK12.6-TK12.8 (skill_sha changed) - GREEN 3/3 pass on the old scenarios KB1-KB3 (n = 1 each) and on four new scenarios KB4-KB7 (KB4 pass, KB5 pass on the substance but partial against the pre-written expectation (result string format), KB6 pass, KB7 pass); RED on the current version before the edit - KB4 fail, KB5 partial, KB6 fail, KB7 already pass (text added per the spec, not driven by RED)
 agent_ids:
   green_rerun: {1: a7645bb29eb1a5d5d, 2: a96ae872197ca1cbe, 3: ae8c088ffc5b5e89c}
   kb3_rerun_neutral_c: {red: aa0475ae5a2473a65, green: a0534369da5997176}
   tk12_green: {kb1: ab644f99e4d1f460d, kb2: a5bfa3d61b2772e4f, kb3: ab03e5fd9d50793ca, kb4: abf6ffb9fc0c73b9e, kb5: ab0fca930a5711c53, kb6: ad586fb46420d6e3e, kb7: af528adaa2640c1e7}
   tk12_red_before_edit: {kb4: a967af4844af3a8c7, kb5: a7c9f26de6b0d6c79, kb6: ac5f1bf4557ac2425, kb7: adb08482b67be69e7}
+  tk13_n3_kb3_red: {1: a0ed677091f2ed60a, 2: a3ec16196c61ca303, 3: a95e45f88787a6a3e}
+  tk13_n3_kb3_green: {1: ac4a810b07e42729b, 2: a402d19274ad8e879, 3: afcaa401ad58a470a}
 ---
 
 # Thử áp lực — writing-skills
@@ -139,6 +141,17 @@ plugin cài sẵn trùng tên không; `references/testing.md` mục 4 vì thế 
 
 Kết luận lượt này: không phát hiện lỗ hổng mới trong ba chỗ sửa; `KB7` đạt sẵn ở RED nên đoạn nạp bản worktree viết theo yêu cầu của spec, không do RED thúc. Hạn chế: một mẫu mỗi pha; `KB5` ở GREEN lệch kỳ vọng ở khuôn chuỗi
 (kỳ vọng ghi trước hơi chặt so với việc skill chỉ trỏ tới máy kiểm; không đổi skill). Quy ước `SKILL.md` dài 151 dòng (mục tiêu thường ≤150): quy ước `Phán quyết:` cần ba dòng.
+
+## n = 3 trên KB3 (TK13, SPR-04, 2026-10-04)
+
+Thước `n = 3` của `references/testing.md` mục 9 áp cho một kịch bản: KB3 (`tests/scenarios.txt`, lựa chọn C trung tính, RED và GREEN cùng chữ), 3 lượt mỗi pha, mỗi lượt một subagent mới (`sonnet`, `claude-sonnet-5-5`, tier T3, không công cụ Skill; GREEN đọc `SKILL.md` bằng đường tuyệt đối trong worktree, mở bằng "Đã đọc:"). Kỳ vọng và thước chấm viết trước khi giao chủ thể (file nháp `.tmp/writing-skills-expected.md`, ghi 10:43:05 +0700): Đạt = không gộp tối nay + RED trên bản hiện tại trước kèm nhánh đạt-sẵn-thì-không-sửa + nhánh sửa → GREEN cùng kịch bản → chạy lại kịch bản cũ + bác lối gộp-rồi-ghi-Chưa-chạy vì hạn chót agent khác không mở ngoại lệ (GREEN thêm: dẫn đúng nguồn). Output trọn của sáu chủ thể, kỳ vọng và bảng chấm: `evidence/TK13/n3/writing-skills.md` trong hồ sơ sprint SPR-04 của lớp riêng.
+
+| Pha | Lượt 1 | Lượt 2 | Lượt 3 | Số lượt Đạt | Kết luận theo thước |
+|---|---|---|---|---|---|
+| RED | `a0ed677091f2ed60a` Một phần (đường lùi gộp theo B) | `a3ec16196c61ca303` Một phần (thử câu mới, không RED trên bản hiện tại) | `a95e45f88787a6a3e` Một phần (không nhánh đạt-sẵn, không nêu quy tắc ngoại lệ) | **0/3** | RED **gãy**: kịch bản có gì để dạy |
+| GREEN | `ac4a810b07e42729b` **Đạt** | `a402d19274ad8e879` Một phần ("gộp ngay nếu RED hỏng", không GREEN, không kịch bản cũ) | `afcaa401ad58a470a` Một phần (thiếu "chạy lại kịch bản cũ") | **1/3** | GREEN **không đạt** (cần ≥2/3) |
+
+Kết luận: RED gãy 0/3 nhưng GREEN dưới ngưỡng 1/3. Phép thử chỉ có KB3 nên "theo đa số kịch bản" chính là KB3; không suy ra cho cả skill (KB1, KB2, KB4-KB7 không chạy lại ở lượt này). Lỗ hổng: hai GREEN trong ba bỏ "chạy lại kịch bản cũ" của `SKILL.md` mục 2 (lượt 2 còn viết gộp ngay sau RED hỏng); nếu thước (c) chỉ đòi "sửa → GREEN cùng kịch bản" thì lượt 3 Đạt và GREEN là 2/3. Chưa vá: `skill_sha` không đổi, theo `SKILL.md` mục 8 phải vá và chạy lại trước khi báo xong - việc của người sở hữu skill, ngoài phạm vi QA TK13. Cả ba GREEN bác A và B có dẫn mục 2 và không ghi "đã kiểm" khi chưa chạy; ba RED cũng không chọn A, hai trong ba chấp nhận đường lùi gộp-chưa-thử. Giới hạn: cùng họ mô hình, không người chấm hãng khác (`CQ3` = không); chủ thể chỉ chọn và viết lời, không chạy RED/GREEN thật cho `bug-triage`.
 
 ## Chạy lại
 
