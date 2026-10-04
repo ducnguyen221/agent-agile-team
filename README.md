@@ -49,7 +49,9 @@ Check: `python scripts/check.py --self` ends with `Đạt` (pass). Common proble
 ## First sprint
 
 [GUIDE.md](GUIDE.md) walks a newcomer through one sprint; [`samples/order-desk/`](samples/README.md) shows
-a project after two sprints.
+a project after four sprints. A full overview of the repository for newcomers (features, how it works, layout,
+install) is [docs/OVERVIEW.md](docs/OVERVIEW.md) (Vietnamese), also published as a web page at
+<https://ducnguyen.vn/agent-agile-team/>.
 
 ## Layout
 
@@ -62,7 +64,7 @@ a project after two sprints.
 | `templates/` | Sprint documents, project registries, project config |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; tests; a sample project with expected results |
 | `hosts/` | Install and loading per harness, and the host plug points |
-| `docs/` | Migration map from older skill names; standardization record; troubleshooting; updating from upstream |
+| `docs/` | Repository overview; migration map from older skill names; standardization record; troubleshooting; updating from upstream |
 
 ## Acknowledgments
 

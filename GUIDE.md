@@ -4,7 +4,9 @@
 > "Đạt / Đạt có điều kiện / Không đạt" ở Cổng 2. Mọi bước còn lại agent tự làm, tự ghi sổ, và nhờ **agent
 > khác** kiểm. File này dẫn bạn đi một sprint thật từ đầu tới cuối.
 
-Chưa cài: xem [`INSTALL.md`](INSTALL.md). Luật đầy đủ: [`method/process.md`](method/process.md).
+Chưa cài: xem [`INSTALL.md`](INSTALL.md). Luật đầy đủ: [`method/process.md`](method/process.md). Muốn nhìn
+toàn cảnh trước khi đi sprint — bộ này làm gì, có gì, cấu trúc ra sao: [`docs/OVERVIEW.md`](docs/OVERVIEW.md),
+hoặc bản trang web <https://ducnguyen.vn/agent-agile-team/>.
 
 ## 1. Ba khái niệm cần biết
 
