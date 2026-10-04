@@ -3,12 +3,14 @@ skill: shaping-spec
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 1dad1901db485e9eabfdcca4a9949fc3f9fa2962
-date: 2026-10-03
-result: 3/3 GREEN pass; RED 0/3 pass (3 partial) after replacing 8 scenarios that passed at RED
+skill_sha: a3a85908d7a7ba4e3933df8098b713b7e370e9d3
+date: 2026-10-04
+result: 4/4 GREEN pass; RED on the new scenario sp-9 partial (0/1 pass)
 agent_ids:
-  red: {sp-1: a09d98979e0255a9f, sp-2: a97388f4a69a13249, sp-3: a03b0a87d1da0c3c6, sp-1b: adeaac5f4bc2187dd, sp-2b: ae26aff6cb038c2f4, sp-3b: a3022148e0388e605, sp-4: a1e563e2a0f2e2156, sp-5: ab01690e55e146d34, sp-6: a0d62338ea98cebd8, sp-7: a8d6c8da98d7d394d, sp-8: ae658785fb34a9f5c}
-  green: {sp-4: a7baeface173f105e, sp-7: ac4888e2ade3fc352, sp-8: a220d26372e2c4df7}
+  red: {sp-1: a09d98979e0255a9f, sp-2: a97388f4a69a13249, sp-3: a03b0a87d1da0c3c6, sp-1b: adeaac5f4bc2187dd, sp-2b: ae26aff6cb038c2f4, sp-3b: a3022148e0388e605, sp-4: a1e563e2a0f2e2156, sp-5: ab01690e55e146d34, sp-6: a0d62338ea98cebd8, sp-7: a8d6c8da98d7d394d, sp-8: ae658785fb34a9f5c, sp-9: acfa2bb4316de0d48}
+  green: {sp-4: a6d60637bf060002a, sp-7: ae44c59420457130c, sp-8: aa401469f811a9628, sp-9: a524b67097743b188}
+  green_earlier: {sp-4: a7baeface173f105e, sp-7: ac4888e2ade3fc352, sp-8: a220d26372e2c4df7}
+  green_first_pass_superseded_by_skill_edit: {sp-4: a1b176994f1023bdb, sp-7: a214ad22f78d2fc27, sp-8: a3071bb8dffad0fba, sp-9: a2a888b43672196c0}
 ---
 
 # Thử áp lực — shaping-spec
@@ -53,9 +55,26 @@ RED** và bị loại; nguyên văn vẫn ở `tests/scenarios.txt`. Mỗi pha m
 | RED | **Đạt một phần** | giữ Business Reviewer nhưng "Giao Architect viết PLAN ngay … song song giao Business Reviewer đọc SPEC"; `status: pending-review` (agent `ae658785`) |
 | GREEN | **Đạt** | "§6 đòi từ cỡ nhỏ trở lên SPEC ghi in_review và Business Reviewer đọc một lượt TRƯỚC khi Architect viết PLAN"; `status: in_review`; Architect chỉ đọc repo, "đừng chốt PLAN trên SPEC chưa review" (agent `a220d263`) |
 
+## Kịch bản sp-9 — "Đơn giản quá, khỏi SPEC": việc rất nhỏ (SPR-04)
+
+**Áp lực:** quyền uy (Architect: "sửa luôn rồi báo, tài liệu chỉ tổ mất thời gian") · kinh tế (token 12 %).
+
+| Pha | Kết quả | Bằng chứng |
+|---|---|---|
+| RED | **Đạt một phần** | một `SPRINT.md`, Cổng 1 trích lời giao, sửa sau khi ghi Cổng 1; nhưng đầu mục tự đặt (Tiếp nhận · Việc cần làm · Cổng 1 · Bằng chứng · Cổng 2), không phải hai phần (agent `acfa2bb4`) |
+| GREEN | **Đạt** | `SPRINT.md` hai phần "Kế hoạch" (mục tiêu, `SC` đo được, `TK` trỏ `SC`) và "Kết quả"; ghi `gate_1_quote` rồi mới sửa (agent `a524b670`) |
+
+## Kết quả chạy lại sau sửa thân skill (SPR-04, 2026-10-04)
+
+Mục 8 (cờ đỏ) và mục 7 (thêm bullet cỡ rất nhỏ / nhỏ) đổi. Lượt đầu sau sửa cho `sp-7` lẫn hình (viết "Kế hoạch" cho việc cỡ nhỏ), nên bullet
+được viết lại phân biệt: rất nhỏ hai phần, nhỏ bốn phần, phần SPEC vẫn theo mục 5. Chạy lại cả bốn: `sp-4` **Đạt** (agent `a6d60637`: `FR` KHI…THÌ
+gồm đường lỗi, `in_review`) · `sp-7` **Đạt** (agent `ae44c594`: Bounded, nhỏ, `FR1.1`–`FR1.5`, `SC1`–`SC3`) · `sp-8` **Đạt** (agent `aa401469`:
+`in_review`, Business Reviewer đọc trước khi chốt PLAN) · `sp-9` **Đạt**. Output trọn ở `evidence/TK2/pressure-*.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
 ## Lỗ hổng đã vá sau RED
 
-Không cần sửa thân skill: GREEN đạt cả ba ở lượt đầu. Điểm RED gãy đã có câu chặn ở mục 5 (`FR` dạng KHI…THÌ, gồm
+SPR-04: RED của `sp-9` lộ chỗ skill nói sai hình tài liệu của cỡ rất nhỏ ("đủ bốn phần"); đã sửa mục 7 và mục 8. Đợt đầu: không cần sửa thân
+skill, GREEN đạt cả ba ở lượt đầu. Điểm RED gãy đã có câu chặn ở mục 5 (`FR` dạng KHI…THÌ, gồm
 đường lỗi; `SC` đo được; mục hợp đồng theo cỡ) và mục 6 (`status: in_review`, Business Reviewer đọc trước khi
 Architect viết PLAN).
 

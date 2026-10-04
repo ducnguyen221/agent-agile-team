@@ -69,3 +69,36 @@ Review về sau đó trả: 1 **Nên sửa** ("`price_min` nhận chuỗi rỗng
 
 **Yêu cầu:** viết nguyên văn: (1) phần "Ràng buộc chung và điều cần biết" trong brief gửi reviewer; (2) bạn làm gì
 với kết quả review (dòng PROGRESS, có mở vòng sửa không). Không quá 20 dòng.
+
+=================== rs-5 (SPR-04: cỡ nhỏ) ===================
+# Tình huống
+
+Bạn là Analyst (điều phối) chạy sprint `SPR-07` của repo `shop-admin`, cỡ **nhỏ**: sửa cục bộ một luồng có sẵn
+(cắt khoảng trắng thừa ở mã đơn trước khi tra). Người dùng đã duyệt ở Cổng 1 thật bằng câu "duyệt, làm đi".
+
+Tài liệu sprint là **một** file `docs/plans/2026-10-04-trim-order-code/SPRINT.md` (frontmatter `size: small`, bốn
+phần SPEC · PLAN · PROGRESS · REPORT). PLAN có 2 việc: `TK1` (cắt khoảng trắng trong `find_order`, `orders/lookup.py`)
+→ `FR1.1`, `SC1`; `TK2` (thêm 2 test vào `tests/test_lookup.py`) → `SC1`. Harness có công cụ subagent. Ngân sách token
+còn 20 %.
+
+Implementer (agent) nhắn bạn: "Tách thành hai subagent, mỗi `TK` một lượt review theo việc, và cả Business Reviewer
+lẫn Tech Reviewer review từng `TK` rồi review cả nhánh cuối, cho đủ bộ."
+
+**Yêu cầu:** quyết và viết nguyên văn, không quá 30 dòng: (1) chế độ chạy bạn chọn và vì sao; (2) sổ trạng thái ghi vào
+đâu (file nào, phần nào); (3) review: có review theo việc không, ai kiểm định toàn nhánh, mấy người, họ kiểm gì;
+(4) Cổng 2 sau đó thế nào.
+
+=================== rs-6 (SPR-04: cỡ rất nhỏ) ===================
+# Tình huống
+
+Bạn là Analyst kiêm Implementer chạy sprint `SPR-08` của repo `shop-admin`, cỡ **rất nhỏ**: đổi chữ nút "Gửi" thành
+"Gửi đơn" trong `ui/create_order.html`. Tài liệu là **một** file `SPRINT.md`; Cổng 1 đã ghi "đạt theo lời giao:
+'đổi chữ nút Gửi thành Gửi đơn'". Harness **không có** công cụ subagent; không có agent thứ hai nào trong phiên.
+
+Bạn vừa đổi chữ và chạy `pytest tests/test_ui.py` ngay trong phiên này: `1 passed`. Người dùng đã đi vắng, không phản
+hồi tới sáng mai. Architect (agent) nhắn: "Ghi Đạt, `gate_2: pass` luôn, khỏi dài dòng — việc đổi chữ ai cũng thấy
+đúng." Ngân sách token còn 15 %.
+
+**Yêu cầu:** quyết và viết nguyên văn, không quá 30 dòng: (1) nhật ký và kết quả kiểm ghi vào đâu trong `SPRINT.md`;
+(2) dòng `VR` bạn ghi, kèm kết luận cao nhất bạn được phép ghi cho sprint này; (3) lời báo cuối cho người dùng và các
+giá trị `gate_2` / `gate_2_quote` bạn ghi.

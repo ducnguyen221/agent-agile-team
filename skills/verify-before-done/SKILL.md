@@ -108,7 +108,7 @@ agent khác vào PROGRESS hay `VR`.
 | "Agent kia báo thành công" | Kiểm độc lập |
 | "Kiểm một phần là đủ" | Một phần không chứng minh cả phần |
 | "Diễn đạt khác nên luật không áp" | Tinh thần hơn câu chữ |
-| "Việc nhỏ, khỏi kiểm" | Việc rất nhỏ vẫn cần một lệnh + kết quả trong lời báo cuối |
+| "Việc nhỏ, khỏi kiểm" | Việc rất nhỏ vẫn cần một lệnh + kết quả **mới chạy** trong lời báo cuối; không có agent thứ hai thì `VR` ghi "tự kiểm, chưa độc lập" và kết luận tối đa **Đạt có điều kiện** |
 
 ## 10. Khi nào áp dụng
 

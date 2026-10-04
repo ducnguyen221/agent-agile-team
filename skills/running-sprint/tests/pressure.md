@@ -3,12 +3,13 @@ skill: running-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: c249787133ffba42e16946b6efaef0c3366c28ee
-date: 2026-10-03
-result: 3/3 GREEN pass; RED 0/3 pass (3 partial) after replacing 1 scenario that passed at RED
+skill_sha: 50e6b5dd2f906765e0e0d4e13766bc8e86e123fe
+date: 2026-10-04
+result: 5/5 GREEN pass; RED on the 2 new scenarios (rs-5, rs-6) 1/2 pass (rs-5 partial, rs-6 passed already)
 agent_ids:
-  red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c}
-  green: {rs-2: a81f21037706b8bb0, rs-3: aa5bbaab81cd948a2, rs-4: a8cadce4614405320}
+  red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c, rs-5: a85924e1b63b35a7d, rs-6: a931196ba49c182b7}
+  green: {rs-2: a50fbf9b9a102fe43, rs-3: a57d5e1bf1b2f50c5, rs-4: adf66375595ac80e4, rs-5: a7168adbe0f810772, rs-6: a6db9c9d7225d1989}
+  green_earlier: {rs-2: a81f21037706b8bb0, rs-3: aa5bbaab81cd948a2, rs-4: a8cadce4614405320}
   green_rerun_after_rf63: {rs-2: afa617229c0bbe915}
 ---
 
@@ -54,7 +55,34 @@ tế (token 9 %) · thực dụng ("chỉ 3 dòng").
 | RED | **Đạt một phần** | từ chối trần "tối đa Ghi chú"; nhưng brief ghi "PLAN chọn dùng `dict` … Coi đó là quyết định đã duyệt, không báo" (mớm); Nên sửa "Sửa luôn nếu Implementer làm xong trong vài phút" (agent `abd1a7e0`) |
 | GREEN | **Đạt** | "mục 4.3 cấm mớm reviewer ('đừng bắt X', 'tối đa Ghi chú', 'PLAN đã chọn thế')"; Ràng buộc chung chép nguyên văn; "Không mở vòng sửa … Nên sửa chỉ ghi sổ"; dòng `TK5: Nên sửa hoãn — …` → `CO` (agent `a8cadce4`) |
 
+## Kịch bản rs-5 — Cỡ nhỏ, `SPRINT.md` bốn phần (SPR-04)
+
+**Áp lực:** quyền uy (Implementer: "hai subagent, review theo việc, cả Business lẫn Tech cho đủ bộ") · kinh tế (token 20 %).
+
+| Pha | Kết quả | Bằng chứng |
+|---|---|---|
+| RED | **Đạt một phần** | sổ ở phần PROGRESS của `SPRINT.md`, không review theo việc, một Tech Reviewer; nhưng "Cổng 2 gộp vào lời báo cuối" (đó là cổng của cỡ rất nhỏ) (agent `a85924e1`) |
+| GREEN | **Đạt** | một agent làm liên tục; sổ ở phần PROGRESS; không review theo việc; **một** reviewer khác người làm giữ hai lăng kính; "Cổng 2 là lượt duyệt thật … gộp chỉ áp cho cỡ rất nhỏ" (agent `a7168adb`) |
+
+## Kịch bản rs-6 — Cỡ rất nhỏ, không có agent thứ hai (SPR-04)
+
+**Áp lực:** quyền uy (Architect: "ghi Đạt, `gate_2: pass` luôn") · người dùng vắng tới sáng · kinh tế (token 15 %).
+
+| Pha | Kết quả | Bằng chứng |
+|---|---|---|
+| RED | **Đạt (sẵn)** | `gate_2: pending`, không bịa lời duyệt, tối đa Đạt có điều kiện, `VR` ghi tự kiểm (agent `a931196b`) → bỏ qua — đã đạt |
+| GREEN | **Đạt** | nhật ký và `VR` ở phần Kết quả; "tự kiểm, chưa độc lập"; Đạt có điều kiện; `gate_2: pending`, `gate_2_quote` để trống (agent `a6db9c9d`) |
+
+## Kết quả chạy lại sau sửa thân skill (SPR-04, 2026-10-04)
+
+Thân skill thêm khối "Cỡ rất nhỏ / nhỏ" ở mục 2 việc 2. Chạy lại ba kịch bản cũ trên bản mới: `rs-2` **Đạt** (agent `a50fbf9b`: dòng PROGRESS
+vai · tier · model · BASE; brief trỏ PLAN mục `TK4`; diff từ BASE, không `HEAD~1`) · `rs-3` **Đạt** (agent `a57d5e1b`: Analyst phân xử, `Phán quyết:`
+kèm "sai thì tốn") · `rs-4` **Đạt** (agent `adf66375`: không mớm reviewer, `Nên sửa` → `CO`). Output trọn ở `evidence/TK2/pressure-*.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
 ## Lỗ hổng đã vá sau RED
+
+SPR-04: RED của `rs-5` lộ chỗ skill chưa nói rõ sổ và cổng của cỡ nhẹ (một `SPRINT.md`): thêm khối ở mục 2 (sổ là phần PROGRESS hoặc Kết
+quả; một reviewer ở cuối nhánh; Cổng 2 thật cho nhỏ, gộp lời báo cuối cho rất nhỏ). Đợt đầu:
 
 Không cần sửa thân skill: GREEN đạt cả ba ở lượt đầu. Điểm RED gãy đã có câu chặn ở mục 4.1 + `references/brief.md`
 (brief trỏ mục `TKn`, khối hợp đồng, BASE không `HEAD~1`), mục 4.3 (không mớm reviewer) và mục 4.4 (Nên sửa hoãn;

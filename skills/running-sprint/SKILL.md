@@ -33,6 +33,11 @@ chạy chế độ một agent và nói rõ.
 2. **PROGRESS là sổ:** `status: in_progress`, `roles` ghi nhãn agent từng vai. Sổ đã có dòng `TKn Đạt`
    thì `TK` đó **xong** — không làm lại; nối ở `TK` đầu tiên chưa có dòng xong. Sau nén ngữ cảnh,
    tin PROGRESS và `git log`, không tin trí nhớ.
+   **Cỡ rất nhỏ / nhỏ** (một `SPRINT.md`): sổ là phần **PROGRESS** (nhỏ) hoặc **Kết quả** (rất nhỏ) của chính file đó,
+   không dựng `PROGRESS.md` riêng; chế độ một agent (mục 6) là mặc định. Kiểm: nhỏ → **một** reviewer khác người
+   làm giữ cả hai lăng kính (khớp SPEC + kỹ thuật) ở cuối nhánh, không review theo việc, Cổng 2 là lượt duyệt thật;
+   rất nhỏ → agent khác chạy nhanh, hoặc ghi "tự kiểm, chưa độc lập" (tối đa Đạt có điều kiện) và Cổng 2 gộp lời
+   báo cuối (`method/process.md` mục 9).
 3. **Đọc PLAN một lần** (Ràng buộc chung, Trọng tâm review, bảng Giao diện) và SPEC (thẩm quyền khi
    PLAN mâu thuẫn). Tạo todo mỗi `TK` — todo là màn hình, PROGRESS là hồ sơ.
 4. **Tiền kiểm giao diện:** với mỗi cặp `TK` chung file hay giao diện, một dòng: hai `TK`, cái này

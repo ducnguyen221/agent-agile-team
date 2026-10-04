@@ -92,6 +92,10 @@ Reviewer (agent khác) đọc một lượt trước khi Architect viết PLAN �
 - **Chỉ duyệt đúng giai đoạn đang trình:** duyệt ý tưởng ≠ duyệt SPEC; duyệt SPEC ≠ duyệt PLAN; duyệt
   PLAN ≠ nghiệm thu. Một lời "ok" không được suy thành phép làm bước sau; nối lại ở giai đoạn chưa
   xong sớm nhất.
+- **Cỡ rất nhỏ / nhỏ không dựng file SPEC và PLAN riêng**, mà viết vào một `SPRINT.md`. Rất nhỏ (`init --tiny`): hai
+  phần **Kế hoạch** (mục tiêu, `SC`, `TK` trỏ `SC`) và **Kết quả**; Cổng 1 = "đạt theo lời giao" (trích nguyên văn
+  lời giao vào `gate_1_quote`), ghi xong mới sửa. Nhỏ (`init --size small`): đủ bốn phần SPEC · PLAN · PROGRESS ·
+  REPORT, phần SPEC vẫn theo mục 5 (`FR` KHI…THÌ, `SC` đo được, ngoài phạm vi); Cổng 1 là lượt duyệt thật.
 - SPEC xong → skill `writing-plan` (Architect). Spike xong → báo cáo khuyến nghị; muốn giữ code là
   yêu cầu mới, phân loại lại.
 - Trình Cổng 1 theo lời trình chuẩn của `method/process.md` mục 3 — sau khi có cả SPEC và PLAN, trừ
@@ -101,7 +105,7 @@ Reviewer (agent khác) đọc một lượt trước khi Architect viết PLAN �
 
 | Ý nghĩ | Thực tế |
 |---|---|
-| "Đơn giản quá, khỏi cần SPEC" | cỡ rất nhỏ vẫn có `SPRINT.md` đủ bốn phần; cổng là lời duyệt, không phải độ dài tài liệu |
+| "Đơn giản quá, khỏi cần SPEC" | cỡ rất nhỏ vẫn có **một** `SPRINT.md` hai phần: **Kế hoạch** (mục tiêu, `SC` đo được, `TK` trỏ `SC`) rồi **Kết quả**; cỡ nhỏ có `SPRINT.md` đủ bốn phần; cổng là lời duyệt, không phải độ dài tài liệu |
 | "Gọi là bounded cho nhanh" | với tay lấy nhãn để bớt việc chính là phân vân — chọn đường nặng |
 | "Hiểu kiểu app này rồi, bounded thôi" | bounded đo trên repo: không có luồng sẵn để sửa thì là architectural |
 | "Spike chạy được, giữ code luôn" | đầu ra của spike là câu trả lời; giữ code là yêu cầu mới |
