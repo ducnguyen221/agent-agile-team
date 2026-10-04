@@ -62,7 +62,7 @@
 
 - **Một đợt cập nhật = một sprint** theo [method/process.md](../method/process.md). Cỡ theo
   [method/sizing.md](../method/sizing.md): chỉ cập nhật mốc hay sửa chữ không đổi hành vi skill → rất nhỏ
-  (một `SPRINT.md`); sửa nội dung một skill có sẵn → nhỏ hoặc vừa; thêm skill/agent hay cả một đợt → vừa
+  (một `SPRINT.md` hai phần); sửa nội dung một skill có sẵn → nhỏ (một `SPRINT.md` bốn phần) hoặc vừa; thêm skill/agent hay cả một đợt → vừa
   hoặc lớn. Đụng `AGENTS.md` hay luật lõi → `risk_tags: [rules]`, cỡ lớn.
 - **Chốt mốc trước khi đọc:** ghi khối "Đợt N — chốt SHA <ngày>" ở `UPSTREAM.md` với nhánh, SHA HEAD, ngày
   commit, tag, giấy phép, cách dùng; đợt dự kiến (mục "Đợt 2 — dự kiến") chuyển thành khối chốt.

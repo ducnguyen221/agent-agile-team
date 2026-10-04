@@ -27,7 +27,7 @@ Lõi và công cụ đọc cấu hình trước, dùng mặc định sau.
 
 | Thứ | Khoá cấu hình | Mặc định |
 |---|---|---|
-| Thư mục sprint | `paths.sprint_dir` | `docs/plans/{date}-{slug}/` (SPEC, PLAN, PROGRESS, REPORT — hoặc `SPRINT.md` khi rất nhỏ) |
+| Thư mục sprint | `paths.sprint_dir` | `docs/plans/{date}-{slug}/` (SPEC, PLAN, PROGRESS, REPORT — hoặc một `SPRINT.md` khi cỡ rất nhỏ hoặc nhỏ) |
 | Sổ REQUESTS | `paths.requests` | `docs/plans/REQUESTS.md` |
 | Sổ SPRINTS | `paths.sprints` | `docs/plans/SPRINTS.md` |
 | Sổ SPECS + spec sống | `paths.specs` · `paths.feature_specs_dir` | `docs/specs/SPECS.md`, `docs/specs/<slug>.md` |

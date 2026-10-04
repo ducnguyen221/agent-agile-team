@@ -2,7 +2,7 @@
 title: Process — six steps, two human gates
 type: method
 status: active
-updated: 2026-10-01
+updated: 2026-10-04
 ---
 
 # Quy trình: sáu bước, hai cổng người
@@ -146,7 +146,9 @@ tier** ([tiers/README.md](../tiers/README.md)).
   không bao giờ giữ cùng lúc vai thực thi và vai kiểm định cho cùng một sản phẩm
   ([roles/README.md](../roles/README.md)).
 - Business Reviewer kiểm **đáp ứng yêu cầu** (`US`/`FR`/`SC`); Tech Reviewer kiểm **kỹ thuật** (code,
-  test, bảo mật, dữ liệu, backend, frontend) và kéo thẻ chuyên đề khi rủi ro cao.
+  test, bảo mật, dữ liệu, backend, frontend) và kéo thẻ chuyên đề khi rủi ro cao. Cỡ nhỏ: **một** reviewer
+  khác người làm giữ cả hai lăng kính; cỡ rất nhỏ: tự kiểm có ghi "chưa độc lập" hoặc agent khác chạy nhanh
+  (mục 9).
 - Mỗi phát hiện là một `RF` mang một mức: Chặn / Phải sửa / Nên sửa / Ghi chú, có bằng chứng
   (`file:dòng` hoặc lệnh + kết quả). Reviewer được trả **0 phát hiện** và **phải** ghi phần mình không
   đánh giá.
@@ -217,10 +219,16 @@ mở REPORT cũ.
 - Bài học đánh dấu **quan trọng** THÌ **chỉ đề xuất** nâng thành luật, skill hoặc bước quy trình, kèm lý
   do và chi phí; người dùng quyết. Agent không tự sửa luật hay tự tạo skill từ bài học.
 
-## 9. Việc rất nhỏ — cổng "đạt theo lời giao"
+## 9. Việc nhẹ — cỡ rất nhỏ và cỡ nhỏ dùng một file
 
-KHI cỡ **rất nhỏ** (đổi chữ, một dòng, không đổi hành vi) THÌ:
-- Bốn tài liệu gộp thành một file `SPRINT.md` có đủ bốn phần.
+Hai cỡ nhẹ dùng **một** file `SPRINT.md` (bảng cỡ và dấu hiệu đo được: [sizing.md](sizing.md) mục 1); phân vân giữa
+hai bậc thì chọn bậc nặng hơn.
+
+**Cỡ rất nhỏ** (đổi chữ hoặc một chỗ, không đổi hành vi hay quyền, lời giao đã nêu rõ kết quả) — "có kế hoạch
+rồi làm cho hoàn thiện":
+- `SPRINT.md` có **hai** phần: "Kế hoạch" (lời giao, mục tiêu, tiêu chí xong `SC`, việc `TK` trỏ `SC`) và "Kết
+  quả" (nhật ký ngắn, `VR` cho mỗi `SC`, cách hoàn tác). Không SPEC / PLAN riêng. `SPRINT.md` bốn phần của
+  sprint cũ vẫn hợp lệ.
 - **Cổng 1** không mở lượt hỏi mới: khi lời giao của người dùng đã nêu rõ kết quả, ghi
   `gate_1: approved`, `gate_1_at` là thời điểm giao, `gate_1_quote` là **trích nguyên văn** lời giao với
   tiền tố "đạt theo lời giao: …". Lời giao chưa nêu rõ kết quả thì không phải việc rất nhỏ — nâng cỡ.
@@ -231,7 +239,16 @@ KHI cỡ **rất nhỏ** (đổi chữ, một dòng, không đổi hành vi) TH�
 - Luật "người làm không tự chấm" vẫn áp: `VR` do agent khác chạy, hoặc ghi rõ "tự kiểm, chưa độc lập"
   và kết luận chỉ được là **Đạt có điều kiện**.
 
-Giữ đủ hai cổng về mặt hồ sơ, không thêm lượt hỏi về mặt con người.
+**Cỡ nhỏ** (sửa cục bộ một luồng có sẵn, một `FR`, không đổi hợp đồng / giao diện / schema, không có quyết định
+kiến trúc):
+- `SPRINT.md` đủ **bốn** phần SPEC · PLAN · PROGRESS · REPORT, mỗi phần ngắn (một `FR`, một hai `SC`, vài `TK`).
+- **Cổng 1 là lượt duyệt thật**: trình tóm tắt ngắn, chờ người dùng duyệt rồi mới làm (mục 3). **Cổng 2 cũng thật**
+  (mục 7).
+- **Một** reviewer (agent khác người làm) kiểm cả nghiệp vụ lẫn kỹ thuật, một vòng ngắn; vòng sửa và điều kiện
+  dừng như mục 5–6.
+
+Giữ đủ hai cổng về mặt hồ sơ ở cả hai bậc; riêng cỡ rất nhỏ không thêm lượt hỏi về mặt con người.
+Việc nâng cỡ giữa chừng (lộ rủi ro mới) thì chuyển sang bốn file ở cỡ vừa/lớn, ghi `Phán quyết:`.
 
 ## 10. Khi nào được hỏi người dùng — bảng tra nhanh
 
