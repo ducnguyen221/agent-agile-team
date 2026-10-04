@@ -114,11 +114,11 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/6 (+0 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-04 |
 | [api-design](api-design/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-03 |
-| [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 5/7 (+2 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
+| [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 2/7 (+5 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [debugging](debugging/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [deployment](deployment/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 5/7 (+2 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [e2e-testing](e2e-testing/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
-| [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
+| [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 0/7 (+7 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [fastapi](fastapi/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 2/7 (+5 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [frontend](frontend/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [github-ops](github-ops/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 1/7 (+6 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
