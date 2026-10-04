@@ -1,13 +1,13 @@
 ---
 name: token-economy
-description: Use when a session is long or the context window is filling, a command or file produces large output, a subagent must report back or be briefed, a phase boundary (SPEC → PLAN → PROGRESS → REPORT) is crossed, or anyone is about to claim a token or cost saving.
+description: Use when a session is long or the context window is filling, a command or file produces large output, a subagent must report back or be briefed, a phase boundary (SPEC → PLAN → PROGRESS → REPORT) is crossed, or a task starts in a codebase whose files and terms are unknown, or anyone is about to claim a token or cost saving.
 metadata:
   group: communication
   roles: [all]
-source: ["affaan-m/ECC skills/context-budget/SKILL.md (via local distill)", "affaan-m/ECC skills/strategic-compact/SKILL.md", "JuliusBrussee/caveman (idea only: terse agent-to-agent register)", "ryoppippi/ccusage (called only)", "yamadashy/repomix (called only)"]
-source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, c70874fae9eb0e5ad0365beb7e2955899fd1d30f, f5d729488caa8f6a5b6c8086fe2cccd3e8a63f91, 1597d65298b6ad93abc8fa174c3bcf78ae86e27a, 0b3f82b401bbc520fd1aca67c06d24e40a868d3e]
+source: ["affaan-m/ECC skills/context-budget/SKILL.md (via local distill)", "affaan-m/ECC skills/strategic-compact/SKILL.md", "JuliusBrussee/caveman (idea only: terse agent-to-agent register)", "ryoppippi/ccusage (called only)", "yamadashy/repomix (called only)", "affaan-m/ECC skills/iterative-retrieval/SKILL.md"]
+source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, c70874fae9eb0e5ad0365beb7e2955899fd1d30f, f5d729488caa8f6a5b6c8086fe2cccd3e8a63f91, 1597d65298b6ad93abc8fa174c3bcf78ae86e27a, 0b3f82b401bbc520fd1aca67c06d24e40a868d3e, ef648e01899ba3e8dc6371642deaaf64b4477775]
 base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT, MIT, "Apache-2.0 (idea only, no text copied)", "MIT (called only, not copied)", "MIT (called only, not copied)"]
+license: [MIT, MIT, "Apache-2.0 (idea only, no text copied)", "MIT (called only, not copied)", "MIT (called only, not copied)", MIT]
 rewrite_before_public: false
 ---
 
@@ -15,7 +15,7 @@ rewrite_before_public: false
 
 > **Kết luận:** hai luồng tối ưu khác nhau — cho **người** thì tối ưu để hiểu nhanh, giữa **agent** thì
 > tối ưu token mạnh. Trạng thái sống trong **file**, không trong ngữ cảnh; nạp đúng lúc, truyền con trỏ
-> thay nội dung; lọc tại nguồn; và **không tuyên bố tiết kiệm khi chưa có cặp số đo trước/sau** — kể cả
+> thay nội dung; lọc tại nguồn; chưa biết cần tệp nào thì truy xuất **theo vòng có trần** (mục 7); và **không tuyên bố tiết kiệm khi chưa có cặp số đo trước/sau** — kể cả
 > dưới nhãn "ước tính".
 
 ## 1. Mười quy tắc
@@ -72,6 +72,7 @@ chép nội dung tài liệu mà subagent tự đọc được.
 - Lệnh nhiều output: chuyển sang chế độ ngắn hoặc JSON rồi lọc trường; output >30 KB lưu file.
 - Nén repo cho agent (khi thật cần) bằng công cụ chạy qua `npx` tạm, không cài global.
 - Không nạp lại tài liệu đã nằm trong ngữ cảnh; không mở lại skill đã đọc trong cùng pha.
+- Chưa biết cần tệp nào hay codebase gọi khái niệm bằng tên gì: truy xuất theo vòng (mục 7), không đọc hết, không đoán.
 
 ## 5. Đo trước khi tuyên bố
 
@@ -94,3 +95,24 @@ chép nội dung tài liệu mà subagent tự đọc được.
 - Có log/dữ liệu dài nào dán vào mà một đường dẫn thay được không?
 - Mọi số còn đơn vị, mọi "không/chưa/chỉ" còn nguyên?
 - Có con số tiết kiệm nào không đi kèm cặp số đo không?
+
+## 7. Truy xuất lặp — khi chưa biết cần ngữ cảnh nào
+
+Dùng khi giao việc (hay tự làm) trong codebase lạ: không đoán trước được tệp nào liên quan và dự án gọi khái niệm
+bằng tên gì. Ba cách sai: **đọc hết** (tràn ngữ cảnh), **không cho gì** hay kết luận "chưa có" từ lần tìm đầu
+(thiếu), **đoán** (thường sai). Thay bằng vòng ngắn, **tối đa 3 chu kỳ** rồi đi tiếp:
+
+1. **Truy vấn rộng:** từ khoá theo ý định + `ls` cấu trúc thư mục; bỏ ngay thư mục chắc chắn không liên quan
+   (build, vendor, tệp sinh tự động).
+2. **Đánh giá:** mỗi tệp ứng viên một mức — **cao** (cài đúng việc) · **vừa** (kiểu, mẫu liên quan) · **thấp** (chỉ
+   nhắc qua) · **loại** — và ghi **lỗ hổng** còn thiếu (nó gắn vào đâu, cấu hình ở đâu, test theo quy ước nào).
+3. **Tinh chỉnh:** thêm **từ vựng lấy từ chính codebase** (tìm "rate limit" ra 0 kết quả mà thư mục có
+   `throttle.ts` → đổi sang `throttle`), thêm mẫu đường dẫn từ tệp mức cao, loại hẳn tệp mức loại, nhắm vào lỗ
+   hổng. Truy vấn ra 0 kết quả chỉ nói **từ khoá sai**, không nói "chưa có".
+4. **Lặp hoặc dừng.** Dừng khi đã có vài tệp mức cao và hết lỗ hổng then chốt ("đủ tốt": ba tệp cao hơn mười tệp
+   nhạt), hoặc hết 3 chu kỳ.
+
+Hết trần mà còn thiếu một mảnh: **không đọc cả thư mục thay cho**; giao việc kèm mảnh thiếu ghi thành giả định
+(`ASSUMPTION`) hay câu hỏi (`CQ`), cho subagent tự truy xuất tiếp **một** vòng có trần; mảnh thiếu mà đổi tiêu chí
+thành công thì hỏi người dùng. Kết quả đi vào brief là **con trỏ**: `file:dòng` + mức + thuật ngữ đã học (mục 3 và 4),
+không phải nội dung. Việc truy xuất nhiều output giao subagent, trả về danh sách tệp kèm mức và lỗ hổng.

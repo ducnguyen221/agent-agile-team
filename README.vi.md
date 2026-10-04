@@ -1,6 +1,6 @@
 # agent-agile-team
 
-> **Trạng thái: bản tiền phát hành private (`0.2.0-dev`).** Cài được trên Claude Code, Codex và
+> **Trạng thái: bản tiền phát hành private (`0.3.0-dev`).** Cài được trên Claude Code, Codex và
 > Antigravity; chưa công khai. Bản tiếng Anh: [README.md](README.md).
 
 Phương pháp agile cho đội agent AI. Một người giao việc bằng lời thường và chỉ trả lời ở đúng hai cổng; đội
@@ -11,10 +11,11 @@ agent làm phần còn lại và ghi sổ.
   đạt) → bài học. Agent chỉ dừng hỏi ở bốn trường hợp đã nêu tên; hỏi ngoài đó là lỗi quy trình.
 - **Vai theo tier, không theo tên model:** Analyst, Architect, Implementer, QA, Business Reviewer, Tech
   Reviewer; tier `T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test. **Người làm không tự chấm.**
-- **Tài liệu agent tra rẻ:** bốn tài liệu sprint (SPEC, PLAN, PROGRESS, REPORT, hoặc một file gộp cho việc rất
-  nhỏ) và ba sổ gốc dự án (yêu cầu, sprint, spec sống) có khối "Đang mở" ở đầu. Mọi mục có mã hai chữ cái
+- **Tài liệu agent tra rẻ:** bốn tài liệu sprint (SPEC, PLAN, PROGRESS, REPORT; việc rất nhỏ dùng một
+  `SPRINT.md` hai phần, việc nhỏ một `SPRINT.md` bốn phần) và ba sổ gốc dự án (yêu cầu, sprint, spec sống) có khối "Đang mở" ở đầu. Mọi mục có mã hai chữ cái
   (`FR3.2`, `TK4`, `RF2`).
-- **28 skill và 7 agent reviewer chỉ-đọc** cho quy trình, kỹ thuật, kiểm định, giao tiếp và tối ưu token.
+- **32 skill và 13 agent** cho quy trình, kỹ thuật, kiểm định, giao tiếp và tối ưu token; agent chỉ đọc, riêng
+  `build-fixer` được sửa file (T2).
 - **Ba công cụ Python chỉ dùng thư viện chuẩn:** `init` dựng khung không ghi đè gì, `check` giữ chuẩn tài
   liệu, `index` sinh lại khối "Đang mở".
 
@@ -52,13 +53,13 @@ sau hai sprint.
 | Đường dẫn | Mục đích |
 |---|---|
 | `AGENTS.md` | Luật lõi nạp đầu phiên (ngân sách ≤120 dòng, ≤10 KB) |
-| `method/` | Quy trình, cỡ việc, thang mức, bằng chứng, quy ước |
+| `method/` | Quy trình, cỡ việc, thang mức, bằng chứng, quy ước, cổng review; `standards/` là các chuẩn code |
 | `roles/` · `tiers/` | Thẻ vai (thực thi, kiểm định, chuyên đề); định nghĩa tier và hợp đồng bảng tier |
-| `skills/` · `agents/` | Skill để phẳng (`skills/<tên>/SKILL.md`); agent reviewer chỉ-đọc |
+| `skills/` · `agents/` | Skill để phẳng (`skills/<tên>/SKILL.md`); agent (chỉ đọc, riêng `build-fixer` được sửa — T2) |
 | `templates/` | Mẫu tài liệu sprint, sổ gốc, cấu hình dự án |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; test; dự án mẫu kèm kết quả kỳ vọng |
 | `hosts/` | Cài và nạp theo từng harness, điểm cắm của lớp riêng |
-| `docs/` | Bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa |
+| `docs/` | Bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa; xử lý sự cố; cập nhật từ nguồn gốc |
 
 ## Ghi nhận
 

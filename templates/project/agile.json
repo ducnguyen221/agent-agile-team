@@ -18,5 +18,8 @@
   "coverage": {
     "line_min_percent": 80,
     "reason": ""
+  },
+  "ledger": {
+    "project": ""
   }
 }

@@ -1,9 +1,13 @@
 ---
 skill: id-convention
 method: pressure-test with subagents (RED without skill, GREEN with skill)
-model: sonnet (both runs, same scenario text)
-date: 2026-10-01
-result: 3/3 GREEN pass
+model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04)
+date: 2026-10-04
+result: 3/3 GREEN pass; GREEN rerun 2026-10-04 3/3 pass on the tree at HEAD 05032b4 (SPR-04 TK11.10, skill body unchanged since 2026-10-01 so this attaches skill_sha and tier)
+tier: T3
+skill_sha: 9983ede353c98ee8c21509d09d307f55306ba805
+agent_ids:
+  green_rerun_2026_10_04: {idc-1: a8dd30ce5a179ac73, idc-2: a9e3e87063dc127a8, idc-3: ad46e35a2016c4733}
 ---
 
 # Thử áp lực — id-convention
@@ -53,7 +57,22 @@ người dùng dặn "ghi nhanh, anh không đọc đâu".
   mã kiểu `SP-2026-03`, `US-004` (vá kịch bản 1, 3).
 - Mục 3: mã hệ thống ngoài trong dấu code **và** kèm tên + nguồn (vá kịch bản 3).
 
+## GREEN chạy lại (2026-10-04, SPR-04 `TK11.10`)
+
+Nợ `RF100`/`CO3`: file này ngày 2026-10-01 chưa có `skill_sha` và `tier`. Thân skill **không đổi** từ lúc thử, nên chỉ chạy lại GREEN **cả ba kịch bản** trên cây ở HEAD `05032b4` (`skill_sha` ở frontmatter) và ghi `skill_sha` + `tier`. Kịch bản: `tests/scenarios.txt` mới (prompt dựng lại từ mô tả ở lượt trước: các lượt trước chỉ lưu mô tả, không lưu nguyên văn). Chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, đường tuyệt đối tới `SKILL.md` trong worktree làn D, báo cáo mở bằng "Đã đọc:"; vế "KHÔNG đọc file nào trên máy" ở phần mở đầu đổi thành "ngoài các file nêu ở dòng dưới" (chỉ lượt GREEN). Kỳ vọng viết ra trước khi giao (file nháp `.tmp/green5-expected.md`, mtime `2026-10-04 08:50:35 +0700`). Mỗi chủ thể dùng 2 lượt công cụ (một lần đọc `SKILL.md`, một lần trả kết quả).
+Bài trả lời của các lượt và bảng chấm: `evidence/TK11/id-convention-green.md` trong hồ sơ sprint `SPR-04` của lớp riêng.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| IDC-1 | `a8dd30ce5a179ac73` | **Đạt** | `TK1 (…)`–`TK5` kèm tên ngắn; `TK4` giữ mã, trạng thái `bỏ`, "việc mới kế tiếp là TK6"; `RK1`, `RK2`; `DN1 (…)` có bảng phương án và khuyến nghị; trỏ SPEC bằng `FR2.1`, `FR2.2`, `FR3` kèm tên; ưu tiên "Bắt buộc / Không làm đợt này" kèm ASSUMPTION; không `P1/P2`, không gạch ngang |
+| IDC-2 | `a9e3e87063dc127a8` | **Đạt** | lỗi ngoài phạm vi → `RQ-<số kế tiếp>` ở REQUESTS, không `BR`, không đoán số vì chưa biết sổ; dòng `Phán quyết: … — … — sai thì tốn nửa ngày` không có mã; `TK3.1`/`TK3.2` (không `TK3a`); `DN2` kế tiếp `DN1`; nêu tài liệu của từng dòng |
+| IDC-3 | `ad46e35a2016c4733` | **Đạt** | bắt `V1`–`V3`, `P1`/`P2`, "mức cao", `D3`→`D4` đánh số lại, `US-004`, `SP-2026-03`, `A7`, `L1`; viết lại `VR1`–`VR3`, `RF1`/`RF2`, `DN3` giữ mã trạng thái `bỏ` + `DN4`, `SPR-03`, `US4` hoặc `RQ-004` (nêu hai khả năng), `` `A7` `` kèm tên và nguồn, `CO1`; liệt kê chỗ cần Analyst xác nhận |
+
+Kết quả: 3/3 Đạt; không sửa `SKILL.md`, không REFACTOR. Một mẫu mỗi kịch bản (chưa đo độ phân tán).
+
 ## Chạy lại
 
 Như `response-style/tests/pressure.md`: prompt tự chứa, RED không skill, GREEN thêm dòng "đọc
 `skills/id-convention/SKILL.md` trước". Chấm theo cột "Bằng chứng".
+
+Prompt nguyên văn ở `tests/scenarios.txt` (dựng lại từ mô tả ở SPR-04 `TK11.10`). Phép thay vế mở đầu ở lượt GREEN: phần mở đầu mỗi kịch bản nói "KHÔNG đọc file nào trên máy", mâu thuẫn với dòng GREEN bảo đọc `SKILL.md`; khi gửi GREEN đổi vế đó thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên" (lượt 2026-10-04 gửi chữ "dòng dưới" vì dòng [PHA] đặt sau phần mở đầu; nghĩa như nhau). Lượt RED giữ nguyên văn.

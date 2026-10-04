@@ -1,6 +1,6 @@
 ---
 name: worktrees
-description: Use when starting work on a task that needs isolation from the current checkout, before executing a plan or a task brief, when several implementers work in parallel on one repo, or when finishing work and deciding how to clean up a worktree.
+description: Use when starting work on a task that needs isolation from the current checkout, before executing a plan or a task brief, when several implementers work in parallel on one repo, merging parallel task branches, creating a worktree from a tag or a PR branch, or when finishing work and deciding how to clean up a worktree.
 metadata:
   group: technique
   kind: reference
@@ -56,11 +56,25 @@ git check-ignore -q .worktrees || echo "CHƯA bị bỏ qua"
 ```
 
 Chưa bị bỏ qua → thêm vào `.gitignore`, commit, rồi mới tạo. Bỏ qua bước này là commit cả cây worktree vào
-repo.
+repo. Chưa muốn đụng file dùng chung (ví dụ đang ở nhánh chính không được sửa) → thêm `.worktrees/` vào
+`.git/info/exclude` (cục bộ, không commit), và đưa vào `.gitignore` ở nhánh làm việc.
 
 ```bash
-git worktree add .worktrees/<nhánh> -b <nhánh>
+git worktree add .worktrees/<tên-thư-mục> -b <nhánh> [<điểm-xuất-phát>]   # mặc định: nhánh hiện tại; tag/SHA: xem references
 ```
+
+**Tên nhánh.** Theo quy ước của dự án nếu có; chưa có thì `<loại>/<mã-việc>-<mô-tả-ngắn>` bằng chữ thường và dấu
+gạch nối (ví dụ `feat/tk7-export-csv`, `sprint/spr-04-d`), có mã việc (`TK`, `RQ`) để từ tên nhánh lần ra việc.
+Luật của git: không khoảng trắng, không `..`, không ký tự `~ ^ : ? * [ \`, không kết thúc bằng `/` hay `.lock`; và
+hai nhánh không được lồng nhau (đã có `sprint/spr-04` thì không tạo được `sprint/spr-04/d` — dùng `sprint/spr-04-d`).
+Tên thư mục worktree nên là dạng phẳng (thay `/` bằng `-`) để khỏi sinh thư mục con.
+
+Xuất phát từ tag hay SHA (hotfix, xem bản cũ) → `references/integration-and-special-cases.md` mục 2.
+
+**Nhiều agent song song:** mỗi agent **một worktree và một nhánh riêng** (git từ chối checkout cùng một nhánh ở hai
+worktree), phạm vi file không giao nhau (hai nhánh vẫn sửa chung một file thì xung đột lộ lúc gộp, xử lý ở
+`references/integration-and-special-cases.md` mục 1), mỗi agent nhận **đường dẫn tuyệt đối** worktree của mình. Không ai chạy
+`git checkout -b` trong thư mục dùng chung của người khác — index và cây làm việc là của từng worktree.
 
 Từ đây làm việc **trong** thư mục worktree đó bằng đường dẫn tuyệt đối; không `cd` sang worktree khác.
 `git worktree add` bị chặn vì quyền (sandbox) → báo đang làm tại chỗ thay vì worktree, rồi làm bước 2–3 tại
@@ -79,6 +93,15 @@ Tự nhận diện và cài phụ thuộc theo file dự án có:
 | `go.mod` | `go mod download` |
 
 Không có file nào → bỏ qua bước cài.
+
+**File không theo dõi không đi theo sang worktree.** `git worktree add` chỉ dựng cây các file đã commit; thư mục bị
+git bỏ qua (`node_modules`, `.venv`, bản build) và file cấu hình cục bộ (`.env.local`) **không** có ở đó — nên "thiếu
+dependency" hay "thiếu cấu hình" ngay sau khi tạo là bình thường, không phải lỗi.
+
+- Phụ thuộc: dựng lại bằng lệnh ở bảng trên (`npm ci`, `uv sync`…), không chép `node_modules` từ chỗ khác.
+- `.env.local` và tương tự: chép từ `.env.example` (file mẫu có trong repo) rồi điền giá trị **thử**; **không** chép,
+  in hay đọc giá trị secret thật từ checkout khác. Cần giá trị thật mà không có → hỏi người dùng, ghi `BR` nếu chặn `TK`.
+- Cần đúng cấu hình cục bộ giống checkout gốc cho test chạy được → ghi vào PROGRESS file nào đã tạo và vì sao.
 
 ## 4. Bước 3 — baseline sạch
 
@@ -103,6 +126,32 @@ Dọn **theo nguồn gốc**: worktree do công cụ harness tạo → dọn b�
 `git worktree add` → `git worktree remove <đường dẫn>` rồi `git worktree prune`, sau khi nhánh đã gộp hoặc
 người dùng chọn giữ. Worktree do người khác/harness tạo mà mình không sở hữu → không xoá.
 
+**Trước khi xoá một worktree của mình** (xoá là mất file chưa commit):
+
+1. `git -C <worktree> status --short` rỗng — không file sửa, không file chưa theo dõi cần giữ.
+2. Mọi commit đã vào nhánh đích hoặc đã đẩy: `git log <nhánh-đích>..<nhánh> --oneline` rỗng (hoặc người dùng chọn giữ).
+3. Gỡ: `git worktree remove <đường dẫn>` — lệnh này **từ chối** worktree không sạch; đừng thêm `--force` chỉ để
+   nó chịu chạy, vì `--force` bỏ luôn việc sửa dở.
+4. Xoá nhánh: `git branch -d <nhánh>` (chỉ xoá khi đã gộp; `-D` ép xoá nhánh chưa gộp là điều cấm
+   khi chưa được giao đích danh — `method/conventions.md` mục 4). Nhánh đã đẩy lên remote: xoá remote là tác động ra ngoài.
+
+**Worktree còn sót và thư mục mồ côi:**
+
+```bash
+git worktree list                       # mọi worktree: đường dẫn, commit, nhánh; "prunable" = thư mục đã mất
+git worktree list --porcelain           # dạng cho script
+git worktree prune --dry-run -v         # xem sẽ dọn entry nào, chưa làm gì
+git worktree prune                      # dọn entry trỏ tới thư mục đã bị xoá tay
+```
+
+- Entry trỏ thư mục không còn (xoá tay bằng `rm`/Explorer) → `prune` dọn metadata đó; nhánh vẫn còn, xử lý theo bước 2 và 4.
+- Thư mục còn nhưng git không biết (không có trong `git worktree list`) → **không xoá ngay**: xem nội dung
+  (`git -C <thư mục> status` — có thể là worktree bị đứt liên kết do đã chuyển chỗ; `git worktree repair` nối lại).
+  Chỉ xoá khi chắc không phải của ai và không có việc dở.
+- Worktree bị khoá (`git worktree lock`) là chủ ý của ai đó: không gỡ khi chưa hỏi.
+- Mỗi worktree tồn tại lâu ghi trong PROGRESS (đường dẫn · nhánh · việc) để hôm sau tra được nhánh nào gắn thư mục nào.
+- Nguồn: tài liệu `git worktree` (list, remove, prune, lock, repair) và `git check-ref-format`.
+
 ## 7. Tra nhanh
 
 | Tình huống | Làm |
@@ -115,6 +164,7 @@ người dùng chọn giữ. Worktree do người khác/harness tạo mà mình 
 | Thư mục chưa bị git bỏ qua | Thêm `.gitignore` + commit trước |
 | Lỗi quyền khi tạo | Làm tại chỗ, báo rõ |
 | Baseline hỏng | Ghi PROGRESS; chặn `TK` thì ghi `BR` |
+| PR, check CI, log Actions, gắn nhãn | skill `github-ops` |
 | Lỗi "branch đã được checkout ở worktree khác" | `git worktree list` tìm worktree đang giữ nhánh; chuyển nhánh hoặc gỡ worktree đó (nếu của mình) rồi mới tạo lại; không `--force` khi chưa xem file chưa commit trong đó |
 
 | Bào chữa | Thực tế |
@@ -123,3 +173,12 @@ người dùng chọn giữ. Worktree do người khác/harness tạo mà mình 
 | "`git worktree add` nhanh hơn tìm công cụ native" | Bỏ qua công cụ native là lỗi số một: tạo trạng thái ma harness không quản lý được |
 | "Thư mục worktree chắc đã bị bỏ qua" | Chạy `git check-ignore`. Thư mục chưa bỏ qua sẽ bị commit cả cây |
 | "Không gian mới tinh, baseline để sau" | Baseline bẩn làm mọi lỗi sau đó mơ hồ — chạy ngay |
+
+## 8. Đọc gì khi nào
+
+| Cần | Đọc |
+|---|---|
+| Hai worktree cùng sửa một file; gộp các nhánh task vào nhánh tích hợp (thứ tự, merge hay rebase, xung đột) | `references/integration-and-special-cases.md` mục 1 |
+| Tạo worktree/nhánh từ tag hay SHA; đưa hotfix về `main` | `references/integration-and-special-cases.md` mục 2 |
+| Submodule và Git LFS trong worktree phụ (khởi tạo, vì sao tăng dung lượng, cách giảm) | `references/integration-and-special-cases.md` mục 3 |
+| Xem hay chạy thử một nhánh PR rồi gỡ mà không để lại nhánh cục bộ (`--detach`) | `references/integration-and-special-cases.md` mục 4 |

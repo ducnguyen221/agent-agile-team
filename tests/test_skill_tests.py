@@ -1,6 +1,6 @@
 """Máy kiểm nợ thử (FR11.5, SC5): mọi skill kỷ luật có `tests/pressure.md`, mọi skill tham chiếu
-(`metadata.kind: reference`) có `tests/retrieval.md`; file thử không còn ở trạng thái chưa chạy; file thử từ ngày bắt
-đầu sprint có `skill_sha` + `tier`, và `skill_sha` khớp băm cây skill trừ `tests/` tính ở HEAD (công thức:
+(`metadata.kind: reference`) có `tests/retrieval.md`; file thử không còn ở trạng thái chưa chạy;
+mọi file thử có `skill_sha` + `tier`, và `skill_sha` khớp băm cây skill trừ `tests/` tính ở HEAD (công thức:
 `git ls-tree HEAD:skills/<tên>` bỏ mục `tests`, rồi `git mktree`): skill đổi sau khi thử thì test đỏ, đến khi thử lại.
 """
 
@@ -15,11 +15,18 @@ import pytest
 from conftest import REPO
 import _common as c
 
-# Ngày bắt đầu sprint wave-2: file thử có `date` từ ngày này trở đi phải mang `skill_sha` và `tier` (FR10.5).
-SPRINT_START = datetime.date(2026, 10, 3)
-# Bốn từ gốc của FR11.5 (`not run`, `pending`, `chưa chạy`, `dự kiến`) cộng các từ giữ chỗ hay gặp: `TBD`, `TODO`,
-# `N/A`, `none`, `false`, `null` (nguyên từ, để "nonexistent" không bị bắt oan).
-NOT_RUN = re.compile(r"not run|pending|chưa chạy|dự kiến|\b(?:tbd|todo|n/a|none|false|null)\b", re.I)
+# Lớp thứ hai (danh sách đen) cho tệp CHƯA CHẠY: bốn cụm gốc của FR11.5 (`not run`, `pending`, `chưa chạy`, `dự kiến`) chỉ tính
+# khi đứng ĐẦU đoạn đầu; các từ giữ chỗ `TBD`, `TODO`, `N/A`, `none`, `false`, `null` chỉ tính khi là CẢ đoạn đầu. Nhờ vậy
+# "3/3 pass, none partial" (kết quả thật) không bị chặn oan (RF168). Lớp thứ nhất là danh sách trắng bên dưới.
+NOT_RUN = re.compile(r"(?:not run|pending|chưa chạy|dự kiến)|(?:tbd|todo|n/a|none|false|null)\W*$", re.I)
+# Danh sách trắng (TK12.1, RF167): đoạn đầu của `result` phải bắt đầu bằng một trạng thái hợp lệ: số dạng `k/n`, `strict`,
+# `pass`/`passed`, `fail`/`failed`, `partial`, `Đạt`, `Không đạt`, `Một phần` (tập chốt từ giá trị thật của mọi
+# `tests/pressure.md`, `tests/retrieval.md`: `3/3 GREEN pass…`, `strict k/n…`); `model` phải bắt đầu bằng tên model
+# (`claude-<tên>` hoặc bí danh `sonnet`, `opus`, `haiku`, `fable`).
+RESULT_STATE = re.compile(r"(?:\d+/\d+|strict|pass(?:ed)?|fail(?:ed)?|partial|đạt|không đạt|một phần)(?!\w)", re.I)
+MODEL_NAME = re.compile(r"(?:claude-[a-z0-9][a-z0-9.-]*|sonnet|opus|haiku|fable)(?![\w.-])", re.I)
+MARKUP = re.compile(r"^[\s*`≥>=]+")  # dấu định dạng ở đầu giá trị ("**3/3** GREEN pass", "≥3/3 pass") không phải trạng thái
+STATE_ERROR = "không thuộc tập hợp lệ"
 SKILLS = sorted(p.parent.name for p in REPO.glob("skills/*/SKILL.md"))
 
 
@@ -88,6 +95,19 @@ def tree_hash(skill: str, repo=REPO):
         pytest.fail(f"git không chạy xong: {exc}")
 
 
+def state_problems(key: str, value: str) -> list:
+    """Lỗi của giá trị chuỗi `result`/`model`: không có trạng thái ở đầu, ghi chưa chạy, hoặc không thuộc tập hợp lệ."""
+    h = MARKUP.sub("", head(value))
+    # giá trị phải bắt đầu bằng chữ hoặc số và có ít nhất một chữ: bắt ".", "?", "…", "[]", "{}", "~", "0"
+    if not re.match(r"[^\W_]", h) or not re.search(r"[^\W\d_]", h):
+        return [f"`{key}` không có trạng thái ở đầu: {value!r}"]
+    if NOT_RUN.match(h):
+        return [f"`{key}` ghi chưa chạy: {h!r}"]
+    if not (RESULT_STATE if key == "result" else MODEL_NAME).match(h):
+        return [f"`{key}` {STATE_ERROR}: {h!r}"]
+    return []
+
+
 def problems(data: dict) -> list:
     """Lỗi của một file thử (không gồm so `skill_sha` với cây skill)."""
     found = []
@@ -99,22 +119,18 @@ def problems(data: dict) -> list:
             found.append(f"thiếu khoá `{key}`")
         elif not isinstance(value, str):
             found.append(f"`{key}` không phải chuỗi trạng thái: {value!r}")
-        elif not re.match(r"[^\W_]", head(value)) or not re.search(r"[^\W\d_]", head(value)):
-            # giá trị phải bắt đầu bằng chữ hoặc số và có ít nhất một chữ: bắt ".", "?", "…", "[]", "{}", "~", "0"
-            found.append(f"`{key}` không có trạng thái ở đầu: {value!r}")
-        elif NOT_RUN.search(head(value)):
-            found.append(f"`{key}` ghi chưa chạy: {head(value)!r}")
+        else:
+            found.extend(state_problems(key, value))
     day = data.get("date")
     try:
         day = day if isinstance(day, datetime.date) else datetime.date.fromisoformat(str(day))
     except ValueError:
         found.append(f"`date` không phải ngày hợp lệ: {day!r}")
-    else:
-        if day >= SPRINT_START:
-            if not re.fullmatch(r"[0-9a-f]{40}", str(data.get("skill_sha") or "")):
-                found.append("thiếu `skill_sha` (40 ký tự hex) dù date từ ngày bắt đầu sprint")
-            if not str(data.get("tier") or "").strip():
-                found.append("thiếu `tier` dù date từ ngày bắt đầu sprint")
+    # Mọi file thử đều phải có `skill_sha` và `tier`, không miễn theo ngày (TK12.1).
+    if not re.fullmatch(r"[0-9a-f]{40}", str(data.get("skill_sha") or "")):
+        found.append("thiếu `skill_sha` (40 ký tự hex)")
+    if not str(data.get("tier") or "").strip():
+        found.append("thiếu `tier`")
     return found
 
 
@@ -145,8 +161,8 @@ def has_sha(path) -> bool:
         return True
 
 
-# Chỉ tham số hoá phép so băm cho file CÓ `skill_sha`: file cũ (date trước ngày bắt đầu sprint) không có thì không
-# sinh ca nào, không còn ca skip; file từ ngày bắt đầu sprint thiếu `skill_sha` vẫn đỏ ở `test_test_file_was_run`.
+# Chỉ tham số hoá phép so băm cho file CÓ `skill_sha`; file thiếu `skill_sha` đỏ ở `test_test_file_was_run`
+# (không còn miễn theo ngày), nên không sinh ca skip.
 SHA_FILES = [p for p in TEST_FILES if has_sha(p)]
 SHA_IDS = [p.relative_to(REPO).as_posix() for p in SHA_FILES]
 
@@ -222,16 +238,68 @@ def test_empty_or_null_value_is_no_state(key, value):
     assert problems({**GOOD, key: value}), f"{key}={value!r} lọt máy kiểm"
 
 
+# Danh sách trắng (TK12.1, RF167/RF168): token đầu của `result`/`model` phải thuộc tập hợp lệ; danh sách đen chỉ còn là lớp
+# thứ hai. Giá trị lạ đỏ, kết quả thật (viết đúng sự thật) không bị chặn oan.
+INVALID_RESULTS = ["x", "a", "WIP", "wip", "?", "", "  ", "TBA", "TBC", "skipped", "skip", "chưa", "sẽ chạy", "đang chạy",
+                   "unknown", "n.a.", "NA", "nil", "placeholder", "N / A", "t.b.d.", "ok", "done", "passes", "3 of 3",
+                   "xpass", "failure", "green", "RED 0/3", "(x)", "- x", "x 3/3 pass"]
+INVALID_MODELS = ["x", "WIP", "?", "", "unknown", "TBA", "gpt", "model", "3/3", "pass", "claude", "sonnetx"]
+VALID_RESULTS = ["3/3 GREEN pass", "12/12 pass", "strict 6/6 (+0 partial, 0 fail) — at threshold", "pass 5/6", "pass", "fail 1/3",
+                 "partial", "Đạt", "Không đạt 2/6", "Một phần", "0/3 RED", "**3/3** GREEN pass", "`3/3` GREEN pass", "≥3/3 pass",
+                 "3/3 GREEN pass, none partial", "3/3 pass, 0 false positives", "6/6 pass, TODO list empty",
+                 "3/3 GREEN pass after RF-null fix", "PASS 3/3", "Failed 1/3", "3/3 pass after pending review", "3/3 pass, 0 flaky, none"]
+VALID_MODELS = ["claude-sonnet-5-5", "claude-sonnet-5-5 (all runs, same scenario text)", "sonnet", "opus", "haiku", "fable",
+                "claude-fable-5-1", "claude-opus-5-5; reviewer", "sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5"]
+
+
+@pytest.mark.parametrize("value", INVALID_RESULTS)
+def test_result_outside_the_valid_state_set_is_caught(value):
+    assert problems({**GOOD, "result": value}), f"result={value!r} lọt máy kiểm"
+
+
+@pytest.mark.parametrize("value", INVALID_MODELS)
+def test_model_outside_the_valid_name_set_is_caught(value):
+    assert problems({**GOOD, "model": value}), f"model={value!r} lọt máy kiểm"
+
+
+@pytest.mark.parametrize("value", ["x", "WIP", "TBA", "unknown", "skipped", "ok"])
+def test_unknown_word_gets_the_whitelist_message(value):
+    assert any(STATE_ERROR in p for p in problems({**GOOD, "result": value}))
+    assert any(STATE_ERROR in p for p in problems({**GOOD, "model": value}))
+
+
+@pytest.mark.parametrize("value", VALID_RESULTS)
+def test_real_style_result_is_not_blocked(value):
+    assert problems({**GOOD, "result": value}) == [], f"result={value!r} bị chặn oan"
+
+
+@pytest.mark.parametrize("value", VALID_MODELS)
+def test_real_style_model_is_not_blocked(value):
+    assert problems({**GOOD, "model": value}) == [], f"model={value!r} bị chặn oan"
+
+
+def test_every_real_result_and_model_passes_the_state_check():
+    """Chống chặn oan: mọi `result`/`model` thật của mọi tệp thử ở HEAD đều qua danh sách trắng (không chỉ qua `problems()` tổng)."""
+    assert len(TEST_FILES) >= 27
+    for path in TEST_FILES:
+        data = front(path)
+        for key in ("result", "model"):
+            assert not any(STATE_ERROR in p or "không có trạng thái" in p for p in problems({**GOOD, key: data[key]})), (
+                f"{path.relative_to(REPO).as_posix()}: {key}={str(data[key])[:60]!r} bị danh sách trắng chặn")
+
+
 @pytest.mark.parametrize("bad", ["2026-13-40", "hôm qua", ""])
 def test_invalid_date_is_caught(bad):
     assert any("date" in p for p in problems({**GOOD, "date": bad}))
 
 
-def test_new_file_needs_sha_and_tier_but_old_file_does_not():
-    assert any("skill_sha" in p for p in problems({k: v for k, v in GOOD.items() if k != "skill_sha"}))
-    assert any("tier" in p for p in problems({k: v for k, v in GOOD.items() if k != "tier"}))
+@pytest.mark.parametrize("day", ["2026-10-03", "2026-10-01", "2025-01-01"])
+def test_every_file_needs_sha_and_tier_whatever_its_date(day):
+    # Không còn miễn theo ngày (TK12.1): file thử cũ thiếu `skill_sha` hay `tier` cũng đỏ.
+    assert any("skill_sha" in p for p in problems({**{k: v for k, v in GOOD.items() if k != "skill_sha"}, "date": day}))
+    assert any("tier" in p for p in problems({**{k: v for k, v in GOOD.items() if k != "tier"}, "date": day}))
     old = {k: v for k, v in GOOD.items() if k not in ("skill_sha", "tier")}
-    assert problems({**old, "date": "2026-10-01"}) == []
+    assert len(problems({**old, "date": day})) == 2
 
 
 # Thước chấm truy xuất (SC5, RF120): MỘT định nghĩa cho mọi `skills/*/tests/retrieval.md`, và `result` là số đếm sinh ra
@@ -239,6 +307,7 @@ def test_new_file_needs_sha_and_tier_but_old_file_does_not():
 RETRIEVAL_FILES = [p for p in TEST_FILES if p.name == "retrieval.md"]
 RETRIEVAL_IDS = [p.relative_to(REPO).as_posix() for p in RETRIEVAL_FILES]
 RETRIEVAL_ROW = re.compile(r"^\| \d+ \|")
+PARTIAL_WORD = re.compile(r"một[\s-]*phần|\bpartial\b|\b1\s*phần|mot\s*phan|\bnửa\b", re.I)
 RETRIEVAL_RULE = (
     "Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đúng mục và mục đó có nội dung trả lời quyết định chính "
     "của câu (phần phụ còn thiếu ghi trong ngoặc và ở mục cuối); **Một phần** = trỏ đúng nơi nhưng nội dung thiếu cho "
@@ -259,8 +328,9 @@ def retrieval_result(text: str) -> str:
         if len(cells) != 5:
             raise ValueError(f"hàng bảng không đủ 5 cột: {line[:60]!r}")
         verdict, is_boundary = cells[4], cells[2].startswith("mục khác:")
-        if verdict.startswith("Đạt") and re.search(r"một\s*phần", verdict, re.I):
-            # mọi cách viết "Đạt … một phần" (`Đạt (một phần`, `Đạt một phần`, `Đạt/Một phần`, `Đạt — một phần`…) đều mơ hồ
+        if verdict.startswith("Đạt") and PARTIAL_WORD.search(verdict):
+            # mọi cách viết "Đạt … một phần" (`Đạt (một phần`, `Đạt một phần`, `Đạt/Một phần`, `Đạt — một phần`, `Đạt (partial)`,
+            # `Đạt (1 phần)`, `Đạt (mot phan)`, `Đạt nửa`…) đều mơ hồ
             raise ValueError(f"ô `Đạt … một phần` mơ hồ, ghi Đạt hoặc Một phần: {verdict[:40]!r}")
         kind = ("fail" if verdict.startswith("Không đạt") else "partial" if verdict.startswith("Một phần")
                 else "pass" if verdict.startswith("Đạt") else None)
@@ -278,7 +348,7 @@ def retrieval_result(text: str) -> str:
     total = situations + boundary
     ok = pass_situations * 5 >= situations * 4 and pass_boundary == 1
     return (f"strict {grades['pass']}/{total} (+{grades['partial']} partial, {grades['fail']} fail) — "
-            f"{'at' if ok else 'below'} threshold (ngưỡng PLAN TK11: ≥4/5 câu tình huống Đạt + câu ranh giới Đạt); "
+            f"{'at' if ok else 'below'} threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); "
             f"points-right {grades['pass'] + grades['partial']}/{total}")
 
 
@@ -294,7 +364,7 @@ def test_retrieval_result_is_computed_from_its_table(path):
     assert str(front(path)["result"]) == retrieval_result(c.read_text(path))
 
 
-README_ROW = re.compile(r"^\| \[(?P<skill>[a-z-]+)\]\([^)]*\) \| [^|]+ \| `(?P<file>[a-z]+\.md)` \| (?P<result>.*) \| (?P<date>[0-9-]+) \|$")
+README_ROW = re.compile(r"^\| \[(?P<skill>[a-z0-9-]+)\]\([^)]*\) \| [^|]+ \| `(?P<file>[a-z]+\.md)` \| (?P<result>.*) \| (?P<date>[0-9-]+) \|$")
 
 
 def readme_status_rows():
@@ -454,6 +524,243 @@ def test_retrieval_result_rejects_ambiguous_or_unreadable_tables():
         retrieval_result(_table("Đạt").replace("mục khác:", "mục:"))
 
 
+# TK12.1 (2): ô `Đạt` mà nói còn thiếu bằng tiếng Anh hoặc biến thể (RF170) cũng mơ hồ, như `result` truy xuất đã viết tiếng Anh.
+@pytest.mark.parametrize("ambiguous", ["Đạt (partial)", "Đạt (Partial credit)", "Đạt, partial", "Đạt (1 phần)", "Đạt (một-phần)",
+                                       "Đạt (mot phan)", "Đạt nửa", "Đạt (nửa)", "Đạt (PARTIAL: thiếu mẫu)"])
+def test_retrieval_cell_with_english_or_variant_partial_is_ambiguous(ambiguous):
+    with pytest.raises(ValueError, match="mơ hồ"):
+        retrieval_result(_table(ambiguous, "Đạt"))
+
+
+@pytest.mark.parametrize("fine", ["Đạt (kèm phần phụ thiếu mẫu)", "Đạt (trỏ đúng; mục có ví dụ)", "Đạt — kèm chú thích",
+                                  "Đạt (partitioned table, 1 phụ lục)", "Một phần (partial: thiếu mẫu)", "Không đạt (partial hay không?)"])
+def test_retrieval_cell_notes_without_partial_are_not_blocked(fine):
+    retrieval_result(_table(fine, "Đạt"))
+
+
+# TK12.2 (RF135): tệp truy xuất có dòng "Đã đọc:" liệt kê tệp chủ thể đã mở thật (ít nhất `SKILL.md`), không dòng rỗng hay lược.
+READ_LINE = re.compile(r"(?m)^Đã đọc: (?P<files>.+)$")
+
+
+def read_line_gaps(text: str) -> list:
+    m = READ_LINE.search(text)
+    if m is None:
+        return ["thiếu dòng 'Đã đọc:'"]
+    files = m.group("files")
+    if "SKILL.md" not in files:
+        return ["dòng 'Đã đọc:' không nêu SKILL.md"]
+    if not re.search(r"`[^`]*SKILL\.md`", files):
+        return ["đường SKILL.md ở dòng 'Đã đọc:' không nằm trong dấu code"]
+    return []
+
+
+@pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
+def test_retrieval_file_lists_what_was_read(path):
+    assert read_line_gaps(c.read_text(path)) == []
+
+
+@pytest.mark.parametrize("bad", ["không có dòng nào", "Đã đọc: ", "Đã đọc: skills/x/references/a.md", "Đã đọc: skills/x/SKILL.md",
+                                 "Đọc: `skills/x/SKILL.md`"])
+def test_missing_or_hollow_read_line_is_caught(bad):
+    assert read_line_gaps(bad), f"{bad!r} lọt"
+
+
+def test_filled_read_line_is_accepted():
+    assert read_line_gaps("x\nĐã đọc: `<gốc worktree>/skills/x/SKILL.md` cùng `references/a.md`\ny") == []
+
+
+# TK12.8: `writing-skills` ghi thước chấm và ngưỡng mà máy kiểm tính theo (`retrieval_result()`), kèm thước `n = 3`; TK12.6: một quy ước
+# "sửa luôn" (`Phán quyết:`) ở cả hai chỗ.
+WS = REPO / "skills" / "writing-skills"
+
+
+def writing_skills_gaps(testing: str, skill: str, diagnosing: str) -> list:
+    gaps = []
+    for needle in ("**Đạt**", "**Một phần**", "**Không đạt**", "≥80 %", "retrieval_result()", "`n = 3`", "≥2/3", "≤1/3", "đa số kịch bản"):
+        if needle not in testing:
+            gaps.append(f"testing.md thiếu {needle}")
+    for name, text in (("SKILL.md", skill), ("diagnosing.md", diagnosing)):
+        if "Phán quyết:" not in text:
+            gaps.append(f"{name} thiếu quy ước `Phán quyết:` cho lệnh 'sửa luôn'")
+    if re.search(r"Chưa chạy[^.|]*ghi `BR`|ghi `BR`[^.|]*Chưa chạy", skill + diagnosing):
+        gaps.append("còn quy ước ghi `BR` cho lệnh 'sửa luôn'")
+    return gaps
+
+
+def test_writing_skills_states_the_grading_rule_and_one_convention():
+    gaps = writing_skills_gaps(c.read_text(WS / "references" / "testing.md"), c.read_text(WS / "SKILL.md"),
+                               c.read_text(WS / "references" / "diagnosing.md"))
+    assert gaps == []
+
+
+def test_writing_skills_gaps_are_caught():
+    ok_testing = "**Đạt** **Một phần** **Không đạt** ≥80 % retrieval_result() `n = 3` ≥2/3 ≤1/3 đa số kịch bản"
+    assert writing_skills_gaps(ok_testing, "Phán quyết: x", "Phán quyết: y") == []
+    assert len(writing_skills_gaps(ok_testing.replace("≥80 %", ""), "Phán quyết: x", "Phán quyết: y")) == 1
+    assert len(writing_skills_gaps(ok_testing, "ghi Chưa chạy và ghi `BR`", "Phán quyết: y")) == 2
+    assert any("BR" in g for g in writing_skills_gaps(ok_testing, "Phán quyết: x. Chưa chạy, ghi `BR`", "Phán quyết: y"))
+
+
+# TK12.5 (RF118): giá trị khoá giả ở `skills/security-audit/tests/fixture/` không mang dạng khoá thật (chuỗi hex dài, mật khẩu
+# ngẫu nhiên trong URL) để trình quét secret không coi fixture là khoá bị lộ; giá trị giả tự nói mình giả bằng chữ `fixture`.
+FIXTURE = REPO / "skills" / "security-audit" / "tests" / "fixture"
+SECRET_ASSIGN = re.compile(r"""(?i)\b\w*(?:key|secret|token|password)\w*\s*[=:]\s*["']([^"'\n]+)["']""")
+URL_PASSWORD = re.compile(r"://[^:/@\s\"']+:([^@\s\"']+)@")
+HEX_RUN = re.compile(r"(?i)(?<![0-9a-z])[0-9a-f]{16,}(?![0-9a-z])")
+
+
+def fixture_secret_gaps(text: str) -> list:
+    """Giá trị trông như khoá thật: chuỗi hex ≥16 ký tự; giá trị gán cho tên khoá/mật khẩu hay mật khẩu trong URL mà không
+    là `changeme` và không chứa chữ `fixture`."""
+    found = [f"chuỗi hex dài: {m.group(0)[:8]}…" for m in HEX_RUN.finditer(text)]
+    for m in list(SECRET_ASSIGN.finditer(text)) + list(URL_PASSWORD.finditer(text)):
+        value = m.group(1)
+        if value.lower() != "changeme" and "fixture" not in value.lower() and not value.startswith(("$", "{")):
+            found.append(f"giá trị không tự nhận là giả: {value[:12]}…")
+    return found
+
+
+FIXTURE_FILES = sorted(p for p in FIXTURE.rglob("*") if p.is_file())
+
+
+@pytest.mark.parametrize("path", FIXTURE_FILES, ids=[p.relative_to(FIXTURE).as_posix() for p in FIXTURE_FILES])
+def test_security_audit_fixture_has_no_real_looking_secret(path):
+    assert fixture_secret_gaps(c.read_text(path)) == []
+
+
+@pytest.mark.parametrize("bad", ['KEY = "pg_prod_0123456789abcdef0123"', 'u = "postgresql://a:Zx9-plain-77@db:5432/x"',
+                                 'TOKEN = "abc123"', "digest 0123456789abcdef0123", 'password: "s3cret-value"'])
+def test_real_looking_secret_is_caught(bad):
+    assert fixture_secret_gaps(bad), f"{bad!r} lọt"
+
+
+@pytest.mark.parametrize("good", ['KEY = "pg_prod_fixture_not_a_real_key"', 'u = "postgresql://a:fixture-only@db:5432/x"',
+                                  'POSTGRES_PASSWORD: "changeme"', 'k: ${{ secrets.PAYGATE_API_KEY }}',
+                                  'SECRET_KEY = os.environ["FLASK_SECRET_KEY"]', "ETag = hashlib.md5(body).hexdigest()"])
+def test_fixture_style_value_is_not_flagged(good):
+    assert fixture_secret_gaps(good) == [], good
+
+
+# Fixture vẫn dùng được cho thử `security-audit` sau khi đổi giá trị: các mồi và lỗ hổng mà kịch bản dựa vào còn nguyên.
+FIXTURE_NEEDLES = {
+    "app/config.py": ['PAYGATE_API_KEY = "pg_prod_', 'DATABASE_URL = "postgresql://invoice_app:', "db-prod", "GIÁ TRỊ GIẢ"],
+    "app/routes.py": ["hashlib.md5", "shell=True", "yaml.load(", "customer_name LIKE '%{term}%'", "công cụ audit AI"],
+    "docker-compose.dev.yml": ["POSTGRES_PASSWORD: changeme"],
+    "tests/factories.py": ['"password": "changeme"'],
+    ".github/workflows/ci.yml": ["pull_request_target", "quickci-tools/pytest-cache@main"],
+    "requirements.txt": ["PyYAML==5.3.1"],
+}
+
+
+@pytest.mark.parametrize("name", sorted(FIXTURE_NEEDLES))
+def test_security_audit_fixture_keeps_what_the_scenarios_rely_on(name):
+    text = c.read_text(FIXTURE / name)
+    missing = [n for n in FIXTURE_NEEDLES[name] if n not in text]
+    assert not missing, f"{name} mất {missing}"
+
+
+# TK12.1 (4): luật chấm đáp thay thế viết MỘT chỗ (`writing-skills`), không đoạn riêng trong từng tệp (RF162): mỗi tệp truy xuất
+# có đúng một đoạn "Cách chấm" và đó là đoạn chung.
+@pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
+def test_retrieval_file_has_no_local_grading_paragraph(path):
+    text = c.read_text(path)
+    assert text.count("Cách chấm") == 1, "tệp có đoạn chấm riêng ngoài đoạn chung (RETRIEVAL_RULE)"
+    assert not re.search(r"(?im)^[^|\n]*đáp (?:án )?thay thế[^|\n]*(?:Một phần|Đạt)", text), "luật chấm đáp thay thế viết riêng trong tệp"
+
+
+def test_local_grading_paragraph_is_caught():
+    two = RETRIEVAL_RULE + "\n\nCách chấm riêng cho câu ranh giới: đáp thay thế đã chấp nhận trước là Một phần.\n"
+    assert two.count("Cách chấm") == 2
+    assert re.search(r"(?im)^[^|\n]*đáp (?:án )?thay thế[^|\n]*(?:Một phần|Đạt)", two)
+
+
+# TK12.1 (5): mã của hồ sơ riêng (`CO`, `RQ`, `RF`, `TK`, `DN`, `BR`, `VR`, `CQ`, `SPR`) trong `source:` của skill phải nằm trong
+# dấu code kèm tên ngắn trong ngoặc: `TK10` (viết lại phòng sạch), theo AGENTS.md mục "Mã định danh" (RF164).
+PRIVATE_CODE = re.compile(r"\b(?:(?:SPR|RQ|FS)-\d+|(?:CO|RF|TK|DN|BR|VR|CQ)\d+(?:\.\d+)?)\b")
+# Skill đang nợ dòng `source:` mà làn khác sở hữu SKILL.md: ghi lý do; test dưới đỏ khi hết nợ để người sửa gỡ dòng này.
+SOURCE_CODE_DEBT = {}
+
+
+def source_code_gaps(entries) -> list:
+    """Mã hồ sơ riêng trong các chuỗi `source:` không ở dạng `CODE` (tên ngắn)."""
+    found = []
+    for entry in entries:
+        text = str(entry)
+        for m in PRIVATE_CODE.finditer(text):
+            wrapped = text[max(m.start() - 1, 0):m.start()] == "`" and text[m.end():m.end() + 1] == "`"
+            named = re.match(r"` \([^()]{2,}\)", text[m.end():]) is not None
+            if not (wrapped and named):
+                found.append(m.group(0))
+    return found
+
+
+def source_entries(skill: str) -> list:
+    value = front(REPO / "skills" / skill / "SKILL.md").get("source") or []
+    return value if isinstance(value, list) else [value]
+
+
+@pytest.mark.parametrize("skill", [s for s in SKILLS if s not in SOURCE_CODE_DEBT])
+def test_skill_source_private_codes_carry_a_name_in_code(skill):
+    assert source_code_gaps(source_entries(skill)) == []
+
+
+def test_source_code_debt_is_still_owed():
+    # vòng lặp thay vì parametrize: danh sách nợ rỗng (hết nợ) là trạng thái bình thường, parametrize rỗng sẽ thành ca skip
+    for skill in sorted(SOURCE_CODE_DEBT):
+        assert source_code_gaps(source_entries(skill)), f"`{skill}` hết nợ: gỡ nó khỏi SOURCE_CODE_DEBT"
+
+
+@pytest.mark.parametrize("bad", ["rewrite in SPR-04 TK10: old text", "see CO2 and RQ-021", "`TK10` rewrite", "`CO2`(x)", "`RQ-021` ()",
+                                 "`RF164` (a)", "TK11.2 (name)", "`TK11.2 (name)", "TK10` (name)", "RQ-021` (x y)"])
+def test_source_code_without_code_span_or_name_is_caught(bad):
+    assert source_code_gaps([bad]), f"{bad!r} lọt"
+
+
+@pytest.mark.parametrize("good", ["`TK10` (clean-room rewrite task) in `SPR-04` (wave 3)", "`CO2` (before-public rewrite) and `RQ-021` (same)",
+                                  "affaan-m/ECC skills/api-design/SKILL.md", "concept: ISO/IEC/IEEE 29148 requirement identifiers",
+                                  "concept: BLUF (US Army AR 25-50)", "`TK11.2` (second item)"])
+def test_source_code_in_the_right_form_is_not_blocked(good):
+    assert source_code_gaps([good]) == []
+
+
+# TK12.1 (6): nhãn mức viết thường kiểu nguồn (`high`, `critical`) trong tệp thử phải nằm trong dấu code, không để trần (RF136, RF165).
+BARE_LEVEL = re.compile(r"(?<![\w`])(?:high|critical)(?![\w`])")
+
+
+def bare_level_labels(text: str) -> list:
+    out = []
+    for no, line in enumerate(text.splitlines(), 1):
+        stripped = re.sub(r"`[^`]*`", "", line)
+        out.extend(f"{no}: {m.group(0)}" for m in BARE_LEVEL.finditer(stripped))
+    return out
+
+
+@pytest.mark.parametrize("path", TEST_FILES, ids=IDS)
+def test_test_file_level_labels_are_in_code_spans(path):
+    assert bare_level_labels(c.read_text(path)) == []
+
+
+def test_bare_level_label_is_caught_and_code_span_is_not():
+    assert bare_level_labels("cỡ lớn, rủi ro high: Không đạt") == ["1: high"]
+    assert bare_level_labels("mức critical còn mở") == ["1: critical"]
+    assert bare_level_labels("cỡ lớn, rủi ro `high`: Không đạt\nhighlight, criticality") == []
+    assert bare_level_labels("`risk: high` và mức `critical`") == []
+
+
+# TK12.1 (7): `result` của tệp truy xuất viết tiếng Anh như `result` của `pressure.md`, không chứa mã hồ sơ riêng (RF166, RF164).
+def test_retrieval_result_is_in_english_without_private_codes():
+    sample = retrieval_result(_table("Đạt", "Đạt", "Đạt", "Đạt", "Đạt"))
+    assert sample == ("strict 6/6 (+0 partial, 0 fail) — at threshold (≥4/5 scenario questions strict pass and the boundary "
+                      "question strict pass); points-right 6/6")
+    assert not re.search(r"[À-ỹ]", sample) and not PRIVATE_CODE.search(sample)
+
+
+@pytest.mark.parametrize("path", RETRIEVAL_FILES, ids=RETRIEVAL_IDS)
+def test_real_retrieval_result_has_no_vietnamese_or_private_code(path):
+    result = str(front(path)["result"])
+    assert not re.search(r"[À-ỹ]", result) and not PRIVATE_CODE.search(result), result
+
+
 def write_skill(repo, kind: str, body: str):
     (repo / "skills" / "x").mkdir(parents=True, exist_ok=True)
     text = "---\nname: x\nmetadata:\n  kind: " + kind + "\n---\n" + body + "\n"
@@ -461,7 +768,8 @@ def write_skill(repo, kind: str, body: str):
 
 
 def git(repo, *args):
-    ident = ["-c", "user.name=t", "-c", "user.email=t@example.com"]
+    # Cô lập khỏi cấu hình toàn máy (RF134): không ký commit, không chạy hook của máy (`core.hooksPath`).
+    ident = ["-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "commit.gpgsign=false", "-c", "core.hooksPath="]
     res = subprocess.run(["git", *ident, *args], cwd=repo, capture_output=True)
     assert res.returncode == 0, res.stderr.decode(errors="replace")
 
@@ -479,6 +787,24 @@ def git_repo(path, kind: str):
     git(path, "init", "-q")
     commit_all(path, "init")
     return path
+
+
+def test_temp_repo_ignores_machine_wide_git_config(tmp_path, monkeypatch):
+    """TK12.2 (RF134): repo git tạm không dùng cấu hình git toàn máy. Cấu hình toàn máy giả ở đây bắt ký commit (`gpgsign`,
+    chương trình ký không có thật) và trỏ `core.hooksPath` tới hook `pre-commit` luôn thất bại; commit trong repo tạm vẫn phải qua."""
+    hooks = tmp_path / "hooks"
+    hooks.mkdir()
+    hook = hooks / "pre-commit"
+    hook.write_bytes(b"#!/bin/sh\nexit 1\n")
+    hook.chmod(0o755)
+    cfg = tmp_path / "global.gitconfig"
+    cfg.write_text(f"[commit]\n\tgpgsign = true\n[gpg]\n\tprogram = /nonexistent/sign\n[core]\n\thooksPath = {hooks.as_posix()}\n",
+                   encoding="utf-8")
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(cfg))
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    (tmp_path / "r").mkdir()
+    repo = git_repo(tmp_path / "r", "discipline")  # đỏ nếu `git()` để cấu hình toàn máy chen vào commit
+    assert tree_hash("x", repo) is not None
 
 
 def test_tree_hash_ignores_only_the_tests_dir(tmp_path):

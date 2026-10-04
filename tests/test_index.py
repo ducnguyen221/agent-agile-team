@@ -159,3 +159,11 @@ def test_non_utf8_ledger_is_input_error_not_traceback(tmp_path, capsys):
     assert "UTF-8" in capsys.readouterr().out
     result = run_script("index.py", str(root))
     assert result.returncode == 2 and "Traceback" not in result.stderr
+
+
+def test_small_sprint_file_shows_in_open_block(tmp_path):
+    root = project(tmp_path)
+    init.main([str(root), "--apply", "--date", DATE, "--sprint", "tweak-flow", "--title", "Chỉnh luồng", "--size", "small"])
+    assert index.main([str(root)]) == 0
+    got = block(root / "docs" / "plans" / "SPRINTS.md")
+    assert f"| SPR-01 | {DATE} | Chỉnh luồng | đang viết SPEC/PLAN | 0 | [{DATE}-tweak-flow]({DATE}-tweak-flow/) |" in got

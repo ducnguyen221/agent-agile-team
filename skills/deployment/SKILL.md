@@ -1,6 +1,6 @@
 ---
 name: deployment
-description: Use when containerizing an app, writing or reviewing a Dockerfile or compose file, setting up a CI/CD pipeline, adding health checks or probes, choosing a rollout strategy (rolling, blue-green, canary), planning a rollback, validating environment config, debugging a container, or preparing a production release.
+description: Use when containerizing an app, writing or reviewing a Dockerfile or compose file, setting up a CI/CD pipeline (including multi-service), adding health checks or probes, choosing a rollout strategy (rolling, blue-green, canary), planning a rollback or roll-forward, validating environment config, debugging a container, or preparing a production release.
 metadata:
   group: technique
   kind: reference
@@ -17,7 +17,8 @@ rewrite_before_public: false
 > **Kết luận:** chọn chiến lược theo câu hỏi **"bản cũ và bản mới có chạy cạnh nhau được không"**; đóng gói
 > thành image tái tạo được, gắn tag bất biến; pipeline đi qua staging và smoke test rồi mới tới production;
 > **trước khi bật lưu lượng** đã viết điều kiện huỷ đo được và đã thử đường hoàn tác. Deploy production,
-> rollback production và xoá dữ liệu là hành động ra ngoài: chỉ làm khi người dùng gật, mỗi lần một lần gật.
+> rollback production và xoá dữ liệu là hành động ra ngoài: chỉ làm khi người dùng gật, mỗi lần một lần gật (ngoại lệ duy
+> nhất: kế hoạch hoàn tác kèm điều kiện huỷ đã được duyệt sẵn — mục 4).
 > "Đã deploy" chưa phải "chạy đúng" — kết quả ghi thành bằng chứng mới chạy.
 
 ## 1. Chọn chiến lược triển khai
@@ -31,7 +32,7 @@ rewrite_before_public: false
 - Rolling và canary để **hai bản cùng đọc ghi một CSDL**: schema phải hợp với cả hai — mở rộng trước, chuyển
   dữ liệu, thu hẹp ở đợt sau (skill `database-migrations`). Không đạt điều đó → blue-green có khoảng bảo trì,
   hoặc tách thay đổi schema ra một lần deploy riêng.
-- Phân vân giữa hai chiến lược → chọn cái hoàn tác nhanh hơn.
+- Phân vân giữa hai chiến lược → chọn cái hoàn tác nhanh hơn. Sau sự cố, quay lui hay vá tiến: `references/roll-forward-and-multi-service-ci.md` mục 1.
 
 Sơ đồ lưu lượng từng chiến lược: `references/deployment-strategies.md`.
 
@@ -40,7 +41,7 @@ Sơ đồ lưu lượng từng chiến lược: `references/deployment-strategie
 1. **Đóng gói** bằng Dockerfile nhiều tầng: người dùng không phải root, image nền ghim phiên bản,
    `HEALTHCHECK`; tag image bằng mã commit, không dùng tag trôi — mẫu ở `references/dockerfiles.md`, luật
    Docker và Compose ở `references/docker.md`.
-2. **Nối pipeline**: lint → kiểm kiểu → test → build image → deploy staging → smoke test → deploy production.
+2. **Nối pipeline**: lint → kiểm kiểu → test → build image → quét image (Trivy) → deploy staging → smoke test → deploy production.
    Production nhận **đúng image** đã qua staging, không build lại — YAML ở `references/cicd-health-config.md`.
 3. **Health check và probe** — ba câu hỏi khác nhau, đừng dồn vào một endpoint:
    - liveness: tiến trình còn sống không — **không** kiểm phụ thuộc, nếu không thì CSDL chập chờn làm mọi
@@ -104,10 +105,11 @@ Mức là gợi ý theo **hậu quả nếu bỏ qua**; quyết cuối theo `met
 
 | Cần | Đọc |
 |---|---|
-| Sơ đồ lưu lượng rolling / blue-green / canary, được mất, khi nào dùng | `references/deployment-strategies.md` |
-| Dockerfile nhiều tầng (Node.js, Go, Python/Django), nên và không nên | `references/dockerfiles.md` |
-| Pipeline GitHub Actions, các chặng pipeline, endpoint health, probe Kubernetes, cấu hình twelve-factor + kiểm, lệnh hoàn tác | `references/cicd-health-config.md` |
+| Sơ đồ lưu lượng rolling / blue-green / canary, được mất, khi nào dùng; phiên đăng nhập khi chuyển blue-green, giữ bản blue | `references/deployment-strategies.md` |
+| Dockerfile nhiều tầng (Node.js, Go, Python/Django), nên và không nên; chọn base slim/alpine/distroless; quyền ghi khi `USER` không root | `references/dockerfiles.md` |
+| Pipeline GitHub Actions, các chặng pipeline + quét Trivy, endpoint health, probe Kubernetes + `terminationGracePeriodSeconds`/`preStop`/`maxUnavailable`, cấu hình twelve-factor + kiểm, lệnh hoàn tác, điều tra `CrashLoopBackOff` | `references/cicd-health-config.md` |
 | Luật Docker/Compose, debug theo mã thoát, lỗi hay gặp, harness kiểm trình cài đặt cô lập | `references/docker.md` |
+| Vá tiến hay quay lui sau sự cố (tiêu chí, ngưỡng, hạn chót), cột `NOT NULL` đã thêm mà bản mới hỏng; pipeline nhiều dịch vụ: chỉ build dịch vụ đổi, ma trận theo dịch vụ, cache Docker theo dịch vụ, song song hoá job | `references/roll-forward-and-multi-service-ci.md` |
 | Stack Compose cho dev; mạng, volume, bảo mật container | `references/docker-compose-dev.md`, `references/docker-network-volume-security.md` |
 
 Liên quan: skill `github-ops` (workflow CI), `security-review` và agent `security-reviewer` (secret, CVE,

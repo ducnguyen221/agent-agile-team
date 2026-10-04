@@ -1,7 +1,7 @@
 {
   "name": "agent-agile-team",
-  "version": "0.2.0-dev",
-  "description": "An agile method for AI agent teams: a six-step process with two human gates (approve spec and plan, accept the report), role cards assigned by tier instead of model name, the rule that whoever does the work never grades it, sprint and project-registry templates, 28 skills, 7 read-only reviewer agents, and three standard-library tools (init, check, index) that keep sprint documents consistent. Core rules live in AGENTS.md; a host environment plugs in its tier table and leak denylist through two environment variables. Private pre-release.",
+  "version": "0.3.0-dev",
+  "description": "An agile method for AI agent teams: a six-step process with two human gates (approve spec and plan, accept the report), role cards assigned by tier instead of model name, the rule that whoever does the work never grades it, sprint and project-registry templates, 32 skills, 13 agents (read-only, except `build-fixer`, which may edit files at T2), and three standard-library tools (init, check, index) that keep sprint documents consistent. Core rules live in AGENTS.md; a host environment plugs in its tier table and leak denylist through two environment variables. Private pre-release.",
   "author": {
     "name": "Nguyễn Quang Đức",
     "email": "ducnguyen.ams@gmail.com",

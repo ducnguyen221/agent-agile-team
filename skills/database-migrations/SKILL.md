@@ -1,11 +1,11 @@
 ---
 name: database-migrations
-description: Use when creating or altering tables, columns, indexes or constraints, writing a data backfill or data-fix script, planning a zero-downtime schema change, setting up migration tooling, reviewing a migration, or before a migration runs against production-sized or production data.
+description: "Use when a database schema or the data inside it has to change: new or reshaped tables, columns, keys, indexes and constraints; a backfill or one-off data repair; a schema change that must not cause downtime; migration tooling and its CI/CD steps, Rails included; a unique index over rows that may be duplicated; a migration under review; or any run against production-scale data."
 metadata:
   group: technique
   kind: reference
   roles: [implementer, tech-reviewer]
-source: [affaan-m/ECC skills/database-migrations/SKILL.md, "concept: migration rehearsal on a production-sized copy (references/rehearsal.md, rewritten from an idea list that kept some source wording; must be genuinely rewritten before public, see CO2 and RQ-021 in the owner private record)"]
+source: [affaan-m/ECC skills/database-migrations/SKILL.md, "concept: migration rehearsal on a production-sized copy (references/rehearsal.md, clean-room rewrite: old text removed first, new writer saw only a noun-phrase idea list; task `TK10` (clean-room rewrite), sprint `SPR-04` (method wave 3))"]
 source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, null]
 base_sha: 3599962a013653191c41676021c7e7dc519ee351
 license: [MIT, none]
@@ -23,6 +23,9 @@ rewrite_before_public: false
 ## 1. Nguyên tắc
 
 1. **Mọi thay đổi là một migration** — không sửa tay DB production; không có dấu vết, không lặp lại được.
+   Ngoại lệ duy nhất: gỡ trạng thái hỏng của công cụ (cờ dirty của golang-migrate) hoặc khôi phục dữ liệu sau
+   lệnh sai — theo runbook đã ghi và được người dùng gật (`references/django-golang-migrate.md`,
+   `references/postgres-safe-ddl.md` mục 8).
 2. **Production chỉ đi tới** — "hoàn tác" ở production là một migration tới mới; bản `downgrade` dùng cho
    môi trường phát triển và diễn tập.
 3. **Schema và dữ liệu tách riêng** — không trộn DDL với cập nhật dữ liệu trong một migration.
@@ -36,6 +39,8 @@ rewrite_before_public: false
 - [ ] Có cả `upgrade` và `downgrade`, hoặc ghi rõ "không đảo ngược được" kèm lý do.
 - [ ] Không khoá toàn bảng trên bảng lớn (dùng thao tác đồng thời).
 - [ ] Cột mới cho phép rỗng hoặc có mặc định (không thêm `NOT NULL` không mặc định vào bảng đã có dữ liệu).
+- [ ] Khoá ngoại trên bảng đã có dữ liệu: `NOT VALID` → dọn dòng mồ côi → `VALIDATE`; đổi kiểu cột: đã đếm dòng
+      không ép được kiểu (`references/postgres-safe-ddl.md` mục 6, 7).
 - [ ] Index trên bảng đã có tạo bằng `CONCURRENTLY`.
 - [ ] Backfill là migration riêng: chia lô, idempotent, chạy tiếp được khi đứt, có log tiến độ.
 - [ ] Đã thử trên bản sao dữ liệu cỡ production (rủi ro cao: diễn tập đủ — mục 5).
@@ -96,9 +101,10 @@ import model ORM hiện hành vào migration — model đổi theo thời gian, 
 
 | Cần | Đọc |
 |---|---|
-| DDL an toàn trên Postgres: thêm/bỏ/đổi tên cột, index đồng thời, backfill bảng lớn theo lô | [references/postgres-safe-ddl.md](references/postgres-safe-ddl.md) |
+| DDL an toàn trên Postgres: thêm/bỏ/đổi tên cột, index đồng thời, backfill bảng lớn theo lô, khoá ngoại + dòng mồ côi, đổi kiểu với dữ liệu hỏng, khôi phục sau `UPDATE` sai, **unique index khi dữ liệu có dòng trùng** (mục 9) | [references/postgres-safe-ddl.md](references/postgres-safe-ddl.md) |
+| Gắn migration vào pipeline CI/CD (kiểm trong PR, staging, production có duyệt), ai được chạy ở production, tài khoản CSDL riêng; Rails (`rails db:migrate`, `strong_migrations`, `disable_ddl_transaction!`) | [references/pipeline-and-rails.md](references/pipeline-and-rails.md) |
 | Diễn tập trên bản sao, đo khoá/độ trễ, runbook production, tiêu chí huỷ | [references/rehearsal.md](references/rehearsal.md) |
-| Django, golang-migrate | [references/django-golang-migrate.md](references/django-golang-migrate.md) |
+| Django, golang-migrate (trạng thái dirty và `force`, trùng số phiên bản, quy ước đánh số) | [references/django-golang-migrate.md](references/django-golang-migrate.md) |
 | Prisma, Drizzle, Kysely (Node) | [references/orm-tooling-node.md](references/orm-tooling-node.md) |
 
 Thiết kế schema, index, truy vấn Postgres: skill `postgres`. Review migration chuyên đề dữ liệu: agent

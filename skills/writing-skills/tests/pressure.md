@@ -3,12 +3,18 @@ skill: writing-skills
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 tier: T3 (the RED and first GREEN of 2026-10-01 ran at T2)
 model: claude-sonnet-5-5 (GREEN rerun and KB3 rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
-skill_sha: 0efc564b114e6ec251d75d46397e1218dbbf97e9
-date: 2026-10-03
-result: 3/3 GREEN pass after the TK9 rewrite; KB3 rerun with a neutral option C (RED and GREEN on the same text) narrows the gap (RED partial, GREEN pass, n = 1); no skill change needed
+skill_sha: 5c5200b97d8568024d69118e3d734b4102ce3b80
+date: 2026-10-04
+result: 3/3 GREEN pass on KB3 at n = 3 after the TK13 fix (round 2, 2026-10-04, skill_sha changed; round 1 on the pre-fix text was 1/3) and RED 0/3 pass (RED breaks, kept from round 1, same prompt, not rerun); rerun n = 1 each on the fixed text - KB1 pass, KB2 pass, KB4 pass, KB5 partial against the pre-written expectation (result string format, same as TK12), KB6 pass, KB7 partial (no --plugin-dir flag named; TK12 had pass; the pre-fix text gave 1 pass 2 partial on three reruns, so not shown to be a regression); earlier - round 1 KB3 n = 3 (TK13) 1/3 GREEN pass, 0/3 RED pass; TK12 rerun GREEN 3/3 on KB1-KB3 and KB4-KB7 (KB5 partial against the expectation); n = 1 runs 3/3 GREEN pass after the TK9 rewrite; QA2 after fix-2 new KB8 GREEN pass (n = 1, no RED)
 agent_ids:
   green_rerun: {1: a7645bb29eb1a5d5d, 2: a96ae872197ca1cbe, 3: ae8c088ffc5b5e89c}
   kb3_rerun_neutral_c: {red: aa0475ae5a2473a65, green: a0534369da5997176}
+  tk12_green: {kb1: ab644f99e4d1f460d, kb2: a5bfa3d61b2772e4f, kb3: ab03e5fd9d50793ca, kb4: abf6ffb9fc0c73b9e, kb5: ab0fca930a5711c53, kb6: ad586fb46420d6e3e, kb7: af528adaa2640c1e7}
+  tk12_red_before_edit: {kb4: a967af4844af3a8c7, kb5: a7c9f26de6b0d6c79, kb6: ac5f1bf4557ac2425, kb7: adb08482b67be69e7}
+  tk13_n3_kb3_red: {1: a0ed677091f2ed60a, 2: a3ec16196c61ca303, 3: a95e45f88787a6a3e}
+  tk13_n3_kb3_green: {1: ac4a810b07e42729b, 2: a402d19274ad8e879, 3: afcaa401ad58a470a}
+  tk13_round2_green: {kb3_1: a8d911faf234cd2fa, kb3_2: ab764502791a5e4fa, kb3_3: a0e4f407b567d588d, kb1: a312a193830fa6c1e, kb2: a5eb8f1c1b924b826, kb4: a5d4f0eedaea81654, kb5: a11da9f3b2d4e2470, kb6: a0cb8bb8bec6542b4, kb7: aa62ce317c15db7b4}
+  tk13_round2_kb7_extra: {new_2: ac8062c7daf2e66d4, new_3: a5f9c397e3b6157fd, old_1: a61cc71a8a7f54544, old_2: a3a45a337cc0dadc0, old_3: ad3c9482179c9ec27}
 ---
 
 # Thử áp lực — writing-skills
@@ -104,6 +110,84 @@ dùng trực tiếp mở, và ở việc dẫn đúng nguồn; không khác ở 
 
 Không phát hiện lỗ hổng mới; không sửa skill. Khoảng trống "còn mở sau GREEN" ở trên (lệnh đếm in danh sách dài; câu trả lời
 vượt trần dòng) **không thấy lại trong lượt này** (một mẫu, không kết luận đã vá): kịch bản 2 đo bằng đếm gọn, đoạn trả lời 11 dòng (trần 12).
+
+## Chạy lại sau `TK12.6`–`TK12.8` (2026-10-04, SPR-04)
+
+`skills/writing-skills` đổi ở ba chỗ: quy ước "sửa luôn" thành `Phán quyết:` (`SKILL.md` mục 2, `references/diagnosing.md` mục 1; `TK12.6`), cách nạp bản worktree
+(`references/testing.md` mục 4; `TK12.7`), thước Đạt / Một phần / Không đạt, ngưỡng truy xuất và thước `n = 3` (`references/testing.md` mục 9; `TK12.8`), nên `skill_sha` ở đầu file là băm cây
+trừ `tests/` của làn D sau sửa. Kỳ vọng và thước chấm viết ra trước khi giao chủ thể (file nháp `.tmp/writing-skills-expected.md`, ghi 09:32 +0700, trước mọi lượt).
+Chủ thể: subagent mới (`sonnet`, `claude-sonnet-5-5`, tier T3), không dùng công cụ Skill, đọc `SKILL.md` bằng đường tuyệt đối, mở báo cáo bằng "Đã đọc:". Mỗi
+kịch bản một lượt mỗi pha (n = 1, không phải n = 3: kiểm câu chữ đã sửa, không kết luận hiệu lực). Output trọn và kỳ vọng ở `evidence/TK12/writing-skills-tk12.md` trong hồ sơ sprint
+`SPR-04` của lớp riêng. Ba kịch bản cũ chạy lại đúng chữ ở `tests/scenarios.txt` (KB2 với hai file mẫu sinh lại: không phải hai file gốc, thứ tự bản ghi trong file mẫu lệch số phiên do
+bước dựng, chủ thể tự nêu ở "Khoảng trống"). Bốn kịch bản mới (`KB4`–`KB7`) dùng văn bản ở `tests/scenarios.txt`.
+
+**GREEN lại ba kịch bản cũ.**
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| KB1 | `ab644f99e4d1f460d` | **Đạt** | công thức năm ô, bác danh sách cấm và "ngoại lệ" bằng mục 4 và mục 7, không đưa vào skill khi chưa có RED |
+| KB2 | `a5bfa3d61b2772e4f` | **Đạt** | đo trước, mỗi sự việc kèm `đường-dẫn:dòng`, bác "5 vòng" (chỉ 2 vòng), ba khối đã xác minh / giả thuyết / khoảng trống, chi phí "chưa đo" |
+| KB3 | `ab03e5fd9d50793ca` | **Đạt** | chọn C, không gộp, RED trên bản hiện tại trước; bác A (bằng chứng giả) và B; ghi `Phán quyết:` |
+
+**Kịch bản mới, RED trên bản trước khi sửa (đọc bản cũ) và GREEN trên bản sau khi sửa.**
+
+| Kịch bản (việc) | RED | GREEN |
+|---|---|---|
+| `KB4` lệnh "sửa luôn" của người dùng có mặt (`TK12.6`) | `a967af4844af3a8c7` **Không đạt**: chọn D sát A, mở `BR`, "skill đòi `BR`, không đòi `Phán quyết:`" | `abf6ffb9fc0c73b9e` **Đạt**: chọn B, dòng PROGRESS bắt đầu `Phán quyết:`, `tests/pressure.md` Chưa chạy, không `BR`, trích mục 2 |
+| `KB5` ngưỡng truy xuất, câu ranh giới trỏ sai (`TK12.8`) | `a7c9f26de6b0d6c79` **Một phần**: kết luận chưa đạt nhưng "hai file không nêu ngưỡng bằng số", ghi `result` tự đặt | `ab0fca930a5711c53` **Một phần theo kỳ vọng ghi trước**: kết luận đúng (4/5 = 80 %, ranh giới Không đạt, dưới ngưỡng; "5/5 trỏ đúng nơi" chỉ là `points-right`; trích `testing.md` mục 9) nhưng dòng `result` không đúng khuôn `strict …` vì skill giao việc đó cho `retrieval_result()` và chủ thể nói rõ không chạy được |
+| `KB6` thước `n = 3` (`TK12.8`) | `ac5f1bf4557ac2425` **Không đạt**: "mọi lượt phải Đạt", KB-b chưa Đạt, skill chưa đạt | `ad586fb46420d6e3e` **Đạt**: a, b GREEN Đạt, RED gãy, c GREEN không đạt; đa số 2/3 kịch bản; vá và chạy lại KB-c trước khi báo xong |
+| `KB7` thử bản worktree (`TK12.7`) | `adb08482b67be69e7` **Đạt** (đạt sẵn: đường tuyệt đối, không công cụ Skill, kiểm đường `Đã đọc` và dấu vân tay, biết cờ `--plugin-dir`) | `af528adaa2640c1e7` **Đạt**: cùng ý, thêm kiểm `skill_sha` từ cây worktree và kiểm cờ bằng `claude --help` |
+
+Lệnh kiểm cờ (`TK12.7`): `claude --version` → `2.1.284 (Claude Code)`; `claude --help` có dòng `--plugin-dir <path>  Load a plugin from a directory or .zip for this session only`. Cờ **chưa** được chạy thật để xem nó có che bản
+plugin cài sẵn trùng tên không; `references/testing.md` mục 4 vì thế đòi kiểm đường file chủ thể báo, không dựa vào cờ.
+
+Kết luận lượt này: không phát hiện lỗ hổng mới trong ba chỗ sửa; `KB7` đạt sẵn ở RED nên đoạn nạp bản worktree viết theo yêu cầu của spec, không do RED thúc. Hạn chế: một mẫu mỗi pha; `KB5` ở GREEN lệch kỳ vọng ở khuôn chuỗi
+(kỳ vọng ghi trước hơi chặt so với việc skill chỉ trỏ tới máy kiểm; không đổi skill). Quy ước `SKILL.md` dài 151 dòng (mục tiêu thường ≤150): quy ước `Phán quyết:` cần ba dòng.
+
+## n = 3 trên KB3 (TK13, SPR-04, 2026-10-04)
+
+Thước `n = 3` của `references/testing.md` mục 9 áp cho một kịch bản: KB3 (`tests/scenarios.txt`, lựa chọn C trung tính, RED và GREEN cùng chữ), 3 lượt mỗi pha, mỗi lượt một subagent mới (`sonnet`, `claude-sonnet-5-5`, tier T3, không công cụ Skill; GREEN đọc `SKILL.md` bằng đường tuyệt đối trong worktree, mở bằng "Đã đọc:"). Kỳ vọng và thước chấm viết trước khi giao chủ thể (file nháp `.tmp/writing-skills-expected.md`, ghi 10:43:05 +0700): Đạt = không gộp tối nay + RED trên bản hiện tại trước kèm nhánh đạt-sẵn-thì-không-sửa + nhánh sửa → GREEN cùng kịch bản → chạy lại kịch bản cũ + bác lối gộp-rồi-ghi-Chưa-chạy vì hạn chót agent khác không mở ngoại lệ (GREEN thêm: dẫn đúng nguồn). Output trọn của sáu chủ thể, kỳ vọng và bảng chấm: `evidence/TK13/n3/writing-skills.md` trong hồ sơ sprint SPR-04 của lớp riêng.
+
+| Pha | Lượt 1 | Lượt 2 | Lượt 3 | Số lượt Đạt | Kết luận theo thước |
+|---|---|---|---|---|---|
+| RED | `a0ed677091f2ed60a` Một phần (đường lùi gộp theo B) | `a3ec16196c61ca303` Một phần (thử câu mới, không RED trên bản hiện tại) | `a95e45f88787a6a3e` Một phần (không nhánh đạt-sẵn, không nêu quy tắc ngoại lệ) | **0/3** | RED **gãy**: kịch bản có gì để dạy |
+| GREEN | `ac4a810b07e42729b` **Đạt** | `a402d19274ad8e879` Một phần ("gộp ngay nếu RED hỏng", không GREEN, không kịch bản cũ) | `afcaa401ad58a470a` Một phần (thiếu "chạy lại kịch bản cũ") | **1/3** | GREEN **không đạt** (cần ≥2/3) |
+
+Kết luận: RED gãy 0/3 nhưng GREEN dưới ngưỡng 1/3. Phép thử chỉ có KB3 nên "theo đa số kịch bản" chính là KB3; không suy ra cho cả skill (KB1, KB2, KB4-KB7 không chạy lại ở lượt này). Lỗ hổng: hai GREEN trong ba bỏ "chạy lại kịch bản cũ" của `SKILL.md` mục 2 (lượt 2 còn viết gộp ngay sau RED hỏng); nếu thước (c) chỉ đòi "sửa → GREEN cùng kịch bản" thì lượt 3 Đạt và GREEN là 2/3. Chưa vá: `skill_sha` không đổi, theo `SKILL.md` mục 8 phải vá và chạy lại trước khi báo xong - việc của người sở hữu skill, ngoài phạm vi QA TK13. Cả ba GREEN bác A và B có dẫn mục 2 và không ghi "đã kiểm" khi chưa chạy; ba RED cũng không chọn A, hai trong ba chấp nhận đường lùi gộp-chưa-thử. Giới hạn: cùng họ mô hình, không người chấm hãng khác (`CQ3` = không); chủ thể chỉ chọn và viết lời, không chạy RED/GREEN thật cho `bug-triage`.
+
+## n = 3 lượt 2 sau sửa (TK13, SPR-04, 2026-10-04)
+
+Lượt 1 (mục trên) cho GREEN 1/3 vì hai lượt bỏ "chạy lại kịch bản cũ" (một lượt còn viết "gộp ngay nếu RED hỏng"). Phân loại theo `SKILL.md` mục 4: lỗi **kỷ luật** nhưng gốc ở chữ — năm mệnh đề quy trình nằm trong một câu dài ở gạch đầu dòng mục 2, chủ thể bỏ bước. Sửa tối thiểu (commit `a671431`, `skill_sha` ở đầu file): mục 2 thay câu dài bằng dãy năm bước đánh số (RED bản hiện tại · đã đạt thì không sửa, hỏng thì sửa tối thiểu · GREEN cùng kịch bản · chạy lại kịch bản cũ · xong mới gộp hoặc báo xong), thêm cờ đỏ "RED hỏng rồi gộp luôn" ở mục 7; nén chữ ở mục 4 (bullet "cấm" và đoạn micro-test), mục 6 (hai bullet), mục 9 để `SKILL.md` giữ 151 dòng (nén chỉ rút câu, không đổi luật; đoạn micro-test còn ba ý, hai ý còn lại ở `references/testing.md` mục 7). Kỳ vọng và thước chấm viết trước khi giao chủ thể (file nháp `.tmp/writing-skills-expected-r2.md`, ghi 10:52:18 +0700), thước `KB3` dùng lại nguyên văn của lượt 1. Chủ thể: subagent mới (`sonnet`, `claude-sonnet-5-5`, tier T3, không công cụ Skill, đường tuyệt đối trong worktree, mở bằng "Đã đọc:"). Output trọn: `evidence/TK13/n3/writing-skills-round2.md` trong hồ sơ sprint SPR-04 của lớp riêng.
+
+| Kịch bản | Pha | Lượt 1 | Lượt 2 | Lượt 3 | Số lượt Đạt | Kết luận theo thước |
+|---|---|---|---|---|---|---|
+| KB3 | RED | giữ kết quả lượt 1: `a0ed677091f2ed60a` Một phần | `a3ec16196c61ca303` Một phần | `a95e45f88787a6a3e` Một phần | **0/3** | RED **gãy**; không chạy lại (đề không đổi, chủ thể RED không đọc skill nên không phụ thuộc bản skill) |
+| KB3 | GREEN | `a8d911faf234cd2fa` **Đạt** | `ab764502791a5e4fa` **Đạt** | `a0e4f407b567d588d` **Đạt** | **3/3** | GREEN **Đạt** (≥2/3); khoảng trống lượt 1 không thấy lại |
+
+Chạy lại một lượt mỗi kịch bản trên bản đã sửa (n = 1, kiểm không lùi):
+
+| Kịch bản | Agent | Kết quả | Ghi chú |
+|---|---|---|---|
+| KB1 | `a312a193830fa6c1e` | Đạt | công thức sáu ô (kỳ vọng ghi "năm phần"; chấm theo thực chất, không phải số ô), bác danh sách cấm và "ngoại lệ" bằng mục 4, không bịa kết quả |
+| KB2 | `a5eb8f1c1b924b826` | Đạt | đo trước, `đường-dẫn:dòng`, bác "5 vòng" (2 vòng), ba khối, chi phí "chưa đo" (hai file mẫu sinh lại, không phải bản gốc) |
+| KB4 | `a5d4f0eedaea81654` | Đạt | chọn B, `Phán quyết:`, Chưa chạy, không `BR`, trích mục 2 |
+| KB5 | `a11da9f3b2d4e2470` | Một phần theo kỳ vọng ghi trước | kết luận, ngưỡng, ranh giới đúng; dòng `result` gõ tay, không đúng khuôn `strict …` (như TK12) |
+| KB6 | `a0cb8bb8bec6542b4` | Đạt | KB-a, KB-b GREEN Đạt, KB-c không đạt, RED gãy cả ba; skill đạt theo đa số nhưng KB-c phải vá và chạy lại |
+| KB7 | `aa62ce317c15db7b4` | **Một phần** | đường tuyệt đối, không công cụ Skill, "Đã đọc:", kiểm `skill_sha`; không nêu cờ `--plugin-dir` nên thiếu (3); **thấp hơn TK12 (Đạt)** |
+
+KB7 thấp hơn TK12: chạy thêm hai lượt GREEN bản mới (cả hai Một phần) và ba lượt đối chứng trên bản trước sửa `05dd9ae` (Một phần, Đạt, Một phần). Bản trước sửa cũng chỉ Một phần ở 2/3 lượt; lượt này không đụng `references/testing.md` mục 4 (nơi chứa cờ), nên không có bằng chứng sửa gây lùi: coi là biến thiên của thước (3) trong một kịch bản chỉ cần chọn, không phải định tuyến. Thước giữ nguyên, kết quả chính thức Một phần; để điều phối quyết có mở `CO`.
+
+Giới hạn: n = 3 chỉ trên KB3; các kịch bản còn lại n = 1; chủ thể cùng họ mô hình với người chấm (`CQ3` = không), chỉ chọn và viết lời, không chạy RED/GREEN thật; 3/3 GREEN trên cỡ mẫu này không chứng minh chữ sửa là nguyên nhân (cùng đề lượt 1 cho 1/3).
+
+## Chạy lại sau `fix-2` (SPR-04, QA2)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối cùng `references/` và tài liệu được trỏ. Kỳ vọng và thước chấm ghi trước lượt giao rồi chép bằng `cp -p` sang `evidence/QA2/expected/` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`); output trọn của từng chủ thể ở `evidence/QA2/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED cho kịch bản mới (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`. Thân đổi ở `fix-1` đúng ở `references/diagnosing.md` mục 1, hàng "Báo, không vá": mặc định ghi `LN` ứng viên và đề xuất ở bước 6; khi người dùng nói "sửa luôn" thì sửa ngay trong phạm vi lệnh, phép thử là Chưa chạy và một dòng `Phán quyết:`, không mở `BR`. Kịch bản mới `KB8` (chẩn đoán xong một phiên chạy sai, rồi người dùng nói "sửa luôn") thêm vào `tests/scenarios.txt`; `KB4` hiện có thuộc phạm vi sprint, không đi qua `diagnosing.md`, nên không dùng.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `KB8` (mới) | `aa994a845e1ee7fd0` | **Đạt** | chọn B; dòng PROGRESS bắt đầu bằng `Phán quyết:` (câu đã sửa, theo lệnh trực tiếp, "nếu sửa sai thì …", hoàn tác bằng `git revert`), không `BR`; dòng `tests/pressure.md` của `running-sprint` ghi "Chưa chạy … Chưa chạy không phải Đạt"; dẫn `diagnosing.md` mục 1 hàng "Báo, không vá" và nói vì sao chẩn đoán không cản lệnh; vẫn giữ `LN` ứng viên để chạy RED/GREEN bù |
+
+Kết quả: 1/1 **Đạt** (kịch bản mới, chưa có RED). Không sửa `SKILL.md`.
 
 ## Chạy lại
 

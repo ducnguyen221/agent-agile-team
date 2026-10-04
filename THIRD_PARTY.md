@@ -2,18 +2,18 @@
 
 Mốc SHA và ngày của từng nguồn, cùng bảng nguồn theo từng skill và agent, ở [UPSTREAM.md](UPSTREAM.md);
 thông báo bản quyền phải mang theo ở [NOTICE](NOTICE). File này ghi **vì sao** mỗi nguồn được dùng theo
-cách đó, các nguồn **chỉ lấy ý**, và danh sách file **phải viết lại trước khi công khai**.
+cách đó, các nguồn **chỉ lấy ý**, và lịch sử viết lại phòng sạch (hiện không còn file nào phải viết lại).
 
-## 1. Nguồn chép được (MIT) — đã dùng ở Đợt 1
+## 1. Nguồn chép được (MIT) — đã dùng ở Đợt 1 và Đợt 2
 
 | Nguồn | Giấy phép | Dùng cho |
 |---|---|---|
 | `obra/superpowers` | MIT | Skill quy trình (`shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`), kỹ thuật (`tdd`, `debugging`, `worktrees`), kiểm định (`verify-before-done`, `code-review`), meta (`writing-skills`) |
 | `obra/superpowers-skills` | MIT | Đối chiếu và bổ sung `tdd`, `debugging` (nguồn đóng băng) |
-| `affaan-m/ECC` | MIT | Skill kỹ thuật (`python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`), `security-review`, `intake`, `token-economy`, phần bài học của `closing-sprint`; 7 agent reviewer |
-| `garrytan/gstack` | MIT | `plan-review`, `security-audit`, `web-qa`, phần `debugging` (điều tra), docs-sync và retro của `closing-sprint` |
+| `affaan-m/ECC` | MIT | Đợt 1: skill kỹ thuật (`python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`), `security-review`, `intake`, `token-economy`, phần bài học của `closing-sprint`; 7 agent reviewer. Đợt 2: 6 agent (`code-explorer`, `code-reviewer`, `test-analyzer`, `build-fixer`, `typescript-reviewer`, `react-reviewer`), 4 skill (`react`, `frontend`, `e2e-testing`, `eval-harness`), chuẩn code `method/standards/**`, luồng orch và cổng review/giao hàng trong `method/`, `roles/verifier/dual-review.md`, phần thêm của `intake`, `shaping-spec`, `tdd`, `verify-before-done`, `web-qa`, `token-economy`, `closing-sprint` |
+| `garrytan/gstack` | MIT | Đợt 1: `plan-review`, `security-audit`, `web-qa`, phần `debugging` (điều tra), docs-sync và retro của `closing-sprint`. Đợt 2: ý của `review` (`code-review`), `qa` (`web-qa`), `ship` và `land-and-deploy` (`closing-sprint`) |
 | `supabase/agent-skills` | MIT | Mẫu Postgres trong `postgres` và agent `database-reviewer` (đến qua ECC) |
-| `obra/superpowers-lab` | MIT | Chưa dùng — tham chiếu tìm hàm trùng lặp (Đợt 2) |
+| `obra/superpowers-lab` | MIT | Đợt 2: bước tìm hàm trùng lặp bằng tay trong `skills/code-review/references/duplicates.md` (không chép script của nguồn) |
 
 ## 2. Nguồn chỉ lấy ý (không chép văn bản)
 
@@ -43,16 +43,23 @@ viết lại để không phải viết lại cả skill.
 
 Bảng hiện trống: không skill nào mang cờ `true` (bất biến cờ ↔ bảng vẫn được `tests/test_provenance.py` kiểm).
 
-Đã viết lại từ danh sách ý (`TK10.2`–`TK10.8`) có mang một số câu chữ nguồn; 8-gram bằng 0 sau khi loại stoplist 45 cụm chung (trước khi loại: còn cụm trùng ở 5/7 đích); chưa đạt quy trình phòng sạch, phải viết lại thật sự trước khi công khai (`CO2`, `RQ-021` ở hồ sơ riêng của chủ repo). Dòng đã rời bảng: `closing-sprint`
-(`references/release-notes.md`, `references/preflight.md`), `bug-triage` (`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`), `roles/executor/qa.md`
-(bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill đó ghi nguồn ý
-dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).
+Bảy đích đã được **viết lại phòng sạch** ở `SPR-04` (`TK10`): bản cũ được gỡ khỏi cây trước; người viết mới chỉ nhận
+danh sách ý dạng cụm danh từ (máy kiểm từng dòng), không mở bản cũ, và để lại nhật ký đường đã đọc; 8-gram so với
+cả gốc private lẫn bản trước đó bằng 0 trên phần viết lại, sau khi loại stoplist cụm chung. Với `roles/executor/qa.md`
+và `scripts/README.md`, phần viết lại là đúng hai chỗ của bảng phủ và bốn ô "Bắt gì"; phần còn lại của hai file không
+nằm trong đợt này. Dòng đã rời bảng: `closing-sprint` (`references/release-notes.md`, `references/preflight.md`),
+`bug-triage` (`SKILL.md`), `adr` (`SKILL.md`), `database-migrations` (`references/rehearsal.md`),
+`roles/executor/qa.md` (bảng phủ `FR` → `VR`), `scripts/README.md` (cột "Bắt gì" của bốn luật truy vết). Các skill
+đó ghi nguồn ý dạng `concept:` với `source_sha: null`, `license: none` (giấy phép của nguồn ý).
+
+Cách đo 8-gram: loại stoplist cụm chung (mỗi cụm chung ghép thành một token), rồi đếm chuỗi 8 từ liên tiếp (N = 8) của
+bản mới trùng với mỗi trong hai mốc (gốc private và bản trước đó), tính cả `description` ở frontmatter; công cụ đo nằm
+ở hồ sơ của chủ repo, ngoài repo này.
 
 Quy tắc cho file MỚI về sau: file nào lấy từ nguồn private không giấy phép thì thêm một dòng vào bảng trên và đặt
-cờ `true` ở skill; trước khi công khai, viết lại từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
-`source`/`license` và dòng tương ứng ở `UPSTREAM.md`, rồi chuyển dòng sang danh sách "đã viết lại" ở trên. Các file đã
-liệt kê ở trên vẫn phải viết lại thật sự trước khi công khai (`CO2`); bảng trên trống vì cờ giữ `false`, không vì việc
-đã xong.
+cờ `true` ở skill; file đó phải viết lại thật sự trước khi công khai: viết lại từ ý (không mở bản gốc khi viết), đổi cờ thành `false`, cập nhật
+`source`/`license` và dòng tương ứng ở `UPSTREAM.md`, rồi chuyển dòng sang danh sách "đã viết lại" ở trên. Bảng trên
+trống và cờ giữ `false` vì bảy đích kể trên đã viết lại xong, không còn file nào chờ viết lại.
 
 ## 4. Công cụ chỉ gọi
 

@@ -92,5 +92,39 @@ gật). Archive hồ sơ không có nghĩa đã kiểm trên production.
   minh hồ sơ **nhất quán**, không chứng minh danh tính — trách nhiệm điều phối là giao kiểm định cho agent
   khác thật.
 - `VR` do QA chạy chỉ tính là độc lập khi nhãn `qa` khác nhãn `implementer`/`architect` của cùng sản
-  phẩm. Trùng nhãn → mỗi `VR` ghi "tự kiểm, chưa độc lập"; kết luận của sprint tối đa **Đạt có điều
-  kiện** cho tới khi agent khác chạy lại.
+  phẩm. Trùng nhãn ở việc cỡ **rất nhỏ** → mỗi `VR` ghi "tự kiểm, chưa độc lập"; kết luận của sprint tối đa **Đạt có điều
+  kiện** cho tới khi agent khác chạy lại. Cỡ nhỏ trở lên không có tự kiểm: trùng nhãn vẫn là Phải sửa dù `VR` có khai.
+
+## 8. Cổng giao hàng — kiểm cơ học trước khi trình Cổng 2
+
+Review (agent khác đọc, chấm) và **cổng giao hàng** là hai lớp khác nhau, chồng lên nhau. Review chấm chất lượng nội
+dung — đúng, đủ, trung thực. Cổng giao hàng chỉ kiểm **sự thật máy kiểm được**: lệnh chạy ra mã thoát nào, hồ sơ có
+nhất quán không, một câu "né" có xuất hiện không. Không suy luận, không đoán ý. Giống cổng của hệ CI: không tin lời
+tự báo, chỉ tin thứ đo được. Cổng này là **luật văn bản**, không cần hook hay thành phần chạy nền nào.
+
+KHI sắp trình Cổng 2 (và trước khi đánh dấu một `TK` là xong) THÌ người điều phối (hoặc QA) chạy đủ năm kiểm sau, ghi
+kết quả vào PROGRESS. Năm kiểm này đọc **kết quả** của vòng kiểm sáu pha mỗi `TK`
+([loop.md](../skills/verify-before-done/references/loop.md)) và của `check`; không chạy lại phép kiểm. Đó là lớp kiểm hồ
+sơ chồng lên bước "Chạy" của cổng năm bước ([verify-before-done](../skills/verify-before-done/SKILL.md) mục 2), không
+phải vòng kiểm thứ hai:
+
+| Kiểm | Cách kiểm cơ học | Trúng thì |
+|---|---|---|
+| Lệnh kiểm của dự án | build, test cả bộ, lint, kiểm kiểu vừa chạy **trên đúng mốc đang giao**; mã thoát 0 (vòng gỡ sửa → hỏng của mục 4 cho test hồi quy) | **Chặn** — chưa trình Cổng 2 |
+| Hồ sơ nhất quán | `scripts/check.py` trên thư mục sprint (và `--self` nếu sửa chính repo phương pháp): Đạt | **Chặn** nếu có mức Chặn/Phải sửa; Nên sửa → ghi `CO` |
+| Mốc còn tươi | commit, spec và toolchain hiện tại bằng mốc ghi trong `VR` (mục 3); working tree sạch hoặc diff chưa commit đã ghi | `VR` hết hạn → **Chưa chạy**, chạy lại |
+| Tài nguyên đủ để kiểm | đĩa, bộ nhớ, hạn mức công cụ đủ chạy phép kiểm; không đủ thì phép kiểm không chạy được | `VR` là **Chưa chạy** kèm giới hạn (mục 2), không phải Đạt |
+| Câu né (xem dưới) | tìm theo mẫu chữ trong báo cáo và PROGRESS | người đọc gán **một** mức (Ghi chú hoặc Phải sửa) theo ngữ cảnh; chỉ cảnh báo, không tự chặn |
+
+**Ca hỏng có sẵn ở gốc.** Lệnh kiểm đỏ mà ca hỏng được **chứng minh** có từ gốc (chạy đúng ca đó ở gốc, như
+`closing-sprint` mục 2 bước 4) thì không phải Chặn của sprint này: ghi `CO` kèm dòng `RQ-`, người dùng quyết ở Cổng 2
+có đóng không. "Lỗi có từ trước" nói miệng, không có lần chạy ở gốc, vẫn là câu né (dưới).
+
+**Câu né** là dấu hiệu việc kiểm bị cắt ngắn: "bỏ qua test lần này", "lỗi có từ trước", "để sau", "chắc chạy được", "chỉ
+là cảnh báo", "test chậm nên tắt". Tìm bằng mẫu chữ nên **có thể báo nhầm** — nhầm thì reviewer đọc ngữ cảnh và bỏ
+cảnh báo; cổng này **không bao giờ tự chặn chỉ vì câu né**. Còn câu né mà đúng là một phép kiểm bị bỏ thì xử như câu "đỏ"
+ở mục 5.
+
+**Giới hạn.** Cổng cơ học chứng minh hồ sơ **nhất quán** và lệnh **đã chạy**, không chứng minh nội dung **đúng**.
+Mọi `VR` vẫn cần agent khác chạy (mục 7); cổng giao hàng không thay review, và review không thay cổng — cái này bắt thói
+quen cắt ngắn, cái kia bắt lỗi nghĩa. Hai lớp chồng nhau mới thành phòng thủ nhiều tầng.

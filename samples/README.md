@@ -8,10 +8,12 @@ Một dự án mẫu sạch, dựng bằng `init.py` rồi điền tay, để xe
 | File | Trạng thái trong mẫu |
 |---|---|
 | `.agile.json` | cấu hình mặc định |
-| `docs/plans/REQUESTS.md` | `RQ-001` xong, `RQ-002` mới (nợ `SPR-01/CO1` chuyển thành yêu cầu), `RQ-003` đang làm |
-| `docs/plans/SPRINTS.md` | `SPR-01` đã đóng (Đạt có điều kiện), `SPR-02` đang mở |
+| `docs/plans/REQUESTS.md` | `RQ-001` xong, `RQ-002` mới (nợ `SPR-01/CO1` chuyển thành yêu cầu), `RQ-003` đang làm, `RQ-004` đang làm, `RQ-005` xong |
+| `docs/plans/SPRINTS.md` | `SPR-01` và `SPR-04` đã đóng, `SPR-02` và `SPR-03` đang mở |
 | `docs/plans/2026-01-15-order-lookup/` | `SPR-01` đủ bốn tài liệu SPEC → PLAN → PROGRESS → REPORT, đã qua Cổng 1 và Cổng 2 |
-| `docs/plans/2026-01-20-fix-not-found-text/SPRINT.md` | `SPR-02` việc rất nhỏ, một file gộp, đang kiểm định |
+| `docs/plans/2026-01-20-fix-not-found-text/SPRINT.md` | `SPR-02` việc rất nhỏ theo dạng cũ (một file bốn phần, vẫn hợp lệ), đang kiểm định |
+| `docs/plans/2026-01-22-trim-order-code/SPRINT.md` | `SPR-03` việc **nhỏ**: một `SPRINT.md` đủ bốn phần, `size: small`, Cổng 1 đã duyệt, đang kiểm định (dựng bằng `init --size small`) |
+| `docs/plans/2026-01-23-rename-submit-button/SPRINT.md` | `SPR-04` việc **rất nhỏ**: một `SPRINT.md` hai phần Kế hoạch / Kết quả, Cổng 1 "đạt theo lời giao", Cổng 2 nghiệm thu ngầm, đã đóng (dựng bằng `init --tiny`) |
 | `docs/specs/SPECS.md` + `order-lookup.md` | `FS-001` spec sống đang chạy |
 
 Kết quả kỳ vọng (cũng là test trong `tests/test_samples.py`):

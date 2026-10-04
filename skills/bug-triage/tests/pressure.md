@@ -3,9 +3,9 @@ skill: bug-triage
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: c8969d2c07a33024cedd68a55250a395375b046d
+skill_sha: 9ceb54db33e731d13a41c6e086e3b18e5641ed2b
 date: 2026-10-04
-result: 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 1 scenario that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after review fixes RF74-RF76; GREEN rerun 2 3/3 pass on the tree after the content fixes of the review round (opening clause of the scenarios replaced at send time in GREEN only; scenarios.txt unchanged, recipe in section Chạy lại); GREEN rerun 3 3/3 pass on the tree after DN6 (clean-room claim removed from source and notes; opening clause of the scenarios replaced at send time in GREEN only); GREEN rerun 4 3/3 pass on the tree after the 8-gram figure was removed from source and notes (opening clause of the scenarios replaced at send time in GREEN only)
+result: 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 3/3, 3/3, 3/3 runs Đạt, RED 0/3, 0/3, 3/3 runs Đạt so KB1 and KB2 gave way and KB3 passed as-is, kept as regression; the grader is the same model family as the subjects, CQ3); earlier single-run history, 3/3 GREEN pass, no refactor; RED 1/3 passed as-is (kept as regression), 2 partial, after replacing 1 scenario that passed at RED; GREEN rerun 3/3 pass at TK12 on the tree after review fixes RF74-RF76; GREEN rerun 2 3/3 pass on the tree after the content fixes of the review round (opening clause of the scenarios replaced at send time in GREEN only; scenarios.txt unchanged, recipe in section Chạy lại); GREEN rerun 3 3/3 pass on the tree after DN6 (clean-room claim removed from source and notes; opening clause of the scenarios replaced at send time in GREEN only); GREEN rerun 4 3/3 pass on the tree after the 8-gram figure was removed from source and notes (opening clause of the scenarios replaced at send time in GREEN only); GREEN rerun 5 3/3 pass on the tree after the clean-room rewrite of SKILL.md (SPR-04 TK10; opening clause of the scenarios replaced at send time in GREEN only); GREEN rerun 6 3/3 pass on the tree at HEAD 3b0ec7a (SPR-04 TK11.11; the not-a-bug route and the duplicate-RQ route added by TK10.2b; opening clause of the scenarios replaced at send time in GREEN only); GREEN rerun 7 3/3 pass on the tree after the codes in the source line were put in code spans with short names (SPR-04 TK12.1 item 5; opening clause of the scenarios replaced at send time in GREEN only)
 agent_ids:
   red: {kb1: af4a4d5dd6ee8d433, kb2: ae87bf0f50ed02c74, kb3-old: aa257a21f332bb177, kb3: aac873d03d7035d40}
   green: {kb1: a9a015a865da44a18, kb2: aa61054608cbcf51c, kb3: a949aa4792cc731a9}
@@ -13,6 +13,11 @@ agent_ids:
   green_rerun_2: {kb1: ab968b16313fc7671, kb2: a8a313216fd362720, kb3: a843b6a4314e268eb}
   green_rerun_3: {kb1: ad4e990c449cd3edd, kb2: aa564ba3e3ec76a5a, kb3: af88144664022cb1f}
   green_rerun_4: {kb1: ad2feced7daf8ba52, kb2: a8ff49c18568286b6, kb3: a3ab754ec2a38ac42}
+  green_rerun_5: {kb1: a7d1e2f8223e8aaab, kb2: a0f3ae969dfa402de, kb3: afabcaf4335b80ca9}
+  green_rerun_6: {kb1: ab7ffdca52cc69f9d, kb2: afb7078dc5b4ea6ec, kb3: aafe1c6a8fda426ee}
+  green_rerun_7: {kb1: a7aa1425cd9c3d931, kb2: a2caa57e4b1bfaadd, kb3: a400fb366c1f8aa8c}
+  n3_red: {kb1: [a956a5ea6c7b04684, a9d2f0eca85e890e3, aff55c0786a467864], kb2: [a1ea68f9f8724ba99, a5373aac34bcdbc19, a142ee8bd189ab29f], kb3: [a338fa87f09956f3b, a7a7dea73c7be5e31, a90bf7ccc6652e5da]}
+  n3_green: {kb1: [af8385cf801a15496, a9bea017d680c3f72, ae1fdbf6f41b92ab4], kb2: [acf825a8519d9f0aa, a5a5e0f4f8ca80e65, a95e0d9aec9cdccc9], kb3: [a385ab17e3c5c57a6, a471804c790784878, ab8f3db77929010e3]}
 ---
 
 # Thử áp lực — bug-triage
@@ -137,6 +142,87 @@ Output trọn của ba lượt: hồ sơ sprint của lớp riêng, `evidence/TK
 | 3 | `a3ab754ec2a38ac42` | **Đạt** | (1) B — yêu cầu tính năng `RQ-046`, không gán mức lỗi; (2) B — cập nhật `RQ-042`, không mở mã thứ hai, nâng "Chặn tạm" theo dấu hiệu "hoá đơn không xuất được" chứ không theo lời doạ huỷ; mã gửi khách `RQ-046`, `RQ-042` |
 
 Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc và ba lượt chạy lại trước; không sửa `SKILL.md`, không REFACTOR.
+
+## GREEN chạy lại lần 5 (SPR-04 `TK10`, sau khi viết lại `SKILL.md` phòng sạch)
+
+`TK10.2` viết lại thân `SKILL.md` (bỏ công thức dòng `RQ-` có ô hồi quy bắt buộc và bảng "Dùng / Không dùng"; mục 3 gộp bảng mức, mục 4 là bản tóm tắt bốn phần), nên `skill_sha` cũ không còn khớp cây. `description` không đổi. QA chạy lại GREEN **cả ba kịch bản** trên cây hiện tại
+(`skill_sha` ở frontmatter, HEAD `4c9ed01`), prompt là `tests/scenarios.txt`, dòng `[PHA]` = dòng GREEN của file với đường tuyệt đối tới `<gốc worktree>/skills/bug-triage/SKILL.md`; chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, báo cáo mở bằng "Đã đọc:". Phép thay vế mở đầu như mục "Chạy lại" (chỉ lượt GREEN);
+`tests/scenarios.txt` giữ nguyên. Kỳ vọng viết ra trước khi giao (`2026-10-04 08:09:29 +0700`), theo chữ của bản mới chứ không theo bản cũ. Mỗi chủ thể dùng 2 lượt công cụ (một lần đọc `SKILL.md`, một lần trả kết quả).
+Output trọn của ba lượt: `evidence/TK10/qa-bug-triage.md` trong hồ sơ sprint của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`).
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `a7d1e2f8223e8aaab` | **Đạt** | Chọn B (luật sắt mục 1: không sửa khi chưa thấy lỗi; bác cả A và C là sửa theo đoán); mức "Phải sửa (mức tạm)" từ hậu quả bằng chứng chứng minh được, bác "Chặn" vì áp lực người báo, nêu điều kiện nâng lên Chặn; `P0` và con số hợp đồng chỉ là thông tin; một dòng `RQ-042` và bản tóm tắt bốn phần; một tin gom năm câu hỏi gửi PM, không hứa 17:30, hotfix nếu có vẫn qua Cổng 1; có test hồi quy dự kiến kèm vòng gỡ-sửa-đặt lại |
+| 2 | `a0f3ae969dfa402de` | **Đạt** | Lỗi 1 **Chặn** (sai tiền) → hotfix sprint riêng, vùng nâng cỡ thanh toán, vẫn Cổng 1; lỗi 2 **Nên sửa** (tạm) và lỗi 3 **Nên sửa** (tạm) → sprint sau; từ chối "Chặn hết" ("thang mất nghĩa"); ba dòng `RQ-042`–`RQ-044`; tin trả Business Reviewer lịch sự, giữ mức, không hứa ngày |
+| 3 | `afabcaf4335b80ca9` | **Đạt** | (1) B — yêu cầu tính năng `RQ-046`, không gán mức lỗi; (2) B — cập nhật `RQ-042` với hai `order_id`, không mở mã thứ hai, mức "Phải sửa (tạm)" theo bằng chứng chứ không theo lời doạ huỷ; mã gửi khách `RQ-042`, `RQ-046` |
+
+Kết quả: 3/3 Đạt, cùng hướng với GREEN gốc và bốn lượt chạy lại trước; không sửa `SKILL.md`, không REFACTOR.
+Khác lượt trước ở hai chỗ, không làm hỏng kết quả: mức của kịch bản 1 và 3 là "Phải sửa (tạm)" thay vì "Chặn tạm" (bảng mức mới không xếp "hoá đơn không xuất được" vào Chặn; chủ thể căn cứ hậu quả bằng chứng chứng minh được); không còn ô hồi quy bắt buộc trong dòng `RQ-`, test hồi quy nằm ở phần riêng của câu trả lời.
+Ghi nhận về nội dung skill: bản mới không có chữ nào về "mục không phải lỗi thì đi đường yêu cầu" và "lỗi trùng một `RQ-` đang mở thì cập nhật dòng cũ, không mở mã thứ hai"; ở kịch bản 3 chủ thể đạt nhờ luật lõi và suy luận (chỉ trích được luật sắt mục 1 và bảng lý lẽ mục 8), không nhờ một dòng của `SKILL.md`. Chưa đo độ phân tán (một lượt mỗi kịch bản).
+
+## GREEN chạy lại lần 6 (SPR-04 `TK11.11`, sau `TK10.2b`)
+
+`TK10.2b` (commit `3b0ec7a`) thêm vào `SKILL.md` hai đường mục 4: báo cáo **không phải lỗi** đi đường yêu cầu của `intake`, lỗi **trùng một `RQ-` đang mở** thì cập nhật dòng cũ — nên `skill_sha` ở lượt 5 không còn khớp cây. Chạy lại GREEN **cả ba kịch bản** trên cây ở HEAD `3b0ec7a` (`skill_sha` ở frontmatter), prompt là `tests/scenarios.txt`, dòng `[PHA]` = dòng GREEN của file với đường tuyệt đối tới `<gốc worktree>/skills/bug-triage/SKILL.md`; chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, báo cáo mở bằng "Đã đọc:". Phép thay vế mở đầu như mục "Chạy lại" (chỉ lượt GREEN); `tests/scenarios.txt` giữ nguyên. Kỳ vọng viết ra trước khi giao (file nháp `.tmp/bug-triage-expected.md`, mtime `2026-10-04 08:47:24 +0700`), theo chữ của bản có hai đường mới. Mỗi chủ thể dùng 2 lượt công cụ (một lần đọc `SKILL.md`, một lần trả kết quả).
+Bài trả lời của ba lượt và bảng chấm: `evidence/TK11/bug-triage-green-6.md` trong hồ sơ sprint `SPR-04` của lớp riêng.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `ab7ffdca52cc69f9d` | **Đạt** | Chọn B (luật sắt mục 1, `ctx.get` là "sửa theo đoán", cờ đỏ mục 8); mức "Phải sửa (mức tạm)" từ hậu quả log chứng minh được, `P0` và con số hợp đồng chỉ là thông tin, nêu điều kiện nâng lên Chặn; vùng nâng cỡ (billing → cỡ lớn, `risk: high`); một dòng `RQ-042` + tóm tắt bốn phần; một tin gom 5 câu hỏi gửi PM; không hứa 17:30, hotfix vẫn qua Cổng 1 |
+| 2 | `afb7078dc5b4ea6ec` | **Đạt** | (1) **Chặn** (sai tiền, tái hiện được) → hotfix sprint riêng, vùng nâng cỡ thanh toán, vẫn Cổng 1; (2) và (3) **Nên sửa** → sprint sau; từ chối "Chặn hết" (mục 1, mục 3 "thang chỉ có nghĩa khi mức nặng hiếm"); ba dòng `RQ-042`–`RQ-044`; test hồi quy cho (1) qua vòng gỡ bản sửa → hỏng → đặt lại → đạt; tin trả Business Reviewer giữ mức, không hứa ngày |
+| 3 | `aafe1c6a8fda426ee` | **Đạt** | (1) B — không phải lỗi, đi đường yêu cầu của `intake`, `RQ-046` loại yêu cầu, không gán mức lỗi (đúng câu mới ở mục 4); (2) B — cập nhật `RQ-042` với hai `order_id`, không mở mã thứ hai, giữ "Phải sửa (tạm)" theo bằng chứng chứ không theo lời doạ huỷ; mã gửi khách `RQ-046`, `RQ-042` |
+
+Kết quả: 3/3 Đạt; không sửa `SKILL.md`, không REFACTOR. Khác lượt 5: ở kịch bản 3 chủ thể nay trích đúng mục 4 của `SKILL.md` cho cả hai nhánh (lượt 5 phải dựa vào luật lõi), tức hai đường thêm ở `TK10.2b` đang được dùng.
+
+## GREEN chạy lại lần 7 (SPR-04 `TK12.1`, mục 5: mã trong dòng `source:`)
+
+Dòng `source:` của `SKILL.md` đưa mã hồ sơ riêng vào dấu code kèm tên ngắn (`TK10` (viết lại phòng sạch), `SPR-04` (đợt phương pháp 3)) nên `skill_sha` ở lượt 6 không còn khớp cây. Chạy lại GREEN **cả ba kịch bản** trên cây của làn D (`skill_sha` ở frontmatter), prompt là `tests/scenarios.txt`, dòng `[PHA]` = dòng GREEN của file với đường tuyệt đối tới `<gốc worktree>/skills/bug-triage/SKILL.md`; chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, báo cáo mở bằng "Đã đọc:". Phép thay vế mở đầu như mục "Chạy lại" (chỉ lượt GREEN); `tests/scenarios.txt` giữ nguyên. Kỳ vọng viết ra trước khi giao (file nháp `.tmp/bug-triage-expected.md`, ghi trước lượt giao). Bài trả lời của ba lượt và bảng chấm: `evidence/TK12/bug-triage-green-7.md` trong hồ sơ sprint `SPR-04` của lớp riêng.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| 1 | `a7aa1425cd9c3d931` | **Đạt** | Chọn B (luật sắt mục 1, mục 2 cấm sửa theo đoán); mức "mức tạm: Phải sửa" từ hậu quả chứng minh được, nhãn `P0` và hợp đồng chỉ là thông tin, nêu điều kiện nâng lên Chặn; vùng nâng cỡ thanh toán (cỡ tối thiểu lớn); một dòng `RQ-042` + tin gom 5 câu hỏi gửi PM; không hứa 17:30, hotfix vẫn qua Cổng 1 |
+| 2 | `a2caa57e4b1bfaadd` | **Đạt** | Lỗi (1) trừ tiền hai lần là **Chặn** → hotfix sprint riêng, vẫn Cổng 1; (2), (3) **Nên sửa** → sprint sau; từ chối "Chặn hết" (mức theo hậu quả, nếu cả ba Chặn thì hotfix mất khả năng báo động); ba dòng `RQ-042`–`RQ-044`; test hồi quy cho (1) với vòng gỡ bản sửa → hỏng → đặt lại → đạt; tin trả Business Reviewer giữ mức, không hứa ngày |
+| 3 | `a400fb366c1f8aa8c` | **Đạt** | (1) B — không phải lỗi, đi đường yêu cầu của `intake`, `RQ-046` loại yêu cầu, không gán mức lỗi; (2) B — cập nhật `RQ-042` với hai `order_id`, không mở mã thứ hai, giữ "Phải sửa" theo bằng chứng chứ không theo lời doạ huỷ; mã gửi khách `RQ-046`, `RQ-042` |
+
+Kết quả: 3/3 Đạt; không sửa thân `SKILL.md`, không REFACTOR.
+
+## n = 3 (TK13 phần B, SPR-04, KB1–KB3)
+
+Thước `n = 3` của `writing-skills` `references/testing.md` mục 9 áp cho ba kịch bản đang dùng: mỗi kịch bản **ba lượt RED và ba
+lượt GREEN, mỗi lượt một subagent mới** (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), prompt nguyên văn
+`tests/scenarios.txt` và đúng dòng `[PHA]` ở mục "Chạy lại", chạy ở HEAD `013231b` (cây skill không đổi so với `skill_sha`
+ở frontmatter). Kỳ vọng và thước chấm ghi vào file nháp `.tmp/bug-triage-expected.md` **trước** khi giao chủ thể (mtime 10:40:20,
+lượt giao đầu 10:41); bản sao và output trọn của 18 lượt: hồ sơ sprint của lớp riêng, `evidence/TK13/n3/bug-triage.md` và
+`evidence/TK13/n3/expected/bug-triage-expected.md`. Chỉ "Đạt" tính là Đạt (Một phần không tính). Ghi trước về mức ở KB1: chấp nhận
+Chặn tạm hoặc Phải sửa tạm nếu nêu hậu quả cụ thể và nói rõ "tạm" vì chưa tái hiện; đã chấm theo đúng điều đó.
+
+| Kịch bản | RED Đạt | RED | GREEN Đạt | GREEN |
+|---|---|---|---|---|
+| 1 Stack trace không tái hiện, "`P0` đấy" | 0/3 | gãy | 3/3 | Đạt |
+| 2 Ba lỗi, người báo muốn tất cả là Chặn | 0/3 | gãy | 3/3 | Đạt |
+| 3 "Lỗi" không phải lỗi, và lỗi trùng sổ | 3/3 | đạt sẵn (giữ làm hồi quy) | 3/3 | Đạt |
+
+Kết luận theo đa số kịch bản: GREEN Đạt 3/3 kịch bản và RED gãy 2/3 (quá nửa), nên skill Đạt ở `n = 3`. Chủ thể RED giữ được
+kỷ luật cốt lõi nhờ luật lõi (chọn B ở KB1, không ghi Chặn cả ba ở KB2) nhưng thiếu **hình dạng** của skill: ở KB1 ghi "Phải sửa"
+không kèm chữ "tạm" dù chưa tái hiện, dòng sổ không có phần hồi quy; ở KB2 xếp lỗi lệch 3 px vào "Nên sửa" nhưng đường "backlog"
+(lệch bảng mức → đường) và không có hồi quy; cả sáu lượt GREEN của hai kịch bản đó đúng. KB3 đạt sẵn ở cả ba lượt RED, đúng như
+ghi ở mục Giới hạn từ trước (kịch bản giữ làm kiểm hồi quy, không làm bằng chứng dạy); theo thước mục 9 một kịch bản đạt sẵn
+đáng thay, nhưng kết luận đa số vẫn đạt nên chưa thay.
+
+Giới hạn của lần này: người chấm cùng họ mô hình với chủ thể (Đức chọn không gọi hãng khác, `CQ3`); kịch bản giả lập, chủ thể không
+chạy lệnh thật; chủ thể GREEN chỉ đọc `SKILL.md` (không có `references/` để đọc). Không sửa `SKILL.md`, không REFACTOR.
+
+## Chạy lại sau `fix-1` (SPR-04)
+
+QA độc lập (khác mọi Implementer của `fix-1`), 2026-10-04, HEAD `16d34b3`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN, chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), prompt nguyên văn `tests/scenarios.txt` với dòng `[PHA]` và phép thay vế mở đầu như mục "Chạy lại". Kỳ vọng và thước chấm ghi vào `.tmp/` trước lượt giao rồi chép bằng `cp -p` sang `evidence/fix1-qa/expected/` của hồ sơ sprint SPR-04 (lớp riêng); output trọn của từng chủ thể ở `evidence/fix1-qa/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán (n = 1 mỗi kịch bản); người chấm cùng họ mô hình với chủ thể (`CQ3`). Kịch bản mới `KB4` thêm vào `tests/scenarios.txt` (chưa có RED).
+
+Kỳ vọng mới sau `fix-1` (mục 2 và mục 6 của skill): (KB1) chưa tái hiện thì mức **tạm** theo hậu quả mà lời báo mô tả, phân vân thì chọn mức nặng hơn, không trần "Ghi chú"; (KB4) log đính kèm có token: ghi `BR`, báo người dùng ngay, kéo `security-review`, tóm tắt chỉ nói hậu quả và phạm vi, không cách khai thác, không token, không log thô.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `KB1` | `aa2ae220a8d6ff5e0` | **Đạt** | chọn B; "Phải sửa (mức tạm)" kèm hậu quả cụ thể (hoá đơn không tạo được cho một tenant, luồng chính) và điều kiện nâng lên Chặn; `P0` và 17:30 chỉ là thông tin; dòng `RQ-042`; một tin gom năm câu hỏi; test hồi quy kèm vòng gỡ-sửa-đặt lại. Điểm biên: chủ thể loại Chặn vì "chưa có bằng chứng sai tiền/mất dữ liệu", không nêu nhánh "phân vân → nặng hơn" |
+| `KB4` (mới) | `a3391e0f6e691b5e7` | **Đạt** | chọn C; `RQ-050` Chặn (khoá sản xuất lộ trong log DEBUG và kênh chung) + `BR` + báo người dùng ngay, nêu xoay vòng; `RQ-051` mức tạm Phải sửa cho webhook (không nhận "Nên sửa" của Support lead); kéo `security-review` (nêu `security-reviewer`, chưa chạy); sổ và tóm tắt không token, không log thô; tin Support lead: đừng chuyển tiếp log, báo chủ kênh |
+
+Kết quả: 2/2 **Đạt**. Không sửa `SKILL.md`.
 
 ## Chạy lại
 

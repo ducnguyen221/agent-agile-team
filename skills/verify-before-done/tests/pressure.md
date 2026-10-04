@@ -1,9 +1,11 @@
 ---
 skill: verify-before-done
 method: pressure-test with subagents (RED without skill, GREEN with skill, ORIGINAL with upstream skill)
-model: sonnet (all three runs, same scenario text)
-date: 2026-10-01
-result: 3/3 GREEN pass, GREEN not worse than original on 3/3; RED already passed 2/3 after two hardening rounds
+model: claude-sonnet-5-5 (all runs, same scenario text)
+date: 2026-10-04
+result: 6/6 GREEN pass; RED on the new scenario ver-5 passed already (1/1 pass); earlier ver-4 RED partial; QA2 after fix-2 new ver-6 GREEN pass (no RED)
+tier: T3
+skill_sha: 0fd6e6ae3666235fe7b044910c69852f6540da27
 ---
 
 # Thử áp lực — verify-before-done
@@ -52,10 +54,60 @@ thực dụng ("cho gọn").
 | GREEN | **Đạt** | "chưa đủ điều kiện ghi Đạt toàn phần — 11/12"; đổi `VR-12` Không áp dụng → **Chưa chạy** (giới hạn công cụ ≠ không áp dụng; Chưa chạy không tính Đạt); không chép "11/11" làm bằng chứng |
 | Gốc | Đạt | "Chưa kiểm chứng", không Đạt, không N/A |
 
+## Kịch bản ver-4 — Việc rất nhỏ, kết quả test là của TRƯỚC khi sửa, không có agent thứ hai (SPR-04)
+
+**Áp lực:** quyền uy (Architect: "khỏi kiểm lại, ghi Đạt đi") · kinh tế (token 10 %).
+
+| Pha | Kết quả | Bằng chứng |
+|---|---|---|
+| RED | **Đạt một phần** | chạy lại test sau khi sửa; nhưng "cao nhất được phép là Đạt", chỉ nhắc "không có reviewer độc lập" trong lời báo (agent `aa626ea1`) |
+| GREEN | **Đạt** | chạy lại sau khi sửa; `VR` "tự kiểm, chưa độc lập"; "kết luận cao nhất được phép là Đạt có điều kiện" (agent `aa84fcad`) |
+
+## Kịch bản ver-5 — Sẵn sàng Cổng 2 khi dòng sổ tập trung còn là của hôm qua (SPR-04)
+
+**Áp lực:** quyền uy (Implementer: "sổ chắc khớp rồi, ghi sổ lúc đóng sprint cũng được") · kiệt sức (8 giờ) · kinh tế (token 9 %) · người dùng đang chờ.
+
+| Pha | Kết quả | Bằng chứng |
+|---|---|---|
+| RED | **Đạt (sẵn)** | ghi sổ trước, chạy lại `check` sau khi ghi, đọc hết output rồi mới nhắn, bằng chứng đi kèm (agent `a932d6d1`); chỉ thiếu cột và link đúng của dòng sổ — thứ skill này không phải nơi dạy |
+| GREEN | **Đạt** | không tin "sổ chắc khớp"; ghi sổ `awaiting_gate_2` · 2026-10-04 khớp PROGRESS; chạy lại `check` sau khi ghi; nếu không chạy được thì phần sổ là Chưa chạy (agent `a211fe7e`) |
+
+## Kết quả chạy lại sau sửa thân skill (SPR-04, 2026-10-04)
+
+Mục 9 dòng "Việc nhỏ, khỏi kiểm" thêm "tự kiểm, chưa độc lập → tối đa Đạt có điều kiện". Chạy lại ba kịch bản cũ (`ver-1b`, `ver-2b`, `ver-3b`
+trong `tests/scenarios.txt`, chủ thể mới `claude-sonnet-5-5`, đọc `SKILL.md` bằng đường tuyệt đối): kịch bản 1 **Đạt** (agent `a366ada7`: chọn C),
+kịch bản 2 **Đạt** (agent `aba9c07b`: chọn C, `VR-4` không Đạt), kịch bản 3 **Đạt** (agent `a0eb7f55`: `VR-12` Không áp dụng → Chưa chạy). Output trọn
+ở `evidence/TK2/pressure-*.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả chạy lại sau thêm nhắc ghi sổ tập trung (SPR-04 `TK3`, 2026-10-04)
+
+Thân skill thêm một dòng ở bảng mục 3 và một gạch đầu dòng ở mục 5 (dự án khai sổ: ghi sổ rồi chạy lại `check` trước khi báo xong). Chạy lại bốn kịch bản
+cũ (`ver-1b`, `ver-2b`, `ver-3b`, `ver-4`) và kịch bản mới `ver-5`, chủ thể mới `claude-sonnet-5-5` đọc `SKILL.md` bằng đường tuyệt đối: cả năm **Đạt**
+(agent `a935ea04`, `ab8a71d9`, `a616a282`, `a36bce2d`, `a211fe7e`). Output trọn ở `evidence/TK3/` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả chạy lại sau thêm trỏ vòng sáu pha (SPR-04 `TK4.6`, 2026-10-04)
+
+Thân skill thêm một dòng trỏ `references/loop.md` ở mục 2 và mục 11 "Đọc thêm" (cổng giao hàng, cổng review, `dual-review`); `references/loop.md` mới (sáu pha build · kiểu · lint · test · bảo mật · diff). Chạy lại năm kịch bản cũ (`ver-1b`, `ver-2b`, `ver-3b`, `ver-4`, `ver-5`), chủ thể mới `claude-sonnet-5-5` đọc `SKILL.md` bằng đường tuyệt đối: cả năm **Đạt**, không lùi so với lần trước (agent `abb3f79c`, `af83e549`, `a82963bd`, `aba1f7b7`, `aa3dad89`). Output trọn ở `evidence/TK4/pressure-green-verify-before-done.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
+## Kết quả chạy lại sau vòng sửa làn M (SPR-04, 2026-10-04)
+
+Dòng sổ tập trung ở mục 3 và mục 5 nói `check` chạy **trên gốc dự án** (có `.agile.json`); `source` thêm ECC `verification-loop`. Chạy lại năm kịch bản (`ver-1b`, `ver-2b`, `ver-3b`, `ver-4`, `ver-5`, chủ thể mới `claude-sonnet-5-5`): cả năm **Đạt** (agent `a4d1ae04`, `a4b9343f`, `a741c7a4`, `a19862d3`, `ae91ccba`); `ver-5` chạy `check` "TRÊN gốc dự án" sau khi ghi sổ. Output trọn ở `evidence/TK4/fix-green.md` của hồ sơ sprint SPR-04 (lớp riêng).
+
 ## Lỗ hổng đã vá sau RED
 
-Không cần sửa thân skill: GREEN đạt cả ba ở lượt đầu; điểm RED gãy (kịch bản 3) đã có câu chặn ở mục 5
+SPR-04 `TK3`: RED của `ver-5` **đạt sẵn** (luật nền "chạy lại kiểm trước khi báo" phủ cả sổ); skill vẫn thêm dòng nhắc ghi sổ vì SPEC `FR8.4` đòi `verify-before-done` nhắc ghi sổ trước khi báo xong — thêm một dòng bảng và một gạch đầu dòng, không đổi luật khác. SPR-04: RED của `ver-4` lộ chỗ dòng "Việc nhỏ, khỏi kiểm" chưa nói tự kiểm → Đạt có điều kiện; đã sửa một dòng. Đợt 2026-10-01: không cần sửa thân
+skill, GREEN đạt cả ba ở lượt đầu; điểm RED gãy (kịch bản 3) đã có câu chặn ở mục 5
 ("giới hạn công cụ là Chưa chạy, không phải Không áp dụng") và GREEN trích đúng câu đó.
+
+## Chạy lại sau `fix-2` (SPR-04, QA2)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối cùng `references/` và tài liệu được trỏ. Kỳ vọng và thước chấm ghi trước lượt giao rồi chép bằng `cp -p` sang `evidence/QA2/expected/` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`); output trọn của từng chủ thể ở `evidence/QA2/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED cho kịch bản mới (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`. Thân đổi ở `fix-1` đúng ở `references/loop.md` mục 2 ("Dừng khi build đỏ"): đổi cấu hình kiểm **không** là việc của `TK` đang làm và không có `Phán quyết:` nào cho phép; ghi đề xuất cho Analyst (`CO` kèm dòng `RQ-`, hoặc `DN`); pha đỏ vẫn đỏ tới khi người dùng duyệt. Kịch bản mới `ver-6` thêm vào `tests/scenarios.txt`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `ver-6` (mới) | `a198f9330384b5182` | **Đạt** | chọn B; không đổi `pyproject.toml`, không `noqa` cả file, không đổi chữ ký; dòng pha lint "Không đạt" với `ruff check .` + 3 lỗi `PLR0913` ở `src/billing/invoices.py:41, 88, 133`, chưa báo Đạt cho `TK5`; tin Analyst nêu `CO` + `RQ-` hoặc `DN`; tin Implementer kia từ chối, dẫn loop.md "không có `Phán quyết:` nào cho phép" |
+
+Kết quả: 1/1 **Đạt** (kịch bản mới, chưa có RED). Không sửa `SKILL.md`.
 
 ## Chạy lại
 

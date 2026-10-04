@@ -4,6 +4,8 @@
 > hình công cụ; **uv** quản lý môi trường và khoá phụ thuộc (`uv.lock` được commit), **ruff** vừa định
 > dạng vừa lint (gồm sắp import), **mypy** kiểm kiểu nghiêm, **pytest** chạy test + coverage.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): PyPA (đóng gói, `[project.scripts]`) và tài liệu uv.
+
 ## 1. Bố cục dự án chuẩn
 
 ```
@@ -108,3 +110,68 @@ addopts = "--cov=mypackage --cov-report=term-missing"
 
 - Ngưỡng coverage không đặt ở đây theo ý thích: theo `method/conventions.md` mục 1.
 - Đổi cấu hình lint/kiểu/test để code "qua" kiểm là điều cấm; sửa code, hoặc ghi lý do và xin duyệt.
+
+## 5. Công cụ dòng lệnh: `[project.scripts]`, `__main__.py`, build
+
+```toml
+[project.scripts]
+mycli = "mypackage.cli:main"        # cài xong có lệnh `mycli`
+```
+
+```python
+# src/mypackage/cli.py
+import argparse
+from collections.abc import Sequence
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="mycli")
+    parser.add_argument("name")
+    args = parser.parse_args(argv)          # argv=None → đọc sys.argv; test truyền danh sách vào
+    print(f"hello {args.name}")
+    return 0                                 # mã thoát
+```
+
+```python
+# src/mypackage/__main__.py — để `python -m mypackage` chạy cùng đường vào
+from mypackage.cli import main
+
+raise SystemExit(main())
+```
+
+- Lệnh sinh từ `[project.scripts]` làm tương đương `import sys; from mypackage.cli import main; sys.exit(main())`,
+  nên `main()` **trả mã thoát** (`0`, hoặc số khác khi lỗi), không tự `sys.exit` bên trong (khó test). Bảng
+  `[project.gui-scripts]` dành cho ứng dụng đồ hoạ — chỉ khác ở Windows (không bật cửa sổ terminal).
+- Giá trị dạng `"gói.module:hàm"` phải trỏ tới tên import được sau khi cài; sai tên thì lệnh cài xong mới báo
+  lỗi khi chạy. Kiểm bằng cách chạy lệnh, không chỉ đọc cấu hình.
+- Build: `uv build` sinh bản nguồn (sdist) và wheel vào `dist/`. Kiểm wheel ở môi trường sạch, không dùng thư
+  mục dự án: `uv run --with dist/<tên>.whl --no-project -- mycli --help`; xem nội dung wheel bằng `unzip -l`
+  (đủ file dữ liệu, có `entry_points.txt`).
+- Nguồn: Python Packaging User Guide, "Writing your `pyproject.toml`" (mục tạo script chạy được); tài liệu `uv`,
+  hướng dẫn build và kiểm package.
+
+## 6. Vòng import (circular import)
+
+`ImportError: cannot import name … (most likely due to a circular import)` hay `AttributeError` lúc nạp module
+nghĩa là hai module import lẫn nhau. Gỡ theo thứ tự ưu tiên:
+
+1. **Tách phần dùng chung ra module thứ ba** mà cả hai cùng import (kiểu, hằng, hàm tiện ích). Vòng import hầu hết
+   là dấu hiệu hai module đang giữ một khái niệm chung chưa có chỗ riêng.
+2. **Chỉ cần kiểu để chú thích** → import dưới `TYPE_CHECKING`, chú thích bằng chuỗi hoặc dùng
+   `from __future__ import annotations`; import này không chạy lúc nạp nên không tạo vòng:
+   ```python
+   from __future__ import annotations
+   from typing import TYPE_CHECKING
+
+   if TYPE_CHECKING:
+       from mypackage.orders import Order   # chỉ cho trình kiểm kiểu
+
+   def refund(order: Order) -> None: ...
+   ```
+3. **Đảo chiều phụ thuộc**: module cấp thấp nhận thứ nó cần qua tham số hoặc `Protocol`
+   (`references/type-hints-and-dataclasses.md` mục 1.4) thay vì import module cấp cao.
+4. **Import cục bộ trong hàm** là cách cuối: nó giấu vòng chứ không gỡ, và chỉ chấp nhận khi hai khái niệm thật
+   sự gắn nhau; để lại một dòng chú thích vì sao.
+
+Không "chữa" bằng cách đổi thứ tự dòng `import` cho tới khi chạy được — vòng vẫn còn, chỉ hỏng lúc khác. Thứ tự
+import (mục 2) do `ruff` sắp, nên đổi tay cũng bị sắp lại.

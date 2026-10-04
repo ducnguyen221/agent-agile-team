@@ -4,9 +4,9 @@ description: Use when code must be reviewed — a diff, a branch, a PR, "check m
 metadata:
   group: verification
   roles: [analyst, tech-reviewer, implementer]
-source: ["obra/superpowers skills/requesting-code-review/ (SKILL.md, code-reviewer.md)", "obra/superpowers skills/receiving-code-review/SKILL.md", "private-process-skills skills/code-review-routing/SKILL.md (private copy, locally written: routing table and verify gate)"]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 4c0fdc5736a49b6223a7dfc7626d5495cf55185c]
-license: [MIT, MIT, none]
+source: ["obra/superpowers skills/requesting-code-review/ (SKILL.md, code-reviewer.md)", "obra/superpowers skills/receiving-code-review/SKILL.md", "private-process-skills skills/code-review-routing/SKILL.md (private copy, locally written: routing table and verify gate)", "obra/superpowers-lab skills/finding-duplicate-functions/SKILL.md", "garrytan/gstack review/SKILL.md (step on approved fixes with regression tests), review/sections/shared-code-reuse.md (caller evidence idea)"]
+source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 4c0fdc5736a49b6223a7dfc7626d5495cf55185c, 51111f74f24058117752d9aa917cb19859f8ec86, f30b7b788a210d217ea3125bf3001b29cbc2a463]
+license: [MIT, MIT, none, MIT, MIT]
 rewrite_before_public: false
 ---
 
@@ -16,7 +16,8 @@ rewrite_before_public: false
 > reviewer trước **không thể** thấy; đòn bẩy của review là **loại bỏ phát hiện giả** (cổng xác minh)
 > hơn là thêm máy dò; reviewer là **agent khác** người làm, nhận ngữ cảnh soạn riêng và một gói diff
 > cắt từ **mốc gốc** (không `HEAD~1`); phát hiện theo thang chung có `file:dòng`; bắt buộc có mục
-> "đã xem xét và gác lại" và "không đánh giá". Người làm **kiểm chứng trước khi sửa**, cấm đồng ý cho có.
+> "đã xem xét và gác lại" và "không đánh giá". Người làm **kiểm chứng trước khi sửa**, cấm đồng ý cho có; mục được chọn sửa = sửa **và**
+> test hồi quy, mục bỏ qua = bỏ **cả hai** và lỗi giữ trạng thái chưa giải.
 
 ## 1. Bước 0 — phân loại yêu cầu
 
@@ -24,7 +25,7 @@ rewrite_before_public: false
 |---|---|---|
 | có diff / PR / "xem thay đổi của tôi" / trước commit | **A. Review diff** | mục 2 |
 | không có diff — "tìm lỗi ở X", "sao hỏng" | **B. Săn lỗi** | mục 3 |
-| chạm xác thực · secret · thanh toán · dữ liệu cá nhân · phân quyền · phạm vi nhiều khách · API công khai · migration · hạ tầng | **C. Nâng cấp bảo mật** | mục 4 — bắt buộc, **chồng lên** A hoặc B |
+| chạm xác thực · secret · thanh toán · dữ liệu cá nhân · phân quyền · phạm vi nhiều khách · API công khai · migration · hạ tầng · file luật (`rules`) | **C. Nâng cấp bảo mật** | mục 4 — bắt buộc, **chồng lên** A hoặc B |
 | "nhìn xấu", khoảng cách, bố cục | thiết kế, không phải review mã | công cụ thiết kế nếu môi trường có; không bịa reviewer |
 | tài liệu, onboarding, trải nghiệm CLI | DX | tự đọc như người mới và báo; không có reviewer riêng |
 | còn ở giai đoạn PLAN, chưa có code | review PLAN | skill `plan-review` |
@@ -70,6 +71,18 @@ thứ lượt tổng quát không thấy:
 | `try/except`, fallback, đường lỗi, `.get()` mặc định | `silent-failure-hunter` |
 | comment có thể đã lệch code | `comment-analyzer` |
 | pipeline RAG, vector store, chunking | `rag-pipeline-reviewer` |
+| TypeScript / JavaScript ngoài mức tầm thường | `typescript-reviewer` |
+| `.tsx` / `.jsx`, hook, ranh giới server/client của React hay Next.js | `react-reviewer` (chạy cạnh `typescript-reviewer`) |
+| thêm hay sửa hành vi có test đi kèm; nghi test rỗng, nhánh lỗi chưa phủ, test chập chờn | `test-analyzer` |
+| cần một lượt tổng quát mà không có chuyên gia hợp, hoặc làm lượt đầu trước khi kéo chuyên gia | `code-reviewer` |
+
+`code-reviewer` và brief `references/reviewer.md` (mục 5) là **hai cách giao cùng một lượt tổng quát**, chọn một cho mỗi
+diff: brief `reviewer.md` khi review toàn nhánh đối chiếu PLAN/SPEC và Trọng tâm review; agent `code-reviewer` khi cần lượt
+tổng quát nhanh trên một diff mà không soạn brief riêng. Chuyên gia khi diff nằm trọn trong một vùng chúng phủ.
+
+Diff **thêm hàm mới** ở vùng hay mọc bản sao (tiện ích, định dạng, kiểm hợp lệ, đường dẫn, đổi lỗi thành chuỗi):
+thêm bước tìm hàm trùng ý theo [references/duplicates.md](references/duplicates.md) — grep và đọc thân, không giao
+agent; trùng là Nên sửa hoặc Ghi chú, không bao giờ Chặn.
 
 Chuyên gia độc lập chạy **song song** (một lượt, nhiều lệnh giao agent), mỗi agent một brief, cùng
 gói diff. Ghi vai · tier · model từng agent vào PROGRESS.
@@ -99,6 +112,8 @@ Chạm vùng ở Bước 0 → `risk: high`, cỡ **lớn** (`method/sizing.md` 
 1. Chạy A bình thường.
 2. **Rồi** lượt bảo mật — không tuỳ chọn, không thay bằng tổng quát: skill `security-review` +
    agent `security-reviewer`; cần soát cả repo (OWASP, STRIDE, khảo cổ secret) thêm `security-audit`.
+   `risk_tags` có `rules`, `secret` hoặc `auth` → lượt kiểm kỹ thuật chạy theo `roles/verifier/dual-review.md`:
+   hai reviewer độc lập cùng rubric, cả hai Đạt mới Đạt (cộng thêm, không thay lượt bảo mật).
 3. Báo đã nâng cấp gì và vì sao, để người dùng gác ở **Cổng 2** trước khi phát hành.
 
 ## 5. Yêu cầu review — brief cho reviewer
@@ -145,6 +160,11 @@ diff trong phiên điều phối thay cho reviewer — đốt ngữ cảnh đi�
   nếu thiếu X; điều tra / hỏi / đi tiếp?".
 - **Thứ tự sửa:** Chặn (vỡ, bảo mật) → sửa đơn giản (typo, import) → sửa phức tạp (refactor, logic);
   test từng mục; cuối cùng cả bộ. Phát hiện Chặn/Phải sửa từ reviewer = **vòng mới** trong PROGRESS.
+- **Sửa và test hồi quy là MỘT lựa chọn.** Mục được chọn sửa = viết test hồi quy cho đúng lỗi, thấy nó **đỏ** với
+  mã gốc, rồi sửa, rồi chạy test đó cùng phép thăm dò ban đầu và cả bộ; chưa có test thì chưa gọi là đã sửa, `RF`
+  chưa đóng. Mục bị bỏ qua = bỏ **cả hai**: không sửa, và không thêm test `xfail`/`skip` làm vật thay thế cho
+  việc sửa. Lỗi giữ trạng thái **chưa giải** (Phải sửa mở, hoặc `CO` có chủ và hạn), không ghi "đã xử lý", và
+  hiện ở Cổng 2. Không đủ giờ cho cả hai → không sửa và báo Analyst; không sửa-không-test để kịp.
 - Đã phản bác mà sai → "Đã kiểm X, nó làm Y — anh đúng. Sửa." Không xin lỗi dài, không bào chữa.
 - Phản hồi từ người dùng: tin, nhưng vẫn hỏi khi phạm vi chưa rõ; vẫn không nói "anh nói đúng".
 - Trả lời thread PR trên GitHub: trả lời **trong thread** (`gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies`), không comment cấp PR.
@@ -169,4 +189,6 @@ diff trong phiên điều phối thay cho reviewer — đốt ngữ cảnh đi�
 | "Phát hiện này nghe hợp lý, báo luôn" | qua cổng xác minh; không `file:dòng` thì tối đa Ghi chú |
 | "Reviewer nói vậy thì làm vậy" | kiểm chứng trước; sai thì phản bác có bằng chứng |
 | "Anh nói đúng quá, em sửa ngay" | nói lại yêu cầu rồi kiểm; hoặc sửa và để code trả lời |
+| "Sửa trước, test sau cho kịp giờ" | sửa và test hồi quy là một lựa chọn; chưa có test thì chưa sửa xong, `RF` chưa đóng |
+| "Không kịp thì thêm test `xfail` rồi đóng `RF` cho REPORT sạch" | bỏ qua = bỏ cả sửa lẫn test; lỗi giữ chưa giải, nói thẳng ở Cổng 2 |
 | "Mục rõ thì làm ngay cho kịp giờ, mục mơ hồ hỏi sau" | còn mục chưa rõ thì chưa sửa mục nào; mục mơ hồ có thể đổi cách làm mục rõ |

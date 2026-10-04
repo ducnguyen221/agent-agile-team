@@ -51,4 +51,8 @@ Diff chạm >5 module không liên quan nhau (phạm vi nổ — trả về Anal
 ## 8. Skill dùng
 `code-review` (định tuyến + khung) · `plan-review` · `security-review` · `security-audit` · thẻ chuyên đề
 [specialists/](specialists/) · `python` · `fastapi` · `postgres` · `api-design` · `error-handling` ·
-`response-style` · `id-convention` · `token-economy`.
+`response-style` · `id-convention` · `token-economy`. Chuẩn code của ngôn ngữ đang review:
+[method/standards/](../../method/standards/README.md) (chuẩn chung `common/` + `python.md` / `typescript.md` / `react.md` /
+`web.md`); chuẩn **không** nạp vào `AGENTS.md`, đọc khi review ngôn ngữ đó. Cổng review nhiều khía cạnh:
+[method/review-gate.md](../../method/review-gate.md); việc có `risk_tags` `rules` / `secret` / `auth`:
+[dual-review.md](dual-review.md) (hai reviewer độc lập cùng rubric).

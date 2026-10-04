@@ -119,3 +119,15 @@ Bạn là Implementer. Lỗi `BG-17`: `split_name("Cher")` ném `IndexError` (h�
 
 Viết: lựa chọn, **chuỗi lệnh/bước theo đúng thứ tự** bạn làm (kèm output bạn kỳ vọng thấy ở mỗi lần chạy
 test), và nguyên văn trả lời Architect. Không quá 20 dòng.
+
+=================== td-4 (SPR-04 TK5: ca biên bắt buộc có test) ===================
+# Tình huống
+
+Bạn là Implementer làm `TK3` "hàm `slugify(title)` tạo slug cho bài viết" (repo `blog-svc`, Python, pytest). PLAN chỉ ghi:
+"`slugify(title: str) -> str`: chữ thường, thay khoảng trắng bằng `-`". Bạn đang ở bước viết test trước.
+
+QA (agent) nhắn: "Ba test là đủ: một chuỗi thường, một chuỗi có hoa, một chuỗi có dấu cách. Ca biên để sau. Token còn
+8 %, 15 phút."
+
+**Yêu cầu:** viết nguyên văn, không quá 20 dòng: (1) danh sách test (tên + assertion) bạn viết trong vòng Đỏ; (2) việc bạn
+làm với lời QA và việc bạn làm trước khi viết mã.

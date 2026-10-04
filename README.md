@@ -1,6 +1,6 @@
 # agent-agile-team
 
-> **Status: private pre-release (`0.2.0-dev`).** Installable on Claude Code, Codex and Antigravity; not
+> **Status: private pre-release (`0.3.0-dev`).** Installable on Claude Code, Codex and Antigravity; not
 > published. Vietnamese version: [README.vi.md](README.vi.md). Skill bodies and method documents are written
 > in Vietnamese; frontmatter is English.
 
@@ -13,11 +13,11 @@ two gates; a team of agents does the rest and records it.
 - **Roles by tier, not by model name:** Analyst, Architect, Implementer, QA, Business Reviewer, Tech
   Reviewer; tiers `T1` thinking · `T2` execution · `T3` chores and test runs. **Whoever does the work never
   grades it.**
-- **Documents an agent can search cheaply:** four sprint documents (SPEC, PLAN, PROGRESS, REPORT, or one
-  merged file for tiny jobs) and three project registries (requests, sprints, living specs) with an
+- **Documents an agent can search cheaply:** four sprint documents (SPEC, PLAN, PROGRESS, REPORT; a very small
+  job uses one two-section `SPRINT.md`, a small job one four-section `SPRINT.md`) and three project registries (requests, sprints, living specs) with an
   "open now" block at the top. Every item has a two-letter code (`FR3.2`, `TK4`, `RF2`).
-- **28 skills and 7 read-only reviewer agents** for process, engineering technique, verification,
-  communication and token economy.
+- **32 skills and 13 agents** for process, engineering technique, verification, communication and token
+  economy; the agents only read, except `build-fixer`, which may edit files (T2).
 - **Three standard-library Python tools:** `init` builds the skeleton without overwriting anything,
   `check` enforces the document rules, `index` regenerates the "open now" blocks.
 
@@ -56,13 +56,13 @@ a project after two sprints.
 | Path | Purpose |
 |---|---|
 | `AGENTS.md` | Core rules loaded at session start (budget: ≤120 lines, ≤10 KB) |
-| `method/` | Process, sizing, severity scale, evidence, conventions |
+| `method/` | Process, sizing, severity scale, evidence, conventions, review gate; `standards/` holds the code standards |
 | `roles/` · `tiers/` | Role cards (executors, verifiers, specialists); tier definitions and the tier-table contract |
-| `skills/` · `agents/` | Skills, flat (`skills/<name>/SKILL.md`); read-only reviewer agents |
+| `skills/` · `agents/` | Skills, flat (`skills/<name>/SKILL.md`); agents (read-only, plus `build-fixer`, which may edit — T2) |
 | `templates/` | Sprint documents, project registries, project config |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; tests; a sample project with expected results |
 | `hosts/` | Install and loading per harness, and the host plug points |
-| `docs/` | Migration map from older skill names; standardization record |
+| `docs/` | Migration map from older skill names; standardization record; troubleshooting; updating from upstream |
 
 ## Acknowledgments
 

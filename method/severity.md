@@ -31,7 +31,7 @@ Quy tắc kèm theo:
 | Kết luận | Điều kiện |
 |---|---|
 | **Đạt** | 0 Chặn, 0 Phải sửa còn mở; mọi `SC` có `VR` Đạt |
-| **Đạt có điều kiện** | 0 Chặn; Phải sửa còn mở đã được người dùng chấp nhận **ghi rõ**, hoặc Nên sửa hoãn thành `CO` có chủ và mốc; hoặc kiểm định chưa độc lập (tự kiểm) với việc rất nhỏ |
+| **Đạt có điều kiện** | 0 Chặn; Phải sửa còn mở đã được người dùng chấp nhận **ghi rõ**, hoặc Nên sửa hoãn thành `CO` có chủ và mốc; hoặc kiểm định chưa độc lập (tự kiểm) — **chỉ ở cỡ rất nhỏ**; cỡ nhỏ trở lên bắt buộc reviewer khác người làm, `qa` trùng nhãn người làm là Phải sửa dù có khai tự kiểm (`check` bắt khi `VR` không khai tự kiểm, hoặc khai tự kiểm mà `verdict: pass`; không bắt được việc khai tự kiểm ở cỡ nhỏ trở lên — người đọc hồ sơ bắt phần đó) |
 | **Không đạt** | Còn Chặn; hoặc `SC` bắt buộc không có `VR` Đạt; hoặc người dùng không nghiệm thu |
 
 Kết luận của reviewer dùng cùng ba từ. Reviewer được kết luận Đạt với 0 phát hiện, nhưng phải ghi phần

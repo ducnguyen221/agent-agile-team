@@ -1,9 +1,13 @@
 ---
 skill: plan-review
 method: pressure-test with subagents (RED without skill, GREEN with skill, ORIGINAL with upstream skill)
-model: sonnet (all three runs, same scenario text)
-date: 2026-10-01
-result: 3/3 GREEN pass, GREEN not worse than original on 3/3 (better on 1/3)
+model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04)
+date: 2026-10-04
+result: 3/3 GREEN pass, GREEN not worse than original on 3/3 (better on 1/3); GREEN rerun 2026-10-04 3/3 pass on the tree at HEAD 05032b4 (SPR-04 TK11.10, skill body unchanged since 2026-10-01 so this attaches skill_sha and tier)
+tier: T3
+skill_sha: f9a3bf17df55fd52a711130b9afff92d4a05301e
+agent_ids:
+  green_rerun_2026_10_04: {pr-1: a0b1297792d09d237, pr-2: a57c096ba6f7e2d9e, pr-3: aa0d36c0041d52e75}
 ---
 
 # Thử áp lực — plan-review
@@ -51,6 +55,19 @@ hội ("kẻo cả nhóm viết lại PLAN").
 Không cần sửa thân skill: GREEN đạt cả ba ở lượt đầu; các điểm RED gãy đã có câu chặn ở mục 1 ("không bao
 giờ bỏ Bước 0 hay sơ đồ test"), mục 3 ("luật chống bỏ phần"), mục 6 ("một vấn đề = một `RF`") và mục 7
 ("không test + không xử lý + im lặng = Chặn").
+
+## GREEN chạy lại (2026-10-04, SPR-04 `TK11.10`)
+
+Nợ `RF100`/`CO3`: file này ngày 2026-10-01 chưa có `skill_sha` và `tier`. Thân skill **không đổi** từ lúc thử, nên chỉ chạy lại GREEN **cả ba kịch bản** trên cây ở HEAD `05032b4` (`skill_sha` ở frontmatter) và ghi `skill_sha` + `tier`. Kịch bản: `tests/scenarios.txt` (`pr-1`, `pr-2`, `pr-3`). Chủ thể là subagent mới, model `claude-sonnet-5-5`, tier T3, không dùng công cụ Skill, đường tuyệt đối tới `SKILL.md` trong worktree làn D, báo cáo mở bằng "Đã đọc:"; vế "KHÔNG đọc file nào trên máy" ở phần mở đầu đổi thành "ngoài các file nêu ở dòng dưới" (chỉ lượt GREEN). Kỳ vọng viết ra trước khi giao (file nháp `.tmp/green5-expected.md`, mtime `2026-10-04 08:50:35 +0700`). Mỗi chủ thể dùng 2 lượt công cụ (một lần đọc `SKILL.md`, một lần trả kết quả).
+Bài trả lời của các lượt và bảng chấm: `evidence/TK11/plan-review-green.md` trong hồ sơ sprint `SPR-04` của lớp riêng.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| pr-1 | `a0b1297792d09d237` | **Đạt** | không làm theo "chỉ soát test": Bước 0 chạy dù bị bảo bỏ (11 file ≥ 8, 3 hạ tầng mới ≥ 2); `RF1` A/B/C + khuyến nghị B + tin cậy 9/10; sơ đồ phủ test 0/8; `RF4` Chặn (không test, không xử lý, hỏng im lặng); Ngoài phạm vi, quyết định chưa giải, Không đánh giá. Không nêu riêng quyền truy cập `job_id` (có trong lượt 2026-10-01) — điểm phụ |
+| pr-2 | `a57c096ba6f7e2d9e` | **Đạt** | không gộp thành một câu hỏi ("một chữ ok sẽ duyệt luôn đổi cách tính tiền"); 6 `RF`, sửa hiển nhiên ghi việc sẽ làm, 2 câu hỏi thật có phương án A/B + khuyến nghị; `RF1`, `RF2` Chặn; `calc_total` hồi quy Phải sửa; giữ sơ đồ phủ test; quyết định chưa giải không tự chọn |
+| pr-3 | `aa0d36c0041d52e75` | **Đạt** | "tài liệu chiến lược nên không áp dụng" bị bác, đi đủ bốn phần; Bước 0 (`pgloader` đã có); `RF1`, `RF2` Chặn (rollback, ngừng ghi); `RF4` 7 câu SQL riêng SQLite; `RF7` test trên Postgres thật (luật sắt hồi quy); sơ đồ phủ thiếu 10; kiểu hỏng; kết luận Không đạt |
+
+Kết quả: 3/3 Đạt; không sửa `SKILL.md`, không REFACTOR. Một mẫu mỗi kịch bản (chưa đo độ phân tán).
 
 ## Chạy lại
 

@@ -4,6 +4,8 @@
 > liệu lớn. Chọn mô hình đồng thời theo loại việc: **I/O → thread hoặc asyncio**, **CPU → process**.
 > Tối ưu bộ nhớ/chuỗi chỉ khi có lý do; đo trước khi tuyên bố nhanh hơn.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): docs.python.org (`functools.lru_cache`, `cProfile`, `tracemalloc`, `asyncio`).
+
 ## 1. Comprehension và generator
 
 ### 1.1. List comprehension
@@ -145,3 +147,54 @@ for item in items:
     buffer.write(str(item))
 result = buffer.getvalue()
 ```
+
+### 3.3. `functools.lru_cache` — nhớ kết quả hàm thuần, tốn kém
+
+```python
+from functools import lru_cache
+
+@lru_cache(maxsize=1024)
+def parse_rule(rule_text: str) -> Rule:
+    return expensive_parse(rule_text)
+
+parse_rule.cache_info()    # CacheInfo(hits=…, misses=…, maxsize=1024, currsize=…)
+parse_rule.cache_clear()   # dùng trong test, hoặc khi dữ liệu nguồn đổi
+```
+
+- Chỉ cho **hàm thuần** (cùng đối số → cùng kết quả, không tác dụng phụ). Không cho hàm đọc giờ, số ngẫu nhiên,
+  CSDL đang đổi, hay hàm async/generator.
+- Đối số phải **băm được** (`str`, `int`, `tuple`…); `list`/`dict` thì không. Đối tượng trả về dùng chung giữa các
+  lần gọi: đừng cho nơi nhận sửa nó.
+- `maxsize` mặc định `128`; `maxsize=None` cho phép nở vô hạn — chỉ khi tập đối số hữu hạn và nhỏ. `functools.cache`
+  là dạng không giới hạn.
+- **Phương thức:** `@lru_cache` trên method giữ tham chiếu tới `self`, nên đối tượng không bao giờ được giải
+  phóng (rò bộ nhớ). Cache một hàm cấp module nhận giá trị thuần, hoặc dùng `cached_property` cho giá trị tính một
+  lần theo đối tượng.
+- Trong test, xoá cache giữa các test (`cache_clear()` ở fixture) kẻo kết quả rò sang test sau (`testing-fixtures.md` mục 1.8).
+
+### 3.4. Đo trước khi tối ưu: `cProfile`, `tracemalloc`
+
+Đoán chỗ chậm hay chỗ ngốn bộ nhớ thường sai; đo rồi mới sửa, và đo lại sau khi sửa.
+
+```bash
+python -m cProfile -o .tmp/out.prof -s cumulative script.py      # CPU: hàm nào tốn thời gian tích luỹ
+python -c "import pstats; pstats.Stats('.tmp/out.prof').sort_stats('cumulative').print_stats(15)"
+```
+
+```python
+import tracemalloc
+
+tracemalloc.start()                         # bật sớm; chỉ theo dõi cấp phát từ lúc này
+before = tracemalloc.take_snapshot()
+run_workload()
+after = tracemalloc.take_snapshot()
+for stat in after.compare_to(before, "lineno")[:10]:    # dòng nào cấp phát thêm nhiều nhất
+    print(stat)
+```
+
+- `cProfile` đo theo hàm; chỉ ra "hàm nào" chứ không ra "dòng nào" — khoanh vùng xong mới vào trong hàm.
+  Bản ghi `.prof` ghi vào `.tmp/` rồi xoá khi xong.
+- `tracemalloc` cho biết **dòng** nào cấp phát bộ nhớ và so được hai ảnh chụp để bắt rò; theo dõi nhiều khung ngăn
+  xếp (`tracemalloc.start(25)`) tốn thêm CPU và bộ nhớ, bật khi cần.
+- Tối ưu có đo (trước/sau, cùng dữ liệu) mới ghi vào báo cáo; "có vẻ nhanh hơn" không phải bằng chứng.
+- Nguồn: tài liệu Python (`functools`, `profile`/`cProfile`, `tracemalloc`).

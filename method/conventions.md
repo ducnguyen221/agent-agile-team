@@ -27,11 +27,12 @@ Lõi và công cụ đọc cấu hình trước, dùng mặc định sau.
 
 | Thứ | Khoá cấu hình | Mặc định |
 |---|---|---|
-| Thư mục sprint | `paths.sprint_dir` | `docs/plans/{date}-{slug}/` (SPEC, PLAN, PROGRESS, REPORT — hoặc `SPRINT.md` khi rất nhỏ) |
+| Thư mục sprint | `paths.sprint_dir` | `docs/plans/{date}-{slug}/` (SPEC, PLAN, PROGRESS, REPORT — hoặc một `SPRINT.md` khi cỡ rất nhỏ hoặc nhỏ) |
 | Sổ REQUESTS | `paths.requests` | `docs/plans/REQUESTS.md` |
 | Sổ SPRINTS | `paths.sprints` | `docs/plans/SPRINTS.md` |
 | Sổ SPECS + spec sống | `paths.specs` · `paths.feature_specs_dir` | `docs/specs/SPECS.md`, `docs/specs/<slug>.md` |
 | ADR | `paths.adr_dir` | `docs/architecture/adr/NNNN-<slug>.md` |
+| Sổ tập trung (tuỳ chọn) | `ledger.project` | rỗng = tắt; điền tên dự án trong sổ để bật ([process.md](process.md) mục 11); máy cấp mẫu đường kho sổ qua biến `AGENT_AGILE_LEDGER`, không ghi đường máy vào repo |
 | Thư mục tạm của sprint | — | `.tmp/` (trong `.gitignore`; xoá khi đóng sprint) |
 
 Mã hồ sơ sổ gốc: `RQ-` và `FS-` tối thiểu 3 chữ số, `SPR-` tối thiểu 2 (`id_width`). Repo **public** mà
@@ -61,11 +62,32 @@ Không có ngoại lệ "cho nhanh"; vi phạm là phát hiện mức **Chặn**
 | **Không `git stash` trần** | dùng commit tạm trên nhánh làm việc, hoặc `stash push -m <tên duy nhất>` rồi `apply` theo mã (stash dùng chung giữa nhiều phiên) |
 | **Không `reset --hard`, không xoá nhánh chưa gộp** | trừ khi được giao đích danh — điều kiện dừng (a) |
 | **Không commit secret** | `.env*`, khoá, token; chỉ `.env.example`. Secret lọt vào diff → Chặn và báo để xoay vòng |
-| **Không tự tăng version, không ghi đè CHANGELOG** | version và CHANGELOG do người dùng quyết lúc phát hành; agent chỉ **thêm** mục vào CHANGELOG dưới tiêu đề đang mở, không viết lại mục cũ |
+| **Không tự tăng version, không ghi đè CHANGELOG** | version và CHANGELOG do người dùng quyết lúc phát hành; agent chỉ **thêm** mục vào CHANGELOG dưới tiêu đề đang mở, không viết lại mục cũ. Agent **đề xuất** mức tăng kèm lý do ở Cổng 2 theo bảng mục 4.1; người dùng quyết |
 | **Commit** | thông điệp một dòng tóm tắt + thân ngắn nêu *vì sao*; mỗi `TK` ít nhất một commit; commit ghi mã `TK` khi có |
 | **Worktree** | ưu tiên công cụ worktree của harness; thư mục worktree nằm trong `.gitignore`; không `cd` sang worktree khác (skill `worktrees`) |
 | **Push, PR, gộp vào nhánh chính** | tác động ra ngoài: chỉ sau Cổng 2 và khi người dùng gật; menu 3 lựa chọn ở skill `closing-sprint` |
 | **Cấu hình harness và file luật** | không sửa để nới quyền cho mình; sửa qua đường chính thức của môi trường và luôn qua người dùng |
+
+### 4.1 Quy tắc số phiên bản
+
+Số phiên bản dạng `MAJOR.MINOR.PATCH`; mỗi đợt phát hành tăng **đúng một phần** (phần thấp hơn về 0). Mức tăng do thay đổi
+**nặng nhất** trong đợt quyết.
+
+| Tăng | Khi | Ví dụ |
+|---|---|---|
+| **MAJOR** | làm gãy bên dùng: đổi tên hoặc bỏ skill, agent, lệnh; đổi hợp đồng hay định dạng file; đổi luật buộc dự án đang chạy phải sửa theo | đổi tên một skill; thêm khoá bắt buộc vào frontmatter |
+| **MINOR** | thêm năng lực tương thích ngược: skill, agent, lệnh hoặc luật mới mà dự án cũ không phải sửa | thêm một skill; thêm một luật `check` mức Ghi chú |
+| **PATCH** | chỉ sửa lỗi, sửa chữ, bổ sung nội dung cho skill có sẵn mà không thêm năng lực | sửa lỗi chính tả; làm rõ một mục của skill |
+
+Bốn điều đi kèm:
+
+- **Dưới `1.0.0`** thay đổi gãy chỉ tăng MINOR (MAJOR giữ `0`).
+- **Chưa phát hành** mang hậu tố `-dev` (ví dụ `1.4.0-dev`); bỏ hậu tố chỉ ở lúc phát hành, do người dùng quyết.
+- **Không dùng lại số đã có**, kể cả số của bản đã thu hồi.
+- **Phân vân giữa hai mức → chọn mức cao hơn.**
+
+Agent nêu mức đề xuất và **lý do** (thay đổi nào quyết mức) trong REPORT hoặc lời trình Cổng 2; không tự ghi số vào manifest hay
+CHANGELOG khi người dùng chưa quyết.
 
 ## 5. Ngôn ngữ và frontmatter
 

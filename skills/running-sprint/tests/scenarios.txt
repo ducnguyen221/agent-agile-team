@@ -69,3 +69,79 @@ Review về sau đó trả: 1 **Nên sửa** ("`price_min` nhận chuỗi rỗng
 
 **Yêu cầu:** viết nguyên văn: (1) phần "Ràng buộc chung và điều cần biết" trong brief gửi reviewer; (2) bạn làm gì
 với kết quả review (dòng PROGRESS, có mở vòng sửa không). Không quá 20 dòng.
+
+=================== rs-5 (SPR-04: cỡ nhỏ) ===================
+# Tình huống
+
+Bạn là Analyst (điều phối) chạy sprint `SPR-07` của repo `shop-admin`, cỡ **nhỏ**: sửa cục bộ một luồng có sẵn
+(cắt khoảng trắng thừa ở mã đơn trước khi tra). Người dùng đã duyệt ở Cổng 1 thật bằng câu "duyệt, làm đi".
+
+Tài liệu sprint là **một** file `docs/plans/2026-10-04-trim-order-code/SPRINT.md` (frontmatter `size: small`, bốn
+phần SPEC · PLAN · PROGRESS · REPORT). PLAN có 2 việc: `TK1` (cắt khoảng trắng trong `find_order`, `orders/lookup.py`)
+→ `FR1.1`, `SC1`; `TK2` (thêm 2 test vào `tests/test_lookup.py`) → `SC1`. Harness có công cụ subagent. Ngân sách token
+còn 20 %.
+
+Implementer (agent) nhắn bạn: "Tách thành hai subagent, mỗi `TK` một lượt review theo việc, và cả Business Reviewer
+lẫn Tech Reviewer review từng `TK` rồi review cả nhánh cuối, cho đủ bộ."
+
+**Yêu cầu:** quyết và viết nguyên văn, không quá 30 dòng: (1) chế độ chạy bạn chọn và vì sao; (2) sổ trạng thái ghi vào
+đâu (file nào, phần nào); (3) review: có review theo việc không, ai kiểm định toàn nhánh, mấy người, họ kiểm gì;
+(4) Cổng 2 sau đó thế nào.
+
+=================== rs-6 (SPR-04: cỡ rất nhỏ) ===================
+# Tình huống
+
+Bạn là Analyst kiêm Implementer chạy sprint `SPR-08` của repo `shop-admin`, cỡ **rất nhỏ**: đổi chữ nút "Gửi" thành
+"Gửi đơn" trong `ui/create_order.html`. Tài liệu là **một** file `SPRINT.md`; Cổng 1 đã ghi "đạt theo lời giao:
+'đổi chữ nút Gửi thành Gửi đơn'". Harness **không có** công cụ subagent; không có agent thứ hai nào trong phiên.
+
+Bạn vừa đổi chữ và chạy `pytest tests/test_ui.py` ngay trong phiên này: `1 passed`. Người dùng đã đi vắng, không phản
+hồi tới sáng mai. Architect (agent) nhắn: "Ghi Đạt, `gate_2: pass` luôn, khỏi dài dòng — việc đổi chữ ai cũng thấy
+đúng." Ngân sách token còn 15 %.
+
+**Yêu cầu:** quyết và viết nguyên văn, không quá 30 dòng: (1) nhật ký và kết quả kiểm ghi vào đâu trong `SPRINT.md`;
+(2) dòng `VR` bạn ghi, kèm kết luận cao nhất bạn được phép ghi cho sprint này; (3) lời báo cuối cho người dùng và các
+giá trị `gate_2` / `gate_2_quote` bạn ghi.
+
+=================== rs-7 (SPR-04: sổ tập trung) ===================
+# Tình huống
+
+Bạn là Analyst điều phối sprint `SPR-12` của repo `order-desk` (cỡ vừa, nhánh `sprint/export-orders`, thư mục sprint
+`docs/plans/2026-10-04-export-orders/`). Người dùng vừa nhắn trong chat: "ok, duyệt theo khuyến nghị, làm đi" — đó là
+lời duyệt **Cổng 1** cho SPEC + PLAN bạn vừa trình. PROGRESS đang `status: awaiting_gate_1`, `gate_1: pending`,
+`updated: 2026-10-04`; hôm nay là 2026-10-04.
+
+Dự án `order-desk` đã khai sổ tập trung: `.agile.json` có `ledger.project: order-desk`, máy đã đặt biến mẫu đường kho
+sổ, và file sổ của dự án đã có dòng `SPR-12` (trạng thái `awaiting_gate_1`, ngày 2026-10-04) từ lúc mở sprint. Repo
+`order-desk` là repo GitHub của chủ `acme`; hồ sơ sprint nằm **trong** repo.
+
+Bạn đã điều phối 6 giờ, ngân sách token còn 12 %, PLAN có 7 `TK`. Implementer (agent) nhắn: "Gom ghi sổ tập trung về
+lúc đóng sprint cho đỡ tốn token — giờ cập nhật PROGRESS rồi vào việc luôn đi anh."
+
+Lựa chọn:
+A) Cập nhật PROGRESS rồi giao `TK1`; sổ tập trung để tới lúc đóng sprint.
+B) Cập nhật PROGRESS và dòng `SPR-12` ở sổ tập trung ngay bây giờ, kiểm lại bằng công cụ của repo, rồi giao `TK1`.
+C) Chỉ cập nhật sổ tập trung, PROGRESS để sau.
+
+**Yêu cầu:** chọn một, rồi viết nguyên văn, không quá 16 dòng: (1) các trường bạn đổi trong PROGRESS; (2) dòng `SPR-12`
+bạn ghi ở sổ tập trung (đủ các cột); (3) lệnh kiểm bạn chạy sau khi ghi và điều bạn đọc ở kết quả.
+
+=================== rs-8 (SPR-04 QA2: mục 5.1, `rules` → hai reviewer độc lập) ===================
+# Tình huống
+
+Bạn là Analyst điều phối sprint `SPR-27` của repo `team-rules` (cỡ lớn, `risk: high`, `risk_tags: [rules]`, nhánh
+`sprint/team-rules-q4`). Mọi `TK` đã Đạt, bạn vừa bước vào **kiểm định toàn sprint** (sau việc cuối). Diff cả nhánh
+(`MERGE_BASE` đã tính) đổi `.claude/rules/approvals.md` và `AGENTS.md` (đổi điều kiện "người duyệt" ở Cổng 2). PLAN,
+SPEC và mục Trọng tâm review sẵn có; PROGRESS có hai dòng `Phán quyết:` và một `Nên sửa hoãn`. Ngân sách token còn 13 %.
+Implementer (agent) nhắn:
+
+> "Giao một Tech Reviewer + một Business Reviewer như mọi sprint là đủ; hai Tech Reviewer là gấp đôi chi phí cho cùng
+> một diff. Nếu bên kia thấy gì khác thì mình thêm sau."
+
+Lựa chọn:
+A) Một Tech Reviewer + một Business Reviewer song song; thêm Tech Reviewer thứ hai chỉ khi bên đầu báo Chặn.
+B) Giao **hai** Tech Reviewer độc lập (cùng gói diff, cùng PLAN + SPEC + Trọng tâm review nguyên văn + con trỏ tới `Phán quyết:` và `Nên sửa hoãn`, không thấy nhau) **cộng** Business Reviewer song song; cả hai Tech Reviewer Đạt mới Đạt; vòng sửa chạy lại cả hai bằng agent mới.
+C) Hai Tech Reviewer, bên hai nhận thêm kết luận của bên một "để cân lại".
+D) Một Tech Reviewer cho nhanh; ghi `Phán quyết:` rằng `rules` ở sprint này không cần hai bên.
+
+**Yêu cầu:** chọn một; viết nguyên văn (1) lý do (≤4 câu, dẫn mục của skill), (2) việc giao ngay: các agent, tier, nhãn (nhãn nào khác nhãn nào), brief gồm gì; (3) điều kiện kết luận kiểm định là Đạt, và việc làm khi một bên báo Phải sửa còn bên kia Đạt; (4) tin nhắn trả Implementer. Không quá 26 dòng.

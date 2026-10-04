@@ -4,6 +4,8 @@
 > (mặc định `function`), fixture dùng chung đặt ở `conftest.py`. `parametrize` thay cho chép test; marker
 > đăng ký trong cấu hình và chạy với `--strict-markers` để gõ sai tên là báo lỗi.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): tài liệu pytest (fixture, `monkeypatch`, thứ tự test).
+
 ## 1. Fixture
 
 ### 1.1. Cơ bản
@@ -112,6 +114,57 @@ def auth_headers(client):
 ```
 
 Mật khẩu/token trong fixture chỉ là giá trị test giả; không dùng secret thật.
+
+### 1.7. `monkeypatch` — đổi tạm thuộc tính, biến môi trường, thư mục hiện hành
+
+Fixture có sẵn của pytest; **mọi thay đổi tự hoàn lại sau khi test hay fixture yêu cầu nó kết thúc**, nên không
+rò sang test khác.
+
+```python
+import datetime
+import pytest
+
+def test_reads_api_url_from_env(monkeypatch):
+    monkeypatch.setenv("API_URL", "http://test.local")
+    monkeypatch.delenv("API_KEY", raising=False)     # xoá nếu có, không lỗi khi vắng
+    assert load_config().api_url == "http://test.local"
+
+def test_uses_fixed_clock(monkeypatch):
+    class FixedDate(datetime.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 1, 15, 9, 0, 0)
+
+    monkeypatch.setattr("mypackage.billing.datetime", FixedDate)   # vá tên mà mã đang dùng
+    assert invoice_due_date().isoformat() == "2026-02-14"
+
+def test_runs_in_tmp_dir(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+```
+
+Các hàm: `setattr`/`delattr` (thuộc tính lớp, module), `setitem`/`delitem` (dict như `os.environ`), `setenv`/
+`delenv`, `syspath_prepend`, `chdir`, `context()` (giới hạn phạm vi vá).
+
+- **Vá đúng chỗ mã đang tra tên**: module làm `from datetime import datetime` thì vá `mypackage.billing.datetime`,
+  không vá `datetime.datetime` gốc. Không vá hàm dựng sẵn như `open()` hay `compile()` — làm hỏng chính pytest.
+- Đồng hồ: ưu tiên truyền thời gian vào hàm (`now: datetime`) thay vì vá; vá là đường cuối khi không đổi được chữ ký.
+- Vá `os.environ` bằng `monkeypatch.setenv`, không gán trực tiếp `os.environ[...] = ...` (gán trực tiếp không được
+  hoàn lại, rò sang test sau).
+- Khác `unittest.mock.patch` (`testing-mocking-async.md`): `monkeypatch` đổi giá trị thật, không ghi lại lời gọi;
+  cần kiểm "đã gọi với đối số nào" thì dùng mock.
+
+### 1.8. Test chỉ xanh theo thứ tự chạy nhất định
+
+Triệu chứng: chạy riêng một test thì đỏ, chạy cả file thì xanh (hoặc ngược lại). Nguyên nhân thường là **trạng thái
+chung bị rò giữa test**: biến module khả biến, cache, singleton, biến môi trường, file thật trên đĩa.
+
+1. Chạy riêng test nghi ngờ: `pytest tests/test_a.py::test_x`; rồi chạy theo thứ tự đảo: `pytest tests/test_b.py
+   tests/test_a.py`.
+2. Thu hẹp: chạy test nghi ngờ cùng từng test đứng trước nó (`-x` dừng ở lỗi đầu) cho tới khi tìm ra cặp làm đỏ.
+3. Chữa tận gốc: đưa trạng thái vào fixture phạm vi `function` có dọn (mục 1.2), dùng `monkeypatch` cho biến môi
+   trường/thuộc tính (mục 1.7), `tmp_path` cho file; `autouse` fixture đặt lại singleton (mục 1.5). Không chữa
+   bằng cách cố định thứ tự test.
+4. Plugin `pytest-randomly` (bên thứ ba) xáo thứ tự mỗi lần chạy để lộ sớm lỗi này; thêm vào chỉ khi dự án đồng ý.
 
 ## 2. Parametrize
 
