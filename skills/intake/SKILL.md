@@ -38,6 +38,10 @@ Lời giao đã nêu rõ mục đích, ràng buộc và kết quả thì phản 
 
 Một tin, bốn phần, mỗi phần ngắn; người dùng trả lời **một lần**:
 
+**Sản phẩm của lượt tiếp nhận:** viết **nguyên văn tin gửi người dùng** ngay trong câu trả lời hiện tại,
+trước phần trả lời agent hay dự thảo hồ sơ. "Sẽ gửi một tin gom" chỉ là kế hoạch, chưa phải tin trao đổi.
+Khi có giới hạn dòng, rút ngắn từng phần nhưng giữ đủ bốn phần; chưa xác nhận thì ghi hồ sơ "chưa lập".
+
 ```
 Tôi hiểu mục tiêu là: <một đến ba câu lời thường>.
 Câu hỏi để chắc mình hiểu đúng (mỗi câu có đề xuất của tôi):
@@ -57,8 +61,9 @@ Có mở sprint không? Khuyến nghị: <có / không; nếu có, bao nhiêu sp
   Đủ bốn phần = mục tiêu nhắc lại + phản biện có đề xuất + bậc từng việc/rủi ro + câu hỏi rõ có mở sprint không.
 - **Người dùng thắng:** họ đổi bậc hay chọn làm thẳng thì theo; nhưng rủi ro vẫn chỉ nâng, và mọi cổng xin phép khác
   (sửa file luật phải được gật, hành động không đảo ngược phải hỏi) vẫn giữ.
-- **Bỏ lượt trao đổi** khi: người dùng đã nói rõ "không cần sprint" / "làm luôn"; hoặc việc là **làm thẳng không mơ
-  hồ** (1–2 thao tác, kết quả rõ, không chạm vùng loại trừ). Khi đó làm ngay và báo kết quả + bằng chứng.
+- **Bỏ lượt trao đổi** khi: người dùng nói rõ "không cần sprint" cho đúng việc; hoặc việc là **làm thẳng không mơ
+  hồ** (1–2 thao tác, kết quả rõ, không chạm vùng loại trừ). "Làm luôn" chỉ thúc tiến độ, không tự miễn sprint
+  hay mở ngoại lệ cho vùng loại trừ. Khi đủ điều kiện bỏ lượt trao đổi, làm ngay và báo kết quả + bằng chứng.
 - Lời giao đã đủ mục tiêu, định nghĩa xong, phạm vi và bậc → tin chỉ còn một câu xác nhận.
 
 **Cỡ quyết hình tài liệu và cổng** (bảng đầy đủ: `method/sizing.md` mục 1) — ghi cỡ kèm hình này:
@@ -81,7 +86,7 @@ né sprint: đếm toàn bộ việc cần để mục tiêu xong trước khi c
 |---|---|---|
 | secret, token, cấu hình xác thực | `secret` | lớn / security |
 | xác thực, phân quyền, phiên | `auth` | lớn / security |
-| đầu vào ngoài: form, API công khai, upload, webhook | `external_input` | lớn / security (+ backend) |
+| thêm điểm nhận dữ liệu không tin cậy, hoặc đổi hợp đồng/kiểm tra bảo mật/giải mã–phân tích/đưa dữ liệu vào thao tác nhạy cảm qua điểm đó (form, API công khai, upload, webhook) | `external_input` | lớn / security (+ backend) |
 | API công khai, hợp đồng giữa dịch vụ | `public_api` | lớn / backend |
 | hạ tầng, deploy, hook, CI, quyền chạy | `infra` | lớn / security (+ backend) |
 | migration, schema, backfill, xoá dữ liệu | `data_migration` | lớn / data |
@@ -89,6 +94,11 @@ né sprint: đếm toàn bộ việc cần để mục tiêu xong trước khi c
 
 Mọi hàng: `risk: high`, `size: large`. Chưa rõ có chạm vùng nào → đề xuất bậc nặng hơn và hỏi phản biện;
 không gắn nhãn tự chế như `security` vào `risk_tags`. `rules` / `secret` / `auth` cần hai Tech Reviewer độc lập.
+
+Trường UI có sẵn không tự tạo nhãn `external_input`. Chỉ đổi chữ hoặc chuẩn hoá tìm kiếm cục bộ (trim đầu/cuối)
+có thể giữ `risk: normal` khi có bằng chứng giữ nguyên quyền, tenant/danh tính, kiểm tra bảo mật, parser/schema,
+hợp đồng API và cách truy vấn/thao tác nhạy cảm; cỡ theo hành vi (sửa một luồng có sẵn là nhỏ). Có thay đổi hoặc
+chưa loại trừ tác động lên những ranh giới đó → `external_input`, `risk: high`, `size: large` và review security.
 
 ## 2. Danh mục 11 điểm thiếu ngữ cảnh
 

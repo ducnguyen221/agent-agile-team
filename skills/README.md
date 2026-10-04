@@ -115,7 +115,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 |---|---|---|---|---|
 | [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 3/3, 3/3, 3/3 runs Đạt, RED 0/3, 0/3, 3/3 runs Đạt so KB1 and KB2 gave way and KB3 passed as-is, kept as regression; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
 | [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 2/3, 2/3, 3/3 runs Đạt, RED 0/3, 0/3, 0/3 runs Đạt so all three gave way; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
-| [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass after intake refactor (same-model baseline 2/6 pass, 3 partial, 1 fail; n = 1 per case; in-4 rubric corrected after observation to avoid asking what the user already specified; not preregistered under the corrected rubric) | 2026-10-05 |
+| [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 final exact GREEN pass on current skill SHA (same-model baseline 2/6 pass; n = 1 per case; in-4 rubric corrected after earlier observation, not preregistered; interim diagnostics excluded) | 2026-10-05 |
 | [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6) | 2026-10-05 |
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
 | [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |

@@ -4,8 +4,8 @@
 > lịch sử — plan, PROGRESS, commit, memory — thì tra bảng ở mục 1–3 để biết thứ tương ứng trong repo này. Tên
 > mới **không có tiền tố**; nhiều skill cũ gộp vào một skill mới; vài skill cũ không còn là skill (thành mẫu,
 > công cụ, thẻ vai) hoặc bị bỏ. Nguồn và SHA của từng skill mới: [UPSTREAM.md](../UPSTREAM.md). (2) Dự án đang dùng
-> bản `0.1`/`0.2` lên `0.3.0`: hồ sơ cũ **vẫn hợp lệ**, không phải sửa gì để `check` xanh; mục 4 liệt kê thứ
-> mới có thể bật và chỗ `check` bắt chặt hơn.
+> bản `0.1`/`0.2` lên `0.3.0`: các hình hồ sơ cũ được giữ tương thích; những luật kiểm chặt hơn có thể yêu cầu
+> sửa nội dung (ví dụ nhãn thang mức cũ), nên chạy `check` sau nâng cấp. Mục 4 liệt kê từng trường hợp.
 
 Ký hiệu cột "Kiểu": **đổi tên** = một-một · **gộp** = nhiều cũ vào một mới · **thành phần khác** = không còn
 là skill · **bỏ** = không mang vào · **ra ngoài** = chuyển sang bộ khác, không thuộc repo này.

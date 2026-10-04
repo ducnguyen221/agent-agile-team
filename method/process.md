@@ -71,10 +71,10 @@ KHI người dùng giao một yêu cầu THÌ Analyst:
    vừa/lớn; cỡ nhỏ trình ngắn ở Cổng 1; cỡ rất nhỏ không có `CQ` chặn — lời giao đã nêu rõ kết quả).
 7. Đi sang bước 2. Không hỏi thêm lượt nào nữa cho tới Cổng 1.
 
-**Khi nào bỏ lượt trao đổi:** người dùng đã nói rõ "không cần sprint" / "làm luôn", hoặc việc là làm thẳng
-**không mơ hồ** (1–2 thao tác, kết quả rõ, không chạm vùng loại trừ của [sizing.md](sizing.md) mục 1). Khi đó làm
-ngay và báo. Lời giao đã nêu đủ mục tiêu, định nghĩa xong, phạm vi và bậc thì tin trao đổi chỉ còn một câu xác nhận
-— không hỏi lại điều đã có.
+**Khi nào bỏ lượt trao đổi:** người dùng nói rõ "không cần sprint" cho đúng việc, hoặc việc là làm thẳng
+**không mơ hồ** (1–2 thao tác, kết quả rõ, không chạm vùng loại trừ của [sizing.md](sizing.md) mục 1). "Làm luôn"
+chỉ thúc tiến độ, không tự miễn sprint hay mở ngoại lệ cho vùng loại trừ. Đủ điều kiện bỏ lượt trao đổi thì làm
+ngay và báo. Lời giao đủ mục tiêu, định nghĩa xong, phạm vi và bậc thì tin chỉ còn một câu xác nhận — không hỏi lại.
 
 **Lượt trao đổi là một tin, không phải một chuỗi.** Hỏi lẻ từng câu, chờ, hỏi câu nữa ở bước này là lỗi quy
 trình như mọi chỗ khác; ngoại lệ duy nhất là người dùng mở chế độ làm rõ (skill `shaping-spec` mục 3).

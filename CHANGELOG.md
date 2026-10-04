@@ -18,6 +18,13 @@ skill, agent và luật tương thích ngược, dự án cũ không phải sử
   trang giới thiệu được quản lý ở repo riêng, ảnh quy trình PNG và nội dung theo hai luật mới. Gói này không chứa site.
 - **Model thử skill:** máy kiểm chấp nhận tên GPT có phiên bản, giữ chặn placeholder; test hồi quy GPT thấy đỏ trước
   sửa và xanh sau sửa. Ba manifest đồng bộ `0.3.0`; không thay ngưỡng coverage hay config kiểm thử.
+- **Sửa sau review phát hành:** "làm luôn" chỉ thúc tiến độ, không miễn sprint/vùng rủi ro; cần người dùng nói rõ
+  "không cần sprint" cho đúng việc hoặc việc đủ điều kiện làm thẳng. Thu hẹp cam kết nâng cấp thành tương thích hình
+  hồ sơ, nêu nội dung có thể cần sửa. Siết hình ID GPT: một major 1–99, minor 0–99 tuỳ chọn, đúng một family;
+  đây là kiểm định dạng metadata, không thay bằng chứng model thật sự chạy hay khoá danh sách phiên bản hiện tại.
+- **Ranh giới đầu vào và tin tiếp nhận:** nhãn `external_input` áp khi thêm/đổi ranh giới nhận và xử lý dữ liệu
+  không tin cậy; trường UI có sẵn không tự tạo nhãn, chưa loại trừ tác động bảo mật vẫn nâng lớn. Tin tiếp nhận phải
+  được viết nguyên văn trong lượt hiện tại; câu hứa "sẽ gửi tin gom" chưa phải sản phẩm tiếp nhận.
 
 - **Bậc việc** (`TK2`): việc **rất nhỏ** một `SPRINT.md` hai phần (Kế hoạch, Kết quả), việc **nhỏ** một `SPRINT.md`
   bốn phần, từ cỡ vừa bốn tài liệu; `init --tiny` và `init --size small`, mẫu `templates/sprint/SPRINT-tiny.md`, luật

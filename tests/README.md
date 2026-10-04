@@ -4,10 +4,11 @@ Chạy: `python -m pytest` từ gốc repo (Python 3.9+ và pytest). Coverage d�
 hình ở `pyproject.toml`): `python -m coverage run -m pytest` rồi `python -m coverage report -m` — cần gói
 `coverage`; cài vào `.venv/` của repo (đã ignore), không cài vào Python chung.
 
-Metadata thử skill chấp nhận tên model Claude và GPT có phiên bản + family `sol` / `astra` / `terra` / `luna`
-(hoặc `gpt-5.5`), kèm chú thích sau tên. Placeholder kể cả sau phiên bản (`gpt-6.1-placeholder`), family giả
-(`gpt-6.1-solx`) và số phiên bản trần chưa được nhận (`gpt-999`) vẫn bị chặn. Đây là kiểm hình tên, không xác
-minh registry hay việc model thật sự chạy; output/ID chủ thể mới là bằng chứng. RED và GREEN dùng cùng model/tier.
+Metadata thử skill chấp nhận tên model Claude và GPT dạng `gpt-major[.minor]-family`: major 1–99, minor
+0–99 tuỳ chọn, không số 0 dẫn đầu, đúng một family `sol` / `astra` / `terra` / `luna`; ngoại lệ `gpt-5.5`.
+Tên có thể kèm chú thích. Placeholder, phiên bản 0/999, ba phần phiên bản và family ghép đều bị chặn.
+Đây là kiểm hình tên, không xác minh registry hay việc model thật sự chạy; test ID tương lai giả lập chỉ
+chứng minh không khoá danh sách version hiện tại. Output/ID chủ thể mới là bằng chứng. RED/GREEN cùng model/tier.
 
 | File | Kiểm gì |
 |---|---|

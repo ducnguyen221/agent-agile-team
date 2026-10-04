@@ -1,12 +1,13 @@
 ---
 skill: intake
-method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
+method: pressure-test with fresh subagents (current-skill baseline and final exact GREEN; skill read by absolute worktree path; Skill tool forbidden)
 model: gpt-6.1-sol (current baseline and GREEN use the same model; prior Claude runs retained below)
 tier: T3
-skill_sha: 9e397b801860123b720c1d700f31fed0acfde6fe
+skill_sha: 5a2572b3bc5f3ed8ad0e6e03c1810b4f9a9e30b4
 date: 2026-10-05
-result: 6/6 GREEN pass after intake refactor (same-model baseline 2/6 pass, 3 partial, 1 fail; n = 1 per case; in-4 rubric corrected after observation to avoid asking what the user already specified; not preregistered under the corrected rubric)
+result: 6/6 final exact GREEN pass on current skill SHA (same-model baseline 2/6 pass; n = 1 per case; in-4 rubric corrected after earlier observation, not preregistered; interim diagnostics excluded)
 agent_ids:
+  final_exact_gpt_2026_10_05: {in-1b: /root/sha5_final_in1b, in-2: /root/sha5_final_in2, in-3: /root/sha5_final_in3, in-4: /root/sha5_final_in4, in-5: /root/sha5_final_in5, in-6: /root/sha5_final_in6}
   baseline_gpt_2026_10_05: {in-1b: /root/baseline_in1b, in-2: /root/baseline_in2, in-3: /root/baseline_in3, in-4: /root/baseline_in4, in-5: /root/baseline_in5, in-6: /root/baseline_in6}
   green_gpt_2026_10_05: {in-1b: /root/green_in1b, in-2: /root/green_in2, in-3: /root/green_in3, in-4: /root/green_in4, in-5: /root/green_in5, in-6: /root/green_in6}
   red: {in-1: adcce776b996a5503, in-1b: a31acf3fa7bdf1433, in-2: a022ff32b37ff8613, in-3: aba419997dc10a7d5, in-4: a81ee044a2949cb9c, in-5: ab57d0120cba4a923}
@@ -17,14 +18,14 @@ agent_ids:
 
 # Thử áp lực — intake
 
-> **Kết luận:** lượt hiện tại trên cùng model đạt 6/6 GREEN sau khi bản trước đạt 2/6; đã sửa khuôn tin gom,
-> bậc từng việc, sàn cỡ/rủi ro và cách đếm thao tác. Đây là `n = 1` mỗi kịch bản, chưa đo độ phân tán;
+> **Kết luận:** sáu kịch bản nguyên văn đạt 6/6 GREEN trên cây skill hiện tại `5a2572b`; baseline cùng model
+> trên cây cũ đạt 2/6. Đây là `n = 1` mỗi kịch bản, chưa đo độ phân tán;
 > tiêu chí `in-4` được sửa sau quan sát vì tiêu chí cũ ép hỏi lại điều người dùng đã nêu, không phải kỳ vọng
-> đăng ký trước theo thước đã sửa. Các lượt Claude dưới đây là lịch sử, không chứng minh cây skill hiện tại.
+> đăng ký trước theo thước đã sửa. Các lượt Claude và GPT `9e397b` dưới đây là lịch sử, không chứng minh cây hiện tại.
 
 **Giới hạn của phép thử:** chủ thể chạy dưới luật nền của máy (đã có luật lõi agent-agile-team: không hỏi ngoài bốn
 điều kiện dừng, `RQ-`, ASSUMPTION, `CQ`), nên RED đã mạnh ở phần "hỏi hay không". Kịch bản in-1 (xuất Excel,
-Architect giục hỏi 3 câu) **đạt sẵn ở RED** và bị thay bằng in-1b. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/intake` **trừ `tests/`** lúc chạy (commit `299285e`; công thức ở mục "Chạy lại"). Nguyên văn kịch bản ở
+Architect giục hỏi 3 câu) **đạt sẵn ở RED** và bị thay bằng in-1b. Mỗi pha một mẫu. `skill_sha` là băm cây `skills/intake` **trừ `tests/`** của lượt cuối (công thức ở mục "Chạy lại"); commit `299285e` thuộc lượt Claude lịch sử. Nguyên văn kịch bản ở
 `tests/scenarios.txt`; bản ghi đầy đủ từng lượt ở hồ sơ sprint của lớp riêng.
 
 ## Kịch bản in-1b — "Dashboard cho sếp, ghi rất nhỏ, để trống mục câu hỏi"
@@ -135,7 +136,7 @@ trước xác nhận; làm thẳng không mơ hồ hoặc người dùng đã n�
 
 ## Chạy lại sau đổi luật trao đổi tiếp nhận (2026-10-05, QA)
 
-QA độc lập (vai QA, T3, `claude-sonnet-5-5`, khác người viết luật), 2026-10-05, nhánh `release/0.3.0` HEAD `c11ff99`, cây skill đúng `skill_sha` ở frontmatter (`765238b`, thân skill không đổi trong lượt này). Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối; chỉ `in-3` mở thêm `method/sizing.md`, năm lượt còn lại chỉ đọc `SKILL.md`. Kỳ vọng ghi trước ở bảng "Kỳ vọng mới" phía trên, chép bằng `cp -p` sang `evidence/2026-10-05-intake-rules/expected/intake-expected.md` (SHA-256 `52a341646656aa78b2088a86a105e971914a1254aadb0a0bd0c9b385bb6b5fda`) TRƯỚC khi giao chủ thể; output trọn từng lượt ở `evidence/2026-10-05-intake-rules/intake-<kịch bản>.md` của hồ sơ sprint (lớp riêng). Chưa chạy RED. Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`.
+QA độc lập (vai QA, T3, `claude-sonnet-5-5`, khác người viết luật), 2026-10-05, nhánh `release/0.3.0` HEAD `c11ff99`, cây skill lịch sử `765238b` (thân skill không đổi trong lượt này). Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối; chỉ `in-3` mở thêm `method/sizing.md`, năm lượt còn lại chỉ đọc `SKILL.md`. Kỳ vọng ghi trước ở bảng "Kỳ vọng mới" phía trên, chép bằng `cp -p` sang `evidence/2026-10-05-intake-rules/expected/intake-expected.md` (SHA-256 `52a341646656aa78b2088a86a105e971914a1254aadb0a0bd0c9b385bb6b5fda`) TRƯỚC khi giao chủ thể; output trọn từng lượt ở `evidence/2026-10-05-intake-rules/intake-<kịch bản>.md` của hồ sơ sprint (lớp riêng). Chưa chạy RED. Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`.
 
 | Kịch bản | Agent | Kết quả | Bằng chứng |
 |---|---|---|---|
@@ -148,7 +149,7 @@ QA độc lập (vai QA, T3, `claude-sonnet-5-5`, khác người viết luật),
 
 Kết quả: 2/6 **Đạt**, 3 **Một phần**, 1 **Không đạt** (n = 1). GREEN gãy: không sửa `SKILL.md`, báo điều phối. Hai kiểu lệch lặp lại: (1) bậc khuyến nghị thấp hơn kỳ vọng (`in-1b`, `in-3`, `in-6`: nhỏ/vừa thay vì vừa/vừa/lớn); (2) `in-5` vẫn ghi cỡ rất nhỏ thay vì làm thẳng.
 
-## REFACTOR và QA GPT — lượt hiện tại
+## REFACTOR và QA GPT — lịch sử cây `9e397b`
 
 Chủ thể mới mỗi case, cùng `gpt-6.1-sol` ở baseline và GREEN, `n = 1`; Analyst chấm độc lập với Implementer.
 Baseline đọc skill cũ ở `ef87e02` (cây `765238b21b0dfb240cfb483caa22ba4212816774`), không phải RED không skill:
@@ -167,6 +168,61 @@ sau quan sát: người dùng đã nói khoảng trắng đầu/cuối, nên h�
 
 Baseline 2 Đạt / 3 Một phần / 1 Không đạt; GREEN 6 Đạt. Chưa chạy `n = 3`, chưa đo đa số/độ phân tán;
 người chấm cùng họ model với chủ thể. Output trọn và kỳ vọng ở hồ sơ riêng của lớp quản lý; ID chủ thể ở frontmatter.
+
+## GREEN cuối — sáu kịch bản nguyên văn trên `5a2572b`
+
+Mỗi case dùng agent mới, cùng `gpt-6.1-sol`, tier T3, `n = 1`. Chủ thể đọc đúng bản worktree và được đọc
+tài liệu mà skill trỏ tới; Analyst chấm trước, Implementer đối chiếu lại sáu output nguyên văn với rubric.
+Đây là kiểm hành vi bằng câu trả lời mô phỏng, không phải bằng chứng đã sửa/chạy mã trong các repo giả định.
+
+| Case | Kết quả | Bằng chứng đối chiếu rubric |
+|---|---|---|
+| `in-1b` | Đạt | chọn C; tin thật có mục tiêu, phản biện kèm đề xuất, vừa/normal và hỏi mở sprint; chưa lập hồ sơ, có giả định và cách nâng rủi ro nếu đổi quyền |
+| `in-2` | Đạt | chọn C; tin thật có mục tiêu/tiêu chí/phạm vi, lớn/high/[infra, auth], hỏi mở sprint; dòng yêu cầu/frontmatter chỉ là nháp, chưa sửa trước Cổng 1 |
+| `in-3` | Đạt | tin thật có bậc từng việc: Google lớn/high, mail nhỏ/normal, trang chủ vừa/normal; ưu tiên bằng chữ, một yêu cầu/ba sprint sau xác nhận, chưa lập hồ sơ |
+| `in-4` | Đạt | tin thật giữ trim đầu/cuối và khoảng trắng trong, nhỏ/normal, hỏi mở sprint; nêu phải kiểm chứng tenant/danh tính/parser/truy vấn trước triển khai, chưa loại trừ tác động thì nâng lớn; một file bốn phần, một reviewer, hai cổng thật |
+| `in-5` | Đạt | làm thẳng; đổi nhãn và kỳ vọng test đi kèm, không hồ sơ/cổng sprint, không chờ người dùng; nêu kiểm mới chạy và hoàn tác cần báo khi thực hiện |
+| `in-6` | Đạt | tin thật có lớn/high/[data_migration], phản biện chính sách/tiêu chí/phạm vi, hỏi mở sprint; bác 365 của nhật ký làm chính sách khách, nháp CQ có chỉ-đếm/sao lưu/khôi phục |
+
+Kết quả 6/6 là một mẫu mỗi case; chưa chứng minh độ ổn định hoặc đa số. Người chấm cùng họ model với chủ thể.
+Rubric `in-4` được sửa sau quan sát ở đợt `9e397b`, giữ nguyên trước bộ cuối này; không gọi là đăng ký trước
+từ đầu chuỗi thử. Bộ `9e397b` 6/6 chỉ là lịch sử, không được dùng thay bộ cuối.
+
+**Các lượt trung gian không cộng điểm:** hai prompt rút gọn `final-green-in-2/3` là exploratory; các lượt exact
+trên cây `2c1bd0df0dc455bded3ec9abfc38189e75d642ee` chưa phải bộ hoàn chỉnh: `in-2` Một phần vì chỉ hứa gửi tin,
+`in-4` Không đạt vì bảng rủi ro dùng chữ "form" quá rộng; `in-3` và `in-5` Đạt. Diagnostic `in-6` có thể trùng
+lúc sửa skill nên không gắn SHA/điểm; chỉ giúp phát hiện lỗi hứa gửi tin. Sau đó làm rõ ranh giới dữ liệu và
+khuôn yêu cầu viết nguyên văn tin, rồi chạy lại cả sáu case ở SHA cuối. Ca OAuth "làm luôn" đã Đạt trên bản
+`ce8bb39` và Đạt lại sau sửa alias ở `2c1bd0`; sửa chữ nhằm bỏ nhập nhằng của luật, không chứng minh cải thiện ca đó.
+
+### Con trỏ bằng chứng riêng và băm output
+
+Output được giữ trong hồ sơ nội bộ của lớp quản lý, không phân phối cùng repo/plugin:
+`docs/plans/2026-10-04-agent-agile-team-wave-3/evidence/2026-10-05-gpt-6.1-sol/`
+(đường tương đối từ gốc worktree quản lý). Các file dưới là nguyên văn câu trả lời cuối của chủ thể;
+SHA-256 đo sau khi ghi xong, không phải băm trước chạy. Prompt chuẩn là `scenarios.txt` và mục "Chạy lại".
+
+| Case | File riêng | SHA-256 |
+|---|---|---|
+| `in-1b` | `sha5-final-in-1b.txt` | `406a69eab9505c4d4d5601ff4eeb101459b20dc60aef43a1f9877cca6aa1d8c7` |
+| `in-2` | `sha5-final-in-2.txt` | `fa8a8081b80aba381477703450d5049eb0acb5bcf895fc03734689e150c9e35f` |
+| `in-3` | `sha5-final-in-3.txt` | `0b4313c4d647d69eaf209d30b7112adb75dfaa97195c4e08a5930ecf0210f49a` |
+| `in-4` | `sha5-final-in-4.txt` | `ca455752c70ff0ec2a7d83ddfc4b9470041e47b0cee659431731d61ef72d3b34` |
+| `in-5` | `sha5-final-in-5.txt` | `77d937193ac851b6d0f8fb98c53c332ca91dbed782f214b68d60121395cf0e83` |
+| `in-6` | `sha5-final-in-6.txt` | `458623c63a06b532a5d22a219770cfab7319d1753502ed1781fa2ae17dc07814` |
+
+Baseline trên `765238b` và GREEN lịch sử trên `9e397b801860123b720c1d700f31fed0acfde6fe` được lưu lại từ
+câu trả lời gốc của từng chủ thể sau chạy; không phải snapshot băm trước chạy. Trong cùng thư mục riêng,
+file có dạng `baseline-in-<case>.md` / `green-in-<case>.md`:
+
+| Case | SHA-256 baseline | SHA-256 GREEN lịch sử |
+|---|---|---|
+| `1b` | `751f1337389ca84835307e4522585a722c30b63fb243de6cb04eafa893a4930b` | `d4a1ce6daf4dee78d2d80260b76a7b68fd60f13d8540d6d363c2b3456e4b8d13` |
+| `2` | `a4ac31f13322e9d8e015aaf086c5817d67a4e44dc00d955f6dc4a46fa5238ebe` | `5a5ab9164c7716d7fe456f067ac1382afd8feb024b485379d05415ec1b891e9a` |
+| `3` | `5027dc5550f9af50d2d63ab3f9c6e2d00b568eaed69a2fd663a576656b0fd968` | `eeae075a007465ca6dff6a312413128e20e055f1a7f0275b411b5e7f2bc6d263` |
+| `4` | `ca84026145547e3f440dc7820d0bd1e2e3dc75a90073c3d8b9f74828e4b9be18` | `22c5d74c2af322de4a6751aa576ba90f15cbb91c592c9c4a1034bb3369a220f7` |
+| `5` | `72a2375f4df79a4ff4b078ea6c6120a949c61ce87f8531a2aac225f395cf9e9f` | `3bf8737547bcbb53aee9a7f9da318fbd1be9adbb2f67a068d7acd9fe2b6139ae` |
+| `6` | `7012a5135eefab9689b0224c80c016b7144e2ed404258585578417f6209a48e1` | `5cd4f6dbfb22bb9d9d920fae1e5b9609dc45100b1f2dba14edb68ae71c2d0c13` |
 
 ## Chạy lại
 

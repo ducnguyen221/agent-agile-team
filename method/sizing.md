@@ -59,13 +59,18 @@ KHI việc chạm **một** trong các vùng sau THÌ ghi nhãn vào `risk_tags`
 |---|---|---|
 | secret, khoá, token, cấu hình xác thực | `secret` | security |
 | xác thực, phân quyền, phiên | `auth` | security |
-| đầu vào từ ngoài (form, API công khai, file tải lên, webhook) | `external_input` | security (+ backend) |
+| thêm điểm nhận dữ liệu không tin cậy, hoặc đổi hợp đồng/kiểm tra bảo mật/giải mã–phân tích/đưa dữ liệu vào thao tác nhạy cảm qua điểm đó (form, API công khai, file tải lên, webhook) | `external_input` | security (+ backend) |
 | API công khai, hợp đồng giữa dịch vụ | `public_api` | backend |
 | hạ tầng, deploy, hook, workflow CI, quyền chạy | `infra` | security (+ backend) |
 | migration dữ liệu, đổi schema, backfill, xoá dữ liệu | `data_migration` | data |
 | file luật của dự án hay của môi trường (quy tắc agent, cấu hình harness) | `rules` | security |
 
 Cấu hình đổi quyền, hook hay workflow thực thi **không được** xếp rất nhỏ dù diff một dòng (và `risk: high` buộc cỡ lớn).
+
+Trường UI có sẵn không tự tạo nhãn `external_input`. Chỉ đổi chữ hoặc chuẩn hoá tìm kiếm cục bộ (trim đầu/cuối)
+có thể giữ `risk: normal` khi có bằng chứng giữ nguyên quyền, tenant/danh tính, kiểm tra bảo mật, parser/schema,
+hợp đồng API và cách truy vấn/thao tác nhạy cảm; cỡ theo hành vi (sửa một luồng có sẵn là nhỏ). Có thay đổi hoặc
+chưa loại trừ tác động lên những ranh giới đó → `external_input`, `risk: high`, `size: large` và review security.
 
 Ba nhãn `rules`, `secret`, `auth` kéo thêm một luật nữa: kiểm định kỹ thuật bắt buộc **hai reviewer độc lập** cùng rubric,
 cả hai Đạt mới Đạt ([roles/verifier/dual-review.md](../roles/verifier/dual-review.md)) — cộng với thẻ chuyên đề security ở bảng trên.
