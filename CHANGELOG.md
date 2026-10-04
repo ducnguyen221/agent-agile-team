@@ -48,6 +48,12 @@ skill, agent và luật tương thích ngược, dự án cũ không phải sử
   (ca đột biến với file ngày 2026-10-01 và 2025-01-01); `result` và `model` theo danh sách trắng; phép kiểm 8-gram nhận mọi
   cách viết, buộc điều kiện "loại stoplist"; luật `check` về nhãn mức kiểu nguồn; fixture `security-audit` đổi sang giá trị giả không khớp mẫu khoá thật; `writing-skills` thống nhất
   một quy ước "sửa lưới" và mục nạp bản worktree.
+- **Thử truy xuất và định tuyến** (`TK13`): 13 skill tham chiếu (`react`, `frontend`, `e2e-testing`, `adr`, `api-design`,
+  `postgres`, `github-ops`, `database-migrations`, `error-handling`, `fastapi`, `python`, `worktrees`, `deployment`) thử truy
+  xuất bằng bộ câu mới do QA độc lập soạn, kỳ vọng ghi trước khi đọc skill, hai lượt: lượt 1 thấy 12/13 skill dưới ngưỡng (chỉ
+  `adr` đạt; không câu nào Không đạt — skill thiếu nội dung, agent không bịa), `references/` được bổ sung có nguồn rồi chạy lại
+  bộ câu mới ở lượt 2; định tuyến 21 câu (12 câu ranh giới, đủ 5 cặp dễ nhầm) đối chiếu danh mục 49 mục; `n = 3` cho 5 skill
+  (`writing-skills`, `closing-sprint`, `bug-triage`, `security-audit`, `web-qa`).
 - **Quy tắc số phiên bản** (`TK15`): `method/conventions.md` mục 4.1 (MAJOR · MINOR · PATCH, bốn điều đi kèm); agent đề xuất
   mức tăng kèm lý do ở Cổng 2, người dùng quyết.
 - **Dấu vết và tài liệu** (`TK14`): `UPSTREAM.md` — khối Đợt 2 thành khối chốt có bảng thành phần đã distill, bảng nguồn theo
@@ -55,6 +61,15 @@ skill, agent và luật tương thích ngược, dự án cũ không phải sử
   `THIRD_PARTY.md` mục 1; số đếm **32 skill, 13 agent** (agent chỉ đọc, riêng `build-fixer` được sửa) ở `README.md`,
   `README.vi.md`, `GUIDE.md`, `agents/README.md`, `skills/README.md`, `hosts/claude/README.md` và mô tả 3 manifest; dòng trỏ
   ở `method/README.md`, `roles/README.md`.
+- **Hai vòng sửa sau review tổng thể** (`fix-1`, `fix-2`): `dual-review` nối vào luồng chính (`process.md`);
+  ngoại lệ bảo mật (phát hiện tin cậy 5–6) vào danh sách chính "cần kiểm" ở cổng
+  review và ở agent; `closing-sprint` so mốc với HEAD sau Cổng 2 là `sha7` của menu, tách nhãn CI không có / chưa chạy; tự
+  kiểm chỉ hợp lệ ở cỡ rất nhỏ — cỡ nhỏ trở lên `qa` trùng nhãn người làm vẫn là Phải sửa dù có khai (`severity.md`,
+  `roles/README.md`, `evidence.md`, `templates/README.md`), và chữ về `check` nói đúng khả năng thật (bắt khi không khai, hoặc
+  khai mà `verdict: pass`); `check` không in traceback khi `.agile.json` sai hình; `description` của `closing-sprint` và
+  `database-migrations` viết lại phòng sạch (đo 8-gram 0 hai mốc, sau khi loại stoplist cụm chung); `adr` điểm 3 chỉ cho ADR
+  lúc PLAN, `preflight.md` ô lớn × `high` thêm reviewer kỹ thuật thứ hai; `docs-sync` chỉ sửa thân PR sau khi người dùng
+  chọn push + PR.
 - Phiên bản các manifest (`.claude-plugin`, `.codex-plugin`, `marketplace.json`) lên `0.3.0-dev`.
 
 ## 0.2.0-dev

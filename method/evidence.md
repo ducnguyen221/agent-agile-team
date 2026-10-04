@@ -92,8 +92,8 @@ gật). Archive hồ sơ không có nghĩa đã kiểm trên production.
   minh hồ sơ **nhất quán**, không chứng minh danh tính — trách nhiệm điều phối là giao kiểm định cho agent
   khác thật.
 - `VR` do QA chạy chỉ tính là độc lập khi nhãn `qa` khác nhãn `implementer`/`architect` của cùng sản
-  phẩm. Trùng nhãn → mỗi `VR` ghi "tự kiểm, chưa độc lập"; kết luận của sprint tối đa **Đạt có điều
-  kiện** cho tới khi agent khác chạy lại.
+  phẩm. Trùng nhãn ở việc cỡ **rất nhỏ** → mỗi `VR` ghi "tự kiểm, chưa độc lập"; kết luận của sprint tối đa **Đạt có điều
+  kiện** cho tới khi agent khác chạy lại. Cỡ nhỏ trở lên không có tự kiểm: trùng nhãn vẫn là Phải sửa dù `VR` có khai.
 
 ## 8. Cổng giao hàng — kiểm cơ học trước khi trình Cổng 2
 
