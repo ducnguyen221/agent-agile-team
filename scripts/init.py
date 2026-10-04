@@ -5,12 +5,14 @@ Cách chạy:
     python scripts/init.py <gốc-dự-án>                    # chạy thử: in thao tác, không ghi gì
     python scripts/init.py <gốc-dự-án> --apply            # ghi thật; file có sẵn không bao giờ bị ghi đè
     python scripts/init.py <gốc-dự-án> --apply --sprint <slug> (--title "<mục tiêu>" | --title-file <file>)
-        [--tiny] [--size S] [--risk normal|high] [--risk-tags a,b] [--request RQ-NNN] [--feature FS-NNN]
+        [--tiny | --size tiny|small|medium|large] [--risk normal|high] [--risk-tags a,b] [--request RQ-NNN] [--feature FS-NNN]
         [--date YYYY-MM-DD]
 
 Sprint mới lấy mã từ `next_id` của SPRINTS, đặt lại trạng thái (`status: drafting` cho PROGRESS/SPRINT, cổng
 và `verdict` về pending/null, `review_round: 0`, mọi vai về nhãn `pending`) rồi ghi một dòng Timeline vào
 SPRINTS (xoá comment dòng ví dụ của mẫu) và tăng `next_id`. Chạy lại cùng `slug` không đổi gì.
+Số file theo cỡ (method/sizing.md): `--tiny` hoặc `--size tiny` → một `SPRINT.md` hai phần "Kế hoạch" / "Kết quả";
+`--size small` → một `SPRINT.md` bốn phần SPEC · PLAN · PROGRESS · REPORT; `medium` (mặc định) và `large` → bốn file.
 
 Tiêu đề có dấu: `--title-file` đọc UTF-8 từ file, không qua shell. Tiêu đề có U+FFFD hoặc `?` kẹp giữa hai chữ
 → cảnh báo (shell có thể đã làm mất dấu). Dựng sprint khi `AGENT_AGILE_TIERS` chưa đặt hoặc trỏ file không có →
@@ -36,6 +38,7 @@ SLUG = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 LEDGERS = (("requests", "REQUESTS.md", "RQ", "request"), ("sprints", "SPRINTS.md", "SPR", "sprint"),
            ("specs", "SPECS.md", "FS", "feature"))
 SPRINT_FILES = ("SPEC", "PLAN", "PROGRESS", "REPORT")
+ONE_FILE_TEMPLATE = {"tiny": "SPRINT-tiny", "small": "SPRINT"}  # cỡ → mẫu của `SPRINT.md` (hai phần / bốn phần)
 STATUS_NEW = {"spec": "draft", "plan": "draft", "progress": "drafting", "report": "draft", "sprint": "drafting"}
 EXAMPLE_COMMENT = "<!-- Ví dụ một dòng"
 SUSPECT_TITLE = re.compile(r"\ufffd|\w\?\w")  # ký tự thay thế, hoặc "?" kẹp giữa hai chữ ("c?ch")
@@ -200,9 +203,13 @@ def plan_sprint(root: Path, cfg: dict, args, plan: Plan) -> None:
         "title": yaml_str(args.title), "created": args.date, "updated": args.date,
         "size": args.size, "risk": args.risk, "risk_tags": yaml_value(args.risk_tags), **RESET,
     }
-    for name in (("SPRINT",) if args.tiny else SPRINT_FILES):
+    if args.size in ONE_FILE_TEMPLATE:  # rất nhỏ / nhỏ: một file SPRINT.md, mẫu theo bậc
+        files = ((ONE_FILE_TEMPLATE[args.size], "SPRINT"),)
+    else:
+        files = tuple((n, n) for n in SPRINT_FILES)
+    for tmpl, name in files:
         doc = name.lower()
-        text = set_keys(template(f"sprint/{name}.md"), {**values, "id": f"{sprint_id}-{doc}", "status": STATUS_NEW[doc]})
+        text = set_keys(template(f"sprint/{tmpl}.md"), {**values, "id": f"{sprint_id}-{doc}", "status": STATUS_NEW[doc]})
         text = reset_roles(text).replace("# Tên mục tiêu sprint —", f"# {args.title} —", 1)
         plan.create(folder / f"{name}.md", text)
 
@@ -263,6 +270,8 @@ def validate(args) -> None:
         print(f"cảnh báo: --title {args.title!r} có '?' giữa hai chữ hoặc ký tự thay thế — shell có thể đã làm mất dấu. "
               "Dùng --title-file <file UTF-8>, hoặc chạy `python -X utf8 scripts/init.py …` từ PowerShell.",
               file=sys.stderr)
+    if args.size == "tiny":
+        args.tiny = True  # `--size tiny` và `--tiny` là một
     if args.tiny:
         if args.size not in (None, "tiny"):
             raise InputError("--tiny không đi cùng --size khác tiny")
@@ -298,8 +307,9 @@ def main(argv=None, env=None) -> int:
     parser.add_argument("--sprint", metavar="SLUG", help="tạo khung một sprint mới")
     parser.add_argument("--title", help="mục tiêu sprint")
     parser.add_argument("--title-file", help="đọc mục tiêu sprint từ file UTF-8 (không qua shell)")
-    parser.add_argument("--tiny", action="store_true", help="việc rất nhỏ: một file SPRINT.md")
-    parser.add_argument("--size", choices=["tiny", "small", "medium", "large"])
+    parser.add_argument("--tiny", action="store_true", help="việc rất nhỏ: một file SPRINT.md hai phần Kế hoạch / Kết quả (= --size tiny)")
+    parser.add_argument("--size", choices=["tiny", "small", "medium", "large"],
+                        help="cỡ việc (mặc định medium): tiny/small một file SPRINT.md, medium/large bốn file")
     parser.add_argument("--risk", choices=["normal", "high"], default="normal")
     parser.add_argument("--risk-tags", help="danh sách nhãn rủi ro, phân cách bằng dấu phẩy")
     parser.add_argument("--request", help="RQ-NNN của yêu cầu gốc")

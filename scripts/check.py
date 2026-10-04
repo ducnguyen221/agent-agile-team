@@ -37,6 +37,7 @@ RULES: dict[str, tuple[str, str]] = {
     "frontmatter-value": (PHAI, "giá trị khoá sai miền hoặc mâu thuẫn"),
     "doc-unknown": (GHI, "khoá `doc` có nhưng không thuộc loại đã biết — chỉ áp luật chung"),
     "heading-missing": (PHAI, "thiếu tiêu đề cấp 2 bắt buộc"),
+    "sprint-size-mismatch": (PHAI, "hình tài liệu không khớp `size`: `SPRINT.md` ở cỡ vừa/lớn, hoặc bốn file ở cỡ rất nhỏ"),
     "conclusion-missing": (PHAI, "thiếu khối `> **Kết luận:**` trước tiêu đề cấp 2 đầu tiên"),
     "id-bare-single-letter": (PHAI, "mã một chữ cái + số ngoài dấu code (trừ T1/T2/T3)"),
     "id-unknown-prefix": (PHAI, "định nghĩa mục bằng tiền tố hai chữ cái ngoài bảng mã"),
@@ -109,12 +110,15 @@ REQUIRED_HEADINGS = {
     "progress": ("Bảng trạng thái việc", "Nhật ký", "Vướng mắc", "Vòng kiểm định hiện tại"),
     "report": ("Tóm tắt cho người không chuyên", "Kết quả kiểm định", "Phát hiện của reviewer", "Rủi ro còn lại",
                "Cách dùng, đã đổi gì, cách hoàn tác", "Bài học", "Việc để lại", "Review & Retro", "Cổng 2"),
-    "sprint": ("SPEC", "PLAN", "PROGRESS", "REPORT"),
+    "sprint": ("SPEC", "PLAN", "PROGRESS", "REPORT"),  # bốn phần; cỡ rất nhỏ còn nhận hai phần (SPRINT_TINY_HEADINGS)
     "feature": ("Hành vi hiện hành", "Tiêu chí đang giữ", "Giới hạn đã biết", "Quyết định liên quan", "Lịch sử sprint"),
     "requests": ("Đang mở", "Timeline"),
     "sprints": ("Đang mở", "Timeline"),
     "specs": ("Đang mở", "Danh mục"),
 }
+
+SPRINT_TINY_HEADINGS = ("Kế hoạch", "Kết quả")  # `SPRINT.md` cỡ rất nhỏ: hai phần; bốn phần cũ vẫn hợp lệ
+SPRINT_FOUR = REQUIRED_HEADINGS["sprint"]
 
 CODE = re.compile(r"(?<![\w/\-])([A-Z]{2})([0-9]+(?:\.[0-9]+)*)(?![\w\-])")
 CODE_AT_START = re.compile(r"([A-Z]{2})([0-9]+(?:\.[0-9]+)*)(?![\w\-])")
@@ -322,6 +326,7 @@ class Engine:
     def __init__(self):
         self.cache: dict = {}
         self.configs: dict = {}
+        self.size_flagged: set = set()  # thư mục sprint bốn file đã báo `sprint-size-mismatch` (một lần mỗi thư mục)
         self.report = Report()
 
     def doc(self, path: Path) -> Doc | None:
@@ -354,6 +359,7 @@ class Engine:
         if doc.kind is None or doc.fm is None:
             return
         self.frontmatter_rules(doc)
+        self.size_rules(doc)
         self.heading_rules(doc)
         self.id_rules(doc)
         self.lead_rule(doc)
@@ -538,6 +544,33 @@ class Engine:
         if doc.kind == "sprint" and status == "done" and data.get("gate_2") in (None, "pending"):
             self.add(doc.path, doc.key_line("status"), "gate-invalid", "status: done nhưng gate_2 chưa có kết luận")
 
+    # -- hình tài liệu theo cỡ --
+
+    def size_rules(self, doc: Doc) -> None:
+        """`size × doc`: `SPRINT.md` chỉ ở cỡ rất nhỏ/nhỏ; bốn file chỉ từ cỡ nhỏ trở lên. Thiếu/sai `size` đã có luật khác."""
+        size = doc.data.get("size")
+        if not isinstance(size, str):
+            return
+        if doc.kind == "sprint" and size in ("medium", "large"):
+            self.add(doc.path, doc.key_line("size"), "sprint-size-mismatch",
+                     f"SPRINT.md ở cỡ {size} — cỡ vừa/lớn dùng bốn file SPEC · PLAN · PROGRESS · REPORT (method/sizing.md)")
+        elif doc.kind in ("spec", "plan", "progress", "report") and size == "tiny":
+            folder = doc.path.resolve().parent
+            if folder not in self.size_flagged:
+                self.size_flagged.add(folder)
+                self.add(doc.path, doc.key_line("size"), "sprint-size-mismatch",
+                         "cỡ rất nhỏ dùng một file SPRINT.md, không dựng bốn file (method/sizing.md); nâng cỡ lên nhỏ nếu giữ bốn file")
+
+    def required_headings(self, doc: Doc, headings: list) -> tuple:
+        """Tiêu đề bắt buộc; `SPRINT.md` cỡ rất nhỏ (hoặc cỡ chưa rõ) nhận hai phần "Kế hoạch" · "Kết quả" hoặc bốn phần cũ."""
+        if doc.kind != "sprint":
+            return REQUIRED_HEADINGS[doc.kind]
+        size = doc.data.get("size")
+        if size in ("small", "medium", "large"):
+            return SPRINT_FOUR
+        four_part = any(w.casefold() in h for w in SPRINT_FOUR[:3] for h in headings)
+        return SPRINT_FOUR if four_part else SPRINT_TINY_HEADINGS
+
     # -- tiêu đề --
 
     def heading_rules(self, doc: Doc) -> None:
@@ -548,7 +581,7 @@ class Engine:
             if line.startswith("## "):
                 first_h2 = min(first_h2, idx)
                 headings.append(NUMBERING.sub("", doc.raw[idx][3:].strip()).casefold())
-        for phrase in REQUIRED_HEADINGS[doc.kind]:
+        for phrase in self.required_headings(doc, headings):
             if not any(phrase.casefold() in h for h in headings):
                 self.add(doc.path, h1, "heading-missing", f"thiếu tiêu đề cấp 2 chứa '{phrase}'")
         if doc.kind == "spec" and doc.data.get("size") in ("medium", "large") and not any("truy vết" in h for h in headings):
