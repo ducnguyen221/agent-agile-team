@@ -172,6 +172,47 @@ Chọn: (1) làm tiếp — bao nhiêu vòng nữa? (2) dừng & bàn giao — p
 Người dùng chọn **làm tiếp** (ghi số vòng thêm) hoặc **dừng & bàn giao** (sang bước 5, phần còn mở
 thành `CO`). Đây là mốc hỏi hợp lệ thứ ba ngoài hai cổng và bốn điều kiện dừng.
 
+### 6.1 Thiết kế vòng lặp — khi giao agent chạy lặp
+
+Vòng 3 ↔ 4 ở trên là một vòng lặp có người canh. Mục này áp khi sprint giao cho agent một vòng **tự chạy lặp**: "sửa tới
+khi test xanh", canh CI cho tới khi xanh, một việc định kỳ. Nền: máy đo được "còn cách đích bao xa" và mài về
+không; **đích có đúng không, có nên đổi hay dừng** là phán đoán của người, vì máy không đứng ra ngoài vòng để nghi ngờ
+đích của nó. Giao phán đoán, nghiệm thu hay công tắc cuối cho vòng là bỏ phản hồi bậc cao — nó chạy nhanh và mạnh tới
+một đích chưa ai hỏi.
+
+1. **Có đáng dựng vòng không — thiếu một điều kiện là không dựng.** Việc lặp lại đủ thường để bù công dựng · kiểm
+   được bằng máy · ngân sách token chịu nổi · agent có công cụ thật sự chạy và thấy kết quả. Việc làm một lần thì
+   làm tay.
+2. **Đích máy quyết được có/không.** "Làm cho tốt" không phải đích. Viết đích kèm **điều cấm** ("không xoá hay làm yếu
+   test, không hạ coverage") — chỉ có tiêu chí xong mà không có điều cấm là giấy phép gian lận (đích bị lách khi nó
+   thành thước đo). Ưu tiên đối chiếu với **sự thật bên ngoài** (mẫu vàng, tổng nguồn, số của hệ khác) hơn là khẳng
+   định của chính mã. Phép thử: đọc đích cho người ngoài lĩnh vực — họ chạy một lệnh và biết xong chưa không?
+3. **Ba vai: lập kế hoạch · làm · chấm.** Người chấm **độc lập** với người làm (khớp luật "người làm không tự
+   chấm"), chấm bằng quy tắc xác định (test, lệnh đối chiếu, kiểm kiểu), không bằng "trông ổn". Người làm **không được
+   sửa tiêu chí nghiệm thu** để qua: tiêu chí đổi là đổi `SC` và là điều kiện dừng (d) ở mục 5.
+4. **Giảm chấn.** Trần số vòng và điểm dừng cứng; hết trần thì báo người (mục 6: khuyến nghị 3 vòng). Phản hồi âm không
+   giảm chấn thì dao động, đốt token tại chỗ.
+5. **Làm hết các câu hỏi trước khi chạy.** Agent chạy lặp sẽ không dừng giữa đêm để hỏi; nó chạy tới cùng với đáp án
+   đoán. Mọi điều chưa rõ gom thành `CQ` và hỏi một lần ở Cổng 1 (mục 3).
+6. **Đưa lên từng nấc.** Chạy tay một lần (buộc phải nói rõ người chấm quyết thế nào) → đóng gói thành quy trình hoặc
+   subagent → mới tới chạy tự động theo lịch.
+
+**Rà một vòng trước khi cho chạy — trúng một dòng là gửi trả:**
+
+| Cách hỏng | Câu hỏi rà | Thuốc |
+|---|---|---|
+| Đích là câu đúng nhưng chung chung → quay vô tận | đích có máy quyết được không? | thay bằng điều kiện kết quả quyết được |
+| "Kiểm" viết thành "xem có ổn không" → agent tự nói ổn rồi dừng | người chấm có là bị cáo? chấm bằng "trông đúng" hay quy tắc xác định? | đối chiếu + mã thoát + người chấm độc lập |
+| Chỉ chặn bằng "mọi test xanh" → agent xoá test | có điều cấm đi cùng tiêu chí xong không? | tiêu chí xong **cộng** điều cấm |
+| Trông chờ agent hỏi giữa chừng | có chỗ nào "đợi chạy tới đó mới hỏi"? | hỏi hết trước khi chạy |
+| Tài liệu nền phình và cũ → vòng càng nhanh càng sai | tài liệu agent dựa vào còn mới không? ai giữ? | giữ tài liệu ngắn, rà định kỳ |
+
+**Ba vạch đỏ — vi phạm một là không được tự chạy:** (1) **phán đoán ở lại với người** — ô "xong" và nghiệm thu do người
+bật, vòng là thợ, không phải người nghiệm thu; (2) **trách nhiệm không chuyển** — thứ mà sai là không gánh nổi
+(gộp nhầm nhánh chính, phát hành nhầm, chuyển nhầm tiền) thì không giao quyền tự động, khớp điều kiện dừng ở mục 5;
+(3) vòng càng "tự cải tiến, tự viết lại luật của mình" thì người duyệt phải càng **chặt**, không lỏng — máy nhanh quá
+để chặn sau, nên phán đoán của người nằm **trước** hành động như một cổng cứng, không phải miếng vá sau.
+
 ## 7. Bước 5 — REPORT và Cổng 2
 
 KHI kiểm định không còn Chặn/Phải sửa, hoặc người dùng chọn dừng, THÌ Analyst viết **REPORT** theo
