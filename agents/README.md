@@ -1,6 +1,7 @@
 # agents/
 
-Agent chuyên đề, mỗi agent một file `<tên>.md`. Agent **chỉ đọc** (không sửa code, không chạy lệnh ghi), riêng
+Agent chuyên đề, mỗi agent một file `<tên>.md`. Agent **chỉ đọc** (không sửa code, không chạy lệnh ghi; cây làm việc "sạch" = `git status --short` rỗng, và khi chạy kiểm
+thì dùng cờ không ghi cache nếu có, như `-p no:cacheprovider`, `PYTHONDONTWRITEBYTECODE=1`), riêng
 `build-fixer` được sửa file (T2, vai Implementer, chỉ sửa đúng chỗ lỗi build đòi). Reviewer, analyzer và
 `code-explorer` là agent **khác** người làm, được Tech Reviewer (hoặc Analyst, Architect với `code-explorer`) kéo
 theo trigger (skill `code-review`, thẻ `roles/verifier/`). Frontmatter không ghi `model:` — tier ghi trong thân
