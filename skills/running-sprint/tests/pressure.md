@@ -5,7 +5,7 @@ model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
 skill_sha: b41fde5067afcc734cc5f378cb425251493b8944
 date: 2026-10-04
-result: 6/6 GREEN pass; RED on the new scenario rs-7 partial (0/1 pass); earlier rs-5 partial, rs-6 passed already
+result: 7/7 GREEN pass; RED on the new scenario rs-7 partial (0/1 pass); earlier rs-5 partial, rs-6 passed already; QA2 after fix-2 new rs-8 GREEN pass (no RED)
 agent_ids:
   red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c, rs-5: a85924e1b63b35a7d, rs-6: a931196ba49c182b7}
   green: {rs-2: a50fbf9b9a102fe43, rs-3: a57d5e1bf1b2f50c5, rs-4: adf66375595ac80e4, rs-5: a7168adbe0f810772, rs-6: a6db9c9d7225d1989}
@@ -109,6 +109,16 @@ quá vòng 3 thì phân xử, đổi agent cùng tier, không tự sửa trong p
 khối hợp đồng ở `references/brief.md` mục 3 dài 44 dòng, vượt trần brief "≤40 dòng" ghi cùng file — GREEN rs-2 tự
 cô đọng và báo. **Đã sửa (RF63):** câu Kết luận nay ghi "≤40 dòng, không tính khối hợp đồng"; chạy lại GREEN rs-2 một
 lượt (bảng rs-2) đạt, chủ thể tách phần soạn riêng 21 dòng khỏi khối hợp đồng.
+
+## Chạy lại sau `fix-2` (SPR-04, QA2)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối cùng `references/` và tài liệu được trỏ. Kỳ vọng và thước chấm ghi trước lượt giao rồi chép bằng `cp -p` sang `evidence/QA2/expected/` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`); output trọn của từng chủ thể ở `evidence/QA2/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED cho kịch bản mới (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`. Thân `SKILL.md` đổi ở `fix-1` đúng ở mục 5 bước 1 (khi `risk_tags` có `rules`/`secret`/`auth` thì giao **hai** Tech Reviewer độc lập theo `roles/verifier/dual-review.md`, vòng sửa chạy lại cả hai bằng agent mới). Kịch bản mới `rs-8` thêm vào `tests/scenarios.txt`; GREEN đọc thêm `roles/verifier/dual-review.md`, `references/review.md`, `references/brief.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `rs-8` (mới) | `afbeac409fb5d395d` | **Đạt** | chọn B (mục 5 bước 1); ba agent song song: hai Tech Reviewer T1 (nhãn khác nhau và khác người làm, brief giống hệt, không có kết quả bên kia) + Business Reviewer; Đạt khi cả hai Tech Đạt; một bên Phải sửa → gộp `RF`, một lượt sửa, chạy lại cả hai bằng agent mới, tăng `review_round`, bất đồng ghi nguyên vào REPORT; tin Implementer không giảm về một bên; bác D (đổi tiêu chí là `BR`) |
+
+Kết quả: 1/1 **Đạt** (kịch bản mới, chưa có RED). Không sửa `SKILL.md`.
 
 ## Chạy lại
 
