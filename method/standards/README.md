@@ -41,10 +41,10 @@ Cột "Luật ngắn" là câu của chuẩn; "Mẫu và lý do" là nơi skill 
 | `python.md` mục Bảo mật | `skills/security-review` | secret từ môi trường; quét bằng bộ luật bảo mật của `ruff` |
 | `typescript.md` | `skills/error-handling` (`references/typescript-patterns.md`) | lỗi có kiểu, giữ nguyên nhân, schema ở biên |
 | `typescript.md`, `web.md` mục Kiểm thử | `skills/web-qa` | Playwright cho luồng trọng yếu; thu bằng chứng ở skill |
-| `react.md`, `web.md` | chưa có skill React hay frontend trong repo; dòng trỏ thêm khi skill vào repo | — |
+| `react.md`, `web.md` | `skills/react` (component, hook, test), `skills/frontend` (build, tải trang), `skills/e2e-testing` (kiểm trình duyệt) | component hàm, state dẫn xuất tính khi render, `key` ổn định, RTL + MSW, `dangerouslySetInnerHTML` là Chặn, `VITE_*`/`NEXT_PUBLIC_*` là biến công khai |
 | `common/coding-style.md` | `skills/error-handling`, `skills/code-review` | không nuốt lỗi; kiểm đầu vào ở biên |
 | `common/testing.md` | `skills/tdd`, `skills/debugging`, `skills/verify-before-done` | một vòng đỏ → xanh → dọn; không sửa cấu hình kiểm; 80 % code mới/sửa |
-| `common/security.md` | `skills/security-review`, `skills/security-audit` | cùng danh mục chín mục; lỗ hổng là mức Chặn |
+| `common/security.md` | `skills/security-review`, `skills/security-audit` | chuẩn có tám mục kiểm trước commit; skill có chín mục (3.1–3.9) — upload, lệnh hệ thống/template, CORS và dependency chỉ nằm ở skill; lỗ hổng là mức Chặn |
 | `common/git-workflow.md` | `skills/github-ops`, `skills/closing-sprint`, `skills/worktrees` | push và PR chỉ sau Cổng 2 và khi người dùng gật |
 | `common/code-review.md` | `skills/code-review`, `method/severity.md` | bốn mức và ba kết luận; reviewer khác người làm |
 | `common/development-workflow.md` | `skills/running-sprint`, `skills/writing-plan`, `method/process.md` | sáu bước và hai cổng không bị bỏ |

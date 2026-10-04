@@ -118,7 +118,10 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
 - **Độc lập kiểm định:** file có `VR` (REPORT, SPRINT) thì nhãn `qa` phải khác nhãn `implementer` và
   `architect`. Trùng nhãn → Phải sửa, trừ khi dòng `VR` ghi rõ "tự kiểm, chưa độc lập"; khi đó `verdict`
   tối đa `conditional_pass`.
-- Phần tử thứ ba `"note"` ghi lý do khi chủ sản phẩm chỉ định model khác tier mặc định cho lượt đó.
+- Phần tử thứ ba `"note"` là chuỗi tự do, ghi theo tiền tố để một chuỗi chứa được nhiều việc: `model: <lý do>` khi chủ
+  sản phẩm chỉ định model khác tier mặc định cho lượt đó; `reviewer 2: <nhãn agent>` cho reviewer thứ hai của
+  `dual-review` (ví dụ `reviewer 2: agent-b; model: chủ sản phẩm chọn model X`). Máy không so nhãn trong `note` với
+  vai thực thi — người điều phối tự bảo đảm reviewer thứ hai khác người làm.
 
 ## 4. Tiêu đề bắt buộc
 

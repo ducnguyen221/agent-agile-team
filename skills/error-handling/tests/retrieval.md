@@ -25,6 +25,8 @@ mtime ở `expected/error-handling-expected.md` trong `round2/` của hồ sơ s
 dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng. Chủ thể được dặn nói thẳng khi skill không có phần câu hỏi cần,
 không dùng kiến thức ngoài.
 
+**Giới hạn của lượt này:** người viết nội dung bổ sung cũng là người chấm (một agent giữ cả hai việc; kế hoạch chỉ tách người soạn câu hỏi khỏi người chấm), nên điểm số không độc lập hoàn toàn. Ở skill này điều phối còn đã thấy bộ câu mới **trước khi** viết nội dung bổ sung (tự khai: nội dung chỉ nhắm các chỗ thiếu của lượt 1, không nhắm câu mới).
+
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
 | 1 | Job nhập danh sách khách hàng từ file CSV có 50.000 dòng, mỗi lần chạy khoảng 400 dòng sai (số điện thoại thiếu số, mã chi nhánh không tồn tại). Hiện tại dòng sai đầu tiên ném exception làm hỏng cả job và rollback hết, nên ban vận hành phải sửa tay file rồi chạy lại từ đầu, mất cả buổi sáng. Một người khác đề xuất bắt hết lỗi từng dòng rồi bỏ qua cho chạy tiếp. Nên thiết kế thế nào để vừa không mất 49.600 dòng đúng, vừa không nuốt lỗi, người vận hành nhận được báo cáo dòng nào sai vì sao, và khi nào thì job nên dừng hẳn thay vì chạy tiếp? | `SKILL.md` › 1, › 2; `references/retry-and-user-messages.md` › 6 | `references/timeouts-validation-and-long-tasks.md` › 3, › 2; `SKILL.md` › 1; `references/retry-and-user-messages.md` › 6 | Một phần (có nguyên tắc không nuốt, `details` theo trường, `failed` có mã, hàng chờ lỗi; không có xử lý lô theo dòng, ngưỡng dừng hẳn) |

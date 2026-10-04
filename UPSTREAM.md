@@ -52,7 +52,7 @@ khỏi đánh giá lại).
 
 ### Tài liệu web (không có commit)
 
-Bảng dưới có 7 nguồn **tài liệu web** — không có SHA, nên cột kiểm ghi ngày đọc gần nhất.
+Bảng dưới có 9 nhóm nguồn **tài liệu web** — không có SHA, nên cột kiểm ghi ngày đọc gần nhất.
 
 | Nguồn | Vai trò | Nhận nội dung | Đọc gần nhất | Kiểm |
 |---|---|---|---|---|
@@ -63,6 +63,8 @@ Bảng dưới có 7 nguồn **tài liệu web** — không có SHA, nên cột 
 | MoSCoW | ý | mức ưu tiên viết bằng chữ trong mẫu SPEC, `id-convention` | 2026-10-01 | không |
 | Nguồn văn phong (BLUF, Minto/SCQ, plain language, Google dev style, Diátaxis, Microsoft style, NN/g) | ý | `response-style` | 2026-10-01 | khi sửa `response-style` |
 | Tài liệu Anthropic (hướng dẫn prompting, context engineering, Claude Code output styles) | ý, chỉ trỏ link | `response-style`, `token-economy` | 2026-10-01 | mỗi lượt — hành vi harness đổi theo bản |
+| Tài liệu chính thức của công cụ (`gh`, PostgreSQL, PgBouncer, golang-migrate, Kubernetes, Docker, Trivy, FastAPI, pytest, PyPA, uv, docs.python.org) | ý, không chép | phần bổ sung của skill kỹ thuật ở `TK11`/`TK13` (`github-ops`, `database-migrations`, `deployment`, `fastapi`, `postgres`, `python`, `worktrees`, `react`, `frontend`, `e2e-testing`) | 2026-10-04 | khi sửa reference tương ứng; nguồn ghi ở mục Nguồn từng file |
+| Bài kỹ thuật của nhà cung cấp (Azure Architecture Center, AWS Builders' Library, Amazon SQS) | ý, không chép | `error-handling`, `deployment` | 2026-10-04 | khi sửa reference tương ứng |
 
 Nguồn **private** (không giấy phép) không theo dõi ở đây: lớp riêng của môi trường giữ bản đồ và đường theo
 dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đợt 1 và `THIRD_PARTY.md` mục 3. SPR-02 đã viết lại 7 đích từ danh sách ý lấy từ nguồn private nhưng còn mang một số câu chữ nguồn; `SPR-04` (`TK10`) **viết lại phòng sạch** đúng 7 đích đó: bản cũ gỡ khỏi cây trước, người viết mới chỉ nhận danh sách ý dạng cụm danh từ (máy kiểm từng dòng), không mở bản cũ, để lại nhật ký đường đã đọc; 8-gram so với cả gốc private lẫn bản trước đó bằng 0 trên phần viết lại, sau khi loại stoplist cụm chung. Đích: `bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md` và `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn luật truy vết trong `scripts/README.md`. Các skill đó ghi nguồn ý dạng `concept:` (`source_sha` rỗng, `license: none`); cờ `rewrite_before_public` là `false` và không còn file nào chờ viết lại (`THIRD_PARTY.md` mục 3).

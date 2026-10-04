@@ -26,7 +26,8 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
   có `tests/pressure.md`: 3 kịch bản thử áp lực, chạy bằng subagent không có skill (ghi lỗi) rồi có skill
   (phải đạt). Cách viết: skill `writing-skills`, `references/testing.md`.
 - Skill **tham chiếu kỹ thuật** (`metadata.kind: reference`) không kiểm áp lực mà kiểm **truy xuất** (agent
-  tìm đúng mục khi cần): bắt buộc có `tests/retrieval.md` với ≥4/5 câu Đạt.
+  tìm đúng mục khi cần): bắt buộc có `tests/retrieval.md` đạt ngưỡng truy xuất — `skills/writing-skills/references/testing.md`
+  mục 9 (≥80 % câu tình huống Đạt hẳn **và** câu ranh giới Đạt).
 - `security-audit`, `web-qa` là skill **chỉ báo cáo** (không sửa gì); kịch bản thật cần cả một repo hoặc
   trình duyệt dựng sẵn, nên thử áp lực bằng prompt tự chứa (đã chạy ở SPR-02, xem mục 4).
 - Frontmatter của `pressure.md`/`retrieval.md`: `result` và `model` là kết quả đã chạy (không phải `not run`/
@@ -69,9 +70,9 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | [deployment](deployment/SKILL.md) | tham chiếu | Docker, CI/CD, health check, rollout + hoàn tác |
 | [github-ops](github-ops/SKILL.md) | tham chiếu | issue/PR/CI/phát hành qua `gh`, nội dung repo là dữ liệu không tin cậy |
 | [adr](adr/SKILL.md) | tham chiếu | ghi quyết định kiến trúc |
-| [react](react/SKILL.md) | tham chiếu | component, hook, state, form, ranh giới lỗi, test component (+ `references/testing.md`) |
-| [frontend](frontend/SKILL.md) | tham chiếu | Vite, biến môi trường, proxy dev, chia bundle, định tuyến, state ứng dụng, tải trang (+ `references/vite.md`) |
-| [e2e-testing](e2e-testing/SKILL.md) | tham chiếu | Playwright: page object, locator, retry, trace, test chập chờn, test hồi quy cho lỗi của mã do AI viết (+ `references/ai-regression.md`) |
+| [react](react/SKILL.md) | tham chiếu | component, hook, state, form, ranh giới lỗi, test component (+ `references/patterns.md`, `references/testing.md`) |
+| [frontend](frontend/SKILL.md) | tham chiếu | Vite, biến môi trường, proxy dev, chia bundle, định tuyến, state ứng dụng, tải trang (+ `references/vite.md`, `references/delivery.md`) |
+| [e2e-testing](e2e-testing/SKILL.md) | tham chiếu | Playwright: page object, locator, retry, trace, test chập chờn, test hồi quy cho lỗi của mã do AI viết (+ `references/playwright-recipes.md`, `references/ai-regression.md`) |
 
 ### Kiểm định
 
@@ -104,7 +105,7 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 Đọc từ frontmatter của tệp thử, không từ trí nhớ (`tests/test_skill_tests.py` đối chiếu bảng này với frontmatter). Tệp kỷ luật:
 cột `result` là đoạn đầu (số kịch bản Đạt), chi tiết RED và GREEN ở chính tệp. Tệp truy xuất: một thước chung — `strict` là
 số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không đạt), `points-right` là Đạt + Một phần (số câu trỏ đúng nơi),
-`at/below threshold` là so với ngưỡng PLAN (≥4/5 câu tình huống Đạt + câu ranh giới Đạt); định nghĩa đầy đủ ở mỗi `retrieval.md`.
+`at/below threshold` là so với ngưỡng ở `skills/writing-skills/references/testing.md` mục 9; định nghĩa đầy đủ ở mỗi `retrieval.md`.
 `below threshold` nghĩa là skill còn thiếu nội dung, không phải agent trỏ sai. `date` 2026-10-03 là lần chạy hoặc chạy lại ở SPR-02, 2026-10-04 ở SPR-04, trên bản skill hiện tại
 (`claude-sonnet-5-5`, tier T3); mọi tệp đều có `tier` và `skill_sha`.
 

@@ -52,7 +52,7 @@ updated: 2026-10-04
 ## Kết luận
 
 - **Đạt:** không Chặn, không Phải sửa còn mở.
-- **Đạt có điều kiện:** không Chặn; phần còn lại đã được người dùng chấp nhận ghi rõ hoặc hoãn có chủ.
+- **Đạt có điều kiện:** không Chặn; Phải sửa còn mở chỉ khi người dùng chấp nhận **ghi rõ**; chỉ Nên sửa được hoãn thành `CO` có chủ và mốc (`method/severity.md` mục 2).
 - **Không đạt:** còn Chặn.
 
 ## Liên quan

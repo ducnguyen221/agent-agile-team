@@ -25,6 +25,8 @@ mtime ở `expected/python-expected.md` trong `round2/` của hồ sơ sprint `S
 dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng. Chủ thể được dặn nói thẳng khi skill không có phần câu hỏi cần,
 không dùng kiến thức ngoài.
 
+**Giới hạn của lượt này:** người viết nội dung bổ sung cũng là người chấm (một agent giữ cả hai việc; kế hoạch chỉ tách người soạn câu hỏi khỏi người chấm), nên điểm số không độc lập hoàn toàn.
+
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
 | 1 | Mình có một script ETL nhỏ viết bằng Python, hiện toàn bộ nằm trong một file `etl.py` dài khoảng 900 dòng, có hàm làm đủ việc: đọc CSV, làm sạch, ghi ra Parquet, và vài hàm dài 120-150 dòng với 6-7 tham số truyền lòng vòng. Mình muốn tách thành package có cấu trúc rõ ràng và sửa lại chữ ký hàm cho gọn. Hàm nhiều tham số nên gói thành một object cấu hình bất biến hay dùng keyword-only, và những quy ước đặt tên/docstring/xử lý đường dẫn (dùng `pathlib` thay `os.path`) nào nên theo để người review không phải nhắc lại từng PR? | `references/packaging-and-tooling.md` › 1; `references/type-hints-and-dataclasses.md` › 2; `SKILL.md` › 6, › 2 | `references/packaging-and-tooling.md` › 1-4; `references/data-modeling-and-async-limits.md` › 1; `references/type-hints-and-dataclasses.md` › 3 | Một phần (có bố cục `src/` và dataclass `frozen`; không có quy tắc keyword-only, quy ước đặt tên và docstring) |

@@ -5,6 +5,8 @@
 > dependency hỏng kéo dài; việc chạy qua hàng đợi thì lỗi vĩnh viễn đi vào hàng chờ lỗi. Câu cho người dùng lấy
 > từ **một** bảng tra theo mã lỗi, mã lạ rơi về câu lỗi chung.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): AWS Builders' Library (timeout, retry, backoff), Amazon SQS (hàng chờ lỗi), Azure Architecture Center (retry, ngắt mạch).
+
 ## 1. Retry — Python
 
 ```python

@@ -125,5 +125,5 @@ updated: 2026-10-04
 
 ## Xem thêm
 
-`typescript.md`, `common/`; skill `web-qa`, `security-review`; skill `react` và skill frontend sẽ được thêm
-vào mục lục khi có.
+`typescript.md`, `web.md`, `common/`; skill `react` (component, hook, test), `frontend` (build, tải trang),
+`e2e-testing`, `web-qa`, `security-review`.

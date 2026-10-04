@@ -53,6 +53,12 @@ agent_ids:
 Không có vòng REFACTOR: GREEN đạt cả tám ở lượt đầu. Phần duy nhất RED hở (eh-3) được phủ bởi mục 4 (ngưỡng hồi quy đường
 tới hạn `pass^3 = 100 %`) và mục 7 (tổng cao không bù hồi quy nhóm tới hạn; ghi `RF` đứng trên bảng tổng).
 
+## Sau rà soát tổng thể (fix-1)
+
+Mục 2 của skill đổi: đổi ngưỡng hay kiểu chỉ số sau khi đã thấy số là điều kiện dừng (d) — `BR` và `DN`, không `Phán quyết:`.
+Các kết quả ở trên chạy trên bản cũ của câu đó. **Kịch bản cần chạy lại sau fix-1:** `eh-1`, `eh-3`, `eh-5` (kịch bản chạm
+ngưỡng; chưa chạy); `skill_sha` ghi lại một lần sau khi gộp mọi làn.
+
 ## Chạy lại
 
 Mỗi kịch bản một subagent mới, cùng model và tier, prompt nguyên văn ở `tests/scenarios.txt` (dòng mở đầu mỗi lượt và dòng

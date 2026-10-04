@@ -3,6 +3,8 @@
 > **Kết luận:** tham khảo cho dự án không dùng Alembic. Nguyên tắc ở `SKILL.md` giữ nguyên: schema và dữ
 > liệu tách migration, backfill chia lô, bỏ cột qua hai lần deploy.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): tài liệu golang-migrate (trạng thái dirty, `force`, đánh số phiên bản) và tài liệu Django (migrations).
+
 ## 1. Django
 
 ```bash

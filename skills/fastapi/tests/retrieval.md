@@ -25,6 +25,8 @@ mtime ở `expected/fastapi-expected.md` trong `round2/` của hồ sơ sprint `
 dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng. Chủ thể được dặn nói thẳng khi skill không có phần câu hỏi cần,
 không dùng kiến thức ngoài.
 
+**Giới hạn của lượt này:** người viết nội dung bổ sung cũng là người chấm (một agent giữ cả hai việc; kế hoạch chỉ tách người soạn câu hỏi khỏi người chấm), nên điểm số không độc lập hoàn toàn.
+
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
 | 1 | Endpoint webhook nhận thanh toán của mình ghi nhận đơn bằng một lệnh INSERT rồi trả 200 cho cổng thanh toán. Cổng này gửi lại (retry) cùng một sự kiện tới 3 lần nếu mình trả chậm quá 5 giây, nên đơn bị tạo trùng. Mình còn muốn gửi email xác nhận và đẩy một job sang hệ thống kế toán sau khi đã trả response, và nếu email lỗi thì không được làm hỏng response đã gửi. Trong FastAPI nên tách phần việc "trả lời ngay" và phần việc "làm sau" thế nào, cái nào chạy trong tiến trình web được và cái nào nên đẩy sang worker riêng? | `references/background-and-streaming.md` › 1, › 2, › 3 và `SKILL.md` › 3 (ràng buộc unique, `BackgroundTasks` sau commit, hàng đợi cho việc không được mất) | `references/background-and-streaming.md` › 1-3; `SKILL.md` › 3; `references/routes-errors-openapi-testing.md` › 2 | Đạt (thiếu khoá idempotency theo mã sự kiện riêng của cổng thanh toán) |

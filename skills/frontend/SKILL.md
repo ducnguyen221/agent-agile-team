@@ -18,8 +18,9 @@ rewrite_before_public: false
 > build nên **luôn thử bản build** trước khi giao; tối ưu tải thì **đo trước** (bundle, chunk), rồi tách
 > route bằng `lazy`, rồi mới tới chia chunk tay. State ở tầng ứng dụng tách **state-server** khỏi state giao diện.
 
-ASSUMPTION stack: Vite 5 + React 18 + TypeScript. Nguồn viết cho Vite bản mới (từ v7 dùng Rolldown, khoá cấu
-hình đổi tên: `build.rollupOptions` ↔ `build.rolldownOptions`, bộ nén mặc định đổi từ esbuild sang Oxc): luôn
+ASSUMPTION stack: Vite 5 + React 18 + TypeScript. Nguồn viết cho Vite bản mới (từ **Vite 8** mặc định dùng Rolldown, khoá cấu
+hình đổi tên: `build.rollupOptions` ↔ `build.rolldownOptions`, bộ nén mặc định đổi từ esbuild sang Oxc; Vite 7 vẫn dùng
+Rollup, và trước Vite 8 Rolldown chỉ có ở gói `rolldown-vite` riêng): luôn
 đối chiếu tài liệu **đúng phiên bản của dự án** trước khi chép cấu hình.
 
 ## 1. Ranh giới với `react`
@@ -114,7 +115,7 @@ hình đổi tên: `build.rollupOptions` ↔ `build.rolldownOptions`, bộ nén 
   khi tải route lazy. Vite không giải quyết sẵn. Hai cách giảm nhẹ: giữ file cũ của `dist/assets/` thêm một
   khoảng thời gian; bắt lỗi import động (`vite:preloadError`) và **tải lại trang** một lần. Cả hai chỉ hiệu quả nếu header cache đúng:
   `index.html` `no-cache`, `assets/*` băm `immutable` (chi tiết, mã mẫu: `references/delivery.md` mục 1).
-- Đổi route: đưa focus về vùng nội dung và cập nhật tiêu đề trang (tiếp cận: thẻ `frontend` mục 9).
+- Đổi route: đưa focus về vùng nội dung và cập nhật tiêu đề trang (tiếp cận: `roles/verifier/specialists/frontend.md` mục 9).
 
 ## 9. State ở tầng ứng dụng
 
@@ -137,6 +138,9 @@ Một nguồn sự thật cho mỗi mẩu dữ liệu; Context + `useReducer` đ
 
 Liên quan: `react`, `e2e-testing`, `deployment` (Dockerfile nhiều tầng, máy chủ tĩnh), `security-review`
 (secret trong bundle), `error-handling`.
+
+Chuẩn mã bắt buộc của dự án (hiệu năng tải, bảo mật phía trình duyệt, kiểm thử): `method/standards/web.md`, `react.md`,
+`typescript.md` — chuẩn giữ luật ngắn, skill giữ mẫu; hai bên trái nhau là lỗi tài liệu (`method/standards/README.md`).
 
 ## 11. Danh mục kiểm trước khi giao bản build
 

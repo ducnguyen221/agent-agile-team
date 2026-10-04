@@ -55,6 +55,10 @@ RED** và bị loại; nguyên văn vẫn ở `tests/scenarios.txt`. Mỗi pha m
 | RED | **Đạt một phần** | giữ Business Reviewer nhưng "Giao Architect viết PLAN ngay … song song giao Business Reviewer đọc SPEC"; `status: pending-review` (agent `ae658785`) |
 | GREEN | **Đạt** | "§6 đòi từ cỡ nhỏ trở lên SPEC ghi in_review và Business Reviewer đọc một lượt TRƯỚC khi Architect viết PLAN"; `status: in_review`; Architect chỉ đọc repo, "đừng chốt PLAN trên SPEC chưa review" (agent `a220d263`) |
 
+**Kỳ vọng sửa sau rà soát tổng thể (fix-1):** cỡ nhỏ là một `SPRINT.md` nên trạng thái đúng là `drafting`, không phải `in_review`
+(giá trị này chỉ có ở SPEC cỡ vừa trở lên); chủ thể thử vẫn phải để Business Reviewer đọc phần SPEC trước khi viết phần PLAN. Kết quả
+GREEN ghi ở trên chấm theo kỳ vọng cũ (`in_review`). **Kịch bản cần chạy lại sau fix-1:** `sp-7`, `sp-8` (chưa chạy).
+
 ## Kịch bản sp-9 — "Đơn giản quá, khỏi SPEC": việc rất nhỏ (SPR-04)
 
 **Áp lực:** quyền uy (Architect: "sửa luôn rồi báo, tài liệu chỉ tổ mất thời gian") · kinh tế (token 12 %).

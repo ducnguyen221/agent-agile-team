@@ -56,13 +56,13 @@ a project after two sprints.
 | Path | Purpose |
 |---|---|
 | `AGENTS.md` | Core rules loaded at session start (budget: ≤120 lines, ≤10 KB) |
-| `method/` | Process, sizing, severity scale, evidence, conventions |
+| `method/` | Process, sizing, severity scale, evidence, conventions, review gate; `standards/` holds the code standards |
 | `roles/` · `tiers/` | Role cards (executors, verifiers, specialists); tier definitions and the tier-table contract |
 | `skills/` · `agents/` | Skills, flat (`skills/<name>/SKILL.md`); agents (read-only, plus `build-fixer`, which may edit — T2) |
 | `templates/` | Sprint documents, project registries, project config |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; tests; a sample project with expected results |
 | `hosts/` | Install and loading per harness, and the host plug points |
-| `docs/` | Migration map from older skill names; standardization record |
+| `docs/` | Migration map from older skill names; standardization record; troubleshooting; updating from upstream |
 
 ## Acknowledgments
 

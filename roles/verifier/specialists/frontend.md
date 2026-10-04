@@ -46,7 +46,7 @@ kiện (b)/(c)) · môi trường trình duyệt không dựng được (ghi Ch�
 
 ## 8. Skill dùng
 `web-qa` · `tdd` (phần test tốt) · `react` (component, test component) · `frontend` (build, tải trang) ·
-`e2e-testing` (luồng trình duyệt) · agent `typescript-reviewer`, `react-reviewer` (khi có) · `response-style`
+`e2e-testing` (luồng trình duyệt) · agent `typescript-reviewer`, `react-reviewer` · `response-style`
 · `id-convention`.
 
 ## 9. Mục a11y — WCAG 2.2 mức AA (web)

@@ -4,6 +4,8 @@
 > lên staging, smoke test, rồi production qua môi trường có người duyệt. Health check tách
 > liveness, readiness và chi tiết nội bộ; cấu hình kiểm bằng schema lúc khởi động. Lệnh hoàn tác production chỉ chạy khi người dùng gật.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): tài liệu Trivy (quét image trong pipeline), tài liệu Kubernetes (probe, `terminationGracePeriodSeconds`, `preStop`), twelve-factor (cấu hình theo môi trường).
+
 ## 1. GitHub Actions (pipeline chuẩn)
 
 ```yaml

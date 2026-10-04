@@ -25,6 +25,8 @@ mtime ở `expected/worktrees-expected.md` trong `round2/` của hồ sơ sprint
 dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng. Chủ thể được dặn nói thẳng khi skill không có phần câu hỏi cần,
 không dùng kiến thức ngoài.
 
+**Giới hạn của lượt này:** người viết nội dung bổ sung cũng là người chấm (một agent giữ cả hai việc; kế hoạch chỉ tách người soạn câu hỏi khỏi người chấm), nên điểm số không độc lập hoàn toàn.
+
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
 | 1 | Repo Node của mình có thư mục `.worktrees/` đặt ngay trong thư mục gốc để cho tiện, nhưng từ hôm tạo 3 worktree thì `git status` ở checkout chính liệt kê cả đống thư mục lạ chưa theo dõi. Jest và ESLint cũng quét vào đó nên chạy ra 3 bản test trùng nhau, và lần commit trước suýt `git add .` kéo theo cả worktree con. Đặt thư mục worktree ở đâu cho đúng, và phải kiểm tra gì trước khi tạo cái đầu tiên để chuyện này không lặp lại? | `SKILL.md` › 2 (1b: `git check-ignore`, `.gitignore`, `.git/info/exclude`) | `SKILL.md` › 2 (1b) | Đạt (thiếu cách để Jest và ESLint bỏ qua thư mục: triệu chứng, không phải điều được hỏi) |

@@ -93,9 +93,11 @@ tồn tại mà không ai trỏ → ghi)? Mâu thuẫn sự thật (lệch số 
 
 `git status` trước: không tài liệu nào đổi → "Tài liệu đã đồng bộ", không commit. Có đổi → stage **theo
 tên file** (không `git add -A` / `.` — nhiều phiên agent chạy song song), một commit `docs: sync
-documentation for <SPR->`. Push chỉ khi người dùng gật (menu nhánh). Có PR: thêm/thay mục
-`## Documentation` trong thân PR qua file tạm (`gh pr view --json body -q .body > tmp` → sửa →
-`gh pr edit --body-file tmp` → xoá) — không heredoc shell (PowerShell không parse); không PR → bỏ qua.
+documentation for <SPR->`. Push chỉ khi người dùng gật (menu nhánh). Bước đồng bộ này chỉ **soạn** mục
+`## Documentation` vào file/bản nháp, **không ghi lên PR**. Ghi lên PR chỉ xảy ra sau khi người dùng chọn
+"2. Push + PR" ở menu, trong [closing-sprint SKILL.md](../SKILL.md) mục 4.1 bước 3 (thân PR): khi đó thêm/thay mục
+`## Documentation` qua file tạm (`gh pr view --json body -q .body > tmp` → sửa → `gh pr edit --body-file tmp` →
+xoá) — không heredoc shell (PowerShell không parse); không PR → bỏ qua.
 
 Bảng cuối: mỗi tài liệu một dòng — *Đã cập nhật (gì)* · *Đúng rồi* · *Đánh bóng chữ* · *Cờ lỗi thời (cho
 người)* · *Không bump (người dùng bỏ)* · *Đã bump* · *Không có file* · *Bỏ qua (vì sao)*.

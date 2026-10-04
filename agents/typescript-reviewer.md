@@ -27,7 +27,7 @@ rewrite_before_public: false
   vấn đề · hậu quả · cách sửa · **độ tin cậy N/10**. Không bằng chứng → tối đa Ghi chú. Phân vân giữa hai
   mức → chọn mức nặng hơn và nói vì sao.
 - Được trả **0 phát hiện**; mục **Không đánh giá** bắt buộc, kể cả khi 0 phát hiện. **Ngưỡng báo chính từ
-  7/10**; dưới 7 → mục **Phụ lục — dưới ngưỡng**, một dòng mỗi mục (xem `agents/code-reviewer.md`; thang N/10
+  7/10**; dưới 7 → mục **Phụ lục — dưới ngưỡng**, một dòng mỗi mục; trừ lỗ hổng bảo mật mà nếu đúng sẽ là Chặn — tin cậy 5–6 vẫn vào báo cáo chính, nhãn "cần kiểm" (xem `agents/code-reviewer.md`; thang N/10
   ở `skills/plan-review` mục 6). Không đòi xuất hiện phát hiện để biện minh lần gọi.
 - Kết luận theo `method/severity.md` mục 2.
 

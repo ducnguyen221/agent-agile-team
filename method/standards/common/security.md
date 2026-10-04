@@ -11,7 +11,7 @@ updated: 2026-10-04
 # Bảo mật chung
 
 > **Kết luận:** trước mỗi commit phải qua danh mục kiểm bảo mật ngắn dưới đây; secret không nằm trong code;
-> thấy lỗ hổng thì dừng, đánh giá mức, sửa, xoay vòng khoá lộ. Chạm bí mật hay bảo mật là điều kiện dừng
+> thấy lỗ hổng thì dừng, đánh giá mức, sửa; khoá lộ thì báo để chủ khoá xoay vòng. Chạm bí mật hay bảo mật là điều kiện dừng
 > của luật lõi — ghi một mục chặn (`BR`) rồi hỏi người dùng. Danh mục chi tiết từng mục: skill `security-review`.
 
 ## Danh mục trước mỗi commit
@@ -29,8 +29,9 @@ updated: 2026-10-04
 
 - Không viết secret vào mã nguồn; dùng biến môi trường hay kho secret; repo chỉ có `.env.example`.
 - Kiểm khi khởi động rằng secret bắt buộc đã có, thiếu thì dừng với lỗi rõ.
-- Secret nghi đã lộ (vào diff, log, đầu ra) thì **xoay vòng** ngay và báo người dùng; không lặp lại giá trị
-  trong báo cáo.
+- Secret nghi đã lộ (vào diff, log, đầu ra) thì **dừng**, ghi `BR`, báo người dùng để **chủ khoá** xoay vòng — agent
+  không tự thu hồi hay xoay khoá ở nhà cung cấp; không lặp lại giá trị trong báo cáo; chỉ gỡ khỏi code sau khi khoá đã
+  xoay.
 
 ## Khi thấy vấn đề bảo mật
 
@@ -38,5 +39,5 @@ updated: 2026-10-04
 2. Đánh giá mức theo thang chung (`method/severity.md`); lỗ hổng hay rò rỉ dữ liệu là **Chặn**.
 3. Chạm vùng bảo mật thì nâng việc lên cỡ lớn và chạy lượt bảo mật: skill `security-review` cùng agent
    `security-reviewer`; muốn soát cả repo thì skill `security-audit`.
-4. Sửa mức Chặn trước khi làm tiếp; xoay vòng secret đã lộ.
+4. Sửa mức Chặn trước khi làm tiếp; secret đã lộ thì báo để chủ khoá xoay vòng (mục Quản lý secret).
 5. Rà phần còn lại của code tìm lỗi cùng kiểu.

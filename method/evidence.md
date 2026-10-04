@@ -103,7 +103,8 @@ nhất quán không, một câu "né" có xuất hiện không. Không suy luậ
 tự báo, chỉ tin thứ đo được. Cổng này là **luật văn bản**, không cần hook hay thành phần chạy nền nào.
 
 KHI sắp trình Cổng 2 (và trước khi đánh dấu một `TK` là xong) THÌ người điều phối (hoặc QA) chạy đủ năm kiểm sau, ghi
-kết quả vào PROGRESS:
+kết quả vào PROGRESS. Năm kiểm này **chính là** bước "Chạy" của vòng kiểm sáu pha mỗi `TK`
+([loop.md](../skills/verify-before-done/references/loop.md)), không phải vòng thứ hai:
 
 | Kiểm | Cách kiểm cơ học | Trúng thì |
 |---|---|---|
@@ -112,6 +113,10 @@ kết quả vào PROGRESS:
 | Mốc còn tươi | commit, spec và toolchain hiện tại bằng mốc ghi trong `VR` (mục 3); working tree sạch hoặc diff chưa commit đã ghi | `VR` hết hạn → **Chưa chạy**, chạy lại |
 | Tài nguyên đủ để kiểm | đĩa, bộ nhớ, hạn mức công cụ đủ chạy phép kiểm; không đủ thì phép kiểm không chạy được | `VR` là **Chưa chạy** kèm giới hạn (mục 2), không phải Đạt |
 | Câu né (xem dưới) | tìm theo mẫu chữ trong báo cáo và PROGRESS | người đọc gán **một** mức (Ghi chú hoặc Phải sửa) theo ngữ cảnh; chỉ cảnh báo, không tự chặn |
+
+**Ca hỏng có sẵn ở gốc.** Lệnh kiểm đỏ mà ca hỏng được **chứng minh** có từ gốc (chạy đúng ca đó ở gốc, như
+`closing-sprint` mục 2 bước 4) thì không phải Chặn của sprint này: ghi `CO` kèm dòng `RQ-`, người dùng quyết ở Cổng 2
+có đóng không. "Lỗi có từ trước" nói miệng, không có lần chạy ở gốc, vẫn là câu né (dưới).
 
 **Câu né** là dấu hiệu việc kiểm bị cắt ngắn: "bỏ qua test lần này", "lỗi có từ trước", "để sau", "chắc chạy được", "chỉ
 là cảnh báo", "test chậm nên tắt". Tìm bằng mẫu chữ nên **có thể báo nhầm** — nhầm thì reviewer đọc ngữ cảnh và bỏ

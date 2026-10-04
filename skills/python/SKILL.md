@@ -95,8 +95,8 @@ uv run --with pip-audit pip-audit        # audit lỗ hổng phụ thuộc
 - Cấu hình đầy đủ `pyproject.toml`: `references/packaging-and-tooling.md`. Chuyển từ `requirements.txt`/`pip-tools`
   sang uv, cache uv trong CI, kiểm nhiều phiên bản Python (ma trận CI, `nox`, `tox`):
   `references/uv-migration-and-multiversion-ci.md`.
-- Chuẩn mã Python bắt buộc của dự án (kiểu, lint, định dạng, ngưỡng): `method/standards/python.md` — file này có
-  khi gộp làn chuẩn; chi tiết trong đó thắng skill này khi hai bên khác nhau.
+- Chuẩn mã Python bắt buộc của dự án (kiểu, lint, định dạng, ngưỡng): `method/standards/python.md` — chuẩn giữ luật
+  ngắn, skill giữ mẫu; hai bên trái nhau là lỗi tài liệu (`method/standards/README.md`).
 
 ## 4. Kiểm thử
 

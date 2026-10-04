@@ -25,7 +25,7 @@ rewrite_before_public: false
 |---|---|---|
 | có diff / PR / "xem thay đổi của tôi" / trước commit | **A. Review diff** | mục 2 |
 | không có diff — "tìm lỗi ở X", "sao hỏng" | **B. Săn lỗi** | mục 3 |
-| chạm xác thực · secret · thanh toán · dữ liệu cá nhân · phân quyền · phạm vi nhiều khách · API công khai · migration · hạ tầng | **C. Nâng cấp bảo mật** | mục 4 — bắt buộc, **chồng lên** A hoặc B |
+| chạm xác thực · secret · thanh toán · dữ liệu cá nhân · phân quyền · phạm vi nhiều khách · API công khai · migration · hạ tầng · file luật (`rules`) | **C. Nâng cấp bảo mật** | mục 4 — bắt buộc, **chồng lên** A hoặc B |
 | "nhìn xấu", khoảng cách, bố cục | thiết kế, không phải review mã | công cụ thiết kế nếu môi trường có; không bịa reviewer |
 | tài liệu, onboarding, trải nghiệm CLI | DX | tự đọc như người mới và báo; không có reviewer riêng |
 | còn ở giai đoạn PLAN, chưa có code | review PLAN | skill `plan-review` |
@@ -71,6 +71,14 @@ thứ lượt tổng quát không thấy:
 | `try/except`, fallback, đường lỗi, `.get()` mặc định | `silent-failure-hunter` |
 | comment có thể đã lệch code | `comment-analyzer` |
 | pipeline RAG, vector store, chunking | `rag-pipeline-reviewer` |
+| TypeScript / JavaScript ngoài mức tầm thường | `typescript-reviewer` |
+| `.tsx` / `.jsx`, hook, ranh giới server/client của React hay Next.js | `react-reviewer` (chạy cạnh `typescript-reviewer`) |
+| thêm hay sửa hành vi có test đi kèm; nghi test rỗng, nhánh lỗi chưa phủ, test chập chờn | `test-analyzer` |
+| cần một lượt tổng quát mà không có chuyên gia hợp, hoặc làm lượt đầu trước khi kéo chuyên gia | `code-reviewer` |
+
+`code-reviewer` và brief `references/reviewer.md` (mục 5) là **hai cách giao cùng một lượt tổng quát**, chọn một cho mỗi
+diff: brief `reviewer.md` khi review toàn nhánh đối chiếu PLAN/SPEC và Trọng tâm review; agent `code-reviewer` khi cần lượt
+tổng quát nhanh trên một diff mà không soạn brief riêng. Chuyên gia khi diff nằm trọn trong một vùng chúng phủ.
 
 Diff **thêm hàm mới** ở vùng hay mọc bản sao (tiện ích, định dạng, kiểm hợp lệ, đường dẫn, đổi lỗi thành chuỗi):
 thêm bước tìm hàm trùng ý theo [references/duplicates.md](references/duplicates.md) — grep và đọc thân, không giao
@@ -104,6 +112,8 @@ Chạm vùng ở Bước 0 → `risk: high`, cỡ **lớn** (`method/sizing.md` 
 1. Chạy A bình thường.
 2. **Rồi** lượt bảo mật — không tuỳ chọn, không thay bằng tổng quát: skill `security-review` +
    agent `security-reviewer`; cần soát cả repo (OWASP, STRIDE, khảo cổ secret) thêm `security-audit`.
+   `risk_tags` có `rules`, `secret` hoặc `auth` → lượt kiểm kỹ thuật chạy theo `roles/verifier/dual-review.md`:
+   hai reviewer độc lập cùng rubric, cả hai Đạt mới Đạt (cộng thêm, không thay lượt bảo mật).
 3. Báo đã nâng cấp gì và vì sao, để người dùng gác ở **Cổng 2** trước khi phát hành.
 
 ## 5. Yêu cầu review — brief cho reviewer

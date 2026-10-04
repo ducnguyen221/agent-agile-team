@@ -69,15 +69,17 @@ Chạy trên **working tree hiện tại** (không dùng kết quả lúc nãy),
 1. **Vị trí.** `git rev-parse --abbrev-ref HEAD`: đang ở nhánh gốc hay nhánh mặc định → dừng, đóng từ nhánh sprint.
    Ghi nhận `git rev-parse --git-dir` ↔ `--git-common-dir` (khác nhau = worktree), `--show-toplevel` (đường worktree
    — lấy **trước** khi đổi thư mục), nhánh có tên hay detached HEAD. Nhánh gốc là nhánh việc này tách ra — PLAN, hội
-   thoại hay upstream của nhánh nói; chưa rõ thì hỏi một câu "nhánh này tách từ `<đoán>`, đúng không?".
+   thoại hay upstream của nhánh nói; chưa rõ thì ghi "nhánh gốc: `<đoán>`" ở dòng đầu tin menu để người dùng sửa, không
+   hỏi lẻ riêng.
 2. **Bắt kịp gốc.** `git fetch origin <gốc>` (lỗi → dừng báo, không đoán). Nhánh tụt sau gốc → báo "tụt N commit".
    Gộp gốc vào nhánh làm đổi cây đã nghiệm thu và làm bằng chứng cũ hết hạn ([evidence.md](../../method/evidence.md)
-   mục 3) nên **hỏi người dùng gật trước**, rồi chạy lại phần ảnh hưởng; xung đột → trình hai bên, không giải ngầm.
+   mục 3) nên **cần người dùng gật trước** — thêm một dòng vào cùng tin với menu ("nhánh tụt N commit so với gốc — gộp gốc
+   trước khi chọn?"), không hỏi lẻ — rồi chạy lại phần ảnh hưởng; xung đột → trình hai bên, không giải ngầm.
 3. **Mọi làn kiểm.** Liệt kê lệnh kiểm dự án khai (file luật, manifest, CI): bộ test, lint / kiểu, build, và eval khi
    sprint đổi lời nhắc hay mô hình ([eval-harness](../eval-harness/SKILL.md)). Chạy **hết**, ghi lệnh nguyên văn và số
    đếm thật (ví dụ "58/59") để chạy lại y hệt sau gộp; không viết "xanh" chung chung khi còn một ca hỏng. Không có
-   bộ test nào → nêu phạm vi chưa kiểm và hỏi: thêm test · đóng với khoảng trống có tên (`VR` Chưa chạy, kết luận tối đa
-   Đạt có điều kiện) · dừng.
+   bộ test nào → nêu phạm vi chưa kiểm và đưa ba lựa chọn vào cùng tin với menu, không hỏi lẻ: thêm test · đóng với
+   khoảng trống có tên (`VR` Chưa chạy, kết luận tối đa Đạt có điều kiện) · dừng.
 4. **Ca hỏng thuộc về ai.** Hỏng → báo `<n> test hỏng, phải sửa trước khi đóng` kèm tên và **dừng**. Điều tra xuất xứ:
    chạy đúng lệnh hay ca đó trên gốc (worktree riêng; không `git stash`). "Hỏng từ trước", "flaky" nói miệng, hay
    chạy lặp tới khi xanh đều không phải bằng chứng. Thuộc nhánh → sửa rồi quay lại bước thực thi. Có sẵn ở gốc → báo số
@@ -99,7 +101,8 @@ commit sau "chỉ chỉnh nhỏ" hay "chỉ tài liệu" — **không** tính. B
 hay dự án không CI). Tra lỗi (quyền, mạng) là "chưa biết", không phải "không có CI".
 
 **Gộp** (lựa chọn 1) chỉ khi CI xanh cho đúng commit, **hoặc** người dùng duyệt rõ commit đó bằng lời trong chat ("gộp
-`9f3c2ab` dù CI chưa xong"). "Đạt" ở Cổng 2 và "CI xanh hôm qua" không phải lời duyệt; CI chạy xong cũng không phải
+`9f3c2ab` dù CI chưa xong"). Dự án không CI: menu đã in `sha7` và dòng "anh duyệt rõ commit", nên người dùng chọn số 1
+ở menu đó **là** duyệt rõ — không hỏi lại; CI **đang chạy** hay **đỏ** mới cần câu duyệt riêng. "Đạt" ở Cổng 2 và "CI xanh hôm qua" không phải lời duyệt; CI chạy xong cũng không phải
 lệnh gộp. CI chưa xanh thì menu vẫn đủ ba dòng và thêm một câu nêu hai đường: chờ CI, hoặc duyệt rõ commit. Lựa chọn 2 vẫn
 dùng được khi CI chưa xanh (đẩy lên chính là để CI chạy).
 
@@ -133,9 +136,12 @@ không bớt lựa chọn; "bỏ việc" chỉ xảy ra khi người dùng **t�
    tiêu đề và thân PR đó, không tạo trùng, không đóng PR cũ khi chưa được bảo. Tra lỗi hay nhiều PR khớp → dừng hỏi.
 2. **Push.** `git push -u origin <nhánh>` (detached: `git push origin HEAD:refs/heads/<tên mới>`). **Không `--no-verify`,
    không `--force`.** Hook chặn vì quét khoá: mở dòng bị báo ở `file:dòng`, báo loại (mẫu hay khoá thật), **không in
-   giá trị**; khoá thật → Chặn, báo để xoay vòng; mẫu → đổi sang giá trị làm mờ hay biến môi trường, commit, chạy lại bộ
-   test (HEAD đã đổi), push lại. Remote đã đổi (từ chối không tiến lên được) → fetch, xem, gộp có kiểm soát, chạy lại
-   mọi làn, không viết lại lịch sử; xác thực hay mạng hỏng → sửa nguyên nhân rồi thử lại.
+   giá trị**; khoá thật → Chặn, báo để xoay vòng; mẫu → vá được (giá trị làm mờ hay biến môi trường) nhưng commit vá
+   đổi HEAD. Remote đã đổi (từ chối không tiến lên được) → fetch, xem. Hễ HEAD khác sha đã nghiệm thu ở Cổng 2 (commit
+   vá hay gộp remote) → **dừng, chưa push**: báo sha mới và diff so với sha đã nghiệm thu, chạy lại mọi làn kiểm trên
+   sha mới (`VR` cũ hết hạn — [evidence.md](../../method/evidence.md) mục 3), không viết lại lịch sử; chỉ push khi
+   người dùng duyệt rõ sha mới bằng lời trong chat, như mục 3 đòi cho gộp. Xác thực hay mạng hỏng → sửa nguyên nhân rồi
+   thử lại.
 3. **Thân PR** viết từ REPORT: tóm tắt **theo chủ đề** (không dán danh sách commit) · kết quả kiểm (lệnh và số đếm thật;
    `VR` Chưa chạy nói rõ) · phát hiện còn mở và việc để lại (`CO`, `RQ-`) · tài liệu đã đồng bộ · cách hoàn tác. Nối
    issue: `Closes #N` chỉ khi **mọi** tiêu chí của issue đã xong và đã kiểm; còn phần hoãn hay dở → `Linked to #N` hay

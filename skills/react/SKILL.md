@@ -110,7 +110,10 @@ thực → SSE hoặc WebSocket; bắn-và-quên một lần → `fetch` trong t
 
 Liên quan: `frontend` (build Vite, routing, state ứng dụng, hiệu năng tải), `e2e-testing` (luồng nhiều trang
 bằng Playwright), `tdd` (chu trình test trước), `web-qa` (QA kiểm bằng trình duyệt), `typescript-reviewer` và
-`react-reviewer` khi có.
+`react-reviewer` (agent review, bảng chuyên gia của `code-review`).
+
+Chuẩn mã bắt buộc của dự án (component, hook, test, kiểu): `method/standards/react.md`, `typescript.md`, `web.md` — chuẩn
+giữ luật ngắn, skill giữ mẫu; hai bên trái nhau là lỗi tài liệu (`method/standards/README.md`).
 
 ## 10. Danh mục kiểm khi viết hoặc review component
 

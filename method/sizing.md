@@ -49,6 +49,9 @@ KHI việc chạm **một** trong các vùng sau THÌ ghi nhãn vào `risk_tags`
 
 Cấu hình đổi quyền, hook hay workflow thực thi **không được** xếp rất nhỏ dù diff một dòng (và `risk: high` buộc cỡ lớn).
 
+Ba nhãn `rules`, `secret`, `auth` kéo thêm một luật nữa: kiểm định kỹ thuật bắt buộc **hai reviewer độc lập** cùng rubric,
+cả hai Đạt mới Đạt ([roles/verifier/dual-review.md](../roles/verifier/dual-review.md)) — cộng với thẻ chuyên đề security ở bảng trên.
+
 ## 3. Sprint = một mục tiêu
 
 - Một sprint phục vụ đúng một mục tiêu đã "định hình": biết làm gì, biết thế nào là xong, biết giới hạn
@@ -79,7 +82,7 @@ Bảng có 5 hàng — mỗi hàng một **luồng** ở cột đầu:
 |---|---|---|---|---|
 | Thêm tính năng (hành vi chưa có) | **Vừa** — luôn có hành vi hay luồng mới | viết test mới cho hành vi mới, thấy nó hỏng **đúng lý do**, rồi mới viết mã | Cổng 1 và Cổng 2 đủ | `intake` → `shaping-spec` → `writing-plan` → `running-sprint` + `tdd` → `code-review` |
 | Đổi hành vi có sẵn (chạy đúng nhưng muốn khác) | **Nhỏ** — một luồng, một `FR`, không đổi hợp đồng; **Vừa** khi đổi nhiều hơn một `FR` | sửa **test hiện có** cho khớp hành vi mới rồi đổi mã tới khi đạt; sửa test trước là điểm phân biệt đổi hành vi với sửa lỗi | Cổng 1 và Cổng 2 thật (trình ngắn) | `intake`, `shaping-spec` (delta **Sửa** cho spec sống), `tdd`, `code-review` |
-| Sửa lỗi (hành vi sai, hồi quy) | lỗi **hành vi** (logic, hồi quy): **Nhỏ** — đổi hành vi nên không xuống Rất nhỏ; lỗi **chữ hay nhãn** không đổi hành vi (câu báo sai chính tả, nhãn nút): **Rất nhỏ** theo mục 1; lỗi chạm vùng rủi ro (mục 2): **Lớn** | lỗi hành vi: tái hiện thành **test hỏng** (test hồi quy) rồi sửa; lỗi chữ: sửa rồi chạy lại phép kiểm hiện có; chứng minh bằng vòng gỡ sửa → hỏng → đặt lại ([evidence.md](evidence.md) mục 4) | Cổng 1 và Cổng 2 thật | `bug-triage` (chấm mức, định tuyến) → `debugging` → `tdd` → `verify-before-done` |
+| Sửa lỗi (hành vi sai, hồi quy) | lỗi **hành vi** (logic, hồi quy): **Nhỏ** — đổi hành vi nên không xuống Rất nhỏ; lỗi **chữ hay nhãn** không đổi hành vi (câu báo sai chính tả, nhãn nút): **Rất nhỏ** theo mục 1; lỗi chạm vùng rủi ro (mục 2): **Lớn** | lỗi hành vi: tái hiện thành **test hỏng** (test hồi quy) rồi sửa; lỗi chữ: sửa rồi chạy lại phép kiểm hiện có; chứng minh bằng vòng gỡ sửa → hỏng → đặt lại ([evidence.md](evidence.md) mục 4) | theo cỡ đã chọn (rất nhỏ: "đạt theo lời giao", mục 1) | `bug-triage` (chấm mức, định tuyến) → `debugging` → `tdd` → `verify-before-done` |
 | Tái cấu trúc (giữ hành vi, đổi cấu trúc) | theo **phạm vi đụng tới**: **Nhỏ** khi một mô-đun cục bộ; **Vừa** khi nhiều mô-đun hoặc đổi giao diện nội bộ; **Lớn** khi chạm hợp đồng bên ngoài | xác nhận test liên quan **đang xanh trước khi chạm mã**; thiếu thì viết test mô tả hành vi hiện tại; đổi từng bước nhỏ, chạy lại sau mỗi bước; diff phải trung tính về hành vi | như cỡ đã chọn | `tdd`, `code-review` (kể cả tìm hàm trùng lặp), `verify-before-done` |
 | Dựng bản đầu từ tài liệu thiết kế | **Lớn** | đọc tài liệu, trích phạm vi, quyết định đã khoá và danh sách tính năng; cắt thành **lát dọc mỏng** (một đường chạy hết đầu–cuối trước, không làm hết lớp này rồi mới tới lớp kia) | Cổng 1 và Cổng 2 đủ; mỗi lát một mục tiêu nên **một sprint một lát**, cùng trỏ về một `RQ-` | `intake`, `shaping-spec`, `writing-plan`, `adr` |
 

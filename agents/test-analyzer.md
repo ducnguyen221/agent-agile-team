@@ -32,7 +32,7 @@ rewrite_before_public: false
 - Mỗi phát hiện (`RF`): mức **Chặn / Phải sửa / Nên sửa / Ghi chú** theo `method/severity.md` · `file:dòng` ·
   vấn đề · hậu quả · cách sửa · **độ tin cậy N/10**. Không bằng chứng → tối đa Ghi chú.
 - Được trả **0 phát hiện**; mục **Không đánh giá** bắt buộc, kể cả khi 0 phát hiện. **Ngưỡng báo chính từ
-  7/10**; dưới 7 → mục **Phụ lục — dưới ngưỡng** (xem `agents/code-reviewer.md`, thang N/10 ở
+  7/10**; dưới 7 → mục **Phụ lục — dưới ngưỡng**; trừ lỗ hổng bảo mật mà nếu đúng sẽ là Chặn — tin cậy 5–6 vẫn vào báo cáo chính, nhãn "cần kiểm" (xem `agents/code-reviewer.md`, thang N/10 ở
   `skills/plan-review` mục 6).
 
 ## Cách chạy

@@ -83,8 +83,10 @@ Mã theo skill `id-convention`: tiền tố hai chữ, mã kèm tên ngắn lầ
 3. **Phạm vi:** vừa một PLAN, hay phải tách sprint?
 4. **Nước đôi:** một `FR` có hai cách hiểu → chọn một, viết tường minh.
 
-Sửa xong đi tiếp, không review lại lần hai. Cỡ nhỏ trở lên: ghi `status: in_review`, Business
-Reviewer (agent khác) đọc một lượt trước khi Architect viết PLAN — tiết kiệm một vòng ở Cổng 1.
+Sửa xong đi tiếp, không review lại lần hai. Từ cỡ **vừa**: SPEC ghi `status: in_review`, Business
+Reviewer (agent khác) đọc một lượt trước khi Architect viết PLAN — tiết kiệm một vòng ở Cổng 1. Cỡ
+**nhỏ**: `SPRINT.md` giữ `status: drafting` (`in_review` không thuộc tập giá trị của `SPRINT.md`); reviewer
+duy nhất (agent khác người viết) đọc phần SPEC trước khi viết phần PLAN.
 
 ## 7. Cổng và điều cấm
 

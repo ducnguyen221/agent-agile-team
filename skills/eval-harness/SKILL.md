@@ -38,8 +38,9 @@ Eval nằm trong PLAN, cạnh `TK` làm ra tính năng; mỗi eval ghi **trướ
   cần tập giữ riêng chưa từng vào prompt.
 - **Người chấm:** mục 3. **Ngưỡng:** mục 4, ghi **trước khi chạy**; ngưỡng đặt sau khi thấy số là chỉnh bia.
 - **Đường cơ sở:** bản đang chạy (SHA hoặc tên mốc) chạy trên **cùng** bộ ca, cùng người chấm.
-- Đổi ngưỡng hoặc đổi kiểu chỉ số giữa chừng = một **phán quyết** ghi lý do (`Phán quyết: <gì> — <vì sao> — <sai
-  thì tốn gì>`) và báo ở Cổng, không đổi lặng lẽ để qua.
+- Đổi ngưỡng hoặc đổi kiểu chỉ số **sau khi đã thấy số** = đổi tiêu chí thành công của PLAN → điều kiện dừng (d): ghi
+  `BR`, trình `DN` cho người dùng; **không** `Phán quyết:`. Trong lúc chờ, số đo theo ngưỡng cũ là Không đạt, không đổi
+  lặng lẽ để qua.
 
 ## 3. Bốn loại người chấm
 
