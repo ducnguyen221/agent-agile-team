@@ -76,6 +76,15 @@ def test_every_rule_has_a_broken_case():
     assert set(check.RULES) - SELF_ONLY <= covered, set(check.RULES) - SELF_ONLY - covered
 
 
+def test_every_rule_has_a_row_in_scripts_readme():
+    """`check.py` tự khai mô tả từng luật ở `scripts/README.md`: mọi mã trong `RULES` phải có hàng ở bảng luật, đúng mức."""
+    text = (REPO / "scripts" / "README.md").read_text(encoding="utf-8")
+    rows = set(re.findall(r"^\| `([a-z0-9-]+)` \|", text, re.M))
+    assert set(check.RULES) <= rows, sorted(set(check.RULES) - rows)
+    for code, (level, _) in check.RULES.items():
+        assert re.search(rf"^\| `{code}` \| {level} \|", text, re.M), f"{code}: mức ở README khác RULES ({level})"
+
+
 def test_rule_levels_use_the_single_scale():
     assert {level for level, _ in check.RULES.values()} <= {"Chặn", "Phải sửa", "Nên sửa", "Ghi chú"}
 
