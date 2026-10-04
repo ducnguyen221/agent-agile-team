@@ -25,6 +25,8 @@ mtime ở `expected/deployment-expected.md` trong `round2/` của hồ sơ sprin
 dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng. Chủ thể được dặn nói thẳng khi skill không có phần câu hỏi cần,
 không dùng kiến thức ngoài.
 
+**Giới hạn của lượt này:** người viết nội dung bổ sung cũng là người chấm (một agent giữ cả hai việc; kế hoạch chỉ tách người soạn câu hỏi khỏi người chấm), nên điểm số không độc lập hoàn toàn. Ở skill này điều phối còn đã thấy bộ câu mới **trước khi** viết nội dung bổ sung (tự khai: nội dung chỉ nhắm các chỗ thiếu của lượt 1, không nhắm câu mới).
+
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
 | 1 | Image Docker của mình đang build qua CI rồi chạy trên 3 node. Tuần trước đồng nghiệp sửa một dòng trong Dockerfile thì phát hiện build lại từ đầu mất 9 phút, và `docker images` cho thấy layer cuối nặng 1,1 GB vì lệnh `COPY . .` đứng trước `npm ci`. Ngoài ra thư mục `.git` và `node_modules` cục bộ cũng bị đưa vào context. Mình nên sắp xếp lại thứ tự các lệnh trong Dockerfile, cấu hình `.dockerignore` ra sao, và dùng cờ/cơ chế cache nào của BuildKit (ví dụ cache mount, `--cache-from`) để lần build sau chỉ chạy lại phần code thay đổi? | `references/docker.md` › 1; `references/dockerfiles.md` › 1; `references/docker-network-volume-security.md` › 4; `references/cicd-health-config.md` › 1 | `references/docker.md` › 1; `references/dockerfiles.md` › 1, › 4; `references/docker-network-volume-security.md` › 4; `references/cicd-health-config.md` › 1; `references/roll-forward-and-multi-service-ci.md` › 2 | Đạt (không có cache mount của BuildKit, nêu trong câu như ví dụ) |

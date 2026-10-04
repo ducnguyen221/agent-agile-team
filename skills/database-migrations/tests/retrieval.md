@@ -25,6 +25,8 @@ mtime ở `expected/database-migrations-expected.md` trong `round2/` của hồ 
 dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng. Chủ thể được dặn nói thẳng khi skill không có phần câu hỏi cần,
 không dùng kiến thức ngoài.
 
+**Giới hạn của lượt này:** người viết nội dung bổ sung cũng là người chấm (một agent giữ cả hai việc; kế hoạch chỉ tách người soạn câu hỏi khỏi người chấm), nên điểm số không độc lập hoàn toàn. Ở skill này điều phối còn đã thấy bộ câu mới **trước khi** viết nội dung bổ sung (tự khai: nội dung chỉ nhắm các chỗ thiếu của lượt 1, không nhắm câu mới).
+
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
 | 1 | Bảng `sessions` của mình có khoảng 70 triệu dòng, ghi liên tục cả ngày. Hôm trước một dev chạy `ALTER TABLE sessions ADD COLUMN device_id uuid` vào lúc 10h sáng. Câu lệnh tự nó chỉ cần vài mili giây, nhưng nó xếp hàng chờ sau một transaction báo cáo chạy 3 phút. Trong thời gian đó mọi INSERT/SELECT vào bảng bị kẹt sau nó và pool kết nối của API đầy, nên cả hệ thống đứng gần 4 phút. Mình cần đặt những tham số nào cho phiên chạy migration, lỗi timeout thì có nên tự động thử lại không, và nếu thử lại thì viết thế nào để không lặp lại sự cố? | `references/postgres-safe-ddl.md` › 6, › 9 (`SET lock_timeout`); `SKILL.md` › 2 | `references/postgres-safe-ddl.md` › 6, › 9, › 1; `references/pipeline-and-rails.md` › 2; `references/rehearsal.md` › 5 | Một phần (có `lock_timeout`; không có `statement_timeout`, thiết kế thử lại khi timeout, transaction dài giữ khoá) |

@@ -25,6 +25,8 @@ mtime ở `expected/github-ops-expected.md` trong `round2/` của hồ sơ sprin
 dẫn (thư mục người dùng) lược thành `<gốc worktree>` vì repo chặn tên người dùng. Chủ thể được dặn nói thẳng khi skill không có phần câu hỏi cần,
 không dùng kiến thức ngoài.
 
+**Giới hạn của lượt này:** người viết nội dung bổ sung cũng là người chấm (một agent giữ cả hai việc; kế hoạch chỉ tách người soạn câu hỏi khỏi người chấm), nên điểm số không độc lập hoàn toàn.
+
 | # | Câu hỏi | Mục kỳ vọng | Mục agent trỏ | Kết quả |
 |---|---|---|---|---|
 | 1 | Pipeline PR của mình có 40 lần chạy đang xếp hàng "queued" vì mỗi lần push lại sinh thêm một lượt, trong khi chỉ lần mới nhất của mỗi nhánh còn cần. Mình muốn liệt kê các run đang queued hoặc in_progress trong repo, huỷ hàng loạt những run cũ, và cho nhánh `feature/billing` thì tải về artifact báo cáo test (tên `playwright-report`) của run thất bại gần nhất để mở cục bộ. Dùng lệnh gh nào cho từng việc, và có cách nào lọc theo nhánh hay trạng thái không? | `SKILL.md` › 5. CI thất bại (`gh run list --status`, `--branch`); không có huỷ run hay tải artifact | `SKILL.md` › 5. CI thất bại, › 6 | Một phần (chỉ liệt kê và lọc run; không có huỷ run, không có tải artifact) |
