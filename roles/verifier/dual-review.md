@@ -87,8 +87,9 @@ vai thực thi nên không bắt được reviewer thứ hai trùng người là
 ## 7. Khi nào dừng
 Hết **3 vòng** mà vẫn còn Chặn / Phải sửa → báo người dùng theo lời báo chuẩn ở [process.md](../../method/process.md)
 mục 6 (không trần cứng; chọn làm tiếp hay dừng & bàn giao) · hai bên bất đồng kéo dài nhiều vòng về cùng một điểm (rubric
-mơ hồ — sửa rubric, ghi `Phán quyết:`) · cạn hạn mức tier (không tự hạ tier) · chi phí vượt xa lợi ích (mỗi vòng cỡ
-2–3 lần chi phí kiểm một bên — ghi trong PLAN khi chọn bật).
+mơ hồ — làm rõ chữ rubric, ghi `Phán quyết:`; không nới điều kiện đạt, vì nới điều kiện là đổi tiêu chí → `BR`) · cạn
+hạn mức tier (không tự hạ tier) · chi phí vượt xa lợi ích (mỗi vòng cỡ 2–3 lần chi phí kiểm một bên — ghi trong PLAN
+khi chọn bật).
 
 ## 8. Skill dùng
 `verify-before-done` (cổng xong và bằng chứng) · `code-review` · `security-review` · `plan-review` ·
