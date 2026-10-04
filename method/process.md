@@ -2,14 +2,16 @@
 title: Process — six steps, two human gates
 type: method
 status: active
-updated: 2026-10-04
+updated: 2026-10-05
 ---
 
 # Quy trình: sáu bước, hai cổng người
 
-> **Kết luận:** mọi sprint đi đúng sáu bước; người dùng chỉ phải quyết ở **hai cổng** (Cổng 1 duyệt
-> SPEC + PLAN, Cổng 2 nghiệm thu) và ở **bốn điều kiện dừng**. Mọi điểm còn lại agent tự quyết, ghi
-> phán quyết vào PROGRESS và đi tiếp. Sprint = một mục tiêu, không đo theo thời gian.
+> **Kết luận:** mọi sprint đi đúng sáu bước; người dùng xác nhận **một lượt trao đổi tiếp nhận** (mục tiêu,
+> bậc việc, có mở sprint không — mục 2), rồi chỉ phải quyết ở **hai cổng** (Cổng 1 duyệt SPEC + PLAN, Cổng 2
+> nghiệm thu) và ở **bốn điều kiện dừng**. Mọi điểm còn lại agent tự quyết, ghi phán quyết vào PROGRESS và đi
+> tiếp. Sprint = một mục tiêu, không đo theo thời gian. Việc **làm thẳng** ([sizing.md](sizing.md) mục 1)
+> không mở sprint và không đi sáu bước.
 
 Thuật ngữ: **sprint** — một lượt làm việc phục vụ đúng một mục tiêu · **cổng** — điểm dừng chờ người
 dùng quyết · **vòng** — một lần quay từ kiểm định về thực thi · **điều phối** — vai Analyst khi nó
@@ -23,7 +25,7 @@ cỡ việc theo [sizing.md](sizing.md). Gặp tên skill cũ trong hồ sơ l�
 
 | Bước | Tên | Ai làm | Tài liệu ra | Cổng |
 |---|---|---|---|---|
-| 1 | Tiếp nhận | Analyst | dòng `RQ-` trong REQUESTS | không |
+| 1 | Tiếp nhận | Analyst (T1) | **một** tin trao đổi gom với người dùng; sau xác nhận: dòng `RQ-` trong REQUESTS (hoặc làm thẳng, không hồ sơ) | **lượt trao đổi tiếp nhận** — người dùng xác nhận mục tiêu, bậc, có mở sprint không; bỏ khi đã rõ (mục 2) |
 | 2 | SPEC rồi PLAN | Analyst (SPEC), Architect (PLAN), Tech Reviewer (review PLAN từ cỡ vừa) | SPEC, PLAN | **Cổng 1** — duyệt / điều chỉnh |
 | 3 | Thực thi | Implementer, QA, (Architect) theo từng `TK` | PROGRESS | cổng điều chỉnh nội bộ (không hỏi người) |
 | 4 | Kiểm định | Business Reviewer, Tech Reviewer — **agent khác** người làm (thêm reviewer thứ hai khi `risk_tags` có `rules`/`secret`/`auth`) | `VR`, `RF` | vòng lặp 3 ↔ 4 |
@@ -32,22 +34,50 @@ cỡ việc theo [sizing.md](sizing.md). Gặp tên skill cũ trong hồ sơ l�
 
 Bước 3 và 4 lặp cho tới khi không còn phát hiện mức Chặn hay Phải sửa (mục 6).
 
-**Người dùng cần làm gì:** giao yêu cầu bằng lời thường ở Bước 1; trả lời **"duyệt"** hoặc **"điều
+**Người dùng cần làm gì:** giao yêu cầu bằng lời thường ở Bước 1 và trả lời **một** tin trao đổi của Analyst
+(mục tiêu đúng chưa, câu hỏi phản biện, bậc việc, có mở sprint không); trả lời **"duyệt"** hoặc **"điều
 chỉnh: <gì>"** ở Cổng 1; kết luận **Đạt / Đạt có điều kiện / Không đạt** ở Cổng 2. Ngoài ra chỉ phải
 lên tiếng khi agent dừng ở bốn điều kiện (mục 5), sau vòng 3 (mục 6) hoặc khi cạn hạn mức tier.
 
-## 2. Bước 1 — Tiếp nhận (không cổng)
+## 2. Bước 1 — Tiếp nhận (một lượt trao đổi gom)
+
+Mục đích của bước này là **phối hợp đúng từ đầu và mở yêu cầu chi tiết nhất có thể**: người dùng và agent cùng
+hiểu một mục tiêu, một định nghĩa xong, một phạm vi, một bậc việc — trước khi có bất kỳ hồ sơ nào. Vai làm: Analyst,
+tier **T1** (cần phân tích và phản biện, không hạ tier).
 
 KHI người dùng giao một yêu cầu THÌ Analyst:
 
-1. Ghi một dòng `RQ-` mới vào sổ REQUESTS: ngày, tóm tắt một câu, trạng thái `mới`.
-2. Tách theo mục tiêu: một mục tiêu = một sprint (`SPR-`); yêu cầu chứa nhiều mục tiêu thì tách thành
-   nhiều sprint, mỗi sprint vẫn trỏ về cùng `RQ-`.
-3. Định cỡ và rủi ro theo [sizing.md](sizing.md). Rủi ro chỉ nâng cỡ, không hạ.
-4. Liệt kê giả định dưới nhãn **ASSUMPTION** (mỗi giả định một dòng, nói rõ nếu sai thì đổi gì).
-5. Rà 11 điểm thiếu ngữ cảnh theo skill `intake`. Điểm chưa rõ mà **không tự giả định được** thì gom
-   thành `CQ` để hỏi **một lần** ở Cổng 1.
-6. Đi thẳng sang bước 2. **Không dừng chờ** người dùng ở bước này.
+1. **Đọc và phân tích đầu bài** trước khi hỏi: tra repo, sổ gốc, spec sống; rà 11 điểm thiếu ngữ cảnh theo skill
+   `intake` — điểm nào tra được thì tra, không hỏi. Kết quả phân tích là nguyên liệu cho tin ở bước 2.
+2. **Gửi người dùng một tin trao đổi gom** (không hỏi lẻ nhiều lượt), đủ bốn phần:
+   - *Mục tiêu theo cách hiểu của agent* — nhắc lại bằng lời thường, một đến ba câu.
+   - *Câu hỏi phản biện* — để hiểu đúng **mục tiêu** (vì sao cần, kết quả trông ra sao), **định nghĩa xong**
+     (đo bằng gì), **phạm vi** (cái gì không làm); mỗi câu kèm đề xuất của agent. Chỉ hỏi điều thuộc ý muốn
+     người dùng; điều tra được từ repo không hỏi.
+   - *Khuyến nghị bậc việc* — làm thẳng / rất nhỏ / nhỏ / vừa / lớn theo [sizing.md](sizing.md), kèm một dòng lý
+     do và rủi ro nhìn thấy (rủi ro chỉ nâng).
+   - *Có cần mở sprint không* — hỏi thẳng, kèm khuyến nghị suy từ bậc (làm thẳng → không; từ rất nhỏ → có).
+3. **Chờ người dùng xác nhận** (có thể đổi mục tiêu, bậc, hay quyết làm thẳng). Chưa có xác nhận thì chưa ghi
+   `RQ-`, chưa mở sprint, chưa chạm mã.
+4. Người dùng chọn **làm thẳng** (hoặc nói "không cần sprint") → làm ngay theo [sizing.md](sizing.md) mục 1, không
+   hồ sơ; kiểm bằng lệnh + kết quả mới chạy, báo trong lời trả lời. Hết bước này.
+5. Người dùng chọn **mở sprint** → ghi một dòng `RQ-` mới vào sổ REQUESTS: ngày, tóm tắt một câu, trạng thái `mới`,
+   **chi tiết nhất có thể**: chép câu trả lời của người dùng (mục tiêu đã chốt, định nghĩa xong, phạm vi ngoài, bậc
+   đã xác nhận) vào `RQ-` và sau đó vào SPEC. Tách theo mục tiêu: một mục tiêu = một sprint (`SPR-`); nhiều mục
+   tiêu → nhiều sprint cùng trỏ về một `RQ-`.
+6. Định cỡ và rủi ro theo [sizing.md](sizing.md) (bậc người dùng đã xác nhận; rủi ro chỉ nâng cỡ, không hạ). Liệt kê
+   giả định còn lại dưới nhãn **ASSUMPTION** (mỗi giả định một dòng, nói rõ nếu sai thì đổi gì). Điểm chưa rõ mà
+   **không tự giả định được và chưa hỏi ở tin trao đổi** thì gom thành `CQ` để hỏi **một lần** ở Cổng 1 (cỡ
+   vừa/lớn; cỡ nhỏ trình ngắn ở Cổng 1; cỡ rất nhỏ không có `CQ` chặn — lời giao đã nêu rõ kết quả).
+7. Đi sang bước 2. Không hỏi thêm lượt nào nữa cho tới Cổng 1.
+
+**Khi nào bỏ lượt trao đổi:** người dùng đã nói rõ "không cần sprint" / "làm luôn", hoặc việc là làm thẳng
+**không mơ hồ** (1–2 thao tác, kết quả rõ, không chạm vùng loại trừ của [sizing.md](sizing.md) mục 1). Khi đó làm
+ngay và báo. Lời giao đã nêu đủ mục tiêu, định nghĩa xong, phạm vi và bậc thì tin trao đổi chỉ còn một câu xác nhận
+— không hỏi lại điều đã có.
+
+**Lượt trao đổi là một tin, không phải một chuỗi.** Hỏi lẻ từng câu, chờ, hỏi câu nữa ở bước này là lỗi quy
+trình như mọi chỗ khác; ngoại lệ duy nhất là người dùng mở chế độ làm rõ (skill `shaping-spec` mục 3).
 
 ## 3. Bước 2 — SPEC rồi PLAN, Cổng 1
 
@@ -125,7 +155,8 @@ duyệt **không** phải phán quyết — đó là điều kiện dừng (d) �
 
 ## 5. Bốn điều kiện dừng giữa chừng
 
-Ngoài hai cổng, bốn điều kiện này, mốc sau vòng 3 và cạn hạn mức tier, **không hỏi**. KHI gặp một trong
+Ngoài lượt trao đổi tiếp nhận (mục 2), hai cổng, bốn điều kiện này, mốc sau vòng 3 và cạn hạn mức tier, **không
+hỏi**. KHI gặp một trong
 bốn trường hợp sau THÌ dừng, ghi `BR` vào bảng Vướng mắc của PROGRESS (vướng gì, loại (a)–(d), đã làm
 gì, cần ai, trạng thái) và hỏi người dùng:
 
@@ -136,7 +167,8 @@ gì, cần ai, trạng thái) và hỏi người dùng:
 | (c) | Tác động **ra ngoài phạm vi / worktree** đã giao | push nhánh chung, gộp vào nhánh chính, deploy, gửi tin, sửa file ngoài dự án |
 | (d) | **PLAN hỏng** — giả định sai làm đổi tiêu chí thành công, hoặc mọi đường đi tiếp đều là đoán | thư viện nền không hỗ trợ tính năng cốt lõi |
 
-Ngoài bốn điều này, dừng hỏi là **lỗi quy trình** (đếm được: số lần hỏi ngoài cổng phải bằng 0).
+Ngoài bốn điều này (và lượt trao đổi tiếp nhận đã qua ở Bước 1), dừng hỏi là **lỗi quy trình** (đếm được: số
+lần hỏi ngoài cổng phải bằng 0).
 Tương tự, cạn hạn mức model của một tier → dừng phần việc của tier đó, ghi `BR`, báo; **không tự hạ
 tier** ([tiers/README.md](../tiers/README.md)).
 
@@ -264,10 +296,16 @@ mở REPORT cũ.
 - Bài học đánh dấu **quan trọng** THÌ **chỉ đề xuất** nâng thành luật, skill hoặc bước quy trình, kèm lý
   do và chi phí; người dùng quyết. Agent không tự sửa luật hay tự tạo skill từ bài học.
 
-## 9. Việc nhẹ — cỡ rất nhỏ và cỡ nhỏ dùng một file
+## 9. Việc nhẹ — làm thẳng, cỡ rất nhỏ và cỡ nhỏ
 
-Hai cỡ nhẹ dùng **một** file `SPRINT.md` (bảng cỡ và dấu hiệu đo được: [sizing.md](sizing.md) mục 1); phân vân giữa
-hai bậc thì chọn bậc nặng hơn.
+**Làm thẳng** (không sprint) — việc 1–2 thao tác có kết quả rõ, hoặc người dùng nói rõ không cần sprint
+([sizing.md](sizing.md) mục 1, kèm điều kiện loại trừ): không `RQ-`, không `SPRINT.md`, không dòng sổ; làm ngay,
+kiểm bằng lệnh + kết quả mới chạy, báo kết quả và bằng chứng trong lời trả lời. Giữ nguyên Git và điều cấm, giữ
+mọi cổng xin phép khác (file luật, hành động không đảo ngược, secret). Lộ ra phức tạp hơn → dừng, mở lượt trao
+đổi tiếp nhận (mục 2).
+
+Hai cỡ nhẹ có sprint dùng **một** file `SPRINT.md` (bảng cỡ và dấu hiệu đo được: [sizing.md](sizing.md) mục 1); phân
+vân giữa hai bậc thì chọn bậc nặng hơn.
 
 **Cỡ rất nhỏ** (đổi chữ hoặc một chỗ, không đổi hành vi hay quyền, lời giao đã nêu rõ kết quả) — "có kế hoạch
 rồi làm cho hoàn thiện":
@@ -299,6 +337,7 @@ Việc nâng cỡ giữa chừng (lộ rủi ro mới) thì chuyển sang bốn 
 
 | Được hỏi | Không được hỏi (tự quyết + `Phán quyết:`) |
 |---|---|
+| Lượt trao đổi tiếp nhận — **một** tin gom (mục 2) | Hỏi lẻ nhiều lượt ở tiếp nhận; hỏi điều repo trả lời được |
 | Cổng 1, Cổng 2 | Chi tiết triển khai PLAN chưa nói |
 | Bốn điều kiện dừng (mục 5) | Mâu thuẫn nhỏ SPEC ↔ PLAN còn trong phạm vi |
 | Sau vòng 3 còn Chặn/Phải sửa (mục 6) | Chọn thư viện/cách làm tương đương trong ràng buộc đã duyệt |

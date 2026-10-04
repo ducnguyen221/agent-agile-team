@@ -120,6 +120,13 @@ QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a3
 
 Kết quả: 1/1 **Đạt** (kịch bản mới, chưa có RED). Không sửa `SKILL.md`.
 
+## Cần chạy lại sau đổi luật trao đổi tiếp nhận (2026-10-05)
+
+Thân skill đổi hai chỗ nhỏ theo luật mới (`AGENTS.md`, `method/process.md` mục 2, `method/sizing.md` mục 1): mục 2 việc 2
+thêm câu "việc làm thẳng không có sprint nên không tới skill này"; mục 8 hàng "Hỏi anh ấy một câu cho chắc" ghi rõ lượt
+trao đổi tiếp nhận thuộc Bước 1, đã qua. **Kỳ vọng của `rs-2` … `rs-8` không đổi** (mọi kịch bản đều sau Cổng 1). `skill_sha`
+chưa cập nhật có chủ đích: điều phối giao QA chạy lại; chủ thể chưa chạy.
+
 ## Chạy lại
 
 Như `skills/intake/tests/pressure.md` mục "Chạy lại"; GREEN đọc `<worktree>/skills/running-sprint/SKILL.md` bằng

@@ -8,7 +8,8 @@ updated: 2026-10-04
 # agent-agile-team — tổng quan
 
 > **Kết luận:** agent-agile-team là một **phương pháp làm phần mềm cho đội AI agent**: bạn giao việc bằng lời
-> thường, trả lời đúng **hai lần** (duyệt kế hoạch, nghiệm thu kết quả), đội agent làm phần còn lại, ghi sổ,
+> thường, xác nhận **một tin trao đổi** lúc tiếp nhận (mục tiêu, bậc việc, có mở sprint không), rồi trả lời đúng
+> **hai lần** (duyệt kế hoạch, nghiệm thu kết quả), đội agent làm phần còn lại, ghi sổ,
 > và nhờ **agent khác** kiểm. Repo gồm luật lõi, 32 skill, 13 agent, bộ mẫu tài liệu và ba công cụ kiểm; cài
 > được trên Claude Code, Codex và Antigravity. Bản hiện tại `0.3.0-dev`, repo **private**.
 
@@ -24,14 +25,17 @@ Lợi ích cho người không chuyên:
 
 - **Nói lời thường, không cần biết thuật ngữ.** Bạn mô tả việc muốn làm; agent tự viết ra "làm gì" (SPEC) và
   "làm thế nào" (PLAN) rồi trình bản tóm tắt ngắn để bạn duyệt.
-- **Chỉ bị hỏi đúng hai lần.** Cổng 1: duyệt hoặc điều chỉnh kế hoạch. Cổng 2: Đạt / Đạt có điều kiện / Không đạt.
+- **Một tin trao đổi lúc tiếp nhận, rồi chỉ bị hỏi đúng hai lần.** Khi nhận việc, agent gửi **một tin gom**: nhắc
+  lại mục tiêu theo cách hiểu, câu hỏi phản biện, khuyến nghị bậc việc và có cần mở sprint không — bạn trả lời một
+  lần. Sau đó: Cổng 1: duyệt hoặc điều chỉnh kế hoạch. Cổng 2: Đạt / Đạt có điều kiện / Không đạt.
   Agent hỏi lẻ giữa chừng là lỗi quy trình — bạn được quyền nhắc.
 - **Người làm không tự chấm.** Agent viết code không được kết luận "xong" cho chính nó; một agent khác kiểm và
   ghi bằng chứng (lệnh đã chạy, kết quả thật).
 - **Mọi việc đều có dấu vết.** Mỗi yêu cầu, mỗi sprint, mỗi quyết định có mã và nằm trong tài liệu tra được —
   tháng sau mở lại vẫn biết vì sao làm vậy.
 - **Việc nhỏ đi đường nhẹ.** Sửa một dòng chữ không cần bốn tài liệu; bậc việc quyết độ dày hồ sơ, không phải
-  nghi thức.
+  nghi thức. Việc 1–2 thao tác có kết quả rõ, hay bạn nói "không cần sprint", agent **làm thẳng** — không hồ sơ,
+  vẫn kiểm và báo kết quả.
 
 Con số của bản `0.3.0-dev`: **6** bước · **2** cổng người · **6** vai · **3** tier · **32** skill · **13** agent ·
 **3** công cụ Python · **3** harness được hỗ trợ.
@@ -40,11 +44,11 @@ Con số của bản `0.3.0-dev`: **6** bước · **2** cổng người · **6*
 
 ### 2.1 Quy trình sáu bước, hai cổng người
 
-Một sprint = một mục tiêu, đi đúng sáu bước; bạn chỉ quyết ở hai cổng.
+Một sprint = một mục tiêu, đi đúng sáu bước; bạn xác nhận một tin trao đổi lúc tiếp nhận rồi chỉ quyết ở hai cổng.
 
-- Tiếp nhận → SPEC + PLAN (**Cổng 1**) → Thực thi ↔ Kiểm định (vòng lặp, khuyến nghị 3 vòng) → REPORT
-  (**Cổng 2**) → Bài học.
-- Ngoài hai cổng, agent chỉ dừng hỏi ở **bốn điều kiện**: hành động không hoàn tác được; chạm bảo mật hay
+- Tiếp nhận (một tin trao đổi gom: mục tiêu, câu hỏi phản biện, bậc việc, có mở sprint không) → SPEC + PLAN
+  (**Cổng 1**) → Thực thi ↔ Kiểm định (vòng lặp, khuyến nghị 3 vòng) → REPORT (**Cổng 2**) → Bài học.
+- Ngoài tin trao đổi tiếp nhận và hai cổng, agent chỉ dừng hỏi ở **bốn điều kiện**: hành động không hoàn tác được; chạm bảo mật hay
   secret; tác động ra ngoài phạm vi đã giao (push, deploy, gửi tin); kế hoạch hỏng vì giả định sai.
 - Chỗ kế hoạch chưa nói tới, agent tự quyết và ghi một dòng `Phán quyết: <gì> — <vì sao> — <sai thì tốn gì>`
   vào nhật ký, không hỏi.
@@ -52,10 +56,12 @@ Một sprint = một mục tiêu, đi đúng sáu bước; bạn chỉ quyết �
 
 ### 2.2 Bậc việc — việc đơn giản đi đường nhẹ
 
-Bốn cỡ việc quyết độ dày tài liệu và độ sâu kiểm định; rủi ro chỉ được **nâng** cỡ, không hạ.
+Bậc "làm thẳng" và bốn cỡ việc quyết độ dày tài liệu và độ sâu kiểm định; rủi ro chỉ được **nâng** cỡ, không hạ.
+Agent khuyến nghị bậc trong tin trao đổi lúc tiếp nhận; bạn xác nhận.
 
 | Cỡ | Dấu hiệu | Hồ sơ | Kiểm định |
 |---|---|---|---|
+| Làm thẳng | 1–2 thao tác, kết quả rõ; hoặc bạn nói "không cần sprint". Không áp khi chạm vùng rủi ro, file luật, secret, việc không hoàn tác — trừ khi bạn nói rõ không cần sprint | không hồ sơ, không sprint | agent tự kiểm (lệnh + kết quả mới chạy) và báo trong lời trả lời |
 | Rất nhỏ | đổi chữ hoặc một chỗ, không đổi hành vi, lời giao đã nêu rõ kết quả | một `SPRINT.md` hai phần (Kế hoạch · Kết quả) | tự kiểm ghi "chưa độc lập", hoặc agent khác kiểm nhanh |
 | Nhỏ | sửa cục bộ một luồng có sẵn, một yêu cầu chức năng, không đổi hợp đồng | một `SPRINT.md` bốn phần | một reviewer khác người làm |
 | Vừa | tính năng hay luồng mới, hoặc nhiều yêu cầu chức năng | bốn file SPEC · PLAN · PROGRESS · REPORT | Business Reviewer và Tech Reviewer |
@@ -164,7 +170,7 @@ này."* Sáu bước diễn ra như sau.
 
 | Bước | Ai làm | Tạo ra gì | Bạn làm gì |
 |---|---|---|---|
-| 1. Tiếp nhận | Analyst | một dòng yêu cầu `RQ-001` trong sổ REQUESTS; cỡ việc (ở đây: **vừa** — hành vi mới); giả định ghi nhãn ASSUMPTION; điểm chưa rõ gom thành câu hỏi | không gì — agent không dừng ở bước này |
+| 1. Tiếp nhận | Analyst | **một tin trao đổi**: nhắc lại mục tiêu, vài câu hỏi phản biện (tra theo mã nào, ai dùng, xong là gì), khuyến nghị cỡ **vừa** (hành vi mới) và mở sprint; sau khi bạn xác nhận: một dòng yêu cầu `RQ-001` trong sổ REQUESTS kèm câu trả lời của bạn; giả định ghi nhãn ASSUMPTION; điểm còn chưa rõ gom thành câu hỏi cho Cổng 1 | trả lời tin trao đổi một lần (xác nhận mục tiêu, cỡ, có mở sprint) |
 | 2. SPEC rồi PLAN | Analyst viết SPEC; Architect viết PLAN; Tech Reviewer soát PLAN | thư mục sprint `docs/plans/<ngày>-order-lookup/` với SPEC (người dùng cần gì, kịch bản KHI… THÌ…, tiêu chí thành công) và PLAN (từng việc: ai làm, kiểm ra sao, hoàn tác thế nào) | **Cổng 1:** đọc bản tóm tắt vài dòng, trả lời "duyệt" hoặc "điều chỉnh: …" |
 | 3. Thực thi | Implementer (code, test), QA (chạy test) | code trên nhánh riêng; PROGRESS ghi từng việc kèm bằng chứng và các dòng `Phán quyết:` | không gì |
 | 4. Kiểm định | Business Reviewer, Tech Reviewer — agent **khác** người làm | phát hiện có mức và bằng chứng; còn Chặn / Phải sửa thì quay lại bước 3 (một vòng) | không gì; sau 3 vòng còn lỗi thì chọn làm tiếp hay dừng |
