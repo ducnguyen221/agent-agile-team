@@ -127,7 +127,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [react](react/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [tdd](tdd/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/6 (+3 partial, 0 fail), below threshold; points-right 6/6 | 2026-10-03 |
-| [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after 1 REFACTOR round | 2026-10-01 |
+| [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
 | [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
 | [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
