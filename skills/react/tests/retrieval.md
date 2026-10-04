@@ -41,6 +41,10 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Phần phụ: cú pháp `renderHook(fn, { wrapper })`, `act` bất đồng bộ (câu 5); refetch ngầm ghi đè bản nháp đang gõ (câu 1).
 - `description` không hứa chỗ nào thân skill thiếu; bốn khoảng trống trên nằm ở mảng hook, form, Suspense mà `description` nêu tên nhưng chỉ phủ nguyên tắc.
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+Kết quả đo trên bản trước `fix-1` (cây `86bdb49baa9281d30a4162bafaaab2ca9230c63c`, trừ `tests/`); `fix-1` chỉ đổi con trỏ thẻ vai thành con trỏ agent review (`react-reviewer`, bảng chuyên gia của `code-review`) và thêm con trỏ chuẩn mã ở cuối `SKILL.md`; không đổi nội dung trả lời. Không chạy lại (QA2, 2026-10-04, đối chiếu `git diff e6b2e60..a35b618 -- skills/react` bỏ `tests/`). `skill_sha` ở frontmatter đã là băm cây hiện tại; bảng và `result` giữ nguyên.
+
 ## Lịch sử
 
 Lượt `TK13` lượt 1 (bộ câu mới, 2026-10-04, `skill_sha` `f906c1e9de32a9ed19830f51fd8b6739a7f82236`, `result`: strict 4/7 (+3 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7), chuyển xuống đây khi chạy bộ câu mới lần 2. Id hàng của bộ đó đổi thành `b1`… để không lẫn vào bảng chấm của lượt mới (id agent: người soạn `a673ba177ac2e78ae`, chủ thể `a54b786f9023c404b`); người soạn lần sau phải đọc cả ba bộ để không lặp. Các đề mục của khối này hạ hai bậc.

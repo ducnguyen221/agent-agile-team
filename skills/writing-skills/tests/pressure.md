@@ -5,7 +5,7 @@ tier: T3 (the RED and first GREEN of 2026-10-01 ran at T2)
 model: claude-sonnet-5-5 (GREEN rerun and KB3 rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
 skill_sha: 5c5200b97d8568024d69118e3d734b4102ce3b80
 date: 2026-10-04
-result: 3/3 GREEN pass on KB3 at n = 3 after the TK13 fix (round 2, 2026-10-04, skill_sha changed; round 1 on the pre-fix text was 1/3) and RED 0/3 pass (RED breaks, kept from round 1, same prompt, not rerun); rerun n = 1 each on the fixed text - KB1 pass, KB2 pass, KB4 pass, KB5 partial against the pre-written expectation (result string format, same as TK12), KB6 pass, KB7 partial (no --plugin-dir flag named; TK12 had pass; the pre-fix text gave 1 pass 2 partial on three reruns, so not shown to be a regression); earlier - round 1 KB3 n = 3 (TK13) 1/3 GREEN pass, 0/3 RED pass; TK12 rerun GREEN 3/3 on KB1-KB3 and KB4-KB7 (KB5 partial against the expectation); n = 1 runs 3/3 GREEN pass after the TK9 rewrite
+result: 3/3 GREEN pass on KB3 at n = 3 after the TK13 fix (round 2, 2026-10-04, skill_sha changed; round 1 on the pre-fix text was 1/3) and RED 0/3 pass (RED breaks, kept from round 1, same prompt, not rerun); rerun n = 1 each on the fixed text - KB1 pass, KB2 pass, KB4 pass, KB5 partial against the pre-written expectation (result string format, same as TK12), KB6 pass, KB7 partial (no --plugin-dir flag named; TK12 had pass; the pre-fix text gave 1 pass 2 partial on three reruns, so not shown to be a regression); earlier - round 1 KB3 n = 3 (TK13) 1/3 GREEN pass, 0/3 RED pass; TK12 rerun GREEN 3/3 on KB1-KB3 and KB4-KB7 (KB5 partial against the expectation); n = 1 runs 3/3 GREEN pass after the TK9 rewrite; QA2 after fix-2 new KB8 GREEN pass (n = 1, no RED)
 agent_ids:
   green_rerun: {1: a7645bb29eb1a5d5d, 2: a96ae872197ca1cbe, 3: ae8c088ffc5b5e89c}
   kb3_rerun_neutral_c: {red: aa0475ae5a2473a65, green: a0534369da5997176}
@@ -178,6 +178,16 @@ Chạy lại một lượt mỗi kịch bản trên bản đã sửa (n = 1, ki�
 KB7 thấp hơn TK12: chạy thêm hai lượt GREEN bản mới (cả hai Một phần) và ba lượt đối chứng trên bản trước sửa `05dd9ae` (Một phần, Đạt, Một phần). Bản trước sửa cũng chỉ Một phần ở 2/3 lượt; lượt này không đụng `references/testing.md` mục 4 (nơi chứa cờ), nên không có bằng chứng sửa gây lùi: coi là biến thiên của thước (3) trong một kịch bản chỉ cần chọn, không phải định tuyến. Thước giữ nguyên, kết quả chính thức Một phần; để điều phối quyết có mở `CO`.
 
 Giới hạn: n = 3 chỉ trên KB3; các kịch bản còn lại n = 1; chủ thể cùng họ mô hình với người chấm (`CQ3` = không), chỉ chọn và viết lời, không chạy RED/GREEN thật; 3/3 GREEN trên cỡ mẫu này không chứng minh chữ sửa là nguyên nhân (cùng đề lượt 1 cho 1/3).
+
+## Chạy lại sau `fix-2` (SPR-04, QA2)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối cùng `references/` và tài liệu được trỏ. Kỳ vọng và thước chấm ghi trước lượt giao rồi chép bằng `cp -p` sang `evidence/QA2/expected/` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`); output trọn của từng chủ thể ở `evidence/QA2/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED cho kịch bản mới (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`. Thân đổi ở `fix-1` đúng ở `references/diagnosing.md` mục 1, hàng "Báo, không vá": mặc định ghi `LN` ứng viên và đề xuất ở bước 6; khi người dùng nói "sửa luôn" thì sửa ngay trong phạm vi lệnh, phép thử là Chưa chạy và một dòng `Phán quyết:`, không mở `BR`. Kịch bản mới `KB8` (chẩn đoán xong một phiên chạy sai, rồi người dùng nói "sửa luôn") thêm vào `tests/scenarios.txt`; `KB4` hiện có thuộc phạm vi sprint, không đi qua `diagnosing.md`, nên không dùng.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `KB8` (mới) | `aa994a845e1ee7fd0` | **Đạt** | chọn B; dòng PROGRESS bắt đầu bằng `Phán quyết:` (câu đã sửa, theo lệnh trực tiếp, "nếu sửa sai thì …", hoàn tác bằng `git revert`), không `BR`; dòng `tests/pressure.md` của `running-sprint` ghi "Chưa chạy … Chưa chạy không phải Đạt"; dẫn `diagnosing.md` mục 1 hàng "Báo, không vá" và nói vì sao chẩn đoán không cản lệnh; vẫn giữ `LN` ứng viên để chạy RED/GREEN bù |
+
+Kết quả: 1/1 **Đạt** (kịch bản mới, chưa có RED). Không sửa `SKILL.md`.
 
 ## Chạy lại
 

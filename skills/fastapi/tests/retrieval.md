@@ -49,6 +49,10 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Điều kiện Đạt ghi trước ở file nháp được áp nguyên; việc câu hỏi nêu đích danh mà skill không có thì câu tính Một phần.
 - Skill không sửa thêm sau lượt này (giới hạn hai lượt của `TK13`); còn dưới ngưỡng thì điều phối ghi `CO`.
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+Kết quả đo trên bản trước `fix-1` (cây `106f8cfa723b59644608d79b925fcd82bf73e5c3`, trừ `tests/`); `fix-1` chỉ thêm dòng "Nguồn" ở `references/routes-errors-openapi-testing.md`; không đổi nội dung trả lời. Không chạy lại (QA2, 2026-10-04, đối chiếu `git diff e6b2e60..a35b618 -- skills/fastapi` bỏ `tests/`). `skill_sha` ở frontmatter đã là băm cây hiện tại; bảng và `result` giữ nguyên.
+
 ## Lịch sử
 
 Lượt `TK13` lần 1 (bộ câu độc lập đầu, ngày 2026-10-04, `skill_sha` e1152e8f4b4e34626b96a26e17510512b95a9dc6, người soạn aff7dea3e8e7d9fe3, chủ thể aca33220692774069): `result` là `strict 3/7 (+4 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7`.

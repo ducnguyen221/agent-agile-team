@@ -47,6 +47,10 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Điều kiện Đạt ghi trước ở file nháp được áp nguyên; việc câu hỏi nêu đích danh mà skill không có thì câu tính Một phần.
 - Skill không sửa thêm sau lượt này (giới hạn hai lượt của `TK13`); còn dưới ngưỡng thì điều phối ghi `CO`.
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+Kết quả đo trên bản trước `fix-1` (cây `f5f164854884d51d591cdc80afb9427b1fb067dd`, trừ `tests/`); `fix-1` chỉ thêm dòng "Nguồn" ở `references/cicd-health-config.md` và `references/deployment-strategies.md`; không đổi nội dung trả lời. Không chạy lại (QA2, 2026-10-04, đối chiếu `git diff e6b2e60..a35b618 -- skills/deployment` bỏ `tests/`). `skill_sha` ở frontmatter đã là băm cây hiện tại; bảng và `result` giữ nguyên.
+
 ## Lịch sử
 
 Lượt `TK13` lần 1 (bộ câu độc lập đầu, ngày 2026-10-04, `skill_sha` 07b95c2020afe72d8978dbedd6ee2174eb8ca624, người soạn a4379b103fc9b94d3, chủ thể a2061dd90e8050429): `result` là `strict 5/7 (+2 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7`.

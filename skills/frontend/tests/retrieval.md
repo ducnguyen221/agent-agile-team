@@ -42,6 +42,16 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Triển khai lên `S3` + CloudFront: thứ tự upload (tệp băm trước, `index.html` sau), invalidation, header của tệp không băm khác `index.html`: không có (câu 6).
 - `description` không hứa chỗ nào thân skill thiếu.
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. `fix-1` sửa ghi chú phiên bản Vite (đầu `SKILL.md` và `references/vite.md`: từ **Vite 8** bộ gói mặc định là Rolldown, `rolldownOptions`; Vite 7 vẫn Rollup; trước Vite 8 Rolldown chỉ ở gói `rolldown-vite` riêng) nên chạy lại **đúng câu 1** (Vite 5, `build.rollupOptions.output.manualChunks`) thay vì ghi chú. Chủ thể: subagent mới (`claude-sonnet-5-5`, tier T3, `ad7aa2cb6d924807f`), không dùng công cụ Skill, được đọc `SKILL.md`, `references/` và tài liệu được trỏ, không mở `tests/`. Kỳ vọng ghi trước (`evidence/QA2/expected/frontend-expected.md`, sha256 `525c1ccc77e39e604c6f00d3bbe78de4b3c039b68273d5959740847c4181078e`, mtime 19:22:28, trước lượt giao); output trọn ở `evidence/QA2/frontend-retrieval-q1.md` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`).
+
+| Câu | Mục agent trỏ | Kết quả |
+|---|---|---|
+| `câu 1` | `SKILL.md` › 7, › 11; `references/vite.md` › 6, › 8; `references/delivery.md` › 1 | Đạt theo thước ghi trước (phần phụ ghi ngoặc: hash chunk ổn định giữa các lần build và hit rate CDN không được nói tới; ghi chú phiên bản đúng: Vite 5 giữ `rollupOptions`, `rolldownOptions` từ Vite 8). Lưu ý: chủ thể tự chấm Một phần vì coi hash ổn định là cốt lõi; thước giữ nguyên như lượt trước nên `result` không đổi |
+
+Sáu câu còn lại: thân skill chỉ đổi con trỏ chuẩn mã và con trỏ thẻ vai (mục 8, mục 10) ở `fix-1`; kết quả đo trên bản trước `fix-1` (cây `b21afba3c0c6a291e82dd356c58d7f84557d1153`); không đổi nội dung trả lời. `result` không đổi.
+
 ## Lịch sử
 
 Lượt `TK13` lượt 1 (bộ câu mới, 2026-10-04, `skill_sha` `8b98b3f727496ad6198d9da78dc485331f5b6714`, `result`: strict 4/7 (+3 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7), chuyển xuống đây khi chạy bộ câu mới lần 2. Id hàng của bộ đó đổi thành `b1`… để không lẫn vào bảng chấm của lượt mới (id agent: người soạn `a1178ca4572e96851`, chủ thể `a2125a6e8d70506f4`); người soạn lần sau phải đọc cả ba bộ để không lặp. Các đề mục của khối này hạ hai bậc.

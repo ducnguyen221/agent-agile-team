@@ -49,6 +49,10 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Điều kiện Đạt ghi trước ở file nháp được áp nguyên; việc câu hỏi nêu đích danh mà skill không có thì câu tính Một phần.
 - Skill không sửa thêm sau lượt này (giới hạn hai lượt của `TK13`); còn dưới ngưỡng thì điều phối ghi `CO`.
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+Kết quả đo trên bản trước `fix-1` (cây `02ef1834a07ef26038d97be948c25f9822bacb0a`, trừ `tests/`); `fix-1` chỉ diễn đạt lại `description` (cùng phạm vi, trong 400 ký tự) và thêm dòng "Nguồn" ở `references/django-golang-migrate.md`; không đổi nội dung trả lời. Không chạy lại (QA2, 2026-10-04, đối chiếu `git diff e6b2e60..a35b618 -- skills/database-migrations` bỏ `tests/`). `skill_sha` ở frontmatter đã là băm cây hiện tại; bảng và `result` giữ nguyên.
+
 ## Lịch sử
 
 Lượt `TK13` lần 1 (bộ câu độc lập đầu, ngày 2026-10-04, `skill_sha` dc525a40346697264e7f6dbae8d12936a310af71, người soạn a4e10fb5b7b922f6a, chủ thể afdfeb8a2c9970b70): `result` là `strict 5/7 (+2 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7`.

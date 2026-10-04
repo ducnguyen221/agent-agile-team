@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: bc0f64a61db9471783a3f3e82c511734c6a23161
 date: 2026-10-04
-result: 6/6 GREEN pass; RED on the three new scenarios 1/3 pass as-is (cr-4 partial, cr-5 partial, cr-6 pass at RED); GREEN rerun of the three 2026-10-01 scenarios cr-1 to cr-3 3/3 pass on the tree after the TK9.1 edits
+result: 8/8 GREEN pass; RED on the three new scenarios 1/3 pass as-is (cr-4 partial, cr-5 partial, cr-6 pass at RED); GREEN rerun of the three 2026-10-01 scenarios cr-1 to cr-3 3/3 pass on the tree after the TK9.1 edits; QA2 after fix-2 new cr-7 and cr-8 GREEN pass (no RED)
 agent_ids:
   red: {cr4: a271d593244c9237e, cr5: aaecd867d1856eebe, cr6: a07176d4fa0bdc33a}
   green: {cr4: aad5d938c1bad1e0e, cr5: a07ac7d0967aa0527, cr6: a401b01bb0a78d377}
@@ -108,6 +108,17 @@ Vì cr-6 đạt sẵn ở RED, **không thêm** vào skill phần "đọc ngoài
   không đủ giờ thì không sửa-không-test); hai dòng cờ đỏ ở mục 8; câu trong khối Kết luận (vá kịch bản 4).
   Mục 2: đoạn "Diff thêm hàm mới ở vùng hay mọc bản sao" trỏ tới `references/duplicates.md` (mới: năm bước thủ công,
   chọn hàm sống sót, thang mức) (vá kịch bản 5). Không cần vòng REFACTOR thứ hai: GREEN đạt cả ba ở lượt đầu.
+
+## Chạy lại sau `fix-2` (SPR-04, QA2)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN (n = 1), chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), đọc `SKILL.md` bằng đường tuyệt đối cùng `references/` và tài liệu được trỏ. Kỳ vọng và thước chấm ghi trước lượt giao rồi chép bằng `cp -p` sang `evidence/QA2/expected/` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`); output trọn của từng chủ thể ở `evidence/QA2/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED cho kịch bản mới (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán; người chấm cùng họ mô hình với chủ thể (`CQ3`). Không sửa `SKILL.md`. Thân `SKILL.md` đổi ở `fix-1`: bảng chuyên gia thêm `typescript-reviewer`, `react-reviewer` (chạy cạnh), `test-analyzer`, `code-reviewer` và đoạn nói `code-reviewer` với brief `references/reviewer.md` là hai cách giao cùng một lượt tổng quát; hàng bảng mục 1 thêm `rules` vào vùng nâng cấp bảo mật; mục 4 bước 2 thêm `dual-review`. Hai kịch bản mới `cr-7`, `cr-8` thêm vào `tests/scenarios.txt`; GREEN đọc thêm `roles/verifier/dual-review.md` (tài liệu được trỏ).
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `cr-7` (mới) | `aaddfa0723229f122` | **Đạt** | chọn B; `typescript-reviewer` + `react-reviewer` ("chạy cạnh nhau") + `test-analyzer`, mỗi agent một brief, song song, cùng gói diff từ `BASE`, ghi vai · tier · model; cổng xác minh (ứng viên không `file:dòng` → tối đa Ghi chú); không kéo agent Python; không thay chuyên gia bằng `code-reviewer` |
+| `cr-8` (mới) | `a2bf84b93f0d1d143` | **Đạt** | chọn B; hai Tech Reviewer T1 độc lập, nhãn khác nhau và khác người làm, brief không gồm lịch sử phiên hay kết luận bên kia; cả hai Đạt mới Đạt, bên nào khác Đạt = chưa Đạt, gộp `RF`, chạy lại cả hai bằng agent mới; lượt bảo mật giữ (cộng thêm); tin Architect không giảm về một bên |
+
+Kết quả: 2/2 **Đạt** (kịch bản mới, chưa có RED). Không sửa `SKILL.md`.
 
 ## Chạy lại
 
