@@ -39,7 +39,9 @@ nào thì theo tài liệu bản đó.
 - Mảng phụ thuộc đủ và đúng; muốn "bỏ bớt cho khỏi chạy lại" là dấu hiệu thiết kế sai, không phải chỗ để tắt cảnh báo.
 - **Mặc định không memo.** `useMemo`, `useCallback`, `React.memo` chỉ thêm khi profiler hoặc chuỗi phụ thuộc
   chứng minh cần; `React.memo` chỉ có lợi khi component render nặng, render thường xuyên và props hay giữ nguyên.
-- Tách custom hook khi cùng một dãy hook xuất hiện ở từ hai component trở lên.
+- Tách custom hook khi cùng một dãy hook xuất hiện ở từ hai component trở lên. Chữ ký trả về, đăng ký nguồn ngoài
+  (`localStorage`, `matchMedia`) bằng `useSyncExternalStore`, effect chạy hai lần ở StrictMode: `references/patterns.md` mục 1–2.
+- Ô nhập gõ mượt mà danh sách nặng: `useDeferredValue` + `memo`, `useTransition`: `references/patterns.md` mục 3.
 
 ## 3. Vị trí state
 
@@ -52,7 +54,8 @@ nào thì theo tài liệu bản đó.
 | bản sao dữ liệu server | thư viện state-server (TanStack Query, SWR) |
 
 Phần lớn trang không cần Context hay store toàn cục: chờ đến khi việc nâng state lặp lại gây đau mới trừu
-tượng hoá. Một Context mỗi mối quan tâm, để đổi theme không render lại phần dùng người dùng.
+tượng hoá. Một Context mỗi mối quan tâm, để đổi theme không render lại phần dùng người dùng; giá trị Provider phải ổn định
+(không object literal mới mỗi lần render): `references/patterns.md` mục 4.
 Cách chọn và dựng store ở tầng ứng dụng: skill `frontend`.
 
 ## 4. Lấy dữ liệu
@@ -74,6 +77,7 @@ thực → SSE hoặc WebSocket; bắn-và-quên một lần → `fetch` trong t
 - Đặt Suspense **sát chỗ lấy dữ liệu**, không ở gốc route, để nội dung hiện dần.
 - Error boundary vẫn là API dạng class (dùng `react-error-boundary` cho gọn). Nó bắt lỗi ném lúc render,
   vòng đời, constructor của con; **không** bắt lỗi trong trình xử lý sự kiện hay mã bất đồng bộ: những chỗ đó tự `catch`.
+  Nút "Thử lại" phải reset boundary (`resetErrorBoundary`, `resetKeys`) và dọn nguyên nhân: `references/patterns.md` mục 7.
 - Cặp chuẩn: `ErrorBoundary` bọc ngoài, `Suspense` bọc trong, mỗi cặp một vùng giao diện độc lập.
 
 ## 7. Ghép thành phần, danh sách, tiếp cận
@@ -81,12 +85,12 @@ thực → SSE hoặc WebSocket; bắn-và-quên một lần → `fetch` trong t
 - Mẫu ghép: khe `children`; khe có tên (`header`, `sidebar` truyền như prop); **compound component** chia
   state qua Context (`Tabs` + `Tabs.Trigger`); render prop khi cha phải đưa tham số cho phần con. Hook trả
   cùng hình dạng dữ liệu thường gọn hơn render prop.
-- Danh sách: `key` ổn định (id từ dữ liệu, không phải chỉ số mảng); ảo hoá (`@tanstack/react-virtual`,
+- Danh sách: `key` ổn định (id từ dữ liệu, không phải chỉ số mảng; vì sao: `references/patterns.md` mục 5); ảo hoá (`@tanstack/react-virtual`,
   `react-window`) khi số dòng thấy được vượt chừng 50 và dòng không nhẹ.
 - Tránh thác render: hạ state xuống thấp thay vì nâng lên; tách Context theo mối quan tâm.
 - **Tiếp cận trước:** dùng thẻ ngữ nghĩa (`button`, `a`, `nav`, `main`) trước khi thêm `role`; mọi thứ bấm được
   phải tới được bằng bàn phím; ô nhập có nhãn (`label htmlFor` hoặc `aria-label`); quản lý focus khi đổi route
-  và khi mở/đóng hộp thoại. Danh mục đầy đủ: `roles/verifier/specialists/frontend.md` mục 9.
+  và khi mở/đóng hộp thoại (cách làm với `<dialog>`, ref, `forwardRef`: `references/patterns.md` mục 6). Danh mục đầy đủ: `roles/verifier/specialists/frontend.md` mục 9.
 
 ## 8. Phiên bản và phạm vi
 
@@ -101,7 +105,8 @@ thực → SSE hoặc WebSocket; bắn-và-quên một lần → `fetch` trong t
 
 | Cần | Đọc |
 |---|---|
-| Viết hoặc sửa test component, hook, trang; MSW; axe; thứ tự truy vấn; snapshot nên hay không; chọn RTL / trình duyệt thật; bộ lệnh test | `references/testing.md` |
+| Viết hoặc sửa test component, hook, trang, hộp thoại, boundary; MSW (kể cả phản hồi chậm, DELETE); axe; thứ tự truy vấn; snapshot nên hay không; chọn RTL / trình duyệt thật; bộ lệnh test | `references/testing.md` |
+| Chữ ký custom hook và đăng ký nguồn ngoài (`useSyncExternalStore`); hàm dọn effect và StrictMode; ô nhập đáp tức thì với `useDeferredValue` / `useTransition`; giá trị Provider ổn định, tách Context; vì sao `key` theo chỉ số làm lệch state; focus, ref, `forwardRef`, hộp thoại; reset error boundary | `references/patterns.md` |
 
 Liên quan: `frontend` (build Vite, routing, state ứng dụng, hiệu năng tải), `e2e-testing` (luồng nhiều trang
 bằng Playwright), `tdd` (chu trình test trước), `web-qa` (QA kiểm bằng trình duyệt), `typescript-reviewer` và

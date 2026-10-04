@@ -65,6 +65,9 @@ ASSUMPTION stack: Playwright Test (TypeScript) cho ứng dụng Vite + React.
 
 Tránh coi `networkidle` là cách chờ chuẩn: chờ sự kiện cụ thể mà người dùng thấy.
 
+Ngày giờ cố định, "chờ 15 phút" không chờ thật (`page.clock`), tải xuống, tab mới: `references/playwright-recipes.md` mục 1–2.
+Đếm dòng sau xoá có thử lại: `toHaveCount` và dữ liệu tự dựng, mục 6 của tệp đó.
+
 ## 6. Test chập chờn: xử lý có kỷ luật
 
 1. **Tái hiện trước khi sửa:** chạy lặp (`--repeat-each=10`) trên đúng tệp; không "thử xem có hết không".
@@ -77,7 +80,7 @@ Tránh coi `networkidle` là cách chờ chuẩn: chờ sự kiện cụ thể m
 ## 7. Bằng chứng
 
 Ảnh chụp (`page.screenshot`, cả trang hoặc một phần tử), trace (xem lại từng bước), video giữ khi hỏng; đặt
-trong thư mục bằng chứng của sprint có git (không `artifacts/` bị bỏ qua). Một lượt chạy ghi vào REPORT: số tổng,
+trong thư mục bằng chứng của sprint có git (không `artifacts/` bị bỏ qua). So sánh ảnh chụp nhiều viewport/ngôn ngữ/giao diện và chống đỏ giả: `references/playwright-recipes.md` mục 3. Một lượt chạy ghi vào REPORT: số tổng,
 qua, hỏng, chập chờn, bỏ qua; mỗi hỏng kèm `tệp:dòng`, thông báo lỗi, ảnh, gợi ý sửa. Tệp báo cáo HTML đưa lên
 CI làm tài liệu đính kèm (`upload-artifact`, `if: always()`).
 
@@ -85,12 +88,13 @@ CI làm tài liệu đính kèm (`upload-artifact`, `if: always()`).
 
 Các bước: lấy mã → cài phụ thuộc theo khoá (`npm ci`) → `npx playwright install --with-deps` → chạy
 `npx playwright test` với `BASE_URL` trỏ môi trường dựng sẵn → tải báo cáo lên, **cả khi hỏng**. Chạy trên đẩy mã
-và pull request. Cấu hình pipeline đầy đủ: skill `deployment`.
+và pull request. Cấu hình pipeline đầy đủ: skill `deployment`. Chia shard, gộp báo cáo `blob`, xử lý một shard đỏ: `references/playwright-recipes.md` mục 4.
 
 ## 9. Luồng quan trọng và tiền
 
 - Luồng có tiền hoặc dữ liệu thật **không chạy trên production**: chặn bằng điều kiện môi trường, dùng môi trường test
   và tài khoản, thẻ, ví giả. Không dán khoá, mật khẩu hay token thật vào test.
+- Đăng nhập bên thứ ba (OAuth, OTP): `storageState` của tài khoản test, đúng một test luồng thật: `references/playwright-recipes.md` mục 5.
 - Dịch vụ ngoài khó điều khiển (ví, cổng thanh toán) mock ở tầng ngữ cảnh trình duyệt (`context.addInitScript` hoặc
   chặn yêu cầu mạng) và khẳng định kết quả nhìn thấy; chờ phản hồi cụ thể với thời gian chờ dài đủ cho bước chậm.
 
@@ -98,6 +102,7 @@ và pull request. Cấu hình pipeline đầy đủ: skill `deployment`.
 
 | Cần | Đọc |
 |---|---|
+| Giả lập thời gian, tải xuống và tab mới, so sánh ảnh nhiều viewport/ngôn ngữ/giao diện, shard CI và gộp báo cáo, đăng nhập bên thứ ba, đếm dòng sau xoá | `references/playwright-recipes.md` |
 | Vì sao cùng một model viết và review thì để lọt lỗi; test hồi quy cho lỗi đã gặp; chạy test trước review; mẫu lỗi hay gặp (lệch đường sandbox/thật, thiếu cột, rò trạng thái lỗi, thiếu hoàn tác) | `references/ai-regression.md` |
 
 Liên quan: `react` (test component, MSW), `web-qa` (QA chỉ báo cáo), `tdd`, `debugging` (tìm nguyên nhân test

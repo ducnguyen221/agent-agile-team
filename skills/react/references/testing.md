@@ -151,3 +151,64 @@ Error boundary: ném lỗi trong con, khẳng định fallback; `vi.spyOn(consol
 để `mockRestore`.
 
 Suspense: render trong `<Suspense fallback={<p>Đang tải</p>}>`; khẳng định fallback hiện, rồi `await findBy*` cho nội dung.
+
+## 15. Test hộp thoại: focus, Esc, trả focus
+
+```tsx
+test("hộp thoại: focus vào Hủy, Esc đóng, trả focus về nút mở", async () => {
+  const user = userEvent.setup();
+  render(<PaymentFlow />);
+  const opener = screen.getByRole("button", { name: /thanh toán/i });
+  await user.click(opener);
+  const dialog = screen.getByRole("dialog", { name: /xác nhận/i });
+  expect(within(dialog).getByRole("button", { name: /hủy/i })).toHaveFocus();
+  await user.keyboard("{Escape}");
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(opener).toHaveFocus();
+});
+```
+
+- Khẳng định bằng `toHaveFocus()` và truy vấn theo `role="dialog"`; không soi ref hay `document.activeElement` trực tiếp.
+- Nhốt focus: `await user.tab()` nhiều lần rồi khẳng định focus vẫn nằm trong `within(dialog)`.
+- JSDOM có thể thiếu `HTMLDialogElement.showModal` hoặc không mô phỏng việc vô hiệu hoá phần nền: kiểm bản JSDOM
+  đang dùng; thiếu thì test phần này bằng Playwright component hoặc E2E (mục 10), phần logic còn lại vẫn kiểm bằng RTL.
+
+## 16. MSW: phản hồi chậm, DELETE, lỗi theo từng test
+
+```ts
+import { delay } from "msw";
+server.use(
+  http.get("/api/invoices", async () => { await delay(150); return HttpResponse.json([]); }),  // chậm có chủ đích
+  http.delete("/api/invoices/:id", () => new HttpResponse(null, { status: 204 })),
+);
+// treo mãi để test trạng thái đang tải / thời gian chờ:
+server.use(http.get("/api/invoices", async () => { await delay("infinite"); }));
+```
+
+- Trong Node (môi trường test), `delay()` không đối số **không** làm chậm (tránh kéo dài test); muốn trạng thái chậm
+  phải truyền số mili giây rõ hoặc `"infinite"`. Với `"infinite"` khẳng định khung xương đang hiện ngay, rồi để test kết thúc.
+- `DELETE` ghi đè bằng `http.delete`; khẳng định hiệu ứng nhìn thấy (dòng biến mất, thông báo) chứ không chỉ "đã gọi".
+  Ca lỗi 500 của `DELETE` khẳng định giao diện trở về trạng thái cũ và có thông báo (mẫu hoàn tác ở `e2e-testing`
+  `references/ai-regression.md`).
+- Mỗi test ghi đè bằng `server.use`; `afterEach(server.resetHandlers)` (mục 5) trả về mặc định. Bỏ `vi.mock("axios")`: mock ở tầng mạng
+  mới bắt được hình dạng phản hồi đổi.
+- Đợi trạng thái tải/lỗi bằng `findBy*`/`waitFor` (mục 4), không tắt cảnh báo `act`.
+
+## 17. Test error boundary có nút "Thử lại"
+
+```tsx
+test("thử lại dựng lại khối biểu đồ", async () => {
+  const user = userEvent.setup();
+  let fail = true;
+  server.use(http.get("/api/activity", () =>
+    fail ? new HttpResponse(null, { status: 500 }) : HttpResponse.json({ points: [1, 2] })));
+  render(<ProfilePage />);
+  expect(await screen.findByRole("alert")).toHaveTextContent(/không tải được/i);
+  expect(screen.getByRole("heading", { name: /hồ sơ/i })).toBeInTheDocument(); // phần ngoài boundary vẫn dùng được
+  fail = false;
+  await user.click(screen.getByRole("button", { name: /thử lại/i }));
+  expect(await screen.findByRole("img", { name: /biểu đồ hoạt động/i })).toBeInTheDocument();
+});
+```
+
+Khẳng định ba điều: fallback hiện, vùng ngoài boundary còn sống, bấm thử lại làm nội dung trở lại.
