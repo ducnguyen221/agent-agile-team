@@ -117,7 +117,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [debugging](debugging/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [deployment](deployment/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/6 (+2 partial, 0 fail), below threshold; points-right 6/6 | 2026-10-03 |
-| [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-03 |
+| [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [fastapi](fastapi/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-03 |
 | [github-ops](github-ops/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [postgres](postgres/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 5/6 (+1 partial, 0 fail), at threshold; points-right 6/6 | 2026-10-03 |
