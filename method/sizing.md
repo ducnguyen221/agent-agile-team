@@ -64,3 +64,30 @@ Frontmatter mọi tài liệu sprint có `size: tiny | small | medium | large`, 
 `risk_tags` (rỗng khi `normal`). `risk: high` buộc `size: large`.
 Cỡ ghi ở Bước 1 (Tiếp nhận), có thể **nâng** ở bất kỳ bước nào khi lộ rủi ro mới (ghi `Phán quyết:` kèm lý
 do); **hạ** cỡ chỉ được ở Cổng 1 do người dùng quyết.
+
+## 5. Đối chiếu luồng orch
+
+Nhiều bộ công cụ chia việc thành năm **luồng** theo loại thay đổi (thêm tính năng, đổi hành vi có sẵn, sửa lỗi, tái
+cấu trúc, dựng bản đầu từ tài liệu thiết kế). Repo này **không** thêm trục thứ hai: cỡ việc (mục 1) vẫn là trục duy
+nhất quyết độ dày tài liệu và cổng. Bảng dưới chỉ trả lời "một luồng quen tay rơi vào cỡ nào, bước đầu tiên là gì,
+kéo skill nào". Bốn bậc của nguồn (nhỏ nhất → lớn nhất) khớp bốn cỡ **Rất nhỏ · Nhỏ · Vừa · Lớn** ở trên, nhưng nguồn
+chỉ đếm số file; ở đây cỡ còn do hành vi, hợp đồng và rủi ro quyết.
+
+Bảng có 5 hàng — mỗi hàng một **luồng** ở cột đầu:
+
+| Luồng (loại việc) | Cỡ tối thiểu | Bước đầu tiên khi làm | Cổng người | Skill kéo vào |
+|---|---|---|---|---|
+| Thêm tính năng (hành vi chưa có) | **Vừa** — luôn có hành vi hay luồng mới | viết test mới cho hành vi mới, thấy nó hỏng **đúng lý do**, rồi mới viết mã | Cổng 1 và Cổng 2 đủ | `intake` → `shaping-spec` → `writing-plan` → `running-sprint` + `tdd` → `code-review` |
+| Đổi hành vi có sẵn (chạy đúng nhưng muốn khác) | **Nhỏ** — một luồng, một `FR`, không đổi hợp đồng; **Vừa** khi đổi nhiều hơn một `FR` | sửa **test hiện có** cho khớp hành vi mới rồi đổi mã tới khi đạt; sửa test trước là điểm phân biệt đổi hành vi với sửa lỗi | Cổng 1 và Cổng 2 thật (trình ngắn) | `intake`, `shaping-spec` (delta **Sửa** cho spec sống), `tdd`, `code-review` |
+| Sửa lỗi (hành vi sai, hồi quy) | **Nhỏ** — sửa lỗi là đổi hành vi nên không xuống Rất nhỏ; lỗi chạm vùng rủi ro (mục 2) thì **Lớn** | tái hiện lỗi thành **test hỏng** (test hồi quy) rồi sửa; chứng minh bằng vòng gỡ sửa → hỏng → đặt lại ([evidence.md](evidence.md) mục 4) | Cổng 1 và Cổng 2 thật | `bug-triage` (chấm mức, định tuyến) → `debugging` → `tdd` → `verify-before-done` |
+| Tái cấu trúc (giữ hành vi, đổi cấu trúc) | theo **phạm vi đụng tới**: **Nhỏ** khi một mô-đun cục bộ; **Vừa** khi nhiều mô-đun hoặc đổi giao diện nội bộ; **Lớn** khi chạm hợp đồng bên ngoài | xác nhận test liên quan **đang xanh trước khi chạm mã**; thiếu thì viết test mô tả hành vi hiện tại; đổi từng bước nhỏ, chạy lại sau mỗi bước; diff phải trung tính về hành vi | như cỡ đã chọn | `tdd`, `code-review` (kể cả tìm hàm trùng lặp), `verify-before-done` |
+| Dựng bản đầu từ tài liệu thiết kế | **Lớn** | đọc tài liệu, trích phạm vi, quyết định đã khoá và danh sách tính năng; cắt thành **lát dọc mỏng** (một đường chạy hết đầu–cuối trước, không làm hết lớp này rồi mới tới lớp kia) | Cổng 1 và Cổng 2 đủ; mỗi lát một mục tiêu nên **một sprint một lát**, cùng trỏ về một `RQ-` | `intake`, `shaping-spec`, `writing-plan`, `adr` |
+
+Luật đi kèm:
+
+- **Luồng không hạ cỡ.** Cột "cỡ tối thiểu" là sàn; mục 1 (phân vân chọn bậc nặng hơn) và mục 2 (rủi ro chỉ nâng)
+  vẫn quyết cỡ cuối cùng. Việc chạm vùng rủi ro nào ở mục 2 cũng thành cỡ lớn, bất kể luồng.
+- **Cổng 2 là nghiệm thu sau REPORT**, không đặt trước từng lần commit. Commit nằm trong bước thực thi theo từng
+  `TK`; push, mở PR và gộp nhánh chính chỉ sau Cổng 2 và khi người dùng gật ([process.md](process.md) mục 7).
+- **Kiểm định luôn do agent khác** người làm ở mọi luồng và mọi cỡ; thêm Tech Reviewer kéo thẻ chuyên đề security khi
+  việc chạm secret, xác thực hay đầu vào từ ngoài (mục 2).
