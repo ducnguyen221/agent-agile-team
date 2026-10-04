@@ -117,6 +117,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [debugging](debugging/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-01 |
 | [deployment](deployment/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/6 (+2 partial, 0 fail), below threshold; points-right 6/6 | 2026-10-03 |
+| [e2e-testing](e2e-testing/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [error-handling](error-handling/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-03 |
 | [fastapi](fastapi/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-03 |
 | [frontend](frontend/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
