@@ -1,6 +1,6 @@
 ---
 name: closing-sprint
-description: Use when verification has no open blocking findings and the sprint must be closed — preflight evidence check before gate 2, a version-bump proposal, then after the user's verdict updating living specs, the central ledger and docs, running every check lane on the tree to merge, and presenting the branch menu (merge only on green CI of the exact commit; push + PR; keep) without force-pushing or deleting work on your own.
+description: Use when closing a sprint after verification has no open blockers: run the evidence preflight before gate 2, propose a version bump, and after the user's verdict update living specs, registries and docs; check every review lane on the tree to be merged; offer the branch menu (merge, push + PR, keep); merge only on green CI for that exact commit or user approval; never force-push or delete work.
 metadata:
   group: process
   roles: [analyst, implementer]

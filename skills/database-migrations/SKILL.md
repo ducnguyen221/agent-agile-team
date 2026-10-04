@@ -1,6 +1,6 @@
 ---
 name: database-migrations
-description: Use when creating or altering tables, columns, indexes or constraints, writing a data backfill or data-fix script, planning a zero-downtime schema change, setting up migration tooling or a migration CI/CD step (including Rails), adding a unique index over possibly duplicate rows, reviewing a migration, or before a migration runs against production-sized or production data.
+description: Use when creating or altering tables, columns, indexes or constraints, writing a backfill or data-fix script, planning a zero-downtime schema change, choosing migration tooling or CI/CD steps (Rails included), adding a unique index over data that may hold duplicates, reviewing a migration, or before running one against production-sized data.
 metadata:
   group: technique
   kind: reference
