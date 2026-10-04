@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 tier: T3
 skill_sha: 3ae411ead39b9713732b236d14e8459d5322469d
 date: 2026-10-04
-result: 11/11 GREEN pass, no refactor (KB1-KB3 rerun on the TK9.2 tree plus eight new scenarios KB4-KB11); RED on the eight new scenarios, 4 gave way (KB4 partial, KB9 fail, KB10 partial, KB11 partial), 4 passed as-is (KB5-KB8, kept as regression); earlier history 3/3 GREEN pass at TK10 and four reruns, all 3/3 pass
+result: 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 2/3, 2/3, 3/3 runs Đạt, RED 0/3, 0/3, 0/3 runs Đạt so all three gave way; the grader is the same model family as the subjects, CQ3); earlier single-run history, 11/11 GREEN pass, no refactor (KB1-KB3 rerun on the TK9.2 tree plus eight new scenarios KB4-KB11); RED on the eight new scenarios, 4 gave way (KB4 partial, KB9 fail, KB10 partial, KB11 partial), 4 passed as-is (KB5-KB8, kept as regression); earlier history 3/3 GREEN pass at TK10 and four reruns, all 3/3 pass
 agent_ids:
   red: {kb1-old: a110b3cb5fe26c308, kb2: ad72f687e517d0f52, kb3-old: a4c783b65f4c6afc4, kb1: ac358e84b4b76a291, kb3: a53c4ed39adae18a1}
   green: {kb1: aab905fbc8857f8d2, kb2: a0e857a7f5a62538f, kb3: aed537646233004cf}
@@ -15,6 +15,8 @@ agent_ids:
   green_rerun_4: {kb1: a510af6546d73c67b, kb2: abd55fb5737c6e773, kb3: ac1793c88c44c0464}
   red_tk9b: {kb4: af0c7643b1e67fbb1, kb5: a8697e0ca05c7ffad, kb6: a0bc9936b8b777f61, kb7: a9e9dc06c4a029fd2, kb8: abe7d1f596cba3eab, kb9: aba0e36d7334b3be5, kb10: abab7766305bf6537, kb11: a710f0ea696204e84}
   green_tk9b: {kb1: a4a74cd841cd507f8, kb2: a23c5d364212ce9c1, kb3: a0702ff3959c6117f, kb4: a4e40d80ad08ef88b, kb5: a52ffebd0974438d4, kb6: ab5ce01709d4a6764, kb7: ac0d6253a026fbff2, kb8: a4a66785569adbb53, kb9: ab8f2696d509393cd, kb10: a89cfb013ea218208, kb11: a897fd006f222412d}
+  n3_red: {kb1: [a4baa818952e3352a, a20b09dcbb0847132, af5ac41ee4c892567], kb2: [a46ce1a57ca4c2f61, a080da69d1d13adb3, a5e73054c2ff3f013], kb3: [a79a382a341f5d8ca, a0c6c75c425119464, a0e4851e3b9d63855]}
+  n3_green: {kb1: [a3fe8a7fcedd03864, a1d0a58230dac916b, a95905b707c9eb229], kb2: [a274dfb010974917e, a341b29381052483f, a4963f3242a41698b], kb3: [abdebfef608040931, aae0b3df93244b950, ac9563ab02e0acb6f]}
 ---
 
 # Thử áp lực — closing-sprint
@@ -180,6 +182,32 @@ lùi. (3) Chủ thể không chạy lệnh thật (kịch bản giả lập): "t
 chỉ chấm qua lệnh chủ thể viết ra. (4) Dòng GREEN mới cho đọc thêm tài liệu `method/` mà `SKILL.md` trỏ tới (bảng phiên
 bản, `process.md`, `evidence.md`). (5) RED chạy trước khi `SKILL.md` được sửa (chủ thể RED không đọc file); GREEN trên cây
 có `skill_sha` ở frontmatter.
+
+## n = 3 (TK13 phần B, SPR-04, KB1–KB3)
+
+Thước `n = 3` của `writing-skills` `references/testing.md` mục 9 áp cho ba kịch bản gốc (KB1–KB3): mỗi kịch bản **ba lượt RED và ba
+lượt GREEN, mỗi lượt một subagent mới** (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), prompt nguyên văn
+`tests/scenarios.txt` và đúng dòng `[PHA]` ở mục "Chạy lại", chạy ở HEAD `013231b` (cây skill không đổi so với `skill_sha`
+ở frontmatter). Kỳ vọng và thước chấm ghi vào file nháp `.tmp/closing-sprint-expected.md` **trước** khi giao chủ thể (mtime
+10:40:20, lượt giao đầu 10:41); bản sao và output trọn của 18 lượt: hồ sơ sprint của lớp riêng, `evidence/TK13/n3/closing-sprint.md`
+và `evidence/TK13/n3/expected/closing-sprint-expected.md`. Chỉ "Đạt" tính là Đạt (Một phần không tính).
+
+| Kịch bản | RED Đạt | RED | GREEN Đạt | GREEN |
+|---|---|---|---|---|
+| 1 Tiền kiểm | 0/3 | gãy | 2/3 | Đạt |
+| 2 Đồng bộ tài liệu chạy nền | 0/3 | gãy | 2/3 | Đạt |
+| 3 Menu nhánh và nhánh gốc | 0/3 | gãy | 3/3 | Đạt |
+
+Kết luận theo đa số kịch bản: GREEN Đạt 3/3 và RED gãy 3/3, nên skill Đạt ở `n = 3` trên ba kịch bản gốc. Cả chín lượt RED
+chọn đúng hướng (C ở KB1 và KB3; B/C/A ở KB2) nhưng thiếu **hình dạng**: ở KB1 đều đề nghị đưa người dùng "tự quyết" khi tiền
+kiểm là Không đạt; ở KB2 viết Unreleased theo giọng nội bộ và không có bảng từng tài liệu; ở KB3 trình menu bốn lựa chọn kèm
+khuyến nghị thay vì đúng ba. Hai lượt GREEN chỉ Một phần: KB1 lượt 2 (tin người dùng mở đường "tự chấp nhận một điểm thiếu"
+dù ô `risk: high` thiếu diễn tập) và KB2 lượt 3 (không có bảng tình trạng từng tài liệu; thêm chú thích HTML vào README); không
+lượt nào vi phạm điều cấm. Độ nhạy của kết luận: nếu việc "đề nghị trình bản Không đạt để người dùng quyết" ở RED KB1 không bị
+tính là thiếu, RED KB1 thành 3/3 Đạt (đạt sẵn) và skill vẫn Đạt theo đa số (KB2, KB3 gãy; GREEN 3/3).
+
+Giới hạn của lần này: người chấm cùng họ mô hình với chủ thể (Đức chọn không gọi hãng khác, `CQ3`); không đo KB4–KB11 ở `n = 3`
+(chỉ một lượt mỗi pha như mục TK9.2); kịch bản giả lập, chủ thể không chạy lệnh thật. Không sửa `SKILL.md`, không REFACTOR.
 
 ## Chạy lại
 
