@@ -294,7 +294,7 @@ def test_retrieval_result_is_computed_from_its_table(path):
     assert str(front(path)["result"]) == retrieval_result(c.read_text(path))
 
 
-README_ROW = re.compile(r"^\| \[(?P<skill>[a-z-]+)\]\([^)]*\) \| [^|]+ \| `(?P<file>[a-z]+\.md)` \| (?P<result>.*) \| (?P<date>[0-9-]+) \|$")
+README_ROW = re.compile(r"^\| \[(?P<skill>[a-z0-9-]+)\]\([^)]*\) \| [^|]+ \| `(?P<file>[a-z]+\.md)` \| (?P<result>.*) \| (?P<date>[0-9-]+) \|$")
 
 
 def readme_status_rows():
