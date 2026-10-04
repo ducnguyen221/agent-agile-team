@@ -1,6 +1,6 @@
 ---
 name: api-design
-description: Use when designing, changing or reviewing a REST endpoint or its contract — resource URLs, HTTP methods, status codes, response or error envelopes, pagination, filtering, auth, rate limits, versioning — or when a SPEC must list an API change and its consumers.
+description: Use when designing, changing or reviewing a REST endpoint or its contract — resource URLs, HTTP methods, status codes, response or error envelopes, pagination, filtering, auth, rate limits, versioning, safe retries, optimistic locking, file upload — or when a SPEC must list an API change and its consumers.
 metadata:
   group: technique
   kind: reference
@@ -75,7 +75,11 @@ POST   /api/v1/auth/refresh
 403 Forbidden             — authenticated but not authorized
 404 Not Found             — resource does not exist
 409 Conflict              — duplicate entry, state conflict
+412 Precondition Failed   — If-Match / ETag no longer matches (lost-update guard)
+413 Content Too Large     — upload over the size limit
+415 Unsupported Media Type — file or body type not allowed
 422 Unprocessable Entity  — valid JSON, semantically invalid data
+428 Precondition Required — endpoint requires If-Match and the client sent none
 429 Too Many Requests     — rate limit exceeded
 
 # Server errors
@@ -83,6 +87,9 @@ POST   /api/v1/auth/refresh
 502 Bad Gateway           — upstream service failed
 503 Service Unavailable   — temporary overload, include Retry-After
 ```
+
+`POST` không idempotent nên client thử lại sau khi hết thời gian chờ có thể tạo trùng: endpoint tạo tiền/đơn/tin nhắn nhận `Idempotency-Key`
+(`references/retries-concurrency-files.md` mục 1). Hai người sửa cùng bản ghi: `ETag` + `If-Match`, lệch → `412` (mục 2 của tệp đó).
 
 Lỗi hay gặp:
 
@@ -123,6 +130,7 @@ Thay đổi làm gãy bên dùng mà không có phiên bản hoặc giai đoạn
 |---|---|
 | Phong bì thành công / danh sách / lỗi; phân trang offset và cursor (SQL, đánh đổi, bảng chọn); lọc, sắp xếp, tìm kiếm, chọn trường | `references/responses-pagination-filtering.md` |
 | Xác thực bằng bearer / API key, kiểm quyền sở hữu và vai; header và bậc rate limit; phiên bản qua URL hay header, lộ trình ngừng hỗ trợ | `references/auth-ratelimit-versioning.md` |
+| Thử lại an toàn cho `POST` (`Idempotency-Key`); khoá lạc quan `ETag` + `If-Match` (`412`, `428`); `If-None-Match`/`304` cho client thăm dò; upload và tải tệp (multipart, URL ký sẵn, `413`, `415`, kiểm quyền lúc tải) | `references/retries-concurrency-files.md` |
 | Endpoint hoàn chỉnh: TypeScript (Next.js + Zod), Python (DRF), Go (net/http) | `references/implementation-examples.md` |
 
 Liên quan: skill `fastapi` (cài endpoint bằng FastAPI), `error-handling` (phân cấp lỗi, ánh xạ lỗi sang
@@ -139,6 +147,8 @@ phong bì), `security-review` (bề mặt tấn công mới), `database-migratio
 - [ ] Bắt buộc xác thực, hoặc ghi rõ là công khai
 - [ ] Kiểm quyền: người dùng chỉ chạm tài nguyên của mình
 - [ ] Có rate limit
+- [ ] Endpoint tạo có hậu quả (tiền, đơn, tin nhắn) nhận khoá chống trùng; endpoint nhiều người sửa có `ETag`/`If-Match`
+- [ ] Endpoint nhận tệp: giới hạn kích thước và loại (`413`, `415`), tên tệp do server đặt, kiểm quyền lúc tải
 - [ ] Response không lộ nội bộ (stack trace, lỗi SQL, chuỗi kết nối)
 - [ ] Đặt tên trường nhất quán với endpoint có sẵn (camelCase hay snake_case)
 - [ ] Đổi hợp đồng đã liệt kê bên dùng và delta (mục 3)
