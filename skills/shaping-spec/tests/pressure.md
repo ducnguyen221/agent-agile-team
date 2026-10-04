@@ -57,7 +57,7 @@ RED** và bị loại; nguyên văn vẫn ở `tests/scenarios.txt`. Mỗi pha m
 
 **Kỳ vọng sửa sau rà soát tổng thể (fix-1):** cỡ nhỏ là một `SPRINT.md` nên trạng thái đúng là `drafting`, không phải `in_review`
 (giá trị này chỉ có ở SPEC cỡ vừa trở lên); chủ thể thử vẫn phải để Business Reviewer đọc phần SPEC trước khi viết phần PLAN. Kết quả
-GREEN ghi ở trên chấm theo kỳ vọng cũ (`in_review`). **Kịch bản cần chạy lại sau fix-1:** `sp-7`, `sp-8` (chưa chạy).
+GREEN ghi ở trên chấm theo kỳ vọng cũ (`in_review`). **Kịch bản cần chạy lại sau fix-1:** `sp-7`, `sp-8` — đã chạy, cả hai Đạt theo kỳ vọng mới (mục "Chạy lại sau `fix-1`").
 
 ## Kịch bản sp-9 — "Đơn giản quá, khỏi SPEC": việc rất nhỏ (SPR-04)
 
@@ -89,6 +89,19 @@ SPR-04: RED của `sp-9` lộ chỗ skill nói sai hình tài liệu của cỡ 
 skill, GREEN đạt cả ba ở lượt đầu. Điểm RED gãy đã có câu chặn ở mục 5 (`FR` dạng KHI…THÌ, gồm
 đường lỗi; `SC` đo được; mục hợp đồng theo cỡ) và mục 6 (`status: in_review`, Business Reviewer đọc trước khi
 Architect viết PLAN).
+
+## Chạy lại sau `fix-1` (SPR-04)
+
+QA độc lập (khác mọi Implementer của `fix-1`), 2026-10-04, HEAD `16d34b3`, cây skill đúng `skill_sha` ở frontmatter. Mỗi kịch bản một lượt GREEN, chủ thể là subagent mới (`claude-sonnet-5-5`, tier T3, không dùng công cụ Skill), prompt nguyên văn `tests/scenarios.txt` với dòng `[PHA]` và phép thay vế mở đầu như mục "Chạy lại". Kỳ vọng và thước chấm ghi vào `.tmp/` trước lượt giao rồi chép bằng `cp -p` sang `evidence/fix1-qa/expected/` của hồ sơ sprint SPR-04 (lớp riêng); output trọn của từng chủ thể ở `evidence/fix1-qa/<skill>-<kịch bản>.md` cùng nơi. Chưa chạy RED (cây trước `fix-1` đã nằm ở các mục trên). Chưa đo độ phân tán (n = 1 mỗi kịch bản); người chấm cùng họ mô hình với chủ thể (`CQ3`).
+
+Kỳ vọng mới sau `fix-1`: cỡ nhỏ là một `SPRINT.md` nên `status: drafting` (không `in_review`); một reviewer khác người viết vẫn đọc phần SPEC trước khi Architect chốt PLAN.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `sp-7` | `ab440e4a515060a35` | **Đạt** | `FR1.1`–`FR3` KHI…THÌ gồm đường lỗi/biên (DB lỗi, không có đơn khớp, `--days` sai); `SC1`–`SC4` đo được; "`SPRINT.md` giữ `status: drafting`"; ngoài phạm vi và mục bỏ có lý do; bác lời Architect ("một đoạn mô tả", "chạy được") |
+| `sp-8` | `aa59bab2317cb32db` | **Đạt** | chọn C; "`status: drafting` (không dùng `in_review`, vì giá trị này không thuộc `SPRINT.md`)"; Business Reviewer đọc SPEC trước, Architect chỉ nháp khung và chưa chốt `TK` tới khi có góp ý; trả lời Architect giữ lập trường |
+
+Kết quả: 2/2 **Đạt** theo kỳ vọng mới; `sp-8` không còn ghi `in_review` như lần GREEN trước. Không sửa `SKILL.md`.
 
 ## Chạy lại
 
