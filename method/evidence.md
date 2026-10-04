@@ -103,8 +103,10 @@ nhất quán không, một câu "né" có xuất hiện không. Không suy luậ
 tự báo, chỉ tin thứ đo được. Cổng này là **luật văn bản**, không cần hook hay thành phần chạy nền nào.
 
 KHI sắp trình Cổng 2 (và trước khi đánh dấu một `TK` là xong) THÌ người điều phối (hoặc QA) chạy đủ năm kiểm sau, ghi
-kết quả vào PROGRESS. Năm kiểm này **chính là** bước "Chạy" của vòng kiểm sáu pha mỗi `TK`
-([loop.md](../skills/verify-before-done/references/loop.md)), không phải vòng thứ hai:
+kết quả vào PROGRESS. Năm kiểm này đọc **kết quả** của vòng kiểm sáu pha mỗi `TK`
+([loop.md](../skills/verify-before-done/references/loop.md)) và của `check`; không chạy lại phép kiểm. Đó là lớp kiểm hồ
+sơ chồng lên bước "Chạy" của cổng năm bước ([verify-before-done](../skills/verify-before-done/SKILL.md) mục 2), không
+phải vòng kiểm thứ hai:
 
 | Kiểm | Cách kiểm cơ học | Trúng thì |
 |---|---|---|
