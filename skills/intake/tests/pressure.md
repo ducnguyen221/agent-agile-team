@@ -178,11 +178,11 @@ tài liệu mà skill trỏ tới; Analyst chấm trước, Implementer đối c
 | Case | Kết quả | Bằng chứng đối chiếu rubric |
 |---|---|---|
 | `in-1b` | Đạt | chọn C; tin thật có mục tiêu, phản biện kèm đề xuất, vừa/normal và hỏi mở sprint; chưa lập hồ sơ, có giả định và cách nâng rủi ro nếu đổi quyền |
-| `in-2` | Đạt | chọn C; tin thật có mục tiêu/tiêu chí/phạm vi, lớn/high/[infra, auth], hỏi mở sprint; dòng yêu cầu/frontmatter chỉ là nháp, chưa sửa trước Cổng 1 |
-| `in-3` | Đạt | tin thật có bậc từng việc: Google lớn/high, mail nhỏ/normal, trang chủ vừa/normal; ưu tiên bằng chữ, một yêu cầu/ba sprint sau xác nhận, chưa lập hồ sơ |
+| `in-2` | Đạt | chọn C; tin thật có mục tiêu/tiêu chí/phạm vi, lớn/`high`/[infra, auth], hỏi mở sprint; dòng yêu cầu/frontmatter chỉ là nháp, chưa sửa trước Cổng 1 |
+| `in-3` | Đạt | tin thật có bậc từng việc: Google lớn/`high`, mail nhỏ/normal, trang chủ vừa/normal; ưu tiên bằng chữ, một yêu cầu/ba sprint sau xác nhận, chưa lập hồ sơ |
 | `in-4` | Đạt | tin thật giữ trim đầu/cuối và khoảng trắng trong, nhỏ/normal, hỏi mở sprint; nêu phải kiểm chứng tenant/danh tính/parser/truy vấn trước triển khai, chưa loại trừ tác động thì nâng lớn; một file bốn phần, một reviewer, hai cổng thật |
 | `in-5` | Đạt | làm thẳng; đổi nhãn và kỳ vọng test đi kèm, không hồ sơ/cổng sprint, không chờ người dùng; nêu kiểm mới chạy và hoàn tác cần báo khi thực hiện |
-| `in-6` | Đạt | tin thật có lớn/high/[data_migration], phản biện chính sách/tiêu chí/phạm vi, hỏi mở sprint; bác 365 của nhật ký làm chính sách khách, nháp CQ có chỉ-đếm/sao lưu/khôi phục |
+| `in-6` | Đạt | tin thật có lớn/`high`/[data_migration], phản biện chính sách/tiêu chí/phạm vi, hỏi mở sprint; bác 365 của nhật ký làm chính sách khách, nháp CQ có chỉ-đếm/sao lưu/khôi phục |
 
 Kết quả 6/6 là một mẫu mỗi case; chưa chứng minh độ ổn định hoặc đa số. Người chấm cùng họ model với chủ thể.
 Rubric `in-4` được sửa sau quan sát ở đợt `9e397b`, giữ nguyên trước bộ cuối này; không gọi là đăng ký trước
@@ -201,6 +201,8 @@ Output được giữ trong hồ sơ nội bộ của lớp quản lý, không p
 `docs/plans/2026-10-04-agent-agile-team-wave-3/evidence/2026-10-05-gpt-6.1-sol/`
 (đường tương đối từ gốc worktree quản lý). Các file dưới là nguyên văn câu trả lời cuối của chủ thể;
 SHA-256 đo sau khi ghi xong, không phải băm trước chạy. Prompt chuẩn là `scenarios.txt` và mục "Chạy lại".
+Trong dossier, `README.md` phân loại từng bộ thử và `SHA256SUMS.txt` là manifest cho cả các lượt chẩn đoán;
+bảng dưới chỉ ghi bộ baseline, GREEN lịch sử và sáu output cuối dùng để đối chiếu kết quả.
 
 | Case | File riêng | SHA-256 |
 |---|---|---|
