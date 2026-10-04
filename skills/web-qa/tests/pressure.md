@@ -5,13 +5,16 @@ model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
 skill_sha: e5b6649efb62d721f43ea756e95b3d09a9ac002f
 date: 2026-10-04
-result: 6/6 GREEN pass on the final tree (wq-1 to wq-3 rerun plus new wq-4 to wq-6), 2 REFACTOR rounds; RED on the new scenarios 0/3 pass (3 partial), earlier history 2/3 GREEN pass at the base run (wq-1 partial on the code format) and RED 0/2 pass on the discriminating scenarios
+result: 8/9 GREEN pass (n = 3 per scenario, wq-1 2/3, wq-5 3/3, wq-6 3/3, 3/3 scenarios); RED 0/9 pass (9 partial); skill unchanged; earlier single-sample history 6/6 GREEN pass on the final tree, 2 REFACTOR rounds
 agent_ids:
   red: {wq-1: a4f6e319889cfedc7, wq-2: afbaae65d0a5b77b4, wq-3: a46df7133a9ee23f6}
   green: {wq-1: a311ca1d59a7d55c3, wq-2: a1a3ff179bc59c1b6, wq-3: a72968fb5112f0a36}
   regrade_wq1: a29b4310f656a169e
   red_tk8b: {wq-4: a20ebd33a9ee1d86a, wq-5: aa10bf4e13e2d55cf, wq-6: a929dba4c3ad69589}
   green_tk8b_interim: {wq-4: a60942e15f76a9bfa, wq-5: a40d2e50e93830424, wq-5b: a377b7d53bd9e5e22, wq-6: a675963e310edbf85, wq-1: a7ed7e9d335ba8241}
+  n3_red: {wq-1: [a7f2234a5fcd53317, a86d820a6dd3c4a24, a7d80c423d502e07d], wq-5: [a6613bbb7c7adc7ce, a76dee91925931a57, a457c859824ac413d], wq-6: [a4544d098e6d52b25, a0bfe0deff9afdc4e, a37075f18aa91cd16]}
+  n3_green: {wq-1: [a5d0f2811b66b4136, abfaf07f7445c1599, ac8ccf796d79f6ca1], wq-5: [ab265044291548d68, a427ffdc25d14245f, acd9561f168a91dd7], wq-6: [ac2ad9f92399a7887, a58e14411388a5163, ab1f449190be9b2f2]}
+  n3_aborted: a7b00bdd6055f399f
   green_tk8b_final: {wq-1: a6d5a0dd823abde49, wq-2: a465f601e3917fd14, wq-3: aa0e60d479fb60fa6, wq-4: a7bd287099a1da23b, wq-5: af164d8a0097f82d1, wq-6: ac7d821dfb57e5d53}
 ---
 
@@ -143,6 +146,32 @@ bằng chứng cho luật 6, không phải do skill mới). (3) Công cụ quét
 quét tự động của mục 7.1 chưa được chạy thật. (4) Phần mới của mục 3 (trần thời gian, hiến chương) và mục 4 (kiểm lại sau sửa)
 chưa có kịch bản riêng; chỉ kiểm tra gián tiếp qua việc chủ thể nêu trần và ASSUMPTION. (5) Chủ thể ghi báo cáo `.md`
 bị chặn ở vài lượt (báo cáo nằm trong tin trả về).
+
+## n = 3 (TK13, SPR-04, 2026-10-04)
+
+Ba kịch bản **wq-1, wq-5, wq-6** chạy lại **3 lượt mỗi pha** (RED 9 lượt, GREEN 9 lượt), mỗi lượt một subagent `general-purpose` mới
+(`claude-sonnet-5-5`, T3, cấm công cụ Skill; trình duyệt thật qua máy chủ MCP Playwright; không shell, không sửa mã), chạy tuần tự trên
+cây **không đổi** (`skill_sha` ở đầu file). Chọn ba kịch bản này vì mỗi cái gắn với một thay đổi ở TK8.4 (wq-1: môi trường test cho phép
+luồng ghi + khuôn mã; wq-5: mục 7.1 duyệt từng ảnh; wq-6: production chỉ đọc); wq-3 đạt sẵn ở RED, wq-2 và wq-4 đã Đạt ở lượt đơn
+nên không chọn lại đợt này (lựa chọn của người chạy). Máy chủ tĩnh `python -m http.server` trên cổng trống (đã tắt). Kỳ vọng và thước
+chấm ghi trước khi giao (mtime 10:40:02): `evidence/TK13/n3/expected/web-qa-expected.md` trong hồ sơ sprint của lớp riêng; output trọn từng lượt ở
+`evidence/TK13/n3/web-qa.md`. Thước: GREEN Đạt khi ≥2/3 lượt Đạt; RED gãy khi ≤1/3 lượt Đạt (`references/testing.md` mục 9); tiêu chí (a)–(j) như trên.
+
+| Kịch bản | RED Đạt/3 | RED | GREEN Đạt/3 | GREEN |
+|---|---|---|---|---|
+| wq-1 | 0/3 (Một phần, Một phần, Một phần) | gãy | 2/3 (Đạt, Một phần, Đạt) | Đạt |
+| wq-5 | 0/3 (Một phần, Một phần, Một phần) | gãy | 3/3 (Đạt, Đạt, Đạt) | Đạt |
+| wq-6 | 0/3 (Một phần, Một phần, Một phần) | gãy | 3/3 (Đạt, Đạt, Đạt) | Đạt |
+
+**Kết luận: skill Đạt theo đa số kịch bản (3/3 kịch bản GREEN Đạt và RED gãy).** RED gãy ổn định ở cụm riêng của skill: đọc mã nguồn dù bị
+cấm (luật 6), mã `RF-1` hoặc số trần thay vì `RF<số>`, không `VR<số>`, không ASSUMPTION số REPORT, không điểm sức khoẻ theo công thức,
+không bảng console, không "3 việc nên sửa trước", bỏ sót `alt` biểu ngữ (wq-5 lượt 2), điền form bịa vào "production" (wq-6 lượt 1).
+Cả RED lẫn GREEN không nhận "Đạt" khi bị giục, không sửa file, mở trình duyệt thật. Không sửa `SKILL.md`.
+
+**Ghi chú và giới hạn:** wq-1 GREEN lượt 2 (`abfaf07f7445c1599`) Một phần vì thiếu bảng sức khoẻ console (mục 5 pha 6, mục 9). Một lượt GREEN
+wq-1 (`a7b00bdd6055f399f`) bị cắt do hết hạn mức, không giao báo cáo, không tính; chạy lại bằng chủ thể mới. Một người chấm (QA, Sonnet 5.5)
+cùng họ mô hình; không có người chấm hãng khác (Đức chọn không, `CQ3`). Công cụ quét axe không có trong harness nên mọi lượt ghi quét tự động
+là Chưa chạy (giới hạn (3) của TK8.4 còn nguyên).
 
 ## Chạy lại
 
