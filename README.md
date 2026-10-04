@@ -1,6 +1,6 @@
 # agent-agile-team
 
-> **Status: private pre-release (`0.2.0-dev`).** Installable on Claude Code, Codex and Antigravity; not
+> **Status: private pre-release (`0.3.0-dev`).** Installable on Claude Code, Codex and Antigravity; not
 > published. Vietnamese version: [README.vi.md](README.vi.md). Skill bodies and method documents are written
 > in Vietnamese; frontmatter is English.
 

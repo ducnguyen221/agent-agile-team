@@ -3,6 +3,60 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+## 0.3.0-dev
+
+Chưa phát hành. SPR-04 — nội dung Đợt 2 (phần mới), luật bậc việc đơn giản / phức tạp, sổ tập trung, quy tắc số phiên
+bản, viết lại phòng sạch 7 đích private, trả nợ máy kiểm của SPR-02. Mức MINOR theo `method/conventions.md` mục 4.1: thêm
+skill, agent và luật tương thích ngược, dự án cũ không phải sửa gì (phân vân → chọn mức cao hơn: chưa có thay đổi gãy nào).
+
+- **Bậc việc** (`TK2`): việc **rất nhỏ** một `SPRINT.md` hai phần (Kế hoạch, Kết quả), việc **nhỏ** một `SPRINT.md`
+  bốn phần, từ cỡ vừa bốn tài liệu; `init --tiny` và `init --size small`, mẫu `templates/sprint/SPRINT-tiny.md`, luật
+  `check` `sprint-size-mismatch`, `method/sizing.md` mục 5 đối chiếu luồng orch ↔ bậc việc ↔ cổng; hai sprint mẫu mới ở
+  `samples/order-desk/`. `AGENTS.md` đổi đúng một câu (bậc nhỏ và rất nhỏ); sprint cũ dạng một file bốn phần cỡ rất nhỏ vẫn
+  hợp lệ.
+- **Sổ tập trung** (`TK3`): khoá `ledger.project` ở `.agile.json`, biến môi trường `AGENT_AGILE_LEDGER` (mẫu đường, máy cấp),
+  khuôn `templates/registry/LEDGER.md`, bốn luật `check` (`ledger-missing-row`, `ledger-stale`, `ledger-unreadable`,
+  `ledger-unconfigured`), `method/process.md` mục 11 "Ghi sổ tại cổng". Dự án không khai khoá thì không áp.
+- **Phương pháp** (`TK4`): `method/review-gate.md` (cổng review bốn pha), `roles/verifier/dual-review.md` (hai reviewer
+  độc lập cho việc có `risk_tags` `rules` / `secret` / `auth`), `method/process.md` mục 6.1 (thiết kế vòng lặp),
+  `method/evidence.md` mục 8 (cổng giao hàng, luật văn bản không hook), `skills/verify-before-done/references/loop.md`,
+  luật giữ spec sống ở `templates/registry/feature-spec.md`.
+- **Thẻ vai và skill quy trình** (`TK5`): thẻ Architect và Implementer (tìm cái có sẵn, theo phong cách file đang sửa, lát
+  giao được độc lập); `intake` (luật nghiệp vụ không đọc được từ mã, tiêu chí nghiệm thu quan sát được), `shaping-spec`
+  (+ `references/spec-mining.md`, một `FR` một hành vi), `tdd` (ca biên bắt buộc có test), `verify-before-done`,
+  `running-sprint` (nhắc ghi sổ ở cổng); mỗi skill sửa có RED/GREEN và `skill_sha` mới.
+- **Chuẩn code** (`TK6`): `method/standards/` — 7 chuẩn chung `common/`, `python.md`, `typescript.md`, `react.md`, `web.md`,
+  bảng đối chiếu chuẩn ↔ skill; thẻ Implementer và Tech Reviewer trỏ tới, **không** nạp vào `AGENTS.md`.
+- **Sáu agent mới** (`TK7`): `code-explorer`, `code-reviewer`, `test-analyzer`, `typescript-reviewer`, `react-reviewer` (chỉ
+  đọc) và `build-fixer` (agent **duy nhất được sửa file**, T2); mỗi agent chạy thử trên fixture, `tests/fixtures/agents/`.
+- **Bốn skill mới và phần bổ sung** (`TK8`, `TK9`): `react` (+ `references/testing.md`), `frontend` (+ `references/vite.md`),
+  `e2e-testing` (+ `references/ai-regression.md`), `eval-harness`; `web-qa` (chỉ báo cáo, ranh giới và nhiệm vụ khám phá,
+  cách đếm điểm, kiểm lại sau sửa), `code-review` (+ `references/duplicates.md`, sửa kèm test hồi quy là một lựa chọn),
+  `closing-sprint` (phần ship, cổng CI của đúng commit, đề xuất mức phiên bản), `token-economy` mục 7 (truy xuất lặp);
+  thẻ QA mục 9 (đo và ghi coverage); thẻ chuyên đề frontend mục 9 (a11y WCAG 2.2 AA).
+- **Viết lại phòng sạch** (`TK10`): `bug-triage`, `adr`, `database-migrations/references/rehearsal.md`,
+  `closing-sprint/references/release-notes.md` và `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn ô "Bắt gì" của
+  `scripts/README.md`: bản cũ gỡ khỏi cây trước, người viết mới chỉ nhận danh sách ý dạng cụm danh từ, để lại nhật ký đường
+  đã đọc; 8-gram so với cả gốc private lẫn bản trước đó bằng 0 trên phần viết lại, sau khi loại stoplist cụm chung. Nguồn
+  ghi dạng `concept:`; `THIRD_PARTY.md` mục 3 trống.
+- **Đính chính (2026-10-04):** mục `0.2.0-dev` bên dưới ghi 7 đích đó "chưa đạt quy trình phòng sạch, phải viết lại thật
+  sự trước khi công khai" — đúng tại thời điểm đó; từ `0.3.0-dev` câu này không còn đúng, 7 đích đã viết lại phòng sạch ở
+  `TK10` và không còn file nào chờ viết lại. Mục `0.2.0-dev` giữ nguyên vì changelog chỉ thêm.
+- **Nội dung thêm cho skill tham chiếu** (`TK11`): `github-ops`, `database-migrations`, `error-handling`, `fastapi`, `python`,
+  `worktrees`, `deployment`, `postgres` thêm phần còn thiếu, mỗi skill chạy lại truy xuất bộ câu cũ.
+- **Máy kiểm** (`TK12`): `tests/test_skill_tests.py` bỏ miễn theo ngày — **mọi** file thử phải có `skill_sha` và `tier`
+  (ca đột biến với file ngày 2026-10-01 và 2025-01-01); `result` và `model` theo danh sách trắng; phép kiểm 8-gram nhận mọi
+  cách viết, buộc điều kiện "loại stoplist"; luật `check` về nhãn mức kiểu nguồn; fixture `security-audit` đổi sang giá trị giả không khớp mẫu khoá thật; `writing-skills` thống nhất
+  một quy ước "sửa lưới" và mục nạp bản worktree.
+- **Quy tắc số phiên bản** (`TK15`): `method/conventions.md` mục 4.1 (MAJOR · MINOR · PATCH, bốn điều đi kèm); agent đề xuất
+  mức tăng kèm lý do ở Cổng 2, người dùng quyết.
+- **Dấu vết và tài liệu** (`TK14`): `UPSTREAM.md` — khối Đợt 2 thành khối chốt có bảng thành phần đã distill, bảng nguồn theo
+  skill/agent và thành phần ngoài skill, mục "Đợt 3 — dự kiến"; `NOTICE` (superpowers-lab thành nguồn đã dùng),
+  `THIRD_PARTY.md` mục 1; số đếm **32 skill, 13 agent** (agent chỉ đọc, riêng `build-fixer` được sửa) ở `README.md`,
+  `README.vi.md`, `GUIDE.md`, `agents/README.md`, `skills/README.md`, `hosts/claude/README.md` và mô tả 3 manifest; dòng trỏ
+  ở `method/README.md`, `roles/README.md`.
+- Phiên bản các manifest (`.claude-plugin`, `.codex-plugin`, `marketplace.json`) lên `0.3.0-dev`.
+
 ## 0.2.0-dev
 
 Chưa phát hành. SPR-02 — làm cứng Đợt 1 (phần nội dung mới của Đợt 2 chưa làm, xem `UPSTREAM.md` mục "Đợt 2 —

@@ -1,6 +1,6 @@
 # agent-agile-team
 
-> **Trạng thái: bản tiền phát hành private (`0.2.0-dev`).** Cài được trên Claude Code, Codex và
+> **Trạng thái: bản tiền phát hành private (`0.3.0-dev`).** Cài được trên Claude Code, Codex và
 > Antigravity; chưa công khai. Bản tiếng Anh: [README.md](README.md).
 
 Phương pháp agile cho đội agent AI. Một người giao việc bằng lời thường và chỉ trả lời ở đúng hai cổng; đội
