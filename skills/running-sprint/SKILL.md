@@ -37,7 +37,8 @@ chạy chế độ một agent và nói rõ.
    không dựng `PROGRESS.md` riêng; chế độ một agent (mục 6) là mặc định. Kiểm: nhỏ → **một** reviewer khác người
    làm giữ cả hai lăng kính (khớp SPEC + kỹ thuật) ở cuối nhánh, không review theo việc, Cổng 2 là lượt duyệt thật;
    rất nhỏ → agent khác chạy nhanh, hoặc ghi "tự kiểm, chưa độc lập" (tối đa Đạt có điều kiện) và Cổng 2 gộp lời
-   báo cuối (`method/process.md` mục 9).
+   báo cuối (`method/process.md` mục 9). Việc **làm thẳng** (`method/sizing.md` mục 1) không có sprint nên không
+   tới skill này: làm, kiểm, báo trong lời trả lời.
 3. **Đọc PLAN một lần** (Ràng buộc chung, Trọng tâm review, bảng Giao diện) và SPEC (thẩm quyền khi
    PLAN mâu thuẫn). Tạo todo mỗi `TK` — todo là màn hình, PROGRESS là hồ sơ.
 4. **Tiền kiểm giao diện:** với mỗi cặp `TK` chung file hay giao diện, một dòng: hai `TK`, cái này
@@ -212,5 +213,5 @@ Giữ nguyên sổ, tiền kiểm, bốn điều kiện dừng, phán quyết. K
 | "Sửa nhỏ, khỏi re-review" | sửa không review là cách hồi quy lọt vào |
 | "Ghi sổ sau vài việc" | nén ngữ cảnh không chờ lúc tiện; một dòng mỗi việc, cùng lượt với commit |
 | "Implementer tự gọi reviewer — thêm bảo đảm miễn phí" | ghế review trùng, toàn chi phí; đó là lỗi cần ghi, không phải sự kỹ |
-| "Hỏi anh ấy một câu cho chắc" | ngoài bốn điều kiện, hỏi là lỗi; phán quyết và ghi sổ |
+| "Hỏi anh ấy một câu cho chắc" | sau Cổng 1, ngoài bốn điều kiện, hỏi là lỗi (lượt trao đổi tiếp nhận thuộc Bước 1, đã qua); phán quyết và ghi sổ |
 | "Nhớ `TK4` nói gì rồi" | nhớ là bản tóm tắt; brief có giá trị chính xác — đọc lại |

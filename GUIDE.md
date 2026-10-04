@@ -1,8 +1,10 @@
 # Hướng dẫn dùng — sprint đầu tiên
 
-> **Kết luận:** bạn giao việc bằng lời thường, rồi chỉ phải lên tiếng **hai lần** — "duyệt" ở Cổng 1 và
-> "Đạt / Đạt có điều kiện / Không đạt" ở Cổng 2. Mọi bước còn lại agent tự làm, tự ghi sổ, và nhờ **agent
-> khác** kiểm. File này dẫn bạn đi một sprint thật từ đầu tới cuối.
+> **Kết luận:** bạn giao việc bằng lời thường, trả lời **một tin trao đổi** lúc tiếp nhận (agent nhắc lại mục
+> tiêu, hỏi phản biện, khuyến nghị bậc việc và có mở sprint không), rồi chỉ phải lên tiếng **hai lần** — "duyệt"
+> ở Cổng 1 và "Đạt / Đạt có điều kiện / Không đạt" ở Cổng 2. Mọi bước còn lại agent tự làm, tự ghi sổ, và nhờ
+> **agent khác** kiểm. Việc 1–2 thao tác rõ, hay bạn nói "không cần sprint", thì agent **làm thẳng**, không hồ sơ.
+> File này dẫn bạn đi một sprint thật từ đầu tới cuối.
 
 Chưa cài: xem [`INSTALL.md`](INSTALL.md). Luật đầy đủ: [`method/process.md`](method/process.md). Muốn nhìn
 toàn cảnh trước khi đi sprint — bộ này làm gì, có gì, cấu trúc ra sao: [`docs/OVERVIEW.md`](docs/OVERVIEW.md),
@@ -43,7 +45,7 @@ python "$HOME\agent-agile-team\scripts\init.py" . --apply
 
 | Bước | Bạn | Agent |
 |---|---|---|
-| 1. Tiếp nhận | Nói yêu cầu bằng lời thường | Ghi dòng `RQ-` vào REQUESTS, định cỡ (rất nhỏ / nhỏ / vừa / lớn) và rủi ro, ghi giả định, gom câu hỏi chưa rõ. **Không dừng hỏi** ở bước này |
+| 1. Tiếp nhận | Nói yêu cầu bằng lời thường; trả lời **một tin** của agent: mục tiêu đúng chưa, câu hỏi phản biện, bậc việc và có mở sprint không | Đọc và phân tích, gửi **một tin gom** (nhắc lại mục tiêu, câu hỏi phản biện, khuyến nghị bậc: làm thẳng / rất nhỏ / nhỏ / vừa / lớn, có mở sprint không). Bạn xác nhận rồi mới ghi dòng `RQ-` vào REQUESTS kèm câu trả lời của bạn, rủi ro, giả định, câu hỏi còn lại. Không hỏi lẻ nhiều lượt. Việc **làm thẳng** (1–2 thao tác rõ, hoặc bạn nói "không cần sprint"): làm ngay, không hồ sơ, vẫn kiểm và báo trong lời trả lời |
 | 2. SPEC rồi PLAN | **Cổng 1:** đọc bản tóm tắt, trả lời "duyệt" hoặc "điều chỉnh: …" | Mở sprint bằng `init --sprint`, viết SPEC + PLAN; từ cỡ vừa nhờ reviewer soát PLAN trước khi trình. Chưa duyệt thì **không viết code** |
 | 3. Thực thi | Không cần làm gì | Làm từng việc theo PLAN, cập nhật PROGRESS kèm bằng chứng; chỗ PLAN chưa nói thì tự quyết và ghi một dòng `Phán quyết:` |
 | 4. Kiểm định | Không cần làm gì | Agent **khác** người làm kiểm; còn lỗi nặng thì quay lại bước 3. Sau 3 vòng còn lỗi → hỏi bạn làm tiếp hay dừng |
@@ -54,7 +56,7 @@ Câu lệnh mẫu để bắt đầu: *"Dùng agent-agile-team: thêm chức nă
 
 ## 4. Khi nào agent được dừng hỏi bạn
 
-Ngoài hai cổng, agent chỉ dừng hỏi khi: (a) sắp làm việc **không hoàn tác được**, (b) chạm **bảo mật hoặc
+Ngoài tin trao đổi lúc tiếp nhận và hai cổng, agent chỉ dừng hỏi khi: (a) sắp làm việc **không hoàn tác được**, (b) chạm **bảo mật hoặc
 secret**, (c) sắp tác động **ra ngoài phạm vi** đã giao (push, deploy, gửi tin, sửa file ngoài dự án), (d) PLAN
 hỏng vì giả định sai. Cộng thêm: sau 3 vòng kiểm định còn lỗi, và khi model của một tier cạn hạn mức. Agent hỏi
 ngoài các trường hợp này là lỗi quy trình — bạn cứ nhắc.

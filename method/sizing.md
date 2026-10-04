@@ -1,29 +1,43 @@
 ---
-title: Sizing — four sizes, risk only raises
+title: Sizing — direct action and four sizes, risk only raises
 type: method
 status: active
-updated: 2026-10-04
+updated: 2026-10-05
 ---
 
-# Cỡ việc: bốn mức, rủi ro chỉ nâng
+# Cỡ việc: làm thẳng và bốn mức, rủi ro chỉ nâng
 
 > **Kết luận:** cỡ việc quyết **độ dày tài liệu và độ sâu kiểm định**, không quyết thời gian. Chọn cỡ
 > theo thứ tự *phạm vi được giao → rủi ro → cỡ → tài liệu/cổng áp dụng*. Rủi ro chỉ được **nâng** cỡ;
-> diff nhỏ không bao giờ là lý do hạ cỡ.
+> diff nhỏ không bao giờ là lý do hạ cỡ. Ngoài bốn cỡ có sprint còn bậc **làm thẳng** — không sprint, không
+> hồ sơ — cho việc 1–2 thao tác có kết quả rõ hoặc khi người dùng nói rõ không cần sprint. Bậc được
+> **khuyến nghị trong lượt trao đổi tiếp nhận** ([process.md](process.md) mục 2) và người dùng xác nhận.
 
-## 1. Bốn cỡ
+## 1. Làm thẳng và bốn cỡ
 
 | Cỡ | Dấu hiệu đo được | Tài liệu | Kiểm định | Cổng |
 |---|---|---|---|---|
+| **Làm thẳng** (không sprint) | việc chỉ gồm **1–2 thao tác** có kết quả rõ (đổi một giá trị cấu hình, chạy một lệnh, trả lời một câu tra cứu, sửa một chữ người dùng đã chỉ đích danh); **hoặc** người dùng nói rõ "không cần sprint" | **không có** hồ sơ: không `RQ-`, không `SPRINT.md`, không dòng sổ | agent tự kiểm bằng lệnh + kết quả **mới chạy** và báo ngay trong lời trả lời (kết quả, bằng chứng, cách hoàn tác nếu có) | không cổng hồ sơ; vẫn giữ nguyên **Git và điều cấm** (`AGENTS.md`) và mọi cổng xin phép khác |
 | **Rất nhỏ** | đổi chữ hoặc một chỗ; không đổi hành vi hay quyền; lời giao đã nêu rõ kết quả; không cần người quyết gì | **một** `SPRINT.md` hai phần: "Kế hoạch" (mục tiêu, tiêu chí xong `SC`, việc `TK` trỏ `SC`) rồi "Kết quả" (nhật ký ngắn, `VR` cho mỗi `SC`) — "có kế hoạch rồi làm cho hoàn thiện", không SPEC / PLAN riêng | tự kiểm ghi "chưa độc lập" (kết luận tối đa Đạt có điều kiện), hoặc agent khác chạy kiểm nhanh | Cổng 1 "đạt theo lời giao" + trích lời giao; Cổng 2 gộp vào lời báo cuối ([process.md](process.md) mục 9) |
 | **Nhỏ** | sửa cục bộ một luồng có sẵn; một `FR`; không đổi hợp đồng / giao diện / schema; không có quyết định kiến trúc | **một** `SPRINT.md` đủ bốn phần SPEC · PLAN · PROGRESS · REPORT, mỗi phần ngắn | **một** reviewer (agent khác người làm) kiểm cả nghiệp vụ lẫn kỹ thuật | Cổng 1 thật (trình ngắn), Cổng 2 thật |
 | **Vừa** | tính năng, hành vi hay luồng mới; hoặc nhiều hơn một `FR` | 4 file đầy đủ; Tech Reviewer review PLAN trước Cổng 1 | cả Business Reviewer **và** Tech Reviewer | đủ 2 cổng |
 | **Lớn** | nhiều phần, đổi hợp đồng / giao diện / schema, hoặc **rủi ro cao** (mục 2) | 4 file + mục "Đổi hợp đồng / giao diện" trong SPEC + ADR cho quyết định kiến trúc + kế hoạch hoàn tác | cả hai reviewer + thẻ chuyên đề theo rủi ro; diễn tập migration nếu có dữ liệu | đủ 2 cổng; Cổng 2 có kiểm kế hoạch hoàn tác |
 
+**Làm thẳng — điều kiện loại trừ.** KHÔNG được làm thẳng, dù chỉ 1–2 thao tác, khi việc chạm **vùng rủi ro**
+(mục 2, bất kỳ nhãn `risk_tags`), **file luật** của dự án hay môi trường, **secret**, hoặc **hành động không đảo
+ngược** (xoá dữ liệu, viết lại lịch sử git, push/deploy/gửi tin) — khi đó tối thiểu là rất nhỏ, và vùng rủi ro
+kéo lên lớn như thường. Ngoại lệ duy nhất: người dùng **nói rõ** không cần sprint cho đúng việc đó — lời người
+dùng thắng, không mở hồ sơ; nhưng mọi cổng xin phép khác **vẫn giữ nguyên**: sửa file luật vẫn phải được gật
+trong chat, hành động không đảo ngược vẫn phải hỏi trước, secret vẫn không đọc. Việc mơ hồ (chưa biết kết quả
+trông ra sao, hay phải chọn giữa nhiều cách) không phải làm thẳng — mở lượt trao đổi tiếp nhận.
+
 **Luật đi kèm bảng:**
 
-- **Phân vân giữa hai bậc → chọn bậc nặng hơn.** Nghi có đổi hành vi hay hợp đồng thì không phải rất nhỏ; nghi
-  hơn một luồng thì không phải nhỏ.
+- **Phân vân giữa hai bậc → chọn bậc nặng hơn.** Nghi cần hơn 2 thao tác hay kết quả chưa rõ thì không phải làm
+  thẳng; nghi có đổi hành vi hay hợp đồng thì không phải rất nhỏ; nghi hơn một luồng thì không phải nhỏ.
+- **Bậc được khuyến nghị, không tự quyết một chiều:** Analyst nêu bậc khuyến nghị và "có mở sprint không" trong
+  **một** tin trao đổi tiếp nhận ([process.md](process.md) mục 2); người dùng xác nhận hay đổi. Bỏ lượt này khi
+  người dùng đã nói "không cần sprint" hoặc việc là làm thẳng không mơ hồ.
 - **Rủi ro chỉ nâng cỡ** (mục 2): `risk: high` luôn là lớn. Diff nhỏ không bao giờ là lý do hạ cỡ.
 - **Hạ cỡ chỉ ở Cổng 1, do người dùng quyết** (mục 4).
 - **Cấu hình quyền, hook hay workflow CI không bao giờ là rất nhỏ**, dù diff một dòng (mục 2).
@@ -64,9 +78,11 @@ cả hai Đạt mới Đạt ([roles/verifier/dual-review.md](../roles/verifier/
 ## 4. Ghi vào tài liệu
 
 Frontmatter mọi tài liệu sprint có `size: tiny | small | medium | large`, `risk: normal | high` và
-`risk_tags` (rỗng khi `normal`). `risk: high` buộc `size: large`.
-Cỡ ghi ở Bước 1 (Tiếp nhận), có thể **nâng** ở bất kỳ bước nào khi lộ rủi ro mới (ghi `Phán quyết:` kèm lý
-do); **hạ** cỡ chỉ được ở Cổng 1 do người dùng quyết.
+`risk_tags` (rỗng khi `normal`). `risk: high` buộc `size: large`. Bậc làm thẳng không có tài liệu nên không có
+frontmatter; nó chỉ xuất hiện trong lời trả lời.
+Cỡ ghi ở Bước 1 (Tiếp nhận) sau khi người dùng xác nhận bậc trong lượt trao đổi, có thể **nâng** ở bất kỳ bước nào
+khi lộ rủi ro mới (ghi `Phán quyết:` kèm lý do); **hạ** cỡ chỉ được ở Cổng 1 do người dùng quyết. Việc đang làm
+thẳng mà lộ ra cần hơn 2 thao tác, chạm vùng rủi ro hay kết quả không còn rõ → dừng, mở lượt trao đổi tiếp nhận.
 
 ## 5. Đối chiếu luồng orch
 
@@ -74,7 +90,8 @@ Nhiều bộ công cụ chia việc thành năm **luồng** theo loại thay đ�
 cấu trúc, dựng bản đầu từ tài liệu thiết kế). Repo này **không** thêm trục thứ hai: cỡ việc (mục 1) vẫn là trục duy
 nhất quyết độ dày tài liệu và cổng. Bảng dưới chỉ trả lời "một luồng quen tay rơi vào cỡ nào, bước đầu tiên là gì,
 kéo skill nào". Bốn bậc của nguồn (nhỏ nhất → lớn nhất) khớp bốn cỡ **Rất nhỏ · Nhỏ · Vừa · Lớn** ở trên, nhưng nguồn
-chỉ đếm số file; ở đây cỡ còn do hành vi, hợp đồng và rủi ro quyết.
+chỉ đếm số file; ở đây cỡ còn do hành vi, hợp đồng và rủi ro quyết. Bậc làm thẳng không có luồng tương ứng: nó
+không phải sprint.
 
 Bảng có 5 hàng — mỗi hàng một **luồng** ở cột đầu:
 

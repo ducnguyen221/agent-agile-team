@@ -3,12 +3,14 @@
 > **Trạng thái: private, bản `0.3.0`.** Cài được trên Claude Code, Codex và
 > Antigravity; chưa công khai. Bản tiếng Anh: [README.md](README.md).
 
-Phương pháp agile cho đội agent AI. Một người giao việc bằng lời thường và chỉ trả lời ở đúng hai cổng; đội
-agent làm phần còn lại và ghi sổ.
+Phương pháp agile cho đội agent AI. Một người giao việc bằng lời thường, xác nhận một tin trao đổi lúc tiếp
+nhận (mục tiêu, bậc việc, có mở sprint không) và chỉ trả lời ở đúng hai cổng; đội agent làm phần còn lại và ghi sổ.
 
-- **Một quy trình, sáu bước, hai cổng người:** tiếp nhận → SPEC + PLAN (**Cổng 1:** duyệt / điều chỉnh) →
+- **Một quy trình, sáu bước, hai cổng người:** tiếp nhận (một tin trao đổi gom: nhắc lại mục tiêu, câu hỏi phản
+  biện, khuyến nghị bậc, mở sprint hay làm thẳng) → SPEC + PLAN (**Cổng 1:** duyệt / điều chỉnh) →
   thực thi ↔ kiểm định (vòng lặp, khuyến nghị 3 vòng) → REPORT (**Cổng 2:** Đạt / Đạt có điều kiện / Không
-  đạt) → bài học. Agent chỉ dừng hỏi ở bốn trường hợp đã nêu tên; hỏi ngoài đó là lỗi quy trình.
+  đạt) → bài học. Việc 1–2 thao tác có kết quả rõ, hay người dùng nói "không cần sprint", thì làm thẳng, không hồ
+  sơ. Agent chỉ dừng hỏi ở bốn trường hợp đã nêu tên; hỏi ngoài đó là lỗi quy trình.
 - **Vai theo tier, không theo tên model:** Analyst, Architect, Implementer, QA, Business Reviewer, Tech
   Reviewer; tier `T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test. **Người làm không tự chấm.**
 - **Tài liệu agent tra rẻ:** bốn tài liệu sprint (SPEC, PLAN, PROGRESS, REPORT; việc rất nhỏ dùng một

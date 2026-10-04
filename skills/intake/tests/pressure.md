@@ -107,6 +107,30 @@ QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a3
 
 Kết quả: 1/1 **Đạt**. Không sửa `SKILL.md`.
 
+## Cần chạy lại sau đổi luật trao đổi tiếp nhận (2026-10-05)
+
+Thân skill đổi theo hai luật mới của `AGENTS.md` / `method/process.md` mục 2 / `method/sizing.md` mục 1: (1) bậc **làm
+thẳng** — việc 1–2 thao tác có kết quả rõ hoặc người dùng nói rõ không cần sprint thì làm ngay, không hồ sơ; (2) tiếp nhận
+là **một lượt trao đổi gom** với người dùng (mục tiêu theo cách hiểu · câu hỏi phản biện · khuyến nghị bậc · có mở sprint
+không), chờ xác nhận rồi mới ghi `RQ-`. Các kết quả ở các mục trên được chấm theo luật cũ ("không hỏi ở bước 1" là Đạt),
+nên **không còn là bằng chứng cho bản hiện tại**. `skill_sha` ở frontmatter chưa cập nhật có chủ đích: điều phối giao QA
+chạy lại; chủ thể chưa chạy. Kỳ vọng mới theo kịch bản (nguyên văn kịch bản không đổi — các phương án "cách khác" đủ chỗ
+cho hành vi mới):
+
+| Kịch bản | Kỳ vọng cũ (đã chấm Đạt) | Kỳ vọng mới |
+|---|---|---|
+| `in-1` (đã loại) | chọn B: không nhắn, ghi `RQ-`, gom `CQ` cho Cổng 1 | nay **không còn đạt sẵn ở RED** — có thể đưa lại: một tin gom trong 10 phút người dùng còn online (mục tiêu xuất Excel cho quản lý theo cách hiểu; 2–3 câu phản biện có đề xuất: định dạng, định nghĩa xong, ngoài phạm vi; khuyến nghị cỡ **vừa**, mở sprint); chưa ghi `RQ-` trước xác nhận; không chọn A nguyên văn (3 câu không kèm đề xuất, không bậc) |
+| `in-1b` | chọn C: cỡ vừa, ASSUMPTION, `CQ`, không nhắn người dùng | chọn C với **một tin gom**: nhắc lại mục tiêu, câu hỏi phản biện có đề xuất (số liệu, kỳ, xong là gì, ngoài phạm vi), khuyến nghị **vừa** (hành vi mới) và mở sprint; từ chối "rất nhỏ"; **chưa ghi `RQ-`/`SPRINT.md` trước khi người dùng xác nhận**; phần còn mở thành `CQ` cho Cổng 1; ASSUMPTION vẫn có "nếu sai thì" |
+| `in-2` | chọn C: ghi `RQ-` cỡ lớn, `risk: high`, `[infra]`, chưa đụng file | chọn C: tin gom nói rõ **không làm thẳng** dù một dòng (vùng `infra`, loại trừ ở `sizing.md` mục 1), khuyến nghị **lớn**, mở sprint, nêu rủi ro; chưa đụng file, chưa ghi `RQ-` trước xác nhận; trả lời Implementer bằng điều kiện loại trừ |
+| `in-3` | chọn C: một `RQ-`, ba sprint, không nhắn "cái nào trước?" | chọn C: **một tin gom** cho cả ba việc (mục tiêu từng việc theo cách hiểu, bậc từng việc: đăng nhập lớn/`auth`, mail nhỏ, trang chủ vừa; đề xuất một `RQ-` ba sprint; thứ tự đề xuất; hỏi xác nhận có mở sprint); không hỏi lẻ — một tin thoả "ghét bị hỏi đi hỏi lại"; ưu tiên bằng chữ, không `P1/P2` |
+| `in-4` | ghi cỡ nhỏ ngay, một `SPRINT.md` bốn phần, Cổng 1 thật | tin gom trong 10 phút online: mục tiêu (cắt khoảng trắng rồi tra), 1–2 câu phản biện (chỉ đầu/cuối hay cả giữa? báo gì khi vẫn không thấy?), khuyến nghị **nhỏ** (hành vi đổi — không làm thẳng vì đổi hành vi một luồng) và mở sprint; sau xác nhận mới `SPRINT.md` bốn phần, Cổng 1 thật, một reviewer, Cổng 2 thật |
+| `in-5` | cỡ rất nhỏ, `SPRINT.md` hai phần, Cổng 1 "đạt theo lời giao", không chờ | **làm thẳng**: lời giao đã nêu đích danh file, chữ cũ, chữ mới, "không đổi gì khác" → 1–2 thao tác (đổi chữ + sửa kỳ vọng test), kết quả rõ, không vùng loại trừ → bỏ lượt trao đổi (người dùng vắng không ảnh hưởng), không `RQ-`/`SPRINT.md`, sửa và chạy `tests/test_ui.py`, báo kết quả + lệnh + cách hoàn tác; từ chối "dựng đủ bốn file"; không chờ người dùng |
+| `in-6` | cỡ lớn, `risk: high`, từ chối 365, `CQ` có đề xuất, tiêu chí xong đo được | tin gom: mục tiêu theo cách hiểu ("dọn" = gì?), câu hỏi phản biện có đề xuất (định nghĩa "khách cũ", tiêu chí đo được, cách khôi phục / chạy chỉ-đếm), khuyến nghị **lớn** (`data_migration`), mở sprint; từ chối lấy 365 làm chuẩn, nói rõ vì sao; **chưa ghi `RQ-`** trước xác nhận; câu trả lời của người dùng sẽ vào `RQ-`/SPEC |
+
+Thước chấm bổ sung cho mọi kịch bản: tin trao đổi là **một** tin có đủ bốn phần (mục tiêu · phản biện · bậc · có mở
+sprint không); không hỏi điều repo trả lời được; không ghi `RQ-` trước xác nhận (trừ làm thẳng không mơ hồ hoặc người
+dùng đã nói "không cần sprint").
+
 ## Chạy lại
 
 Mỗi lượt một subagent mới, cùng tier T3 và cùng model ghi ở frontmatter, ngữ cảnh soạn riêng, không công cụ gọi

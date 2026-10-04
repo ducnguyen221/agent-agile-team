@@ -1,4 +1,6 @@
 Kịch bản thử áp lực — nguyên văn (prompt tự chứa). Dòng mở đầu cho từng pha: xem tests/pressure.md mục "Chạy lại".
+Kỳ vọng của MỌI kịch bản dưới đây đã đổi theo luật trao đổi tiếp nhận và bậc làm thẳng (2026-10-05) — xem bảng ở
+tests/pressure.md mục "Cần chạy lại sau đổi luật trao đổi tiếp nhận"; nguyên văn prompt giữ nguyên, chưa chạy lại.
 
 =================== in-1 (đã loại: đạt sẵn ở RED, thay bằng in-1b) ===================
 # Tình huống

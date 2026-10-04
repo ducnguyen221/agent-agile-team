@@ -47,7 +47,7 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
 
 | Skill | Dùng khi |
 |---|---|
-| [intake](intake/SKILL.md) | tiếp nhận yêu cầu: ghi `RQ-`, định cỡ/rủi ro, 11 điểm thiếu ngữ cảnh → ASSUMPTION/`CQ` |
+| [intake](intake/SKILL.md) | tiếp nhận yêu cầu: một lượt trao đổi gom (mục tiêu, câu hỏi phản biện, khuyến nghị bậc, mở sprint hay làm thẳng) → ghi `RQ-`, định cỡ/rủi ro, 11 điểm thiếu ngữ cảnh → ASSUMPTION/`CQ` |
 | [shaping-spec](shaping-spec/SKILL.md) | 3 đường Spike/Bounded/Architectural, viết SPEC, gom `CQ`, không code trước Cổng 1 |
 | [writing-plan](writing-plan/SKILL.md) | `TK` có file + giao diện + bước RED→GREEN→commit, trọng tâm review ≤5 |
 | [running-sprint](running-sprint/SKILL.md) | hai chế độ thực thi, brief/review theo việc, phán quyết, 4 điều kiện dừng, 3 vòng khuyến nghị |

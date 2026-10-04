@@ -18,8 +18,11 @@ Cập nhật hay mở rộng skill/agent: quay lại nguồn gốc trong `UPSTRE
 
 ## Quy trình sáu bước
 
-1. **Tiếp nhận** (không cổng): ghi `RQ-` vào REQUESTS, định cỡ (rất nhỏ / nhỏ / vừa / lớn) và rủi ro
-   (chỉ nâng), ghi **ASSUMPTION**, gom điểm chưa rõ thành `CQ`. Đi tiếp ngay.
+1. **Tiếp nhận** (T1, **một lượt trao đổi gom**): đọc đầu bài, phân tích, rồi gửi người dùng **một tin**: mục
+   tiêu theo cách hiểu · câu hỏi phản biện (mục tiêu, định nghĩa xong, phạm vi) · khuyến nghị bậc (làm thẳng /
+   rất nhỏ / nhỏ / vừa / lớn) · **có mở sprint không**. Chờ xác nhận rồi mới ghi `RQ-` vào REQUESTS (chép câu
+   trả lời vào `RQ-`/SPEC), rủi ro (chỉ nâng), **ASSUMPTION**, `CQ` còn lại để Cổng 1. Không hỏi lẻ nhiều lượt.
+   Bỏ lượt này khi người dùng đã nói rõ "không cần sprint" hoặc việc là làm thẳng không mơ hồ.
 2. **SPEC rồi PLAN** → **Cổng 1** (người dùng duyệt / điều chỉnh). Từ cỡ vừa, Tech Reviewer review PLAN
    trước khi trình. Trình tóm tắt: kết luận, `CQ`, `DN`, rủi ro, ước lượng. Duyệt thì ghi
    `gate_1: approved` + `gate_1_quote` nguyên văn. **Không code trước Cổng 1.**
@@ -33,7 +36,11 @@ Cập nhật hay mở rộng skill/agent: quay lại nguồn gốc trong `UPSTRE
 
 **Dừng và hỏi chỉ khi:** (a) hành động không đảo ngược, (b) chạm bảo mật/secret, (c) tác động ra ngoài
 phạm vi/worktree đã giao, (d) PLAN hỏng — giả định sai làm đổi tiêu chí thành công. Ghi `BR`, hỏi.
-Ngoài đó, hỏi là lỗi. Việc **nhỏ** và **rất nhỏ** dùng một file `SPRINT.md` (bậc ở `method/sizing.md`): rất nhỏ
+Ngoài đó và lượt trao đổi tiếp nhận, hỏi là lỗi. **Làm thẳng** (bậc ở `method/sizing.md`): việc 1–2 thao tác có
+kết quả rõ, hoặc người dùng nói rõ không cần sprint → làm ngay, không `RQ-`/`SPRINT.md`/sổ; vẫn giữ Git và điều
+cấm, vẫn kiểm (lệnh + kết quả mới chạy) và báo trong lời trả lời. Không áp khi chạm `risk_tags`, file luật, secret,
+hành động không đảo ngược — trừ khi người dùng nói rõ không cần sprint; lúc đó mọi cổng xin phép khác vẫn giữ (sửa
+file luật vẫn phải được gật). Việc **nhỏ** và **rất nhỏ** dùng một file `SPRINT.md`: rất nhỏ
 chỉ Kế hoạch + Kết quả, Cổng 1 = "đạt theo lời giao" + trích lời giao, Cổng 2 gộp lời báo cuối; nhỏ đủ bốn phần
 và hai cổng. Bằng chứng = lệnh + kết quả **mới chạy** hoặc `file:dòng`; Chưa chạy
 và Không áp dụng không bao giờ là Đạt.

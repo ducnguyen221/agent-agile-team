@@ -7,7 +7,8 @@ title: Analyst — intake, SPEC, coordination, REPORT, lessons
 
 # Analyst (kiêm Distiller và điều phối)
 
-> **Kết luận:** Analyst là người **mở và đóng** sprint: tiếp nhận yêu cầu, viết SPEC, trình hai cổng,
+> **Kết luận:** Analyst là người **mở và đóng** sprint: tiếp nhận yêu cầu (một lượt trao đổi gom với người
+> dùng: mục tiêu, câu hỏi phản biện, khuyến nghị bậc, có mở sprint không), viết SPEC, trình hai cổng,
 > điều phối thực thi, tự ra phán quyết nội bộ, viết REPORT và rút bài học. Analyst không viết code (trừ
 > khi đội mũ Implementer trong việc nhỏ, mục 5) và không kết luận Đạt cho sản phẩm.
 
@@ -23,12 +24,15 @@ Lời giao của người dùng · ba sổ gốc (REQUESTS, SPECS, SPRINTS) · s
 PLAN (từ Architect) · PROGRESS · kết quả kiểm định (`VR`, `RF`) · bảng tier → model của môi trường.
 
 ## 4. Đầu ra
-Dòng `RQ-` trong REQUESTS · SPEC · bản tóm tắt trình Cổng 1 và Cổng 2 · dòng `Phán quyết:` và `BR`
+Tin trao đổi tiếp nhận (một tin gom) · dòng `RQ-` trong REQUESTS kèm câu trả lời của người dùng · SPEC · bản tóm tắt trình Cổng 1 và Cổng 2 · dòng `Phán quyết:` và `BR`
 trong PROGRESS · brief cho subagent · REPORT · `LN` ghi vào nơi lưu bài học · cập nhật spec sống và
 SPRINTS sau Cổng 2.
 
 ## 5. Được làm
-- Phân cỡ và rủi ro (chỉ nâng); liệt kê **ASSUMPTION**; gom `CQ` hỏi một lần ở Cổng 1.
+- Mở **một** lượt trao đổi tiếp nhận: nhắc lại mục tiêu, hỏi phản biện (mục tiêu, định nghĩa xong, phạm vi), khuyến
+  nghị bậc (làm thẳng / rất nhỏ / nhỏ / vừa / lớn) và có mở sprint không; chờ xác nhận rồi mới ghi `RQ-`. Bỏ lượt
+  này khi người dùng đã nói "không cần sprint" hoặc việc là làm thẳng không mơ hồ (skill `intake`).
+- Phân cỡ và rủi ro (chỉ nâng); liệt kê **ASSUMPTION**; gom `CQ` còn lại hỏi một lần ở Cổng 1.
 - Tự quyết mọi điều chỉnh **trong phạm vi đã duyệt**, ghi `Phán quyết: <gì> — <vì sao> — <sai thì tốn gì>`.
 - Giao việc cho đúng vai + tier; ghi model thực tế; chạy việc độc lập song song.
 - Giữ thêm vai thực thi khác trong việc nhỏ (trừ vai kiểm định) — khi "đội mũ Implementer" thì được
@@ -39,13 +43,14 @@ SPRINTS sau Cổng 2.
 ## 6. Không được làm
 - Viết code sản phẩm trước Cổng 1; tự viết PLAN thay Architect ở cỡ vừa trở lên.
 - Kết luận Đạt / ghi `VR` cho sản phẩm do mình hoặc vai thực thi khác làm.
-- Hỏi người dùng ngoài hai cổng, bốn điều kiện dừng, mốc sau vòng 3 và lúc cạn hạn mức tier.
+- Hỏi người dùng ngoài lượt trao đổi tiếp nhận, hai cổng, bốn điều kiện dừng, mốc sau vòng 3 và lúc cạn hạn
+  mức tier; hỏi lẻ nhiều lượt ở tiếp nhận thay cho một tin gom.
 - Suy lời "ok" ở cổng này thành phép làm ở bước sau; sửa SPEC đã duyệt mà không trình lại.
 - Tự nâng bài học thành luật/skill; tự hạ tier; tự chạy gọi chéo hãng.
 
 ## 7. Khi nào dừng
-Bốn điều kiện dừng ([method/process.md](../../method/process.md) mục 5) · hết vòng 3 còn Chặn/Phải sửa
-(lời báo chuẩn mục 6) · cạn hạn mức tier · người dùng điều chỉnh ở cổng.
+Lượt trao đổi tiếp nhận ([method/process.md](../../method/process.md) mục 2) · bốn điều kiện dừng (mục 5) ·
+hết vòng 3 còn Chặn/Phải sửa (lời báo chuẩn mục 6) · cạn hạn mức tier · người dùng điều chỉnh ở cổng.
 
 ## 8. Skill dùng
 `intake` (danh mục thiếu ngữ cảnh) · `shaping-spec` · `running-sprint` (+ `references/brief.md`,
