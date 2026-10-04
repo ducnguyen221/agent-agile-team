@@ -1,6 +1,6 @@
 """Máy kiểm nợ thử (FR11.5, SC5): mọi skill kỷ luật có `tests/pressure.md`, mọi skill tham chiếu
-(`metadata.kind: reference`) có `tests/retrieval.md`; file thử không còn ở trạng thái chưa chạy; file thử từ ngày bắt
-đầu sprint có `skill_sha` + `tier`, và `skill_sha` khớp băm cây skill trừ `tests/` tính ở HEAD (công thức:
+(`metadata.kind: reference`) có `tests/retrieval.md`; file thử không còn ở trạng thái chưa chạy;
+mọi file thử có `skill_sha` + `tier`, và `skill_sha` khớp băm cây skill trừ `tests/` tính ở HEAD (công thức:
 `git ls-tree HEAD:skills/<tên>` bỏ mục `tests`, rồi `git mktree`): skill đổi sau khi thử thì test đỏ, đến khi thử lại.
 """
 
@@ -15,8 +15,6 @@ import pytest
 from conftest import REPO
 import _common as c
 
-# Ngày bắt đầu sprint wave-2: file thử có `date` từ ngày này trở đi phải mang `skill_sha` và `tier` (FR10.5).
-SPRINT_START = datetime.date(2026, 10, 3)
 # Lớp thứ hai (danh sách đen) cho tệp CHƯA CHẠY: bốn cụm gốc của FR11.5 (`not run`, `pending`, `chưa chạy`, `dự kiến`) chỉ tính
 # khi đứng ĐẦU đoạn đầu; các từ giữ chỗ `TBD`, `TODO`, `N/A`, `none`, `false`, `null` chỉ tính khi là CẢ đoạn đầu. Nhờ vậy
 # "3/3 pass, none partial" (kết quả thật) không bị chặn oan (RF168). Lớp thứ nhất là danh sách trắng bên dưới.
@@ -128,12 +126,11 @@ def problems(data: dict) -> list:
         day = day if isinstance(day, datetime.date) else datetime.date.fromisoformat(str(day))
     except ValueError:
         found.append(f"`date` không phải ngày hợp lệ: {day!r}")
-    else:
-        if day >= SPRINT_START:
-            if not re.fullmatch(r"[0-9a-f]{40}", str(data.get("skill_sha") or "")):
-                found.append("thiếu `skill_sha` (40 ký tự hex) dù date từ ngày bắt đầu sprint")
-            if not str(data.get("tier") or "").strip():
-                found.append("thiếu `tier` dù date từ ngày bắt đầu sprint")
+    # Mọi file thử đều phải có `skill_sha` và `tier`, không miễn theo ngày (TK12.1).
+    if not re.fullmatch(r"[0-9a-f]{40}", str(data.get("skill_sha") or "")):
+        found.append("thiếu `skill_sha` (40 ký tự hex)")
+    if not str(data.get("tier") or "").strip():
+        found.append("thiếu `tier`")
     return found
 
 
@@ -164,8 +161,8 @@ def has_sha(path) -> bool:
         return True
 
 
-# Chỉ tham số hoá phép so băm cho file CÓ `skill_sha`: file cũ (date trước ngày bắt đầu sprint) không có thì không
-# sinh ca nào, không còn ca skip; file từ ngày bắt đầu sprint thiếu `skill_sha` vẫn đỏ ở `test_test_file_was_run`.
+# Chỉ tham số hoá phép so băm cho file CÓ `skill_sha`; file thiếu `skill_sha` đỏ ở `test_test_file_was_run`
+# (không còn miễn theo ngày), nên không sinh ca skip.
 SHA_FILES = [p for p in TEST_FILES if has_sha(p)]
 SHA_IDS = [p.relative_to(REPO).as_posix() for p in SHA_FILES]
 
@@ -296,11 +293,13 @@ def test_invalid_date_is_caught(bad):
     assert any("date" in p for p in problems({**GOOD, "date": bad}))
 
 
-def test_new_file_needs_sha_and_tier_but_old_file_does_not():
-    assert any("skill_sha" in p for p in problems({k: v for k, v in GOOD.items() if k != "skill_sha"}))
-    assert any("tier" in p for p in problems({k: v for k, v in GOOD.items() if k != "tier"}))
+@pytest.mark.parametrize("day", ["2026-10-03", "2026-10-01", "2025-01-01"])
+def test_every_file_needs_sha_and_tier_whatever_its_date(day):
+    # Không còn miễn theo ngày (TK12.1): file thử cũ thiếu `skill_sha` hay `tier` cũng đỏ.
+    assert any("skill_sha" in p for p in problems({**{k: v for k, v in GOOD.items() if k != "skill_sha"}, "date": day}))
+    assert any("tier" in p for p in problems({**{k: v for k, v in GOOD.items() if k != "tier"}, "date": day}))
     old = {k: v for k, v in GOOD.items() if k not in ("skill_sha", "tier")}
-    assert problems({**old, "date": "2026-10-01"}) == []
+    assert len(problems({**old, "date": day})) == 2
 
 
 # Thước chấm truy xuất (SC5, RF120): MỘT định nghĩa cho mọi `skills/*/tests/retrieval.md`, và `result` là số đếm sinh ra
