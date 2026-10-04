@@ -4,6 +4,8 @@
 > `typing.List`/`Optional` từ Python 3.9/3.10; `Protocol` cho duck typing có kiểm; `dataclass` cho lớp
 > dữ liệu (kiểm hợp lệ trong `__post_init__`), `NamedTuple` cho bản ghi bất biến nhỏ.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): docs.python.org (`typing`, `dataclasses`).
+
 ## 1. Type hint
 
 ### 1.1. Chú thích cơ bản

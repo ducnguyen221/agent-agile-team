@@ -4,6 +4,8 @@
 > (mặc định `function`), fixture dùng chung đặt ở `conftest.py`. `parametrize` thay cho chép test; marker
 > đăng ký trong cấu hình và chạy với `--strict-markers` để gõ sai tên là báo lỗi.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): tài liệu pytest (fixture, `monkeypatch`, thứ tự test).
+
 ## 1. Fixture
 
 ### 1.1. Cơ bản

@@ -4,6 +4,8 @@
 > liệu lớn. Chọn mô hình đồng thời theo loại việc: **I/O → thread hoặc asyncio**, **CPU → process**.
 > Tối ưu bộ nhớ/chuỗi chỉ khi có lý do; đo trước khi tuyên bố nhanh hơn.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): docs.python.org (`functools.lru_cache`, `cProfile`, `tracemalloc`, `asyncio`).
+
 ## 1. Comprehension và generator
 
 ### 1.1. List comprehension

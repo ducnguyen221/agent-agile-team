@@ -4,6 +4,8 @@
 > hay đổi cấu hình. `EXPLAIN ANALYZE` **chạy thật** câu lệnh: câu ghi chỉ thử trên CSDL dev hay bản sao, bọc
 > trong giao dịch rồi huỷ. Đổi cấu hình máy chủ dùng chung là thao tác ngoài phạm vi thường: hỏi trước.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): tài liệu PostgreSQL (`EXPLAIN`, `lock_timeout`, index, `jsonb`) và tài liệu PgBouncer (số kết nối, pool).
+
 ## 1. Đọc kế hoạch thực thi
 
 `EXPLAIN (ANALYZE, BUFFERS) <truy vấn>` — với câu ghi: `BEGIN; EXPLAIN (ANALYZE, BUFFERS) …; ROLLBACK;`, và chỉ

@@ -4,6 +4,8 @@
 > hình công cụ; **uv** quản lý môi trường và khoá phụ thuộc (`uv.lock` được commit), **ruff** vừa định
 > dạng vừa lint (gồm sắp import), **mypy** kiểm kiểu nghiêm, **pytest** chạy test + coverage.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): PyPA (đóng gói, `[project.scripts]`) và tài liệu uv.
+
 ## 1. Bố cục dự án chuẩn
 
 ```

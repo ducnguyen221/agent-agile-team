@@ -4,6 +4,8 @@
 > chịu được gấp đôi hạ tầng; canary khi muốn thử bản mới trên lưu lượng thật trước khi mở rộng. Cả ba đều
 > cần health check và giám sát mới an toàn.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): Azure Architecture Center (blue-green), tài liệu Kubernetes (`maxUnavailable`, `maxSurge`, rollout).
+
 ## 1. Rolling (mặc định)
 
 Thay dần từng instance — bản cũ và bản mới chạy song song trong lúc chuyển.

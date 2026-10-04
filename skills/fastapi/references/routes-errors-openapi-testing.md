@@ -4,6 +4,8 @@
 > DB nằm ở tầng service; lỗi miền đổi sang vỏ JSON ổn định qua handler tập trung; OpenAPI tuỳ biến bằng
 > cách gán `app.openapi`; test dựng app mới và ghi đè đúng dependency.
 
+Nguồn (phần bổ sung ở SPR-04, đọc 2026-10-04): tài liệu chính thức FastAPI.
+
 ## 1. Endpoint async có phân trang
 
 ```python
