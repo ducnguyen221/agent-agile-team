@@ -6,19 +6,20 @@ quyền tương ứng ở đây là bắt buộc. Nguồn của từng skill và
 và agent". Nguồn chỉ lấy ý và phần phải viết lại trước khi công khai: THIRD_PARTY.md.
 
 ------------------------------------------------------------------------------------------------------
-Nguồn MIT đã dùng ở Đợt 1 (giữ thông báo bản quyền và văn bản giấy phép MIT bên dưới)
+Nguồn MIT đã dùng ở Đợt 1 và Đợt 2 (giữ thông báo bản quyền và văn bản giấy phép MIT bên dưới)
 ------------------------------------------------------------------------------------------------------
 
 - Superpowers (obra/superpowers) — Copyright (c) 2025 Jesse Vincent
 - superpowers-skills (obra/superpowers-skills) — Copyright (c) 2025 Jesse Vincent
 - ECC (affaan-m/ECC) — Copyright (c) 2026 Affaan Mustafa
 - gstack (garrytan/gstack) — Copyright (c) 2026 Garry Tan
+- superpowers-lab (obra/superpowers-lab) — Copyright (c) 2025 Jesse Vincent
+  (Đợt 2: viết lại bước tìm hàm trùng lặp trong skills/code-review/references/duplicates.md)
 - Supabase Agent Skills (supabase/agent-skills) — Copyright (c) 2026 Supabase
   (đến qua ECC; ghi công trong skill postgres và agent database-reviewer)
 
-Nguồn MIT đã chốt mốc nhưng Đợt 1 chưa chép văn bản (ghi sẵn cho đợt sau):
+Nguồn MIT đã chốt mốc nhưng chưa chép văn bản (chỉ lấy ý):
 
-- superpowers-lab (obra/superpowers-lab) — Copyright (c) 2025 Jesse Vincent
 - BMAD-METHOD (bmad-code-org/BMAD-METHOD) — Copyright (c) 2025 BMad Code, LLC (chỉ lấy ý)
 - Spec Kit (github/spec-kit) — Copyright (c) GitHub, Inc. (chỉ lấy ý)
 - OpenSpec (Fission-AI/OpenSpec) — Copyright (c) 2024 OpenSpec Contributors (chỉ lấy ý)

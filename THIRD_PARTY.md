@@ -4,16 +4,16 @@ Mốc SHA và ngày của từng nguồn, cùng bảng nguồn theo từng skill
 thông báo bản quyền phải mang theo ở [NOTICE](NOTICE). File này ghi **vì sao** mỗi nguồn được dùng theo
 cách đó, các nguồn **chỉ lấy ý**, và danh sách file **phải viết lại trước khi công khai**.
 
-## 1. Nguồn chép được (MIT) — đã dùng ở Đợt 1
+## 1. Nguồn chép được (MIT) — đã dùng ở Đợt 1 và Đợt 2
 
 | Nguồn | Giấy phép | Dùng cho |
 |---|---|---|
 | `obra/superpowers` | MIT | Skill quy trình (`shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`), kỹ thuật (`tdd`, `debugging`, `worktrees`), kiểm định (`verify-before-done`, `code-review`), meta (`writing-skills`) |
 | `obra/superpowers-skills` | MIT | Đối chiếu và bổ sung `tdd`, `debugging` (nguồn đóng băng) |
-| `affaan-m/ECC` | MIT | Skill kỹ thuật (`python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`), `security-review`, `intake`, `token-economy`, phần bài học của `closing-sprint`; 7 agent reviewer |
-| `garrytan/gstack` | MIT | `plan-review`, `security-audit`, `web-qa`, phần `debugging` (điều tra), docs-sync và retro của `closing-sprint` |
+| `affaan-m/ECC` | MIT | Đợt 1: skill kỹ thuật (`python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`), `security-review`, `intake`, `token-economy`, phần bài học của `closing-sprint`; 7 agent reviewer. Đợt 2: 6 agent (`code-explorer`, `code-reviewer`, `test-analyzer`, `build-fixer`, `typescript-reviewer`, `react-reviewer`), 4 skill (`react`, `frontend`, `e2e-testing`, `eval-harness`), chuẩn code `method/standards/**`, luồng orch và cổng review/giao hàng trong `method/`, `roles/verifier/dual-review.md`, phần thêm của `intake`, `shaping-spec`, `tdd`, `verify-before-done`, `web-qa`, `token-economy`, `closing-sprint` |
+| `garrytan/gstack` | MIT | Đợt 1: `plan-review`, `security-audit`, `web-qa`, phần `debugging` (điều tra), docs-sync và retro của `closing-sprint`. Đợt 2: ý của `review` (`code-review`), `qa` (`web-qa`), `ship` và `land-and-deploy` (`closing-sprint`) |
 | `supabase/agent-skills` | MIT | Mẫu Postgres trong `postgres` và agent `database-reviewer` (đến qua ECC) |
-| `obra/superpowers-lab` | MIT | Chưa dùng — tham chiếu tìm hàm trùng lặp (Đợt 2) |
+| `obra/superpowers-lab` | MIT | Đợt 2: bước tìm hàm trùng lặp bằng tay trong `skills/code-review/references/duplicates.md` (không chép script của nguồn) |
 
 ## 2. Nguồn chỉ lấy ý (không chép văn bản)
 
