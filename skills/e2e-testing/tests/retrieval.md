@@ -42,6 +42,16 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 - Phần phụ: `fill` so với `pressSequentially`, chờ đúng response cho từng lần gõ (câu 5).
 - `description` hứa "locators, config, retries, traces, CI runs, flaky tests, quarantine"; "traces" và "quarantine" có thân nhưng mỏng so với câu hỏi (câu 1, câu 6).
 
+## Chạy lại sau `fix-2` (QA2, SPR-04)
+
+QA độc lập (khác mọi Implementer của `fix-1`/`fix-2`), 2026-10-04, `a35b618`, cây skill đúng `skill_sha` ở frontmatter. Thân `SKILL.md` đổi ở `fix-1` đúng ở mục 6 bước 3 (thêm: cách ly **không** dùng để đóng một `RF` hay làm `VR` Đạt) và con trỏ chuẩn mã ở mục 10; nên chạy lại **đúng câu 1** (quy trình cách ly) thay vì ghi chú. Chủ thể: subagent mới (`claude-sonnet-5-5`, tier T3, `a91ef73d38fb727a1`), không dùng công cụ Skill, được đọc `SKILL.md`, `references/` và tài liệu được trỏ, không mở `tests/`. Kỳ vọng ghi trước (`evidence/QA2/expected/e2e-testing-expected.md`, sha256 `6cbd98c09bd16167cc538423b79a5e0dc2f3c51e1f018dfe4b2004a702cf85d4`, mtime 19:22:28, trước lượt giao); output trọn ở `evidence/QA2/e2e-testing-retrieval-q1.md` của hồ sơ sprint `SPR-04` của lớp riêng (`docs/plans/2026-10-04-agent-agile-team-wave-3/`).
+
+| Câu | Mục agent trỏ | Kết quả |
+|---|---|---|
+| `câu 1` | `SKILL.md` › 6 (bước 1–5), › 4, › 7; `references/playwright-recipes.md` › 4–5; `method/standards/common/testing.md` | Một phần (như lượt trước: đúng nơi, thiếu tag, project riêng, job CI không chặn merge, hạn bằng số, điều kiện quay lại; **điều mới có mặt đúng**: chủ thể nêu cách ly không đóng `RF` hay làm `VR` Đạt) |
+
+Sáu câu còn lại: thân skill chỉ đổi con trỏ chuẩn mã (mục 10) ở `fix-1`, không câu nào hỏi tới; kết quả đo trên bản trước `fix-1` (cây `79da4c4c006fa1c0c10dd518b2888e8395f9c9a1`); `fix-1` chỉ thêm con trỏ và dòng "Nguồn" ở `references/retry-and-user-messages.md`; không đổi nội dung trả lời. `result` không đổi (bảng chính giữ nguyên, câu 1 vẫn Một phần).
+
 ## Lịch sử
 
 Lượt `TK13` lượt 1 (bộ câu mới, 2026-10-04, `skill_sha` `51e76464b28d22c68ebbaa1a5828e708eb4a1734`, `result`: strict 2/7 (+5 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7), chuyển xuống đây khi chạy bộ câu mới lần 2. Id hàng của bộ đó đổi thành `b1`… để không lẫn vào bảng chấm của lượt mới (id agent: người soạn `a5bfd2ee4d689e95d`, chủ thể `a6faffdbabaa76ee1`); người soạn lần sau phải đọc cả ba bộ để không lặp. Các đề mục của khối này hạ hai bậc.
