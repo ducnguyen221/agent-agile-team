@@ -65,7 +65,7 @@
   (một `SPRINT.md` hai phần); sửa nội dung một skill có sẵn → nhỏ (một `SPRINT.md` bốn phần) hoặc vừa; thêm skill/agent hay cả một đợt → vừa
   hoặc lớn. Đụng `AGENTS.md` hay luật lõi → `risk_tags: [rules]`, cỡ lớn.
 - **Chốt mốc trước khi đọc:** ghi khối "Đợt N — chốt SHA <ngày>" ở `UPSTREAM.md` với nhánh, SHA HEAD, ngày
-  commit, tag, giấy phép, cách dùng; đợt dự kiến (mục "Đợt 2 — dự kiến") chuyển thành khối chốt.
+  commit, tag, giấy phép, cách dùng; đợt dự kiến (hiện là mục "Đợt 3 — dự kiến") chuyển thành khối chốt, bảng của nó thành "Thành phần Đợt N".
 - **Cách dùng theo giấy phép** (bảng đầu `UPSTREAM.md`): chép · ý · NOTICE · private. Nguồn chỉ lấy ý thì
   viết lại, không chép câu.
 - **Sửa skill có sẵn** theo skill `writing-skills`: chạy RED trên **bản hiện tại** với kịch bản dụ đúng lỗi
@@ -89,7 +89,7 @@
 
 ## 5. Mở rộng — thêm skill, agent hay nguồn mới
 
-1. **Tìm nguồn trước khi viết.** Xem mục "Đợt 2 — dự kiến" và Sổ theo dõi trước; chưa có thì tìm repo công
+1. **Tìm nguồn trước khi viết.** Xem mục "Đợt 3 — dự kiến" và Sổ theo dõi trước; chưa có thì tìm repo công
    khai phù hợp. Nguồn đã loại không đánh giá lại trừ khi điều kiện "xét lại" đạt.
 2. **Ghi sổ trước khi distill.** Kiểm giấy phép, chọn cách dùng, thêm một dòng vào Sổ theo dõi (vai trò, nơi
    nhận nội dung, mốc, khi nào kiểm). Chủ (owner) mới thì thêm vào `UPSTREAM_OWNERS` trong
