@@ -66,6 +66,16 @@ Bảng dưới có 9 nhóm nguồn **tài liệu web** — không có SHA, nên 
 | Tài liệu chính thức của công cụ (`gh`, PostgreSQL, PgBouncer, golang-migrate, Kubernetes, Docker, Trivy, FastAPI, pytest, PyPA, uv, docs.python.org) | ý, không chép | phần bổ sung của skill kỹ thuật ở `TK11`/`TK13` (`github-ops`, `database-migrations`, `deployment`, `fastapi`, `postgres`, `python`, `worktrees`, `react`, `frontend`, `e2e-testing`) | 2026-10-04 | khi sửa reference tương ứng; nguồn ghi ở mục Nguồn từng file |
 | Bài kỹ thuật của nhà cung cấp (Azure Architecture Center, AWS Builders' Library, Amazon SQS) | ý, không chép | `error-handling`, `deployment` | 2026-10-04 | khi sửa reference tương ứng |
 
+## SPR-06 — ý từ workshop Lauren Tan
+
+Nguồn: transcript workshop Lauren Tan do người dùng cung cấp, đọc ngày 2026-10-05; chưa đối chiếu video.
+Nguồn không phải repo Git nên nhánh/SHA/ngày commit không áp dụng; giấy phép chưa xác minh. Cách dùng:
+**ý**, diễn giải độc lập, không chép văn bản. Các mốc 15:10 và 18:20 gợi ý chỉ dẫn phải được vai thực sự
+nạp và thay đổi chỉ dẫn phải được kiểm qua hành vi. Áp dụng ở `roles/executor/analyst.md` mục 5 và
+`method/process.md` mục 1: nối điều phối với quy trình, rồi quy trình với thẻ vai; giữ nguyên các phần
+baseline đã đủ. Không nhập feature-map, runner, auto-merge hay quy tắc riêng của sản phẩm nguồn; không
+dùng các tuyên bố hiệu quả, số PR/token làm bằng chứng cho phương pháp này.
+
 Nguồn **private** (không giấy phép) không theo dõi ở đây: lớp riêng của môi trường giữ bản đồ và đường theo
 dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đợt 1 và `THIRD_PARTY.md` mục 3. SPR-02 đã viết lại 7 đích từ danh sách ý lấy từ nguồn private nhưng còn mang một số câu chữ nguồn; `SPR-04` (`TK10`) **viết lại phòng sạch** đúng 7 đích đó: bản cũ gỡ khỏi cây trước, người viết mới chỉ nhận danh sách ý dạng cụm danh từ (máy kiểm từng dòng), không mở bản cũ, để lại nhật ký đường đã đọc; 8-gram so với cả gốc private lẫn bản trước đó bằng 0 trên phần viết lại, sau khi loại stoplist cụm chung. Đích: `bug-triage`, `adr`, `database-migrations/references/rehearsal.md`, `closing-sprint/references/release-notes.md` và `preflight.md`, bảng phủ `FR` → `VR` của thẻ QA, bốn luật truy vết trong `scripts/README.md`. Các skill đó ghi nguồn ý dạng `concept:` (`source_sha` rỗng, `license: none`); cờ `rewrite_before_public` là `false` và không còn file nào chờ viết lại (`THIRD_PARTY.md` mục 3).
 

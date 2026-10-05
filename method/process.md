@@ -34,6 +34,16 @@ cỡ việc theo [sizing.md](sizing.md). Gặp tên skill cũ trong hồ sơ l�
 
 Bước 3 và 4 lặp cho tới khi không còn phát hiện mức Chặn hay Phải sửa (mục 6).
 
+**Nạp thẻ vai trước khi làm.** Khi bắt đầu tiếp nhận, viết SPEC/PLAN, bàn giao thực thi hoặc QA/kiểm định,
+Analyst đưa đường tới đúng thẻ trong [bảng vai](../roles/README.md) vào brief hiện có, cùng con trỏ tới bước
+quy trình và mục đầu vào liên quan. Agent nhận việc tự mở thẻ và các mục được trỏ trước hành động của vai;
+log đọc file của chính agent là bằng chứng, điều phối đọc thay không đủ. Analyst tự giữ vai cũng phải tự đọc
+thẻ trước khi làm. Chỉ nạp vai đang dùng, không dán lịch sử hay cả thư viện vai vào brief; hợp đồng brief,
+quyền, tier và các cổng giữ theo quy trình hiện hành.
+Khi dùng nguồn ngoài, brief giữ rõ nguồn do ai cung cấp và phần nào đã/chưa kiểm chứng; người nhận giữ
+đúng dữ kiện đó khi bàn giao, không hỏi lại dữ kiện nguồn đã có hay biến ví dụ thành yêu cầu; chỉ hỏi thêm
+nội dung nguồn còn thiếu khi cần cho phần việc được giao.
+
 **Người dùng cần làm gì:** giao yêu cầu bằng lời thường ở Bước 1 và trả lời **một** tin trao đổi của Analyst
 (mục tiêu đúng chưa, câu hỏi phản biện, bậc việc, có mở sprint không); trả lời **"duyệt"** hoặc **"điều
 chỉnh: <gì>"** ở Cổng 1; kết luận **Đạt / Đạt có điều kiện / Không đạt** ở Cổng 2. Ngoài ra chỉ phải
