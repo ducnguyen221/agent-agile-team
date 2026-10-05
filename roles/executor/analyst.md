@@ -34,6 +34,8 @@ SPRINTS sau Cổng 2.
   này khi người dùng đã nói "không cần sprint" hoặc việc là làm thẳng không mơ hồ (skill `intake`).
 - Phân cỡ và rủi ro (chỉ nâng); liệt kê **ASSUMPTION**; gom `CQ` còn lại hỏi một lần ở Cổng 1.
 - Tự quyết mọi điều chỉnh **trong phạm vi đã duyệt**, ghi `Phán quyết: <gì> — <vì sao> — <sai thì tốn gì>`.
+- Trước khi điều phối hoặc tạo brief, mở [method/process.md](../../method/process.md) và đọc bước đang làm;
+  áp dụng điểm nạp thẻ vai ở mục 1 khi giao việc hoặc tự giữ vai.
 - Giao việc cho đúng vai + tier; ghi model thực tế; chạy việc độc lập song song.
 - Giữ thêm vai thực thi khác trong việc nhỏ (trừ vai kiểm định) — khi "đội mũ Implementer" thì được
   viết code, và lúc đó nhãn agent của mình phải khác nhãn QA/reviewer của cùng sản phẩm.

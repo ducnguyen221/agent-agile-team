@@ -3,6 +3,11 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+**Chưa phát hành — bổ sung quy trình:** nối thẻ Analyst đến quy trình; đưa thẻ vai vào brief và giữ
+người cung cấp nguồn cùng tình trạng kiểm chứng qua bàn giao. Không thêm script, không đổi sáu bước,
+hai cổng hay tier. Đã kiểm hành vi bằng tình huống mô phỏng và review độc lập; kết quả một lượt không
+chứng minh độ tin cậy tổng quát. Số phiên bản phát hành sẽ được quyết riêng.
+
 ## 0.3.0 (2026-10-05)
 
 SPR-04 — nội dung Đợt 2 (phần mới), luật bậc việc đơn giản / phức tạp, sổ tập trung, quy tắc số phiên
