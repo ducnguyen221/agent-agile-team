@@ -120,6 +120,34 @@ code — cũng là lỗi.
 
 Sửa tại chỗ, không review lại lần hai.
 
+## 6b. PLAN lớn hoặc nhiều sprint — hợp đồng trước, kiểm mã trước, trần vòng review
+
+Bài học từ một chuỗi 5 sprint (10 vòng review, 82 phát hiện, ~15 triệu token; OpcOS SPR-08…12, 10–11/10/2026):
+khoảng 40 % phát hiện là bẫy gãy im lặng thật, 40 % là lệch do chính các lần sửa tạo ra, 20 % văn phong.
+Phần 40 % giữa và phần lớn token tránh được bằng năm luật sau.
+
+1. **Hợp đồng bàn giao trước khi chia việc hoặc fan-out.** Trước khi giao bất kỳ sprint hay `TK` nào cho
+   agent khác viết, chốt trên **một trang**: tên file/đường bàn giao, schema (khoá, kiểu), chữ ký CLI và mã
+   thoát của công cụ dùng chung, cách kiểm bằng lệnh, ai sản xuất – ai tiêu thụ. Giao viết song song mà chưa
+   có trang này thì mỗi agent tự đặt tên khác nhau và reviewer tốn 2–3 vòng chỉ để vá lệch.
+2. **Tự kiểm chứng khẳng định về mã trước khi gọi reviewer.** Liệt 5–10 câu PLAN khẳng định về mã hiện có
+   (hàm X đọc biến Y, hook thoát mã Z khi thiếu file, script chỉ nhận tiền tố W…) và `grep`/mở đúng dòng cho
+   từng câu — mỗi câu 30 giây. Người viết làm từ báo cáo trung gian luôn thua reviewer có mã trong tay; đừng
+   trả tiền cho reviewer để làm việc `grep` thay mình.
+3. **Sau mỗi lần sửa lớn, chạy một lượt đồng bộ chéo** trước khi re-review: grep tên file, mã (`TK`, `SC`,
+   `RF`), số liệu, trạng thái giữa SPEC – PLAN – tài liệu thiết kế – REPORT – PROGRESS. Sửa một chỗ mà không
+   quét lại là tự tạo phát hiện cho vòng sau.
+4. **Trần vòng review PLAN: 2, tối đa 3.** Vượt trần mà còn Phải sửa không phải Chặn → gộp thành *điều
+   kiện thực thi* ghi ở `TK` sở hữu, không re-review toàn bộ (mỗi vòng reviewer đọc lại toàn bộ PLAN + mã;
+   PLAN 300–400 dòng × nhiều sprint = hàng triệu token một vòng). Còn Chặn thì sửa đúng Chặn và re-review
+   **hẹp** theo diff.
+5. **Giữ PLAN ngắn:** kiểm kê, bảng `file:dòng`, nguyên văn review → `evidence/`; PLAN chỉ giữ hợp đồng,
+   bước, cách kiểm, hoàn tác. Reviewer đọc PLAN, tra evidence khi cần.
+
+Chọn model cho vai viết PLAN theo bảng tier (`AGENT_AGILE_TIERS`), không theo cảm giác "model mạnh hơn":
+chênh lệch chất lượng giữa người viết và người review đến từ **có mã trong tay và có hợp đồng trước** nhiều
+hơn từ model. Reviewer phải là model hoặc phiên khác người viết.
+
 ## 7. Bàn giao
 
 - Từ cỡ **vừa**: `status: in_review`, Tech Reviewer (agent khác) review PLAN theo skill `plan-review`;

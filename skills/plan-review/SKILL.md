@@ -184,3 +184,17 @@ soi kỹ hơn: chỗ từng có vấn đề thường có lại.
 Muốn ý kiến của mô hình hay hãng khác → chỉ **tư vấn** cho người dùng (hỏi gì, vì sao); người dùng quyết,
 công cụ gọi chéo do môi trường cung cấp. Hai mô hình đồng ý là bằng chứng mạnh, **không phải giấy phép**
 để tự áp khuyến nghị.
+
+## 10. Vòng sau và chi phí
+
+- **Re-review hẹp theo diff.** Từ vòng 2, người viết trình *diff từ mốc vòng trước* và bảng `RF` → cách
+  xử lý; reviewer chỉ đọc diff + mục bị chạm, kiểm từng `RF` đóng chưa, rồi tìm lỗi **do sửa gây ra**. Không
+  đọc lại toàn bộ PLAN trừ khi diff chạm kiến trúc.
+- **Trần: 2 vòng, tối đa 3.** Vượt trần mà không còn Chặn → kết luận *Đạt có điều kiện*, điều kiện ghi về
+  `TK` sở hữu để xử lý lúc thực thi; không mở vòng mới cho Phải sửa/Nên sửa. Còn Chặn → sửa đúng Chặn, vòng
+  tiếp chỉ xem Chặn đó.
+- **Phân loại phát hiện theo nguồn:** *bẫy thật* (gãy im lặng, mất dữ liệu, không hoàn tác, không đo được) ·
+  *lệch tự sinh* (do lần sửa trước) · *văn phong*. Nhiều lệch tự sinh liên tiếp là dấu hiệu người viết chưa
+  chạy đồng bộ chéo (`writing-plan` mục 6b) — nêu một lần, không liệt từng dòng.
+- **Kiểm chứng bằng mã, ghi `file:dòng`.** Phát hiện về mã hiện có phải có dòng mã đi kèm; phát hiện không
+  kiểm được ghi "chưa kiểm". Đây là giá trị lớn nhất reviewer thêm được so với người viết.

@@ -3,6 +3,8 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+**Chưa phát hành — bài học lập PLAN lớn:** `writing-plan` mục 6b (hợp đồng bàn giao trước fan-out, tự kiểm chứng mã trước review, đồng bộ chéo sau mỗi lần sửa, trần 2–3 vòng review, PLAN ngắn) và `plan-review` mục 10 (re-review hẹp theo diff, trần vòng, phân loại phát hiện theo nguồn, bắt buộc `file:dòng`). Nguồn: chuỗi OpcOS SPR-08…12 (10 vòng, 82 RF, ~15M token, 10–11/10/2026). Không đổi sáu bước, hai cổng hay tier.
+
 **Chưa phát hành — bổ sung quy trình:** nối thẻ Analyst đến quy trình; đưa thẻ vai vào brief và giữ
 người cung cấp nguồn cùng tình trạng kiểm chứng qua bàn giao. Không thêm script, không đổi sáu bước,
 hai cổng hay tier. Đã kiểm hành vi bằng tình huống mô phỏng và review độc lập; kết quả một lượt không
