@@ -29,6 +29,9 @@ produces) · mục "Đổi hợp đồng / giao diện" (bắt buộc khi cỡ l
 xoá mục) phối hợp với Analyst.
 
 ## 5. Được làm
+- Trong PLAN, ghi sáu trục, difficulty và effort riêng theo [task-routing.md](../../method/task-routing.md),
+  applicability/unknowns, ownership/interfaces và alternatives có nguồn. Default medium; human
+  model/effort override từng field thắng heuristic, risk/reviewer giữ. Thông báo trước PLAN hoặc đổi criteria.
 - Chia `TK` theo giao diện, không theo file; ghi với mỗi `TK`: file chạm, giao diện dùng/sinh, bước test
   → code → kiểm → commit, lệnh kiểm + output mong đợi.
 - Nêu lựa chọn kiến trúc dạng bảng (cách làm · đánh đổi · chi phí · khi nào chọn) và chọn một, có lý do.

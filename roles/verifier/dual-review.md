@@ -78,15 +78,18 @@ vai thực thi nên không bắt được reviewer thứ hai trùng người là
 
 | Cách hỏng | Dấu hiệu | Thuốc |
 |---|---|---|
-| Vòng vô tận | reviewer cứ tìm ra lỗi mới sau mỗi lần sửa | mốc 3 vòng (không trần cứng), rồi hỏi người dùng |
+| Vòng vô tận | reviewer cứ tìm ra lỗi mới sau mỗi lần sửa | ba vòng thực hiện sửa có kiểm chứng; còn kẹt hoặc regression ở vòng ba thì dừng assignment và bàn giao theo process |
 | Reviewer dễ dãi | cả hai Đạt hết | brief ghi "việc của bạn là tìm vấn đề"; rubric có điều kiện cụ thể |
 | Trôi sang phong cách | cờ toàn là sở thích | rubric chỉ điều kiện xác định |
 | Sửa lỗi này sinh lỗi kia | lỗi mới xuất hiện sau vòng sửa | reviewer mới mỗi vòng bắt hồi quy |
 | Chi phí phình | quá nhiều vòng cho đầu ra lớn | chia đầu ra theo phần; ghi trần ngân sách trong PLAN |
 
 ## 7. Khi nào dừng
-Hết **3 vòng** mà vẫn còn Chặn / Phải sửa → báo người dùng theo lời báo chuẩn ở [process.md](../../method/process.md)
-mục 6 (không trần cứng; chọn làm tiếp hay dừng & bàn giao) · hai bên bất đồng kéo dài nhiều vòng về cùng một điểm (rubric
+Sau **ba vòng thực hiện sửa có kiểm chứng**, cùng nguyên nhân, không tiến triển hoặc có regression ở vòng ba →
+thông báo, dừng writer và bàn giao tier cao hơn theo [process.md](../../method/process.md) mục 6; không tự mở vòng
+bốn cùng assignment. Giữ counter khi bàn giao; model/effort pin, quyền, quota và trần T1 vẫn áp. Lượt review
+không tự tiêu một vòng sửa: chỉ hypothesis + thay đổi + oracle + kết quả đã thực hiện mới được tính. Hai bên
+bất đồng kéo dài nhiều vòng về cùng một điểm (rubric
 mơ hồ — làm rõ chữ rubric, ghi `Phán quyết:`; không nới điều kiện đạt, vì nới điều kiện là đổi tiêu chí → `BR`) · cạn
 hạn mức tier (không tự hạ tier) · chi phí vượt xa lợi ích (mỗi vòng cỡ 2–3 lần chi phí kiểm một bên — ghi trong PLAN
 khi chọn bật).
@@ -95,3 +98,5 @@ khi chọn bật).
 `verify-before-done` (cổng xong và bằng chứng) · `code-review` · `security-review` · `plan-review` ·
 `response-style` · `id-convention` · `token-economy`. Thiết kế cổng review chia theo khía cạnh:
 [method/review-gate.md](../../method/review-gate.md).
+
+📜 Lịch sử mục này: [CHANGELOG.md](../../CHANGELOG.md) — mốc 2026-10-12.

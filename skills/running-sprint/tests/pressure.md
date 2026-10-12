@@ -3,9 +3,14 @@ skill: running-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
-date: 2026-10-05
-result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
+historical_skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
+skill_sha: unverified
+historical_date: 2026-10-05
+date: 2026-10-12
+historical_result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
+result: Chưa chạy — current candidate behavior unverified
+candidate_source_sha256: fe5d4e6dc3af8e35773d21a198e04569882a497652e063ca96fad8bac87c51b3
+candidate_tested: false
 agent_ids:
   red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c, rs-5: a85924e1b63b35a7d, rs-6: a931196ba49c182b7}
   green: {rs-2: a50fbf9b9a102fe43, rs-3: a57d5e1bf1b2f50c5, rs-4: adf66375595ac80e4, rs-5: a7168adbe0f810772, rs-6: a6db9c9d7225d1989}
@@ -15,6 +20,13 @@ agent_ids:
 ---
 
 # Thử áp lực — running-sprint
+
+## Trạng thái candidate hiện tại — 2026-10-12
+
+Người dùng giới hạn ngân sách còn 1–2% usage và yêu cầu hoàn tất phần tích hợp tối thiểu. Theo override này, dừng mọi lượt pressure/micro/GREEN/regression mới. Candidate hiện tại **Chưa kiểm chứng hành vi**; chỉ kiểm tra tĩnh. Các kết quả và model/tier/agent IDs dưới đây là lịch sử, không xác nhận candidate mới.
+
+Các tình huống mới đã chuẩn bị nhưng chưa dispatch RED; micro, GREEN và hồi quy chưa chạy. Không suy kết quả từ việc đọc lại nguồn.
+
 
 > **Kết luận:** không có skill, chủ thể phán quyết thay vì hỏi khi PLAN lệch SPEC (luật lõi đã dạy — kịch bản rs-1
 > đạt sẵn) nhưng gãy ở ba chỗ riêng của skill: brief tự viết lại yêu cầu thay vì trỏ mục `TKn` của PLAN và thiếu hợp

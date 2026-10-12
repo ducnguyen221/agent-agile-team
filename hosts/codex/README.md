@@ -37,6 +37,12 @@ Reviewer cần một chuyên đề, brief của subagent ghi "đọc `agents/<t�
 
 ## 4. Lưu ý
 
+- Phân công đọc [task-routing](../../method/task-routing.md); tên model chỉ lấy từ bảng môi trường hoặc
+  human override trong scope. Native effort controls per invocation phải verified bởi adapter/harness;
+  requested/effective không thay actual runtime. Không viết config để ép một assignment.
+- Codex routing parity có thể đi CLI→bridge→runner của môi trường; không suy có MCP Codex chỉ vì
+  server chung có tool Claude/AGY. Chưa capability/access là unknown/unsupported, không fallback model.
+
 - Sandbox của Codex có thể chặn ghi ra ngoài thư mục đang mở; `init.py` ghi vào **dự án đang áp dụng**, nên
   mở Codex ở gốc dự án đó.
 - Điểm cắm (bảng tier, từ cấm, nơi lưu bài học, cầu gọi chéo): [`hosts/README.md`](../README.md) mục 2.

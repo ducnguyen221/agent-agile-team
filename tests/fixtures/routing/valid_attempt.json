@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "record_kind": "attempt",
+  "record_ref": "attempt-record-1",
+  "task_ref": "SPR-01",
+  "work_item_ref": "TK1",
+  "policy_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "plan_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "criteria_version": "v1",
+  "evidence_refs": ["PROGRESS.md#attempt-1"],
+  "unknown_reasons": {
+    "dispatch.context_tier": "not_applicable: codex does not use context tier",
+    "dispatch.actual_model_sequence": "native metadata provided initial model only",
+    "dispatch.fallback_observed": "native metadata omitted fallback history",
+    "dispatch.fallback_source": "native metadata omitted fallback history",
+    "provenance.catalog_at": "catalog timestamp unavailable",
+    "provenance.fit_ref": "not_applicable: pilot has no measured fit",
+    "provenance.approval_ref": "not_applicable: policy assignment",
+    "outcome.first_error_ref": "not_applicable: first attempt passed",
+    "outcome.failure_class": "not_applicable: first attempt passed",
+    "outcome.root_cause_ref": "not_applicable: first attempt passed",
+    "time.active_ms": "not measured",
+    "time.waiting_ms": "not measured",
+    "time.e2e_ms": "not measured",
+    "time.human_minutes": "not measured",
+    "usage.tokens_in": "native usage unavailable",
+    "usage.tokens_out": "native usage unavailable",
+    "usage.cache_tokens": "native usage unavailable",
+    "usage.quota_used": "not measured",
+    "usage.quota_unit": "not measured",
+    "usage.usage_source": "native usage unavailable",
+    "cost.api_equivalent_usd": "not measured",
+    "cost.actual_incremental_usd": "subscription bill not attributable per call",
+    "cost.price_source_at": "not applicable without quoted API estimate",
+    "join.session_id": "session identifier unavailable",
+    "effort.effort_actual": "native effort telemetry unavailable",
+    "effort.native_only_reason": "not_applicable: standard effort level",
+    "criteria_change": "not_applicable: initial criteria",
+    "decision.override_ref": "not_applicable: no owner override",
+    "effort.override_ref": "not_applicable: no owner override",
+    "notification.approval_ref": "not_applicable: policy assignment"
+  },
+  "identity": {"attempt_id": "attempt-1", "assignment_ref": "assignment-1"},
+  "dispatch": {
+    "harness": "codex",
+    "requested_model": "model-example",
+    "actual_model": "model-example",
+    "actual_model_source": "native:call-1",
+    "context_tier": null,
+    "access": "accepted",
+    "actual_model_sequence": null,
+    "fallback_observed": null,
+    "fallback_source": null,
+    "billing_capability_status": "unknown"
+  },
+  "provenance": {
+    "tier_table_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "catalog_source": "native-metadata",
+    "catalog_at": null,
+    "catalog_status": "unknown",
+    "access_status": "accepted",
+    "fit_ref": null,
+    "approval_ref": null
+  },
+  "outcome": {
+    "first_error_ref": null,
+    "failure_class": null,
+    "root_cause_ref": null,
+    "repair_rounds": 0,
+    "regressions": [],
+    "escalations": [],
+    "deescalation_proposals": []
+  },
+  "repair_history": {
+    "repair_cycle_index": 0,
+    "total_repair_cycles": 0,
+    "assignment_history": ["assignment-1"]
+  },
+  "quality": {
+    "first_pass": true,
+    "acceptance_pass": true,
+    "critical_group_pass": true,
+    "review_findings": [],
+    "human_rework": false
+  },
+  "time": {
+    "started_at": "2026-10-12T10:01:00Z",
+    "finished_at": "2026-10-12T10:02:00Z",
+    "active_ms": null,
+    "waiting_ms": null,
+    "e2e_ms": null,
+    "human_minutes": null
+  },
+  "usage": {
+    "tokens_in": null,
+    "tokens_out": null,
+    "cache_tokens": null,
+    "quota_used": null,
+    "quota_unit": null,
+    "usage_source": null,
+    "coverage_status": "unknown"
+  },
+  "cost": {
+    "billing_mode": "subscription",
+    "api_equivalent_usd": null,
+    "actual_incremental_usd": null,
+    "price_source_at": null
+  },
+  "join": {
+    "call_id": "call-1",
+    "session_id": null,
+    "evidence_refs": ["ledger:call-1"]
+  },
+  "decision": {
+    "difficulty_level": 1,
+    "decision_basis": "heuristic",
+    "override_ref": null,
+    "topology_evidence": {
+      "separable_modules": 1,
+      "context_transfer": 0,
+      "integration_load": 0,
+      "benefit_evidence": "unmeasured",
+      "ownership_refs": ["PLAN.md#ownership"],
+      "dependency_refs": ["PLAN.md#deps"]
+    }
+  },
+  "effort": {
+    "effort_level": 2,
+    "effort_requested": "medium",
+    "effort_effective": "medium",
+    "effort_actual": null,
+    "effort_source": "policy",
+    "effort_capability": "supported",
+    "override_ref": null,
+    "native_only_reason": null
+  },
+  "notification": {
+    "notification_ref": "notice-1",
+    "notified_at": "2026-10-12T10:00:00Z",
+    "event_kind": "dispatch",
+    "assignment_ref": "assignment-1",
+    "harness": "codex",
+    "role": "Implementer",
+    "tier": "T2",
+    "model": "model-example",
+    "native_effort": "medium",
+    "scope_ref": "TK1",
+    "reason": "Bounded work with deterministic tests.",
+    "approval_ref": null
+  },
+  "criteria_change": null
+}

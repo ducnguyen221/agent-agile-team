@@ -109,3 +109,26 @@ script sinh luật). Rồi đối chiếu bảng dưới.
 `result` và `model` theo danh sách trạng thái hợp lệ ([tests/README.md](../tests/README.md)). File thử từ `0.2` thiếu hai
 khoá đó làm `pytest` đỏ cho tới khi chạy lại tệp thử và ghi đủ (cách chạy: [skills/writing-skills](../skills/writing-skills/SKILL.md),
 `references/testing.md`).
+
+## 5. Routing và effort — candidate chưa promotion
+
+Không đổi version hoặc tự cập nhật plugin/cache. Method mới ở [task-routing](../method/task-routing.md)
+tách cỡ/risk, technical difficulty, tier và effort; default medium, human override từng field, notice
+trước PLAN/dispatch/change/handoff, ba verified repair cycles và giữ total counters. Mô hình lower-tier
+bounded/routine và parallel thresholds cần pilot, baseline fixed-role-tier tiếp tục.
+
+Hồ sơ cũ không marker/không trong manifest giữ nguyên. Pilot dùng marker `routing-evidence:v1` với JSON
+schema 1 và manifest QA giữ độc lập; xóa block không tránh completeness check. Không đổi shape roles
+frontmatter. Các field actual/usage/cost chưa quan sát ghi null + reason, không lấy requested hoặc 0.
+Producer/consumer contract và cách kiểm: [evaluation](../evals/task-routing/contract.md),
+[scripts](../scripts/README.md), [templates](../templates/README.md).
+
+Adapter model/effort/capability thuộc môi trường và opt-in; legacy absent controls giữ hành vi cũ.
+Native unsupported dừng trước gọi, không model fallback. Resume routed cần known matching identity,
+effective effort/capability/approval; không coi null là wildcard. Không đổi context tier, mapping hoặc
+global config. Catalog fresh khác access granted. Luật lõi môi trường cần approval/deploy chuẩn riêng.
+
+Hoàn tác trước release: giữ baseline mapping, bỏ opt-in routing ở assignment mới và revert từng lát
+source đã duyệt trong checkout triển khai; giữ failed records/ledger/evidence. Nếu sau này đã deploy
+luật thì rebuild/deploy từ nguồn cũ bằng pipeline chính thức, không sửa bản sinh tay. Không reset toàn
+repo hoặc xóa lịch sử/dirty edits để rollback. Cổng 2, pilot và deploy chưa được coi Đạt chỉ vì fixtures.

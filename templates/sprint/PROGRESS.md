@@ -77,3 +77,12 @@ PROGRESS có 1 **blocker** (BR):
 Vòng 0 — chưa kiểm. Mẫu khi đã kiểm: *Vòng 1 — Business Reviewer (agent-c, T1) và Tech Reviewer (agent-d,
 T1): Đạt có điều kiện; 0 Chặn, 0 Phải sửa, 2 Nên sửa, 0 Ghi chú; RF2 (thông báo khó hiểu) đã sửa ở TK2,
 RF3 (truy vấn chưa có chỉ mục) để lại → CO1.*
+
+## 5. Bằng chứng routing (khi thuộc pilot)
+
+<!-- Chỉ thêm record khi task nằm trong manifest pilot hoặc cần bằng chứng routing. Đặt marker HTML
+     routing-evidence:v1 trên một dòng riêng rồi ngay sau đó là một khối JSON fenced theo
+     evals/task-routing/run.schema.json. Mỗi classification và attempt có record_ref riêng; actual chỉ ghi
+     khi có nguồn runtime. Attempt thất bại vẫn ghi; bộ ba vòng sửa có counter riêng với vòng reviewer. -->
+
+Không áp dụng — sprint mẫu chưa thuộc pilot routing.

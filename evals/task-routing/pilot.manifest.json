@@ -1,0 +1,1514 @@
+{
+  "schema": 1,
+  "manifest_revision": 1,
+  "status": "dataset_ready_not_run",
+  "phase": "prepared",
+  "criteria_version": "routing-v1",
+  "policy_hash": "d3f302ed7f6e757b242583f3ec8b51eda9592c53b9ac04be22dd9d74ac037e7f",
+  "policy_hash_status": "baseline_source_snapshot_not_candidate_freeze",
+  "candidate_policy_hash": null,
+  "candidate_policy_hash_reason": "pending_calibration_and_candidate_freeze",
+  "baseline": {
+    "policy_hash": "d3f302ed7f6e757b242583f3ec8b51eda9592c53b9ac04be22dd9d74ac037e7f",
+    "source_files": [
+      {
+        "sha256": "e08327d368027cc6bfdcb6c5746efc64b95a0f2a8938376d719d93a8f874fb01",
+        "path": "AGENTS.md"
+      },
+      {
+        "sha256": "172b7b137e21ccdfc96634e8841b9122744f943d85e4067f818c570e29ef9416",
+        "path": "method/process.md"
+      },
+      {
+        "sha256": "62438f892534b8a43d54b1ddadb4b44c552c9f8087a4560f60a1ead4cb7a3ce3",
+        "path": "method/sizing.md"
+      },
+      {
+        "sha256": "01aaf82ea416292d911a196e63c1c4dc271916824d6bf39e8450494c0b9dbc85",
+        "path": "tiers/README.md"
+      },
+      {
+        "sha256": "da3596470f905ff43d961b1e3a993825f2f882416301a4a21db441da2011dfbb",
+        "path": "roles/executor/analyst.md"
+      },
+      {
+        "sha256": "3c2bf4a42dec683c583bdadf4c3b42e58a6dca436e1319f658b17c227cb726a7",
+        "path": "roles/executor/architect.md"
+      },
+      {
+        "sha256": "5ef2f45fd129904b35c5079f9267a041c9ee47c8aeb4391500f71f17fd1dca60",
+        "path": "roles/executor/implementer.md"
+      },
+      {
+        "sha256": "91f66a868dc5fd059dc6a9ef16282565d35f7a4d4b626790c7bfb803a3b6d5f3",
+        "path": "roles/executor/qa.md"
+      },
+      {
+        "sha256": "9061aed42910737e44a3397f1ca2d1797153a58372b3997debff31206ae348cb",
+        "path": "roles/verifier/business-reviewer.md"
+      },
+      {
+        "sha256": "9c5e92647279eb8d8fea45abd2aaae786835e5f6f3b72f3011f00fbe1cef5115",
+        "path": "roles/verifier/tech-reviewer.md"
+      },
+      {
+        "sha256": "e807c50f535555bfaf06a407ba7637c496ef60f140145f86b11061591ba94fd6",
+        "path": "skills/intake/SKILL.md"
+      },
+      {
+        "sha256": "1cb9968bfe3696e22949854b46d7a1816d54088c69113a001e280e8e3999ca9d",
+        "path": "skills/writing-plan/SKILL.md"
+      },
+      {
+        "sha256": "817b0c53f79c19ff91cbcc6fb04f349f4451f2598aeee35c63cf9cde0986a05c",
+        "path": "skills/running-sprint/SKILL.md"
+      },
+      {
+        "sha256": "169a76d2009278c3aabe92ac6db12c0de76ed6192497f9a4aa3d22fd277bcd15",
+        "path": "skills/token-economy/SKILL.md"
+      }
+    ],
+    "observed_at": "2026-10-12",
+    "run_status": "not_run"
+  },
+  "criteria": {
+    "ordinal_rubric_version": "ordinal-v1",
+    "ordinal_rubric_hash": "92cfc2af5dab399fb318f6203b1df061d5b4422c862a06ba90805850e622c61d",
+    "effort_mapping_version": "effort-v1",
+    "effort_mapping_hash": "8183face97fb709d19a9efb03568f958520366a1e6f060100f95ac8729e279a6",
+    "critical_pass_all_repeats": true,
+    "repetitions": 3,
+    "routing_first_pass_minimum": 0.9,
+    "median_e2e_ratio_maximum": 1.1,
+    "probability_calibration": "not_applicable_no_probability_interface",
+    "threshold_status": "approved_design_not_empirically_calibrated",
+    "ordinal_rubric_ref": "contract.md#ordinal-v1",
+    "effort_mapping_ref": "contract.md#effort-v1"
+  },
+  "dataset": {
+    "version": 1,
+    "file": "evals/task-routing/cases.jsonl",
+    "sha256": "c1ba5ce59c033eee53d3abd6b5f7d53f9af22fd5af93cb65595e23d9700c422d",
+    "case_count": 36,
+    "split_counts": {
+      "calibration": 18,
+      "holdout": 18
+    },
+    "coverage": [
+      {
+        "case_id": "cal-01",
+        "split": "calibration",
+        "sc_refs": [
+          "SC1"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-02",
+        "split": "calibration",
+        "sc_refs": [
+          "SC2",
+          "SC19"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "cal-03",
+        "split": "calibration",
+        "sc_refs": [
+          "SC3"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "cal-04",
+        "split": "calibration",
+        "sc_refs": [
+          "SC4",
+          "SC20"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-05",
+        "split": "calibration",
+        "sc_refs": [
+          "SC5"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-06",
+        "split": "calibration",
+        "sc_refs": [
+          "SC6"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "cal-07",
+        "split": "calibration",
+        "sc_refs": [
+          "SC7",
+          "SC21"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-08",
+        "split": "calibration",
+        "sc_refs": [
+          "SC8",
+          "SC23"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-09",
+        "split": "calibration",
+        "sc_refs": [
+          "SC9"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-10",
+        "split": "calibration",
+        "sc_refs": [
+          "SC10"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "cal-11",
+        "split": "calibration",
+        "sc_refs": [
+          "SC11"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "cal-12",
+        "split": "calibration",
+        "sc_refs": [
+          "SC12"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-13",
+        "split": "calibration",
+        "sc_refs": [
+          "SC13"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-14",
+        "split": "calibration",
+        "sc_refs": [
+          "SC14"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-15",
+        "split": "calibration",
+        "sc_refs": [
+          "SC15",
+          "SC22"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-16",
+        "split": "calibration",
+        "sc_refs": [
+          "SC16"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-17",
+        "split": "calibration",
+        "sc_refs": [
+          "SC17"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "cal-18",
+        "split": "calibration",
+        "sc_refs": [
+          "SC18",
+          "SC24"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-01",
+        "split": "holdout",
+        "sc_refs": [
+          "SC1"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-02",
+        "split": "holdout",
+        "sc_refs": [
+          "SC2",
+          "SC19"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "hld-03",
+        "split": "holdout",
+        "sc_refs": [
+          "SC3"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "hld-04",
+        "split": "holdout",
+        "sc_refs": [
+          "SC4",
+          "SC20"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-05",
+        "split": "holdout",
+        "sc_refs": [
+          "SC5"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-06",
+        "split": "holdout",
+        "sc_refs": [
+          "SC6"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "hld-07",
+        "split": "holdout",
+        "sc_refs": [
+          "SC7",
+          "SC21"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-08",
+        "split": "holdout",
+        "sc_refs": [
+          "SC8",
+          "SC23"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-09",
+        "split": "holdout",
+        "sc_refs": [
+          "SC9"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-10",
+        "split": "holdout",
+        "sc_refs": [
+          "SC10"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "hld-11",
+        "split": "holdout",
+        "sc_refs": [
+          "SC11"
+        ],
+        "critical": false
+      },
+      {
+        "case_id": "hld-12",
+        "split": "holdout",
+        "sc_refs": [
+          "SC12"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-13",
+        "split": "holdout",
+        "sc_refs": [
+          "SC13"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-14",
+        "split": "holdout",
+        "sc_refs": [
+          "SC14"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-15",
+        "split": "holdout",
+        "sc_refs": [
+          "SC15",
+          "SC22"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-16",
+        "split": "holdout",
+        "sc_refs": [
+          "SC16"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-17",
+        "split": "holdout",
+        "sc_refs": [
+          "SC17"
+        ],
+        "critical": true
+      },
+      {
+        "case_id": "hld-18",
+        "split": "holdout",
+        "sc_refs": [
+          "SC18",
+          "SC24"
+        ],
+        "critical": true
+      }
+    ],
+    "sanitization": "synthetic_general_no_private_paths_accounts_or_real_model_ids",
+    "holdout_owner": "independent_qa",
+    "writer_holdout_access": "prohibited_before_freeze",
+    "blind_holdout_status": "pending_independent_execution_no_filesystem_access_control"
+  },
+  "interface": {
+    "schema_version": 1,
+    "file": "evals/task-routing/run.schema.json",
+    "sha256": "341c91052e0e2f136696dcb5e83abc79e90d50b539a7ea1e22d7ef731ec8dc9f"
+  },
+  "budget": {
+    "status": "pending_owner_decision",
+    "max_calls": null,
+    "max_elapsed_ms": null,
+    "live_authorized": false,
+    "additional_billing_authorized": false,
+    "classification_observations_planned": 216,
+    "task_episodes_planned": 72,
+    "observations_are_not_call_budget": true
+  },
+  "freeze": {
+    "status": "not_frozen",
+    "frozen_at": null,
+    "frozen_by": null,
+    "manifest_hash": null,
+    "hash_reason": "external_hash_after_finalization_avoids_self_hash_cycle"
+  },
+  "source_coverage": {
+    "status": "unknown",
+    "ledger_refs": [],
+    "reconciliation_ref": null,
+    "reason": "No live dispatch or ledger reconciliation has run."
+  },
+  "tasks": [
+    {
+      "task_ref": "synthetic/cal-01",
+      "document_refs": [
+        "evals/task-routing/runs/cal-01.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-01-baseline-r1",
+        "classification/cal-01-baseline-r2",
+        "classification/cal-01-baseline-r3",
+        "classification/cal-01-candidate-r1",
+        "classification/cal-01-candidate-r2",
+        "classification/cal-01-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-01-baseline-r1",
+        "assignment/cal-01-baseline-r2",
+        "assignment/cal-01-baseline-r3",
+        "assignment/cal-01-candidate-r1",
+        "assignment/cal-01-candidate-r2",
+        "assignment/cal-01-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-01-baseline-r1",
+        "attempt/cal-01-baseline-r2",
+        "attempt/cal-01-baseline-r3",
+        "attempt/cal-01-candidate-r1",
+        "attempt/cal-01-candidate-r2",
+        "attempt/cal-01-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-02",
+      "document_refs": [
+        "evals/task-routing/runs/cal-02.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-02-baseline-r1",
+        "classification/cal-02-baseline-r2",
+        "classification/cal-02-baseline-r3",
+        "classification/cal-02-candidate-r1",
+        "classification/cal-02-candidate-r2",
+        "classification/cal-02-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-02-baseline-r1",
+        "assignment/cal-02-baseline-r2",
+        "assignment/cal-02-baseline-r3",
+        "assignment/cal-02-candidate-r1",
+        "assignment/cal-02-candidate-r2",
+        "assignment/cal-02-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-02-baseline-r1",
+        "attempt/cal-02-baseline-r2",
+        "attempt/cal-02-baseline-r3",
+        "attempt/cal-02-candidate-r1",
+        "attempt/cal-02-candidate-r2",
+        "attempt/cal-02-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-03",
+      "document_refs": [
+        "evals/task-routing/runs/cal-03.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-03-baseline-r1",
+        "classification/cal-03-baseline-r2",
+        "classification/cal-03-baseline-r3",
+        "classification/cal-03-candidate-r1",
+        "classification/cal-03-candidate-r2",
+        "classification/cal-03-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-03-baseline-r1",
+        "assignment/cal-03-baseline-r2",
+        "assignment/cal-03-baseline-r3",
+        "assignment/cal-03-candidate-r1",
+        "assignment/cal-03-candidate-r2",
+        "assignment/cal-03-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-03-baseline-r1",
+        "attempt/cal-03-baseline-r2",
+        "attempt/cal-03-baseline-r3",
+        "attempt/cal-03-candidate-r1",
+        "attempt/cal-03-candidate-r2",
+        "attempt/cal-03-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-04",
+      "document_refs": [
+        "evals/task-routing/runs/cal-04.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-04-baseline-r1",
+        "classification/cal-04-baseline-r2",
+        "classification/cal-04-baseline-r3",
+        "classification/cal-04-candidate-r1",
+        "classification/cal-04-candidate-r2",
+        "classification/cal-04-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-04-baseline-r1",
+        "assignment/cal-04-baseline-r2",
+        "assignment/cal-04-baseline-r3",
+        "assignment/cal-04-candidate-r1",
+        "assignment/cal-04-candidate-r2",
+        "assignment/cal-04-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-04-baseline-r1",
+        "attempt/cal-04-baseline-r2",
+        "attempt/cal-04-baseline-r3",
+        "attempt/cal-04-candidate-r1",
+        "attempt/cal-04-candidate-r2",
+        "attempt/cal-04-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-05",
+      "document_refs": [
+        "evals/task-routing/runs/cal-05.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-05-baseline-r1",
+        "classification/cal-05-baseline-r2",
+        "classification/cal-05-baseline-r3",
+        "classification/cal-05-candidate-r1",
+        "classification/cal-05-candidate-r2",
+        "classification/cal-05-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-05-baseline-r1",
+        "assignment/cal-05-baseline-r2",
+        "assignment/cal-05-baseline-r3",
+        "assignment/cal-05-candidate-r1",
+        "assignment/cal-05-candidate-r2",
+        "assignment/cal-05-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-05-baseline-r1",
+        "attempt/cal-05-baseline-r2",
+        "attempt/cal-05-baseline-r3",
+        "attempt/cal-05-candidate-r1",
+        "attempt/cal-05-candidate-r2",
+        "attempt/cal-05-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-06",
+      "document_refs": [
+        "evals/task-routing/runs/cal-06.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-06-baseline-r1",
+        "classification/cal-06-baseline-r2",
+        "classification/cal-06-baseline-r3",
+        "classification/cal-06-candidate-r1",
+        "classification/cal-06-candidate-r2",
+        "classification/cal-06-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-06-baseline-r1",
+        "assignment/cal-06-baseline-r2",
+        "assignment/cal-06-baseline-r3",
+        "assignment/cal-06-candidate-r1",
+        "assignment/cal-06-candidate-r2",
+        "assignment/cal-06-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-06-baseline-r1",
+        "attempt/cal-06-baseline-r2",
+        "attempt/cal-06-baseline-r3",
+        "attempt/cal-06-candidate-r1",
+        "attempt/cal-06-candidate-r2",
+        "attempt/cal-06-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-07",
+      "document_refs": [
+        "evals/task-routing/runs/cal-07.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-07-baseline-r1",
+        "classification/cal-07-baseline-r2",
+        "classification/cal-07-baseline-r3",
+        "classification/cal-07-candidate-r1",
+        "classification/cal-07-candidate-r2",
+        "classification/cal-07-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-07-baseline-r1",
+        "assignment/cal-07-baseline-r2",
+        "assignment/cal-07-baseline-r3",
+        "assignment/cal-07-candidate-r1",
+        "assignment/cal-07-candidate-r2",
+        "assignment/cal-07-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-07-baseline-r1",
+        "attempt/cal-07-baseline-r2",
+        "attempt/cal-07-baseline-r3",
+        "attempt/cal-07-candidate-r1",
+        "attempt/cal-07-candidate-r2",
+        "attempt/cal-07-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-08",
+      "document_refs": [
+        "evals/task-routing/runs/cal-08.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-08-baseline-r1",
+        "classification/cal-08-baseline-r2",
+        "classification/cal-08-baseline-r3",
+        "classification/cal-08-candidate-r1",
+        "classification/cal-08-candidate-r2",
+        "classification/cal-08-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-08-baseline-r1",
+        "assignment/cal-08-baseline-r2",
+        "assignment/cal-08-baseline-r3",
+        "assignment/cal-08-candidate-r1",
+        "assignment/cal-08-candidate-r2",
+        "assignment/cal-08-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-08-baseline-r1",
+        "attempt/cal-08-baseline-r2",
+        "attempt/cal-08-baseline-r3",
+        "attempt/cal-08-candidate-r1",
+        "attempt/cal-08-candidate-r2",
+        "attempt/cal-08-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-09",
+      "document_refs": [
+        "evals/task-routing/runs/cal-09.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-09-baseline-r1",
+        "classification/cal-09-baseline-r2",
+        "classification/cal-09-baseline-r3",
+        "classification/cal-09-candidate-r1",
+        "classification/cal-09-candidate-r2",
+        "classification/cal-09-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-09-baseline-r1",
+        "assignment/cal-09-baseline-r2",
+        "assignment/cal-09-baseline-r3",
+        "assignment/cal-09-candidate-r1",
+        "assignment/cal-09-candidate-r2",
+        "assignment/cal-09-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-09-baseline-r1",
+        "attempt/cal-09-baseline-r2",
+        "attempt/cal-09-baseline-r3",
+        "attempt/cal-09-candidate-r1",
+        "attempt/cal-09-candidate-r2",
+        "attempt/cal-09-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-10",
+      "document_refs": [
+        "evals/task-routing/runs/cal-10.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-10-baseline-r1",
+        "classification/cal-10-baseline-r2",
+        "classification/cal-10-baseline-r3",
+        "classification/cal-10-candidate-r1",
+        "classification/cal-10-candidate-r2",
+        "classification/cal-10-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-10-baseline-r1",
+        "assignment/cal-10-baseline-r2",
+        "assignment/cal-10-baseline-r3",
+        "assignment/cal-10-candidate-r1",
+        "assignment/cal-10-candidate-r2",
+        "assignment/cal-10-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-10-baseline-r1",
+        "attempt/cal-10-baseline-r2",
+        "attempt/cal-10-baseline-r3",
+        "attempt/cal-10-candidate-r1",
+        "attempt/cal-10-candidate-r2",
+        "attempt/cal-10-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-11",
+      "document_refs": [
+        "evals/task-routing/runs/cal-11.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-11-baseline-r1",
+        "classification/cal-11-baseline-r2",
+        "classification/cal-11-baseline-r3",
+        "classification/cal-11-candidate-r1",
+        "classification/cal-11-candidate-r2",
+        "classification/cal-11-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-11-baseline-r1",
+        "assignment/cal-11-baseline-r2",
+        "assignment/cal-11-baseline-r3",
+        "assignment/cal-11-candidate-r1",
+        "assignment/cal-11-candidate-r2",
+        "assignment/cal-11-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-11-baseline-r1",
+        "attempt/cal-11-baseline-r2",
+        "attempt/cal-11-baseline-r3",
+        "attempt/cal-11-candidate-r1",
+        "attempt/cal-11-candidate-r2",
+        "attempt/cal-11-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-12",
+      "document_refs": [
+        "evals/task-routing/runs/cal-12.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-12-baseline-r1",
+        "classification/cal-12-baseline-r2",
+        "classification/cal-12-baseline-r3",
+        "classification/cal-12-candidate-r1",
+        "classification/cal-12-candidate-r2",
+        "classification/cal-12-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-12-baseline-r1",
+        "assignment/cal-12-baseline-r2",
+        "assignment/cal-12-baseline-r3",
+        "assignment/cal-12-candidate-r1",
+        "assignment/cal-12-candidate-r2",
+        "assignment/cal-12-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-12-baseline-r1",
+        "attempt/cal-12-baseline-r2",
+        "attempt/cal-12-baseline-r3",
+        "attempt/cal-12-candidate-r1",
+        "attempt/cal-12-candidate-r2",
+        "attempt/cal-12-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-13",
+      "document_refs": [
+        "evals/task-routing/runs/cal-13.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-13-baseline-r1",
+        "classification/cal-13-baseline-r2",
+        "classification/cal-13-baseline-r3",
+        "classification/cal-13-candidate-r1",
+        "classification/cal-13-candidate-r2",
+        "classification/cal-13-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-13-baseline-r1",
+        "assignment/cal-13-baseline-r2",
+        "assignment/cal-13-baseline-r3",
+        "assignment/cal-13-candidate-r1",
+        "assignment/cal-13-candidate-r2",
+        "assignment/cal-13-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-13-baseline-r1",
+        "attempt/cal-13-baseline-r2",
+        "attempt/cal-13-baseline-r3",
+        "attempt/cal-13-candidate-r1",
+        "attempt/cal-13-candidate-r2",
+        "attempt/cal-13-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-14",
+      "document_refs": [
+        "evals/task-routing/runs/cal-14.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-14-baseline-r1",
+        "classification/cal-14-baseline-r2",
+        "classification/cal-14-baseline-r3",
+        "classification/cal-14-candidate-r1",
+        "classification/cal-14-candidate-r2",
+        "classification/cal-14-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-14-baseline-r1",
+        "assignment/cal-14-baseline-r2",
+        "assignment/cal-14-baseline-r3",
+        "assignment/cal-14-candidate-r1",
+        "assignment/cal-14-candidate-r2",
+        "assignment/cal-14-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-14-baseline-r1",
+        "attempt/cal-14-baseline-r2",
+        "attempt/cal-14-baseline-r3",
+        "attempt/cal-14-candidate-r1",
+        "attempt/cal-14-candidate-r2",
+        "attempt/cal-14-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-15",
+      "document_refs": [
+        "evals/task-routing/runs/cal-15.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-15-baseline-r1",
+        "classification/cal-15-baseline-r2",
+        "classification/cal-15-baseline-r3",
+        "classification/cal-15-candidate-r1",
+        "classification/cal-15-candidate-r2",
+        "classification/cal-15-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-15-baseline-r1",
+        "assignment/cal-15-baseline-r2",
+        "assignment/cal-15-baseline-r3",
+        "assignment/cal-15-candidate-r1",
+        "assignment/cal-15-candidate-r2",
+        "assignment/cal-15-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-15-baseline-r1",
+        "attempt/cal-15-baseline-r2",
+        "attempt/cal-15-baseline-r3",
+        "attempt/cal-15-candidate-r1",
+        "attempt/cal-15-candidate-r2",
+        "attempt/cal-15-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-16",
+      "document_refs": [
+        "evals/task-routing/runs/cal-16.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-16-baseline-r1",
+        "classification/cal-16-baseline-r2",
+        "classification/cal-16-baseline-r3",
+        "classification/cal-16-candidate-r1",
+        "classification/cal-16-candidate-r2",
+        "classification/cal-16-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-16-baseline-r1",
+        "assignment/cal-16-baseline-r2",
+        "assignment/cal-16-baseline-r3",
+        "assignment/cal-16-candidate-r1",
+        "assignment/cal-16-candidate-r2",
+        "assignment/cal-16-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-16-baseline-r1",
+        "attempt/cal-16-baseline-r2",
+        "attempt/cal-16-baseline-r3",
+        "attempt/cal-16-candidate-r1",
+        "attempt/cal-16-candidate-r2",
+        "attempt/cal-16-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-17",
+      "document_refs": [
+        "evals/task-routing/runs/cal-17.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-17-baseline-r1",
+        "classification/cal-17-baseline-r2",
+        "classification/cal-17-baseline-r3",
+        "classification/cal-17-candidate-r1",
+        "classification/cal-17-candidate-r2",
+        "classification/cal-17-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-17-baseline-r1",
+        "assignment/cal-17-baseline-r2",
+        "assignment/cal-17-baseline-r3",
+        "assignment/cal-17-candidate-r1",
+        "assignment/cal-17-candidate-r2",
+        "assignment/cal-17-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-17-baseline-r1",
+        "attempt/cal-17-baseline-r2",
+        "attempt/cal-17-baseline-r3",
+        "attempt/cal-17-candidate-r1",
+        "attempt/cal-17-candidate-r2",
+        "attempt/cal-17-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/cal-18",
+      "document_refs": [
+        "evals/task-routing/runs/cal-18.md"
+      ],
+      "required_classification_refs": [
+        "classification/cal-18-baseline-r1",
+        "classification/cal-18-baseline-r2",
+        "classification/cal-18-baseline-r3",
+        "classification/cal-18-candidate-r1",
+        "classification/cal-18-candidate-r2",
+        "classification/cal-18-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/cal-18-baseline-r1",
+        "assignment/cal-18-baseline-r2",
+        "assignment/cal-18-baseline-r3",
+        "assignment/cal-18-candidate-r1",
+        "assignment/cal-18-candidate-r2",
+        "assignment/cal-18-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/cal-18-baseline-r1",
+        "attempt/cal-18-baseline-r2",
+        "attempt/cal-18-baseline-r3",
+        "attempt/cal-18-candidate-r1",
+        "attempt/cal-18-candidate-r2",
+        "attempt/cal-18-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-01",
+      "document_refs": [
+        "evals/task-routing/runs/hld-01.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-01-baseline-r1",
+        "classification/hld-01-baseline-r2",
+        "classification/hld-01-baseline-r3",
+        "classification/hld-01-candidate-r1",
+        "classification/hld-01-candidate-r2",
+        "classification/hld-01-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-01-baseline-r1",
+        "assignment/hld-01-baseline-r2",
+        "assignment/hld-01-baseline-r3",
+        "assignment/hld-01-candidate-r1",
+        "assignment/hld-01-candidate-r2",
+        "assignment/hld-01-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-01-baseline-r1",
+        "attempt/hld-01-baseline-r2",
+        "attempt/hld-01-baseline-r3",
+        "attempt/hld-01-candidate-r1",
+        "attempt/hld-01-candidate-r2",
+        "attempt/hld-01-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-02",
+      "document_refs": [
+        "evals/task-routing/runs/hld-02.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-02-baseline-r1",
+        "classification/hld-02-baseline-r2",
+        "classification/hld-02-baseline-r3",
+        "classification/hld-02-candidate-r1",
+        "classification/hld-02-candidate-r2",
+        "classification/hld-02-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-02-baseline-r1",
+        "assignment/hld-02-baseline-r2",
+        "assignment/hld-02-baseline-r3",
+        "assignment/hld-02-candidate-r1",
+        "assignment/hld-02-candidate-r2",
+        "assignment/hld-02-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-02-baseline-r1",
+        "attempt/hld-02-baseline-r2",
+        "attempt/hld-02-baseline-r3",
+        "attempt/hld-02-candidate-r1",
+        "attempt/hld-02-candidate-r2",
+        "attempt/hld-02-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-03",
+      "document_refs": [
+        "evals/task-routing/runs/hld-03.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-03-baseline-r1",
+        "classification/hld-03-baseline-r2",
+        "classification/hld-03-baseline-r3",
+        "classification/hld-03-candidate-r1",
+        "classification/hld-03-candidate-r2",
+        "classification/hld-03-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-03-baseline-r1",
+        "assignment/hld-03-baseline-r2",
+        "assignment/hld-03-baseline-r3",
+        "assignment/hld-03-candidate-r1",
+        "assignment/hld-03-candidate-r2",
+        "assignment/hld-03-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-03-baseline-r1",
+        "attempt/hld-03-baseline-r2",
+        "attempt/hld-03-baseline-r3",
+        "attempt/hld-03-candidate-r1",
+        "attempt/hld-03-candidate-r2",
+        "attempt/hld-03-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-04",
+      "document_refs": [
+        "evals/task-routing/runs/hld-04.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-04-baseline-r1",
+        "classification/hld-04-baseline-r2",
+        "classification/hld-04-baseline-r3",
+        "classification/hld-04-candidate-r1",
+        "classification/hld-04-candidate-r2",
+        "classification/hld-04-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-04-baseline-r1",
+        "assignment/hld-04-baseline-r2",
+        "assignment/hld-04-baseline-r3",
+        "assignment/hld-04-candidate-r1",
+        "assignment/hld-04-candidate-r2",
+        "assignment/hld-04-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-04-baseline-r1",
+        "attempt/hld-04-baseline-r2",
+        "attempt/hld-04-baseline-r3",
+        "attempt/hld-04-candidate-r1",
+        "attempt/hld-04-candidate-r2",
+        "attempt/hld-04-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-05",
+      "document_refs": [
+        "evals/task-routing/runs/hld-05.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-05-baseline-r1",
+        "classification/hld-05-baseline-r2",
+        "classification/hld-05-baseline-r3",
+        "classification/hld-05-candidate-r1",
+        "classification/hld-05-candidate-r2",
+        "classification/hld-05-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-05-baseline-r1",
+        "assignment/hld-05-baseline-r2",
+        "assignment/hld-05-baseline-r3",
+        "assignment/hld-05-candidate-r1",
+        "assignment/hld-05-candidate-r2",
+        "assignment/hld-05-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-05-baseline-r1",
+        "attempt/hld-05-baseline-r2",
+        "attempt/hld-05-baseline-r3",
+        "attempt/hld-05-candidate-r1",
+        "attempt/hld-05-candidate-r2",
+        "attempt/hld-05-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-06",
+      "document_refs": [
+        "evals/task-routing/runs/hld-06.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-06-baseline-r1",
+        "classification/hld-06-baseline-r2",
+        "classification/hld-06-baseline-r3",
+        "classification/hld-06-candidate-r1",
+        "classification/hld-06-candidate-r2",
+        "classification/hld-06-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-06-baseline-r1",
+        "assignment/hld-06-baseline-r2",
+        "assignment/hld-06-baseline-r3",
+        "assignment/hld-06-candidate-r1",
+        "assignment/hld-06-candidate-r2",
+        "assignment/hld-06-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-06-baseline-r1",
+        "attempt/hld-06-baseline-r2",
+        "attempt/hld-06-baseline-r3",
+        "attempt/hld-06-candidate-r1",
+        "attempt/hld-06-candidate-r2",
+        "attempt/hld-06-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-07",
+      "document_refs": [
+        "evals/task-routing/runs/hld-07.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-07-baseline-r1",
+        "classification/hld-07-baseline-r2",
+        "classification/hld-07-baseline-r3",
+        "classification/hld-07-candidate-r1",
+        "classification/hld-07-candidate-r2",
+        "classification/hld-07-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-07-baseline-r1",
+        "assignment/hld-07-baseline-r2",
+        "assignment/hld-07-baseline-r3",
+        "assignment/hld-07-candidate-r1",
+        "assignment/hld-07-candidate-r2",
+        "assignment/hld-07-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-07-baseline-r1",
+        "attempt/hld-07-baseline-r2",
+        "attempt/hld-07-baseline-r3",
+        "attempt/hld-07-candidate-r1",
+        "attempt/hld-07-candidate-r2",
+        "attempt/hld-07-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-08",
+      "document_refs": [
+        "evals/task-routing/runs/hld-08.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-08-baseline-r1",
+        "classification/hld-08-baseline-r2",
+        "classification/hld-08-baseline-r3",
+        "classification/hld-08-candidate-r1",
+        "classification/hld-08-candidate-r2",
+        "classification/hld-08-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-08-baseline-r1",
+        "assignment/hld-08-baseline-r2",
+        "assignment/hld-08-baseline-r3",
+        "assignment/hld-08-candidate-r1",
+        "assignment/hld-08-candidate-r2",
+        "assignment/hld-08-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-08-baseline-r1",
+        "attempt/hld-08-baseline-r2",
+        "attempt/hld-08-baseline-r3",
+        "attempt/hld-08-candidate-r1",
+        "attempt/hld-08-candidate-r2",
+        "attempt/hld-08-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-09",
+      "document_refs": [
+        "evals/task-routing/runs/hld-09.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-09-baseline-r1",
+        "classification/hld-09-baseline-r2",
+        "classification/hld-09-baseline-r3",
+        "classification/hld-09-candidate-r1",
+        "classification/hld-09-candidate-r2",
+        "classification/hld-09-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-09-baseline-r1",
+        "assignment/hld-09-baseline-r2",
+        "assignment/hld-09-baseline-r3",
+        "assignment/hld-09-candidate-r1",
+        "assignment/hld-09-candidate-r2",
+        "assignment/hld-09-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-09-baseline-r1",
+        "attempt/hld-09-baseline-r2",
+        "attempt/hld-09-baseline-r3",
+        "attempt/hld-09-candidate-r1",
+        "attempt/hld-09-candidate-r2",
+        "attempt/hld-09-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-10",
+      "document_refs": [
+        "evals/task-routing/runs/hld-10.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-10-baseline-r1",
+        "classification/hld-10-baseline-r2",
+        "classification/hld-10-baseline-r3",
+        "classification/hld-10-candidate-r1",
+        "classification/hld-10-candidate-r2",
+        "classification/hld-10-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-10-baseline-r1",
+        "assignment/hld-10-baseline-r2",
+        "assignment/hld-10-baseline-r3",
+        "assignment/hld-10-candidate-r1",
+        "assignment/hld-10-candidate-r2",
+        "assignment/hld-10-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-10-baseline-r1",
+        "attempt/hld-10-baseline-r2",
+        "attempt/hld-10-baseline-r3",
+        "attempt/hld-10-candidate-r1",
+        "attempt/hld-10-candidate-r2",
+        "attempt/hld-10-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-11",
+      "document_refs": [
+        "evals/task-routing/runs/hld-11.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-11-baseline-r1",
+        "classification/hld-11-baseline-r2",
+        "classification/hld-11-baseline-r3",
+        "classification/hld-11-candidate-r1",
+        "classification/hld-11-candidate-r2",
+        "classification/hld-11-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-11-baseline-r1",
+        "assignment/hld-11-baseline-r2",
+        "assignment/hld-11-baseline-r3",
+        "assignment/hld-11-candidate-r1",
+        "assignment/hld-11-candidate-r2",
+        "assignment/hld-11-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-11-baseline-r1",
+        "attempt/hld-11-baseline-r2",
+        "attempt/hld-11-baseline-r3",
+        "attempt/hld-11-candidate-r1",
+        "attempt/hld-11-candidate-r2",
+        "attempt/hld-11-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-12",
+      "document_refs": [
+        "evals/task-routing/runs/hld-12.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-12-baseline-r1",
+        "classification/hld-12-baseline-r2",
+        "classification/hld-12-baseline-r3",
+        "classification/hld-12-candidate-r1",
+        "classification/hld-12-candidate-r2",
+        "classification/hld-12-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-12-baseline-r1",
+        "assignment/hld-12-baseline-r2",
+        "assignment/hld-12-baseline-r3",
+        "assignment/hld-12-candidate-r1",
+        "assignment/hld-12-candidate-r2",
+        "assignment/hld-12-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-12-baseline-r1",
+        "attempt/hld-12-baseline-r2",
+        "attempt/hld-12-baseline-r3",
+        "attempt/hld-12-candidate-r1",
+        "attempt/hld-12-candidate-r2",
+        "attempt/hld-12-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-13",
+      "document_refs": [
+        "evals/task-routing/runs/hld-13.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-13-baseline-r1",
+        "classification/hld-13-baseline-r2",
+        "classification/hld-13-baseline-r3",
+        "classification/hld-13-candidate-r1",
+        "classification/hld-13-candidate-r2",
+        "classification/hld-13-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-13-baseline-r1",
+        "assignment/hld-13-baseline-r2",
+        "assignment/hld-13-baseline-r3",
+        "assignment/hld-13-candidate-r1",
+        "assignment/hld-13-candidate-r2",
+        "assignment/hld-13-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-13-baseline-r1",
+        "attempt/hld-13-baseline-r2",
+        "attempt/hld-13-baseline-r3",
+        "attempt/hld-13-candidate-r1",
+        "attempt/hld-13-candidate-r2",
+        "attempt/hld-13-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-14",
+      "document_refs": [
+        "evals/task-routing/runs/hld-14.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-14-baseline-r1",
+        "classification/hld-14-baseline-r2",
+        "classification/hld-14-baseline-r3",
+        "classification/hld-14-candidate-r1",
+        "classification/hld-14-candidate-r2",
+        "classification/hld-14-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-14-baseline-r1",
+        "assignment/hld-14-baseline-r2",
+        "assignment/hld-14-baseline-r3",
+        "assignment/hld-14-candidate-r1",
+        "assignment/hld-14-candidate-r2",
+        "assignment/hld-14-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-14-baseline-r1",
+        "attempt/hld-14-baseline-r2",
+        "attempt/hld-14-baseline-r3",
+        "attempt/hld-14-candidate-r1",
+        "attempt/hld-14-candidate-r2",
+        "attempt/hld-14-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-15",
+      "document_refs": [
+        "evals/task-routing/runs/hld-15.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-15-baseline-r1",
+        "classification/hld-15-baseline-r2",
+        "classification/hld-15-baseline-r3",
+        "classification/hld-15-candidate-r1",
+        "classification/hld-15-candidate-r2",
+        "classification/hld-15-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-15-baseline-r1",
+        "assignment/hld-15-baseline-r2",
+        "assignment/hld-15-baseline-r3",
+        "assignment/hld-15-candidate-r1",
+        "assignment/hld-15-candidate-r2",
+        "assignment/hld-15-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-15-baseline-r1",
+        "attempt/hld-15-baseline-r2",
+        "attempt/hld-15-baseline-r3",
+        "attempt/hld-15-candidate-r1",
+        "attempt/hld-15-candidate-r2",
+        "attempt/hld-15-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-16",
+      "document_refs": [
+        "evals/task-routing/runs/hld-16.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-16-baseline-r1",
+        "classification/hld-16-baseline-r2",
+        "classification/hld-16-baseline-r3",
+        "classification/hld-16-candidate-r1",
+        "classification/hld-16-candidate-r2",
+        "classification/hld-16-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-16-baseline-r1",
+        "assignment/hld-16-baseline-r2",
+        "assignment/hld-16-baseline-r3",
+        "assignment/hld-16-candidate-r1",
+        "assignment/hld-16-candidate-r2",
+        "assignment/hld-16-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-16-baseline-r1",
+        "attempt/hld-16-baseline-r2",
+        "attempt/hld-16-baseline-r3",
+        "attempt/hld-16-candidate-r1",
+        "attempt/hld-16-candidate-r2",
+        "attempt/hld-16-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-17",
+      "document_refs": [
+        "evals/task-routing/runs/hld-17.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-17-baseline-r1",
+        "classification/hld-17-baseline-r2",
+        "classification/hld-17-baseline-r3",
+        "classification/hld-17-candidate-r1",
+        "classification/hld-17-candidate-r2",
+        "classification/hld-17-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-17-baseline-r1",
+        "assignment/hld-17-baseline-r2",
+        "assignment/hld-17-baseline-r3",
+        "assignment/hld-17-candidate-r1",
+        "assignment/hld-17-candidate-r2",
+        "assignment/hld-17-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-17-baseline-r1",
+        "attempt/hld-17-baseline-r2",
+        "attempt/hld-17-baseline-r3",
+        "attempt/hld-17-candidate-r1",
+        "attempt/hld-17-candidate-r2",
+        "attempt/hld-17-candidate-r3"
+      ]
+    },
+    {
+      "task_ref": "synthetic/hld-18",
+      "document_refs": [
+        "evals/task-routing/runs/hld-18.md"
+      ],
+      "required_classification_refs": [
+        "classification/hld-18-baseline-r1",
+        "classification/hld-18-baseline-r2",
+        "classification/hld-18-baseline-r3",
+        "classification/hld-18-candidate-r1",
+        "classification/hld-18-candidate-r2",
+        "classification/hld-18-candidate-r3"
+      ],
+      "assignment_refs": [
+        "assignment/hld-18-baseline-r1",
+        "assignment/hld-18-baseline-r2",
+        "assignment/hld-18-baseline-r3",
+        "assignment/hld-18-candidate-r1",
+        "assignment/hld-18-candidate-r2",
+        "assignment/hld-18-candidate-r3"
+      ],
+      "expected_attempt_refs": [
+        "attempt/hld-18-baseline-r1",
+        "attempt/hld-18-baseline-r2",
+        "attempt/hld-18-baseline-r3",
+        "attempt/hld-18-candidate-r1",
+        "attempt/hld-18-candidate-r2",
+        "attempt/hld-18-candidate-r3"
+      ]
+    }
+  ]
+}

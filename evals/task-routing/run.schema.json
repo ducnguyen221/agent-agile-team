@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Task routing evidence version 1",
+  "description": "Evidence shape only. Cross-record completeness, null reasons, provenance and policy invariants are checked separately. Unknown extra fields are notes, not silently interpreted.",
+  "type": "object",
+  "required": ["schema", "record_kind", "record_ref", "task_ref", "work_item_ref", "policy_hash", "plan_hash", "criteria_version", "evidence_refs", "unknown_reasons", "decision", "effort", "notification", "criteria_change"],
+  "properties": {
+    "schema": {"const": 1},
+    "record_kind": {"enum": ["classification", "attempt"]},
+    "record_ref": {"$ref": "#/$defs/ref"},
+    "task_ref": {"$ref": "#/$defs/ref"},
+    "work_item_ref": {"$ref": "#/$defs/ref"},
+    "policy_hash": {"$ref": "#/$defs/hash"},
+    "plan_hash": {"$ref": "#/$defs/nullableHash"},
+    "criteria_version": {"type": "string", "minLength": 1},
+    "evidence_refs": {"$ref": "#/$defs/refs"},
+    "unknown_reasons": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+    "axes": {"$ref": "#/$defs/axes"},
+    "assignment": {"$ref": "#/$defs/assignment"},
+    "decision": {"$ref": "#/$defs/decision"},
+    "effort": {"$ref": "#/$defs/effort"},
+    "notification": {"$ref": "#/$defs/notification"},
+    "criteria_change": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/criteriaChange"}]},
+    "identity": {"$ref": "#/$defs/identity"},
+    "dispatch": {"$ref": "#/$defs/dispatch"},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "outcome": {"$ref": "#/$defs/outcome"},
+    "repair_history": {"$ref": "#/$defs/repairHistory"},
+    "quality": {"$ref": "#/$defs/quality"},
+    "time": {"$ref": "#/$defs/time"},
+    "usage": {"$ref": "#/$defs/usage"},
+    "cost": {"$ref": "#/$defs/cost"},
+    "join": {"$ref": "#/$defs/join"}
+  },
+  "allOf": [
+    {"if": {"properties": {"record_kind": {"const": "classification"}}}, "then": {"required": ["axes", "assignment"]}},
+    {"if": {"properties": {"record_kind": {"const": "attempt"}}}, "then": {"required": ["identity", "dispatch", "provenance", "outcome", "repair_history", "quality", "time", "usage", "cost", "join"]}}
+  ],
+  "$defs": {
+    "ref": {"type": "string", "minLength": 1},
+    "refs": {"type": "array", "items": {"$ref": "#/$defs/ref"}, "uniqueItems": true},
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "nullableHash": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "nullableString": {"type": ["string", "null"], "minLength": 1},
+    "nullableBoolean": {"type": ["boolean", "null"]},
+    "nullableNumber": {"type": ["number", "null"], "minimum": 0},
+    "nullableInteger": {"type": ["integer", "null"], "minimum": 0},
+    "timestamp": {"type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"},
+    "tier": {"enum": ["T1", "T2", "T3", null]},
+    "role": {"enum": ["Analyst", "Architect", "Implementer", "QA", "Business Reviewer", "Tech Reviewer"]},
+    "axis": {
+      "type": "object", "required": ["value", "ordinal", "evidence_refs", "unknowns", "consequence_if_wrong"],
+      "properties": {"value": {"$ref": "#/$defs/nullableString"}, "ordinal": {"enum": [0, 1, 2, null]}, "evidence_refs": {"$ref": "#/$defs/refs"}, "unknowns": {"$ref": "#/$defs/refs"}, "consequence_if_wrong": {"type": "string", "minLength": 1}}
+    },
+    "axes": {
+      "type": "object", "required": ["ambiguity", "scope_dependencies", "error_consequence", "verifiability", "plan_readiness", "execution_complexity"],
+      "properties": {
+        "ambiguity": {"allOf": [{"$ref": "#/$defs/axis"}, {"properties": {"value": {"enum": ["resolved", "technical_unknown", "owner_decision_open", null]}}}]},
+        "scope_dependencies": {"allOf": [{"$ref": "#/$defs/axis"}, {"properties": {"value": {"enum": ["local", "coupled", "cross_boundary", null]}}}]},
+        "error_consequence": {"allOf": [{"$ref": "#/$defs/axis"}, {"properties": {"value": {"enum": ["reversible_local", "shared_behavior", "sensitive_or_irreversible", null]}}}]},
+        "verifiability": {"allOf": [{"$ref": "#/$defs/axis"}, {"properties": {"value": {"enum": ["deterministic", "mixed", "weak_or_unavailable", null]}}}]},
+        "plan_readiness": {"allOf": [{"$ref": "#/$defs/axis"}, {"properties": {"value": {"enum": ["complete_feasible", "direction_only", "invalid_or_unavailable", null]}}}]},
+        "execution_complexity": {"allOf": [{"$ref": "#/$defs/axis"}, {"properties": {"value": {"enum": ["bounded_known", "nontrivial", "complex", null]}}}]}
+      }
+    },
+    "assignment": {
+      "type": "object", "required": ["assignment_ref", "role", "work_level", "role_default_tier", "requested_tier", "override_reason", "evidence_refs"],
+      "properties": {"assignment_ref": {"$ref": "#/$defs/ref"}, "role": {"$ref": "#/$defs/role"}, "work_level": {"type": "string", "minLength": 1}, "role_default_tier": {"$ref": "#/$defs/tier"}, "requested_tier": {"$ref": "#/$defs/tier"}, "override_reason": {"$ref": "#/$defs/nullableString"}, "evidence_refs": {"$ref": "#/$defs/refs"}, "override": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/override"}]}}
+    },
+    "override": {
+      "type": "object", "required": ["decision_ref", "owner_quote", "approved_at", "scope_kind", "scope_ref", "status", "model_override", "effort_override", "constraints", "expiry"],
+      "properties": {"decision_ref": {"$ref": "#/$defs/ref"}, "owner_quote": {"type": "string", "minLength": 1}, "approved_at": {"$ref": "#/$defs/timestamp"}, "scope_kind": {"enum": ["turn", "work_item", "task"]}, "scope_ref": {"$ref": "#/$defs/ref"}, "status": {"enum": ["approved", "expired", "pending"]}, "model_override": {"$ref": "#/$defs/nullableString"}, "effort_override": {"$ref": "#/$defs/nullableString"}, "constraints": {"$ref": "#/$defs/refs"}, "expiry": {"$ref": "#/$defs/nullableString"}}
+    },
+    "decision": {
+      "type": "object", "required": ["difficulty_level", "decision_basis", "override_ref", "topology_evidence"],
+      "properties": {"difficulty_level": {"enum": [1, 2, 3, 4, null]}, "decision_basis": {"enum": ["heuristic", "measured", "human_override", "unknown"]}, "override_ref": {"$ref": "#/$defs/nullableString"}, "topology_evidence": {"type": "object", "required": ["separable_modules", "context_transfer", "integration_load", "benefit_evidence", "ownership_refs", "dependency_refs"], "properties": {"separable_modules": {"$ref": "#/$defs/nullableInteger"}, "context_transfer": {"enum": [0, 1, 2, null]}, "integration_load": {"enum": [0, 1, 2, null]}, "benefit_evidence": {"enum": ["measured", "unmeasured"]}, "ownership_refs": {"$ref": "#/$defs/refs"}, "dependency_refs": {"$ref": "#/$defs/refs"}}}}
+    },
+    "effort": {
+      "type": "object", "required": ["effort_level", "effort_requested", "effort_effective", "effort_actual", "effort_source", "effort_capability", "override_ref", "native_only_reason"],
+      "properties": {"effort_level": {"enum": [1, 2, 3, 4, null]}, "effort_requested": {"$ref": "#/$defs/nullableString"}, "effort_effective": {"$ref": "#/$defs/nullableString"}, "effort_actual": {"$ref": "#/$defs/nullableString"}, "effort_source": {"$ref": "#/$defs/nullableString"}, "effort_capability": {"enum": ["supported", "unsupported", "unknown"]}, "override_ref": {"$ref": "#/$defs/nullableString"}, "native_only_reason": {"$ref": "#/$defs/nullableString"}}
+    },
+    "notification": {
+      "type": "object", "required": ["notification_ref", "notified_at", "event_kind", "assignment_ref", "harness", "role", "tier", "model", "native_effort", "scope_ref", "reason", "approval_ref"],
+      "properties": {"notification_ref": {"$ref": "#/$defs/ref"}, "notified_at": {"$ref": "#/$defs/timestamp"}, "event_kind": {"enum": ["plan_start", "dispatch", "handoff", "model_change", "effort_change", "criteria_change"]}, "assignment_ref": {"$ref": "#/$defs/ref"}, "harness": {"$ref": "#/$defs/nullableString"}, "agent": {"$ref": "#/$defs/nullableString"}, "model_status": {"enum": ["requested", "actual", "unknown"]}, "effort_status": {"enum": ["requested", "effective", "actual", "unknown"]}, "role": {"$ref": "#/$defs/role"}, "tier": {"$ref": "#/$defs/tier"}, "model": {"$ref": "#/$defs/nullableString"}, "native_effort": {"$ref": "#/$defs/nullableString"}, "scope_ref": {"$ref": "#/$defs/ref"}, "reason": {"type": "string", "minLength": 1}, "approval_ref": {"$ref": "#/$defs/nullableString"}, "from": {"type": ["object", "null"]}, "to": {"type": ["object", "null"]}}
+    },
+    "criteriaChange": {
+      "type": "object", "required": ["criteria_version", "previous_version", "change_ref", "baseline_invalidated", "re_evaluation_scope"],
+      "properties": {"criteria_version": {"type": "string", "minLength": 1}, "previous_version": {"type": "string", "minLength": 1}, "change_ref": {"$ref": "#/$defs/ref"}, "baseline_invalidated": {"type": "boolean"}, "re_evaluation_scope": {"enum": ["both_branches", "new_experiment"]}}
+    },
+    "identity": {"type": "object", "required": ["attempt_id", "assignment_ref"], "properties": {"attempt_id": {"$ref": "#/$defs/ref"}, "assignment_ref": {"$ref": "#/$defs/ref"}}},
+    "dispatch": {
+      "type": "object", "required": ["harness", "requested_model", "actual_model", "actual_model_source", "context_tier", "access", "actual_model_sequence", "fallback_observed", "fallback_source", "billing_capability_status"],
+      "properties": {"harness": {"type": "string", "minLength": 1}, "requested_model": {"$ref": "#/$defs/nullableString"}, "actual_model": {"$ref": "#/$defs/nullableString"}, "actual_model_source": {"$ref": "#/$defs/nullableString"}, "context_tier": {"$ref": "#/$defs/nullableString"}, "access": {"$ref": "#/$defs/nullableString"}, "actual_model_sequence": {"type": ["array", "null"], "items": {"type": "string", "minLength": 1}}, "fallback_observed": {"$ref": "#/$defs/nullableBoolean"}, "fallback_source": {"$ref": "#/$defs/nullableString"}, "billing_capability_status": {"enum": ["supported", "unsupported", "unknown"]}}
+    },
+    "provenance": {"type": "object", "required": ["tier_table_hash", "catalog_source", "catalog_at", "catalog_status", "access_status", "fit_ref", "approval_ref"], "properties": {"tier_table_hash": {"$ref": "#/$defs/nullableHash"}, "catalog_source": {"$ref": "#/$defs/nullableString"}, "catalog_at": {"$ref": "#/$defs/timestamp"}, "catalog_status": {"enum": ["fresh", "stale", "unknown"]}, "access_status": {"enum": ["accepted", "denied", "unknown"]}, "fit_ref": {"$ref": "#/$defs/nullableString"}, "approval_ref": {"$ref": "#/$defs/nullableString"}}},
+    "outcome": {"type": "object", "required": ["first_error_ref", "failure_class", "root_cause_ref", "repair_rounds", "regressions", "escalations", "deescalation_proposals"], "properties": {"first_error_ref": {"$ref": "#/$defs/nullableString"}, "failure_class": {"enum": ["capability", "requirements_or_plan", "permission", "governor", "tool", "environment", "quota", "model_access", "unknown", null]}, "root_cause_ref": {"$ref": "#/$defs/nullableString"}, "repair_rounds": {"$ref": "#/$defs/nullableInteger"}, "regressions": {"$ref": "#/$defs/refs"}, "escalations": {"$ref": "#/$defs/refs"}, "deescalation_proposals": {"$ref": "#/$defs/refs"}}},
+    "repairHistory": {"type": "object", "required": ["repair_cycle_index", "total_repair_cycles", "assignment_history"], "properties": {"repair_cycle_index": {"type": ["integer", "null"], "minimum": 0, "maximum": 3}, "total_repair_cycles": {"$ref": "#/$defs/nullableInteger"}, "assignment_history": {"$ref": "#/$defs/refs"}}},
+    "quality": {"type": "object", "required": ["first_pass", "acceptance_pass", "critical_group_pass", "review_findings", "human_rework"], "properties": {"first_pass": {"$ref": "#/$defs/nullableBoolean"}, "acceptance_pass": {"$ref": "#/$defs/nullableBoolean"}, "critical_group_pass": {"$ref": "#/$defs/nullableBoolean"}, "review_findings": {"$ref": "#/$defs/refs"}, "human_rework": {"$ref": "#/$defs/nullableBoolean"}}},
+    "time": {"type": "object", "required": ["started_at", "finished_at", "active_ms", "waiting_ms", "e2e_ms", "human_minutes"], "properties": {"started_at": {"$ref": "#/$defs/timestamp"}, "finished_at": {"$ref": "#/$defs/timestamp"}, "active_ms": {"$ref": "#/$defs/nullableNumber"}, "waiting_ms": {"$ref": "#/$defs/nullableNumber"}, "e2e_ms": {"$ref": "#/$defs/nullableNumber"}, "human_minutes": {"$ref": "#/$defs/nullableNumber"}}},
+    "usage": {"type": "object", "required": ["tokens_in", "tokens_out", "cache_tokens", "quota_used", "quota_unit", "usage_source", "coverage_status"], "properties": {"tokens_in": {"$ref": "#/$defs/nullableInteger"}, "tokens_out": {"$ref": "#/$defs/nullableInteger"}, "cache_tokens": {"$ref": "#/$defs/nullableInteger"}, "quota_used": {"$ref": "#/$defs/nullableNumber"}, "quota_unit": {"$ref": "#/$defs/nullableString"}, "usage_source": {"$ref": "#/$defs/nullableString"}, "coverage_status": {"enum": ["complete", "partial", "unknown"]}}},
+    "cost": {"type": "object", "required": ["billing_mode", "api_equivalent_usd", "actual_incremental_usd", "price_source_at"], "properties": {"billing_mode": {"enum": ["subscription", "api", "unknown"]}, "api_equivalent_usd": {"$ref": "#/$defs/nullableNumber"}, "actual_incremental_usd": {"$ref": "#/$defs/nullableNumber"}, "price_source_at": {"$ref": "#/$defs/timestamp"}}},
+    "join": {"type": "object", "required": ["call_id", "session_id", "evidence_refs"], "properties": {"call_id": {"$ref": "#/$defs/nullableString"}, "session_id": {"$ref": "#/$defs/nullableString"}, "evidence_refs": {"$ref": "#/$defs/refs"}}}
+  }
+}

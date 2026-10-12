@@ -20,6 +20,17 @@ rewrite_before_public: false
 > nhiều lượt ở bước này là lỗi quy trình; bỏ hẳn lượt trao đổi khi người dùng đã nói "không cần sprint" hoặc việc
 > là làm thẳng không mơ hồ.
 
+## 0. Phân loại trước khi chọn người làm
+
+Khi tiếp nhận có quyết định phân công, đọc [task-routing](../../method/task-routing.md) mục 1–3 và 5
+trước khi chọn vai/tier/model/effort. Bản phân loại gồm **sáu hàng theo thang của phương pháp**, mỗi hàng
+có value · ordinal · nguồn · điều chưa biết · hậu quả nếu sai; thiếu nguồn để `null` kèm lý do.
+Sau bảng là difficulty từ ba trục kỹ thuật đủ nguồn, effort theo default/override, assignment baseline
+hay candidate, và cách giao có căn cứ. Cỡ/rủi ro và tin trao đổi gom vẫn theo các mục dưới.
+Model lấy từ mapping/override **của việc đang phân loại**; model của agent điều phối không thay thế
+mapping hay chỉ định cho người nhận việc. Trước PLAN/assignment, tin ngắn có agent/harness · vai · tier · model · effort · phạm vi
+· lý do · nguồn duyệt, tách requested/effective/actual; field chưa có bằng chứng để `null` kèm lý do.
+
 ## 1. Bảy việc, theo thứ tự
 
 | # | Việc | Ghi vào |

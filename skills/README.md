@@ -115,10 +115,10 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 |---|---|---|---|---|
 | [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 3/3, 3/3, 3/3 runs Đạt, RED 0/3, 0/3, 3/3 runs Đạt so KB1 and KB2 gave way and KB3 passed as-is, kept as regression; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
 | [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 2/3, 2/3, 3/3 runs Đạt, RED 0/3, 0/3, 0/3 runs Đạt so all three gave way; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
-| [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 final exact GREEN pass on current skill SHA (same-model baseline 2/6 pass; n = 1 per case; in-4 rubric corrected after earlier observation, not preregistered; interim diagnostics excluded) | 2026-10-05 |
-| [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6) | 2026-10-05 |
+| [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | partial; A v1, B v2 and C v2 each RED 0/3 and GREEN 3/3; v1 full GREEN 4/9 failed; micro control 0/5 and candidate 5/5; old regression 5/6, remaining mismatch also observed on archived source; diagnostic writer scores, independent acceptance pending | 2026-10-12 |
+| [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | Chưa chạy — current candidate behavior unverified | 2026-10-12 |
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
-| [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-03 |
+| [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | Chưa chạy — current candidate behavior unverified | 2026-10-12 |
 | [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [api-design](api-design/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/7 (+4 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 2/7 (+5 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
@@ -142,7 +142,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 8/9 GREEN pass (n = 3 per scenario, wq-1 2/3, wq-5 3/3, wq-6 3/3, 3/3 scenarios); RED 0/9 pass (9 partial); skill unchanged | 2026-10-04 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
-| [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
+| [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | Chưa chạy — current candidate behavior unverified | 2026-10-12 |
 | [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 8/8 GREEN pass | 2026-10-04 |
 | [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on KB3 at n = 3 after the TK13 fix (round 2, 2026-10-04, round 1 on the pre-fix text was 1/3) and RED 0/3 pass (RED breaks); rerun n = 1 - KB1, KB2, KB4, KB6 pass, KB5 partial against the expectation, KB7 partial (TK12 had pass; not shown to be a regression); earlier TK12 rerun GREEN 3/3 on the old scenarios and 4 new ones | 2026-10-04 |
 

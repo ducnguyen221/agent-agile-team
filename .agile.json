@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "visibility": "private",
+  "artifact_root": ".",
+  "paths": {
+    "requests": "docs/plans/REQUESTS.md",
+    "sprints": "docs/plans/SPRINTS.md",
+    "sprint_dir": "docs/plans/{date}-{slug}",
+    "specs": "docs/specs/SPECS.md",
+    "feature_specs_dir": "docs/specs",
+    "adr_dir": "docs/architecture/adr"
+  },
+  "id_width": {
+    "request": 3,
+    "feature": 3,
+    "sprint": 2
+  },
+  "coverage": {
+    "line_min_percent": 80,
+    "reason": ""
+  },
+  "ledger": {
+    "project": ""
+  }
+}

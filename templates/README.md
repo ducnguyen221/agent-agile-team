@@ -222,3 +222,18 @@ kiểm định, `blocked` → vướng, `awaiting_gate_2` → chờ Cổng 2.
 | `coverage.line_min_percent` | `80` | Ngưỡng coverage dòng cho code mới và code được sửa |
 | `coverage.reason` | `""` | Bắt buộc khác rỗng khi ngưỡng khác 80 |
 | `ledger.project` | `""` | **Công tắc sổ tập trung**: rỗng (hoặc không có khoá) = tắt, `check` không đọc sổ dù máy đặt biến; điền tên dự án (chữ, số, `.`, `_`, `-`) = bật. Máy cấp mẫu đường file sổ bằng biến môi trường `AGENT_AGILE_LEDGER` chứa `{project}` — đường máy không vào repo. Sai hình (không phải object, không phải chuỗi, có `/`, `\`, `..`) → `config-invalid`. Khuôn file sổ: `registry/LEDGER.md` |
+
+## 8. Bằng chứng routing theo pilot
+
+PLAN giữ phạm vi, nguồn phân loại và criteria version đã khóa. PROGRESS giữ các record
+`classification` và `attempt` trong body, mỗi record có marker `routing-evidence:v1` rồi một khối JSON
+fenced ngay sau. Hình dạng canonical là `evals/task-routing/run.schema.json` với `schema: 1`;
+`unknown_reasons` giải thích từng field null. `requested`, `effective` và `actual` là ba nguồn
+khác nhau; chỉ có yêu cầu gửi đi không chứng minh actual. Human override phải giữ quote/scope và chỉ pin
+field được chỉ định. Thông báo phải có timestamp trước dispatch, criteria đổi phải version lại và đánh giá
+cả hai nhánh hoặc mở experiment mới.
+
+REPORT dẫn tới record, manifest và kết quả đối chiếu source coverage, không gộp lỗi lần đầu với vòng sửa.
+Hồ sơ pilot chạy `check.py --routing-manifest` cùng manifest QA khóa độc lập; checker bắt cả record thiếu
+marker, assignment/attempt trùng hay vắng, và source coverage chưa reconcile. Mẫu không tự sinh record
+giả, không thêm frontmatter bắt buộc, và hồ sơ ngoài pilot không phải điền routing.

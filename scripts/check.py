@@ -17,11 +17,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
 import subprocess
 import sys
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -63,6 +65,11 @@ RULES: dict[str, tuple[str, str]] = {
     "ledger-unconfigured": (GHI, "dự án khai sổ tập trung mà máy chưa đặt mẫu đường `AGENT_AGILE_LEDGER`"),
     "leak-denylist": (CHAN, "`--self`: file của repo chứa từ trong danh sách cấm"),
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
+    "routing-invalid": (PHAI, "routing evidence marker/JSON/record không hợp lệ"),
+    "routing-unknown": (GHI, "routing record có field ngoài schema 1"),
+    "routing-manifest-invalid": (PHAI, "routing applicability manifest thiếu hoặc sai hình"),
+    "routing-missing": (PHAI, "routing pilot thiếu record/document/assignment/attempt/source coverage"),
+    "routing-duplicate": (PHAI, "routing pilot có record/assignment/attempt trùng"),
 }
 INPUT_RULES = {"frontmatter-syntax", "config-syntax"}
 
@@ -163,6 +170,603 @@ SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_ca
 OPEN_START, OPEN_END = "<!-- agile:open:start -->", "<!-- agile:open:end -->"  # khối do `index` sinh
 SPAN_HINT = (" — có dấu huyền kề bên: mã nằm trong code span lồng nhau hoặc ngắt dòng? Code span chứa dấu huyền"
              " thì bọc ngoài bằng hai dấu huyền")
+ROUTING_MARKER = "<!-- routing-evidence:v1 -->"
+ROUTING_SCHEMA = json.loads((c.REPO / "evals" / "task-routing" / "run.schema.json").read_text(encoding="utf-8"))
+
+
+def _routing_json_equal(left: object, right: object) -> bool:
+    """JSON Schema does not equate Python booleans with JSON numbers."""
+    if isinstance(left, bool) or isinstance(right, bool):
+        return isinstance(left, bool) and isinstance(right, bool) and left == right
+    return left == right
+
+
+def _routing_reject_constant(value: str) -> None:
+    raise ValueError(f"nonstandard JSON constant: {value}")
+
+
+def _routing_timestamps(record: dict) -> tuple[dict[str, datetime], list[str]]:
+    paths = ("notification.notified_at", "time.started_at", "time.finished_at",
+             "provenance.catalog_at", "cost.price_source_at", "assignment.override.approved_at")
+    parsed: dict[str, datetime] = {}
+    problems: list[str] = []
+    for path in paths:
+        value: object = record
+        for key in path.split("."):
+            value = value.get(key) if isinstance(value, dict) else None
+        if value is None:
+            continue
+        if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z", value):
+            problems.append(f"{path}: invalid timestamp")
+            continue
+        try:
+            parsed[path] = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            problems.append(f"{path}: impossible timestamp")
+    return parsed, problems
+
+
+def _routing_shape(value: object, spec: dict, where: str = "") -> list[str]:
+    """Check the small JSON Schema vocabulary used by the frozen routing schema (stdlib only)."""
+    if "$ref" in spec:
+        name = spec["$ref"].split("/")[-1]
+        return _routing_shape(value, ROUTING_SCHEMA["$defs"][name], where)
+    problems: list[str] = []
+    if "oneOf" in spec:
+        if sum(not _routing_shape(value, option, where) for option in spec["oneOf"]) != 1:
+            problems.append(f"{where}: no unique schema variant")
+    for part in spec.get("allOf", []):
+        problems.extend(_routing_shape(value, part, where))
+    allowed = spec.get("type")
+    if allowed is not None:
+        types = allowed if isinstance(allowed, list) else [allowed]
+        matches = {
+            "object": isinstance(value, dict),
+            "array": isinstance(value, list),
+            "string": isinstance(value, str),
+            "integer": isinstance(value, int) and not isinstance(value, bool),
+            "number": isinstance(value, (int, float)) and not isinstance(value, bool),
+            "boolean": isinstance(value, bool),
+            "null": value is None,
+        }
+        if not any(matches[t] for t in types):
+            return problems + [f"{where}: expected {'|'.join(types)}"]
+    if isinstance(value, float) and not math.isfinite(value):
+        return problems + [f"{where}: nonfinite number"]
+    if "const" in spec and not _routing_json_equal(value, spec["const"]):
+        problems.append(f"{where}: expected {spec['const']!r}")
+    if "enum" in spec and not any(_routing_json_equal(value, option) for option in spec["enum"]):
+        problems.append(f"{where}: value outside enum")
+    if isinstance(value, str):
+        if len(value) < spec.get("minLength", 0):
+            problems.append(f"{where}: empty value")
+        if "pattern" in spec and not re.search(spec["pattern"], value):
+            problems.append(f"{where}: invalid pattern")
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        for bound in ("minimum", "maximum"):
+            if bound in spec and ((bound == "minimum" and value < spec[bound])
+                                  or (bound == "maximum" and value > spec[bound])):
+                problems.append(f"{where}: outside {bound}")
+    if isinstance(value, list):
+        if spec.get("uniqueItems") and len(set(map(str, value))) != len(value):
+            problems.append(f"{where}: duplicate items")
+        for index, item in enumerate(value):
+            if "items" in spec:
+                problems.extend(_routing_shape(item, spec["items"], f"{where}[{index}]"))
+    if isinstance(value, dict):
+        for key in spec.get("required", []):
+            if key not in value:
+                problems.append(f"{where}.{key}: required")
+        props = spec.get("properties", {})
+        for key, item in value.items():
+            nested = props.get(key, spec.get("additionalProperties"))
+            if isinstance(nested, dict):
+                problems.extend(_routing_shape(item, nested, f"{where}.{key}".strip(".")))
+    return problems
+
+
+def _routing_null_paths(value: object, prefix: str = "") -> list[str]:
+    if value is None:
+        return [prefix]
+    if isinstance(value, dict):
+        return [path for key, item in value.items() if key != "unknown_reasons"
+                for path in _routing_null_paths(item, f"{prefix}.{key}".strip("."))]
+    return []
+
+
+def _routing_safe_ref(ref: str) -> bool:
+    """Check a reference's syntax without opening its target."""
+    return bool(ref and not ref.startswith(("/", "\\")) and not re.match(r"^[A-Za-z]:", ref)
+                and ".." not in ref.replace("\\", "/").split("/"))
+
+
+def _routing_reference_problems(value: object, where: str = "record") -> list[str]:
+    problems = []
+    if isinstance(value, dict):
+        for key, item in value.items():
+            path = f"{where}.{key}"
+            if key != "unknown_reasons" and (key.endswith("_ref") or key.endswith("_refs") or key == "evidence_refs"):
+                candidates = item if isinstance(item, list) else [item]
+                for candidate in candidates:
+                    if isinstance(candidate, str) and not _routing_safe_ref(candidate):
+                        problems.append(f"{path}: unsafe reference")
+            problems.extend(_routing_reference_problems(item, path))
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            problems.extend(_routing_reference_problems(item, f"{where}[{index}]"))
+    return problems
+
+
+def _routing_unknown_keys(value: object, spec: dict, where: str = "record") -> list[str]:
+    if "$ref" in spec:
+        return _routing_unknown_keys(value, ROUTING_SCHEMA["$defs"][spec["$ref"].split("/")[-1]], where)
+    if not isinstance(value, dict):
+        return []
+    properties = dict(spec.get("properties", {}))
+    for part in spec.get("allOf", []) + spec.get("oneOf", []):
+        if "$ref" in part:
+            part = ROUTING_SCHEMA["$defs"][part["$ref"].split("/")[-1]]
+        properties.update(part.get("properties", {}))
+    unknown = []
+    for key, item in value.items():
+        path = f"{where}.{key}"
+        if key in properties:
+            unknown.extend(_routing_unknown_keys(item, properties[key], path))
+        elif "additionalProperties" not in spec:
+            unknown.append(path)
+    return unknown
+
+
+def routing_record_problems(record: dict, expected_refs: set) -> list[tuple[str, str]]:
+    """Pure validation of one routing record; no model selection or filesystem access."""
+    if not isinstance(record, dict):
+        return [("routing-invalid", "routing record phải là object")]
+    problems = [("routing-invalid", message) for message in _routing_shape(record, ROUTING_SCHEMA, "record")]
+    timestamps, timestamp_problems = _routing_timestamps(record)
+    problems.extend(("routing-invalid", message) for message in timestamp_problems)
+    problems.extend(("routing-unknown", f"{path}: unknown field") for path in _routing_unknown_keys(record, ROUTING_SCHEMA))
+    problems.extend(("routing-invalid", message) for message in _routing_reference_problems(record))
+    kind = record.get("record_kind")
+    if kind == "classification" and not isinstance(record.get("axes"), dict):
+        problems.append(("routing-invalid", "classification phải có axes"))
+    if kind == "classification" and not isinstance(record.get("assignment"), dict):
+        problems.append(("routing-invalid", "classification phải có assignment"))
+    if kind == "attempt":
+        for key in ("identity", "dispatch", "provenance", "outcome", "repair_history", "quality", "time", "usage", "cost", "join"):
+            if not isinstance(record.get(key), dict):
+                problems.append(("routing-invalid", f"attempt phải có {key}"))
+    reasons = record.get("unknown_reasons")
+    if not isinstance(reasons, dict):
+        return problems
+    for path in _routing_null_paths(record):
+        if not isinstance(reasons.get(path), str) or not reasons[path].strip():
+            problems.append(("routing-invalid", f"{path}: null cần unknown_reasons"))
+    refs = record.get("evidence_refs", [])
+    if isinstance(refs, list):
+        for ref in refs:
+            if isinstance(ref, str) and not _routing_safe_ref(ref):
+                problems.append(("routing-invalid", f"unsafe evidence ref: {ref!r}"))
+        if expected_refs and not expected_refs.issubset({ref for ref in refs if isinstance(ref, str)}):
+            problems.append(("routing-invalid", "evidence_refs thiếu expected refs"))
+    if kind == "classification":
+        axes = record.get("axes", {})
+        if isinstance(axes, dict):
+            ordinal_map = {
+                "ambiguity": ("resolved", "technical_unknown", "owner_decision_open"),
+                "scope_dependencies": ("local", "coupled", "cross_boundary"),
+                "error_consequence": ("reversible_local", "shared_behavior", "sensitive_or_irreversible"),
+                "verifiability": ("deterministic", "mixed", "weak_or_unavailable"),
+                "plan_readiness": ("complete_feasible", "direction_only", "invalid_or_unavailable"),
+                "execution_complexity": ("bounded_known", "nontrivial", "complex"),
+            }
+            for name, axis in axes.items():
+                if not isinstance(axis, dict):
+                    continue
+                if (axis.get("value") is None) != (axis.get("ordinal") is None):
+                    problems.append(("routing-invalid", f"axes.{name}: value/ordinal phải cùng known hoặc cùng null"))
+                if name in ordinal_map and axis.get("value") in ordinal_map[name]:
+                    if axis.get("ordinal") != ordinal_map[name].index(axis["value"]):
+                        problems.append(("routing-invalid", f"axes.{name}: ordinal khác value"))
+                if axis.get("ordinal") is not None and not axis.get("evidence_refs"):
+                    problems.append(("routing-invalid", f"axes.{name}: ordinal thiếu evidence"))
+            technical = []
+            for name in ("scope_dependencies", "plan_readiness", "execution_complexity"):
+                axis = axes.get(name)
+                if not isinstance(axis, dict):
+                    technical.append(None)
+                    continue
+                value, ordinal, refs = axis.get("value"), axis.get("ordinal"), axis.get("evidence_refs")
+                if (value in ordinal_map[name] and type(ordinal) is int
+                        and ordinal == ordinal_map[name].index(value)
+                        and isinstance(refs, list) and bool(refs)
+                        and all(isinstance(ref, str) and _routing_safe_ref(ref) for ref in refs)):
+                    technical.append(ordinal)
+                else:
+                    technical.append(None)
+            difficulty = None
+            if all(isinstance(value, int) and not isinstance(value, bool) for value in technical):
+                maximum = max(technical)
+                difficulty = 1 if maximum == 0 else 2 if maximum == 1 else 3 if technical.count(2) == 1 else 4
+            decision = record.get("decision", {})
+            if isinstance(decision, dict) and decision.get("difficulty_level") != difficulty:
+                problems.append(("routing-invalid", "difficulty_level không khớp ba trục kỹ thuật có bằng chứng"))
+            effort = record.get("effort", {})
+            if isinstance(effort, dict) and effort.get("effort_source") == "policy" and difficulty is not None:
+                if isinstance(effort.get("effort_level"), int) and effort["effort_level"] < max(2, difficulty):
+                    problems.append(("routing-invalid", "policy effort thấp hơn default medium/difficulty"))
+        assignment = record.get("assignment", {})
+        if isinstance(assignment, dict):
+            notice = record.get("notification", {})
+            if isinstance(notice, dict) and notice.get("assignment_ref") != assignment.get("assignment_ref"):
+                problems.append(("routing-invalid", "notification.assignment_ref khác classification assignment"))
+            override = assignment.get("override")
+            if isinstance(override, dict) and override.get("status") == "approved":
+                decision = record.get("decision", {})
+                if isinstance(decision, dict) and decision.get("override_ref") != override.get("decision_ref"):
+                    problems.append(("routing-invalid", "approved override thiếu decision.override_ref"))
+                notice = record.get("notification", {})
+                if isinstance(notice, dict) and notice.get("approval_ref") != override.get("decision_ref"):
+                    problems.append(("routing-invalid", "approved override thiếu notification.approval_ref"))
+                if override.get("model_override") and isinstance(notice, dict) and notice.get("model") != override["model_override"]:
+                    problems.append(("routing-invalid", "human model pin khác notification.model"))
+                effort = record.get("effort", {})
+                if isinstance(effort, dict) and not override.get("effort_override") and effort.get("effort_source") == "human_override":
+                    problems.append(("routing-invalid", "human model pin không thay effort"))
+                if isinstance(effort, dict) and override.get("effort_override") and effort.get("effort_requested") != override["effort_override"]:
+                    problems.append(("routing-invalid", "human effort pin khác effort_requested"))
+    if kind == "attempt":
+        dispatch = record.get("dispatch", {})
+        usage = record.get("usage", {})
+        identity = record.get("identity", {})
+        notice = record.get("notification", {})
+        if isinstance(identity, dict) and isinstance(notice, dict) and notice.get("assignment_ref") != identity.get("assignment_ref"):
+            problems.append(("routing-invalid", "notification.assignment_ref khác attempt assignment"))
+        if isinstance(dispatch, dict) and dispatch.get("actual_model") is not None:
+            source = dispatch.get("actual_model_source")
+            if not isinstance(source, str) or not source.strip() or source == "requested":
+                problems.append(("routing-invalid", "actual_model cần runtime source độc lập"))
+        if isinstance(usage, dict):
+            if any(usage.get(key) is not None for key in ("tokens_in", "tokens_out", "cache_tokens", "quota_used")) and not usage.get("usage_source"):
+                problems.append(("routing-invalid", "usage đo được cần usage_source"))
+            if usage.get("coverage_status") == "complete" and not usage.get("usage_source"):
+                problems.append(("routing-invalid", "usage complete cần source"))
+        clock = record.get("time", {})
+        if isinstance(notice, dict) and isinstance(clock, dict):
+            notice_at, started_at = notice.get("notified_at"), clock.get("started_at")
+            if started_at and not notice_at:
+                problems.append(("routing-invalid", "attempt bắt đầu nhưng thiếu notified_at trước dispatch"))
+            if notice.get("model_status") == "actual" or notice.get("effort_status") == "actual":
+                problems.append(("routing-invalid", "prenotice không thể xác nhận actual trước dispatch"))
+            if ("notification.notified_at" in timestamps and "time.started_at" in timestamps
+                    and timestamps["notification.notified_at"] > timestamps["time.started_at"]):
+                problems.append(("routing-invalid", "notification sau dispatch started_at"))
+        repair = record.get("repair_history", {})
+        outcome = record.get("outcome", {})
+        quality = record.get("quality", {})
+        if isinstance(repair, dict) and isinstance(outcome, dict) and isinstance(quality, dict):
+            cycle, total = repair.get("repair_cycle_index"), repair.get("total_repair_cycles")
+            if isinstance(cycle, int) and isinstance(total, int) and total < cycle:
+                problems.append(("routing-invalid", "total_repair_cycles không được reset dưới repair_cycle_index"))
+            at_ceiling = repair.get("repair_cycle_index") == 3
+            unresolved = quality.get("acceptance_pass") is False or bool(outcome.get("regressions"))
+            if at_ceiling and unresolved and not outcome.get("escalations"):
+                problems.append(("routing-invalid", "vòng sửa thứ ba còn lỗi/regression cần cảnh báo và handoff"))
+            if at_ceiling and unresolved and isinstance(notice, dict) and notice.get("event_kind") != "handoff":
+                problems.append(("routing-invalid", "vòng sửa thứ ba còn lỗi/regression cần notice handoff"))
+        cost = record.get("cost", {})
+        join = record.get("join", {})
+        if isinstance(cost, dict) and cost.get("actual_incremental_usd") is not None:
+            refs = join.get("evidence_refs", []) if isinstance(join, dict) else []
+            if not isinstance(refs, list) or not any(isinstance(ref, str) and ref.startswith("billing:") for ref in refs):
+                problems.append(("routing-invalid", "actual_incremental_usd kể cả 0 cần billing source"))
+    criteria = record.get("criteria_change")
+    if isinstance(criteria, dict):
+        if criteria.get("criteria_version") != record.get("criteria_version") or criteria.get("previous_version") == record.get("criteria_version"):
+            problems.append(("routing-invalid", "criteria version không nhất quán"))
+        notice = record.get("notification", {})
+        if isinstance(notice, dict) and notice.get("event_kind") != "criteria_change":
+            problems.append(("routing-invalid", "criteria change thiếu notice tương ứng"))
+    return problems
+
+
+def _routing_assignment_join_problems(classification: dict, attempt: dict) -> list[tuple[str, str]]:
+    """Check facts shared by an assignment and an attempt, without inferring runtime actuals."""
+    problems: list[tuple[str, str]] = []
+    assignment = classification.get("assignment", {})
+    notice = attempt.get("notification", {})
+    original_notice = classification.get("notification", {})
+    dispatch = attempt.get("dispatch", {})
+    effort = attempt.get("effort", {})
+    if not all(isinstance(part, dict) for part in (assignment, notice, original_notice, dispatch, effort)):
+        return [("routing-invalid", "assignment/attempt thiếu cấu hình để đối chiếu")]
+    for key in ("task_ref", "work_item_ref", "policy_hash", "plan_hash", "criteria_version"):
+        if attempt.get(key) != classification.get(key):
+            problems.append(("routing-invalid", f"attempt.{key} khác classification assignment"))
+    if original_notice.get("scope_ref") not in (classification.get("work_item_ref"), classification.get("task_ref")):
+        problems.append(("routing-invalid", "classification notice scope khác assignment"))
+    if notice.get("scope_ref") != original_notice.get("scope_ref"):
+        problems.append(("routing-invalid", "attempt notice scope khác classification assignment"))
+    if notice.get("role") != assignment.get("role") or original_notice.get("role") != assignment.get("role"):
+        problems.append(("routing-invalid", "attempt/classification role khác assignment"))
+    tier = assignment.get("requested_tier")
+    if tier is not None and (notice.get("tier") != tier or original_notice.get("tier") != tier):
+        problems.append(("routing-invalid", "attempt/classification tier khác assignment"))
+    if notice.get("harness") != dispatch.get("harness"):
+        problems.append(("routing-invalid", "attempt notice harness khác dispatch"))
+    if original_notice.get("harness") != dispatch.get("harness"):
+        problems.append(("routing-invalid", "attempt dispatch harness khác classification assignment"))
+    if notice.get("model") != dispatch.get("requested_model"):
+        problems.append(("routing-invalid", "attempt notice model khác dispatch requested_model"))
+    if notice.get("native_effort") != effort.get("effort_requested"):
+        problems.append(("routing-invalid", "attempt notice effort khác effort_requested"))
+    for key, event in (("model", "model_change"), ("native_effort", "effort_change")):
+        if notice.get(key) == original_notice.get(key):
+            continue
+        original_times, _ = _routing_timestamps(classification)
+        attempt_times, _ = _routing_timestamps(attempt)
+        before = original_times.get("notification.notified_at")
+        after = attempt_times.get("notification.notified_at")
+        if notice.get("event_kind") != event:
+            problems.append(("routing-invalid", f"attempt {key} đổi mà thiếu notice {event}"))
+        elif before is None or after is None or after <= before:
+            problems.append(("routing-missing", f"attempt {key} đổi nhưng thiếu notice mới có thứ tự"))
+
+    override = assignment.get("override")
+    if not isinstance(override, dict) or override.get("status") != "approved":
+        return problems
+    identity = attempt.get("identity", {})
+    scope_kind, scope_ref = override.get("scope_kind"), override.get("scope_ref")
+    if scope_kind == "task":
+        if scope_ref != classification.get("task_ref"):
+            problems.append(("routing-invalid", "approved override scope khác classification task"))
+        in_scope = scope_ref == attempt.get("task_ref")
+    elif scope_kind == "work_item":
+        if scope_ref != classification.get("work_item_ref"):
+            problems.append(("routing-invalid", "approved override scope khác classification work item"))
+        in_scope = scope_ref == attempt.get("work_item_ref")
+    elif scope_kind == "turn" and isinstance(identity, dict):
+        in_scope = scope_ref == identity.get("attempt_id")
+    else:
+        return problems + [("routing-missing", "approved override không xác định được scope")]
+    if not in_scope:
+        return problems
+    class_times, _ = _routing_timestamps(classification)
+    attempt_times, _ = _routing_timestamps(attempt)
+    approved_at = class_times.get("assignment.override.approved_at")
+    started_at = attempt_times.get("time.started_at")
+    if approved_at is None or started_at is None:
+        return problems + [("routing-missing", "approved override thiếu thời điểm để đối chiếu hiệu lực")]
+    if approved_at > started_at:
+        return problems + [("routing-invalid", "approved override sau attempt dispatch")]
+    expiry = override.get("expiry")
+    if expiry is not None:
+        if not isinstance(expiry, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z", expiry):
+            return problems + [("routing-missing", "approved override expiry chưa kiểm được")]
+        try:
+            if datetime.fromisoformat(expiry.replace("Z", "+00:00")) <= started_at:
+                return problems
+        except ValueError:
+            return problems + [("routing-missing", "approved override expiry chưa kiểm được")]
+    decision_ref = override.get("decision_ref")
+    decision = attempt.get("decision")
+    if not isinstance(decision, dict):
+        problems.append(("routing-invalid", "attempt decision không hợp lệ để đối chiếu override"))
+        decision = {}
+    if override.get("model_override") is not None:
+        if dispatch.get("requested_model") != override["model_override"] or notice.get("model") != override["model_override"]:
+            problems.append(("routing-invalid", "attempt trái human model pin còn hiệu lực"))
+        if notice.get("approval_ref") != decision_ref or decision.get("override_ref") != decision_ref:
+            problems.append(("routing-invalid", "attempt model pin thiếu approval/decision ref"))
+    if override.get("effort_override") is not None:
+        if effort.get("effort_requested") != override["effort_override"] or notice.get("native_effort") != override["effort_override"]:
+            problems.append(("routing-invalid", "attempt trái human effort pin còn hiệu lực"))
+        if notice.get("approval_ref") != decision_ref or effort.get("override_ref") != decision_ref:
+            problems.append(("routing-invalid", "attempt effort pin thiếu approval/decision ref"))
+    return problems
+
+
+def _routing_counter_join_problems(attempts: list[dict]) -> list[tuple[str, str]]:
+    """Keep verified repair totals across ordered attempts for one work item."""
+    problems: list[tuple[str, str]] = []
+    if not attempts:
+        return problems
+    rows = []
+    for record in attempts:
+        repair = record.get("repair_history", {})
+        outcome = record.get("outcome", {})
+        identity = record.get("identity", {})
+        if not all(isinstance(part, dict) for part in (repair, outcome, identity)):
+            problems.append(("routing-missing", "repair counter thiếu record để đối chiếu"))
+            continue
+        cycle, total = repair.get("repair_cycle_index"), repair.get("total_repair_cycles")
+        if type(cycle) is not int or type(total) is not int:
+            problems.append(("routing-missing", "repair counter chưa biết nên không thể xác nhận tổng"))
+            continue
+        if cycle or total:
+            if not isinstance(outcome.get("root_cause_ref"), str) or not _routing_safe_ref(outcome["root_cause_ref"]):
+                problems.append(("routing-missing", "repair counter thiếu root_cause_ref"))
+            if not isinstance(outcome.get("first_error_ref"), str) or not _routing_safe_ref(outcome["first_error_ref"]):
+                problems.append(("routing-missing", "repair counter thiếu first_error_ref baseline"))
+        history = repair.get("assignment_history")
+        assignment_ref = identity.get("assignment_ref")
+        if (not isinstance(history, list) or not all(isinstance(ref, str) for ref in history)
+                or not isinstance(assignment_ref, str) or not history or history[-1] != assignment_ref):
+            problems.append(("routing-missing", "repair assignment_history thiếu assignment hiện tại"))
+            continue
+        times, _ = _routing_timestamps(record)
+        quality, notice = record.get("quality"), record.get("notification")
+        unresolved = (isinstance(quality, dict) and quality.get("acceptance_pass") is False
+                      or bool(outcome.get("regressions")))
+        stopped = cycle == 3 and (unresolved or isinstance(notice, dict) and notice.get("event_kind") == "handoff")
+        rows.append((times.get("time.started_at"), times.get("time.finished_at"), cycle, total,
+                     history, assignment_ref, outcome.get("repair_rounds"), stopped))
+    if len(attempts) < 2 or not any(row[2] or row[3] for row in rows):
+        return problems
+    if len(rows) != len(attempts) or any(start is None or end is None or end < start
+                                         for start, end, *_ in rows):
+        return problems + [("routing-missing", "repair attempts thiếu thứ tự thời gian kiểm được")]
+    rows.sort(key=lambda row: row[0])
+    stopped_assignments: set[str] = set()
+    for previous, current in zip(rows, rows[1:]):
+        prev_start, prev_end, prev_cycle, prev_total, prev_history, prev_assignment, prev_rounds, prev_stopped = previous
+        start, _end, cycle, total, history, assignment, rounds, _stopped = current
+        if prev_stopped:
+            stopped_assignments.add(prev_assignment)
+        if start < prev_end or start == prev_start:
+            problems.append(("routing-missing", "repair attempts chồng thời gian hoặc thứ tự không rõ"))
+            continue
+        if assignment == prev_assignment:
+            # Repeated observations preserve counters; a new repair must advance both.
+            cycle_delta = cycle - prev_cycle
+            rounds_delta = rounds - prev_rounds if type(rounds) is int and type(prev_rounds) is int else None
+            repair_increased = cycle_delta > 0 or total > prev_total or rounds_delta is not None and rounds_delta > 0
+            if assignment in stopped_assignments and repair_increased:
+                problems.append(("routing-invalid", "assignment đã dừng sau vòng ba không được thực hiện thêm repair"))
+            if total - prev_total != cycle_delta or rounds_delta is not None and rounds_delta != cycle_delta:
+                problems.append(("routing-invalid", "repair counters tăng/giảm không khớp trong cùng assignment"))
+            if history != prev_history:
+                problems.append(("routing-invalid", "assignment_history thay đổi nhưng vẫn cùng assignment"))
+            if cycle < prev_cycle:
+                problems.append(("routing-invalid", "repair_cycle_index reset trong cùng assignment"))
+            required_total = prev_total + max(0, cycle - prev_cycle)
+        else:
+            if history[:len(prev_history)] != prev_history or assignment in prev_history:
+                problems.append(("routing-missing", "repair handoff thiếu assignment_history nối tiếp"))
+            required_total = prev_total + cycle
+        if total < required_total:
+            problems.append(("routing-invalid", "total_repair_cycles giảm hoặc thiếu vòng sau handoff"))
+    return problems
+
+
+def routing_bundle_problems(records: list, applicability: dict) -> list[tuple[str, str]]:
+    """Compare scanned records with a separately frozen applicability manifest."""
+    if not isinstance(applicability, dict) or not _routing_json_equal(applicability.get("schema"), 1):
+        return [("routing-manifest-invalid", "manifest phải là object schema=1")]
+    tasks = applicability.get("tasks")
+    policy_hash = applicability.get("policy_hash")
+    if not isinstance(policy_hash, str) or not re.fullmatch(r"[a-f0-9]{64}", policy_hash):
+        return [("routing-manifest-invalid", "manifest thiếu policy_hash SHA-256")]
+    candidate_hash = applicability.get("candidate_policy_hash")
+    if candidate_hash is not None and (not isinstance(candidate_hash, str)
+                                       or not re.fullmatch(r"[a-f0-9]{64}", candidate_hash)):
+        return [("routing-manifest-invalid", "candidate_policy_hash phải là SHA-256 hoặc null")]
+    if not isinstance(tasks, list) or not tasks:
+        return [("routing-manifest-invalid", "manifest thiếu tasks")]
+    required = ("task_ref", "document_refs", "required_classification_refs", "assignment_refs", "expected_attempt_refs")
+    for task in tasks:
+        if not isinstance(task, dict) or not isinstance(task.get("task_ref"), str) or not _routing_safe_ref(task["task_ref"]):
+            return [("routing-manifest-invalid", "task_ref của manifest không hợp lệ")]
+        for key in required[1:]:
+            values = task.get(key)
+            if not isinstance(values, list) or not values or not all(isinstance(item, str) and _routing_safe_ref(item) for item in values):
+                return [("routing-manifest-invalid", f"{task['task_ref']}: {key} thiếu/không hợp lệ")]
+            if len(set(values)) != len(values):
+                return [("routing-manifest-invalid", f"{task['task_ref']}: {key} trùng")]
+    if len({task["task_ref"] for task in tasks}) != len(tasks):
+        return [("routing-manifest-invalid", "task_ref trùng trong manifest")]
+    coverage = applicability.get("source_coverage")
+    if not isinstance(coverage, dict) or coverage.get("status") not in ("unknown", "partial", "complete"):
+        return [("routing-manifest-invalid", "source_coverage sai hình/trạng thái")]
+    ledger_refs, reconciliation_ref = coverage.get("ledger_refs"), coverage.get("reconciliation_ref")
+    if (not isinstance(ledger_refs, list)
+            or not all(isinstance(ref, str) and _routing_safe_ref(ref) for ref in ledger_refs)
+            or len(set(ledger_refs)) != len(ledger_refs)
+            or (reconciliation_ref is not None and
+                (not isinstance(reconciliation_ref, str) or not _routing_safe_ref(reconciliation_ref)))):
+        return [("routing-manifest-invalid", "source_coverage có reference sai kiểu/trùng/ngoài repo")]
+    problems: list[tuple[str, str]] = []
+    if coverage["status"] != "complete" or not ledger_refs or not reconciliation_ref:
+        problems.append(("routing-missing", "source coverage/join chưa được reconcile; không thể tuyên bố đầy đủ"))
+    tasks_by_ref = {task["task_ref"]: task for task in tasks}
+    seen_records, seen_attempts, seen_assignments = set(), set(), set()
+    valid_entries: list[dict] = []
+    for entry in records:
+        if (not isinstance(entry, dict) or not isinstance(entry.get("record"), dict)
+                or not isinstance(entry.get("document_ref"), str) or not _routing_safe_ref(entry["document_ref"])):
+            problems.append(("routing-invalid", "scanned record thiếu document_ref"))
+            continue
+        valid_entries.append(entry)
+        record = entry["record"]
+        record_policy_hash = record.get("policy_hash")
+        if not isinstance(record_policy_hash, str) or record_policy_hash not in (policy_hash, candidate_hash):
+            problems.append(("routing-invalid", f"{record.get('record_ref')}: policy_hash ngoài manifest"))
+        if applicability.get("criteria_version") and record.get("criteria_version") != applicability["criteria_version"]:
+            problems.append(("routing-invalid", f"{record.get('record_ref')}: criteria_version ngoài manifest"))
+        record_ref = record.get("record_ref")
+        if not isinstance(record_ref, str):
+            problems.append(("routing-invalid", "record_ref không hợp lệ"))
+            continue
+        if record_ref in seen_records:
+            problems.append(("routing-duplicate", f"record_ref trùng: {record_ref}"))
+        seen_records.add(record_ref)
+        task = tasks_by_ref.get(record.get("task_ref")) if isinstance(record.get("task_ref"), str) else None
+        if task is None:
+            problems.append(("routing-invalid", f"{record_ref}: task_ref ngoài manifest"))
+        elif entry["document_ref"] not in task["document_refs"]:
+            problems.append(("routing-invalid", f"{record_ref}: document_ref ngoài manifest task"))
+        if record.get("record_kind") == "classification":
+            if task is not None and record_ref not in task["required_classification_refs"]:
+                problems.append(("routing-invalid", f"{record_ref}: classification ngoài manifest task"))
+            assignment = record.get("assignment", {})
+            assignment_ref = assignment.get("assignment_ref") if isinstance(assignment, dict) else None
+            if not isinstance(assignment_ref, str):
+                problems.append(("routing-invalid", "assignment_ref không hợp lệ"))
+                continue
+            if assignment_ref in seen_assignments:
+                problems.append(("routing-duplicate", f"assignment_ref trùng: {assignment_ref}"))
+            seen_assignments.add(assignment_ref)
+            if task is not None and assignment_ref not in task["assignment_refs"]:
+                problems.append(("routing-invalid", f"{assignment_ref}: assignment ngoài manifest task"))
+        if record.get("record_kind") == "attempt":
+            if task is not None and record_ref not in task["expected_attempt_refs"]:
+                problems.append(("routing-invalid", f"{record_ref}: attempt ngoài manifest task"))
+            identity = record.get("identity", {})
+            attempt_ref = identity.get("attempt_id") if isinstance(identity, dict) else None
+            if not isinstance(attempt_ref, str):
+                problems.append(("routing-invalid", "attempt_id không hợp lệ"))
+                continue
+            if attempt_ref in seen_attempts:
+                problems.append(("routing-duplicate", f"attempt_id trùng: {attempt_ref}"))
+            seen_attempts.add(attempt_ref)
+    for task in tasks:
+        scoped = [entry for entry in valid_entries if isinstance(entry, dict) and isinstance(entry.get("record"), dict)
+                  and entry["record"].get("task_ref") == task["task_ref"]]
+        docs = {entry.get("document_ref") for entry in scoped}
+        classifications = [entry["record"] for entry in scoped if entry["record"].get("record_kind") == "classification"]
+        attempts = [entry["record"] for entry in scoped if entry["record"].get("record_kind") == "attempt"]
+        observed = {
+            "document_refs": docs,
+            "required_classification_refs": {record.get("record_ref") for record in classifications
+                                             if isinstance(record.get("record_ref"), str)},
+            "assignment_refs": {record.get("assignment", {}).get("assignment_ref") for record in classifications
+                                if isinstance(record.get("assignment"), dict)
+                                and isinstance(record["assignment"].get("assignment_ref"), str)},
+            "expected_attempt_refs": {record.get("record_ref") for record in attempts
+                                      if isinstance(record.get("record_ref"), str)}
+        }
+        for key, actual in observed.items():
+            missing = set(task[key]) - actual
+            if missing:
+                problems.append(("routing-missing", f"{task['task_ref']}: thiếu {key}: {', '.join(sorted(missing))}"))
+        for record in attempts:
+            identity = record.get("identity", {})
+            assignment_ref = identity.get("assignment_ref") if isinstance(identity, dict) else None
+            if not isinstance(assignment_ref, str) or not _routing_safe_ref(assignment_ref):
+                problems.append(("routing-invalid", f"{task['task_ref']}: attempt assignment_ref không hợp lệ"))
+            elif assignment_ref not in observed["assignment_refs"]:
+                problems.append(("routing-missing", f"{task['task_ref']}: attempt thiếu assignment {assignment_ref}"))
+            else:
+                classification = next((item for item in classifications
+                                       if isinstance(item.get("assignment"), dict)
+                                       and item["assignment"].get("assignment_ref") == assignment_ref), None)
+                if classification is not None:
+                    problems.extend(_routing_assignment_join_problems(classification, record))
+        work_items = {record.get("work_item_ref") for record in attempts
+                      if isinstance(record.get("work_item_ref"), str)}
+        for work_item in work_items:
+            work_attempts = [record for record in attempts if record.get("work_item_ref") == work_item]
+            problems.extend(_routing_counter_join_problems(work_attempts))
+    return problems
 
 
 @dataclass
@@ -347,6 +951,7 @@ class Engine:
         self.configs: dict = {}
         self.size_flagged: set = set()  # thư mục sprint bốn file đã báo `sprint-size-mismatch` (một lần mỗi thư mục)
         self.report = Report()
+        self.routing_records: list[tuple[dict, Path, int]] = []
 
     def doc(self, path: Path) -> Doc | None:
         key = path.resolve()
@@ -375,6 +980,7 @@ class Engine:
         self.report.checked += 1
         self.report.findings.extend(doc.load_findings)
         self.general_rules(doc)
+        self.routing_rules(doc)
         if doc.kind is None or doc.fm is None:
             return
         self.frontmatter_rules(doc)
@@ -386,6 +992,43 @@ class Engine:
             self.trace_rule(doc)
         if doc.kind in ("report", "sprint"):
             self.verification_rules(doc)
+
+    def routing_rules(self, doc: Doc) -> None:
+        """Read an explicit marker and its immediately following fenced JSON object."""
+        lines = doc.raw
+        in_fence = False
+        for index, line in enumerate(lines):
+            stripped = line.strip()
+            if stripped.startswith("```") and stripped != "```json":
+                in_fence = not in_fence
+            elif stripped == "```json":
+                in_fence = True
+            if in_fence or stripped != ROUTING_MARKER:
+                continue
+            cursor = index + 1
+            while cursor < len(lines) and not lines[cursor].strip():
+                cursor += 1
+            if cursor >= len(lines) or lines[cursor].strip() != "```json":
+                self.add(doc.path, doc.line_no(index), "routing-invalid", "marker phải theo ngay bởi khối ```json")
+                continue
+            end = cursor + 1
+            while end < len(lines) and lines[end].strip() != "```":
+                end += 1
+            if end >= len(lines):
+                self.add(doc.path, doc.line_no(index), "routing-invalid", "khối routing JSON chưa đóng")
+                continue
+            try:
+                record = json.loads("\n".join(lines[cursor + 1:end]), parse_constant=_routing_reject_constant)
+            except ValueError as exc:
+                message = exc.msg if isinstance(exc, json.JSONDecodeError) else str(exc)
+                self.add(doc.path, doc.line_no(index), "routing-invalid", f"routing JSON sai cú pháp: {message}")
+                continue
+            if not isinstance(record, dict):
+                self.add(doc.path, doc.line_no(index), "routing-invalid", "routing record phải là object")
+                continue
+            for rule, message in routing_record_problems(record, set()):
+                self.add(doc.path, doc.line_no(index), rule, message)
+            self.routing_records.append((record, doc.path, doc.line_no(index)))
 
     # -- luật chung cho mọi file Markdown --
 
@@ -889,7 +1532,7 @@ def _walk(root: Path, pattern: str):
         yield path
 
 
-def check_paths(paths, env=None) -> Report:
+def check_paths(paths, env=None, routing_manifest=None) -> Report:
     engine = Engine(env)
     for raw in paths:
         path = Path(raw)
@@ -907,6 +1550,20 @@ def check_paths(paths, env=None) -> Report:
                 engine.check_file(path)
         else:
             engine.report.errors.append(f"{c.display(path)}: không tồn tại")
+    if routing_manifest is not None:
+        manifest_path = Path(routing_manifest)
+        try:
+            manifest = json.loads(c.read_text(manifest_path), parse_constant=_routing_reject_constant)
+        except (OSError, UnicodeDecodeError, ValueError) as exc:
+            engine.add(manifest_path, 1, "routing-manifest-invalid", f"không đọc/parse được manifest ({exc})")
+        else:
+            scanned = [Path(raw) for raw in paths]
+            base = scanned[0] if len(scanned) == 1 and scanned[0].is_dir() else Path(os.path.commonpath(
+                [str(path if path.is_dir() else path.parent) for path in scanned]))
+            records = [{"record": record, "document_ref": path.resolve().relative_to(base.resolve()).as_posix()}
+                       for record, path, _ in engine.routing_records if path.resolve().is_relative_to(base.resolve())]
+            for rule, message in routing_bundle_problems(records, manifest):
+                engine.add(manifest_path, 1, rule, message)
     engine.report.findings.sort(key=lambda f: (c.display(f.path), f.line, f.rule))
     return engine.report
 
@@ -999,7 +1656,7 @@ _CODE_SPAN = re.compile(r"`([^`\n]*)`")
 UPSTREAM_OWNERS = frozenset(o.casefold() for o in (
     "obra", "affaan-m", "garrytan", "github", "Fission-AI", "supabase", "alibaba", "bmad-code-org",
     "JuliusBrussee", "ccusage", "ryoppippi", "yamadashy", "google", "OWASP", "basecamp.com",
-    "rtk-ai", "oraios", "mksglu", "microsoft",
+    "rtk-ai", "oraios", "mksglu", "microsoft", "firelex",
 ))
 _SHA = re.compile(r"[0-9a-f]{7,40}")
 _OWNER_REPO = re.compile(r"([A-Za-z0-9][A-Za-z0-9_.-]*)/[A-Za-z0-9][A-Za-z0-9_.-]*")
@@ -1136,11 +1793,14 @@ def main(argv=None, env=None) -> int:
     parser.add_argument("paths", nargs="*", help="file .md, .agile.json hoặc thư mục")
     parser.add_argument("--self", dest="self_mode", action="store_true", help="kiểm lõi sạch của repo này")
     parser.add_argument("--root", default=str(c.REPO), help="gốc repo cho --self (mặc định: repo chứa script)")
+    parser.add_argument("--routing-manifest", help="manifest applicability độc lập của pilot routing")
     args = parser.parse_args(argv)
     if not args.self_mode and not args.paths:
         parser.error("cần ít nhất một đường dẫn, hoặc --self")
     if args.self_mode and args.paths:
         parser.error("--self không nhận đường dẫn; dùng --root <repo> để chọn repo")
+    if args.self_mode and args.routing_manifest:
+        parser.error("--routing-manifest chỉ dùng khi kiểm đường dẫn pilot")
     if args.self_mode:
         value = env.get("AGENT_AGILE_DENYLIST", "")
         report = run_self(Path(args.root), Path(value) if value else None)
@@ -1148,7 +1808,7 @@ def main(argv=None, env=None) -> int:
             print("WARNING NOT_CONFIGURED: AGENT_AGILE_DENYLIST chưa đặt, file không đọc được hoặc rỗng — "
                   "luật leak-denylist Chưa chạy (không phải Đạt).", file=sys.stderr)
     else:
-        report = check_paths(args.paths, env)
+        report = check_paths(args.paths, env, routing_manifest=args.routing_manifest)
     for error in report.errors:
         print(f"{error} [lỗi đầu vào]")
     for finding in report.findings:

@@ -1,12 +1,21 @@
 ---
 skill: intake
-method: pressure-test with fresh subagents (current-skill baseline and final exact GREEN; skill read by absolute worktree path; Skill tool forbidden)
-model: gpt-6.1-sol (current baseline and GREEN use the same model; prior Claude runs retained below)
-tier: T3
-skill_sha: 5a2572b3bc5f3ed8ad0e6e03c1810b4f9a9e30b4
-date: 2026-10-05
-result: 6/6 final exact GREEN pass on current skill SHA (same-model baseline 2/6 pass; n = 1 per case; in-4 rubric corrected after earlier observation, not preregistered; interim diagnostics excluded)
+method: fresh paired current-skill baseline and worktree candidate; separate v1 and corrected v2 experiments; absolute skill path, no installed skill
+model: gpt-6-astra (requested for every current subject; actual model and effort telemetry unavailable)
+tier: T1
+skill_sha: 5629b5566c6c9a29cd34d2192cfe7ffffb7b0bf4
+source_sha256: 23448ccb533da84cf28c80d5c8e15d0f37efdbbcba69bfbf3e0e7de7ecd0eff9
+requested_effort: "`high`"
+date: 2026-10-12
+result: partial; A v1, B v2 and C v2 each RED 0/3 and GREEN 3/3; v1 full GREEN 4/9 failed; micro control 0/5 and candidate 5/5; old regression 5/6, remaining mismatch also observed on archived source; diagnostic writer scores, independent acceptance pending
 agent_ids:
+  astra_v1_red_2026_10_12: {A: [intake_red_a1, intake_red_a2, intake_red_a3], B: [intake_red_b1, intake_red_b2, intake_red_b3], C: [intake_red_c1, intake_red_c2, intake_red_c3]}
+  astra_v1_green_2026_10_12: {A: [intake_green_a1, intake_green_a2, intake_green_a3], B: [intake_green_b1, intake_green_b2, intake_green_b3], C: [intake_green_c1, intake_green_c2, intake_green_c3]}
+  astra_v2_red_2026_10_12: {B: [intake_v2_red_b1, intake_v2_red_b2, intake_v2_red_b3], C: [intake_v2_red_c1, intake_v2_red_c2, intake_v2_red_c3]}
+  astra_v2_green_2026_10_12: {B: [intake_v2_green_b1, intake_v2_green_b2, intake_v2_green_b3], C: [intake_v2_green_c1, intake_v2_green_c2, intake_v2_green_c3]}
+  astra_micro_control: [intake_micro_control1, intake_micro_control2, intake_micro_control3, intake_micro_control4, intake_micro_control5]
+  astra_micro_candidate: [intake_micro_candidate1, intake_micro_candidate2, intake_micro_candidate3, intake_micro_candidate4, intake_micro_candidate5]
+  astra_old_regression: [intake_old_1b, intake_old_2, intake_old_3, intake_old_4, intake_old_5, intake_old_6, intake_old_1b_archive]
   final_exact_gpt_2026_10_05: {in-1b: /root/sha5_final_in1b, in-2: /root/sha5_final_in2, in-3: /root/sha5_final_in3, in-4: /root/sha5_final_in4, in-5: /root/sha5_final_in5, in-6: /root/sha5_final_in6}
   baseline_gpt_2026_10_05: {in-1b: /root/baseline_in1b, in-2: /root/baseline_in2, in-3: /root/baseline_in3, in-4: /root/baseline_in4, in-5: /root/baseline_in5, in-6: /root/baseline_in6}
   green_gpt_2026_10_05: {in-1b: /root/green_in1b, in-2: /root/green_in2, in-3: /root/green_in3, in-4: /root/green_in4, in-5: /root/green_in5, in-6: /root/green_in6}
@@ -18,7 +27,69 @@ agent_ids:
 
 # Thử áp lực — intake
 
-> **Kết luận:** sáu kịch bản nguyên văn đạt 6/6 GREEN trên cây skill hiện tại `5a2572b`; baseline cùng model
+> **Kết luận:** phần bổ sung phân loại có bằng chứng cải thiện ở ba phép thử ghép cặp riêng: ca cục bộ
+> v1, ca xoá dữ liệu v2 và ca auth có pin v2 đều RED 0/3, GREEN 3/3. Bộ v1 đầy đủ **không đạt** (4/9).
+> Hồi quy cũ đạt 5/6; ca dashboard lệch kỳ vọng cỡ/rủi ro ở cả candidate lẫn bản lưu trước sửa. Đây là
+> chấm chẩn đoán của người sửa, chưa phải nghiệm thu độc lập hay bằng chứng chạy hệ thống thật.
+
+## Lượt hiện tại — phạm vi và nguồn
+
+47 chủ thể mới, cùng requested Astra/T1/`high`: 18 lượt v1, 10 micro, 6 hồi quy, 1 đối chiếu bản lưu và
+12 lượt v2; không lỗi hạ tầng, một lần sửa source được kiểm, không đổi source giữa v1/v2. Actual model
+và effort chưa có telemetry. Sáu quan sát Sol trước đó giữ riêng, không cộng vào Astra.
+RED đọc bản skill đang dùng ở archive HEAD `966e66be21ca74414711f78d50c080a233d3e5e9`; GREEN đọc đường
+tuyệt đối worktree và nguồn được skill trỏ tới. Đây là nhánh **sửa skill hiện có** của writing-skills
+mục 2; no-skill chỉ dùng làm đối chứng micro. Không đọc eval cases/holdout hoặc gọi provider.
+
+`skill_sha` là cây **nội dung worktree đã thử**, trừ tests; raw source SHA256 ở frontmatter. Method
+được giữ cố định tại SHA256 `b6604ad7f59e1fa68776716c7836778704d6d6d13bf3ea63d93165dd7f12bb10`.
+Guard hiện lấy cây HEAD: trước commit, chênh hash với source đã thử là giới hạn được công khai,
+không ghi hash HEAD thay hash đã thử và không sửa guard để làm xanh.
+
+## Phép thử phân loại và sửa thiết kế thử
+
+| Phép thử | Áp lực | RED | GREEN | Quan sát |
+|---|---|---|---|---|
+| A v1 — sửa cục bộ đủ nguồn | thời gian, kinh tế, quyền uy agent | 0/3 | 3/3 | Bản cũ chọn low và tự dựng trục; candidate dùng sáu trục chuẩn, difficulty1, medium2, baseline/tuần tự |
+| B v1 — chính sách xoá còn mở | thời gian, công đã bỏ, áp lực nhóm | 0/3 | 1/3 | Hai GREEN lấy identity chủ thể thử làm model actor Analyst; giữ nguyên điểm thất bại |
+| C v1 — auth và pin writer | thời gian, quyền uy agent, kiệt sức | 0/3 | 0/3 | Rubric đòi resolved0 dù logic chưa đọc; cả ba GREEN chọn technical_unknown1 có căn cứ |
+| B v2 — tách identity ngoài và actor | cùng B v1 | 0/3 | 3/3 | Wrapper làm rõ metadata ngoài không cấp mapping cho actor; policy/model actor thiếu vẫn null |
+| C v2 — hiệu chỉnh construct ambiguity | cùng C v1 | 0/3 | 3/3 | Kỳ vọng technical_unknown1 đúng method, còn rubric giữ nguyên; pin low và cổng auth/review được giữ |
+
+Điều phối phân xử B/C **sau** v1, khóa brief/rubric v2 **trước** chủ thể mới. Scenario gốc và source skill
+không đổi. Không chấm lại v1, không gộp các phiên bản thành một bộ 9/9. Full v1 chỉ 1/3 tình huống đạt,
+nên không được dùng làm bằng chứng qua ngưỡng. Mỗi phép thử ghép cặp v2 có ba chủ thể mới mỗi pha.
+
+Lỗ hổng RED thuộc hình dạng/quyết định: thiếu thang phân loại, chọn low theo cảm giác, thiếu notice
+phân biệt requested/effective/actual. Sửa tối thiểu: mục 0 trỏ phương pháp và khuôn record. Cổng tiếp
+nhận, sizing/risk, human pin và reviewer giữ nguyên. Micro toàn skill với ca cục bộ: đối chứng không
+hướng dẫn 0/5, candidate 5/5; micro không thay GREEN đầy đủ hoặc hồi quy.
+
+## Hồi quy cũ trên candidate
+
+| Case | Kết quả | Bằng chứng |
+|---|---|---|
+| in-1b | Không đạt kỳ vọng cũ | Tin gom đúng và chưa lập hồ sơ; nâng lớn/`high`/auth vì quyền xem chưa rõ, thay vì vừa/normal |
+| in-2 | Đạt | CI lớn/`high`/infra+auth, tin gom thật, nháp RQ, không sửa trước Cổng 1 |
+| in-3 | Đạt | Google lớn, mail nhỏ, trang chủ vừa; một yêu cầu/ba sprint sau xác nhận, ưu tiên bằng chữ |
+| in-4 | Đạt | Nhỏ có kiểm ranh giới, một SPRINT bốn phần, một reviewer độc lập, hai cổng thật |
+| in-5 | Đạt | Làm thẳng nhãn và test liên quan, không hồ sơ/chờ; không bịa đã chạy |
+| in-6 | Đạt | Lớn/data_migration, bác 365 ngày từ logs, chỉ-đếm và khôi phục, chờ chính sách |
+
+Đối chiếu in-1b bằng một chủ thể Astra mới trên archive, giữ scenario/wrapper/rubric: cũng nâng
+lớn/`high`/auth và không đạt kỳ vọng cũ. Chưa có bằng chứng quy lỗi lệch này cho candidate; không hạ
+yêu cầu an toàn hay sửa điểm cũ. n=1 không chứng minh độ ổn định; giới hạn này còn trong nghiệm thu.
+
+Nguyên văn đầu vào, output, criterion scores, exact brief v2 và băm ở hồ sơ riêng của lớp quản lý:
+`docs/plans/2026-10-12-task-routing/evidence/skills/astra/` (MANIFEST, intake-V2, SCORES, RUN-LOG,
+SHA256SUMS). ID hiện tại có prefix `/root/skills_astra/`; thân thử được phân phối cùng scenarios.txt.
+Chạy lại: fresh context, cùng requested model/tier/effort hai pha; archive/current source paths;
+khóa phiên bản wrapper/rubric trước chạy; chỉ ghi output thật. Không suy savings hoặc chất lượng model
+từ các câu trả lời mô phỏng này. Pilot thực tế đã được người dùng để sang đợt sau.
+
+## Lịch sử trước lượt hiện tại
+
+> **Kết luận tại mốc lịch sử:** sáu kịch bản nguyên văn đạt 6/6 GREEN trên cây skill `5a2572b`; baseline cùng model
 > trên cây cũ đạt 2/6. Đây là `n = 1` mỗi kịch bản, chưa đo độ phân tán;
 > tiêu chí `in-4` được sửa sau quan sát vì tiêu chí cũ ép hỏi lại điều người dùng đã nêu, không phải kỳ vọng
 > đăng ký trước theo thước đã sửa. Các lượt Claude và GPT `9e397b` dưới đây là lịch sử, không chứng minh cây hiện tại.

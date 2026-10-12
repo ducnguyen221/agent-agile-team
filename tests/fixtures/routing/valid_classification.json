@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "record_kind": "classification",
+  "record_ref": "classification-1",
+  "task_ref": "SPR-01",
+  "work_item_ref": "TK1",
+  "policy_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "plan_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "criteria_version": "v1",
+  "evidence_refs": ["PLAN.md#TK1"],
+  "unknown_reasons": {
+    "effort.effort_actual": "not_dispatched",
+    "effort.native_only_reason": "not_applicable: standard effort level",
+    "criteria_change": "not_applicable: initial criteria",
+    "assignment.override": "not_applicable: no owner override",
+    "assignment.override_reason": "not_applicable: default tier",
+    "decision.override_ref": "not_applicable: no owner override",
+    "effort.override_ref": "not_applicable: no owner override",
+    "notification.approval_ref": "not_applicable: policy assignment"
+  },
+  "axes": {
+    "ambiguity": {"value": "resolved", "ordinal": 0, "evidence_refs": ["SPEC.md#SC1"], "unknowns": [], "consequence_if_wrong": "Owner may reject the result."},
+    "scope_dependencies": {"value": "local", "ordinal": 0, "evidence_refs": ["PLAN.md#TK1"], "unknowns": [], "consequence_if_wrong": "An unseen caller may fail."},
+    "error_consequence": {"value": "reversible_local", "ordinal": 0, "evidence_refs": ["PLAN.md#rollback"], "unknowns": [], "consequence_if_wrong": "Rollback may be needed."},
+    "verifiability": {"value": "deterministic", "ordinal": 0, "evidence_refs": ["PLAN.md#verify"], "unknowns": [], "consequence_if_wrong": "A test may miss the behavior."},
+    "plan_readiness": {"value": "complete_feasible", "ordinal": 0, "evidence_refs": ["PLAN.md#TK1"], "unknowns": [], "consequence_if_wrong": "The worker may need a revised plan."},
+    "execution_complexity": {"value": "bounded_known", "ordinal": 0, "evidence_refs": ["PLAN.md#TK1"], "unknowns": [], "consequence_if_wrong": "Implementation may take longer."}
+  },
+  "assignment": {
+    "assignment_ref": "assignment-1",
+    "role": "Implementer",
+    "work_level": "bounded",
+    "role_default_tier": "T2",
+    "requested_tier": "T2",
+    "override_reason": null,
+    "evidence_refs": ["PLAN.md#TK1"],
+    "override": null
+  },
+  "decision": {
+    "difficulty_level": 1,
+    "decision_basis": "heuristic",
+    "override_ref": null,
+    "topology_evidence": {
+      "separable_modules": 1,
+      "context_transfer": 0,
+      "integration_load": 0,
+      "benefit_evidence": "unmeasured",
+      "ownership_refs": ["PLAN.md#ownership"],
+      "dependency_refs": ["PLAN.md#deps"]
+    }
+  },
+  "effort": {
+    "effort_level": 2,
+    "effort_requested": "medium",
+    "effort_effective": "medium",
+    "effort_actual": null,
+    "effort_source": "policy",
+    "effort_capability": "supported",
+    "override_ref": null,
+    "native_only_reason": null
+  },
+  "notification": {
+    "notification_ref": "notice-1",
+    "notified_at": "2026-10-12T10:00:00Z",
+    "event_kind": "dispatch",
+    "assignment_ref": "assignment-1",
+    "harness": "codex",
+    "role": "Implementer",
+    "tier": "T2",
+    "model": "model-example",
+    "native_effort": "medium",
+    "scope_ref": "TK1",
+    "reason": "Bounded work with deterministic tests.",
+    "approval_ref": null
+  },
+  "criteria_change": null
+}

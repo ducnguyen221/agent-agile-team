@@ -77,6 +77,10 @@ cả hai Đạt mới Đạt ([roles/verifier/dual-review.md](../roles/verifier/
 
 ## 3. Sprint = một mục tiêu
 
+**Cỡ khác độ khó và effort.** Sáu trục ở [task-routing.md](task-routing.md) đánh giá work item và chọn
+assignment có nguồn; cỡ ở đây quyết hồ sơ/cổng/reviewer cho toàn mục tiêu. Một dòng auth có thể ít
+phức tạp kỹ thuật nhưng vẫn lớn/high. Human model/effort override không hạ cỡ/risk hoặc miễn kiểm định.
+
 - Một sprint phục vụ đúng một mục tiêu đã "định hình": biết làm gì, biết thế nào là xong, biết giới hạn
   công sức. Dài ngắn tuỳ mục tiêu — một phiên, một tính năng, một đợt chỉnh đều là sprint.
 - Yêu cầu chứa nhiều mục tiêu → tách thành nhiều sprint, cùng trỏ về một `RQ-`.

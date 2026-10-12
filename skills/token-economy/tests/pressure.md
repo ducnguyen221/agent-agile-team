@@ -3,15 +3,27 @@ skill: token-economy
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 05dd26d86f0c111834deb9fe31c5c224e862d754
-date: 2026-10-04
-result: 4/4 GREEN pass; RED on the new scenario te-4 partial; GREEN rerun of te-1 to te-3 (rebuilt from the 2026-10-01 descriptions) 3/3 pass on the tree after the TK9.5 edit
+historical_skill_sha: 05dd26d86f0c111834deb9fe31c5c224e862d754
+skill_sha: unverified
+historical_date: 2026-10-04
+date: 2026-10-12
+historical_result: 4/4 GREEN pass; RED on the new scenario te-4 partial; GREEN rerun of te-1 to te-3 (rebuilt from the 2026-10-01 descriptions) 3/3 pass on the tree after the TK9.5 edit
+result: Chưa chạy — current candidate behavior unverified
+candidate_source_sha256: 028dc42117df8d8676f6f58d6921f5c7c704b905005c1e666a2ae1e0b0435239
+candidate_tested: false
 agent_ids:
   red: {te4: a2d940f7cff830e71}
   green: {te1: adabc13b02e19f6a6, te2: a0e0b9a1eb31363e3, te3: a14a905600245bd7d, te4: ad4963bcacc9d87c6}
 ---
 
 # Thử áp lực — token-economy
+
+## Trạng thái candidate hiện tại — 2026-10-12
+
+Người dùng giới hạn ngân sách còn 1–2% usage và yêu cầu hoàn tất phần tích hợp tối thiểu. Theo override này, dừng mọi lượt pressure/micro/GREEN/regression mới. Candidate hiện tại **Chưa kiểm chứng hành vi**; chỉ kiểm tra tĩnh. Các kết quả và model/tier/agent IDs dưới đây là lịch sử, không xác nhận candidate mới.
+
+Các tình huống mới đã chuẩn bị nhưng chưa dispatch RED; micro, GREEN và hồi quy chưa chạy. Không suy kết quả từ việc đọc lại nguồn.
+
 
 > **Kết luận:** lượt 2026-10-04 (TK9.5) thêm mục 7 "truy xuất lặp" (nguồn: ECC `skills/iterative-retrieval`). RED trên bản
 > hiện tại với kịch bản mới te-4 (chưa biết codebase gọi khái niệm bằng tên gì, chủ sản phẩm bảo "đọc hết `src/`" hoặc "chưa

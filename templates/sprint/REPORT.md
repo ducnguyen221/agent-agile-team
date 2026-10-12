@@ -155,6 +155,9 @@ REPORT có 1 **carry-over** (CO), đã ghi thành dòng mới trong sổ REQUEST
 - **Chưa tốt:** câu báo lỗi chưa được duyệt chữ trước khi làm.
 - **Thử lần sau:** duyệt câu chữ giao diện ngay trong SPEC.
 - **Token phiên:** chưa đo. <!-- tổng token các phiên của sprint, kèm nguồn đo -->
+- **Routing pilot (nếu áp dụng):** trỏ manifest và record trong PROGRESS; ghi số classification/assignment/
+  attempt so với số manifest yêu cầu, trạng thái đối chiếu ledger, unknown còn lại và việc đổi criteria có
+  re-evaluate cả baseline/candidate hay mở experiment mới. Không coi thiếu record là 100% coverage.
 
 ## 8. Cổng 2 — nghiệm thu
 

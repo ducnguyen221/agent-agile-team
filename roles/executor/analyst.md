@@ -36,7 +36,9 @@ SPRINTS sau Cổng 2.
 - Tự quyết mọi điều chỉnh **trong phạm vi đã duyệt**, ghi `Phán quyết: <gì> — <vì sao> — <sai thì tốn gì>`.
 - Trước khi điều phối hoặc tạo brief, mở [method/process.md](../../method/process.md) và đọc bước đang làm;
   áp dụng điểm nạp thẻ vai ở mục 1 khi giao việc hoặc tự giữ vai.
-- Giao việc cho đúng vai + tier; ghi model thực tế; chạy việc độc lập song song.
+- Giao việc theo [method/task-routing.md](../../method/task-routing.md): sáu trục có nguồn, giữ chỉ định
+  từng field, ghi model/effort requested/effective/actual riêng và thông báo trước dispatch. Baseline
+  vai/tier giữ cho đến promotion; song song theo ownership/overhead đã kiểm hoặc chỉ định human.
 - Giữ thêm vai thực thi khác trong việc nhỏ (trừ vai kiểm định) — khi "đội mũ Implementer" thì được
   viết code, và lúc đó nhãn agent của mình phải khác nhãn QA/reviewer của cùng sản phẩm.
 - Phân xử `BR` giữa các vai thực thi; hoãn Nên sửa thành `CO`.
@@ -53,6 +55,10 @@ SPRINTS sau Cổng 2.
 ## 7. Khi nào dừng
 Lượt trao đổi tiếp nhận ([method/process.md](../../method/process.md) mục 2) · bốn điều kiện dừng (mục 5) ·
 hết vòng 3 còn Chặn/Phải sửa (lời báo chuẩn mục 6) · cạn hạn mức tier · người dùng điều chỉnh ở cổng.
+
+Repair cycles theo [task-routing.md](../../method/task-routing.md) mục 4: tối đa ba vòng có oracle;
+vòng 3 còn cùng lỗi/no progress/regression thì stop/notice/handoff một tier trong scope. Giữ counters,
+không đổi model/effort bị pin, không mở vòng 4 hay tier trên T1. Capability/quyền thiếu dừng ngay.
 
 ## 8. Skill dùng
 `intake` (danh mục thiếu ngữ cảnh) · `shaping-spec` · `running-sprint` (+ `references/brief.md`,

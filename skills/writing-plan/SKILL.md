@@ -17,6 +17,17 @@ rewrite_before_public: false
 > codebase** này. Mỗi `TK` có bước **test hỏng → chạy thấy hỏng → code tối thiểu → chạy thấy đạt →
 > commit** viết tường minh. PLAN dài gấp nhiều lần SPEC là đang chép code, không phải lập kế hoạch.
 
+## 0. Phân loại và thông báo trước PLAN
+
+Áp dụng `method/task-routing.md` mục 1–3 và 5: ghi sáu trục `ambiguity`, `scope`, `consequence`,
+`verifier`, `plan`, `complexity`, mỗi trục có giá trị chuẩn, ordinal và nguồn; thiếu nguồn để unknown.
+Difficulty chỉ suy từ scope/plan/complexity; effort mặc định `medium` (ordinal 2), kết hợp difficulty,
+risk floor và capability theo công thức của method. Giữ baseline theo vai; pin người dùng thắng riêng
+field được chỉ định, không thay risk/gates hoặc các field khác. Tách capability, quyền truy cập và runtime.
+Trước PLAN hoặc đổi assignment, phát notice đủ actor/harness/vai/tier/model/effort/phạm vi/lý do/nguồn,
+phân biệt requested/effective/actual; thiếu bằng chứng actual thì unknown, không lấy identity của người
+kiểm thử làm identity actor. Topology theo module độc lập, ownership và overhead; chưa đo thì không
+nhận có lợi ích tiết kiệm. Giữ thủ tục review và counter sửa có kiểm chứng riêng theo mục 6b.
 ## 1. Trước khi chia việc
 
 1. **Kiểm phạm vi:** SPEC gộp nhiều hệ con độc lập → đề xuất tách thành nhiều PLAN (mỗi PLAN cho ra
@@ -122,9 +133,8 @@ Sửa tại chỗ, không review lại lần hai.
 
 ## 6b. PLAN lớn hoặc nhiều sprint — hợp đồng trước, kiểm mã trước, trần vòng review
 
-Bài học từ một chuỗi 5 sprint (10 vòng review, 82 phát hiện, ~15 triệu token; OpcOS SPR-08…12, 10–11/10/2026):
-khoảng 40 % phát hiện là bẫy gãy im lặng thật, 40 % là lệch do chính các lần sửa tạo ra, 20 % văn phong.
-Phần 40 % giữa và phần lớn token tránh được bằng năm luật sau.
+PLAN lớn cần hợp đồng trước khi chia việc, kiểm chứng source trước review và đồng bộ tài liệu sau sửa.
+Năm quy tắc dưới giữ phạm vi review rõ, tránh lệch do chính lần sửa tạo ra và giảm việc đọc lại không cần thiết.
 
 1. **Hợp đồng bàn giao trước khi chia việc hoặc fan-out.** Trước khi giao bất kỳ sprint hay `TK` nào cho
    agent khác viết, chốt trên **một trang**: tên file/đường bàn giao, schema (khoá, kiểu), chữ ký CLI và mã

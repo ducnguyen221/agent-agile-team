@@ -53,6 +53,9 @@ links:
 
 - Chỉ đọc dữ liệu đơn; không thêm thao tác ghi.
 - Coverage dòng ≥80% cho code mới và code được sửa (hoặc ngưỡng của cấu hình dự án).
+- Nếu sprint tham gia pilot routing: khóa manifest áp dụng, policy/criteria version và nguồn sáu trục trước
+  dispatch. Quyết định của chủ về model hoặc effort được ghi theo từng field và scope; thiếu bằng chứng thì
+  để unknown có lý do, không gán 0 hay tự suy actual.
 
 ## Trọng tâm review
 

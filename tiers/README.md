@@ -32,6 +32,11 @@ lệnh rõ, cần **chạy và ghi** → T3. Phân vân giữa hai tier → ch�
 
 ## 3. Giao việc: luôn ghi model
 
+Routing/effort dùng [method/task-routing.md](../method/task-routing.md). Tier mặc định của vai, tier tra
+bảng, requested model và human override là các field riêng. Default effort medium áp coordinator cho
+routed assignment; native support phải verified, actual unknown không lấy requested thay. Notice trước
+dispatch/model/effort/criteria/handoff; không ghi model ID môi trường vào policy phân phối.
+
 KHI giao một `TK` cho subagent hoặc phiên khác THÌ Analyst:
 
 1. Đọc tier của vai trong PLAN (`TK` ghi vai + tier).
@@ -52,7 +57,10 @@ T1 làm QA vì chưa có T3) THÌ làm theo và ghi phần tử thứ ba `"note"
 architect: [T1, agent-b, "owner assigned a T2 model for this run"]
 ```
 
-Chỉ định đè có hiệu lực **cho lượt đó**; lượt sau quay về bảng tier. Agent không tự kéo dài chỉ định.
+Chỉ định đè có hiệu lực trong **scope người dùng đã nói**, có thể một lượt, một vai hoặc cả task; ghi
+quote/source/scope và expiry nếu có. Chỉ định mới nhất trong scope thắng từng field. Model-only không
+đổi effort; effort-only không đổi model. Hết scope quay về baseline; agent không tự kéo dài hoặc tự
+thu hẹp chỉ định cả task thành một lượt. Capability/quyền/risk và reviewer không bị override.
 
 ## 5. Cạn hạn mức: dừng, không tự hạ tier
 

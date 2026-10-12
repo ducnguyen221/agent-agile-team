@@ -203,19 +203,25 @@ tier** ([tiers/README.md](../tiers/README.md)).
 **Vòng.** Còn Chặn hoặc Phải sửa → quay lại bước 3; mỗi lần quay lại là **một vòng**, ghi
 `review_round` trong PROGRESS. Nên sửa được **hoãn** và ghi thành `CO`; Ghi chú không chặn.
 
-**Khuyến nghị 3 vòng, không trần cứng.** Vòng 1–3 do cùng người làm sửa. Hết vòng thứ ba mà còn Chặn
-hoặc Phải sửa THÌ Analyst **báo người dùng** theo lời báo chuẩn:
+**Ba vòng sửa có kiểm chứng.** Baseline lỗi đầu tiên không tiêu vòng sửa. Mỗi vòng có hypothesis,
+thay đổi thực tế, cùng oracle và outcome; tối đa ba vòng cho assignment. Ghi repair_cycle_index riêng
+với review_round, root cause/test/regression refs và total counters. Hết vòng 3 còn cùng lỗi, không
+tiến triển hoặc bất kỳ regression chưa xử lý: stop writer, cảnh báo, handoff một tier cao hơn trong
+scope/hãng/role đã cấp. Không vòng 4 cho assignment bị kẹt. Chi tiết và pin/capability/quyền/T1 ceiling:
+[task-routing.md](task-routing.md) mục 4. Analyst báo:
 
 ```
-Sau 3 vòng kiểm định, sprint <SPR-> còn <n> phát hiện mức Chặn/Phải sửa:
+Sau 3 vòng sửa có kiểm chứng, sprint <SPR-> còn <n> phát hiện mức Chặn/Phải sửa:
 - RF<k> (<tên>) — <một dòng vì sao chưa xong>
 ...
-Đề xuất: <làm tiếp với cách khác / đổi tier / thu hẹp phạm vi / dừng và bàn giao phần đã đạt>.
-Chọn: (1) làm tiếp — bao nhiêu vòng nữa? (2) dừng & bàn giao — phần còn mở ghi CO.
+Đã dừng assignment <cũ>; kết quả/oracle/counters: <refs>.
+Bàn giao: <agent/vai/tier/model/effort mới trong scope>; lý do: <cùng lỗi/no progress/regression>.
+Nếu pin, T1 ceiling hoặc thiếu quyền/capability: <đúng phần cần người quyết, kèm khuyến nghị>.
 ```
 
-Người dùng chọn **làm tiếp** (ghi số vòng thêm) hoặc **dừng & bàn giao** (sang bước 5, phần còn mở
-thành `CO`). Đây là mốc hỏi hợp lệ thứ ba ngoài hai cổng và bốn điều kiện dừng.
+Handoff đã có quyền thì thông báo rồi làm, không xin lại. Receiver có chu kỳ riêng tối đa ba vòng,
+giữ lịch sử tổng. Pin/ceiling/quyền thiếu thì chờ đúng quyết định phụ thuộc; việc độc lập vẫn tiếp tục.
+Phần không đạt giữ nguyên mức và evidence; không đổi Chặn/Phải sửa thành CO để vượt Cổng 2.
 
 ### 6.1 Thiết kế vòng lặp — khi giao agent chạy lặp
 

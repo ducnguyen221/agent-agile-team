@@ -19,6 +19,7 @@ cách đó, các nguồn **chỉ lấy ý**, và lịch sử viết lại phòng
 
 | Nguồn | Giấy phép | Vì sao chỉ lấy ý | Ý đã lấy · ở đâu |
 |---|---|---|---|
+| Jeff (`firelex/jeff`), Jeff-Code (`firelex/jeff-code`) | MIT tại SHA trong UPSTREAM | Chỉ cần phương pháp quyết định và đo, không model/runtime hoặc code | Tập lựa chọn, calibration trước holdout, routine/effort và overhead → `method/task-routing.md`; chỉ là candidate chưa có pilot |
 | GitHub Spec Kit (`github/spec-kit`) | MIT | Không cài; chỉ cần khái niệm | Mã `US`/`FR`/`SC`, câu cần làm rõ → mẫu SPEC, `id-convention`, `shaping-spec` |
 | OpenSpec (`Fission-AI/OpenSpec`) | MIT | Không cài; chỉ cần khái niệm | Spec sống theo tính năng, thay đổi dạng delta Thêm / Sửa / Bỏ → `templates/registry/feature-spec.md`, mục "Đổi hợp đồng / giao diện" của mẫu SPEC |
 | BMAD-METHOD | MIT | Chỉ cần khái niệm | Vai agile cho agent → `roles/` |

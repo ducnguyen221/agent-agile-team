@@ -22,12 +22,14 @@ nào phải xem lại nguồn này. SHA rút gọn 8 ký tự; bản đầy đ�
 
 ### Repo đã dùng hoặc đã xét
 
-Bảng dưới có 21 nguồn dạng repo, chia theo **vai trò**: **distill** (nội dung đã vào skill/agent) · **ý**
+Bảng dưới có 23 nguồn dạng repo, chia theo **vai trò**: **distill** (nội dung đã vào skill/agent) · **ý**
 (chỉ lấy khái niệm) · **chỉ gọi** (công cụ chạy qua `npx`) · **đã loại** (đánh giá rồi không lấy, ghi để
 khỏi đánh giá lại).
 
 | Nguồn | Vai trò | Nhận nội dung | Đã distill tới | Kiểm gần nhất | Kiểm |
 |---|---|---|---|---|---|
+| `firelex/jeff` | ý, không cài | `method/task-routing.md`: tập lựa chọn, calibration riêng và khóa ngưỡng trước holdout | chuẩn bị · `3720e7c6` | 2026-10-12 · `3720e7c6` | trước khi đổi policy/evaluation |
+| `firelex/jeff-code` | ý, không cài | `method/task-routing.md`: tách quyết định, việc thường lệ và tài nguyên suy luận; tính overhead | chuẩn bị · `83068959` | 2026-10-12 · `83068959` | trước khi đổi policy/evaluation |
 | `obra/superpowers` | distill · chép | `shaping-spec`, `writing-plan`, `running-sprint`, `closing-sprint`, `tdd`, `debugging`, `worktrees`, `verify-before-done`, `code-review`, `writing-skills` | Đợt 1 · `8ca22dba` (`v6.4.2`); SPR-02 viết lại sâu `references/diagnosing.md` của `writing-skills`, cùng SHA | 2026-10-04 · `8ca22dba` | mọi lượt |
 | `affaan-m/ECC` (tên cũ `affaan-m/everything-claude-code`) | distill · chép | `intake`, `python`, `fastapi`, `postgres`, `database-migrations`, `api-design`, `error-handling`, `deployment`, `github-ops`, `security-review`, `token-economy`, phần bài học của `closing-sprint`; 7 agent | Đợt 1 · `c70874fa` (`v2.2.2`); SPR-02 viết lại sâu 7 mục trên `ef648e01`: `deployment` (+ `references/docker.md`), `fastapi`, `postgres`, agent `fastapi-reviewer`, `database-reviewer`, `comment-analyzer`, `rag-pipeline-reviewer`; Đợt 2 · `ef648e01` (SPR-04): 6 agent mới, `method/standards/**` (`rules/*`), 4 skill mới (`react`, `frontend`, `e2e-testing`, `eval-harness`), luồng orch, `santa-method`, `verification-loop`, `delivery-gate`, `loop-design-check`, `living-docs-governance`, `spec-miner`, `tdd-guide`, `iterative-retrieval`, `browser-qa`, `click-path-audit`, các lệnh `code-review`, `review-pr`, `test-coverage`, `update-docs`, `build-fix` — chi tiết ở khối Đợt 2 | 2026-10-04 · `ef648e01` | mọi lượt — nguồn chính của Đợt 2 và Đợt 3 |
 | `garrytan/gstack` | distill · chép | `plan-review`, `security-audit`, `web-qa`, phần điều tra của `debugging`, docs-sync và retro của `closing-sprint`; Đợt 2: `review` (`code-review`), `qa` (`web-qa`), `ship` và `land-and-deploy` (`closing-sprint`) | Đợt 1 · `96764e80` (VERSION 1.91.9.0); Đợt 2 · `f30b7b78` (VERSION 1.91.13.0, SPR-04) | 2026-10-04 · `fe6d1ae6` (VERSION 1.91.17.0) | mọi lượt — còn ý luật dừng mới của `qa` (HEAD sau mốc) và checklist Pass 1/2 của `review` ở Đợt 3 |
@@ -66,6 +68,17 @@ Bảng dưới có 9 nhóm nguồn **tài liệu web** — không có SHA, nên 
 | Tài liệu chính thức của công cụ (`gh`, PostgreSQL, PgBouncer, golang-migrate, Kubernetes, Docker, Trivy, FastAPI, pytest, PyPA, uv, docs.python.org) | ý, không chép | phần bổ sung của skill kỹ thuật ở `TK11`/`TK13` (`github-ops`, `database-migrations`, `deployment`, `fastapi`, `postgres`, `python`, `worktrees`, `react`, `frontend`, `e2e-testing`) | 2026-10-04 | khi sửa reference tương ứng; nguồn ghi ở mục Nguồn từng file |
 | Bài kỹ thuật của nhà cung cấp (Azure Architecture Center, AWS Builders' Library, Amazon SQS) | ý, không chép | `error-handling`, `deployment` | 2026-10-04 | khi sửa reference tương ứng |
 
+## SPR-07 — phân loại và phân công, chốt nguồn 2026-10-12
+
+Hai HEAD `main` được đo lại bằng `git ls-remote` trước khi viết method; trùng mốc nghiên cứu thiết kế.
+`firelex/jeff`: `3720e7c66d73b79a6e90189f3d5b0d6ecf03ddc0`;
+`firelex/jeff-code`: `8306895999915523c9ae609f0a845587938e5656`.
+README và LICENSE đọc tại SHA: đều MIT. Chỉ viết lại **ý**, không chép code/câu, không cài model hoặc
+runtime. Jeff gợi tập lựa chọn và calibration riêng trước holdout; Jeff-Code gợi tách routine/effort
+và tính overhead. Thang sáu trục, mặc định medium, field override và ba repair cycles là hợp đồng riêng.
+Candidate ở `method/task-routing.md`; evaluation ở `evals/task-routing/`. Không dùng benchmark của nguồn
+để nhận task-fit, savings hoặc calibrated probabilities tại đây. Chuẩn bị source không là pilot Đạt.
+
 ## SPR-06 — ý từ workshop Lauren Tan
 
 Nguồn: transcript workshop Lauren Tan do người dùng cung cấp, đọc ngày 2026-10-05; chưa đối chiếu video.
@@ -84,6 +97,10 @@ dõi của chúng; trong repo chúng chỉ có nhãn trung tính ở khối Đ�
 Mỗi lượt kiểm một dòng, mới nhất trên cùng: ngày · nguồn đã kiểm · HEAD đã xem · quyết định (`lấy` / `bỏ
 qua` / `hoãn` — gì, vì sao, sai thì tốn gì). Lượt kiểm không lấy gì vẫn ghi, để lần sau không đọc lại cùng
 đoạn thay đổi. Cách làm: [docs/updating-from-upstream.md](docs/updating-from-upstream.md) mục 3.
+
+- 2026-10-12 · `firelex/jeff` `3720e7c6`, `firelex/jeff-code` `83068959` · **lấy ý** từ README tại HEAD
+  đã khóa và xác minh MIT; method candidate giữ decision trong agent hiện tại, không model/runtime mới.
+  Sai thì sửa policy/evaluation trước promotion; không import tỷ lệ benchmark hoặc xác suất của nguồn.
 
 - 2026-10-04 · 20 nguồn repo (đo đầu SPR-04, trước mọi sửa) · gstack `fe6d1ae6` (1.91.17.0, 3 commit sau mốc), spec-kit
   `ae5ade72` (hai commit tự huỷ nhau, 0 file đổi), BMAD `3cae711e` (10 commit, 49 file — chỉ `bmad-ticket`, `bmad-build`),

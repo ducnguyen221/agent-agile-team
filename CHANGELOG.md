@@ -3,7 +3,18 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
-**Chưa phát hành — bài học lập PLAN lớn:** `writing-plan` mục 6b (hợp đồng bàn giao trước fan-out, tự kiểm chứng mã trước review, đồng bộ chéo sau mỗi lần sửa, trần 2–3 vòng review, PLAN ngắn) và `plan-review` mục 10 (re-review hẹp theo diff, trần vòng, phân loại phát hiện theo nguồn, bắt buộc `file:dòng`). Nguồn: chuỗi OpcOS SPR-08…12 (10 vòng, 82 RF, ~15M token, 10–11/10/2026). Không đổi sáu bước, hai cổng hay tier.
+**Chưa phát hành — phân loại tác vụ và effort:** method candidate có sáu trục, difficulty/effort riêng,
+default medium và human override từng field; notice trước thay đổi, ba repair cycles có oracle và
+handoff giữ counters. Checker/template opt-in schema 1 + manifest độc lập; 36 synthetic cases chuẩn
+bị, chưa pilot. Giữ baseline tier, ngưỡng coverage/denylist, native capabilities của môi trường và hai
+cổng. Hồ sơ: `docs/plans/2026-10-12-task-routing/`; migration: `docs/MIGRATION.md` mục 5.
+Luật lõi/skill pressure/reviews/pilot/release có trạng thái riêng; chưa promotion hoặc version bump.
+Mức phiên bản **đề xuất MINOR** cho schema opt-in, owner quyết khi nghiệm thu.
+
+- **2026-10-12:** thẻ `roles/verifier/dual-review.md` phân biệt lượt review với vòng thực hiện sửa có kiểm chứng; sau vòng sửa ba còn kẹt hoặc regression thì dừng assignment và bàn giao, giữ counter và chỉ định người dùng. Hồ sơ và review: `docs/plans/2026-10-12-task-routing/`.
+- **2026-10-12:** nối `intake`, `writing-plan`, `running-sprint` và `token-economy` với hợp đồng phân loại/effort/notice hiện có; `running-sprint` giữ trần ba lần sửa có kiểm chứng và lịch sử bàn giao. Intake có bằng chứng một phần; ba candidate còn lại chưa kiểm chứng hành vi sau giới hạn ngân sách của người dùng. Không kế thừa kết quả thử của bản cũ cho bản mới, không phát hành hoặc đổi file luật đang chạy.
+
+**Chưa phát hành — bài học lập PLAN lớn:** `writing-plan` mục 6b (hợp đồng bàn giao trước fan-out, tự kiểm chứng mã trước review, đồng bộ chéo sau mỗi lần sửa, trần 2–3 vòng review, PLAN ngắn) và `plan-review` mục 10 (re-review hẹp theo diff, trần vòng, phân loại phát hiện theo nguồn, bắt buộc `file:dòng`). Nguồn: chuỗi năm sprint nội bộ (10 vòng, 82 phát hiện, khoảng 15 triệu token). Không đổi sáu bước, hai cổng hay tier.
 
 **Chưa phát hành — bổ sung quy trình:** nối thẻ Analyst đến quy trình; đưa thẻ vai vào brief và giữ
 người cung cấp nguồn cùng tình trạng kiểm chứng qua bàn giao. Không thêm script, không đổi sáu bước,

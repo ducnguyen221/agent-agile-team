@@ -18,6 +18,17 @@ rewrite_before_public: false
 > thay nội dung; lọc tại nguồn; chưa biết cần tệp nào thì truy xuất **theo vòng có trần** (mục 7); và **không tuyên bố tiết kiệm khi chưa có cặp số đo trước/sau** — kể cả
 > dưới nhãn "ước tính".
 
+## 0. Ngân sách không thay routing hoặc bằng chứng
+
+Dùng `method/task-routing.md` mục 1–5: sáu trục có giá trị/ordinal/nguồn, difficulty từ scope/plan/complexity,
+effort mặc định `medium` (ordinal 2), kết hợp risk floor và capability; pin người dùng chỉ thắng field đã
+chỉ định, không hạ risk/gates hoặc tự đổi baseline vai. Ngân sách ít không tự suy thành tier thấp, effort thấp
+hay parallel; topology cần module/ownership/overhead và bằng chứng lợi ích hoặc override hợp lệ. Notice trước
+assignment/đổi cấu hình giữ actor/harness/vai/tier/model/effort/phạm vi/lý do/nguồn và requested/effective/actual;
+capability, access và runtime là ba bằng chứng riêng, thiếu thì unknown. Nén context vẫn giữ lỗi, counters sửa
+của assignment và tổng lịch sử, pin, quyền bàn giao, gates và rollback. Usage thiếu là unknown, không phải 0;
+không suy tiết kiệm từ độ ngắn văn bản. Muốn so chi phí phải có cặp đo cùng đơn vị việc và chất lượng theo mục 5;
+chưa có dữ liệu thì chỉ đề xuất cách đo, không tự chạy provider hoặc mở pilot.
 ## 1. Mười quy tắc
 
 | # | Quy tắc | Làm cụ thể |

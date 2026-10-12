@@ -19,6 +19,7 @@ python scripts/init.py <gốc-dự-án> --apply --sprint <slug> (--title "<mục
        [--size tiny|small|medium|large] [--risk normal|high] [--risk-tags a,b] [--request RQ-NNN] [--feature FS-NNN]
        [--date YYYY-MM-DD]
 python scripts/check.py <file.md|.agile.json|thư-mục> [...]   # thư mục: quét đệ quy *.md và mọi .agile.json
+python scripts/check.py <thư-mục-pilot> --routing-manifest <manifest.json>
 python scripts/check.py --self [--root <repo>]
 python scripts/index.py <gốc-dự-án> [--check]          # --check: không ghi, thoát 1 nếu sổ chưa cập nhật
 ```
@@ -57,6 +58,23 @@ Mức theo thang chung `method/severity.md`. Luật tài liệu chỉ áp cho fi
 về mã (`id-bare-single-letter`, `id-unknown-prefix`, `old-scale-label`) áp cho mọi file `.md` được quét. Mã
 trong code span, khối code, comment HTML và đích của liên kết không bị xét. Truyền thẳng `.agile.json` thì chỉ
 chạy các luật `config-*` cho file đó.
+
+**Routing pilot:** hồ sơ có marker HTML `routing-evidence:v1` phải đặt ngay trước một khối JSON fenced. Mỗi
+khối là một record schema 1 theo `evals/task-routing/run.schema.json`; checker kiểm shape, unknown có lý do,
+nguồn actual, override độc lập, notice trước dispatch và ba vòng sửa. `--routing-manifest` đối chiếu các
+record đã quét với danh sách task/document/classification/assignment/attempt do QA khóa riêng; cùng assignment
+phải khớp work item, cấu hình, notice và pin đã duyệt còn hiệu lực. Tổng vòng sửa phải giữ qua handoff khi
+root cause, lịch sử assignment và thứ tự thời gian đủ bằng chứng; thiếu những nguồn đó là chưa kiểm được.
+Trong cùng assignment, chênh lệch local cycle và tổng phải bằng nhau; `repair_rounds` khi hai đầu đã biết
+cũng phải có cùng chênh lệch. Vòng ba thất bại, còn regression hoặc đã handoff giữ trạng thái dừng qua
+các observation sau: muốn sửa tiếp phải có assignment receiver mới với lịch sử và tổng được giữ.
+Observation/review/lỗi quyền không tiêu thêm vòng có thể giữ nguyên bộ đếm khác 0; không reset lịch sử.
+Checker đối chiếu số tự khai, không chứng minh hypothesis, thay đổi và cùng oracle đã thực sự chạy.
+Manifest thiếu hoặc source coverage chưa reconcile làm pilot Không đạt. Không có manifest và marker thì hồ sơ cũ giữ cách kiểm
+trước đây. Checker chỉ đọc file Markdown được chỉ định và manifest, không mở ref nằm trong record hay ledger.
+`effort_source` mô tả quyết định chọn effort, không chứng minh `effort_actual` đã được runtime quan sát. Khi
+chưa có telemetry nguồn độc lập, record phải giữ `effort_actual: null` cùng `unknown_reasons` tương ứng;
+QA/oracle đối chiếu nguồn này trước khi báo actual effort. Checker hiện chỉ kiểm hình dạng của field đó.
 
 **Code span:** được ngắt qua nhiều dòng trong cùng một đoạn văn, nhưng `check` chỉ nối khi dòng mở và dòng đóng
 đều lẻ số dấu huyền (dòng tự cân thì coi dấu huyền lẻ ở dòng trên là chữ thường). Code span **không lồng**: một
@@ -97,6 +115,11 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `ledger-unconfigured` | Ghi chú | Dự án khai `ledger.project` mà máy chưa đặt `AGENT_AGILE_LEDGER` — chưa đối chiếu được; không làm đỏ. Dự án không khai khoá thì không có phát hiện nào về sổ, kể cả khi máy đặt biến. Mẫu đường thiếu `{project}` báo `config-invalid` |
 | `leak-denylist` | Chặn | `--self`: file của repo (kể cả tên file) chứa từ cấm — mục chữ khớp nguyên từ, mục có ký tự đường dẫn khớp chuỗi con ([`tests/README.md`](../tests/README.md)); báo số thứ tự từ, không in lại từ |
 | `agents-md-budget` | Phải sửa | `--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 240 byte |
+| `routing-invalid` | Phải sửa | Marker routing thiếu khối JSON kế tiếp, JSON sai, record sai schema 1 hoặc thiếu chứng cứ/nguồn độc lập |
+| `routing-unknown` | Ghi chú | Record có field ngoài schema routing 1; checker không diễn giải field lạ |
+| `routing-manifest-invalid` | Phải sửa | `--routing-manifest` thiếu file, JSON sai, hoặc manifest không có task/ref hợp lệ |
+| `routing-missing` | Phải sửa | Manifest pilot có document/classification/assignment/attempt chưa xuất hiện hoặc source coverage chưa đối chiếu |
+| `routing-duplicate` | Phải sửa | Record, assignment hoặc attempt trùng trong pilot |
 
 **Phạm vi `--self`:** mọi file Git đang theo dõi **và** file chưa add, trừ file bị `.gitignore` (`git ls-files -c -o
 --exclude-standard`); không phải repo Git thì quét cây thư mục. `--self` không nhận đường dẫn (thoát 2); chọn repo

@@ -17,6 +17,19 @@ rewrite_before_public: false
 > và — từ cỡ vừa — review theo việc; mâu thuẫn và chỗ PLAN mơ hồ thì Analyst **phán quyết rồi đi
 > tiếp**, chỉ dừng ở bốn điều kiện. PROGRESS là sổ sống: ngữ cảnh phiên mất sau nén, sổ thì không.
 
+## 0. Routing và giới hạn sửa theo assignment
+
+Trước giao việc hoặc đổi assignment, áp dụng `method/task-routing.md` mục 1–5: sáu trục có giá trị,
+ordinal và nguồn; difficulty từ scope/plan/complexity; effort mặc định `medium` (ordinal 2) rồi xét
+risk floor/capability và pin riêng từng field. Giữ baseline vai, ownership và điều kiện topology;
+notice nêu actor/harness/vai/tier/model/effort/phạm vi/lý do/nguồn, requested/effective/actual tách biệt.
+Capability và access không chứng minh runtime; thiếu bằng chứng thì unknown. Mỗi lần sửa chỉ tính khi
+có hypothesis → thay đổi thực tế → chạy lại cùng oracle → outcome; baseline, review-only, quota hoặc
+permission denial trước thực thi không tăng counter. Sau ba lần sửa còn cùng lỗi, không tiến triển hoặc
+có regression mới: dừng assignment cũ, giữ finding/gates và bàn giao theo mục 4 của method; không có lần
+thứ tư bằng đổi nhãn, tăng effort hay đổi agent cùng tier. Trong quyền đã có, đề xuất receiver cùng vai/vendor
+ở tier kế tiếp T3 → T2 → T1; T1 ceiling, pin hoặc thiếu quyền/mapping/capability/access thì xin đúng quyết định
+còn thiếu. Receiver mới có counter riêng, lịch sử và tổng counter vẫn giữ; lỗi môi trường không tự nâng tier. Khi mục 4.4 dùng “không trần cứng” hoặc phân xử sau vòng 3, giới hạn assignment ở mục này thắng; phân xử không cho phép tiếp tục sửa assignment đã dừng hoặc hoãn finding bắt buộc để báo Đạt.
 ## 1. Hai chế độ — chọn ở Cổng 1
 
 | Chế độ | Cách chạy | Được gì | Tốn gì | Chọn khi |

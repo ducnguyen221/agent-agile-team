@@ -3,15 +3,27 @@ skill: writing-plan
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 5313ed728f3658b600ebcce39d72fc2f96ca6bbe
-date: 2026-10-03
-result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
+historical_skill_sha: 5313ed728f3658b600ebcce39d72fc2f96ca6bbe
+skill_sha: unverified
+historical_date: 2026-10-03
+date: 2026-10-12
+historical_result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
+result: Chưa chạy — current candidate behavior unverified
+candidate_source_sha256: c179050928271af1c8a68abbf4297fcc5d65af10c2151e7666cd0a9bf3f450cc
+candidate_tested: false
 agent_ids:
   red: {wp-1: a6a43b76ef914efbe, wp-2: a4fde2a01516e4f3d, wp-3: a9a1b5729761dad09}
   green: {wp-1: a3a95bee1a8b559d2, wp-2: ae247258d58793055, wp-3: a9539bf9aa72282cf}
 ---
 
 # Thử áp lực — writing-plan
+
+## Trạng thái candidate hiện tại — 2026-10-12
+
+Người dùng giới hạn ngân sách còn 1–2% usage và yêu cầu hoàn tất phần tích hợp tối thiểu. Theo override này, dừng mọi lượt pressure/micro/GREEN/regression mới. Candidate hiện tại **Chưa kiểm chứng hành vi**; chỉ kiểm tra tĩnh. Các kết quả và model/tier/agent IDs dưới đây là lịch sử, không xác nhận candidate mới.
+
+RED archived current: 12/12 usable; ba tình huống routing mỗi tình huống 0/3, tình huống trần sửa PLAN 3/3. Giữ mục 6b.4; chưa chạy micro, GREEN hoặc hồi quy trên candidate.
+
 
 > **Kết luận:** không có skill, chủ thể từ chối dán thân hàm và giữ test trước, nhưng viết `TK` sai hình: thiếu
 > khối Giao diện, thiếu Cổng/Hoàn tác, không có bước chạy kỳ vọng FAIL và bước commit mang mã `TK`; Trọng tâm review
