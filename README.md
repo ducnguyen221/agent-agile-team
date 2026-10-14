@@ -28,6 +28,8 @@ The core is neutral: it knows nothing about any machine, person or project. A ho
 through five declared points — session-start loading, `AGENT_AGILE_TIERS`, `AGENT_AGILE_DENYLIST`, lesson
 storage, and a cross-vendor bridge ([`hosts/README.md`](hosts/README.md)).
 
+Role in the multi-repo ACD system (upstream, downstream, bundles, handoff files): [ECOSYSTEM.md](ECOSYSTEM.md).
+
 ## Install
 
 Paste the prompt at the end of [INSTALL.md](INSTALL.md) into your agent; it follows that file and asks
