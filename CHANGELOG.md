@@ -23,6 +23,11 @@ người cung cấp nguồn cùng tình trạng kiểm chứng qua bàn giao. Kh
 hai cổng hay tier. Đã kiểm hành vi bằng tình huống mô phỏng và review độc lập; kết quả một lượt không
 chứng minh độ tin cậy tổng quát. Số phiên bản phát hành sẽ được quyết riêng.
 
+## 0.3.1 (2026-10-14)
+
+Gắn `.mcp.json` cho `pageindex-mcp` (SPR-13, repo dời về `OpcOS/plugins`); không đổi luật lõi hay skill.
+Bản phát hành để cache plugin theo kịp nguồn; phần "Chưa phát hành" phía trên vẫn chưa vào bản nào.
+
 ## 0.3.0 (2026-10-05)
 
 SPR-04 — nội dung Đợt 2 (phần mới), luật bậc việc đơn giản / phức tạp, sổ tập trung, quy tắc số phiên
