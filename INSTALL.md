@@ -116,6 +116,8 @@ Hình dạng file: bảng tier theo [`tiers/tiers.example.json`](tiers/tiers.exa
 [`tests/README.md`](tests/README.md). Nơi lưu bài học và cầu gọi chéo: [`hosts/README.md`](hosts/README.md) mục 2–3.
 Biến chỉ thấy ở tiến trình **mới** — khởi động lại ứng dụng AI.
 
+**MCP `pageindex-mcp`:** plugin mang sẵn `.mcp.json` trỏ tới `${OPCOS_RUNTIME}\mcp\pageindex-mcp` (máy cần biến `OPCOS_RUNTIME`; thư mục MCP có `.venv` riêng, cài bằng `install.ps1` của nó). Thiếu biến hoặc thư mục thì chỉ MCP này không khởi động, phần còn lại của plugin vẫn chạy.
+
 ## 6. Kiểm
 
 ```bash
