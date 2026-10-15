@@ -11,7 +11,7 @@ cổng. Hồ sơ: `docs/plans/2026-10-12-task-routing/`; migration: `docs/MIGRAT
 Luật lõi/skill pressure/reviews/pilot/release có trạng thái riêng; chưa promotion hoặc version bump.
 Mức phiên bản **đề xuất MINOR** cho schema opt-in, owner quyết khi nghiệm thu.
 
-**Chưa phát hành — MCP đi kèm plugin:** thêm `.mcp.json` khai `pageindex-mcp` theo thư mục MCP trong runtime của hệ chủ; INSTALL mục 5 có ghi chú. Không đổi version.
+**Chưa phát hành — MCP đi kèm plugin:** thêm `.mcp.json` khai `pageindex-mcp` theo thư mục lấy từ biến `PAGEINDEX_MCP_DIR` (tên biến trung tính do plugin định nghĩa); INSTALL mục 5 có ghi chú. Không đổi version.
 
 - **2026-10-12:** thẻ `roles/verifier/dual-review.md` phân biệt lượt review với vòng thực hiện sửa có kiểm chứng; sau vòng sửa ba còn kẹt hoặc regression thì dừng assignment và bàn giao, giữ counter và chỉ định người dùng. Hồ sơ và review: `docs/plans/2026-10-12-task-routing/`.
 - **2026-10-12:** nối `intake`, `writing-plan`, `running-sprint` và `token-economy` với hợp đồng phân loại/effort/notice hiện có; `running-sprint` giữ trần ba lần sửa có kiểm chứng và lịch sử bàn giao. Intake có bằng chứng một phần; ba candidate còn lại chưa kiểm chứng hành vi sau giới hạn ngân sách của người dùng. Không kế thừa kết quả thử của bản cũ cho bản mới, không phát hành hoặc đổi file luật đang chạy.

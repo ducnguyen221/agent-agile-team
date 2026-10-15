@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "pageindex-mcp": {
-      "command": "${OPCOS_RUNTIME}\\mcp\\pageindex-mcp\\.venv\\Scripts\\python.exe",
-      "args": ["-u", "${OPCOS_RUNTIME}\\mcp\\pageindex-mcp\\server.py"]
+      "command": "${PAGEINDEX_MCP_DIR}\\.venv\\Scripts\\python.exe",
+      "args": ["-u", "${PAGEINDEX_MCP_DIR}\\server.py"]
     }
   }
 }
