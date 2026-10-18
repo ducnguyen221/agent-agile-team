@@ -77,4 +77,8 @@ Chưa chọn; giữ mọi quyền trong thời gian private ([LICENSE](LICENSE))
 
 ## Tác giả
 
-Nguyễn Quang Đức — <https://ducnguyen.vn>. Repo: <https://github.com/ducnguyen221/agent-agile-team> (private).
+**Nguyễn Quang Đức** (Tobi) — nhà sáng lập, CEO KPIM và đồng sáng lập COMPA Class; chuyên gia Data/AI và giảng viên công nghệ tại Việt Nam.
+
+Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducnguyen221) · Liên hệ: ducnguyen.ams@gmail.com
+
+Repo: <https://github.com/ducnguyen221/agent-agile-team> (private).

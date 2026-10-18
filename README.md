@@ -85,4 +85,8 @@ licence.
 
 ## Author
 
-Nguyễn Quang Đức — <https://ducnguyen.vn>. Repository: <https://github.com/ducnguyen221/agent-agile-team> (private).
+**Nguyễn Quang Đức** (Tobi) — founder and CEO of KPIM and co-founder of COMPA Class; Data/AI practitioner and instructor in Vietnam.
+
+Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducnguyen221) · Contact: ducnguyen.ams@gmail.com
+
+Repository: <https://github.com/ducnguyen221/agent-agile-team> (private).
