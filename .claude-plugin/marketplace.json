@@ -11,7 +11,7 @@
       "description": "Six-step agile process for AI agent teams: tiered role cards, no self-grading, sprint and registry templates, 32 skills, 13 agents (read-only, except the file-editing `build-fixer`, T2) and three document tools (init, check, index).",
       "version": "0.3.1",
       "source": "./",
-      "license": "UNLICENSED",
+      "license": "MIT",
       "author": {
         "name": "Nguyễn Quang Đức",
         "email": "ducnguyen.ams@gmail.com",

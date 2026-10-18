@@ -1,6 +1,6 @@
 # agent-agile-team
 
-> **Status: private, version `0.3.0`.** Installable on Claude Code, Codex and Antigravity; not
+> **Status: public, version `0.3.0`.** Installable on Claude Code, Codex and Antigravity; not
 > published. Vietnamese version: [README.vi.md](README.vi.md). Skill bodies and method documents are written
 > in Vietnamese; frontmatter is English.
 
@@ -80,7 +80,7 @@ those sources: [docs/updating-from-upstream.md](docs/updating-from-upstream.md).
 
 ## Licence
 
-Not chosen yet; all rights reserved while private ([LICENSE](LICENSE)). Third-party content keeps its own
+MIT — see [LICENSE](LICENSE). Third-party content keeps its own
 licence.
 
 ## Author
@@ -89,4 +89,4 @@ licence.
 
 Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducnguyen221) · Contact: ducnguyen.ams@gmail.com
 
-Repository: <https://github.com/ducnguyen221/agent-agile-team> (private).
+Repository: <https://github.com/ducnguyen221/agent-agile-team>.

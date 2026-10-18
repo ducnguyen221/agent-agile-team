@@ -35,7 +35,7 @@ cách đó, các nguồn **chỉ lấy ý**, và lịch sử viết lại phòng
 
 ## 3. Nguồn private — file lấy từ đó phải viết lại trước khi công khai
 
-Bộ skill quy trình private (gốc private, **không giấy phép**) chỉ dùng được khi repo còn private. Cờ
+Bộ skill quy trình private (gốc private, **không giấy phép**) không được đưa vào repo công khai; repo đã công khai nên bảng dưới phải trống. Cờ
 `rewrite_before_public: true` đặt ở **cấp skill** (frontmatter `SKILL.md`); bảng dưới ghi đúng file nào cần
 viết lại để không phải viết lại cả skill.
 

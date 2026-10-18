@@ -5,8 +5,8 @@ Mỗi đợt distill một khối. Mỗi nguồn ghi: nhánh, SHA HEAD lúc ch�
 frontmatter của skill đó ghi `source` (repo, đường file, SHA) khớp bảng dưới.
 
 Cách dùng: **chép** = chép nguyên văn được, giữ thông báo bản quyền · **ý** = chỉ viết lại ý, không chép
-văn bản · **NOTICE** = chép được nhưng mang theo NOTICE Apache-2.0 · **private** = chỉ dùng khi repo còn
-private, phải viết lại trước khi công khai.
+văn bản · **NOTICE** = chép được nhưng mang theo NOTICE Apache-2.0 · **private** = không được đưa vào repo
+công khai, phải viết lại (mọi file loại này đã viết lại).
 
 **File này là nguồn sự thật duy nhất để theo dõi bản mới của mọi nguồn gốc.** Repo thay thế các bộ skill
 gốc, nên môi trường dùng repo có thể không còn cài bộ nào trong số đó — không plugin, cache hay kho nào khác

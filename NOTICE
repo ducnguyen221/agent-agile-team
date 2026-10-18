@@ -1,5 +1,5 @@
 agent-agile-team
-Copyright (c) 2026 Nguyễn Quang Đức (https://ducnguyen.vn). All rights reserved (private, not yet released).
+Copyright (c) 2026 Nguyễn Quang Đức (https://ducnguyen.vn). Licensed under the MIT License (see LICENSE).
 Author: Nguyễn Quang Đức (Tobi) — https://ducnguyen.vn
 
 Một nguồn được coi là "đã dùng" khi có file trong repo ghi `source` trỏ tới nó; khi đó thông báo bản

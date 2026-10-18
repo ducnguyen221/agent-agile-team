@@ -1,6 +1,6 @@
 # agent-agile-team
 
-> **Trạng thái: private, bản `0.3.0`.** Cài được trên Claude Code, Codex và
+> **Trạng thái: công khai, bản `0.3.0`.** Cài được trên Claude Code, Codex và
 > Antigravity; chưa công khai. Bản tiếng Anh: [README.md](README.md).
 
 Phương pháp agile cho đội agent AI. Một người giao việc bằng lời thường, xác nhận một tin trao đổi lúc tiếp
@@ -73,7 +73,7 @@ các nguồn đó: [docs/updating-from-upstream.md](docs/updating-from-upstream.
 
 ## Giấy phép
 
-Chưa chọn; giữ mọi quyền trong thời gian private ([LICENSE](LICENSE)). Nội dung bên thứ ba giữ giấy phép gốc.
+MIT — xem [LICENSE](LICENSE). Nội dung bên thứ ba giữ giấy phép gốc.
 
 ## Tác giả
 
@@ -81,4 +81,4 @@ Chưa chọn; giữ mọi quyền trong thời gian private ([LICENSE](LICENSE))
 
 Website: https://ducnguyen.vn · GitHub: [@ducnguyen221](https://github.com/ducnguyen221) · Liên hệ: ducnguyen.ams@gmail.com
 
-Repo: <https://github.com/ducnguyen221/agent-agile-team> (private).
+Repo: <https://github.com/ducnguyen221/agent-agile-team>.
