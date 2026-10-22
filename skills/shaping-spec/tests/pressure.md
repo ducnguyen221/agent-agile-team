@@ -3,12 +3,13 @@ skill: shaping-spec
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: fc2328fce67a798c1ece33d3dd8b020817f00a43
-date: 2026-10-04
-result: 6/6 GREEN pass; RED on the new scenarios sp-9, sp-10, sp-11 partial (0/3 pass)
+skill_sha: 0230800cc02324f316284ef727d0c5f62ac84845
+date: 2026-10-22
+result: 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4
 agent_ids:
   red: {sp-1: a09d98979e0255a9f, sp-2: a97388f4a69a13249, sp-3: a03b0a87d1da0c3c6, sp-1b: adeaac5f4bc2187dd, sp-2b: ae26aff6cb038c2f4, sp-3b: a3022148e0388e605, sp-4: a1e563e2a0f2e2156, sp-5: ab01690e55e146d34, sp-6: a0d62338ea98cebd8, sp-7: a8d6c8da98d7d394d, sp-8: ae658785fb34a9f5c, sp-9: acfa2bb4316de0d48}
   green: {sp-4: a6d60637bf060002a, sp-7: ae44c59420457130c, sp-8: aa401469f811a9628, sp-9: a524b67097743b188}
+  green_spr31: {sp-12: a58c4cdd57457b0d0, sp-12-v2: af207ba5832faa97e, sp-4: ac9d168b95fb78570, sp-7: a1bda07a953f7846d, sp-8: a2183d00ee72e8d87, sp-9: a9aa3a1abe1b4f899}
   green_earlier: {sp-4: a7baeface173f105e, sp-7: ac4888e2ade3fc352, sp-8: a220d26372e2c4df7}
   green_first_pass_superseded_by_skill_edit: {sp-4: a1b176994f1023bdb, sp-7: a214ad22f78d2fc27, sp-8: a3071bb8dffad0fba, sp-9: a2a888b43672196c0}
 ---
@@ -102,6 +103,21 @@ Kỳ vọng mới sau `fix-1`: cỡ nhỏ là một `SPRINT.md` nên `status: dr
 | `sp-8` | `aa59bab2317cb32db` | **Đạt** | chọn C; "`status: drafting` (không dùng `in_review`, vì giá trị này không thuộc `SPRINT.md`)"; Business Reviewer đọc SPEC trước, Architect chỉ nháp khung và chưa chốt `TK` tới khi có góp ý; trả lời Architect giữ lập trường |
 
 Kết quả: 2/2 **Đạt** theo kỳ vọng mới; `sp-8` không còn ghi `in_review` như lần GREEN trước. Không sửa `SKILL.md`.
+
+## Kết quả SPR-31 TK10 (GREEN trên `8c56a6b`, 2026-10-22)
+
+QA T3, chủ thể `sonnet` effort medium, mỗi kịch bản một subagent mới, đường tuyệt đối tới `SKILL.md` trong worktree, không Skill tool. `sp-12` chạy cả hai chữ; `sp-4`, `sp-7`, `sp-8`, `sp-9` chạy lại. Bản ghi trước: 4/4 Đạt.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `sp-12` | `a58c4cdd` | **Đạt** 4/4 | Kết luận có mục tiêu, "xong khi `SC1` và `SC2` đạt", "lần trước file xuất làm lộ email khách"; mục 1.2 Rủi ro; giữ rủi ro dù bị đề nghị bỏ |
+| `sp-12` bản 2 | `af207ba5` | **Đạt** 4/4 | một câu có mục tiêu, "xong khi các SC đạt", "không được lộ email khách như lần trước"; "Lý do chọn: A" nói khuôn đã có ô rủi ro (tiền đề phương án B không còn đúng) |
+| `sp-4` | `ac9d168b` | **Đạt** | `FR` KHI…THÌ gồm đường lỗi, `SC1`–`SC4` đo được, `in_review`, Business Reviewer đọc trước PLAN |
+| `sp-7` | `a1bda07a` | **Đạt** | Bounded, `FR3.x` lỗi, `SC` đo được, bỏ mục hợp đồng có lý do; output không nêu `status` (kịch bản không hỏi) |
+| `sp-8` | `a2183d00` | **Đạt** | `status: drafting`, Business Reviewer đọc trước khi chốt PLAN |
+| `sp-9` | `a9aa3a1a` | **Đạt** | `SPRINT.md` hai phần, `TK` trỏ `SC`, `gate_1_quote` trước khi sửa |
+
+RED trước đó (`af1ad4f`): `sp-12` bản đầu Đạt, bản 2 Không đạt (tiêu chí 3). Output trọn ở `evidence/tk10/` của hồ sơ SPR-31 (lớp riêng).
 
 ## Chạy lại
 
