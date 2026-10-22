@@ -45,7 +45,7 @@ mapping hay chỉ định cho người nhận việc. Trước PLAN/assignment, 
 
 Lời giao đã nêu rõ mục đích, ràng buộc và kết quả thì phản ánh lại trong tin trao đổi, không hỏi lại điều đã có.
 
-Sau câu trả lời, ô 1, 2 hay 4 của Brief (mục 1.2) còn trống → **một** tin bổ sung duy nhất, mỗi ô một câu có đề xuất; vẫn trống → `CQ` cho Cổng 1, không có lượt thứ ba. Im lặng hay "cứ làm" chưa phải xác nhận các ô đó: chưa xác nhận thì chưa `RQ-`, chưa mở sprint, chưa ghi bậc.
+Sau câu trả lời, ô 1, 2 hay 4 của Brief (mục 1.2) còn trống → **một** tin bổ sung duy nhất, mỗi ô một câu có đề xuất; vẫn trống → `CQ` cho Cổng 1, không có lượt thứ ba. "Cứ làm" hay im lặng không thay cho xác nhận bậc và mở sprint; tin bổ sung hỏi rõ hai điều đó. Chưa có câu trả lời ấy thì chưa `RQ-`, chưa mở sprint, chưa ghi bậc; ô còn trống không chặn — thành `CQ`.
 
 ### 1.1 Tin trao đổi gom — viết thế nào
 
@@ -92,7 +92,7 @@ Rà bốn ô trước khi viết tin gom; ô người giao đã nêu thì nhắc
 | 4. Rủi ro cần chú ý · khẩu vị · mức tự trị | dòng 1: rủi ro cụ thể (cái từng hỏng, chỗ dễ vỡ, ai bị ảnh hưởng) + nhãn `risk_tags` bạn bổ sung; dòng 2: sai thì hại tới đâu, hoàn tác được không, mức *hỏi mọi bước* · *trong phạm vi* (mặc định) · *tự quyết* |
 
 *Tự quyết* chỉ là ý muốn chạy không hỏi trong phạm vi đã duyệt — không hạ cỡ, không hạ rủi ro, không phải lời cấp duyệt thay (`method/process.md` mục 3).
-Cỡ, tài liệu và cổng theo `method/sizing.md` mục 1; nhãn rủi ro theo mục 2. Ba luật giữ ở đây: rủi ro chỉ nâng, kể cả sau xác nhận; không chia một mục tiêu thành nhiều lần làm thẳng để né sprint; không làm thẳng khi chạm `risk_tags`, file luật, secret hay hành động không đảo ngược — trừ khi người dùng nói rõ.
+Cỡ, tài liệu và cổng theo `method/sizing.md` mục 1; nhãn rủi ro theo mục 2 — chỉ dùng bảy nhãn ở đó, không gắn nhãn tự chế như `security`. Ba luật giữ ở đây: rủi ro chỉ nâng, kể cả sau xác nhận; không chia một mục tiêu thành nhiều lần làm thẳng để né sprint; không làm thẳng khi chạm `risk_tags`, file luật, secret hay hành động không đảo ngược — trừ khi người dùng nói rõ.
 
 ## 2. Danh mục 11 điểm thiếu ngữ cảnh
 
@@ -146,7 +146,7 @@ Việc xoá hay ghi đè dữ liệu thì tiêu chí gồm cả **cách khôi ph
 |---|---|
 | Ghi `RQ-` hay mở sprint trước khi người dùng xác nhận tin trao đổi | bỏ lượt trao đổi ở việc còn mơ hồ — quay lại mục 1.1 |
 | Hỏi người dùng điều repo trả lời được (stack, file chạm, test hiện có) | bỏ bước tra repo; làm lại mục 2 trước khi gửi tin |
-| Hỏi một câu, chờ, hỏi câu nữa ở tiếp nhận | không phải một tin gom — gom lại; câu còn lại thành `CQ` cho Cổng 1 |
+| Hỏi một câu, chờ, hỏi câu nữa ở tiếp nhận | không phải một tin gom — gom lại; câu còn lại thành `CQ` cho Cổng 1 (trừ một tin bổ sung cho ô Brief còn trống, mục 1) |
 | Tin trao đổi không có khuyến nghị bậc hay không hỏi "có mở sprint không" | thiếu nửa sau của tin — người dùng không có gì để xác nhận |
 | Mở lượt trao đổi cho việc người dùng đã nói "không cần sprint", hoặc làm thẳng không mơ hồ | hỏi thừa — làm ngay và báo |
 | Làm thẳng việc chạm `risk_tags`, file luật, secret hay hành động không đảo ngược mà người dùng chưa nói rõ | sai bậc — tối thiểu rất nhỏ, vùng rủi ro kéo lên lớn |
@@ -163,7 +163,7 @@ Việc xoá hay ghi đè dữ liệu thì tiêu chí gồm cả **cách khôi ph
 |---|---|
 | Lời giao mơ hồ → đoán rồi làm luôn | mở tin trao đổi gom: nhắc lại mục tiêu, hỏi phản biện có đề xuất, khuyến nghị bậc; chờ xác nhận |
 | Lời giao mơ hồ → tự ghi `RQ-` và ASSUMPTION thay cho hỏi | điều thuộc ý muốn người dùng phải hỏi ở tin trao đổi; ASSUMPTION chỉ cho điều tự giả định được, có "nếu sai thì đổi gì" |
-| Hỏi một câu, chờ, hỏi câu nữa | một tin gom ở tiếp nhận; phần còn lại thành `CQ`, hỏi một lần ở Cổng 1 |
+| Hỏi một câu, chờ, hỏi câu nữa | một tin gom ở tiếp nhận; phần còn lại thành `CQ`, hỏi một lần ở Cổng 1 (trừ một tin bổ sung cho ô Brief còn trống, mục 1) |
 | Tự quyết bậc rồi dựng hồ sơ, không hỏi người dùng có cần sprint không | tin trao đổi phải có khuyến nghị bậc + câu "có mở sprint không"; người dùng xác nhận mới ghi |
 | Người dùng nói "không cần sprint" mà vẫn mở `RQ-`/`SPRINT.md` | lời người dùng thắng: làm thẳng, kiểm, báo; chỉ giữ các cổng xin phép khác |
 | Tech stack ghi "chưa rõ" dù repo có file cấu hình | tra file cấu hình trước; "chưa rõ" chỉ khi dự án mới |
