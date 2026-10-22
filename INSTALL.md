@@ -112,7 +112,8 @@ echo 'export AGENT_AGILE_DENYLIST="<đường tới file từ cấm .txt>"' >> ~
 zsh -lic 'echo $AGENT_AGILE_TIERS'      # kiểm qua login shell, không kiểm bằng echo trong shell hiện tại
 ```
 
-Hình dạng file: bảng tier theo [`tiers/tiers.example.json`](tiers/tiers.example.json); từ cấm theo
+Hình dạng file: bảng tier theo [`tiers/tiers.example.json`](tiers/tiers.example.json) (schema 1
+hoặc 2; hình ma trận ở [`tiers/ROLE-MATRIX.example.md`](tiers/ROLE-MATRIX.example.md)); từ cấm theo
 [`tests/README.md`](tests/README.md). Nơi lưu bài học và cầu gọi chéo: [`hosts/README.md`](hosts/README.md) mục 2–3.
 Biến chỉ thấy ở tiến trình **mới** — khởi động lại ứng dụng AI.
 

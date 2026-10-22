@@ -20,8 +20,13 @@ lệnh rõ, cần **chạy và ghi** → T3. Phân vân giữa hai tier → ch�
 
 - **Giá trị:** đường dẫn tuyệt đối tới một file JSON bảng tier → model. File nằm **ngoài** repo, do môi
   trường dùng repo quản lý. Repo không bao giờ chứa tên model thật.
-- **Hình dạng:** như [`tiers.example.json`](tiers.example.json) — khóa `schema` (số nguyên, hiện là `1`)
-  và `tiers`; mỗi tier có `purpose` và `models` ánh xạ tên harness → mã model của harness đó.
+- **Hình dạng:** như [`tiers.example.json`](tiers.example.json) — khóa `schema` (`1` hoặc `2`) và `tiers`; mỗi tier có
+  `purpose` và `models` ánh xạ tên harness → mã model. Schema 2 thêm, đều tuỳ chọn: `effort_scale.<harness>` (năm khoá
+  `"1"`…`"5"` → nhãn native hoặc `null`), `fallback.<harness>: "clamp_to_max"`, `tiers.<T>.effort` và
+  `roles.<vai>.{tier, models, effort}`; effort luôn là số 1–5 hoặc `{<harness>: số}` ([thang](../method/effort-scale.md)).
+  Mỗi field phân giải riêng: chỉ định của người dùng → `roles.<vai>` → `tiers.<tier>` → "Effort mặc định" của thẻ vai;
+  model không có mặc định. `roles.<vai>.tier` phải bằng tier của thẻ. Schema 1 vẫn hợp lệ. Hình người đọc được:
+  [`ROLE-MATRIX.example.md`](ROLE-MATRIX.example.md).
 - **Khi thiếu biến, file không tồn tại hoặc đọc lỗi:** công cụ báo **Chưa chạy** cho phần cần bảng tier,
   không đoán model, không lấy giá trị mặc định (`init` cảnh báo ngay khi dựng sprint). Agent giao việc dùng
   **chỉ định tier → model người dùng đã nêu trong chat** — một nguồn hợp lệ ngang bảng: ghi nguyên văn vào
@@ -36,12 +41,13 @@ Routing/effort dùng [method/task-routing.md](../method/task-routing.md). Tier m
 bảng, requested model và human override là các field riêng. Default effort medium áp coordinator cho
 routed assignment; native support phải verified, actual unknown không lấy requested thay. Notice trước
 dispatch/model/effort/criteria/handoff; không ghi model ID môi trường vào policy phân phối.
+Mức effort theo [method/effort-scale.md](../method/effort-scale.md): sàn ở thẻ vai, nâng theo độ khó; chỉ định của người dùng thắng.
 
 KHI giao một `TK` cho subagent hoặc phiên khác THÌ Analyst:
 
 1. Đọc tier của vai trong PLAN (`TK` ghi vai + tier).
 2. Tra bảng tier → model theo harness đang dùng.
-3. Ghi vào PROGRESS, cột "Vai · tier · model": `Implementer · T2 · <model-id>`; nhãn agent vào `roles`
+3. Ghi vào PROGRESS, cột "Vai · tier · model": `Implementer · T2 · <model-id> · 3 (high)`; nhãn agent vào `roles`
    của frontmatter (`implementer: [T2, agent-e]`).
 4. Ghi model vào brief của subagent chỉ khi harness cần tham số; không ghi tên model vào SPEC/PLAN.
 
@@ -97,3 +103,5 @@ và hãng vào PROGRESS như mục 3. Không có cầu thì ghi "cần người 
 | Muốn hãng khác | Tư vấn một lần; người dùng quyết |
 | Giao việc | Ghi vai · tier · model vào PROGRESS, nhãn agent vào `roles` |
 | Phân vân tier | Chọn cao hơn, ghi lý do |
+| Bảng schema 1 | Vẫn đọc được: effort lấy từ thẻ vai, nhãn theo thang mặc định |
+| Vendor không có mức effort cần | Hạ chỉ khi bảng ghi `fallback` (ghi `clamped_by_table`); không có → dừng phần đó, báo |

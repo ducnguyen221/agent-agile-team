@@ -1,29 +1,23 @@
 {
-  "schema": 1,
+  "schema": 2,
+  "effort_scale": {
+    "claude":      { "1": "low", "2": "medium", "3": "high", "4": "xhigh", "5": "max" },
+    "codex":       { "1": "low", "2": "medium", "3": "high", "4": "xhigh", "5": "max" },
+    "antigravity": { "1": "low", "2": "medium", "3": "high", "4": null,    "5": null }
+  },
+  "fallback": { "antigravity": "clamp_to_max" },
   "tiers": {
-    "T1": {
-      "purpose": "thinking",
-      "models": {
-        "claude": "<model-id>",
-        "codex": "<model-id>",
-        "antigravity": "<model-id>"
-      }
-    },
-    "T2": {
-      "purpose": "execution",
-      "models": {
-        "claude": "<model-id>",
-        "codex": "<model-id>",
-        "antigravity": "<model-id>"
-      }
-    },
-    "T3": {
-      "purpose": "chores-and-qa",
-      "models": {
-        "claude": "<model-id>",
-        "codex": "<model-id>",
-        "antigravity": "<model-id>"
-      }
-    }
+    "T1": { "purpose": "thinking",
+            "models": { "claude": "<model-id>", "codex": "<model-id>", "antigravity": "<model-id>" },
+            "effort": 3 },
+    "T2": { "purpose": "execution",
+            "models": { "claude": "<model-id>", "codex": "<model-id>", "antigravity": "<model-id>" },
+            "effort": 3 },
+    "T3": { "purpose": "chores-and-qa",
+            "models": { "claude": "<model-id>", "codex": "<model-id>", "antigravity": "<model-id>" },
+            "effort": { "claude": 2, "codex": 2, "antigravity": 1 } }
+  },
+  "roles": {
+    "tech-reviewer": { "tier": "T1", "models": { "claude": "<model-id>" }, "effort": 3 }
   }
 }

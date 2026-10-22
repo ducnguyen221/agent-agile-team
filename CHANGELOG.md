@@ -3,6 +3,10 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+**Chưa phát hành — hồ sơ vai và thang effort 1–5:** bảng tier schema 2 cộng thêm (schema 1 vẫn
+hợp lệ) có `effort_scale`, `fallback`, effort số theo tier và theo vai; thang ở `method/effort-scale.md`; ma trận mẫu
+`tiers/ROLE-MATRIX.example.md`. Không đổi version.
+
 **Chưa phát hành — giấy phép MIT, repo công khai:** `LICENSE` chuyển sang giấy phép MIT (Copyright (c) 2026 Nguyễn Quang Đức); trường `license` ở `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json` và `.claude-plugin/marketplace.json` đổi từ `UNLICENSED` sang `MIT`; `NOTICE`, `README.md`, `README.vi.md`, `INSTALL.md`, `THIRD_PARTY.md`, `UPSTREAM.md`, `docs/standardization.md` bỏ câu "private"/"giữ mọi quyền". `.agile.json` giữ `visibility: private` vì khai báo đó nói về nơi đặt hồ sơ dự án (`artifact_root` là `.`), không phải trạng thái GitHub. Không đổi version.
 
 **Chưa phát hành — phân loại tác vụ và effort:** method candidate có sáu trục, difficulty/effort riêng,
