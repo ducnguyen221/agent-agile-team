@@ -1325,9 +1325,9 @@ class Engine:
             revoked_at = parse_moment(revoked)
             if revoked_at is None:
                 return bad("delegation.revoked_at", f"delegation.revoked_at: {revoked!r} không đọc được")
-            if gate_at is not None:  # ngày không giờ: cùng ngày chưa đủ để kết luận đã thu hồi trước cổng
+            if gate_at is not None:  # ngày không giờ: trùng ngày cổng thì coi là đã thu hồi (an toàn khi không chắc)
                 timed = revoked_at[1] is not None and gate_at[1] is not None
-                if revoked_at[1] <= gate_at[1] if timed else revoked_at[0] < gate_at[0]:
+                if revoked_at[1] <= gate_at[1] if timed else revoked_at[0] <= gate_at[0]:
                     return bad("delegation.revoked_at", f"đã thu hồi ({revoked}) không sau thời điểm cổng ({data[f'{gate}_at']})")
         quote = data.get(quote_key)
         if not (isinstance(quote, str) and quote.startswith(DELEGATION_QUOTE)):

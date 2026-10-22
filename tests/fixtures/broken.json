@@ -122,6 +122,8 @@
     {"name": "thời điểm thu hồi không đọc được", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
      "replace": ["revoked_at: null", "revoked_at: hôm qua"]},
     {"name": "thời điểm cấp là ngày không có thật", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
-     "replace": ["grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-02-30 08:30 +07"]}
+     "replace": ["grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-02-30 08:30 +07"]},
+    {"name": "thu hồi chỉ ghi ngày, trùng ngày cổng", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
+     "replace": ["revoked_at: null", "revoked_at: 2026-02-01"]}
   ]
 }

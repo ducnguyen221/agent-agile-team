@@ -144,7 +144,7 @@ không có nghĩa duyệt kết quả. Agent không được suy một lời "ok
 
 ### Duyệt thay khi được phép
 
-Mặc định **tắt**: vắng `gate_N_mode` nghĩa là `human`, cổng là của người dùng. Chỉ khi người dùng nói câu cấp quyền, Analyst ghi khối `delegation` (lời cấp nguyên văn, thời điểm, phạm vi, hạn, nhãn và tier người duyệt, file luật nêu đích danh); tới cổng trong phạm vi và còn hạn, một agent T1 **khác người làm** ghi kết luận cổng.
+Mặc định **tắt**: vắng `gate_N_mode` nghĩa là `human`, cổng là của người dùng. Chỉ khi người dùng nói câu cấp quyền, Analyst ghi khối `delegation` (lời cấp nguyên văn, thời điểm, phạm vi, hạn, nhãn và tier người duyệt, file luật nêu đích danh); tới cổng trong phạm vi và còn hạn, một agent T1 **khác người làm** ghi kết luận cổng với `gate_N_mode: delegated`, `gate_N_quote` bắt đầu `duyệt thay:`.
 
 - **Câu cấp quyền mẫu** (người dùng nói trong chat, đủ cổng · sprint · hạn):
   `Cho phép T1 duyệt thay Cổng 1 của SPR-NN tới hết sprint.` ·
