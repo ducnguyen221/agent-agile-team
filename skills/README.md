@@ -47,8 +47,8 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
 
 | Skill | Dùng khi |
 |---|---|
-3/3 GREEN pass after re-scoring two criteria that over-read the spec (QA first pass 1/3; second run of in-6 pass, second run of in-8 not obtained: blocked by API safeguard three times); RED on af1ad4f 0/3 pass; old scenarios 8/9 | 2026-10-22 |
-1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4 | 2026-10-22 |
+| [intake](intake/SKILL.md) | tiếp nhận yêu cầu: một lượt trao đổi gom (mục tiêu, câu hỏi phản biện, khuyến nghị bậc, mở sprint hay làm thẳng) → ghi `RQ-`, định cỡ/rủi ro, 11 điểm thiếu ngữ cảnh → ASSUMPTION/`CQ` |
+| [shaping-spec](shaping-spec/SKILL.md) | 3 đường Spike/Bounded/Architectural, viết SPEC, gom `CQ`, không code trước Cổng 1 |
 | [writing-plan](writing-plan/SKILL.md) | `TK` có file + giao diện + bước RED→GREEN→commit, trọng tâm review ≤5 |
 | [running-sprint](running-sprint/SKILL.md) | hai chế độ thực thi, brief/review theo việc, phán quyết, 4 điều kiện dừng, 3 vòng khuyến nghị |
 | [closing-sprint](closing-sprint/SKILL.md) | tiền kiểm → REPORT/Cổng 2 → docs-sync, release notes, bài học → menu nhánh 3 lựa chọn |
