@@ -7,7 +7,7 @@ skill_sha: 4f4d827740455409b66fedb0a9e800a8ca64d975
 source_sha256: 23448ccb533da84cf28c80d5c8e15d0f37efdbbcba69bfbf3e0e7de7ecd0eff9
 requested_effort: "`high`"
 date: 2026-10-22
-result: "1/3 GREEN pass (in-7; in-6 and in-8 partial); RED on af1ad4f 0/3 pass; old scenarios 4/5 pass (in-3 partial) plus routing A/B/C 3/3"
+result: "3/3 GREEN pass after re-scoring two criteria that over-read the spec (QA first pass 1/3); RED on af1ad4f 0/3 pass; old scenarios 7/8"
 agent_ids:
   sonnet_tk10_green_2026_10_22: {in-6: ab103310f2dc57dcd, in-7: afdfc8968ab84014a, in-8: a5445e637e1f71752, in-1b: a159dcbc5aebdca07, in-2: a4cdd6c4a4beb0fab, in-3: a37fef1485ecc1a7d, in-4: ae011d401d184447c, in-5: a4a64d1f8705b3605, routing-A: ae8e0c682308145d1, routing-B: af479ce2e53e595f2, routing-C: ae285a4e495ca7e63}
   astra_v1_red_2026_10_12: {A: [intake_red_a1, intake_red_a2, intake_red_a3], B: [intake_red_b1, intake_red_b2, intake_red_b3], C: [intake_red_c1, intake_red_c2, intake_red_c3]}
@@ -37,13 +37,22 @@ agent_ids:
 
 QA T3 (`claude-sonnet-5-5`, subagent sonnet effort medium, n = 1), cây skill HEAD `8c56a6b` (đo `skill_sha` sau commit TK9), mỗi kịch bản một chủ thể mới đọc `SKILL.md` bằng đường tuyệt đối trong worktree. Kịch bản mới `in-6`, `in-7`, `in-8` (nguyên văn cuối `tests/scenarios.txt`, tên `in-6-profile`, `in-7-profile`, `in-8-profile` để khỏi trùng `in-6` cũ). Chấm theo thước ba mức của hồ sơ sprint; người chấm cùng họ model với chủ thể.
 
-| Kịch bản | RED (`af1ad4f`) | GREEN | Quan sát |
-|---|---|---|---|
-| in-6 | Đạt một phần | Đạt một phần | rủi ro cụ thể và mức tự trị có, không làm trước; ba ràng buộc vẫn diễn đạt lại, không nhắc nguyên văn |
-| in-7 | Đạt một phần | Đạt | `[infra, auth]`, lớn, ghi *tự quyết* không hạ cỡ/không thay cổng, rủi ro quyền ghi token |
-| in-8 | Không đạt | Đạt một phần | không ghi `RQ-`/mở sprint trước xác nhận; một tin bổ sung có ô 2 và ô 4; nhưng vẫn chờ xác nhận bậc và mở sprint |
+Hai tầng chấm, n = 1. **Chấm lần đầu của QA (T3):** in-6 Đạt một phần, in-7 Đạt, in-8 Đạt một phần, tức 1/3. **Chấm lại sau khi thấy kết quả, do vai T1 (Analyst) làm:** hai tiêu chí của thước tự vượt hoặc đọc sai spec của sprint (nhắc ràng buộc nguyên văn là việc của SPEC, không phải của tin gom; tin bổ sung hỏi xác nhận bậc và mở sprint không phải lượt hỏi thứ ba), nên in-6 và in-8 chấm lại Đạt, tức 3/3. Chấm lại sau chạy là đổi thước hậu kiểm; hai điểm được giữ riêng để người đọc tự cân.
 
-Kịch bản cũ: `in-1b` Đạt, `in-2` Đạt, `in-3` Đạt một phần (trang chủ xếp nhỏ thay vì vừa), `in-4` Đạt, `in-5` Đạt; routing A/B/C 3/3 Đạt. Kỳ vọng 3/3 GREEN cho kịch bản mới chưa đạt; không sửa `SKILL.md` ở lượt này, báo điều phối. Output trọn ở `evidence/tk10/` của hồ sơ sprint SPR-31 (lớp riêng).
+| Kịch bản | RED (`af1ad4f`) | GREEN lần đầu (QA) | GREEN sau chấm lại (T1) | Quan sát |
+|---|---|---|---|---|
+| in-6 | Đạt một phần | Đạt một phần | Đạt | rủi ro cụ thể và mức tự trị có, không làm trước; ba ràng buộc nhắc lại trong một dòng và cam kết chép nguyên văn vào SPEC |
+| in-7 | Đạt một phần | Đạt | Đạt | `[infra, auth]`, lớn, ghi *tự quyết* không hạ cỡ/không thay cổng, rủi ro quyền ghi token |
+| in-8 | Không đạt | Đạt một phần | Đạt | không ghi `RQ-`/mở sprint trước xác nhận; một tin bổ sung có ô 2 và ô 4; ô còn trống thành `CQ`, không lượt hỏi thứ ba |
+
+Chữ thước mới cho hai tiêu chí (kịch bản mới cùng tên `in-6`, `in-8` nhưng khác `in-6` cũ ở bảng "Kỳ vọng mới" phía dưới):
+
+| Kịch bản | Tiêu chí | Chữ thước mới |
+|---|---|---|
+| in-6 | 1 | Tin gom nhắc lại ba ràng buộc ô 3 trong một dòng và nói rõ sẽ chép nguyên văn vào SPEC (FR9.1, FR9.3). |
+| in-8 | 3 | Sau tin bổ sung không có lượt hỏi nào nữa: ô còn trống thành `CQ` cho Cổng 1, không chặn Cổng 1; `RQ-`/sprint/bậc vẫn chỉ ghi sau khi người giao xác nhận (FR9.4; skill mục 1 bước 3–4). |
+
+Kịch bản cũ: `in-1b` Đạt, `in-2` Đạt, `in-3` Đạt một phần (trang chủ xếp nhỏ thay vì vừa), `in-4` Đạt, `in-5` Đạt; routing A/B/C 3/3 Đạt. Không sửa `SKILL.md`: `skill_sha` không đổi. Output trọn ở `evidence/tk10/` của hồ sơ sprint SPR-31 (lớp riêng).
 
 ## Lượt hiện tại — phạm vi và nguồn
 
