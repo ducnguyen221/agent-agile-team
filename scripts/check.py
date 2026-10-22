@@ -23,7 +23,7 @@ import re
 import subprocess
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -55,6 +55,7 @@ RULES: dict[str, tuple[str, str]] = {
     "qa-not-independent": (PHAI, "QA trùng nhãn với implementer/architect mà không khai tự kiểm, hoặc khai tự kiểm mà verdict là pass"),
     "roles-invalid": (PHAI, "`roles` sai hình: vai lạ, tier ngoài T1–T3, thiếu nhãn agent"),
     "gate-invalid": (PHAI, "cổng đã kết luận mà thiếu thời điểm/câu nguyên văn, hoặc trạng thái vượt cổng"),
+    "gate-delegation-invalid": (PHAI, "duyệt thay thiếu lời cấp/phạm vi/hạn/bản ghi, quá hạn, đã thu hồi, người duyệt không phải T1, hoặc vào vùng cấm"),
     "old-scale-label": (PHAI, "nhãn thang mức cũ (kiểu nguồn trong câu, hoặc tiếng Việt kiểu cũ) ngoài bảng quy đổi `method/severity.md`"),
     "config-syntax": (CHAN, "`.agile.json` không phải JSON hợp lệ (lỗi đầu vào → thoát 2)"),
     "config-invalid": (PHAI, "`.agile.json` sai hình hoặc đổi ngưỡng coverage không ghi lý do"),
@@ -96,7 +97,8 @@ REQUIRED_KEYS = {
     "sprints": ("id", "doc", "title", "next_id", "updated"),
 }
 KNOWN_KEYS = set(_SPRINT_KEYS) | set(_GATE1) | set(_GATE2) | {
-    "risk_tags", "review_round", "requests", "sprints", "next_id", "links"}
+    "risk_tags", "review_round", "requests", "sprints", "next_id", "links",
+    "gate_1_mode", "gate_2_mode", "delegation"}
 
 STATUS = {
     "spec": {"draft", "in_review", "approved", "superseded"},
@@ -111,6 +113,13 @@ RISKS = {"normal", "high"}
 RISK_TAGS = {"secret", "auth", "external_input", "public_api", "infra", "data_migration", "rules"}
 GATE1_VALUES = {"pending", "approved", "changes_requested"}
 VERDICT_VALUES = {"pending", "pass", "conditional_pass", "fail"}
+GATE_MODES = {"human", "delegated"}  # vắng `gate_N_mode` = human; chỉ `delegated` kích các luật duyệt thay
+DELEGATION_FORBIDDEN_TAGS = {"secret", "auth"}  # vùng cấm duyệt thay (SPEC 7.3)
+DELEGATION_RECORD = "Bản ghi duyệt thay"  # tiêu đề cấp 2 ở plan, report, sprint
+DELEGATION_LABELS = ("Phương án chọn:", "Phương án bị loại:", "Nếu sai thì tốn gì:")
+DELEGATION_QUOTE = "duyệt thay:"  # tiền tố bắt buộc của `gate_N_quote`
+DELEGATION_KEYS = ("grant", "grant_at", "scope", "expires", "by", "tier", "files", "revoked_at")
+MOMENT = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})(?: ([0-9]{2}):([0-9]{2}) ([+-])([0-9]{2})(?::?([0-9]{2}))?)?")
 EXECUTORS = {"analyst", "architect", "implementer", "qa", "researcher"}
 VERIFIERS = {"business-reviewer", "tech-reviewer"}
 NEXT_ID_PREFIX = {"requests": "RQ", "specs": "FS", "sprints": "SPR"}
@@ -857,6 +866,29 @@ def _is_candidate(text: str, name: str) -> bool:
     return False
 
 
+def parse_moment(value) -> tuple | None:
+    """`YYYY-MM-DD` hoặc `YYYY-MM-DD HH:MM +TZ` → (ngày như đã viết, thời điểm có múi giờ hoặc `None`); không đọc được → `None`."""
+    m = MOMENT.fullmatch(value.strip()) if isinstance(value, str) else None
+    if not m:
+        return None
+    try:
+        day = datetime.strptime(m.group(1), "%Y-%m-%d").date()
+        if m.group(2) is None:
+            return day, None
+        offset = int(m.group(5)) * 60 + int(m.group(6) or 0)
+        if m.group(4) == "-":
+            offset = -offset
+        return day, datetime(day.year, day.month, day.day, int(m.group(2)), int(m.group(3)),
+                             tzinfo=timezone(timedelta(minutes=offset)))
+    except ValueError:  # ngày không có thật, giờ ngoài 00:00–23:59, múi giờ ngoài ±24h
+        return None
+
+
+def moment_not_after(a: tuple, b: tuple) -> bool:
+    """`a` không sau `b`: so thời điểm khi cả hai có giờ, không thì so ngày."""
+    return a[1] <= b[1] if a[1] is not None and b[1] is not None else a[0] <= b[0]
+
+
 def load_doc(path: Path) -> Doc:
     text = c.read_text(path)
     start, raw = c.body_lines(text)
@@ -1156,6 +1188,10 @@ class Engine:
         if kind in ("report", "sprint"):
             check_set("verdict", VERDICT_VALUES)
             check_set("gate_2", VERDICT_VALUES)
+        for gate, kinds in (("gate_1", ("spec", "plan", "sprint")), ("gate_2", ("report", "sprint"))):
+            mode = data.get(f"{gate}_mode")
+            if kind in kinds and f"{gate}_mode" in data and not (isinstance(mode, str) and mode in GATE_MODES):
+                bad(f"{gate}_mode", f"{gate}_mode: {mode!r} không thuộc {sorted(GATE_MODES)}")
         if "review_round" in data:
             value = data["review_round"]
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
@@ -1222,6 +1258,107 @@ class Engine:
             self.add(doc.path, doc.key_line("status"), "gate-invalid", "status: accepted nhưng gate_2 chưa có kết luận")
         if doc.kind == "sprint" and status == "done" and data.get("gate_2") in (None, "pending"):
             self.add(doc.path, doc.key_line("status"), "gate-invalid", "status: done nhưng gate_2 chưa có kết luận")
+        if doc.kind in ("spec", "plan", "sprint"):
+            self._delegation(doc, "gate_1")
+        if doc.kind in ("report", "sprint"):
+            self._delegation(doc, "gate_2")
+
+    def _delegation(self, doc: Doc, gate: str) -> None:
+        """Cổng `delegated` đã kết luận phải có hồ sơ duyệt thay đủ (SPEC 7.3); báo lỗi đầu tiên của cổng rồi dừng.
+        Vắng `gate_N_mode` hoặc `human` → không kiểm gì (hồ sơ cũ giữ nguyên kết quả)."""
+        data, path = doc.data, doc.path
+        mode_key, quote_key = f"{gate}_mode", f"{gate}_quote"
+        if data.get(mode_key) != "delegated" or data.get(gate) in (None, "pending"):
+            return
+
+        def bad(key: str, message: str) -> None:
+            self.add(path, doc.key_line(key), "gate-delegation-invalid", f"{mode_key}: delegated — {message}")
+
+        block = data.get("delegation")
+        if not isinstance(block, dict) or not block:
+            return bad("delegation" if "delegation" in data else mode_key,
+                       "thiếu khối delegation (lời cấp, phạm vi, hạn, người duyệt)")
+        unknown = [k for k in block if k not in DELEGATION_KEYS]
+        if unknown:
+            return bad(f"delegation.{unknown[0]}", f"delegation.{unknown[0]} ngoài bảng khoá {list(DELEGATION_KEYS)}")
+        grant = block.get("grant")
+        if not (isinstance(grant, str) and grant.strip()):
+            return bad("delegation.grant" if "grant" in block else "delegation", "thiếu lời cấp nguyên văn (delegation.grant)")
+        gate_at = None
+        if data.get(f"{gate}_at") not in (None, ""):
+            gate_at = parse_moment(data[f"{gate}_at"])
+            if gate_at is None:
+                return bad(f"{gate}_at", f"{gate}_at: {data[f'{gate}_at']!r} không đọc được (YYYY-MM-DD hoặc YYYY-MM-DD HH:MM +TZ)")
+        grant_at = parse_moment(block.get("grant_at"))
+        if grant_at is None:
+            return bad("delegation.grant_at" if "grant_at" in block else "delegation",
+                       f"delegation.grant_at: {block.get('grant_at')!r} thiếu hoặc không đọc được")
+        if gate_at is not None and not moment_not_after(grant_at, gate_at):
+            return bad("delegation.grant_at", f"lời cấp ({block['grant_at']}) sau thời điểm cổng ({data[f'{gate}_at']})")
+        scope = block.get("scope")
+        if not isinstance(scope, list) or gate not in scope:
+            return bad("delegation.scope" if "scope" in block else "delegation", f"phạm vi {scope!r} không chứa {gate}")
+        expires = block.get("expires")
+        if expires != "sprint_end":
+            until = parse_moment(expires) if isinstance(expires, str) and DATE.fullmatch(expires) else None
+            if until is None:
+                return bad("delegation.expires" if "expires" in block else "delegation",
+                           f"delegation.expires: {expires!r} phải là sprint_end hoặc ngày YYYY-MM-DD")
+            if gate_at is not None and until[0] < gate_at[0]:
+                return bad("delegation.expires", f"quá hạn: hạn {expires} trước ngày cổng")
+        if block.get("tier") != "T1":
+            return bad("delegation.tier" if "tier" in block else "delegation", f"người duyệt thay phải là T1, đang là {block.get('tier')!r}")
+        by = block.get("by")
+        if not isinstance(by, str) or not by.strip() or by == "pending":
+            return bad("delegation.by" if "by" in block else "delegation", "delegation.by phải là nhãn agent đã giao (khác rỗng, khác pending)")
+        roles = data.get("roles")
+        held = sorted(r for r, v in roles.items()
+                      if r in EXECUTORS and isinstance(v, list) and len(v) >= 2 and v[1] == by) if isinstance(roles, dict) else []
+        if held:
+            self.add(path, doc.key_line("delegation.by"), "self-review",
+                     f"người duyệt thay '{by}' cũng giữ vai thực thi ({', '.join(held)}) của cùng tài liệu")
+        files = block.get("files", [])
+        if not isinstance(files, list):
+            return bad("delegation.files", f"delegation.files: {files!r} phải là danh sách")
+        revoked = block.get("revoked_at")
+        if revoked not in (None, ""):
+            revoked_at = parse_moment(revoked)
+            if revoked_at is None:
+                return bad("delegation.revoked_at", f"delegation.revoked_at: {revoked!r} không đọc được")
+            if gate_at is not None:  # ngày không giờ: cùng ngày chưa đủ để kết luận đã thu hồi trước cổng
+                timed = revoked_at[1] is not None and gate_at[1] is not None
+                if revoked_at[1] <= gate_at[1] if timed else revoked_at[0] < gate_at[0]:
+                    return bad("delegation.revoked_at", f"đã thu hồi ({revoked}) không sau thời điểm cổng ({data[f'{gate}_at']})")
+        quote = data.get(quote_key)
+        if not (isinstance(quote, str) and quote.startswith(DELEGATION_QUOTE)):
+            return bad(quote_key, f"{quote_key} phải bắt đầu bằng '{DELEGATION_QUOTE}'")
+        if doc.kind in ("plan", "report", "sprint"):
+            missing = self._record_gaps(doc)
+            if missing is not None:
+                return bad(mode_key, missing)
+        tags = data.get("risk_tags")
+        tags = set(tags) if isinstance(tags, list) and all(isinstance(t, str) for t in tags) else set()
+        if tags & DELEGATION_FORBIDDEN_TAGS:
+            return bad("risk_tags", f"risk_tags có {', '.join(sorted(tags & DELEGATION_FORBIDDEN_TAGS))} — vùng cấm duyệt thay")
+        if "rules" in tags and not files:
+            return bad("delegation.files", "risk_tags có rules mà delegation.files rỗng — file luật phải nêu đích danh trong lời cấp")
+
+    def _record_gaps(self, doc: Doc) -> str | None:
+        """Mục `## Bản ghi duyệt thay` có đủ ba nhãn không; `None` = đủ, ngược lại = lời mô tả chỗ thiếu."""
+        start = end = None
+        for idx, line in enumerate(doc.masked):
+            if not line.startswith("## "):
+                continue
+            if start is not None:
+                end = idx
+                break
+            if DELEGATION_RECORD.casefold() in NUMBERING.sub("", doc.raw[idx][3:].strip()).casefold():
+                start = idx
+        if start is None:
+            return f"thiếu mục '## {DELEGATION_RECORD}'"
+        body = [re.sub(r"^[-*\s]+", "", line).replace("**", "") for line in doc.masked[start + 1:end]]
+        missing = [label for label in DELEGATION_LABELS if not any(line.startswith(label) for line in body)]
+        return f"mục '{DELEGATION_RECORD}' thiếu nhãn {', '.join(missing)}" if missing else None
 
     # -- hình tài liệu theo cỡ --
 

@@ -49,6 +49,8 @@ SPRINTS sau Cổng 2.
   phán quyết vẫn ở Analyst.
 - Chọn effort khi giao: max(sàn vai, độ khó) theo `method/effort-scale.md`; chỉ định của người dùng thắng; độ khó ≥
   sàn + 2 → ghi `Phán quyết:` xét lại vai/tier trước khi nâng effort.
+- Khuyến nghị tại cổng khi người dùng xin (chọn · vì sao · loại · sai thì tốn); duyệt thay chỉ khi có lời cấp đủ cổng · sprint ·
+  hạn ([method/process.md](../../method/process.md) mục 3), ghi `gate_N_mode: delegated` và mục Bản ghi duyệt thay.
 
 ## 6. Không được làm
 - Viết code sản phẩm trước Cổng 1; tự viết PLAN thay Architect ở cỡ vừa trở lên.
@@ -57,6 +59,7 @@ SPRINTS sau Cổng 2.
   mức tier; hỏi lẻ nhiều lượt ở tiếp nhận thay cho một tin gom.
 - Suy lời "ok" ở cổng này thành phép làm ở bước sau; sửa SPEC đã duyệt mà không trình lại.
 - Tự nâng bài học thành luật/skill; tự hạ tier; tự chạy gọi chéo hãng.
+- Duyệt thay sản phẩm mình làm; duyệt thay khi `risk_tags` có `secret` hoặc `auth`.
 
 ## 7. Khi nào dừng
 Lượt trao đổi tiếp nhận ([method/process.md](../../method/process.md) mục 2) · bốn điều kiện dừng (mục 5) ·

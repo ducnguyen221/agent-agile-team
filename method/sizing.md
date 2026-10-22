@@ -96,6 +96,7 @@ frontmatter; nó chỉ xuất hiện trong lời trả lời.
 Cỡ ghi ở Bước 1 (Tiếp nhận) sau khi người dùng xác nhận bậc trong lượt trao đổi, có thể **nâng** ở bất kỳ bước nào
 khi lộ rủi ro mới (ghi `Phán quyết:` kèm lý do); **hạ** cỡ chỉ được ở Cổng 1 do người dùng quyết. Việc đang làm
 thẳng mà lộ ra cần hơn 2 thao tác, chạm vùng rủi ro hay kết quả không còn rõ → dừng, mở lượt trao đổi tiếp nhận.
+Mức tự trị ở Brief và chế độ duyệt thay không hạ cỡ hay rủi ro.
 
 ## 5. Đối chiếu luồng orch
 

@@ -26,6 +26,10 @@ def make_sprint(tmp_path: Path) -> Path:
 
 
 def apply_case(root: Path, case: dict) -> None:
+    if case.get("base") == "delegated":
+        delegate_plan(root)
+    elif case.get("base") == "delegated-report":
+        delegate_report(root)
     if "replace" in case:
         target = root / case.get("target", case["file"])
         old, new = case["replace"]
@@ -42,13 +46,67 @@ def rules_of(report) -> set:
     return {f.rule for f in report.findings}
 
 
+DELEGATION_RECORD = """
+## Bản ghi duyệt thay
+
+- **Phương án chọn:** phương án a — giữ nguyên hình hiện có.
+- **Phương án bị loại:** phương án b — đổi hình, tốn thêm một việc.
+- **Nếu sai thì tốn gì:** sửa lại tài liệu và duyệt lại, chưa có mã nào được viết.
+- Lời cấp: khối `delegation` ở frontmatter.
+"""
+
+
+def _rewrite(path: Path, old: str, new: str, tail: str = "") -> None:
+    text = path.read_text(encoding="utf-8")
+    assert old in text, f"không thấy chuỗi cần thay trong {path.name}"
+    write_lf(path, text.replace(old, new, 1) + tail)
+
+
+def delegate_plan(root: Path) -> None:
+    """PLAN hợp lệ ở Cổng 1 duyệt thay: khối `delegation` đủ, quote `duyệt thay:` và mục bản ghi."""
+    _rewrite(root / "PLAN.md", 'gate_1_quote: "duyệt"\n', (
+        'gate_1_quote: "duyệt thay: chọn phương án a — xem mục Bản ghi duyệt thay"\n'
+        "gate_1_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint."\n'
+        "  grant_at: 2026-02-01 08:30 +07\n"
+        "  scope: [gate_1]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-r\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"), DELEGATION_RECORD)
+
+
+def delegate_report(root: Path) -> None:
+    """REPORT hợp lệ ở Cổng 2 duyệt thay."""
+    _rewrite(root / "REPORT.md", "gate_2: pending\ngate_2_at: null\ngate_2_quote: null\n", (
+        "gate_2: pass\n"
+        "gate_2_at: 2026-02-02 17:00 +07\n"
+        'gate_2_quote: "duyệt thay: Đạt — xem mục Bản ghi duyệt thay"\n'
+        "gate_2_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 2 của SPR-03 tới hết sprint."\n'
+        "  grant_at: 2026-02-02 08:00 +07\n"
+        "  scope: [gate_2]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-r\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"), DELEGATION_RECORD)
+
+
+def codes(findings) -> list:
+    return sorted(f.rule for f in findings)
+
+
 def test_valid_fixture_is_clean():
     report = check.check_paths([VALID])
     assert [f.render() for f in report.findings] == []
     assert report.exit_code == 0
 
 
-@pytest.mark.parametrize("case", CASES, ids=[c["rule"] for c in CASES])
+@pytest.mark.parametrize("case", CASES, ids=[c.get("name", c["rule"]) for c in CASES])
 def test_broken_case_is_caught_with_its_rule(tmp_path, case):
     root = make_sprint(tmp_path)
     apply_case(root, case)
@@ -1558,3 +1616,88 @@ def test_researcher_role_is_executor(tmp_path):
     write_lf(path, text.replace(old, old + "  researcher: [T3, agent-g]\n", 1))
     report = check.check_paths([root])
     assert not [f for f in report.findings if f.rule == "roles-invalid"], [f.render() for f in report.findings]
+
+
+# --- Duyệt thay tại cổng (SPEC 7.3) -----------------------------------------------------------------------
+
+
+def test_delegated_gate_valid_has_no_findings(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    report = check.check_paths([root])
+    assert codes(report.findings) == [], [f.render() for f in report.findings]
+    assert report.exit_code == 0
+
+
+def test_delegated_gate_report_scope(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_report(root)
+    report = check.check_paths([root])
+    assert codes(report.findings) == [], [f.render() for f in report.findings]
+    assert report.exit_code == 0
+
+
+@pytest.mark.parametrize("old,new", [
+    ("expires: sprint_end", "expires: 2026-02-01"),  # hạn đúng ngày cổng vẫn còn hiệu lực
+    ("grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-02-01"),  # ngày không giờ: so theo ngày
+    ("grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-02-01 01:30 +0000"),  # cùng một lúc 08:30 +07, múi giờ khác
+    ("grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-01-31 20:00 -05:00"),  # múi giờ âm, dạng +HH:MM
+    ("revoked_at: null", "revoked_at: 2026-02-01 09:30 +07"),  # thu hồi sau cổng: cổng vẫn hợp lệ
+    ("files: []", "files: [AGENTS.md]"),
+])
+def test_delegation_boundary_values_stay_valid(tmp_path, old, new):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", old, new)
+    assert codes(check.check_paths([root]).findings) == []
+
+
+def test_delegation_rules_stay_quiet_while_gate_is_pending(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "gate_1: approved", "gate_1: pending")
+    _rewrite(root / "PLAN.md", "scope: [gate_1]", "scope: []")
+    assert "gate-delegation-invalid" not in codes(check.check_paths([root]).findings)
+
+
+def test_delegation_stops_at_first_problem_per_gate(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "tier: T1", "tier: T3")
+    _rewrite(root / "PLAN.md", "scope: [gate_1]", "scope: []")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "gate-delegation-invalid"]
+    assert len(hits) == 1, [f.render() for f in hits]
+
+
+def test_delegated_spec_does_not_need_the_record_section(tmp_path):
+    """SPEC không có mục bản ghi: bản ghi nằm ở PLAN; khối đủ ở SPEC không bị đòi mục bản ghi."""
+    root = make_sprint(tmp_path)
+    _rewrite(root / "SPEC.md", 'gate_1_quote: "duyệt"\n', (
+        'gate_1_quote: "duyệt thay: chọn phương án a — xem mục Bản ghi duyệt thay ở PLAN"\n'
+        "gate_1_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint."\n'
+        "  grant_at: 2026-02-01 08:30 +07\n"
+        "  scope: [gate_1]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-r\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"))
+    assert codes(check.check_paths([root]).findings) == []
+
+
+def test_delegation_record_labels_must_sit_in_the_record_section(tmp_path):
+    """Nhãn nằm ở mục khác phía sau không thay cho nhãn trong mục `Bản ghi duyệt thay`."""
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "**Nếu sai thì tốn gì:**", "**Hậu quả:**", "\n## Phần khác\n\n- **Nếu sai thì tốn gì:** đặt nhầm chỗ.\n")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "gate-delegation-invalid"]
+    assert len(hits) == 1 and "Nếu sai thì tốn gì:" in hits[0].message, [f.render() for f in hits]
+
+
+def test_delegation_record_may_precede_another_section(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "- Lời cấp:", "- Lời cấp:", "\n## Phần khác\n\nKhông có.\n")
+    assert codes(check.check_paths([root]).findings) == []

@@ -25,13 +25,15 @@ Cập nhật hay mở rộng skill/agent: quay lại nguồn gốc trong `UPSTRE
    Bỏ lượt này khi người dùng đã nói rõ "không cần sprint" hoặc việc là làm thẳng không mơ hồ.
 2. **SPEC rồi PLAN** → **Cổng 1** (người dùng duyệt / điều chỉnh). Từ cỡ vừa, Tech Reviewer review PLAN
    trước khi trình. Trình tóm tắt: kết luận, `CQ`, `DN`, rủi ro, ước lượng. Duyệt thì ghi
-   `gate_1: approved` + `gate_1_quote` nguyên văn. **Không code trước Cổng 1.**
+   `gate_1: approved` + `gate_1_quote` nguyên văn. **Không code trước Cổng 1.** T1 khuyến nghị khi được xin;
+   duyệt thay chỉ khi người dùng cấp rõ, có phạm vi và hạn — `method/process.md` mục 3.
 3. **Thực thi** theo `TK`, cập nhật PROGRESS sau mỗi việc (trạng thái + bằng chứng). Điều chỉnh trong
    phạm vi đã duyệt: Analyst tự quyết, ghi `Phán quyết: <gì> — <vì sao> — <sai thì tốn gì>`, không hỏi.
 4. **Kiểm định** bởi agent khác người làm: `RF` có mức + bằng chứng. Còn Chặn/Phải sửa → quay lại 3
    (một vòng). Khuyến nghị 3 vòng, không trần cứng: hết vòng 3 còn Chặn/Phải sửa → báo người dùng chọn
    làm tiếp hoặc dừng & bàn giao. Nên sửa được hoãn thành `CO`.
-5. **REPORT** → **Cổng 2** (Đạt / Đạt có điều kiện / Không đạt). Sau đó mới cập nhật spec sống, đóng sprint.
+5. **REPORT** → **Cổng 2** (Đạt / Đạt có điều kiện / Không đạt). T1 khuyến nghị khi được xin; duyệt thay chỉ khi
+   người dùng cấp rõ, có phạm vi và hạn — `method/process.md` mục 3. Sau đó mới cập nhật spec sống, đóng sprint.
 6. **Bài học** `LN` ghi nơi lớp riêng quy định; quan trọng thì **đề xuất** nâng thành luật/skill, không tự nâng.
 
 **Dừng và hỏi chỉ khi:** (a) hành động không đảo ngược, (b) chạm bảo mật/secret, (c) tác động ra ngoài

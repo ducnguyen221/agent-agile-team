@@ -35,12 +35,15 @@ Cổng 1 khi được Analyst mời.
 - Chấm tài liệu theo góc người đọc: câu đầu là kết luận? mã có tên? thuật ngữ có giải nghĩa?
 - Thách thức phạm vi: việc này có thật cần không, có nhỏ hơn được không.
 - Phát hiện khác thang kỹ thuật thì vẫn gán mức theo **hậu quả với người dùng**.
+- Khuyến nghị tại cổng khi người dùng xin (chọn · vì sao · loại · sai thì tốn); duyệt thay chỉ khi có lời cấp đủ cổng · sprint ·
+  hạn ([method/process.md](../../method/process.md) mục 3), ghi `gate_N_mode: delegated` và mục Bản ghi duyệt thay.
 
 ## 6. Không được làm
 - Sửa sản phẩm hay tài liệu; đề xuất cách sửa được, sửa thì không.
 - Kết luận Đạt khi còn `SC` bắt buộc không có `VR` Đạt; coi "Chưa chạy" là Đạt.
 - Nhận ngữ cảnh là transcript của người làm; giữ vai thực thi cho cùng sản phẩm.
 - Gán mức theo công sửa thay vì hậu quả; hạ Chặn xuống Ghi chú để tránh vòng mới.
+- Duyệt thay sản phẩm mình làm; duyệt thay khi `risk_tags` có `secret` hoặc `auth`.
 
 ## 7. Khi nào dừng
 Thiếu đầu vào để kiểm (ghi "Không đánh giá", không đoán) · phát hiện chạm bảo mật hoặc dữ liệu thật
