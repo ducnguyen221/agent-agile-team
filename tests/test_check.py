@@ -1733,6 +1733,13 @@ def test_task_order_ignores_parallel_mark(tmp_path):
     assert "task-order" not in codes(findings), [f.render() for f in findings]
 
 
+def test_task_order_parallel_mark_ignores_case(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_tasks(root, _task("TK2", "TK1.") + _task("TK3", "TK2. Chạy cùng được với TK4.") + _task("TK4", "TK2."))
+    findings = check.check_paths([root]).findings
+    assert "task-order" not in codes(findings), [f.render() for f in findings]
+
+
 def test_task_order_allows_parent_for_subtask(tmp_path):
     root = make_sprint(tmp_path)
     _add_tasks(root, _task("TK2", "TK1.") + _task("TK2.1", "TK2.") + _task("TK3", "TK2.1."))

@@ -50,7 +50,7 @@ gộp làm một `TK` có danh sách file.
 | Mục của mẫu | Viết gì |
 |---|---|
 | Kết luận | một câu: cách làm chính + số việc + điều cần người quyết |
-| Mục tiêu | ba dòng nhãn của mẫu (luật `plan-goal-block`): mục tiêu sprint (và mục tiêu việc nếu khác) · kết quả và khi nào xong, trỏ `SC` · rủi ro cụ thể, trỏ `RK` |
+| Mục tiêu | ba dòng nhãn chép đúng chữ mẫu (luật `plan-goal-block` báo khi viết tắt): `Mục tiêu sprint:` một câu (và mục tiêu việc nếu khác) · `Kết quả mong muốn / xong khi:` trỏ `SC` · `Rủi ro cần chú ý:` rủi ro cụ thể, trỏ `RK` |
 | Kiến trúc | 2–3 câu cách làm; thành phần đổi; luồng dữ liệu; quyết định lâu dài → trỏ ADR (`docs/architecture/adr/`) |
 | Ràng buộc chung | luật áp cho MỌI `TK`: ngưỡng phiên bản, giới hạn phụ thuộc, quy ước đặt tên, nền tảng, coverage — chép nguyên văn từ SPEC/dự án |
 | Trọng tâm review | **≤5** lớp đầu vào hay kiểu hỏng SPEC ngụ ý nhưng chưa `TK` nào có test — thứ dễ cắn người dùng nhất lên đầu; mỗi dòng rồi **gắn test về `TK` sở hữu code** (mục 4) |
@@ -64,7 +64,7 @@ vào đó làm hỏng chương trình — đó là việc của Trọng tâm rev
 
 ## 4. Một `TK` gồm gì
 
-Sáu dòng bắt buộc của mẫu, rồi khối **Bước**:
+Sáu dòng bắt buộc của mẫu, rồi khối **Bước** — khung tối thiểu, ví dụ dưới viết rút gọn; thước đủ chi tiết là checklist 11 ô ngay sau ví dụ:
 
 ```
 ### TK3 — Hàm chuẩn hoá mã đơn (→ FR1.2, SC1)
@@ -90,10 +90,10 @@ Sáu dòng bắt buộc của mẫu, rồi khối **Bước**:
 độc lập vẫn số liền nhau, việc sau ghi "chạy cùng được với TKk". Trước Cổng 1 được đánh số lại; sau Cổng 1 chèn `TKn.m`
 (`id-convention` mục 4).
 
-**Checklist 11 ô mỗi `TK`** — ô trống là Phải sửa khi review: tiêu đề trỏ `FR`/`SC` · vai · tier (+ effort nếu khác sàn) ·
-`Đầu vào:` · `File:` đường đầy đủ + tạo/sửa + neo (dòng hoặc mục) · `Giao diện:` tên + chữ ký/giá trị, enum đủ · hành vi
-từng nhánh "vào → ra" có ví dụ · chữ dự thảo cho tài liệu/skill/mẫu (hoặc trỏ mục SPEC có chữ chốt) · Bước theo bảng dưới
-· Cách kiểm lệnh + output · commit mang mã `TK` · Hoàn tác + Bằng chứng đạt.
+**Checklist 11 ô mỗi `TK`** — ô trống là Phải sửa khi review: (1) tiêu đề trỏ `FR`/`SC` · (2) vai · tier (+ effort nếu khác
+sàn) · (3) `Đầu vào:` · (4) `File:` đường đầy đủ + tạo/sửa + neo (dòng hoặc mục) · (5) `Giao diện:` tên + chữ ký/giá trị, enum
+đủ · (6) hành vi từng nhánh "vào → ra" có ví dụ · (7) chữ dự thảo cho tài liệu/skill/mẫu (hoặc trỏ mục SPEC có chữ chốt) ·
+(8) Bước theo bảng dưới · (9) Cách kiểm lệnh + output · (10) commit mang mã `TK` · (11) Hoàn tác + Bằng chứng đạt.
 
 **Khối Giao diện là cách `TK` sau biết tên và kiểu của `TK` trước:** người làm `TK` chỉ thấy `TK` của
 mình. `TK` trỏ `TK` khác thì trỏ vào khối Giao diện của nó, không chép lại code.

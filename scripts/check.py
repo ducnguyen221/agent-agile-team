@@ -1523,7 +1523,7 @@ class Engine:
             line, text = field
             own = _tk_key(d.code)
             seen = set()
-            for code in codes_on(text.split(PARALLEL_MARK)[0]):
+            for code in codes_on(re.split(re.escape(PARALLEL_MARK), text, maxsplit=1, flags=re.I)[0]):
                 if prefix(code) == "TK" and code not in seen and _tk_key(code) >= own:
                     seen.add(code)
                     self.add(doc.path, line, "task-order", f"{d.code} trỏ {code} ở Đầu vào — số TK phải là thứ tự làm")
