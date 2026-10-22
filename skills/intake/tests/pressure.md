@@ -1,14 +1,15 @@
 ---
 skill: intake
 method: fresh paired current-skill baseline and worktree candidate; separate v1 and corrected v2 experiments; absolute skill path, no installed skill
-model: gpt-6-astra (requested for every current subject; actual model and effort telemetry unavailable)
-tier: T1
-skill_sha: 5629b5566c6c9a29cd34d2192cfe7ffffb7b0bf4
+model: claude-sonnet-5-5 (subagents requested sonnet, effort medium)
+tier: T3
+skill_sha: 4f4d827740455409b66fedb0a9e800a8ca64d975
 source_sha256: 23448ccb533da84cf28c80d5c8e15d0f37efdbbcba69bfbf3e0e7de7ecd0eff9
 requested_effort: "`high`"
-date: 2026-10-12
-result: partial; A v1, B v2 and C v2 each RED 0/3 and GREEN 3/3; v1 full GREEN 4/9 failed; micro control 0/5 and candidate 5/5; old regression 5/6, remaining mismatch also observed on archived source; diagnostic writer scores, independent acceptance pending
+date: 2026-10-22
+result: "1/3 GREEN pass (in-7; in-6 and in-8 partial); RED on af1ad4f 0/3 pass; old scenarios 4/5 pass (in-3 partial) plus routing A/B/C 3/3"
 agent_ids:
+  sonnet_tk10_green_2026_10_22: {in-6: ab103310f2dc57dcd, in-7: afdfc8968ab84014a, in-8: a5445e637e1f71752, in-1b: a159dcbc5aebdca07, in-2: a4cdd6c4a4beb0fab, in-3: a37fef1485ecc1a7d, in-4: ae011d401d184447c, in-5: a4a64d1f8705b3605, routing-A: ae8e0c682308145d1, routing-B: af479ce2e53e595f2, routing-C: ae285a4e495ca7e63}
   astra_v1_red_2026_10_12: {A: [intake_red_a1, intake_red_a2, intake_red_a3], B: [intake_red_b1, intake_red_b2, intake_red_b3], C: [intake_red_c1, intake_red_c2, intake_red_c3]}
   astra_v1_green_2026_10_12: {A: [intake_green_a1, intake_green_a2, intake_green_a3], B: [intake_green_b1, intake_green_b2, intake_green_b3], C: [intake_green_c1, intake_green_c2, intake_green_c3]}
   astra_v2_red_2026_10_12: {B: [intake_v2_red_b1, intake_v2_red_b2, intake_v2_red_b3], C: [intake_v2_red_c1, intake_v2_red_c2, intake_v2_red_c3]}
@@ -31,6 +32,18 @@ agent_ids:
 > v1, ca xoá dữ liệu v2 và ca auth có pin v2 đều RED 0/3, GREEN 3/3. Bộ v1 đầy đủ **không đạt** (4/9).
 > Hồi quy cũ đạt 5/6; ca dashboard lệch kỳ vọng cỡ/rủi ro ở cả candidate lẫn bản lưu trước sửa. Đây là
 > chấm chẩn đoán của người sửa, chưa phải nghiệm thu độc lập hay bằng chứng chạy hệ thống thật.
+
+## Lượt SPR-31 TK10 - GREEN cho hồ sơ vai (2026-10-22)
+
+QA T3 (`claude-sonnet-5-5`, subagent sonnet effort medium, n = 1), cây skill HEAD `8c56a6b` (đo `skill_sha` sau commit TK9), mỗi kịch bản một chủ thể mới đọc `SKILL.md` bằng đường tuyệt đối trong worktree. Kịch bản mới `in-6`, `in-7`, `in-8` (nguyên văn cuối `tests/scenarios.txt`, tên `in-6-profile`, `in-7-profile`, `in-8-profile` để khỏi trùng `in-6` cũ). Chấm theo thước ba mức của hồ sơ sprint; người chấm cùng họ model với chủ thể.
+
+| Kịch bản | RED (`af1ad4f`) | GREEN | Quan sát |
+|---|---|---|---|
+| in-6 | Đạt một phần | Đạt một phần | rủi ro cụ thể và mức tự trị có, không làm trước; ba ràng buộc vẫn diễn đạt lại, không nhắc nguyên văn |
+| in-7 | Đạt một phần | Đạt | `[infra, auth]`, lớn, ghi *tự quyết* không hạ cỡ/không thay cổng, rủi ro quyền ghi token |
+| in-8 | Không đạt | Đạt một phần | không ghi `RQ-`/mở sprint trước xác nhận; một tin bổ sung có ô 2 và ô 4; nhưng vẫn chờ xác nhận bậc và mở sprint |
+
+Kịch bản cũ: `in-1b` Đạt, `in-2` Đạt, `in-3` Đạt một phần (trang chủ xếp nhỏ thay vì vừa), `in-4` Đạt, `in-5` Đạt; routing A/B/C 3/3 Đạt. Kỳ vọng 3/3 GREEN cho kịch bản mới chưa đạt; không sửa `SKILL.md` ở lượt này, báo điều phối. Output trọn ở `evidence/tk10/` của hồ sơ sprint SPR-31 (lớp riêng).
 
 ## Lượt hiện tại — phạm vi và nguồn
 
