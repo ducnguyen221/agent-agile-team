@@ -183,7 +183,7 @@ delegation:
 
 - Mỗi `TK` do đúng vai và tier ghi trong PLAN làm (skill `running-sprint`). Khi giao cho subagent:
   brief soạn riêng (mục tiêu, phạm vi, đầu vào, điều cấm, cách báo cáo), **không dán lịch sử phiên**,
-  và **ghi vai + tier + model thực tế** vào cột "Vai · tier · model" của PROGRESS; nhãn agent
+  và **ghi vai + tier + model + effort thực tế** vào cột "Vai · tier · model" của PROGRESS; nhãn agent
   (`agent-a`, `agent-b`…) vào `roles` của frontmatter.
 - Sau mỗi `TK`: cập nhật bảng trạng thái PROGRESS (Đạt / Không đạt / Chưa chạy / Không áp dụng / Đang
   làm) kèm **bằng chứng** theo [evidence.md](evidence.md). Hai dòng tối thiểu cho mỗi `TK`: lúc bắt đầu

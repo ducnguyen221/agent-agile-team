@@ -11,11 +11,13 @@ the rest and records it.
 - **One process, six steps, two human gates:** intake (one consolidated exchange: restated goal, challenging
   questions, recommended size, sprint or direct action) → spec + plan (**Gate 1:** approve or adjust) →
   execute ↔ verify (loop, three rounds recommended) → report (**Gate 2:** pass / conditional pass / fail) →
-  lessons. A one-or-two-step job with a clear result, or one the user says needs no sprint, is done directly
+  lessons. At a gate the user may ask T1 for a recommendation; T1 approves in the user's place only under an
+  explicit grant with a scope and an expiry (off by default).
+  A one-or-two-step job with a clear result, or one the user says needs no sprint, is done directly
   with no paperwork. Agents stop to ask only in four named cases; asking anywhere else is a process error.
-- **Roles by tier, not by model name:** Analyst, Architect, Implementer, QA, Business Reviewer, Tech
-  Reviewer; tiers `T1` thinking · `T2` execution · `T3` chores and test runs. **Whoever does the work never
-  grades it.**
+- **Roles by tier, not by model name:** Analyst, Architect, Implementer, QA, Researcher (T3, finds and reads,
+  draws no conclusions), Business Reviewer, Tech Reviewer; tiers `T1` thinking · `T2` execution · `T3` chores
+  and test runs; effort is one 1–5 number shared by every vendor. **Whoever does the work never grades it.**
 - **Documents an agent can search cheaply:** four sprint documents (SPEC, PLAN, PROGRESS, REPORT; a very small
   job uses one two-section `SPRINT.md`, a small job one four-section `SPRINT.md`) and three project registries (requests, sprints, living specs) with an
   "open now" block at the top. Every item has a two-letter code (`FR3.2`, `TK4`, `RF2`).

@@ -19,8 +19,8 @@ hoặc bản trang web <https://ducnguyen.vn/agent-agile-team/>.
 - **Sổ gốc** — ba file sống lâu của dự án: REQUESTS (mọi yêu cầu theo thời gian, mã `RQ-001`…), SPRINTS
   (mọi sprint, mã `SPR-01`…), SPECS (mọi tính năng đang chạy, mã `FS-001`…). Đầu mỗi sổ có khối "Đang mở" để
   agent tra nhanh.
-- **Vai và tier** — agent nhận vai (Analyst điều phối, Architect, Implementer, QA, Business Reviewer, Tech
-  Reviewer); mỗi vai có **tier** (`T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test) thay vì tên
+- **Vai và tier** — agent nhận vai (Analyst điều phối, Architect, Implementer, QA, Researcher tìm đọc không kết luận,
+  Business Reviewer, Tech Reviewer); mỗi vai có **tier** (`T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test) thay vì tên
   model. Ai làm thì **không** tự chấm việc của mình.
 
 ## 2. Dựng khung cho dự án (một lần)
@@ -51,6 +51,8 @@ python "$HOME\agent-agile-team\scripts\init.py" . --apply
 | 4. Kiểm định | Không cần làm gì | Agent **khác** người làm kiểm; còn lỗi nặng thì quay lại bước 3. Sau 3 vòng còn lỗi → hỏi bạn làm tiếp hay dừng |
 | 5. REPORT | **Cổng 2:** kết luận Đạt / Đạt có điều kiện / Không đạt | Viết REPORT (kết luận trước, cách dùng, cách hoàn tác, việc để lại), nợ còn lại thành dòng `RQ-` mới |
 | 6. Bài học | Quyết có nâng bài học thành luật hay không | Ghi bài học vào nơi môi trường quy định; bài quan trọng chỉ **đề xuất** nâng |
+
+Ở mỗi cổng bạn có thể xin T1 một **khuyến nghị** (chọn gì, vì sao, loại gì, sai thì tốn gì); cổng vẫn là của bạn. Muốn T1 **duyệt thay** thì phải nói rõ câu cấp quyền có phạm vi và hạn (mặc định tắt; `method/process.md` mục 3); nói "Thu hồi duyệt thay SPR-NN." là dừng ngay.
 
 Câu lệnh mẫu để bắt đầu: *"Dùng agent-agile-team: thêm chức năng tra cứu đơn theo mã cho dự án này."*
 

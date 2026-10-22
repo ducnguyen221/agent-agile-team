@@ -9,10 +9,13 @@ nhận (mục tiêu, bậc việc, có mở sprint không) và chỉ trả lời
 - **Một quy trình, sáu bước, hai cổng người:** tiếp nhận (một tin trao đổi gom: nhắc lại mục tiêu, câu hỏi phản
   biện, khuyến nghị bậc, mở sprint hay làm thẳng) → SPEC + PLAN (**Cổng 1:** duyệt / điều chỉnh) →
   thực thi ↔ kiểm định (vòng lặp, khuyến nghị 3 vòng) → REPORT (**Cổng 2:** Đạt / Đạt có điều kiện / Không
-  đạt) → bài học. Việc 1–2 thao tác có kết quả rõ, hay người dùng nói "không cần sprint", thì làm thẳng, không hồ
+  đạt) → bài học. Ở cổng, người dùng có thể xin T1 khuyến nghị; T1 chỉ duyệt thay khi có lời cấp rõ, có
+  phạm vi và hạn (mặc định tắt).
+  Việc 1–2 thao tác có kết quả rõ, hay người dùng nói "không cần sprint", thì làm thẳng, không hồ
   sơ. Agent chỉ dừng hỏi ở bốn trường hợp đã nêu tên; hỏi ngoài đó là lỗi quy trình.
-- **Vai theo tier, không theo tên model:** Analyst, Architect, Implementer, QA, Business Reviewer, Tech
-  Reviewer; tier `T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test. **Người làm không tự chấm.**
+- **Vai theo tier, không theo tên model:** Analyst, Architect, Implementer, QA, Researcher (T3, tìm đọc, không
+  kết luận), Business Reviewer, Tech Reviewer; tier `T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test;
+  effort là một số 1–5 dùng chung cho mọi hãng. **Người làm không tự chấm.**
 - **Tài liệu agent tra rẻ:** bốn tài liệu sprint (SPEC, PLAN, PROGRESS, REPORT; việc rất nhỏ dùng một
   `SPRINT.md` hai phần, việc nhỏ một `SPRINT.md` bốn phần) và ba sổ gốc dự án (yêu cầu, sprint, spec sống) có khối "Đang mở" ở đầu. Mọi mục có mã hai chữ cái
   (`FR3.2`, `TK4`, `RF2`).

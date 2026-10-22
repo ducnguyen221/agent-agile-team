@@ -37,7 +37,7 @@ Lợi ích cho người không chuyên:
   nghi thức. Việc 1–2 thao tác có kết quả rõ, hay bạn nói "không cần sprint", agent **làm thẳng** — không hồ sơ,
   vẫn kiểm và báo kết quả.
 
-Con số của bản `0.3.0`: **6** bước · **2** cổng người · **6** vai · **3** tier · **32** skill · **13** agent ·
+Con số của bản `0.3.0`: **6** bước · **2** cổng người · **7** vai · **3** tier · **32** skill · **13** agent ·
 **3** công cụ Python · **3** harness được hỗ trợ.
 
 ## 2. Tính năng
@@ -53,6 +53,9 @@ Một sprint = một mục tiêu, đi đúng sáu bước; bạn xác nhận m�
 - Chỗ kế hoạch chưa nói tới, agent tự quyết và ghi một dòng `Phán quyết: <gì> — <vì sao> — <sai thì tốn gì>`
   vào nhật ký, không hỏi.
 - Không viết code trước Cổng 1; không push, không gộp nhánh chính trước Cổng 2 và khi bạn chưa gật.
+- Mặc định hai cổng là của bạn. Khi bạn xin, T1 đưa **khuyến nghị** (chọn gì, vì sao, loại gì, sai thì tốn gì); chỉ khi bạn nói
+  rõ một câu cấp quyền có phạm vi và hạn, T1 mới **duyệt thay**, và `check` kiểm hồ sơ đó
+  ([`method/process.md`](../method/process.md) mục 3).
 
 ### 2.2 Bậc việc — việc đơn giản đi đường nhẹ
 
@@ -75,14 +78,17 @@ Agent khuyến nghị bậc trong tin trao đổi lúc tiếp nhận; bạn xác
 
 ### 2.3 Vai và tier — giao việc theo năng lực, không theo tên model
 
-Sáu vai agent chia hai nhóm; mỗi vai có tier; repo không chứa tên model thật.
+Bảy vai agent chia hai nhóm; mỗi vai có tier; repo không chứa tên model thật.
 
-- **Thực thi:** Analyst (điều phối, T1) · Architect (T1) · Implementer (T2) · QA (T3). **Kiểm định:** Business
+- **Thực thi:** Analyst (điều phối, T1) · Architect (T1) · Implementer (T2) · QA (T3) · Researcher (T3, tìm đọc, không kết luận). **Kiểm định:** Business
   Reviewer (T1) · Tech Reviewer (T1), kéo thêm 4 thẻ chuyên đề security · data · backend · frontend khi rủi ro cao.
 - Tier: `T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test. Bảng tier → model nằm **ngoài repo**, trỏ
-  bằng biến môi trường `AGENT_AGILE_TIERS`; thiếu bảng thì agent dùng chỉ định của bạn trong chat, không đoán.
+  bằng biến môi trường `AGENT_AGILE_TIERS` (bảng schema 1 hoặc 2; hình ma trận vai × hãng ở `tiers/ROLE-MATRIX.example.md`);
+  thiếu bảng thì agent dùng chỉ định của bạn trong chat, không đoán.
+- Effort là một số **1–5** dùng chung cho mọi hãng: sàn theo vai, nâng theo độ khó, chỉ định của bạn thắng
+  ([`method/effort-scale.md`](../method/effort-scale.md)).
 - Cạn hạn mức model: dừng tier đó, ghi vướng mắc, báo bạn — **không tự hạ tier**.
-- Mỗi lần giao việc cho agent con, hồ sơ ghi đủ vai · tier · model thực tế.
+- Mỗi lần giao việc cho agent con, hồ sơ ghi đủ vai · tier · model · effort thực tế.
 
 ### 2.4 Bộ 32 skill và 13 agent
 
@@ -119,7 +125,7 @@ Kết luận Đạt chỉ đến từ bằng chứng **mới chạy** do agent *
 Ba công cụ Python chỉ dùng thư viện chuẩn (3.9+), chạy trên Windows và macOS, không cần cài gói nào.
 
 - `init` dựng `.agile.json`, ba sổ gốc và khung sprint từ mẫu; mặc định chạy thử, **không bao giờ ghi đè**.
-- `check` kiểm chuẩn tài liệu bằng 32 luật: đủ mục, mã đúng chuẩn, mỗi tiêu chí có kết quả kiểm, không ai tự
+- `check` kiểm chuẩn tài liệu bằng 41 luật: đủ mục, mã đúng chuẩn, mỗi tiêu chí có kết quả kiểm, không ai tự
   chấm, cổng đã kết luận thì có câu nguyên văn. Thoát 0 = Đạt, 1 = Không đạt, 2 = lỗi đầu vào.
 - `check --self` kiểm chính repo phương pháp: lõi sạch, ngân sách `AGENTS.md` (≤120 dòng, ≤10 KB), và luật
   **chống rò** — không một đường máy, tên người hay dự án riêng nào lọt vào lõi.
@@ -194,8 +200,8 @@ agent-agile-team/
 ├── INSTALL.md           hướng dẫn cài dành cho AI agent (prompt dán ở cuối)
 ├── method/              luật chơi: process, sizing, severity, evidence, review-gate, conventions
 │   └── standards/       chuẩn code chung và theo ngôn ngữ
-├── roles/               thẻ vai: executor/ (4) · verifier/ (2 + dual-review + 4 chuyên đề)
-├── tiers/               ba tier và hợp đồng bảng tier → model (tiers.example.json)
+├── roles/               thẻ vai: executor/ (5) · verifier/ (2 + dual-review + 4 chuyên đề)
+├── tiers/               ba tier, hợp đồng bảng tier → model và ma trận mẫu (tiers.example.json)
 ├── skills/              32 skill, mỗi skill một thư mục skills/<tên>/SKILL.md
 ├── agents/              13 agent chuyên đề, mỗi agent một file
 ├── templates/           khuôn hồ sơ: sprint/ (6) · registry/ (5) · project/agile.json
@@ -282,7 +288,7 @@ mã đơn)"). Bảng dưới liệt kê các **mã** chính:
 | `CO` | carry-over | việc để lại, có chủ và mốc | REPORT |
 
 Frontmatter của mỗi tài liệu (khối khoá–giá trị ở đầu file, tiếng Anh) ghi cỡ, rủi ro, vai và nhãn agent, trạng
-thái cổng kèm **câu duyệt nguyên văn** của bạn — `check` đọc chúng để bắt hồ sơ lệch.
+thái cổng kèm **câu duyệt nguyên văn** của bạn (hoặc câu `duyệt thay:` khi bạn đã cấp quyền) — `check` đọc chúng để bắt hồ sơ lệch.
 
 ## 6. Cài đặt và dùng
 
@@ -328,7 +334,7 @@ Không đặt gì repo vẫn chạy. Muốn cố định thì đặt biến ở 
 
 | Biến | Trỏ tới | Thiếu thì |
 |---|---|---|
-| `AGENT_AGILE_TIERS` | file JSON bảng tier → model (hình dạng: `tiers/tiers.example.json`) | agent dùng chỉ định tier → model bạn nêu trong chat; chưa có thì hỏi ở Cổng 1 |
+| `AGENT_AGILE_TIERS` | file JSON bảng tier → model (hình dạng: `tiers/tiers.example.json`, schema 1 hoặc 2) | agent dùng chỉ định tier → model bạn nêu trong chat; chưa có thì hỏi ở Cổng 1 |
 | `AGENT_AGILE_DENYLIST` | file văn bản từ cấm, một từ một dòng | `check --self` báo luật chống rò **Chưa chạy** (`NOT_CONFIGURED`) — không phải lỗi |
 | `AGENT_AGILE_LEDGER` | mẫu đường file sổ tập trung, chứa `{project}` | chỉ dự án khai `ledger.project` mới dùng |
 
