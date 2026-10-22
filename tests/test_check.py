@@ -1546,3 +1546,15 @@ def test_ledger_template_has_the_sprint_table_and_no_machine_paths():
     assert len(example) == 2 and not any(ABSOLUTE_PATH.search(line) for line in example)
     assert any(URL_PATTERN.search(line) for line in example)  # một dòng URL, một dòng tương đối
     assert check.check_paths([path]).findings == []
+
+
+def test_researcher_role_is_executor(tmp_path):
+    """Khoá `researcher` là vai thực thi: `check` không báo `roles-invalid` cho nó."""
+    root = make_sprint(tmp_path)
+    path = root / "SPEC.md"
+    text = path.read_text(encoding="utf-8")
+    old = "  business-reviewer: [T1, agent-c]\n"
+    assert old in text
+    write_lf(path, text.replace(old, old + "  researcher: [T3, agent-g]\n", 1))
+    report = check.check_paths([root])
+    assert not [f for f in report.findings if f.rule == "roles-invalid"], [f.render() for f in report.findings]

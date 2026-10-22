@@ -18,6 +18,8 @@ tài liệu để nghiệm thu.
 ## 2. Tier
 **T1 tư duy.**
 
+**Effort mặc định: 3** (sàn; thang `method/effort-scale.md`)
+
 ## 3. Đầu vào
 Ngữ cảnh soạn riêng: SPEC, REPORT nháp hoặc PROGRESS, sản phẩm (chạy được hoặc ảnh/output), `VR` của QA ·
 **không** nhận lịch sử phiên của người làm.

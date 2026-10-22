@@ -9,6 +9,8 @@
      "replace": ["risk: normal\n", ""]},
     {"rule": "frontmatter-value", "exit": 1, "file": "SPEC.md", "line": 8,
      "replace": ["status: approved", "status: finished"]},
+    {"rule": "self-review", "exit": 1, "file": "SPEC.md",
+     "replace": ["  business-reviewer: [T1, agent-c]", "  business-reviewer: [T1, agent-c]\n  researcher: [T3, agent-c]"]},
     {"rule": "frontmatter-key-unknown", "exit": 0, "file": "SPEC.md", "line": 5,
      "replace": ["sprint: SPR-03\n", "owner: someone\nsprint: SPR-03\n"]},
     {"rule": "heading-missing", "exit": 1, "file": "PLAN.md",

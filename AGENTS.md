@@ -53,6 +53,7 @@ và Không áp dụng không bao giờ là Đạt.
 | Architect | Thực thi | T1 | PLAN, thiết kế, ADR |
 | Implementer | Thực thi | T2 | mã, test, tài liệu theo `TK` |
 | QA | Thực thi | T3 | chạy test, coverage, kiểm trình duyệt, ghi `VR` |
+| Researcher | Thực thi | T3 | tìm, đọc, dossier có nguồn; không kết luận |
 | Business Reviewer | Kiểm định | T1 | đáp ứng `US`/`FR`/`SC` |
 | Tech Reviewer (+ security, data, backend, frontend) | Kiểm định | T1 | code, test, bảo mật, dữ liệu; kéo chuyên đề khi rủi ro cao |
 
@@ -60,7 +61,7 @@ và Không áp dụng không bao giờ là Đạt.
   lịch sử). Reviewer được trả 0 phát hiện, phải ghi phần không đánh giá. Việc nhỏ: một agent giữ nhiều
   vai thực thi, Analyst luôn điều phối.
 - Giao việc theo **tier**, không theo tên model; bảng tier → model đọc từ file mà biến môi trường
-  `AGENT_AGILE_TIERS` trỏ tới (ngoài repo); thiếu bảng thì hỏi, không đoán. **Luôn ghi vai · tier · model** vào PROGRESS khi giao subagent.
+  `AGENT_AGILE_TIERS` trỏ tới (ngoài repo); thiếu bảng thì hỏi, không đoán. **Luôn ghi vai · tier · model · effort** vào PROGRESS khi giao subagent (effort: số 1–5, `method/effort-scale.md`).
 - Cạn hạn mức: dừng tier đó, ghi `BR`, báo — **không tự hạ tier**. Người dùng chỉ định đè → làm theo,
   ghi `"note"` trong `roles`. Muốn hãng khác → chỉ **tư vấn**, người dùng quyết.
 

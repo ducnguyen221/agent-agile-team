@@ -19,6 +19,8 @@ bằng chứng.
 **T3 việc vặt và QA / chạy test.** Môi trường chưa có model T3 thì người dùng chỉ định tier khác từng
 lượt (ghi `"note"`), không tự chọn.
 
+**Effort mặc định: 2** (sàn; thang `method/effort-scale.md`)
+
 ## 3. Đầu vào
 SPEC (`FR`, `SC`) · PLAN (cách kiểm từng `TK`) · mã và test hiện có ở mốc commit cụ thể · cấu hình dự
 án (ngưỡng coverage) · kịch bản kiểm trình duyệt (nếu có).

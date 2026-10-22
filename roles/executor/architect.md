@@ -18,6 +18,8 @@ Từ SPEC đã có, thiết kế kiến trúc và chia việc sao cho Implemente
 ## 2. Tier
 **T1 tư duy.**
 
+**Effort mặc định: 3** (sàn; thang `method/effort-scale.md`)
+
 ## 3. Đầu vào
 SPEC · spec sống và ADR hiện có · mã nguồn liên quan (đọc) · ràng buộc chung của dự án · kết quả review
 PLAN của Tech Reviewer (từ cỡ vừa).

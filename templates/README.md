@@ -107,7 +107,7 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
 
 ### 3.1. Khoá vai và luật "người làm không tự chấm"
 
-- Vai thực thi: `analyst`, `architect`, `implementer`, `qa`. Vai kiểm định: `business-reviewer`,
+- Vai thực thi: `analyst`, `architect`, `implementer`, `qa`, `researcher`. Vai kiểm định: `business-reviewer`,
   `tech-reviewer` và chuyên đề `<tên>-specialist` (`security-specialist`, `data-specialist`,
   `backend-specialist`, `frontend-specialist`).
 - `tier` là `T1` · `T2` · `T3`. `agent` là **nhãn phiên hoặc subagent** (`agent-a`), không phải tên model —

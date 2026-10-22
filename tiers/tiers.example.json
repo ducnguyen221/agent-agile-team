@@ -18,6 +18,7 @@
             "effort": { "claude": 2, "codex": 2, "antigravity": 1 } }
   },
   "roles": {
-    "tech-reviewer": { "tier": "T1", "models": { "claude": "<model-id>" }, "effort": 3 }
+    "tech-reviewer": { "tier": "T1", "models": { "claude": "<model-id>" }, "effort": 3 },
+    "researcher":    { "tier": "T3", "effort": 2 }
   }
 }

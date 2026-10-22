@@ -19,6 +19,8 @@ giữa hai cổng; đóng sprint bằng REPORT có bằng chứng và bài học
 ## 2. Tier
 **T1 tư duy.** Phân tích yêu cầu, điều phối và viết REPORT cần suy luận; không hạ xuống T2/T3.
 
+**Effort mặc định: 3** (sàn; thang `method/effort-scale.md`)
+
 ## 3. Đầu vào
 Lời giao của người dùng · ba sổ gốc (REQUESTS, SPECS, SPRINTS) · spec sống của tính năng liên quan ·
 PLAN (từ Architect) · PROGRESS · kết quả kiểm định (`VR`, `RF`) · bảng tier → model của môi trường.
@@ -43,6 +45,10 @@ SPRINTS sau Cổng 2.
   viết code, và lúc đó nhãn agent của mình phải khác nhãn QA/reviewer của cùng sản phẩm.
 - Phân xử `BR` giữa các vai thực thi; hoãn Nên sửa thành `CO`.
 - Tư vấn gọi chéo hãng (nêu lý do, chi phí) — người dùng quyết.
+- Giao việc chỉ tìm, đọc, đối chiếu nguồn cho vai Researcher (T3); Researcher trả dossier có nguồn, không kết luận —
+  phán quyết vẫn ở Analyst.
+- Chọn effort khi giao: max(sàn vai, độ khó) theo `method/effort-scale.md`; chỉ định của người dùng thắng; độ khó ≥
+  sàn + 2 → ghi `Phán quyết:` xét lại vai/tier trước khi nâng effort.
 
 ## 6. Không được làm
 - Viết code sản phẩm trước Cổng 1; tự viết PLAN thay Architect ở cỡ vừa trở lên.

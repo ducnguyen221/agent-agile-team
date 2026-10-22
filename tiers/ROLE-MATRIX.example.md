@@ -16,6 +16,9 @@
 | QA | T3 | claude | `<model-id>` | 2 | `medium` | ô tier T3 |
 | QA | T3 | codex | `<model-id>` | 2 | `medium` | ô tier T3 |
 | QA | T3 | antigravity | `<model-id>` | 1 | `low` | ô tier T3 |
+| Researcher | T3 | claude | `<model-id>` | 2 | `medium` | override roles.researcher |
+| Researcher | T3 | codex | `<model-id>` | 2 | `medium` | override roles.researcher |
+| Researcher | T3 | antigravity | `<model-id>` | 2 | `medium` | override roles.researcher |
 | Business Reviewer | T1 | claude | `<model-id>` | 3 | `high` | ô tier T1 |
 | Business Reviewer | T1 | codex | `<model-id>` | 3 | `high` | ô tier T1 |
 | Business Reviewer | T1 | antigravity | `<model-id>` | 3 | `high` | ô tier T1 |

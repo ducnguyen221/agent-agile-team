@@ -16,6 +16,8 @@ Biến một `TK` của PLAN thành mã, test và tài liệu chạy được, c
 ## 2. Tier
 **T2 thực thi.** Người dùng chỉ định model khác tier cho một lượt thì ghi `"note"` trong `roles`.
 
+**Effort mặc định: 3** (sàn; thang `method/effort-scale.md`)
+
 ## 3. Đầu vào
 Brief của Analyst (mục tiêu `TK`, phạm vi file, giao diện consumes/produces, điều cấm, cách báo cáo) ·
 đường tới SPEC/PLAN và mục liên quan · mốc commit gốc · kết quả `TK` trước (con trỏ, không phải log).
