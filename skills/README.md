@@ -47,8 +47,8 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
 
 | Skill | Dùng khi |
 |---|---|
-| [intake](intake/SKILL.md) | tiếp nhận yêu cầu: một lượt trao đổi gom (mục tiêu, câu hỏi phản biện, khuyến nghị bậc, mở sprint hay làm thẳng) → ghi `RQ-`, định cỡ/rủi ro, 11 điểm thiếu ngữ cảnh → ASSUMPTION/`CQ` |
-| [shaping-spec](shaping-spec/SKILL.md) | 3 đường Spike/Bounded/Architectural, viết SPEC, gom `CQ`, không code trước Cổng 1 |
+3/3 GREEN pass after re-scoring two criteria that over-read the spec (QA first pass 1/3; second run of in-6 pass, second run of in-8 not obtained: blocked by API safeguard three times); RED on af1ad4f 0/3 pass; old scenarios 8/9 | 2026-10-22 |
+1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4 | 2026-10-22 |
 | [writing-plan](writing-plan/SKILL.md) | `TK` có file + giao diện + bước RED→GREEN→commit, trọng tâm review ≤5 |
 | [running-sprint](running-sprint/SKILL.md) | hai chế độ thực thi, brief/review theo việc, phán quyết, 4 điều kiện dừng, 3 vòng khuyến nghị |
 | [closing-sprint](closing-sprint/SKILL.md) | tiền kiểm → REPORT/Cổng 2 → docs-sync, release notes, bài học → menu nhánh 3 lựa chọn |
@@ -115,9 +115,9 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 |---|---|---|---|---|
 | [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 3/3, 3/3, 3/3 runs Đạt, RED 0/3, 0/3, 3/3 runs Đạt so KB1 and KB2 gave way and KB3 passed as-is, kept as regression; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
 | [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 2/3, 2/3, 3/3 runs Đạt, RED 0/3, 0/3, 0/3 runs Đạt so all three gave way; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
-| [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | partial; A v1, B v2 and C v2 each RED 0/3 and GREEN 3/3; v1 full GREEN 4/9 failed; micro control 0/5 and candidate 5/5; old regression 5/6, remaining mismatch also observed on archived source; diagnostic writer scores, independent acceptance pending | 2026-10-12 |
+| [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after re-scoring two criteria that over-read the spec (QA first pass 1/3; second run of in-6 pass, second run of in-8 not obtained: blocked by API safeguard three times); RED on af1ad4f 0/3 pass; old scenarios 8/9 | 2026-10-22 |
 | [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | Chưa chạy — current candidate behavior unverified | 2026-10-12 |
-| [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
+| [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4 | 2026-10-22 |
 | [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix | 2026-10-22 |
 | [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [api-design](api-design/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/7 (+4 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |

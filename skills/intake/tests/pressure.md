@@ -1,15 +1,16 @@
 ---
 skill: intake
-method: fresh paired current-skill baseline and worktree candidate; separate v1 and corrected v2 experiments; absolute skill path, no installed skill
+method: "TK10 of the role-profile sprint: fresh subagent per scenario reading the worktree SKILL.md by absolute path, Skill tool forbidden; earlier sections below keep their own method (historic)"
 model: claude-sonnet-5-5 (subagents requested sonnet, effort medium)
 tier: T3
 skill_sha: 4f4d827740455409b66fedb0a9e800a8ca64d975
-source_sha256: 23448ccb533da84cf28c80d5c8e15d0f37efdbbcba69bfbf3e0e7de7ecd0eff9
-requested_effort: "`high`"
+source_sha256: b5eab2a3ec7c978f1565cf74d6ce3a4e5396a376561ab42d5b699b60d1430116
+requested_effort: "medium"
 date: 2026-10-22
-result: "3/3 GREEN pass after re-scoring two criteria that over-read the spec (QA first pass 1/3); RED on af1ad4f 0/3 pass; old scenarios 7/8"
+result: "3/3 GREEN pass after re-scoring two criteria that over-read the spec (QA first pass 1/3; second run of in-6 pass, second run of in-8 not obtained: blocked by API safeguard three times); RED on af1ad4f 0/3 pass; old scenarios 8/9"
 agent_ids:
-  sonnet_tk10_green_2026_10_22: {in-6: ab103310f2dc57dcd, in-7: afdfc8968ab84014a, in-8: a5445e637e1f71752, in-1b: a159dcbc5aebdca07, in-2: a4cdd6c4a4beb0fab, in-3: a37fef1485ecc1a7d, in-4: ae011d401d184447c, in-5: a4a64d1f8705b3605, routing-A: ae8e0c682308145d1, routing-B: af479ce2e53e595f2, routing-C: ae285a4e495ca7e63}
+  sonnet_tk10_green_2026_10_22: {in-6-profile: ab103310f2dc57dcd, in-7-profile: afdfc8968ab84014a, in-8-profile: a5445e637e1f71752, in-1b: a159dcbc5aebdca07, in-2: a4cdd6c4a4beb0fab, in-3: a37fef1485ecc1a7d, in-4: ae011d401d184447c, in-5: a4a64d1f8705b3605, routing-A: ae8e0c682308145d1, routing-B: af479ce2e53e595f2, routing-C: ae285a4e495ca7e63}
+  sonnet_tk10_round2_2026_10_22: {in-6-profile: a4581d582627412b5, in-6-old: a64769f781c07beca, in-8-profile: "not obtained (three API safeguard blocks)"}
   astra_v1_red_2026_10_12: {A: [intake_red_a1, intake_red_a2, intake_red_a3], B: [intake_red_b1, intake_red_b2, intake_red_b3], C: [intake_red_c1, intake_red_c2, intake_red_c3]}
   astra_v1_green_2026_10_12: {A: [intake_green_a1, intake_green_a2, intake_green_a3], B: [intake_green_b1, intake_green_b2, intake_green_b3], C: [intake_green_c1, intake_green_c2, intake_green_c3]}
   astra_v2_red_2026_10_12: {B: [intake_v2_red_b1, intake_v2_red_b2, intake_v2_red_b3], C: [intake_v2_red_c1, intake_v2_red_c2, intake_v2_red_c3]}
@@ -52,7 +53,9 @@ Chữ thước mới cho hai tiêu chí (kịch bản mới cùng tên `in-6`, `
 | in-6 | 1 | Tin gom nhắc lại ba ràng buộc ô 3 trong một dòng và nói rõ sẽ chép nguyên văn vào SPEC (FR9.1, FR9.3). |
 | in-8 | 3 | Sau tin bổ sung không có lượt hỏi nào nữa: ô còn trống thành `CQ` cho Cổng 1, không chặn Cổng 1; `RQ-`/sprint/bậc vẫn chỉ ghi sau khi người giao xác nhận (FR9.4; skill mục 1 bước 3–4). |
 
-Kịch bản cũ: `in-1b` Đạt, `in-2` Đạt, `in-3` Đạt một phần (trang chủ xếp nhỏ thay vì vừa), `in-4` Đạt, `in-5` Đạt; routing A/B/C 3/3 Đạt. Không sửa `SKILL.md`: `skill_sha` không đổi. Output trọn ở `evidence/tk10/` của hồ sơ sprint SPR-31 (lớp riêng).
+Vòng 2 (thước mới ghi trước, chủ thể mới): `in-6` Đạt 3/3 (tin gom nhắc ba ràng buộc trong một dòng, cam kết chép nguyên văn vào SPEC, rủi ro dữ liệu khách, chưa `RQ-`). `in-8` chạy lại ba lần nhưng cả ba lần chủ thể bị bộ lọc an toàn của API chặn, chưa có output: điểm Đạt của `in-8` chỉ dựa vào chấm lại của vai T1 trên output vòng 1, chưa có lượt kiểm độc lập.
+
+Kịch bản cũ: `in-1b` Đạt, `in-2` Đạt, `in-3` Đạt một phần (trang chủ xếp nhỏ thay vì vừa), `in-4` Đạt, `in-5` Đạt, `in-6` cũ (data_migration) Đạt; routing A/B/C 3/3 Đạt. Tính lại gồm `in-6` cũ: 8/9 Đạt. So bản ghi Astra trước (`in-1b` lệch, `in-3` Đạt): đổi chỗ, `in-1b` nay Đạt còn `in-3` nay Đạt một phần. Rubric riêng của routing A/B/C cũ không còn trên đĩa: chấm theo chữ yêu cầu của kịch bản, độ tin cậy vừa. Không sửa `SKILL.md`: `skill_sha` không đổi.
 
 ## Lượt hiện tại — phạm vi và nguồn
 
