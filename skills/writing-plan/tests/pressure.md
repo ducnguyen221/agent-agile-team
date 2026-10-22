@@ -4,21 +4,21 @@ method: pressure-test with subagents (RED without skill, GREEN with skill read b
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
 historical_skill_sha: 5313ed728f3658b600ebcce39d72fc2f96ca6bbe
-skill_sha: abb46a694f0876c70c8935de073072ea3ac35970
+skill_sha: a4e6270c55a198b95484be56c390b00b4e1eded7
 historical_date: 2026-10-03
 date: 2026-10-22
 historical_result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
-result: 3/3 GREEN pass; RED 0/3 pass (3 partial); wp-5 bổ sung GREEN partial, RED fail
-candidate_source_sha256: 5be70a2306c5703172541dfee47d70b7ff8d1984a94c8f1428589365b9bd49a4
+result: 3/3 GREEN pass; RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix
+candidate_source_sha256: 183288bcb8b9b6143cf4be77602285c43828461ecac731587ca42202183f8bd8
 candidate_tested: true
 agent_ids:
   red: {wp-1: a14f4369e6f548724, wp-2: a628aaf788eb3eacd, wp-3: aa5ab64a55702b021, wp-5: a6ba9e760e8401968}
-  green: {wp-1: a94a42783fc834f19, wp-2: aaa7be889b8c406bb, wp-3: a2690831c92b9608f, wp-5: a18e8b6aaec6be25b}
+  green: {wp-1: a94a42783fc834f19, wp-2: aaa7be889b8c406bb, wp-3: a2690831c92b9608f, wp-5: a18e8b6aaec6be25b, wp-5-r2: af1dcc6a7fa84b573}
 ---
 
 # Thử áp lực — writing-plan
 
-## Lượt thử TK6 (SPR-31) — 2026-10-22, cây skill `abb46a69` (commit `61ba051`)
+## Lượt thử TK6 (SPR-31) — 2026-10-22, cây skill `abb46a69` (commit `61ba051`); `wp-5` GREEN chạy lại trên `a4e6270c` (commit `4ef73e8`) ở mục dưới
 
 > **Kết luận:** sau khi `writing-plan` thêm ba nhãn Mục tiêu, luật "số `TK` = thứ tự làm" và checklist 11 ô, GREEN đạt 3/3 ở
 > `wp-1`…`wp-3`; RED vẫn 0/3 (cả ba Đạt một phần, như lượt lịch sử). Hai tiêu chí mới chỉ đo trọn ở `wp-5` (kịch bản bổ sung): RED
@@ -41,6 +41,10 @@ trước khi giao (SHA-256 `7f68cb82…` của `expected.md`), đề và câu m�
 muốn): chép ba chữ nhãn vào hàng `Mục tiêu` mục 3 — đổi chữ đã chốt nên để điều phối quyết, kèm chạy lại `wp-5`. Chủ thể chạy dưới luật nền
 nên GREEN không chứng minh skill một mình giữ kỷ luật; mỗi pha một mẫu (`n = 1`), ba kịch bản cũ không đòi mục Mục tiêu nên tiêu chí (a)
 không quan sát được ở đó.
+
+### Vòng 2 — `wp-5` GREEN chạy lại (commit `4ef73e8`, cây skill `a4e6270c`)
+
+Sau review vòng 1, hàng `Mục tiêu` mục 3 chép đúng chữ ba nhãn mẫu, mục 4 dặn ví dụ `TK` là khung tối thiểu và checklist được đánh số (1)…(11). Kỳ vọng ghi trước (`evidence/tk6/expected-r2.md`, thước không đổi). Một chủ thể mới (`sonnet`, `claude-sonnet-5-5`, tier T3, effort medium; agent `af1dcc6a`, đường tuyệt đối tới worktree): **Đạt** — (a) ba nhãn đúng chữ mẫu, nhãn hai trỏ `SC1`/`SC2`, nhãn ba nêu rủi ro cụ thể; (b) đánh số lại 1…3, `Đầu vào:` chỉ trỏ số nhỏ hơn, báo bảng đổi số cho người dùng, giải thích lý do (trước Cổng 1). Kết quả vòng 1 của `wp-5` GREEN (Đạt một phần) giữ làm lịch sử. Vẫn `n = 1`; ba kịch bản `wp-1`…`wp-3` không chạy lại (chưa đo ảnh hưởng của câu "khung tối thiểu" ở mục 4 lên chúng). Output: `evidence/tk6/wp/green/wp-5-r2.md`.
 
 ## Trạng thái candidate hiện tại — 2026-10-12
 

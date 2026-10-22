@@ -118,7 +118,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | partial; A v1, B v2 and C v2 each RED 0/3 and GREEN 3/3; v1 full GREEN 4/9 failed; micro control 0/5 and candidate 5/5; old regression 5/6, remaining mismatch also observed on archived source; diagnostic writer scores, independent acceptance pending | 2026-10-12 |
 | [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | Chưa chạy — current candidate behavior unverified | 2026-10-12 |
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass | 2026-10-04 |
-| [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 0/3 pass (3 partial); wp-5 bổ sung GREEN partial, RED fail | 2026-10-22 |
+| [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix | 2026-10-22 |
 | [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
 | [api-design](api-design/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/7 (+4 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [database-migrations](database-migrations/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 2/7 (+5 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
