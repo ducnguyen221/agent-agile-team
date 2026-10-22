@@ -127,6 +127,10 @@
      "replace": ["revoked_at: null", "revoked_at: 2026-02-01"]},
     {"name": "TK trỏ Đầu vào của việc sau", "rule": "task-order", "exit": 1, "file": "PLAN.md", "replace": ["## Rủi ro", "### TK2 — Việc trỏ tới (→ FR1.1)\n\n- **Đầu vào:** TK3.\n\n### TK3 — Việc sau (→ FR1.1)\n\n- **Đầu vào:** TK1.\n\n## Rủi ro"]},
     {"name": "số TK cấp một hụt số", "rule": "task-gap", "exit": 0, "file": "PLAN.md", "replace": ["## Rủi ro", "### TK3 — Việc nhảy số (→ FR1.1)\n\n- **Đầu vào:** TK1.\n\n## Rủi ro"]},
-    {"name": "mục Mục tiêu thiếu nhãn thứ ba", "rule": "plan-goal-block", "exit": 0, "file": "PLAN.md", "replace": ["- **Rủi ro cần chú ý:** tên khách có dấu phẩy làm lệch cột — RK1 (dấu phẩy trong tên).\n", ""]}
+    {"name": "mục Mục tiêu thiếu nhãn thứ ba", "rule": "plan-goal-block", "exit": 0, "file": "PLAN.md", "replace": ["- **Rủi ro cần chú ý:** tên khách có dấu phẩy làm lệch cột — RK1 (dấu phẩy trong tên).\n", ""]},
+    {"name": "quote duyệt thay mà không khai mode", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md",
+     "replace": ["gate_1_quote: \"duyệt\"", "gate_1_quote: \"Duyệt thay: chọn phương án a\""]},
+    {"name": "khối delegation mà không khai mode", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md",
+     "replace": ["gate_1_quote: \"duyệt\"\n", "gate_1_quote: \"duyệt\"\ndelegation:\n  grant: \"Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint.\"\n  scope: [gate_1]\n"]}
   ]
 }

@@ -1284,7 +1284,17 @@ class Engine:
         Vắng `gate_N_mode` hoặc `human` → không kiểm gì (hồ sơ cũ giữ nguyên kết quả)."""
         data, path = doc.data, doc.path
         mode_key, quote_key = f"{gate}_mode", f"{gate}_quote"
-        if data.get(mode_key) != "delegated" or data.get(gate) in (None, "pending"):
+        done = data.get(gate) not in (None, "pending")
+        if data.get(mode_key, "human") == "human":  # vắng mode = human: lời/khối duyệt thay mà không khai mode là cách né kiểm
+            quote = data.get(f"{gate}_quote")
+            if isinstance(quote, str) and quote.lstrip().casefold().startswith(DELEGATION_QUOTE):
+                self.add(path, doc.key_line(f"{gate}_quote"), "gate-delegation-invalid",
+                         f"{gate}_quote bắt đầu '{DELEGATION_QUOTE}' mà {mode_key} không phải delegated")
+            elif done and "delegation" in data and "delegated" not in (data.get("gate_1_mode"), data.get("gate_2_mode")):
+                self.add(path, doc.key_line("delegation"), "gate-delegation-invalid",
+                         f"có khối delegation và {gate} đã kết luận mà {mode_key} không phải delegated")
+            return
+        if data.get(mode_key) != "delegated" or not done:
             return
 
         def bad(key: str, message: str) -> None:

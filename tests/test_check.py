@@ -1769,3 +1769,10 @@ def test_plan_goal_block_flags_missing_label(tmp_path):
 def test_plan_goal_block_accepts_three_labels(tmp_path):
     root = make_sprint(tmp_path)
     assert "plan-goal-block" not in codes(check.check_paths([root]).findings)
+
+
+def test_plain_quote_without_delegation_stays_clean(tmp_path):
+    """Hồ sơ cũ: quote thường, không khoá mới → 0 phát hiện (không né, không báo oan)."""
+    root = make_sprint(tmp_path)
+    _rewrite(root / "PLAN.md", 'gate_1_quote: "duyệt"', 'gate_1_quote: "duyệt, chọn phương án a"')
+    assert codes(check.check_paths([root]).findings) == []
