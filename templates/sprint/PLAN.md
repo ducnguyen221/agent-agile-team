@@ -51,7 +51,8 @@ links:
 ## Ràng buộc chung
 
 <!-- Luật áp cho MỌI việc trong plan: quyết định đã chốt, giới hạn kỹ thuật, điều cấm. Chép nguyên, không
-     diễn giải lại. Implementer đọc mục này trước mọi TK. -->
+     diễn giải lại. Implementer đọc mục này trước mọi TK.
+     Gồm nguyên văn mục 1.1 của SPEC. -->
 
 - Chỉ đọc dữ liệu đơn; không thêm thao tác ghi.
 - Coverage dòng ≥80% cho code mới và code được sửa (hoặc ngưỡng của cấu hình dự án).

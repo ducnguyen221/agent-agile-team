@@ -42,6 +42,20 @@ links:
 - Yêu cầu gốc: RQ-001 (tra trạng thái đơn hàng). Tính năng chạm tới: FS-001 (tra cứu đơn hàng).
 - Hiện trạng: <!-- điều đang sai hoặc đang thiếu, kèm số đo trước sprint + lệnh đo nếu có -->
 
+### 1.1 Ràng buộc và lưu ý do người giao
+
+<!-- Chép nguyên văn ô 3 của Brief; PLAN chép mục này vào Ràng buộc chung. -->
+
+- Không sửa dữ liệu đơn; chỉ đọc.
+- Theo khuôn màn hình tra cứu đang có.
+
+### 1.2 Rủi ro cần chú ý và khẩu vị / mức tự trị
+
+<!-- Ô 4 của Brief: dòng rủi ro cụ thể trước, rồi khẩu vị và mức tự trị. Rủi ro chỉ nâng cỡ. -->
+
+- Rủi ro cụ thể: thông báo lỗi có thể lộ đơn khác tồn tại.
+- Mức tự trị: trong phạm vi.
+
 ## 2. Câu chuyện người dùng
 
 <!-- Mỗi dòng: "Là <ai>, tôi <muốn gì>, để <được gì>". Mã US + tên ngắn trong ngoặc. -->

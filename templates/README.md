@@ -15,6 +15,7 @@ khoá frontmatter, giá trị cho phép, tiêu đề bắt buộc, khuôn sổ g
 | `sprint/REPORT.md` | `<thư mục sprint>/REPORT.md` | Như trên — kết quả, bàn giao |
 | `sprint/SPRINT.md` | `<thư mục sprint>/SPRINT.md` | Cỡ nhỏ: bốn phần SPEC · PLAN · PROGRESS · REPORT gộp một file (`size: small`) |
 | `sprint/SPRINT-tiny.md` | `<thư mục sprint>/SPRINT.md` (đổi tên khi dựng) | Cỡ rất nhỏ: hai phần "Kế hoạch" / "Kết quả" (`size: tiny`) |
+| `sprint/BRIEF.md` | không dựng — `init` không chép; người giao tự điền | Brief người giao 4 ô, điền trước khi giao việc |
 | `registry/REQUESTS.md` | `paths.requests` | Sổ yêu cầu theo timeline |
 | `registry/SPECS.md` | `paths.specs` | Mục lục tính năng |
 | `registry/feature-spec.md` | `<paths.feature_specs_dir>/<slug>.md` | Spec sống của một tính năng |
