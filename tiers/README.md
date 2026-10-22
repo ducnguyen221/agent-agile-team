@@ -38,9 +38,10 @@ lệnh rõ, cần **chạy và ghi** → T3. Phân vân giữa hai tier → ch�
 ## 3. Giao việc: luôn ghi model
 
 Routing/effort dùng [method/task-routing.md](../method/task-routing.md). Tier mặc định của vai, tier tra
-bảng, requested model và human override là các field riêng. Default effort medium (thuộc `method/task-routing.md`, bản candidate, chưa hiệu lực; mức hiệu lực là sàn ở thẻ vai +
-`method/effort-scale.md`) áp coordinator cho
-routed assignment; native support phải verified, actual unknown không lấy requested thay. Notice trước
+bảng, requested model và human override là các field riêng. Default effort medium (thuộc
+`method/task-routing.md`, bản candidate, chưa hiệu lực; mức hiệu lực là sàn ở thẻ vai +
+`method/effort-scale.md`) áp coordinator cho routed assignment;
+native support phải verified, actual unknown không lấy requested thay. Notice trước
 dispatch/model/effort/criteria/handoff; không ghi model ID môi trường vào policy phân phối.
 Mức effort theo [method/effort-scale.md](../method/effort-scale.md): sàn ở thẻ vai, nâng theo độ khó; chỉ định của người dùng thắng.
 

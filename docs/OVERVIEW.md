@@ -11,10 +11,10 @@ updated: 2026-10-05
 > thường, xác nhận **một tin trao đổi** lúc tiếp nhận (mục tiêu, bậc việc, có mở sprint không), rồi trả lời đúng
 > **hai lần** (duyệt kế hoạch, nghiệm thu kết quả), đội agent làm phần còn lại, ghi sổ,
 > và nhờ **agent khác** kiểm. Repo gồm luật lõi, 32 skill, 13 agent, bộ mẫu tài liệu và ba công cụ kiểm; cài
-> được trên Claude Code, Codex và Antigravity. Bản hiện tại `0.3.0`, repo **private**.
+> được trên Claude Code, Codex và Antigravity. Bản hiện tại `0.4.0`, repo công khai (MIT).
 
 File này là nguồn cho trang giới thiệu <https://ducnguyen.vn/agent-agile-team/>. Số liệu và tên file khớp repo
-ở bản `0.3.0`; đổi repo thì sửa file này cùng lượt. Người mới cài xong đọc tiếp [`GUIDE.md`](../GUIDE.md).
+ở bản `0.4.0`; đổi repo thì sửa file này cùng lượt. Người mới cài xong đọc tiếp [`GUIDE.md`](../GUIDE.md).
 
 ## 1. Định vị và lợi ích
 
@@ -37,7 +37,7 @@ Lợi ích cho người không chuyên:
   nghi thức. Việc 1–2 thao tác có kết quả rõ, hay bạn nói "không cần sprint", agent **làm thẳng** — không hồ sơ,
   vẫn kiểm và báo kết quả.
 
-Con số của bản `0.3.0`: **6** bước · **2** cổng người · **7** vai · **3** tier · **32** skill · **13** agent ·
+Con số của bản `0.4.0`: **6** bước · **2** cổng người · **7** vai · **3** tier · **32** skill · **13** agent ·
 **3** công cụ Python · **3** harness được hỗ trợ.
 
 ## 2. Tính năng
@@ -166,7 +166,7 @@ Repo chưng cất từ các bộ skill mã nguồn mở và ghi dấu vết từ
   `license` trong frontmatter; `UPSTREAM.md` chốt SHA từng đợt và theo dõi bản mới.
 - Phần từng lấy từ nguồn private đã được **viết lại phòng sạch**: bản cũ gỡ khỏi cây, người viết mới chỉ nhận
   danh sách ý; hiện không còn file nào chờ viết lại.
-- Giấy phép của repo **chưa chọn**; giữ mọi quyền trong thời gian private. Nội dung bên thứ ba giữ giấy phép
+- Giấy phép của repo là **MIT**. Nội dung bên thứ ba giữ giấy phép
   gốc (`NOTICE`, `THIRD_PARTY.md`).
 
 ## 3. Cách hoạt động — một ví dụ
@@ -294,8 +294,7 @@ thái cổng kèm **câu duyệt nguyên văn** của bạn (hoặc câu `duyệ
 
 Cần **Git** và **Python 3.9+**; ba script không cần cài gói nào (chỉ `pytest` khi muốn chạy bộ test của repo).
 
-**Repo đang private.** Bạn cần quyền đọc `https://github.com/ducnguyen221/agent-agile-team` mới clone được;
-chưa có quyền thì phần cài dưới đây chưa dùng được.
+**Repo công khai (MIT).** Clone được từ `https://github.com/ducnguyen221/agent-agile-team` mà không cần quyền đặc biệt.
 
 ### 6.1 Cách nhanh nhất: để agent cài
 
@@ -401,7 +400,7 @@ reviewer là cho phần mềm.
 
 Trung thực về chỗ chưa tới:
 
-- **Repo private, giấy phép chưa chọn.** Người ngoài chưa clone được. `0.3.0` là bản đầu tiên mang số không có
+- **Repo công khai (MIT), chưa có Release công khai.** `0.3.0` là bản đầu tiên mang số không có
   hậu tố `-dev` (quy tắc ở `method/conventions.md` mục 4.1); chưa có Release công khai. Nâng cấp dự án đang dùng
   bản `0.1`/`0.2`: [`docs/MIGRATION.md`](MIGRATION.md) mục 4.
 - **12/13 skill tham chiếu chưa đạt ngưỡng truy xuất** (chỉ `adr` đạt): agent tìm đúng chỗ nhưng nội dung còn

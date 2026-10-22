@@ -3,38 +3,41 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
-**Chưa phát hành — hồ sơ vai và thang effort 1–5:** bảng tier schema 2 cộng thêm (schema 1 vẫn
+## 0.4.0 (2026-10-23)
+
+Gộp các đoạn "Chưa phát hành" sau 0.3.1: hồ sơ vai và thang effort (schema 2), phân loại tác vụ và effort (ứng viên),
+giấy phép MIT, bài học lập PLAN lớn, bổ sung quy trình. Mức MINOR do chủ sản phẩm chốt (22/10); sửa nhãn phiên bản lệch (RQ-011) cùng lượt.
+
+**Hồ sơ vai và thang effort 1–5:** bảng tier schema 2 cộng thêm (schema 1 vẫn
 hợp lệ) có `effort_scale`, `fallback`, effort số theo tier và theo vai; thang ở `method/effort-scale.md`; ma trận mẫu
 `tiers/ROLE-MATRIX.example.md`; vai Researcher (T3); khuyến nghị T1 và duyệt thay có máy kiểm (mặc định tắt); Brief 4 ô ở `intake`,
 Kết luận SPEC có rủi ro; luật `task-order`, `task-gap`, `plan-goal-block`; mẫu PLAN ba nhãn; `writing-plan` có checklist 11 ô.
-Mức phiên bản **đề xuất MINOR**, chủ quyết khi nghiệm thu. Không đổi version.
 
-**Chưa phát hành — giấy phép MIT, repo công khai:** `LICENSE` chuyển sang giấy phép MIT (Copyright (c) 2026 Nguyễn Quang Đức); trường `license` ở `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json` và `.claude-plugin/marketplace.json` đổi từ `UNLICENSED` sang `MIT`; `NOTICE`, `README.md`, `README.vi.md`, `INSTALL.md`, `THIRD_PARTY.md`, `UPSTREAM.md`, `docs/standardization.md` bỏ câu "private"/"giữ mọi quyền". `.agile.json` giữ `visibility: private` vì khai báo đó nói về nơi đặt hồ sơ dự án (`artifact_root` là `.`), không phải trạng thái GitHub. Không đổi version.
+**Giấy phép MIT, repo công khai:** `LICENSE` chuyển sang giấy phép MIT (Copyright (c) 2026 Nguyễn Quang Đức); trường `license` ở `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json` và `.claude-plugin/marketplace.json` đổi từ `UNLICENSED` sang `MIT`; `NOTICE`, `README.md`, `README.vi.md`, `INSTALL.md`, `THIRD_PARTY.md`, `UPSTREAM.md`, `docs/standardization.md` bỏ câu "private"/"giữ mọi quyền". `.agile.json` giữ `visibility: private` vì khai báo đó nói về nơi đặt hồ sơ dự án (`artifact_root` là `.`), không phải trạng thái GitHub.
 
-**Chưa phát hành — phân loại tác vụ và effort:** method candidate có sáu trục, difficulty/effort riêng,
+**Phân loại tác vụ và effort:** method candidate có sáu trục, difficulty/effort riêng,
 default medium và human override từng field; notice trước thay đổi, ba repair cycles có oracle và
 handoff giữ counters. Checker/template opt-in schema 1 + manifest độc lập; 36 synthetic cases chuẩn
 bị, chưa pilot. Giữ baseline tier, ngưỡng coverage/denylist, native capabilities của môi trường và hai
 cổng. Hồ sơ: `docs/plans/2026-10-12-task-routing/`; migration: `docs/MIGRATION.md` mục 5.
-Luật lõi/skill pressure/reviews/pilot/release có trạng thái riêng; chưa promotion hoặc version bump.
-Mức phiên bản **đề xuất MINOR** cho schema opt-in, owner quyết khi nghiệm thu.
-
-**Chưa phát hành — MCP đi kèm plugin:** thêm `.mcp.json` khai `pageindex-mcp` theo thư mục lấy từ biến `PAGEINDEX_MCP_DIR` (tên biến trung tính do plugin định nghĩa); INSTALL mục 5 có ghi chú. Không đổi version.
+Luật lõi/skill pressure/reviews/pilot/release có trạng thái riêng; chưa promotion.
 
 - **2026-10-12:** thẻ `roles/verifier/dual-review.md` phân biệt lượt review với vòng thực hiện sửa có kiểm chứng; sau vòng sửa ba còn kẹt hoặc regression thì dừng assignment và bàn giao, giữ counter và chỉ định người dùng. Hồ sơ và review: `docs/plans/2026-10-12-task-routing/`.
 - **2026-10-12:** nối `intake`, `writing-plan`, `running-sprint` và `token-economy` với hợp đồng phân loại/effort/notice hiện có; `running-sprint` giữ trần ba lần sửa có kiểm chứng và lịch sử bàn giao. Intake có bằng chứng một phần; ba candidate còn lại chưa kiểm chứng hành vi sau giới hạn ngân sách của người dùng. Không kế thừa kết quả thử của bản cũ cho bản mới, không phát hành hoặc đổi file luật đang chạy.
 
-**Chưa phát hành — bài học lập PLAN lớn:** `writing-plan` mục 6b (hợp đồng bàn giao trước fan-out, tự kiểm chứng mã trước review, đồng bộ chéo sau mỗi lần sửa, trần 2–3 vòng review, PLAN ngắn) và `plan-review` mục 10 (re-review hẹp theo diff, trần vòng, phân loại phát hiện theo nguồn, bắt buộc `file:dòng`). Nguồn: chuỗi năm sprint nội bộ (10 vòng, 82 phát hiện, khoảng 15 triệu token). Không đổi sáu bước, hai cổng hay tier.
+**Bài học lập PLAN lớn:** `writing-plan` mục 6b (hợp đồng bàn giao trước fan-out, tự kiểm chứng mã trước review, đồng bộ chéo sau mỗi lần sửa, trần 2–3 vòng review, PLAN ngắn) và `plan-review` mục 10 (re-review hẹp theo diff, trần vòng, phân loại phát hiện theo nguồn, bắt buộc `file:dòng`). Nguồn: chuỗi năm sprint nội bộ (10 vòng, 82 phát hiện, khoảng 15 triệu token). Không đổi sáu bước, hai cổng hay tier.
 
-**Chưa phát hành — bổ sung quy trình:** nối thẻ Analyst đến quy trình; đưa thẻ vai vào brief và giữ
+**Bổ sung quy trình:** nối thẻ Analyst đến quy trình; đưa thẻ vai vào brief và giữ
 người cung cấp nguồn cùng tình trạng kiểm chứng qua bàn giao. Không thêm script, không đổi sáu bước,
 hai cổng hay tier. Đã kiểm hành vi bằng tình huống mô phỏng và review độc lập; kết quả một lượt không
-chứng minh độ tin cậy tổng quát. Số phiên bản phát hành sẽ được quyết riêng.
+chứng minh độ tin cậy tổng quát.
 
 ## 0.3.1 (2026-10-14)
 
 Gắn `.mcp.json` cho `pageindex-mcp` (SPR-13, repo dời về thư mục plugins của hệ chủ); không đổi luật lõi hay skill.
 Bản phát hành để cache plugin theo kịp nguồn; phần "Chưa phát hành" phía trên vẫn chưa vào bản nào.
+
+**MCP đi kèm plugin:** thêm `.mcp.json` khai `pageindex-mcp` theo thư mục lấy từ biến `PAGEINDEX_MCP_DIR` (tên biến trung tính do plugin định nghĩa); INSTALL mục 5 có ghi chú.
 
 ## 0.3.0 (2026-10-05)
 
