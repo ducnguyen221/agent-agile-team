@@ -429,7 +429,7 @@ def test_caught_code_next_to_backtick_gets_a_hint(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "PLAN.md"
     text = path.read_text(encoding="utf-8").replace(
-        "Đạt SC1 (xuất đủ cột).", "Đạt SC1 (xuất đủ cột); `git commit -m \"`RF9`\"`.", 1)
+        "SC1 (xuất đủ cột) của SPEC đạt.", "SC1 (xuất đủ cột) của SPEC đạt; `git commit -m \"`RF9`\"`.", 1)
     write_lf(path, text)
     hits = [f for f in check.check_paths([root]).findings if f.rule == "xref-missing"]
     assert hits and all("code span" in f.message for f in hits), [f.render() for f in hits]
@@ -472,7 +472,7 @@ def test_hint_uses_the_position_of_each_match(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "PLAN.md"
     text = path.read_text(encoding="utf-8").replace(
-        "Đạt SC1 (xuất đủ cột).", 'Đạt SC1 (xuất đủ cột); RF9 thường, P4 thường; `git commit -m "`RF9 P4`"`.', 1)
+        "SC1 (xuất đủ cột) của SPEC đạt.", 'SC1 (xuất đủ cột) của SPEC đạt; RF9 thường, P4 thường; `git commit -m "`RF9 P4`"`.', 1)
     write_lf(path, text)
     report = check.check_paths([root])
     for rule in ("xref-missing", "id-bare-single-letter"):
@@ -1701,3 +1701,64 @@ def test_delegation_record_may_precede_another_section(tmp_path):
     delegate_plan(root)
     _rewrite(root / "PLAN.md", "- Lời cấp:", "- Lời cấp:", "\n## Phần khác\n\nKhông có.\n")
     assert codes(check.check_paths([root]).findings) == []
+
+
+def _add_tasks(root: Path, body: str) -> None:
+    """Chèn các việc `TK` ngay trước mục `## Rủi ro` của PLAN."""
+    path = root / "PLAN.md"
+    write_lf(path, path.read_text(encoding="utf-8").replace("## Rủi ro", body + "\n## Rủi ro", 1))
+
+
+def _task(code: str, input_line: str) -> str:
+    return f"### {code} — Việc mẫu (→ FR1.1)\n\n- **Đầu vào:** {input_line}\n\n"
+
+
+def test_task_order_flags_forward_input(tmp_path):
+    root = make_sprint(tmp_path / "a")
+    _add_tasks(root, _task("TK2", "TK3.") + _task("TK3", "TK1."))
+    findings = check.check_paths([root]).findings
+    hits = [f for f in findings if f.rule == "task-order"]
+    assert "task-order" in codes(findings) and hits[0].level == "Phải sửa", [f.render() for f in findings]
+    assert "TK2 trỏ TK3 ở Đầu vào" in hits[0].message
+    assert check.check_paths([root]).exit_code == 1
+    other = make_sprint(tmp_path / "b")
+    _add_tasks(other, _task("TK2", "TK1.") + _task("TK3", "TK2–TK4."))
+    assert "task-order" in codes(check.check_paths([other]).findings)  # đầu trên của dải là 4 ≥ 3
+
+
+def test_task_order_ignores_parallel_mark(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_tasks(root, _task("TK2", "TK1.") + _task("TK3", "TK2; chạy cùng được với TK4.") + _task("TK4", "TK2."))
+    findings = check.check_paths([root]).findings
+    assert "task-order" not in codes(findings), [f.render() for f in findings]
+
+
+def test_task_order_allows_parent_for_subtask(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_tasks(root, _task("TK2", "TK1.") + _task("TK2.1", "TK2.") + _task("TK3", "TK2.1."))
+    findings = check.check_paths([root]).findings
+    assert "task-order" not in codes(findings), [f.render() for f in findings]
+
+
+def test_task_gap_flags_missing_number(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_tasks(root, _task("TK3", "TK1."))
+    report = check.check_paths([root])
+    assert "task-gap" in codes(report.findings) and report.exit_code == 0, [f.render() for f in report.findings]
+
+
+def test_plan_goal_block_flags_missing_label(tmp_path):
+    root = make_sprint(tmp_path)
+    path = root / "PLAN.md"
+    text = path.read_text(encoding="utf-8")
+    assert "**Rủi ro cần chú ý:**" in text
+    write_lf(path, text.replace("**Rủi ro cần chú ý:**", "**Rủi ro:**", 1))
+    report = check.check_paths([root])
+    hits = [f for f in report.findings if f.rule == "plan-goal-block"]
+    assert hits and hits[0].level == "Ghi chú" and "Rủi ro cần chú ý:" in hits[0].message, [f.render() for f in report.findings]
+    assert report.exit_code == 0
+
+
+def test_plan_goal_block_accepts_three_labels(tmp_path):
+    root = make_sprint(tmp_path)
+    assert "plan-goal-block" not in codes(check.check_paths([root]).findings)

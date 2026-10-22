@@ -146,6 +146,8 @@ trích bắt đầu bằng `> **Kết luận:**` trước tiêu đề cấp 2 đ
 
 Mục không có nội dung vẫn giữ tiêu đề và ghi "Không có." — không xoá tiêu đề.
 
+PLAN: mục `Mục tiêu` có ba dòng nhãn của mẫu (luật `plan-goal-block`, Ghi chú khi thiếu); số `TK` = thứ tự làm (luật `task-order`, `task-gap`).
+
 **Khi cổng là `delegated`:** PLAN (Cổng 1), REPORT (Cổng 2) hoặc `SPRINT.md` có thêm mục `## Bản ghi duyệt thay` với ba dòng nhãn `Phương án chọn:` · `Phương án bị loại:` (mỗi phương án một lý do) · `Nếu sai thì tốn gì:`, kèm đường tới lời cấp. SPEC không đòi mục này (bản ghi của Cổng 1 nằm ở PLAN). `check` kiểm bằng luật `gate-delegation-invalid`.
 
 **Hợp đồng `size × doc`** (luật bậc việc: [method/sizing.md](../method/sizing.md) mục 1). `size` ở frontmatter quyết

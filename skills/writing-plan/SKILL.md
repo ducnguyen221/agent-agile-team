@@ -50,7 +50,7 @@ gộp làm một `TK` có danh sách file.
 | Mục của mẫu | Viết gì |
 |---|---|
 | Kết luận | một câu: cách làm chính + số việc + điều cần người quyết |
-| Mục tiêu | nhắc mục tiêu sprint, trỏ SPEC |
+| Mục tiêu | ba dòng nhãn của mẫu (luật `plan-goal-block`): mục tiêu sprint (và mục tiêu việc nếu khác) · kết quả và khi nào xong, trỏ `SC` · rủi ro cụ thể, trỏ `RK` |
 | Kiến trúc | 2–3 câu cách làm; thành phần đổi; luồng dữ liệu; quyết định lâu dài → trỏ ADR (`docs/architecture/adr/`) |
 | Ràng buộc chung | luật áp cho MỌI `TK`: ngưỡng phiên bản, giới hạn phụ thuộc, quy ước đặt tên, nền tảng, coverage — chép nguyên văn từ SPEC/dự án |
 | Trọng tâm review | **≤5** lớp đầu vào hay kiểu hỏng SPEC ngụ ý nhưng chưa `TK` nào có test — thứ dễ cắn người dùng nhất lên đầu; mỗi dòng rồi **gắn test về `TK` sở hữu code** (mục 4) |
@@ -86,6 +86,15 @@ Sáu dòng bắt buộc của mẫu, rồi khối **Bước**:
   5. Commit: `git add tests/test_orders.py services/orders.py && git commit -m "TK3: normalize order code"`.
 ```
 
+**Số `TK` = thứ tự làm.** Đánh số 1…N theo thứ tự thực hiện; `Đầu vào:` chỉ trỏ `TK` số nhỏ hơn (luật `task-order`); hai việc
+độc lập vẫn số liền nhau, việc sau ghi "chạy cùng được với TKk". Trước Cổng 1 được đánh số lại; sau Cổng 1 chèn `TKn.m`
+(`id-convention` mục 4).
+
+**Checklist 11 ô mỗi `TK`** — ô trống là Phải sửa khi review: tiêu đề trỏ `FR`/`SC` · vai · tier (+ effort nếu khác sàn) ·
+`Đầu vào:` · `File:` đường đầy đủ + tạo/sửa + neo (dòng hoặc mục) · `Giao diện:` tên + chữ ký/giá trị, enum đủ · hành vi
+từng nhánh "vào → ra" có ví dụ · chữ dự thảo cho tài liệu/skill/mẫu (hoặc trỏ mục SPEC có chữ chốt) · Bước theo bảng dưới
+· Cách kiểm lệnh + output · commit mang mã `TK` · Hoàn tác + Bằng chứng đạt.
+
 **Khối Giao diện là cách `TK` sau biết tên và kiểu của `TK` trước:** người làm `TK` chỉ thấy `TK` của
 mình. `TK` trỏ `TK` khác thì trỏ vào khối Giao diện của nó, không chép lại code.
 
@@ -113,7 +122,8 @@ thật) — chọn một, ghi rõ trong `TK`:
 Không bao giờ viết: "TBD", "làm sau", "xử lý biên phù hợp", "thêm validation", "viết test cho phần
 trên", "tương tự TK2" (người đọc có thể đọc không theo thứ tự), bước mô tả *làm gì* mà không nói *thế
 nào*, kiểu/hàm không `TK` nào định nghĩa. Ngược lại, thân hàm mà chữ ký và test đã xác định là chép
-code — cũng là lỗi.
+code — cũng là lỗi. Ô nào của checklist mục 4 bỏ trống, hay "viết nội dung phù hợp" thay cho chữ dự thảo, cũng
+là chỗ trống.
 
 ## 6. Tự review 5 điểm — chạy chính mình, không giao subagent
 

@@ -49,6 +49,9 @@ RULES: dict[str, tuple[str, str]] = {
     "xref-missing": (PHAI, "nhắc tới mã không được định nghĩa ở tài liệu sở hữu"),
     "xref-unresolved": (GHI, "không tìm được tài liệu sở hữu qua `links` để đối chiếu mã"),
     "task-without-trace": (PHAI, "việc `TK` không trỏ `FR`/`SC` nào (việc con kế thừa việc cha)"),
+    "task-order": (PHAI, "`Đầu vào:` của `TK` trỏ `TK` số ≥ chính nó — số `TK` phải là thứ tự làm"),
+    "task-gap": (GHI, "số `TK` cấp một không liền 1…N theo thứ tự xuất hiện"),
+    "plan-goal-block": (GHI, "mục Mục tiêu của PLAN thiếu một trong ba dòng nhãn (mẫu PLAN)"),
     "report-sc-without-vr": (PHAI, "`SC` của SPEC không có `VR` nào trong REPORT"),
     "report-fr-without-vr": (PHAI, "`FR` của SPEC không có `VR` nào trỏ tới nó hoặc kịch bản con (trừ `bỏ`/NOT_APPLICABLE)"),
     "self-review": (CHAN, "một nhãn agent vừa giữ vai thực thi vừa giữ vai kiểm định"),
@@ -137,6 +140,11 @@ REQUIRED_HEADINGS = {
     "sprints": ("Đang mở", "Timeline"),
     "specs": ("Đang mở", "Danh mục"),
 }
+
+PLAN_GOAL_LABELS = ("Mục tiêu sprint:", "Kết quả mong muốn / xong khi:", "Rủi ro cần chú ý:")  # SPEC 7.8
+INPUT_FIELD = "**Đầu vào:**"
+OUTPUT_FIELD = "**Đầu ra:**"
+PARALLEL_MARK = "chạy cùng được với"
 
 SPRINT_TINY_HEADINGS = ("Kế hoạch", "Kết quả")  # `SPRINT.md` cỡ rất nhỏ: hai phần; bốn phần cũ vẫn hợp lệ
 SPRINT_FOUR = REQUIRED_HEADINGS["sprint"]
@@ -973,6 +981,11 @@ def prefix(code: str) -> str:
     return code[:2]
 
 
+def _tk_key(code: str) -> tuple:
+    """`TK3.1` → `(3, 1)`: so theo bộ số nên việc con lớn hơn việc cha."""
+    return tuple(int(x) for x in code[2:].split("."))
+
+
 # --- Bộ máy kiểm ----------------------------------------------------------------------------------------
 
 
@@ -1022,6 +1035,9 @@ class Engine:
         self.lead_rule(doc)
         if doc.kind in ("plan", "sprint"):
             self.trace_rule(doc)
+            self.order_rules(doc)
+        if doc.kind == "plan":
+            self.plan_goal_rule(doc)
         if doc.kind in ("report", "sprint"):
             self.verification_rules(doc)
 
@@ -1487,6 +1503,63 @@ class Engine:
                 parent = parent.rsplit(".", 1)[0]
             if parent not in tasks:
                 self.add(doc.path, line, "task-without-trace", f"{code} không trỏ FR/SC và không có việc cha để kế thừa")
+
+    def order_rules(self, doc: Doc) -> None:
+        """Số `TK` là thứ tự làm: `Đầu vào:` chỉ trỏ số nhỏ hơn (`task-order`); số cấp một liền 1…N (`task-gap`)."""
+        heads = [d for d in doc.defs if prefix(d.code) == "TK" and d.position == "heading"]
+        previous = 0
+        for d in heads:
+            if "." in d.code:
+                continue
+            number = _tk_key(d.code)[0]
+            if number != previous + 1:
+                self.add(doc.path, d.line, "task-gap", f"{d.code} đứng sau TK{previous} — số TK cấp một phải liền 1…N" if previous else f"{d.code} là việc cấp một đầu tiên — số đầu phải là TK1")
+            previous = number
+        for i, d in enumerate(heads):
+            end = heads[i + 1].line - doc.start if i + 1 < len(heads) else len(doc.masked)
+            field = self._input_field(doc, d.line - doc.start + 1, end)
+            if field is None:
+                continue
+            line, text = field
+            own = _tk_key(d.code)
+            seen = set()
+            for code in codes_on(text.split(PARALLEL_MARK)[0]):
+                if prefix(code) == "TK" and code not in seen and _tk_key(code) >= own:
+                    seen.add(code)
+                    self.add(doc.path, line, "task-order", f"{d.code} trỏ {code} ở Đầu vào — số TK phải là thứ tự làm")
+
+    def _input_field(self, doc: Doc, begin: int, end: int):
+        """Mục danh sách `**Đầu vào:**` trong phần [begin, end) của một việc: (dòng, chữ) tới `**Đầu ra:**` hoặc hết mục."""
+        for idx in range(begin, end):
+            line = doc.masked[idx]
+            if HEADING.match(line):
+                break
+            m = re.match(r"^(\s*)(?:[-*+]|[0-9]+\.)\s+" + re.escape(INPUT_FIELD), line)
+            if not m:
+                continue
+            parts = [line[m.end():]]
+            for nxt in doc.masked[idx + 1:end]:
+                if not nxt.strip():
+                    continue
+                if len(nxt) - len(nxt.lstrip()) <= len(m.group(1)) or HEADING.match(nxt):
+                    break
+                parts.append(nxt)
+            return doc.line_no(idx), " ".join(parts).split(OUTPUT_FIELD)[0]
+        return None
+
+    def plan_goal_rule(self, doc: Doc) -> None:
+        """Mục `## Mục tiêu` của PLAN có đủ ba dòng nhãn của mẫu (SPEC 7.8)."""
+        start = next((i for i, line in enumerate(doc.masked) if re.match(r"^##\s+Mục tiêu\s*$", line)), None)
+        if start is None:
+            return  # thiếu tiêu đề đã có `heading-missing`
+        lines = []
+        for line in doc.masked[start + 1:]:
+            if re.match(r"^#{1,2}\s", line):
+                break
+            lines.append(re.sub(r"^\s*(?:[-*+]\s+)?(?:\*\*)?", "", line))
+        for label in PLAN_GOAL_LABELS:
+            if not any(x.startswith(label) for x in lines):
+                self.add(doc.path, doc.line_no(start), "plan-goal-block", f"mục Mục tiêu thiếu dòng nhãn '{label}' (mẫu PLAN)")
 
     def verification_rules(self, doc: Doc) -> None:
         vr_rows = [d for d in doc.defs if prefix(d.code) == "VR" and d.position == "table"]

@@ -35,9 +35,11 @@ links:
 
 ## Mục tiêu
 
-<!-- Nhắc lại mục tiêu sprint bằng một câu và trỏ SPEC. -->
+<!-- Ba dòng nhãn bắt buộc (luật plan-goal-block): mục tiêu sprint; kết quả và khi nào xong — trỏ SC; rủi ro cụ thể — trỏ RK. -->
 
-Đạt SC1 (tra nhanh) của SPEC bằng một điểm tra cứu chỉ-đọc.
+- **Mục tiêu sprint:** Cho nhân viên bán hàng tra trạng thái đơn trong một bước.
+- **Kết quả mong muốn / xong khi:** SC1 (tra nhanh) của SPEC đạt.
+- **Rủi ro cần chú ý:** mã đơn cũ lẫn chữ hoa và chữ thường làm tra hụt — RK1 (tra hụt do hoa thường).
 
 ## Kiến trúc
 
@@ -65,8 +67,9 @@ links:
 
 ## Việc
 
-<!-- Mỗi TK đủ 7 dòng: Vai (+ tier) · Đầu vào/ra · Giao diện · Cách kiểm · Cổng · Hoàn tác, và tiêu đề trỏ FR/SC.
-     Việc con viết `TK1.1`, kế thừa phần trỏ của việc cha. Không đánh số lại; việc bỏ giữ mã, ghi trạng thái `bỏ`. -->
+<!-- Mỗi TK đủ 11 ô (skill writing-plan mục 4): tiêu đề trỏ FR/SC · Vai (+ tier, effort) · Đầu vào · File · Giao diện · hành vi từng nhánh · chữ dự thảo · Bước · Cách kiểm · commit · Hoàn tác + bằng chứng; hai việc mẫu dưới viết rút gọn.
+     Số TK = thứ tự làm: Đầu vào chỉ trỏ TK số nhỏ hơn (luật task-order); việc độc lập ghi "chạy cùng được với TKk".
+     Trước Cổng 1 được đánh số lại; sau Cổng 1 việc chèn viết TKn.m, việc bỏ giữ mã, ghi trạng thái bỏ. -->
 
 PLAN có 2 **task** (TK):
 

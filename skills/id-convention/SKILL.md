@@ -15,7 +15,7 @@ rewrite_before_public: false
 > **Kết luận:** mỗi loại mục có một tiền tố **hai chữ cái rút từ tên tiếng Anh**, thuộc đúng một tài
 > liệu; hồ sơ trong sổ gốc có gạch nối và số tăng dần không tái dùng; mọi mã **luôn kèm tên ngắn** trong
 > chat; **trước mọi danh sách / bảng mã có câu dẫn** nói tài liệu nào và mã là gì (nghĩa in đậm); cấm mã
-> trần một chữ cái, cấm tự chế tiền tố, cấm đánh số lại, ưu tiên viết bằng chữ.
+> trần một chữ cái, cấm tự chế tiền tố, cấm đánh số lại (trừ `TK` trước Cổng 1, mục 4), ưu tiên viết bằng chữ.
 
 ## 1. Luật đặt tiền tố
 
@@ -80,6 +80,9 @@ rewrite_before_public: false
 - Quyết định cần người dùng → `DN` kế tiếp trong PLAN (bảng Quyết định cần người), PROGRESS trỏ tới.
 - Mục bị bỏ: **giữ nguyên mã**, cột trạng thái ghi `bỏ`, không gạch ngang tên, không xoá dòng, không đánh
   số lại các mục sau.
+- **Ngoại lệ đánh số `TK` trước Cổng 1:** khi PLAN còn `gate_1: pending`, số `TK` là thứ tự làm dự kiến — sắp lại thứ tự thì
+  đánh số lại 1…N liền nhau, bắt đầu từ 1; từ Cổng 1 không đánh lại nữa, việc chèn vào giữa thành `TKn.m` của việc đứng
+  trước. Mục bỏ sau Cổng 1 vẫn giữ mã, ghi `bỏ`.
 
 ## 5. Cấm — và sửa thành
 
@@ -100,7 +103,7 @@ rewrite_before_public: false
 2. Có mã một chữ cái + số ngoài dấu code? Có → Phải sửa.
 3. Mã lần đầu trong đoạn có tên? Chat có tên ở mọi mã?
 4. Nhắc chéo trỏ tới mục có thật (`TK` trỏ ít nhất một `FR`/`SC`)?
-5. Có số bị tái dùng hay đánh số lại? Mục bỏ còn mã và trạng thái `bỏ`?
+5. Có số bị tái dùng hay đánh số lại (ngoài ngoại lệ mục 4)? Mục bỏ còn mã và trạng thái `bỏ`?
 6. Mã hệ thống ngoài nằm trong dấu code kèm tên + nguồn?
 7. Ưu tiên và mức bằng chữ?
 8. Mỗi bảng / danh sách mã có câu dẫn (tài liệu + nghĩa in đậm) ngay trên?

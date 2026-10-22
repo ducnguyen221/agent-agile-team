@@ -23,7 +23,7 @@
      "replace": ["| US1 (xuất nhanh) | Là kế toán", "| YC2 (tự chế) | Là ai đó, tôi muốn X, để Y | Nên có |\n| US1 (xuất nhanh) | Là kế toán"]},
     {"rule": "id-wrong-doc", "exit": 1, "file": "PLAN.md",
      "replace": ["| RK1 (dấu phẩy trong tên)", "| BR1 (vướng nhầm chỗ) | Ghi vướng mắc trong PLAN | Nên sửa | Chuyển sang PROGRESS |\n| RK1 (dấu phẩy trong tên)"]},
-    {"rule": "xref-missing", "exit": 1, "file": "PLAN.md", "line": 48,
+    {"rule": "xref-missing", "exit": 1, "file": "PLAN.md", "line": 50,
      "replace": ["(→ FR1.1, SC1)", "(→ FR1.1, FR9, SC1)"]},
     {"rule": "xref-unresolved", "exit": 0, "file": "PLAN.md",
      "replace": ["links:\n  spec: SPEC.md\n", "links:\n"]},
@@ -124,6 +124,9 @@
     {"name": "thời điểm cấp là ngày không có thật", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
      "replace": ["grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-02-30 08:30 +07"]},
     {"name": "thu hồi chỉ ghi ngày, trùng ngày cổng", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
-     "replace": ["revoked_at: null", "revoked_at: 2026-02-01"]}
+     "replace": ["revoked_at: null", "revoked_at: 2026-02-01"]},
+    {"name": "TK trỏ Đầu vào của việc sau", "rule": "task-order", "exit": 1, "file": "PLAN.md", "replace": ["## Rủi ro", "### TK2 — Việc trỏ tới (→ FR1.1)\n\n- **Đầu vào:** TK3.\n\n### TK3 — Việc sau (→ FR1.1)\n\n- **Đầu vào:** TK1.\n\n## Rủi ro"]},
+    {"name": "số TK cấp một hụt số", "rule": "task-gap", "exit": 0, "file": "PLAN.md", "replace": ["## Rủi ro", "### TK3 — Việc nhảy số (→ FR1.1)\n\n- **Đầu vào:** TK1.\n\n## Rủi ro"]},
+    {"name": "mục Mục tiêu thiếu nhãn thứ ba", "rule": "plan-goal-block", "exit": 0, "file": "PLAN.md", "replace": ["- **Rủi ro cần chú ý:** tên khách có dấu phẩy làm lệch cột — RK1 (dấu phẩy trong tên).\n", ""]}
   ]
 }

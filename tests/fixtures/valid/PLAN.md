@@ -29,7 +29,9 @@ links:
 
 ## Mục tiêu
 
-Đạt SC1 (xuất đủ cột).
+- **Mục tiêu sprint:** Xuất danh sách đơn ra CSV đủ cột.
+- **Kết quả mong muốn / xong khi:** SC1 (xuất đủ cột) của SPEC đạt.
+- **Rủi ro cần chú ý:** tên khách có dấu phẩy làm lệch cột — RK1 (dấu phẩy trong tên).
 
 ## Kiến trúc
 
