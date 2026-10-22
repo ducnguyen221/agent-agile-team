@@ -29,6 +29,8 @@ Nói ra phân loại ("việc này bounded, tôi viết SPEC ngắn") để ngư
 ẩn giữa chừng → **dừng, nói rõ, nâng đường**; không bao giờ hạ giữa chừng. Thấy mình với tay lấy nhãn
 nhẹ để khỏi viết SPEC thì đó chính là lúc chọn nhãn nặng.
 
+Dù đường nào, Kết luận SPEC nêu đủ ba yếu tố: mục tiêu · xong khi nào (trỏ `SC`) · rủi ro cụ thể cần chú ý (từ ô 4 của Brief hoặc mục 1.2 của SPEC).
+
 ## 2. Hiểu đúng ý trước khi viết
 
 1. **Tìm ý định:** kết quả mong muốn, cho ai, thế nào là thành công. Biết "kiểu ứng dụng" không cho
@@ -65,7 +67,7 @@ Ngoài chế độ làm rõ, hỏi lẻ giữa Bước 2–5 là lỗi quy trìn
 
 | Mục | Viết gì | Kiểm |
 |---|---|---|
-| Kết luận | một câu: làm gì, cho ai, xong khi nào | người không chuyên đọc câu này là đủ |
+| Kết luận | một câu: làm gì, cho ai, xong khi nào (trỏ `SC`), rủi ro cụ thể cần chú ý | người không chuyên đọc câu này là đủ |
 | Bối cảnh | vì sao; trỏ `RQ-`, `FS-`; số liệu có nguồn | 3–6 dòng |
 | `US` | "Là <ai>, tôi <muốn gì>, để <được gì>" + ưu tiên bằng chữ | mỗi `US` có ít nhất một `FR` |
 | `FR` | **một `FR` một hành vi**; mỗi kịch bản `FRx.y` dạng **KHI <sự kiện> THÌ <hệ thống> <phản ứng>**; kịch bản là thứ đem đi kiểm | gồm cả đường lỗi, không chỉ đường vui; một `FR` (hay một câu KHI…THÌ) chứa hai phản ứng khác nhau là hai hành vi — tách thành hai `FR`, vì mỗi hành vi cần `VR` riêng và delta Thêm / Sửa / Bỏ trỏ vào từng hành vi |

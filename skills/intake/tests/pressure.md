@@ -1,14 +1,16 @@
 ---
 skill: intake
-method: fresh paired current-skill baseline and worktree candidate; separate v1 and corrected v2 experiments; absolute skill path, no installed skill
-model: gpt-6-astra (requested for every current subject; actual model and effort telemetry unavailable)
-tier: T1
-skill_sha: 5629b5566c6c9a29cd34d2192cfe7ffffb7b0bf4
-source_sha256: 23448ccb533da84cf28c80d5c8e15d0f37efdbbcba69bfbf3e0e7de7ecd0eff9
-requested_effort: "`high`"
-date: 2026-10-12
-result: partial; A v1, B v2 and C v2 each RED 0/3 and GREEN 3/3; v1 full GREEN 4/9 failed; micro control 0/5 and candidate 5/5; old regression 5/6, remaining mismatch also observed on archived source; diagnostic writer scores, independent acceptance pending
+method: "TK10 of the role-profile sprint: fresh subagent per scenario reading the worktree SKILL.md by absolute path, Skill tool forbidden; earlier sections below keep their own method (historic)"
+model: claude-sonnet-5-5 (subagents requested sonnet, effort medium)
+tier: T3
+skill_sha: 4f4d827740455409b66fedb0a9e800a8ca64d975
+source_sha256: b5eab2a3ec7c978f1565cf74d6ce3a4e5396a376561ab42d5b699b60d1430116
+requested_effort: "medium"
+date: 2026-10-22
+result: "3/3 GREEN pass after re-scoring two criteria that over-read the spec (QA first pass 1/3; second run of in-6 pass, second run of in-8 pass (fresh subject, criteria written before dispatch)); RED on af1ad4f 0/3 pass; old scenarios 8/9"
 agent_ids:
+  sonnet_tk10_green_2026_10_22: {in-6-profile: ab103310f2dc57dcd, in-7-profile: afdfc8968ab84014a, in-8-profile: a5445e637e1f71752, in-1b: a159dcbc5aebdca07, in-2: a4cdd6c4a4beb0fab, in-3: a37fef1485ecc1a7d, in-4: ae011d401d184447c, in-5: a4a64d1f8705b3605, routing-A: ae8e0c682308145d1, routing-B: af479ce2e53e595f2, routing-C: ae285a4e495ca7e63}
+  sonnet_tk10_round2_2026_10_22: {in-6-profile: a4581d582627412b5, in-6-old: a64769f781c07beca, in-8-profile: "round 2 fourth dispatch, agent id not recorded"}
   astra_v1_red_2026_10_12: {A: [intake_red_a1, intake_red_a2, intake_red_a3], B: [intake_red_b1, intake_red_b2, intake_red_b3], C: [intake_red_c1, intake_red_c2, intake_red_c3]}
   astra_v1_green_2026_10_12: {A: [intake_green_a1, intake_green_a2, intake_green_a3], B: [intake_green_b1, intake_green_b2, intake_green_b3], C: [intake_green_c1, intake_green_c2, intake_green_c3]}
   astra_v2_red_2026_10_12: {B: [intake_v2_red_b1, intake_v2_red_b2, intake_v2_red_b3], C: [intake_v2_red_c1, intake_v2_red_c2, intake_v2_red_c3]}
@@ -31,6 +33,29 @@ agent_ids:
 > v1, ca xoá dữ liệu v2 và ca auth có pin v2 đều RED 0/3, GREEN 3/3. Bộ v1 đầy đủ **không đạt** (4/9).
 > Hồi quy cũ đạt 5/6; ca dashboard lệch kỳ vọng cỡ/rủi ro ở cả candidate lẫn bản lưu trước sửa. Đây là
 > chấm chẩn đoán của người sửa, chưa phải nghiệm thu độc lập hay bằng chứng chạy hệ thống thật.
+
+## Lượt SPR-31 TK10 - GREEN cho hồ sơ vai (2026-10-22)
+
+QA T3 (`claude-sonnet-5-5`, subagent sonnet effort medium, n = 1), cây skill HEAD `8c56a6b` (đo `skill_sha` sau commit TK9), mỗi kịch bản một chủ thể mới đọc `SKILL.md` bằng đường tuyệt đối trong worktree. Kịch bản mới `in-6`, `in-7`, `in-8` (nguyên văn cuối `tests/scenarios.txt`, tên `in-6-profile`, `in-7-profile`, `in-8-profile` để khỏi trùng `in-6` cũ). Chấm theo thước ba mức của hồ sơ sprint; người chấm cùng họ model với chủ thể.
+
+Hai tầng chấm, n = 1. **Chấm lần đầu của QA (T3):** in-6 Đạt một phần, in-7 Đạt, in-8 Đạt một phần, tức 1/3. **Chấm lại sau khi thấy kết quả, do vai T1 (Analyst) làm:** hai tiêu chí của thước tự vượt hoặc đọc sai spec của sprint (nhắc ràng buộc nguyên văn là việc của SPEC, không phải của tin gom; tin bổ sung hỏi xác nhận bậc và mở sprint không phải lượt hỏi thứ ba), nên in-6 và in-8 chấm lại Đạt, tức 3/3. Chấm lại sau chạy là đổi thước hậu kiểm; hai điểm được giữ riêng để người đọc tự cân.
+
+| Kịch bản | RED (`af1ad4f`) | GREEN lần đầu (QA) | GREEN sau chấm lại (T1) | Quan sát |
+|---|---|---|---|---|
+| in-6 | Đạt một phần | Đạt một phần | Đạt | rủi ro cụ thể và mức tự trị có, không làm trước; ba ràng buộc nhắc lại trong một dòng và cam kết chép nguyên văn vào SPEC |
+| in-7 | Đạt một phần | Đạt | Đạt | `[infra, auth]`, lớn, ghi *tự quyết* không hạ cỡ/không thay cổng, rủi ro quyền ghi token |
+| in-8 | Không đạt | Đạt một phần | Đạt | không ghi `RQ-`/mở sprint trước xác nhận; một tin bổ sung có ô 2 và ô 4; ô còn trống thành `CQ`, không lượt hỏi thứ ba |
+
+Chữ thước mới cho hai tiêu chí (kịch bản mới cùng tên `in-6`, `in-8` nhưng khác `in-6` cũ ở bảng "Kỳ vọng mới" phía dưới):
+
+| Kịch bản | Tiêu chí | Chữ thước mới |
+|---|---|---|
+| in-6 | 1 | Tin gom nhắc lại ba ràng buộc ô 3 trong một dòng và nói rõ sẽ chép nguyên văn vào SPEC (FR9.1, FR9.3). |
+| in-8 | 3 | Sau tin bổ sung không có lượt hỏi nào nữa: ô còn trống thành `CQ` cho Cổng 1, không chặn Cổng 1; `RQ-`/sprint/bậc vẫn chỉ ghi sau khi người giao xác nhận (FR9.4; skill mục 1 bước 3–4). |
+
+Vòng 2 (thước mới ghi trước, chủ thể mới): `in-6` Đạt 3/3 (tin gom nhắc ba ràng buộc trong một dòng, cam kết chép nguyên văn vào SPEC, rủi ro dữ liệu khách, chưa `RQ-`). `in-8` Đạt 3/3: ba lần giao đầu bị bộ lọc an toàn của API chặn, không có output; lần giao thứ tư (khoảng 23:44, sau thước ghi lúc 23:40:14) chủ thể mới trả đúng một tin bổ sung, ô trống thành `CQ`, không lượt hỏi nào nữa, chưa `RQ-`.
+
+Kịch bản cũ: `in-1b` Đạt, `in-2` Đạt, `in-3` Đạt một phần (trang chủ xếp nhỏ thay vì vừa), `in-4` Đạt, `in-5` Đạt, `in-6` cũ (data_migration) Đạt; routing A/B/C 3/3 Đạt. Tính lại gồm `in-6` cũ: 8/9 Đạt. So bản ghi Astra trước (`in-1b` lệch, `in-3` Đạt): đổi chỗ, `in-1b` nay Đạt còn `in-3` nay Đạt một phần. Rubric riêng của routing A/B/C cũ không còn trên đĩa: chấm theo chữ yêu cầu của kịch bản, độ tin cậy vừa. Không sửa `SKILL.md`: `skill_sha` không đổi.
 
 ## Lượt hiện tại — phạm vi và nguồn
 

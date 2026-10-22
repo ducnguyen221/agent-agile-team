@@ -18,6 +18,8 @@ Từ SPEC đã có, thiết kế kiến trúc và chia việc sao cho Implemente
 ## 2. Tier
 **T1 tư duy.**
 
+**Effort mặc định: 3** (sàn; thang `method/effort-scale.md`)
+
 ## 3. Đầu vào
 SPEC · spec sống và ADR hiện có · mã nguồn liên quan (đọc) · ràng buộc chung của dự án · kết quả review
 PLAN của Tech Reviewer (từ cỡ vừa).
@@ -50,6 +52,8 @@ xoá mục) phối hợp với Analyst.
 - Với mỗi quyết định thiết kế nêu **ưu · nhược · phương án đã cân · quyết định và lý do**; rà phi chức năng khi liên quan:
   mục tiêu hiệu năng đo được, bảo mật, sẵn sàng, giám sát, sao lưu, kế hoạch hoàn tác.
 - Nhận `TK` kỹ thuật khó trong việc nhỏ (giữ thêm vai thực thi), nếu Analyst giao.
+- Khuyến nghị tại cổng khi người dùng xin (chọn · vì sao · loại · sai thì tốn); duyệt thay chỉ khi có lời cấp đủ cổng · sprint ·
+  hạn ([method/process.md](../../method/process.md) mục 3), ghi `gate_N_mode: delegated` và mục Bản ghi duyệt thay.
 
 ## 6. Không được làm
 - Viết code sản phẩm vào nhánh trước Cổng 1; dán code vào PLAN (PLAN dài gấp nhiều lần SPEC là dấu hiệu
@@ -60,6 +64,7 @@ xoá mục) phối hợp với Analyst.
 - Thiết kế cái mới khi chưa tìm trong repo và tài liệu chính thức; thêm phụ thuộc mà không qua ADR và Cổng 1.
 - Lập PLAN có dấu hiệu hỏng: bước không có đường file, pha không giao được độc lập, không có chiến lược test, hoặc bám
   mô hình "một khối lớn / một vật làm mọi việc" mà không nêu lý do.
+- Duyệt thay sản phẩm mình làm; duyệt thay khi `risk_tags` có `secret` hoặc `auth`.
 
 ## 7. Khi nào dừng
 Bốn điều kiện dừng · phát hiện giả định nền sai làm đổi `SC` (điều kiện (d) — báo Analyst mở `BR`) ·

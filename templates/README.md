@@ -15,6 +15,7 @@ khoá frontmatter, giá trị cho phép, tiêu đề bắt buộc, khuôn sổ g
 | `sprint/REPORT.md` | `<thư mục sprint>/REPORT.md` | Như trên — kết quả, bàn giao |
 | `sprint/SPRINT.md` | `<thư mục sprint>/SPRINT.md` | Cỡ nhỏ: bốn phần SPEC · PLAN · PROGRESS · REPORT gộp một file (`size: small`) |
 | `sprint/SPRINT-tiny.md` | `<thư mục sprint>/SPRINT.md` (đổi tên khi dựng) | Cỡ rất nhỏ: hai phần "Kế hoạch" / "Kết quả" (`size: tiny`) |
+| `sprint/BRIEF.md` | không dựng — `init` không chép; người giao tự điền | Brief người giao 4 ô, điền trước khi giao việc |
 | `registry/REQUESTS.md` | `paths.requests` | Sổ yêu cầu theo timeline |
 | `registry/SPECS.md` | `paths.specs` | Mục lục tính năng |
 | `registry/feature-spec.md` | `<paths.feature_specs_dir>/<slug>.md` | Spec sống của một tính năng |
@@ -88,6 +89,8 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
 | `risk_tags` | tài liệu sprint | danh sách con của `secret`, `auth`, `external_input`, `public_api`, `infra`, `data_migration`, `rules`; khác rỗng buộc `risk: high` |
 | `roles` | tài liệu sprint | khối lồng; khoá vai → `[tier, agent]` hoặc `[tier, agent, "note"]` (mục 3.1) |
 | `gate_1` · `gate_1_at` · `gate_1_quote` | SPEC, PLAN, SPRINT | `pending` · `approved` · `changes_requested`; thời điểm và câu duyệt nguyên văn, chưa có thì `null` |
+| `gate_1_mode` · `gate_2_mode` | SPEC, PLAN, SPRINT (Cổng 1) · REPORT, SPRINT (Cổng 2) | `human` (mặc định khi vắng) · `delegated` (T1 duyệt thay theo lời cấp, [method/process.md](../method/process.md) mục 3); giá trị khác → `frontmatter-value`. `delegated` buộc `gate_N_quote` bắt đầu `duyệt thay:` |
+| `delegation` | nơi có `gate_N_mode: delegated` | khối lồng một cấp, chỉ tám khoá sau — khoá lạ cũng báo: `grant` (lời cấp nguyên văn) · `grant_at` · `scope` (`[gate_1]`, `[gate_2]` hoặc cả hai) · `expires` (`sprint_end` hoặc `YYYY-MM-DD`) · `by` (nhãn agent T1) · `tier` (`T1`) · `files` (file luật nêu đích danh, `[]` nếu không) · `revoked_at` (`null` hoặc thời điểm thu hồi). Thời điểm dạng `YYYY-MM-DD` hoặc `YYYY-MM-DD HH:MM +TZ` |
 | `verdict` | REPORT, SPRINT | kết luận vòng kiểm định cuối: `pending` · `pass` (Đạt) · `conditional_pass` (Đạt có điều kiện) · `fail` (Không đạt) |
 | `gate_2` · `gate_2_at` · `gate_2_quote` | REPORT, SPRINT | kết luận của chủ sản phẩm, cùng bộ giá trị với `verdict`; thời điểm, câu nguyên văn |
 | `review_round` | PROGRESS, REPORT, SPRINT | số nguyên ≥ 0 — vòng kiểm định hiện tại |
@@ -107,7 +110,7 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
 
 ### 3.1. Khoá vai và luật "người làm không tự chấm"
 
-- Vai thực thi: `analyst`, `architect`, `implementer`, `qa`. Vai kiểm định: `business-reviewer`,
+- Vai thực thi: `analyst`, `architect`, `implementer`, `qa`, `researcher`. Vai kiểm định: `business-reviewer`,
   `tech-reviewer` và chuyên đề `<tên>-specialist` (`security-specialist`, `data-specialist`,
   `backend-specialist`, `frontend-specialist`).
 - `tier` là `T1` · `T2` · `T3`. `agent` là **nhãn phiên hoặc subagent** (`agent-a`), không phải tên model —
@@ -115,6 +118,7 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
   "Vai · tier · model" của PROGRESS.
 - Luật `check` dựa vào: trong một file, không nhãn `agent` nào (trừ `pending`) vừa giữ vai thực thi vừa giữ
   vai kiểm định (mức Chặn). Một agent được giữ nhiều vai thực thi.
+- Người duyệt thay (`delegation.by`) cũng không được trùng nhãn một vai thực thi trong `roles` của cùng file: mức Chặn, cùng luật `self-review`.
 - **Độc lập kiểm định:** file có `VR` (REPORT, SPRINT) thì nhãn `qa` phải khác nhãn `implementer` và
   `architect`. Trùng nhãn → Phải sửa, trừ khi việc cỡ **rất nhỏ** và dòng `VR` ghi rõ "tự kiểm, chưa độc lập"; khi đó
   `verdict` tối đa `conditional_pass`. Cỡ nhỏ trở lên không có tự kiểm: `qa` trùng nhãn người làm vẫn là Phải sửa dù
@@ -142,6 +146,10 @@ trích bắt đầu bằng `> **Kết luận:**` trước tiêu đề cấp 2 đ
 | SPECS | Đang mở · Danh mục |
 
 Mục không có nội dung vẫn giữ tiêu đề và ghi "Không có." — không xoá tiêu đề.
+
+PLAN: mục `Mục tiêu` có ba dòng nhãn của mẫu (luật `plan-goal-block`, Ghi chú khi thiếu); số `TK` = thứ tự làm (luật `task-order`, `task-gap`).
+
+**Khi cổng là `delegated`:** PLAN (Cổng 1), REPORT (Cổng 2) hoặc `SPRINT.md` có thêm mục `## Bản ghi duyệt thay` với ba dòng nhãn `Phương án chọn:` · `Phương án bị loại:` (mỗi phương án một lý do) · `Nếu sai thì tốn gì:`, kèm đường tới lời cấp. SPEC không đòi mục này (bản ghi của Cổng 1 nằm ở PLAN). `check` kiểm bằng luật `gate-delegation-invalid`.
 
 **Hợp đồng `size × doc`** (luật bậc việc: [method/sizing.md](../method/sizing.md) mục 1). `size` ở frontmatter quyết
 hình tài liệu; `check` đối chiếu hai thứ:

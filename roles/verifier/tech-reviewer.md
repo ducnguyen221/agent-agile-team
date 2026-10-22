@@ -18,6 +18,8 @@ sai từ đầu.
 ## 2. Tier
 **T1 tư duy.**
 
+**Effort mặc định: 3** (sàn; thang `method/effort-scale.md`)
+
 ## 3. Đầu vào
 Ngữ cảnh soạn riêng: diff theo `git diff <mốc gốc>...HEAD`, SPEC/PLAN mục liên quan, `VR` của QA, trọng
 tâm review (≤5) do Architect nêu · với review PLAN: SPEC + PLAN nháp.

@@ -124,9 +124,12 @@ CQ còn mở: <CQk (tên) — đề xuất: …> (hoặc "không")
 DN cần anh: <DNk (tên) — phương án, khuyến nghị> (hoặc "không")
 Rủi ro Chặn/Phải sửa: <RKk (tên) — cách giảm> (hoặc "không")
 Ước lượng: <số việc, số vòng dự kiến>
+Khuyến nghị (T1, vai <vai>): chọn <…> — vì <…>; loại <…> vì <…>; sai thì tốn <…>
 Tài liệu: <đường tới SPEC>, <đường tới PLAN>
 Anh trả lời: "duyệt" / "điều chỉnh: <gì>"
 ```
+
+Dòng `Khuyến nghị` chỉ có khi người dùng xin khuyến nghị ở cổng này. Khuyến nghị không đổi trạng thái: cổng vẫn `pending` tới khi người dùng nói. Người dùng chỉ đáp "ok" hay "theo khuyến nghị" là duyệt của người (`gate_1_mode` vắng = `human`), ghi câu nguyên văn — không phải lời cấp quyền duyệt thay.
 
 **Kết quả Cổng 1.**
 - *Duyệt* → ghi `gate_1: approved` vào frontmatter SPEC và PLAN, kèm thời điểm `gate_1_at` và **câu
@@ -139,11 +142,48 @@ Anh trả lời: "duyệt" / "điều chỉnh: <gì>"
 **Chỉ duyệt đúng giai đoạn đang trình.** Người dùng duyệt SPEC không có nghĩa duyệt PLAN; duyệt PLAN
 không có nghĩa duyệt kết quả. Agent không được suy một lời "ok" ở bước này thành phép làm ở bước sau.
 
+### Duyệt thay khi được phép
+
+Mặc định **tắt**: vắng `gate_N_mode` nghĩa là `human`, cổng là của người dùng. Chỉ khi người dùng nói câu cấp quyền, Analyst ghi khối `delegation` (lời cấp nguyên văn, thời điểm, phạm vi, hạn, nhãn và tier người duyệt, file luật nêu đích danh); tới cổng trong phạm vi và còn hạn, một agent T1 **khác người làm** ghi kết luận cổng với `gate_N_mode: delegated`, `gate_N_quote` bắt đầu `duyệt thay:`.
+
+- **Câu cấp quyền mẫu** (người dùng nói trong chat, đủ cổng · sprint · hạn):
+  `Cho phép T1 duyệt thay Cổng 1 của SPR-NN tới hết sprint.` ·
+  `Cho phép T1 duyệt thay Cổng 1 và Cổng 2 của SPR-NN tới 2026-10-30, gồm sửa file luật AGENTS.md, tiers/README.md.`
+  Không phải lời cấp: "ok", "làm luôn", "tự quyết đi", "theo khuyến nghị", mức tự trị *tự quyết* ở Brief — khi đó
+  Analyst đề xuất câu cấp quyền ở lời trình cổng kế để người dùng nói lại cho đủ.
+- **Câu thu hồi:** `Thu hồi duyệt thay SPR-NN.` (hiệu lực ngay; ghi `revoked_at`).
+- **Frontmatter khi đã duyệt thay** (SPEC + PLAN cho Cổng 1; REPORT cho Cổng 2; `SPRINT.md` cho cả hai):
+
+```yaml
+gate_1: approved
+gate_1_at: 2026-10-23 09:40 +07
+gate_1_quote: "duyệt thay: chọn DN2 phương án a — bản ghi ở PLAN mục Bản ghi duyệt thay"
+gate_1_mode: delegated
+delegation:
+  grant: "Cho phép T1 duyệt thay Cổng 1 của SPR-12 tới hết sprint."
+  grant_at: 2026-10-23 09:05 +07
+  scope: [gate_1]
+  expires: sprint_end
+  by: agent-r
+  tier: T1
+  files: []
+  revoked_at: null
+```
+
+- **Bản ghi quyết định** — mục `## Bản ghi duyệt thay` trong PLAN (Cổng 1) hoặc REPORT (Cổng 2), ba dòng nhãn bắt
+  buộc `Phương án chọn:` · `Phương án bị loại:` (mỗi phương án một lý do) · `Nếu sai thì tốn gì:`, kèm đường tới lời
+  cấp.
+- **Giới hạn:** không miễn bốn điều kiện dừng (mục 5); không thay cổng sửa file luật (5 ý, gật trong chat) trừ file nêu đích
+  danh ở `files`; không hạ cỡ hay rủi ro; người duyệt là T1 và khác mọi nhãn thực thi của tài liệu; nhãn `secret`,
+  `auth` cấm duyệt thay; menu nhánh sau Cổng 2 vẫn hỏi người; người dùng thu hồi bất cứ lúc nào.
+- **`check` kiểm** hồ sơ này bằng luật `gate-delegation-invalid` (và `self-review` khi người duyệt trùng nhãn vai thực thi);
+  chi tiết ở [scripts/README.md](../scripts/README.md).
+
 ## 4. Bước 3 — Thực thi và cổng điều chỉnh nội bộ
 
 - Mỗi `TK` do đúng vai và tier ghi trong PLAN làm (skill `running-sprint`). Khi giao cho subagent:
   brief soạn riêng (mục tiêu, phạm vi, đầu vào, điều cấm, cách báo cáo), **không dán lịch sử phiên**,
-  và **ghi vai + tier + model thực tế** vào cột "Vai · tier · model" của PROGRESS; nhãn agent
+  và **ghi vai + tier + model + effort thực tế** vào cột "Vai · tier · model" của PROGRESS; nhãn agent
   (`agent-a`, `agent-b`…) vào `roles` của frontmatter.
 - Sau mỗi `TK`: cập nhật bảng trạng thái PROGRESS (Đạt / Không đạt / Chưa chạy / Không áp dụng / Đang
   làm) kèm **bằng chứng** theo [evidence.md](evidence.md). Hai dòng tối thiểu cho mỗi `TK`: lúc bắt đầu
@@ -181,6 +221,8 @@ Ngoài bốn điều này (và lượt trao đổi tiếp nhận đã qua ở B�
 lần hỏi ngoài cổng phải bằng 0).
 Tương tự, cạn hạn mức model của một tier → dừng phần việc của tier đó, ghi `BR`, báo; **không tự hạ
 tier** ([tiers/README.md](../tiers/README.md)).
+
+Khi duyệt thay đang hiệu lực, bốn điều kiện này không được miễn: gặp điều kiện nào vẫn dừng, ghi `BR`, hỏi người dùng.
 
 ## 6. Bước 4 — Kiểm định bởi agent khác, vòng lặp
 
@@ -287,8 +329,11 @@ Phát hiện còn mở: <RFk (tên) — mức — xử lý> (hoặc "không")
 Việc để lại: <COk (tên) — chủ — mốc> (hoặc "không")
 Cách dùng / đã đổi gì / hoàn tác: <một dòng mỗi ý>; REPORT: <đường dẫn>
 Phiên bản đề xuất: <MAJOR | MINOR | PATCH> → <số>, vì <thay đổi nặng nhất> (hoặc "không áp dụng") — bảng ở conventions.md mục 4.1
+Khuyến nghị (T1, vai <vai>): chọn <…> — vì <…>; loại <…> vì <…>; sai thì tốn <…>
 Anh kết luận: Đạt / Đạt có điều kiện (kèm điều kiện) / Không đạt (kèm lý do)
 ```
+
+Lời trình Cổng 2 có khối khuyến nghị khi người dùng xin; Cổng 2 chỉ duyệt thay khi lời cấp nêu đích danh Cổng 2, ghi `gate_2_mode` ở REPORT như mục 3; menu nhánh sau Cổng 2 vẫn hỏi người.
 
 Người dùng kết luận **Đạt / Đạt có điều kiện / Không đạt**:
 - *Đạt* → ghi `gate_2: pass` + `gate_2_at` + `gate_2_quote` nguyên văn; cập nhật **spec sống** của tính
@@ -360,6 +405,7 @@ Việc nâng cỡ giữa chừng (lộ rủi ro mới) thì chuyển sang bốn 
 | Cạn hạn mức tier (không tự hạ tier) | Thứ tự làm `TK`, tách `TK` con |
 | `CQ` gom ở Cổng 1 (một lần) | Hỏi lẻ từng câu giữa chừng |
 | Tư vấn gọi chéo hãng (chỉ tư vấn, người dùng quyết) | Tự chạy gọi chéo |
+| Cấp hay thu hồi duyệt thay — lời người dùng ở cổng hoặc bất cứ lúc nào (câu mẫu ở mục 3) | — |
 
 ## 11. Ghi sổ tại cổng
 

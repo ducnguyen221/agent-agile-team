@@ -35,7 +35,9 @@ links:
 
 <!-- Nhắc lại mục tiêu sprint bằng một câu và trỏ SPEC. -->
 
-Đạt SC1 (tra nhanh) của SPEC bằng một điểm tra cứu chỉ-đọc.
+- **Mục tiêu sprint:** Cho nhân viên bán hàng tra trạng thái đơn trong một bước.
+- **Kết quả mong muốn / xong khi:** SC1 (tra nhanh) của SPEC đạt.
+- **Rủi ro cần chú ý:** mã đơn cũ lẫn chữ hoa và chữ thường làm tra hụt — RK1 (tra hụt do hoa thường).
 
 ## Kiến trúc
 

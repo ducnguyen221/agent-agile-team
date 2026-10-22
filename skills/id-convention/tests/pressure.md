@@ -2,12 +2,13 @@
 skill: id-convention
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04)
-date: 2026-10-04
-result: 3/3 GREEN pass; GREEN rerun 2026-10-04 3/3 pass on the tree at HEAD 05032b4 (SPR-04 TK11.10, skill body unchanged since 2026-10-01 so this attaches skill_sha and tier)
+date: 2026-10-22
+result: 3/3 GREEN pass; GREEN rerun 2026-10-22 3/3 pass on the tree at HEAD 61ba051 (SPR-31 TK6, skill body gained the pre-gate-1 TK renumbering exception); earlier rerun 2026-10-04 3/3 pass on 05032b4
 tier: T3
-skill_sha: 9983ede353c98ee8c21509d09d307f55306ba805
+skill_sha: eda840c67312735265977e8973637114be8369e9
 agent_ids:
   green_rerun_2026_10_04: {idc-1: a8dd30ce5a179ac73, idc-2: a9e3e87063dc127a8, idc-3: ad46e35a2016c4733}
+  green_rerun_2026_10_22: {idc-1: a36383306ad2b27b9, idc-2: a52a4d3efd751748e, idc-3: afc4749b0ead27ecc}
 ---
 
 # Thử áp lực — id-convention
@@ -69,6 +70,10 @@ Bài trả lời của các lượt và bảng chấm: `evidence/TK11/id-convent
 | IDC-3 | `ad46e35a2016c4733` | **Đạt** | bắt `V1`–`V3`, `P1`/`P2`, "mức cao", `D3`→`D4` đánh số lại, `US-004`, `SP-2026-03`, `A7`, `L1`; viết lại `VR1`–`VR3`, `RF1`/`RF2`, `DN3` giữ mã trạng thái `bỏ` + `DN4`, `SPR-03`, `US4` hoặc `RQ-004` (nêu hai khả năng), `` `A7` `` kèm tên và nguồn, `CO1`; liệt kê chỗ cần Analyst xác nhận |
 
 Kết quả: 3/3 Đạt; không sửa `SKILL.md`, không REFACTOR. Một mẫu mỗi kịch bản (chưa đo độ phân tán).
+
+## GREEN chạy lại (2026-10-22, SPR-31 `TK6`)
+
+Thân skill đổi ở `61ba051`: Kết luận và mục 6 bước 5 nhắc ngoại lệ, mục 4 thêm một gạch "Ngoại lệ đánh số `TK` trước Cổng 1". `skill_sha` cũ lệch cây nên chạy lại GREEN cả ba kịch bản trên cây ở HEAD `61ba051` (prompt nguyên văn `tests/scenarios.txt`, cùng phép thay vế mở đầu như lượt 2026-10-04; chủ thể subagent mới, `sonnet`, `claude-sonnet-5-5`, tier T3, không công cụ Skill, đường tuyệt đối tới `SKILL.md` trong worktree, mở bằng "Đã đọc:"). Kết quả: **IDC-1 Đạt** (`a3638330`: `TK4` giữ mã, trạng thái `bỏ`, không đánh số lại `TK5`; ưu tiên bằng chữ), **IDC-2 Đạt** (`a52a4d3e`: `RQ-` cho lỗi ngoài phạm vi, `Phán quyết:` không mã, `TK3.1`/`TK3.2`, `DN2`), **IDC-3 Đạt** (`afc4749b`: bắt đủ `V1`–`V3`, `P1`/`P2`, "mức cao", `D3`→`D4` đánh số lại, `US-004`, `SP-2026-03`, `A7`, `L1`; ngoại lệ trước Cổng 1 không bị viện nhầm vì REPORT đã sau Cổng 1). 3/3 Đạt, không RED mới (RED lịch sử giữ nguyên), một mẫu mỗi kịch bản. Output nguyên văn: `evidence/tk6/idc-green-rerun.md` trong hồ sơ sprint SPR-31 của lớp riêng.
 
 ## Chạy lại
 

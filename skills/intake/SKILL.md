@@ -40,10 +40,12 @@ mapping hay chỉ định cho người nhận việc. Trước PLAN/assignment, 
 | 3 | **Chờ xác nhận.** Chưa xác nhận thì chưa `RQ-`, chưa sprint, chưa chạm mã. Người dùng chọn làm thẳng → làm ngay, kiểm, báo; hết bước | — |
 | 4 | Một dòng `RQ-` mới: ngày, tóm tắt một câu, trạng thái `mới`, **kèm câu trả lời của người dùng** (mục tiêu đã chốt, định nghĩa xong, phạm vi ngoài, bậc đã xác nhận) | sổ REQUESTS |
 | 5 | Tách mục tiêu: một mục tiêu = một sprint; nhiều mục tiêu → nhiều sprint cùng trỏ một `RQ-` | sổ SPRINTS (khi mở sprint) |
-| 6 | Ghi bậc đã xác nhận và `risk_tags`; bất kỳ nhãn rủi ro nào ở bảng dưới → `risk: high`, `size: large`, kể cả sau xác nhận (báo lại một câu) | frontmatter SPEC |
+| 6 | Ghi bậc đã xác nhận và `risk_tags`; bất kỳ nhãn rủi ro nào ở `method/sizing.md` mục 2 → `risk: high`, `size: large`, kể cả sau xác nhận (báo lại một câu) | frontmatter SPEC |
 | 7 | Điểm còn lại ở 11 điểm → **ASSUMPTION** hoặc `CQ` (mục 3); rồi sang skill `shaping-spec`, không hỏi thêm lượt nào tới Cổng 1 | SPEC mục Câu hỏi cần làm rõ |
 
 Lời giao đã nêu rõ mục đích, ràng buộc và kết quả thì phản ánh lại trong tin trao đổi, không hỏi lại điều đã có.
+
+Sau câu trả lời, ô 1, 2 hay 4 của Brief (mục 1.2) còn trống → **một** tin bổ sung duy nhất, mỗi ô một câu có đề xuất; vẫn trống → `CQ` cho Cổng 1, không có lượt thứ ba. "Cứ làm" hay im lặng không thay cho xác nhận bậc và mở sprint; tin bổ sung hỏi rõ hai điều đó. Chưa có câu trả lời ấy thì chưa `RQ-`, chưa mở sprint, chưa ghi bậc; ô còn trống không chặn — thành `CQ`.
 
 ### 1.1 Tin trao đổi gom — viết thế nào
 
@@ -61,6 +63,7 @@ Câu hỏi để chắc mình hiểu đúng (mỗi câu có đề xuất của t
   3. <phạm vi — cái gì không làm đợt này> — đề xuất: …
 Bậc từng việc: <tên việc>: <làm thẳng / rất nhỏ / nhỏ / vừa / lớn> — vì <dấu hiệu đo được>; risk: <normal/high>; risk_tags: <[] hoặc nhãn>.
   <lặp dòng này cho mỗi mục tiêu; đề xuất thứ tự bằng Bắt buộc / Nên có / Có thì tốt>.
+Brief: mục tiêu · xong · ràng buộc · rủi ro cụ thể và mức tự trị — <đã có / hỏi ở câu k>.
 Có mở sprint không? Khuyến nghị: <có / không; nếu có, bao nhiêu sprint>. Anh xác nhận hoặc sửa giúp.
 ```
 
@@ -77,39 +80,19 @@ Có mở sprint không? Khuyến nghị: <có / không; nếu có, bao nhiêu sp
   hay mở ngoại lệ cho vùng loại trừ. Khi đủ điều kiện bỏ lượt trao đổi, làm ngay và báo kết quả + bằng chứng.
 - Lời giao đã đủ mục tiêu, định nghĩa xong, phạm vi và bậc → tin chỉ còn một câu xác nhận.
 
-**Cỡ quyết hình tài liệu và cổng** (bảng đầy đủ: `method/sizing.md` mục 1) — ghi cỡ kèm hình này:
+### 1.2 Brief người giao — 4 ô
 
-| Cỡ | Dấu hiệu đo được | Tài liệu | Cổng 1 · kiểm định |
-|---|---|---|---|
-| Làm thẳng | 1–2 thao tác, kết quả rõ; hoặc người dùng nói rõ không cần sprint. Không áp khi chạm `risk_tags`, file luật, secret, hành động không đảo ngược — trừ khi người dùng nói rõ | **không hồ sơ**: không `RQ-`, không `SPRINT.md`, không dòng sổ | không cổng hồ sơ; tự kiểm bằng lệnh + kết quả mới chạy, báo trong lời trả lời; giữ Git và điều cấm, giữ mọi cổng xin phép khác |
-| Rất nhỏ | đổi chữ hoặc một chỗ — kể cả chữ kỳ vọng trong test đi kèm, số file chạm không quyết cỡ; không đổi hành vi, quyền; lời giao đã nêu rõ kết quả | một `SPRINT.md` hai phần **Kế hoạch** (mục tiêu, `SC`, `TK` trỏ `SC`) · **Kết quả** (`VR` mỗi `SC`) | "đạt theo lời giao" + trích lời giao; không mở lượt hỏi mới (`method/process.md` mục 9) · agent khác chạy nhanh, hoặc tự kiểm "chưa độc lập" (tối đa Đạt có điều kiện); Cổng 2 gộp lời báo cuối |
-| Nhỏ | sửa cục bộ một luồng có sẵn (hành vi đổi), một `FR`, không đổi hợp đồng / giao diện / schema | một `SPRINT.md` đủ bốn phần SPEC · PLAN · PROGRESS · REPORT | Cổng 1 thật (trình ngắn, chờ duyệt) · **một** reviewer khác người làm kiểm cả nghiệp vụ lẫn kỹ thuật; Cổng 2 thật |
-| Vừa | tính năng, hành vi hay luồng mới; hoặc hơn một `FR` | bốn file | đủ hai cổng; Business Reviewer và Tech Reviewer |
-| Lớn | nhiều phần; đổi hợp đồng / giao diện / schema; hoặc bất kỳ nhãn rủi ro ở bảng dưới | bốn file + đổi hợp đồng / giao diện, ADR khi có quyết định kiến trúc, hoàn tác | đủ hai cổng; cả hai reviewer + chuyên đề |
+Rà bốn ô trước khi viết tin gom; ô người giao đã nêu thì nhắc lại một dòng, ô trống thành câu hỏi phản biện có đề xuất:
 
-**Thao tác** = một thay đổi có nghĩa ở một chỗ hoặc một lệnh đã xác định. Đổi chữ và sửa chữ kỳ vọng trong test
-đi kèm là hai thao tác; tự kiểm/chạy test đi kèm không tính thêm. Sửa hành vi một luồng có sẵn vẫn theo hàng **Nhỏ**;
-tính năng mới theo **Vừa**; rủi ro theo **Lớn** — số file hay số dòng không hạ các sàn này.
-Phân vân → bậc nặng hơn; hạ cỡ chỉ ở Cổng 1 do người dùng. Không chia một mục tiêu thành nhiều lần làm thẳng để
-né sprint: đếm toàn bộ việc cần để mục tiêu xong trước khi chọn bậc; chỉ tách những mục tiêu độc lập.
+| Ô | Gồm |
+|---|---|
+| 1. Mục tiêu | mục tiêu việc và mục tiêu sprint (nếu khác) · kết quả · cho ai · vì sao bây giờ |
+| 2. Định nghĩa xong | hành vi quan sát được · test/ngưỡng · tài liệu · cách hoàn tác · ai kiểm · điều kiện **không** đạt |
+| 3. Ràng buộc và lưu ý | đừng đụng gì · tiền lệ · hạn/ngân sách công sức · quyền agent · bẫy đã biết — chép nguyên văn vào SPEC mục 1.1 |
+| 4. Rủi ro cần chú ý · khẩu vị · mức tự trị | dòng 1: rủi ro cụ thể (cái từng hỏng, chỗ dễ vỡ, ai bị ảnh hưởng) + nhãn `risk_tags` bạn bổ sung; dòng 2: sai thì hại tới đâu, hoàn tác được không, mức *hỏi mọi bước* · *trong phạm vi* (mặc định) · *tự quyết* |
 
-| Chạm vùng | `risk_tags` | Bậc / chuyên đề |
-|---|---|---|
-| secret, token, cấu hình xác thực | `secret` | lớn / security |
-| xác thực, phân quyền, phiên | `auth` | lớn / security |
-| thêm điểm nhận dữ liệu không tin cậy, hoặc đổi hợp đồng/kiểm tra bảo mật/giải mã–phân tích/đưa dữ liệu vào thao tác nhạy cảm qua điểm đó (form, API công khai, upload, webhook) | `external_input` | lớn / security (+ backend) |
-| API công khai, hợp đồng giữa dịch vụ | `public_api` | lớn / backend |
-| hạ tầng, deploy, hook, CI, quyền chạy | `infra` | lớn / security (+ backend) |
-| migration, schema, backfill, xoá dữ liệu | `data_migration` | lớn / data |
-| file luật dự án/môi trường, cấu hình harness | `rules` | lớn / security |
-
-Mọi hàng: `risk: high`, `size: large`. Chưa rõ có chạm vùng nào → đề xuất bậc nặng hơn và hỏi phản biện;
-không gắn nhãn tự chế như `security` vào `risk_tags`. `rules` / `secret` / `auth` cần hai Tech Reviewer độc lập.
-
-Trường UI có sẵn không tự tạo nhãn `external_input`. Chỉ đổi chữ hoặc chuẩn hoá tìm kiếm cục bộ (trim đầu/cuối)
-có thể giữ `risk: normal` khi có bằng chứng giữ nguyên quyền, tenant/danh tính, kiểm tra bảo mật, parser/schema,
-hợp đồng API và cách truy vấn/thao tác nhạy cảm; cỡ theo hành vi (sửa một luồng có sẵn là nhỏ). Có thay đổi hoặc
-chưa loại trừ tác động lên những ranh giới đó → `external_input`, `risk: high`, `size: large` và review security.
+*Tự quyết* chỉ là ý muốn chạy không hỏi trong phạm vi đã duyệt — không hạ cỡ, không hạ rủi ro, không phải lời cấp duyệt thay (`method/process.md` mục 3).
+Cỡ, tài liệu và cổng theo `method/sizing.md` mục 1; nhãn rủi ro theo mục 2 — chỉ dùng bảy nhãn ở đó, không gắn nhãn tự chế như `security`. Ba luật giữ ở đây: rủi ro chỉ nâng, kể cả sau xác nhận; không chia một mục tiêu thành nhiều lần làm thẳng để né sprint; không làm thẳng khi chạm `risk_tags`, file luật, secret hay hành động không đảo ngược — trừ khi người dùng nói rõ.
 
 ## 2. Danh mục 11 điểm thiếu ngữ cảnh
 
@@ -163,15 +146,16 @@ Việc xoá hay ghi đè dữ liệu thì tiêu chí gồm cả **cách khôi ph
 |---|---|
 | Ghi `RQ-` hay mở sprint trước khi người dùng xác nhận tin trao đổi | bỏ lượt trao đổi ở việc còn mơ hồ — quay lại mục 1.1 |
 | Hỏi người dùng điều repo trả lời được (stack, file chạm, test hiện có) | bỏ bước tra repo; làm lại mục 2 trước khi gửi tin |
-| Hỏi một câu, chờ, hỏi câu nữa ở tiếp nhận | không phải một tin gom — gom lại; câu còn lại thành `CQ` cho Cổng 1 |
+| Hỏi một câu, chờ, hỏi câu nữa ở tiếp nhận | không phải một tin gom — gom lại; câu còn lại thành `CQ` cho Cổng 1 (trừ một tin bổ sung cho ô Brief còn trống, mục 1) |
 | Tin trao đổi không có khuyến nghị bậc hay không hỏi "có mở sprint không" | thiếu nửa sau của tin — người dùng không có gì để xác nhận |
 | Mở lượt trao đổi cho việc người dùng đã nói "không cần sprint", hoặc làm thẳng không mơ hồ | hỏi thừa — làm ngay và báo |
 | Làm thẳng việc chạm `risk_tags`, file luật, secret hay hành động không đảo ngược mà người dùng chưa nói rõ | sai bậc — tối thiểu rất nhỏ, vùng rủi ro kéo lên lớn |
 | ≥5 câu hỏi trong tin, hay ≥5 `CQ` | chưa tra đủ, hoặc lời giao chứa nhiều mục tiêu — tách sprint |
 | 0 ASSUMPTION ở việc cỡ vừa trở lên | chưa rà; lời giao hiếm khi đủ cả 11 điểm |
 | Cỡ rất nhỏ nhưng lời giao chưa nêu rõ kết quả, hoặc hành vi đổi | không phải rất nhỏ — nâng cỡ |
-| Dựng bốn file hay gọi hai reviewer cho việc nhỏ / rất nhỏ; hoặc ghi rất nhỏ cho việc sửa một luồng | sai bậc — tra bảng ở mục 1 |
+| Dựng bốn file hay gọi hai reviewer cho việc nhỏ / rất nhỏ; hoặc ghi rất nhỏ cho việc sửa một luồng | sai bậc — tra `method/sizing.md` mục 1 |
 | Diff "chỉ một dòng" ở cấu hình quyền, hook, CI | `risk_tags: [infra]` hoặc `[rules]` → cỡ lớn, không làm thẳng |
+| Coi *tự quyết* là lời cấp duyệt thay hay lý do hạ cỡ; ô 4 chỉ có khẩu vị mà không có rủi ro cụ thể | sai — mức tự trị không hạ cỡ; dòng 1 của ô 4 là rủi ro cụ thể (mục 1.2) |
 
 ## 5. Lỗi hay gặp — và sửa
 
@@ -179,7 +163,7 @@ Việc xoá hay ghi đè dữ liệu thì tiêu chí gồm cả **cách khôi ph
 |---|---|
 | Lời giao mơ hồ → đoán rồi làm luôn | mở tin trao đổi gom: nhắc lại mục tiêu, hỏi phản biện có đề xuất, khuyến nghị bậc; chờ xác nhận |
 | Lời giao mơ hồ → tự ghi `RQ-` và ASSUMPTION thay cho hỏi | điều thuộc ý muốn người dùng phải hỏi ở tin trao đổi; ASSUMPTION chỉ cho điều tự giả định được, có "nếu sai thì đổi gì" |
-| Hỏi một câu, chờ, hỏi câu nữa | một tin gom ở tiếp nhận; phần còn lại thành `CQ`, hỏi một lần ở Cổng 1 |
+| Hỏi một câu, chờ, hỏi câu nữa | một tin gom ở tiếp nhận; phần còn lại thành `CQ`, hỏi một lần ở Cổng 1 (trừ một tin bổ sung cho ô Brief còn trống, mục 1) |
 | Tự quyết bậc rồi dựng hồ sơ, không hỏi người dùng có cần sprint không | tin trao đổi phải có khuyến nghị bậc + câu "có mở sprint không"; người dùng xác nhận mới ghi |
 | Người dùng nói "không cần sprint" mà vẫn mở `RQ-`/`SPRINT.md` | lời người dùng thắng: làm thẳng, kiểm, báo; chỉ giữ các cổng xin phép khác |
 | Tech stack ghi "chưa rõ" dù repo có file cấu hình | tra file cấu hình trước; "chưa rõ" chỉ khi dự án mới |

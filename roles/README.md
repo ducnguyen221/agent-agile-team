@@ -1,23 +1,24 @@
 # roles/ — thẻ vai
 
-> **Kết luận:** một vai người (User) và hai nhóm vai agent — **thực thi** (Analyst, Architect,
-> Implementer, QA) và **kiểm định** (Business Reviewer, Tech Reviewer + 4 thẻ chuyên đề). Luật cứng:
+> **Kết luận:** một vai người (User) và hai nhóm vai agent — **thực thi** (năm vai: Analyst, Architect,
+> Implementer, QA, Researcher) và **kiểm định** (Business Reviewer, Tech Reviewer + 4 thẻ chuyên đề). Luật cứng:
 > **người làm ra sản phẩm không được kết luận Đạt cho chính nó.** Mỗi thẻ có đúng 8 mục: mục đích ·
 > tier · đầu vào · đầu ra · được làm · không được làm · khi nào dừng · skill dùng.
 
 ## Bảng vai
 
-| Vai | Nhóm | Tier | Khoá `roles` | Thẻ |
-|---|---|---|---|---|
-| User | Người | — | — | không có thẻ: giao yêu cầu, xác nhận một tin trao đổi tiếp nhận (mục tiêu, bậc từng việc, có mở sprint không), quyết ở Cổng 1, Cổng 2, bốn điều kiện dừng, mốc sau vòng 3 |
-| Analyst (kiêm Distiller, điều phối) | Thực thi | T1 | `analyst` | [executor/analyst.md](executor/analyst.md) |
-| Architect | Thực thi | T1 | `architect` | [executor/architect.md](executor/architect.md) |
-| Implementer | Thực thi | T2 | `implementer` | [executor/implementer.md](executor/implementer.md) |
-| QA | Thực thi | T3 | `qa` | [executor/qa.md](executor/qa.md) |
-| Business Reviewer | Kiểm định | T1 | `business-reviewer` | [verifier/business-reviewer.md](verifier/business-reviewer.md) |
-| Tech Reviewer | Kiểm định | T1 | `tech-reviewer` | [verifier/tech-reviewer.md](verifier/tech-reviewer.md) |
-| Dual Review (hai reviewer độc lập cùng rubric, cho việc có `risk_tags` `rules` / `secret` / `auth`) | Kiểm định | T1 | `tech-reviewer` (+ lời ghi reviewer thứ hai ở `note`) | [verifier/dual-review.md](verifier/dual-review.md) |
-| Chuyên đề security · data · backend · frontend | Kiểm định | T1 | `<tên>-specialist` | [verifier/specialists/](verifier/specialists/) |
+| Vai | Nhóm | Tier | Effort mặc định | Khoá `roles` | Thẻ |
+|---|---|---|---|---|---|
+| User | Người | — | — | — | không có thẻ: giao yêu cầu, xác nhận một tin trao đổi tiếp nhận (mục tiêu, bậc từng việc, có mở sprint không), quyết ở Cổng 1, Cổng 2, bốn điều kiện dừng, mốc sau vòng 3; cấp và thu hồi duyệt thay (mặc định tắt) |
+| Analyst (kiêm Distiller, điều phối) | Thực thi | T1 | 3 | `analyst` | [executor/analyst.md](executor/analyst.md) |
+| Architect | Thực thi | T1 | 3 | `architect` | [executor/architect.md](executor/architect.md) |
+| Implementer | Thực thi | T2 | 3 | `implementer` | [executor/implementer.md](executor/implementer.md) |
+| QA | Thực thi | T3 | 2 | `qa` | [executor/qa.md](executor/qa.md) |
+| Researcher | Thực thi | T3 | 2 | `researcher` | [executor/researcher.md](executor/researcher.md) |
+| Business Reviewer | Kiểm định | T1 | 3 | `business-reviewer` | [verifier/business-reviewer.md](verifier/business-reviewer.md) |
+| Tech Reviewer | Kiểm định | T1 | 3 | `tech-reviewer` | [verifier/tech-reviewer.md](verifier/tech-reviewer.md) |
+| Dual Review (hai reviewer độc lập cùng rubric, cho việc có `risk_tags` `rules` / `secret` / `auth`) | Kiểm định | T1 | 3 | `tech-reviewer` (+ lời ghi reviewer thứ hai ở `note`) | [verifier/dual-review.md](verifier/dual-review.md) |
+| Chuyên đề security · data · backend · frontend | Kiểm định | T1 | — | `<tên>-specialist` | [verifier/specialists/](verifier/specialists/) |
 
 ## Luật chung cho mọi vai
 

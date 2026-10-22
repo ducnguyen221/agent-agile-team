@@ -26,6 +26,10 @@ def make_sprint(tmp_path: Path) -> Path:
 
 
 def apply_case(root: Path, case: dict) -> None:
+    if case.get("base") == "delegated":
+        delegate_plan(root)
+    elif case.get("base") == "delegated-report":
+        delegate_report(root)
     if "replace" in case:
         target = root / case.get("target", case["file"])
         old, new = case["replace"]
@@ -42,13 +46,67 @@ def rules_of(report) -> set:
     return {f.rule for f in report.findings}
 
 
+DELEGATION_RECORD = """
+## Bản ghi duyệt thay
+
+- **Phương án chọn:** phương án a — giữ nguyên hình hiện có.
+- **Phương án bị loại:** phương án b — đổi hình, tốn thêm một việc.
+- **Nếu sai thì tốn gì:** sửa lại tài liệu và duyệt lại, chưa có mã nào được viết.
+- Lời cấp: khối `delegation` ở frontmatter.
+"""
+
+
+def _rewrite(path: Path, old: str, new: str, tail: str = "") -> None:
+    text = path.read_text(encoding="utf-8")
+    assert old in text, f"không thấy chuỗi cần thay trong {path.name}"
+    write_lf(path, text.replace(old, new, 1) + tail)
+
+
+def delegate_plan(root: Path) -> None:
+    """PLAN hợp lệ ở Cổng 1 duyệt thay: khối `delegation` đủ, quote `duyệt thay:` và mục bản ghi."""
+    _rewrite(root / "PLAN.md", 'gate_1_quote: "duyệt"\n', (
+        'gate_1_quote: "duyệt thay: chọn phương án a — xem mục Bản ghi duyệt thay"\n'
+        "gate_1_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint."\n'
+        "  grant_at: 2026-02-01 08:30 +07\n"
+        "  scope: [gate_1]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-r\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"), DELEGATION_RECORD)
+
+
+def delegate_report(root: Path) -> None:
+    """REPORT hợp lệ ở Cổng 2 duyệt thay."""
+    _rewrite(root / "REPORT.md", "gate_2: pending\ngate_2_at: null\ngate_2_quote: null\n", (
+        "gate_2: pass\n"
+        "gate_2_at: 2026-02-02 17:00 +07\n"
+        'gate_2_quote: "duyệt thay: Đạt — xem mục Bản ghi duyệt thay"\n'
+        "gate_2_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 2 của SPR-03 tới hết sprint."\n'
+        "  grant_at: 2026-02-02 08:00 +07\n"
+        "  scope: [gate_2]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-r\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"), DELEGATION_RECORD)
+
+
+def codes(findings) -> list:
+    return sorted(f.rule for f in findings)
+
+
 def test_valid_fixture_is_clean():
     report = check.check_paths([VALID])
     assert [f.render() for f in report.findings] == []
     assert report.exit_code == 0
 
 
-@pytest.mark.parametrize("case", CASES, ids=[c["rule"] for c in CASES])
+@pytest.mark.parametrize("case", CASES, ids=[c.get("name", c["rule"]) for c in CASES])
 def test_broken_case_is_caught_with_its_rule(tmp_path, case):
     root = make_sprint(tmp_path)
     apply_case(root, case)
@@ -371,7 +429,7 @@ def test_caught_code_next_to_backtick_gets_a_hint(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "PLAN.md"
     text = path.read_text(encoding="utf-8").replace(
-        "Đạt SC1 (xuất đủ cột).", "Đạt SC1 (xuất đủ cột); `git commit -m \"`RF9`\"`.", 1)
+        "SC1 (xuất đủ cột) của SPEC đạt.", "SC1 (xuất đủ cột) của SPEC đạt; `git commit -m \"`RF9`\"`.", 1)
     write_lf(path, text)
     hits = [f for f in check.check_paths([root]).findings if f.rule == "xref-missing"]
     assert hits and all("code span" in f.message for f in hits), [f.render() for f in hits]
@@ -414,7 +472,7 @@ def test_hint_uses_the_position_of_each_match(tmp_path):
     root = make_sprint(tmp_path)
     path = root / "PLAN.md"
     text = path.read_text(encoding="utf-8").replace(
-        "Đạt SC1 (xuất đủ cột).", 'Đạt SC1 (xuất đủ cột); RF9 thường, P4 thường; `git commit -m "`RF9 P4`"`.', 1)
+        "SC1 (xuất đủ cột) của SPEC đạt.", 'SC1 (xuất đủ cột) của SPEC đạt; RF9 thường, P4 thường; `git commit -m "`RF9 P4`"`.', 1)
     write_lf(path, text)
     report = check.check_paths([root])
     for rule in ("xref-missing", "id-bare-single-letter"):
@@ -1546,3 +1604,175 @@ def test_ledger_template_has_the_sprint_table_and_no_machine_paths():
     assert len(example) == 2 and not any(ABSOLUTE_PATH.search(line) for line in example)
     assert any(URL_PATTERN.search(line) for line in example)  # một dòng URL, một dòng tương đối
     assert check.check_paths([path]).findings == []
+
+
+def test_researcher_role_is_executor(tmp_path):
+    """Khoá `researcher` là vai thực thi: `check` không báo `roles-invalid` cho nó."""
+    root = make_sprint(tmp_path)
+    path = root / "SPEC.md"
+    text = path.read_text(encoding="utf-8")
+    old = "  business-reviewer: [T1, agent-c]\n"
+    assert old in text
+    write_lf(path, text.replace(old, old + "  researcher: [T3, agent-g]\n", 1))
+    report = check.check_paths([root])
+    assert not [f for f in report.findings if f.rule == "roles-invalid"], [f.render() for f in report.findings]
+
+
+# --- Duyệt thay tại cổng (SPEC 7.3) -----------------------------------------------------------------------
+
+
+def test_delegated_gate_valid_has_no_findings(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    report = check.check_paths([root])
+    assert codes(report.findings) == [], [f.render() for f in report.findings]
+    assert report.exit_code == 0
+
+
+def test_delegated_gate_report_scope(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_report(root)
+    report = check.check_paths([root])
+    assert codes(report.findings) == [], [f.render() for f in report.findings]
+    assert report.exit_code == 0
+
+
+@pytest.mark.parametrize("old,new", [
+    ("expires: sprint_end", "expires: 2026-02-01"),  # hạn đúng ngày cổng vẫn còn hiệu lực
+    ("grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-02-01"),  # ngày không giờ: so theo ngày
+    ("grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-02-01 01:30 +0000"),  # cùng một lúc 08:30 +07, múi giờ khác
+    ("grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-01-31 20:00 -05:00"),  # múi giờ âm, dạng +HH:MM
+    ("revoked_at: null", "revoked_at: 2026-02-01 09:30 +07"),  # thu hồi sau cổng: cổng vẫn hợp lệ
+    ("files: []", "files: [AGENTS.md]"),
+])
+def test_delegation_boundary_values_stay_valid(tmp_path, old, new):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", old, new)
+    assert codes(check.check_paths([root]).findings) == []
+
+
+def test_delegation_rules_stay_quiet_while_gate_is_pending(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "gate_1: approved", "gate_1: pending")
+    _rewrite(root / "PLAN.md", "scope: [gate_1]", "scope: []")
+    assert "gate-delegation-invalid" not in codes(check.check_paths([root]).findings)
+
+
+def test_delegation_stops_at_first_problem_per_gate(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "tier: T1", "tier: T3")
+    _rewrite(root / "PLAN.md", "scope: [gate_1]", "scope: []")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "gate-delegation-invalid"]
+    assert len(hits) == 1, [f.render() for f in hits]
+
+
+def test_delegated_spec_does_not_need_the_record_section(tmp_path):
+    """SPEC không có mục bản ghi: bản ghi nằm ở PLAN; khối đủ ở SPEC không bị đòi mục bản ghi."""
+    root = make_sprint(tmp_path)
+    _rewrite(root / "SPEC.md", 'gate_1_quote: "duyệt"\n', (
+        'gate_1_quote: "duyệt thay: chọn phương án a — xem mục Bản ghi duyệt thay ở PLAN"\n'
+        "gate_1_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint."\n'
+        "  grant_at: 2026-02-01 08:30 +07\n"
+        "  scope: [gate_1]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-r\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"))
+    assert codes(check.check_paths([root]).findings) == []
+
+
+def test_delegation_record_labels_must_sit_in_the_record_section(tmp_path):
+    """Nhãn nằm ở mục khác phía sau không thay cho nhãn trong mục `Bản ghi duyệt thay`."""
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "**Nếu sai thì tốn gì:**", "**Hậu quả:**", "\n## Phần khác\n\n- **Nếu sai thì tốn gì:** đặt nhầm chỗ.\n")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "gate-delegation-invalid"]
+    assert len(hits) == 1 and "Nếu sai thì tốn gì:" in hits[0].message, [f.render() for f in hits]
+
+
+def test_delegation_record_may_precede_another_section(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "- Lời cấp:", "- Lời cấp:", "\n## Phần khác\n\nKhông có.\n")
+    assert codes(check.check_paths([root]).findings) == []
+
+
+def _add_tasks(root: Path, body: str) -> None:
+    """Chèn các việc `TK` ngay trước mục `## Rủi ro` của PLAN."""
+    path = root / "PLAN.md"
+    write_lf(path, path.read_text(encoding="utf-8").replace("## Rủi ro", body + "\n## Rủi ro", 1))
+
+
+def _task(code: str, input_line: str) -> str:
+    return f"### {code} — Việc mẫu (→ FR1.1)\n\n- **Đầu vào:** {input_line}\n\n"
+
+
+def test_task_order_flags_forward_input(tmp_path):
+    root = make_sprint(tmp_path / "a")
+    _add_tasks(root, _task("TK2", "TK3.") + _task("TK3", "TK1."))
+    findings = check.check_paths([root]).findings
+    hits = [f for f in findings if f.rule == "task-order"]
+    assert "task-order" in codes(findings) and hits[0].level == "Phải sửa", [f.render() for f in findings]
+    assert "TK2 trỏ TK3 ở Đầu vào" in hits[0].message
+    assert check.check_paths([root]).exit_code == 1
+    other = make_sprint(tmp_path / "b")
+    _add_tasks(other, _task("TK2", "TK1.") + _task("TK3", "TK2–TK4."))
+    assert "task-order" in codes(check.check_paths([other]).findings)  # đầu trên của dải là 4 ≥ 3
+
+
+def test_task_order_ignores_parallel_mark(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_tasks(root, _task("TK2", "TK1.") + _task("TK3", "TK2; chạy cùng được với TK4.") + _task("TK4", "TK2."))
+    findings = check.check_paths([root]).findings
+    assert "task-order" not in codes(findings), [f.render() for f in findings]
+
+
+def test_task_order_parallel_mark_ignores_case(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_tasks(root, _task("TK2", "TK1.") + _task("TK3", "TK2. Chạy cùng được với TK4.") + _task("TK4", "TK2."))
+    findings = check.check_paths([root]).findings
+    assert "task-order" not in codes(findings), [f.render() for f in findings]
+
+
+def test_task_order_allows_parent_for_subtask(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_tasks(root, _task("TK2", "TK1.") + _task("TK2.1", "TK2.") + _task("TK3", "TK2.1."))
+    findings = check.check_paths([root]).findings
+    assert "task-order" not in codes(findings), [f.render() for f in findings]
+
+
+def test_task_gap_flags_missing_number(tmp_path):
+    root = make_sprint(tmp_path)
+    _add_tasks(root, _task("TK3", "TK1."))
+    report = check.check_paths([root])
+    assert "task-gap" in codes(report.findings) and report.exit_code == 0, [f.render() for f in report.findings]
+
+
+def test_plan_goal_block_flags_missing_label(tmp_path):
+    root = make_sprint(tmp_path)
+    path = root / "PLAN.md"
+    text = path.read_text(encoding="utf-8")
+    assert "**Rủi ro cần chú ý:**" in text
+    write_lf(path, text.replace("**Rủi ro cần chú ý:**", "**Rủi ro:**", 1))
+    report = check.check_paths([root])
+    hits = [f for f in report.findings if f.rule == "plan-goal-block"]
+    assert hits and hits[0].level == "Ghi chú" and "Rủi ro cần chú ý:" in hits[0].message, [f.render() for f in report.findings]
+    assert report.exit_code == 0
+
+
+def test_plan_goal_block_accepts_three_labels(tmp_path):
+    root = make_sprint(tmp_path)
+    assert "plan-goal-block" not in codes(check.check_paths([root]).findings)
+
+
+def test_plain_quote_without_delegation_stays_clean(tmp_path):
+    """Hồ sơ cũ: quote thường, không khoá mới → 0 phát hiện (không né, không báo oan)."""
+    root = make_sprint(tmp_path)
+    _rewrite(root / "PLAN.md", 'gate_1_quote: "duyệt"', 'gate_1_quote: "duyệt, chọn phương án a"')
+    assert codes(check.check_paths([root]).findings) == []

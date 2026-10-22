@@ -23,6 +23,8 @@ test, lint làm bằng lệnh — dùng [method/evidence.md](../../method/eviden
 **T1 tư duy** cho cả hai reviewer. Hai bên **cùng tier**, nhãn agent **khác nhau**, và khác nhãn người làm. Muốn
 reviewer hãng khác thì chỉ **tư vấn**, người dùng quyết ([tiers/README.md](../../tiers/README.md)).
 
+**Effort mặc định: 3** (sàn; thang `method/effort-scale.md`)
+
 ## 3. Đầu vào
 Cho **mỗi** reviewer, cùng một bộ: SPEC + PLAN mục liên quan (đặc tả), sản phẩm cần kiểm (diff từ mốc gốc hoặc file),
 **rubric** chung. Ngữ cảnh soạn riêng cho từng bên, không dán lịch sử phiên, không đưa kết quả của bên kia.
