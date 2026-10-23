@@ -1662,6 +1662,94 @@ def test_delegation_rules_stay_quiet_while_gate_is_pending(tmp_path):
     assert "gate-delegation-invalid" not in codes(check.check_paths([root]).findings)
 
 
+DELEGATION_BLOCK_END = "  revoked_at: null\n"
+
+
+def _pending_delegated_plan(root: Path, *, mode: str = "delegated", block: str | None = None) -> None:
+    """PLAN hợp lệ ở Cổng 1 duyệt thay rồi đưa về `pending`; `block` thay cả khối `delegation` (None = giữ nguyên)."""
+    delegate_plan(root)
+    path = root / "PLAN.md"
+    _rewrite(path, "gate_1: approved", "gate_1: pending")
+    _rewrite(path, "gate_1_mode: delegated", f"gate_1_mode: {mode}")
+    if mode == "human":
+        _rewrite(path, 'gate_1_quote: "duyệt thay: chọn phương án a — xem mục Bản ghi duyệt thay"', 'gate_1_quote: "duyệt"')
+    if block is not None:
+        head, rest = path.read_text(encoding="utf-8").split("delegation:\n", 1)
+        write_lf(path, head + block + rest.split(DELEGATION_BLOCK_END, 1)[1])
+
+
+def test_unknown_delegation_key_is_reported_while_the_gate_is_pending(tmp_path):
+    """FR3.1: cổng còn `pending` mà `delegated` và khối có khoá lạ → một Phải sửa, đúng dòng khoá lạ."""
+    root = make_sprint(tmp_path)
+    _pending_delegated_plan(root)
+    _rewrite(root / "PLAN.md", "  files: []\n", "  files: []\n  note: x\n")
+    hits = _delegation_hits(root)
+    assert len(hits) == 1 and "delegation.note" in hits[0].message, [f.render() for f in hits]
+    line = (root / "PLAN.md").read_text(encoding="utf-8").splitlines()[hits[0].line - 1]
+    assert line.strip() == "note: x"
+
+
+def test_pending_delegated_gate_with_only_known_keys_is_clean(tmp_path):
+    root = make_sprint(tmp_path)
+    _pending_delegated_plan(root)
+    assert _delegation_hits(root) == []
+
+
+def test_pending_human_gate_ignores_unknown_delegation_keys(tmp_path):
+    """Hành vi cũ không đổi: cổng `human` còn mở, khối `delegation` có khoá lạ → vẫn không báo."""
+    root = make_sprint(tmp_path)
+    _pending_delegated_plan(root, mode="human")
+    _rewrite(root / "PLAN.md", "  files: []\n", "  files: []\n  note: x\n")
+    assert _delegation_hits(root) == []
+
+
+@pytest.mark.parametrize("block", ["delegation: oops\n", "delegation: [a, b]\n", "delegation:\n"],
+                         ids=["chuỗi", "danh sách", "rỗng"])
+def test_pending_delegated_gate_with_a_non_dict_block_is_not_reported(tmp_path, block):
+    """Hành vi cũ không đổi: khối `delegation` không phải dict khi còn `pending` → không báo."""
+    root = make_sprint(tmp_path)
+    _pending_delegated_plan(root, block=block)
+    assert _delegation_hits(root) == []
+
+
+def _two_gate_sprint(tmp_path: Path, *, gate_1_done: bool, gate_2_done: bool) -> Path:
+    """`SPRINT.md` có cả hai cổng `delegated` và một khối `delegation` chung chứa khoá lạ `note`."""
+    text = two_part_sprint()
+    quote_1 = 'gate_1_quote: "sửa chữ ở màn hình tra đơn cho đúng chính tả"\n'
+    pending_2 = "gate_2: pending\ngate_2_at: null\ngate_2_quote: null\n"
+    assert quote_1 in text and pending_2 in text
+    block = (
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay hai cổng của SPR-02 tới hết sprint."\n'
+        "  grant_at: 2026-01-20 08:30 +07\n"
+        "  scope: [gate_1, gate_2]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-d\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"
+        "  note: x\n")
+    done_1 = 'gate_1_quote: "duyệt thay: sửa chữ — xem mục Bản ghi duyệt thay"\n'
+    text = text.replace(quote_1, (done_1 if gate_1_done else quote_1) + "gate_1_mode: delegated\n" + block, 1)
+    if not gate_1_done:
+        text = text.replace("gate_1: approved", "gate_1: pending", 1)
+    done_2 = ("gate_2: pass\ngate_2_at: 2026-01-21 10:00 +07\n"
+              'gate_2_quote: "duyệt thay: Đạt — xem mục Bản ghi duyệt thay"\n')
+    text = text.replace(pending_2, (done_2 if gate_2_done else pending_2) + "gate_2_mode: delegated\n", 1)
+    put(tmp_path, "SPRINT.md", text + DELEGATION_RECORD)
+    return tmp_path
+
+
+@pytest.mark.parametrize("gate_1_done,gate_2_done", [(False, False), (True, False), (False, True), (True, True)],
+                         ids=["cả hai pending", "cổng 1 đã kết luận, cổng 2 pending",
+                              "cổng 1 pending, cổng 2 đã kết luận", "cả hai đã kết luận"])
+def test_sprint_file_reports_an_unknown_delegation_key_once(tmp_path, gate_1_done, gate_2_done):
+    """Khối `delegation` của `SPRINT.md` chung cho hai cổng: khoá lạ báo đúng một lần, không lặp giữa hai lần kiểm."""
+    root = _two_gate_sprint(tmp_path, gate_1_done=gate_1_done, gate_2_done=gate_2_done)
+    hits = _delegation_hits(root)
+    assert len(hits) == 1 and "delegation.note" in hits[0].message, [f.render() for f in hits]
+
+
 def test_delegation_stops_at_first_problem_per_gate(tmp_path):
     root = make_sprint(tmp_path)
     delegate_plan(root)

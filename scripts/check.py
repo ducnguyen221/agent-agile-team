@@ -995,6 +995,7 @@ class Engine:
         self.cache: dict = {}
         self.configs: dict = {}
         self.size_flagged: set = set()  # thư mục sprint bốn file đã báo `sprint-size-mismatch` (một lần mỗi thư mục)
+        self.delegation_flagged: set = set()  # (tài liệu, khoá lạ) đã báo trong khối `delegation` (khối chung của hai cổng)
         self.report = Report()
         self.routing_records: list[tuple[dict, Path, int]] = []
 
@@ -1294,7 +1295,11 @@ class Engine:
                 self.add(path, doc.key_line("delegation"), "gate-delegation-invalid",
                          f"có khối delegation và {gate} đã kết luận mà {mode_key} không phải delegated")
             return
-        if data.get(mode_key) != "delegated" or not done:
+        if data.get(mode_key) != "delegated":
+            return
+        if not done:  # cổng còn mở: chỉ khoá lạ trong khối (khối vắng/không phải dict/rỗng giữ nguyên, không báo)
+            if isinstance(data.get("delegation"), dict):
+                self._unknown_delegation_key(doc, mode_key)
             return
 
         def bad(key: str, message: str) -> None:
@@ -1304,9 +1309,8 @@ class Engine:
         if not isinstance(block, dict) or not block:
             return bad("delegation" if "delegation" in data else mode_key,
                        "thiếu khối delegation (lời cấp, phạm vi, hạn, người duyệt)")
-        unknown = [k for k in block if k not in DELEGATION_KEYS]
-        if unknown:
-            return bad(f"delegation.{unknown[0]}", f"delegation.{unknown[0]} ngoài bảng khoá {list(DELEGATION_KEYS)}")
+        if self._unknown_delegation_key(doc, mode_key):
+            return
         grant = block.get("grant")
         if not (isinstance(grant, str) and grant.strip()):
             return bad("delegation.grant" if "grant" in block else "delegation", "thiếu lời cấp nguyên văn (delegation.grant)")
@@ -1382,6 +1386,19 @@ class Engine:
             return bad("risk_tags", f"risk_tags có {', '.join(sorted(tags & DELEGATION_FORBIDDEN_TAGS))} — vùng cấm duyệt thay")
         if "rules" in tags and not files:
             return bad("delegation.files", "risk_tags có rules mà delegation.files rỗng — file luật phải nêu đích danh trong lời cấp")
+
+    def _unknown_delegation_key(self, doc: Doc, mode_key: str) -> bool:
+        """Khối `delegation` có khoá ngoài bảng không; có thì báo một lần cho mỗi (tài liệu, khoá lạ) — khối là CHUNG của
+        hai cổng nên lần gọi của cổng kia không báo lặp. Trả `True` khi có khoá lạ (người gọi dừng, kể cả khi đã báo)."""
+        unknown = [k for k in doc.data["delegation"] if k not in DELEGATION_KEYS]
+        if not unknown:
+            return False
+        flag = (doc.path.resolve(), unknown[0])
+        if flag not in self.delegation_flagged:
+            self.delegation_flagged.add(flag)
+            self.add(doc.path, doc.key_line(f"delegation.{unknown[0]}"), "gate-delegation-invalid",
+                     f"{mode_key}: delegated — delegation.{unknown[0]} ngoài bảng khoá {list(DELEGATION_KEYS)}")
+        return True
 
     def _record_gaps(self, doc: Doc) -> str | None:
         """Mục `## Bản ghi duyệt thay` có đủ ba nhãn không; `None` = đủ, ngược lại = lời mô tả chỗ thiếu."""
