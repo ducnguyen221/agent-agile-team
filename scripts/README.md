@@ -35,7 +35,7 @@ Dòng sprint đầu tiên `init` ghi vào SPRINTS thay luôn comment dòng ví d
 **Quét thư mục không tính `evidence/`.** Khi `check.py` quét một **thư mục**, nó bỏ qua thư mục con tên `evidence`
 **nằm cạnh tài liệu sprint** — tức thư mục cha trực tiếp của `evidence/` có file `SPEC.md`, `PLAN.md`, `PROGRESS.md`,
 `REPORT.md` hoặc `SPRINT.md` (so đúng hoa/thường trên mọi hệ điều hành). Hồ sơ kèm (log, dossier, ghi chú) ở đó không phải tài liệu sprint, nên số phát hiện
-của một thư mục sprint bằng tổng bốn tài liệu của nó. Quy tắc áp cho cả `*.md` và `.agile.json` dưới `evidence/`.
+của một thư mục sprint bằng tổng số phát hiện của các file `.md` ngoài `evidence/`. Quy tắc áp cho cả `*.md` và `.agile.json` dưới `evidence/`.
 Thư mục `evidence` ở chỗ khác (cha không có tài liệu sprint) là tài liệu thật của dự án và vẫn được quét. Cờ
 `--include-evidence` quét lại cả `evidence/` cạnh tài liệu sprint (hành vi cũ). Đường file truyền đích danh, hoặc
 chính thư mục `evidence/` truyền làm gốc quét, luôn được kiểm, có cờ hay không. `--self` không đổi và không nhận cờ này.
