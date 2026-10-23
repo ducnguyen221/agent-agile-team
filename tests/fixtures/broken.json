@@ -100,15 +100,15 @@
     {"name": "risk_tags có rules mà files rỗng", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
      "replace": ["risk_tags: []", "risk_tags: [rules]"]},
     {"name": "người duyệt trùng nhãn vai thực thi", "rule": "self-review", "exit": 1, "file": "PLAN.md", "base": "delegated",
-     "replace": ["by: agent-r", "by: agent-b"]},
+     "replace": ["by: agent-d", "by: agent-b"]},
     {"name": "gate_1_mode ngoài miền", "rule": "frontmatter-value", "exit": 1, "file": "PLAN.md", "base": "delegated",
      "replace": ["gate_1_mode: delegated", "gate_1_mode: auto"]},
     {"name": "thời điểm cấp không đọc được", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
      "replace": ["grant_at: 2026-02-01 08:30 +07", "grant_at: hôm qua"]},
     {"name": "người duyệt chưa giao", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
-     "replace": ["by: agent-r", "by: pending"]},
+     "replace": ["by: agent-d", "by: pending"]},
     {"name": "khối delegation vắng", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
-     "replace": ["delegation:\n  grant: \"Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint.\"\n  grant_at: 2026-02-01 08:30 +07\n  scope: [gate_1]\n  expires: sprint_end\n  by: agent-r\n  tier: T1\n  files: []\n  revoked_at: null\n", ""]},
+     "replace": ["delegation:\n  grant: \"Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint.\"\n  grant_at: 2026-02-01 08:30 +07\n  scope: [gate_1]\n  expires: sprint_end\n  by: agent-d\n  tier: T1\n  files: []\n  revoked_at: null\n", ""]},
     {"name": "khoá lạ trong delegation", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
      "replace": ["  files: []\n", "  files: []\n  note: x\n"]},
     {"name": "Cổng 2 của REPORT: phạm vi chỉ gate_1", "rule": "gate-delegation-invalid", "exit": 1, "file": "REPORT.md", "base": "delegated-report",
@@ -131,6 +131,12 @@
     {"name": "quote duyệt thay mà không khai mode", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md",
      "replace": ["gate_1_quote: \"duyệt\"", "gate_1_quote: \"Duyệt thay: chọn phương án a\""]},
     {"name": "khối delegation mà không khai mode", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md",
-     "replace": ["gate_1_quote: \"duyệt\"\n", "gate_1_quote: \"duyệt\"\ndelegation:\n  grant: \"Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint.\"\n  scope: [gate_1]\n"]}
+     "replace": ["gate_1_quote: \"duyệt\"\n", "gate_1_quote: \"duyệt\"\ndelegation:\n  grant: \"Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint.\"\n  scope: [gate_1]\n"]},
+    {"name": "duyệt thay mà thiếu risk_tags", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["risk_tags: []\n", ""]},
+    {"name": "duyệt thay mà risk_tags là chuỗi đơn", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["risk_tags: []", "risk_tags: secret"]},
+    {"name": "duyệt thay mà risk_tags là danh sách lẫn số", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["risk_tags: []", "risk_tags: [rules, 1]"]},
+    {"name": "người duyệt thay không có trong roles", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["  by: agent-d\n", "  by: agent-x\n"]},
+    {"name": "người duyệt thay giữ vai kiểm định nhưng không phải T1", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["  tech-reviewer: [T1, agent-d]", "  tech-reviewer: [T2, agent-d]"]},
+    {"name": "cổng còn pending mà delegation có khoá lạ", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replaces": [["status: approved", "status: draft"], ["gate_1: approved", "gate_1: pending"], ["  files: []\n", "  files: []\n  note: x\n"]]}
   ]
 }

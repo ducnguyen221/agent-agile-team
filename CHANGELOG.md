@@ -3,6 +3,26 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+### Chưa phát hành
+
+Chưa gắn số phiên bản; số phiên bản và manifest chốt khi phát hành.
+
+- **Sửa — kiểm duyệt thay (`scripts/check.py`):** khi `gate_N_mode: delegated` và cổng đã kết luận, `check.py` đòi `risk_tags` khai
+  hợp lệ (danh sách chuỗi; áp cho mọi tài liệu có cổng duyệt thay, kể cả SPEC) và đòi `delegation.by` giữ ít nhất một vai kiểm
+  định (`business-reviewer`, `tech-reviewer` hoặc `*-specialist`, vai chuyên đề phải thuộc danh sách chuyên đề đã liệt kê) có tier T1 trong
+  `roles` của PLAN, REPORT hoặc SPRINT (SPEC không bị đòi). Cũng khi `gate_N_mode: delegated`, khoá lạ trong khối `delegation` được báo cả khi cổng còn mở (`pending`): chỉ khoá lạ đầu
+  tiên, một lần cho mỗi tài liệu. Khối `roles` và luật `self-review` cũng chỉ nhận bốn chuyên đề đã liệt kê (tên khác bị báo vai lạ). Cổng `human` không đổi.
+- **Sửa — quét thư mục sprint:** `check.py` không còn tính `evidence/` cạnh tài liệu sprint; thêm cờ `--include-evidence` để
+  quét lại như cũ (không dùng cùng `--self`); tên tài liệu sprint được so đúng hoa thường.
+- **Thay đổi — mẫu PROGRESS và SPRINT:** cột "Vai · tier · model · effort" thay cho "Vai · tier · model"; effort là số 1–5
+  (`method/effort-scale.md`), chưa giao thì ghi `—`.
+- **Ghi nợ (known limitations):**
+  - các `tests/pressure.md` giữ lệ ghi `model:` hiện có (id model cụ thể trong 19 file), chưa chuẩn hoá thành nhãn trung tính;
+  - chưa chạy lại ca đo `in-3` của skill `intake` (lần chấm gần nhất: Đạt một phần, n = 1) và chưa dựng lại rubric riêng của ba
+    phép thử routing A/B/C; chỉ còn đề bài và bảng kỳ vọng ở `skills/intake/tests/`;
+  - tên cột cũ "Vai · tier · model" còn trong vài tài liệu phụ (`skills/closing-sprint/references/preflight.md`,
+    `method/process.md`, `roles/verifier/dual-review.md`, `tiers/README.md`), sẽ đồng bộ ở đợt sửa tài liệu luật.
+
 ## 0.4.0 (2026-10-23)
 
 Gộp các đoạn "Chưa phát hành" sau 0.3.1: hồ sơ vai và thang effort (schema 2), phân loại tác vụ và effort (ứng viên),

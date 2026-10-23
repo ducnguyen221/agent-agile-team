@@ -20,6 +20,8 @@
 | Dual Review (hai reviewer độc lập cùng rubric, cho việc có `risk_tags` `rules` / `secret` / `auth`) | Kiểm định | T1 | 3 | `tech-reviewer` (+ lời ghi reviewer thứ hai ở `note`) | [verifier/dual-review.md](verifier/dual-review.md) |
 | Chuyên đề security · data · backend · frontend | Kiểm định | T1 | — | `<tên>-specialist` | [verifier/specialists/](verifier/specialists/) |
 
+Muốn thêm chuyên đề mới: thêm thẻ trong `roles/verifier/specialists/` và thêm tên vào `DELEGATION_SPECIALISTS` trong `scripts/check.py`.
+
 ## Luật chung cho mọi vai
 
 - **Người làm không tự chấm.** Kiểm định do agent **khác** người làm: phiên hoặc subagent mới, nhận ngữ

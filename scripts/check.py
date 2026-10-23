@@ -118,6 +118,7 @@ GATE1_VALUES = {"pending", "approved", "changes_requested"}
 VERDICT_VALUES = {"pending", "pass", "conditional_pass", "fail"}
 GATE_MODES = {"human", "delegated"}  # vắng `gate_N_mode` = human; chỉ `delegated` kích các luật duyệt thay
 DELEGATION_FORBIDDEN_TAGS = {"secret", "auth"}  # vùng cấm duyệt thay (SPEC 7.3)
+DELEGATION_SPECIALISTS = {"security-specialist", "data-specialist", "backend-specialist", "frontend-specialist"}  # danh sách chuyên đề kiểm định (dùng chung cho roles, self-review và người duyệt thay)
 DELEGATION_RECORD = "Bản ghi duyệt thay"  # tiêu đề cấp 2 ở plan, report, sprint
 DELEGATION_LABELS = ("Phương án chọn:", "Phương án bị loại:", "Nếu sai thì tốn gì:")
 DELEGATION_QUOTE = "duyệt thay:"  # tiền tố bắt buộc của `gate_N_quote`
@@ -184,6 +185,9 @@ DROPPED = re.compile(r"[(—–:-]\s*bỏ\s*(?:\)|$)")  # trạng thái `bỏ` c
 AGENTS_MAX_LINES = 120
 AGENTS_MAX_BYTES = 10 * 1024
 SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache", ".tmp"}
+# Thư mục `evidence` cạnh tài liệu sprint là hồ sơ kèm, không phải tài liệu sprint: quét thư mục thì bỏ qua (FR4.1).
+EVIDENCE_DIR = "evidence"
+SPRINT_DOC_NAMES = ("SPEC.md", "PLAN.md", "PROGRESS.md", "REPORT.md", "SPRINT.md")
 OPEN_START, OPEN_END = "<!-- agile:open:start -->", "<!-- agile:open:end -->"  # khối do `index` sinh
 SPAN_HINT = (" — có dấu huyền kề bên: mã nằm trong code span lồng nhau hoặc ngắt dòng? Code span chứa dấu huyền"
              " thì bọc ngoài bằng hai dấu huyền")
@@ -995,6 +999,7 @@ class Engine:
         self.cache: dict = {}
         self.configs: dict = {}
         self.size_flagged: set = set()  # thư mục sprint bốn file đã báo `sprint-size-mismatch` (một lần mỗi thư mục)
+        self.delegation_flagged: set = set()  # (tài liệu, khoá lạ) đã báo trong khối `delegation` (khối chung của hai cổng)
         self.report = Report()
         self.routing_records: list[tuple[dict, Path, int]] = []
 
@@ -1241,7 +1246,7 @@ class Engine:
         holders: dict = {}
         for role, value in roles.items():
             rline = doc.key_line(f"roles.{role}")
-            if role not in EXECUTORS | VERIFIERS and not re.fullmatch(r"[a-z]+-specialist", role):
+            if role not in EXECUTORS | VERIFIERS | DELEGATION_SPECIALISTS:
                 self.add(doc.path, rline, "roles-invalid", f"vai '{role}' không có trong danh sách vai")
                 continue
             if (not isinstance(value, list) or len(value) not in (2, 3) or value[0] not in c.TIERS
@@ -1254,7 +1259,7 @@ class Engine:
             if agent == "pending":
                 continue
             executes = held & EXECUTORS
-            verifies = {r for r in held if r in VERIFIERS or r.endswith("-specialist")}
+            verifies = held & (VERIFIERS | DELEGATION_SPECIALISTS)
             if executes and verifies:
                 self.add(doc.path, line, "self-review",
                          f"agent '{agent}' vừa thực thi ({', '.join(sorted(executes))}) vừa kiểm định ({', '.join(sorted(verifies))})")
@@ -1281,6 +1286,7 @@ class Engine:
 
     def _delegation(self, doc: Doc, gate: str) -> None:
         """Cổng `delegated` đã kết luận phải có hồ sơ duyệt thay đủ (SPEC 7.3); báo lỗi đầu tiên của cổng rồi dừng.
+        Cổng `delegated` còn mở (chưa kết luận) chỉ bị kiểm khoá lạ trong khối `delegation`.
         Vắng `gate_N_mode` hoặc `human` → không kiểm gì (hồ sơ cũ giữ nguyên kết quả)."""
         data, path = doc.data, doc.path
         mode_key, quote_key = f"{gate}_mode", f"{gate}_quote"
@@ -1294,7 +1300,11 @@ class Engine:
                 self.add(path, doc.key_line("delegation"), "gate-delegation-invalid",
                          f"có khối delegation và {gate} đã kết luận mà {mode_key} không phải delegated")
             return
-        if data.get(mode_key) != "delegated" or not done:
+        if data.get(mode_key) != "delegated":
+            return
+        if not done:  # cổng còn mở: chỉ khoá lạ trong khối (khối vắng/không phải dict/rỗng giữ nguyên, không báo)
+            if isinstance(data.get("delegation"), dict):
+                self._unknown_delegation_key(doc, mode_key)
             return
 
         def bad(key: str, message: str) -> None:
@@ -1304,9 +1314,8 @@ class Engine:
         if not isinstance(block, dict) or not block:
             return bad("delegation" if "delegation" in data else mode_key,
                        "thiếu khối delegation (lời cấp, phạm vi, hạn, người duyệt)")
-        unknown = [k for k in block if k not in DELEGATION_KEYS]
-        if unknown:
-            return bad(f"delegation.{unknown[0]}", f"delegation.{unknown[0]} ngoài bảng khoá {list(DELEGATION_KEYS)}")
+        if self._unknown_delegation_key(doc, mode_key):
+            return
         grant = block.get("grant")
         if not (isinstance(grant, str) and grant.strip()):
             return bad("delegation.grant" if "grant" in block else "delegation", "thiếu lời cấp nguyên văn (delegation.grant)")
@@ -1343,6 +1352,19 @@ class Engine:
         if held:
             self.add(path, doc.key_line("delegation.by"), "self-review",
                      f"người duyệt thay '{by}' cũng giữ vai thực thi ({', '.join(held)}) của cùng tài liệu")
+        elif doc.kind in ("plan", "report", "sprint"):  # SPEC không đòi: Cổng 1 duyệt thay ghi ở cả SPEC lẫn PLAN (DN5)
+            if not isinstance(roles, dict):
+                return bad("roles" if "roles" in data else mode_key, "tài liệu duyệt thay phải có khối roles để đối chiếu delegation.by")
+            mine = {r: v for r, v in roles.items() if isinstance(v, list) and len(v) >= 2 and v[1] == by}
+            if not mine:
+                return bad("delegation.by", f"người duyệt thay '{by}' không giữ vai nào trong roles của tài liệu")
+            tiers = [v[0] for r, v in mine.items() if r in VERIFIERS or r in DELEGATION_SPECIALISTS]
+            unlisted = sorted(r for r in mine if r.endswith("-specialist") and r not in DELEGATION_SPECIALISTS)
+            hint = f" (chuyên đề ngoài danh sách: {', '.join(unlisted)})" if unlisted else ""
+            if "T1" not in tiers:
+                if not tiers:
+                    return bad("delegation.by", f"người duyệt thay '{by}' không giữ vai kiểm định nào trong roles của tài liệu{hint}")
+                return bad("delegation.by", f"người duyệt thay '{by}' giữ vai kiểm định nhưng tier là {', '.join(map(str, tiers))}, phải là T1{hint}")
         files = block.get("files", [])
         if not isinstance(files, list):
             return bad("delegation.files", f"delegation.files: {files!r} phải là danh sách")
@@ -1363,11 +1385,27 @@ class Engine:
             if missing is not None:
                 return bad(mode_key, missing)
         tags = data.get("risk_tags")
-        tags = set(tags) if isinstance(tags, list) and all(isinstance(t, str) for t in tags) else set()
+        if not (isinstance(tags, list) and all(isinstance(t, str) for t in tags)):
+            return bad("risk_tags" if "risk_tags" in data else mode_key,
+                       "risk_tags thiếu hoặc không phải danh sách chuỗi — duyệt thay cần khai nhãn rủi ro (dùng [] khi không có)")
+        tags = set(tags)
         if tags & DELEGATION_FORBIDDEN_TAGS:
             return bad("risk_tags", f"risk_tags có {', '.join(sorted(tags & DELEGATION_FORBIDDEN_TAGS))} — vùng cấm duyệt thay")
         if "rules" in tags and not files:
             return bad("delegation.files", "risk_tags có rules mà delegation.files rỗng — file luật phải nêu đích danh trong lời cấp")
+
+    def _unknown_delegation_key(self, doc: Doc, mode_key: str) -> bool:
+        """Khối `delegation` có khoá ngoài bảng không; có thì báo một lần cho mỗi (tài liệu, khoá lạ) — khối là CHUNG của
+        hai cổng nên lần gọi của cổng kia không báo lặp. Trả `True` khi có khoá lạ (người gọi dừng, kể cả khi đã báo)."""
+        unknown = [k for k in doc.data["delegation"] if k not in DELEGATION_KEYS]
+        if not unknown:
+            return False
+        flag = (doc.path.resolve(), unknown[0])
+        if flag not in self.delegation_flagged:
+            self.delegation_flagged.add(flag)
+            self.add(doc.path, doc.key_line(f"delegation.{unknown[0]}"), "gate-delegation-invalid",
+                     f"{mode_key}: delegated — delegation.{unknown[0]} ngoài bảng khoá {list(DELEGATION_KEYS)}")
+        return True
 
     def _record_gaps(self, doc: Doc) -> str | None:
         """Mục `## Bản ghi duyệt thay` có đủ ba nhãn không; `None` = đủ, ngược lại = lời mô tả chỗ thiếu."""
@@ -1744,22 +1782,47 @@ class Engine:
 # --- Quét đường dẫn ------------------------------------------------------------------------------------
 
 
-def _walk(root: Path, pattern: str):
+def _has_sprint_document(folder: Path) -> bool:
+    """`folder` có FILE mang đúng tên tài liệu sprint, so đúng hoa/thường như trên Linux (`spec.md` thì không)?"""
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        return False
+    return any(name in SPRINT_DOC_NAMES and (folder / name).is_file() for name in names)
+
+
+def _under_sprint_evidence(root: Path, rel: tuple, beside: dict) -> bool:
+    """`rel` đi qua một thư mục `evidence` nằm cạnh tài liệu sprint (FR4.1)? `root` không bao giờ tính (FR4.2)."""
+    for index, part in enumerate(rel):
+        if part != EVIDENCE_DIR:
+            continue
+        parent = root.joinpath(*rel[:index])
+        if parent not in beside:
+            beside[parent] = _has_sprint_document(parent)
+        if beside[parent]:
+            return True
+    return False
+
+
+def _walk(root: Path, pattern: str, include_evidence: bool = False):
+    beside: dict = {}
     for path in sorted(root.rglob(pattern)):
         rel = path.relative_to(root).parts[:-1]
         if any(part in SKIP_DIRS or part.startswith(".") for part in rel):
             continue
+        if not include_evidence and _under_sprint_evidence(root, rel, beside):
+            continue
         yield path
 
 
-def check_paths(paths, env=None, routing_manifest=None) -> Report:
+def check_paths(paths, env=None, routing_manifest=None, include_evidence: bool = False) -> Report:
     engine = Engine(env)
     for raw in paths:
         path = Path(raw)
         if path.is_dir():
-            for config in _walk(path, c.CONFIG_NAME):
+            for config in _walk(path, c.CONFIG_NAME, include_evidence):
                 engine.check_config(config.parent)
-            for md in _walk(path, "*.md"):
+            for md in _walk(path, "*.md", include_evidence):
                 engine.check_file(md)
         elif path.is_file():
             if path.name == c.CONFIG_NAME:
@@ -2014,11 +2077,15 @@ def main(argv=None, env=None) -> int:
     parser.add_argument("--self", dest="self_mode", action="store_true", help="kiểm lõi sạch của repo này")
     parser.add_argument("--root", default=str(c.REPO), help="gốc repo cho --self (mặc định: repo chứa script)")
     parser.add_argument("--routing-manifest", help="manifest applicability độc lập của pilot routing")
+    parser.add_argument("--include-evidence", action="store_true",
+                        help="khi quét thư mục: quét cả thư mục evidence/ nằm cạnh tài liệu sprint (mặc định bỏ qua)")
     args = parser.parse_args(argv)
     if not args.self_mode and not args.paths:
         parser.error("cần ít nhất một đường dẫn, hoặc --self")
     if args.self_mode and args.paths:
         parser.error("--self không nhận đường dẫn; dùng --root <repo> để chọn repo")
+    if args.self_mode and args.include_evidence:
+        parser.error("--include-evidence chỉ dùng khi quét đường dẫn; --self không đổi")
     if args.self_mode and args.routing_manifest:
         parser.error("--routing-manifest chỉ dùng khi kiểm đường dẫn pilot")
     if args.self_mode:
@@ -2028,7 +2095,8 @@ def main(argv=None, env=None) -> int:
             print("WARNING NOT_CONFIGURED: AGENT_AGILE_DENYLIST chưa đặt, file không đọc được hoặc rỗng — "
                   "luật leak-denylist Chưa chạy (không phải Đạt).", file=sys.stderr)
     else:
-        report = check_paths(args.paths, env, routing_manifest=args.routing_manifest)
+        report = check_paths(args.paths, env, routing_manifest=args.routing_manifest,
+                             include_evidence=args.include_evidence)
     for error in report.errors:
         print(f"{error} [lỗi đầu vào]")
     for finding in report.findings:

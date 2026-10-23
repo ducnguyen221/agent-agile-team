@@ -60,11 +60,12 @@ PLAN có 1 **task** (TK):
 ## 3. PROGRESS
 
 <!-- Bảng trạng thái + nhật ký chỉ-thêm. Phán quyết nội bộ: "Phán quyết: <gì> — <vì sao> — <sai thì tốn gì>".
-     Vướng mắc BR chỉ cho 4 trường hợp phải dừng. -->
+     Vướng mắc BR chỉ cho 4 trường hợp phải dừng. Cột "Vai · tier · model · effort" ghi vai, tier, model và effort
+     thực tế đã giao; effort là số 1–5 (`method/effort-scale.md`), chưa giao thì ghi `—`. -->
 
-| Việc | Vai · tier · model | Trạng thái | Bằng chứng |
+| Việc | Vai · tier · model · effort | Trạng thái | Bằng chứng |
 |---|---|---|---|
-| TK1 (cắt khoảng trắng mã đơn) | Implementer · T2 · model-x | Đạt | `pytest tests/test_lookup.py` → 1 passed |
+| TK1 (cắt khoảng trắng mã đơn) | Implementer · T2 · model-x · 3 | Đạt | `pytest tests/test_lookup.py` → 1 passed |
 
 - **2026-01-20 10:00 +07** — Implementer thêm bước cắt khoảng trắng; test xanh.
 - **Vướng mắc:** Không có.
