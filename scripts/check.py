@@ -1363,7 +1363,10 @@ class Engine:
             if missing is not None:
                 return bad(mode_key, missing)
         tags = data.get("risk_tags")
-        tags = set(tags) if isinstance(tags, list) and all(isinstance(t, str) for t in tags) else set()
+        if not (isinstance(tags, list) and all(isinstance(t, str) for t in tags)):
+            return bad("risk_tags" if "risk_tags" in data else mode_key,
+                       "risk_tags thiếu hoặc không phải danh sách chuỗi — duyệt thay cần khai nhãn rủi ro (dùng [] khi không có)")
+        tags = set(tags)
         if tags & DELEGATION_FORBIDDEN_TAGS:
             return bad("risk_tags", f"risk_tags có {', '.join(sorted(tags & DELEGATION_FORBIDDEN_TAGS))} — vùng cấm duyệt thay")
         if "rules" in tags and not files:
