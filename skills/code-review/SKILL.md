@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Use when code must be reviewed — a diff, a branch, a PR, "check my changes", a pre-merge or pre-deploy pass, a task review inside a sprint, or a bug hunt without a diff — to decide which reviewer runs, in what order, when to stop, how to brief the reviewer, and how the author receives the findings — including when tempted to fix the clear review items first while others are still unclear.
+description: Use when code must be reviewed — a diff, a branch, a PR, "check my changes", a pre-merge or pre-deploy pass, a task review inside a sprint, or a bug hunt without a diff — to decide which reviewer runs, in what order, when to stop, how to brief the reviewer, and how the author receives the findings — including when tempted to fix the clear review items first while others are still unclear, or when a repository REVIEW.md, a follow-up review round or a pre-existing finding is involved.
 metadata:
   group: verification
   roles: [analyst, tech-reviewer, implementer]
@@ -19,6 +19,18 @@ rewrite_before_public: false
 > "đã xem xét và gác lại" và "không đánh giá". Người làm **kiểm chứng trước khi sửa**, cấm đồng ý cho có; mục được chọn sửa = sửa **và**
 > test hồi quy, mục bỏ qua = bỏ **cả hai** và lỗi giữ trạng thái chưa giải.
 
+## Contents
+
+- 1. Bước 0 — phân loại yêu cầu — mọi yêu cầu review; có cả phân vai skill và lệnh review của harness
+- 2. A — Review diff — có diff hay PR: phạm vi, gói diff, `REVIEW.md` của repo, chuyên gia, cổng xác minh
+- 3. B — Săn lỗi (không có diff) — "tìm lỗi ở X" khi chưa có diff
+- 4. C — Nâng cấp bảo mật (bắt buộc, đè right-sizing) — diff chạm vùng nhạy cảm
+- 5. Yêu cầu review — brief cho reviewer — soạn brief; 5.1 vòng sau, 5.2 nhãn và kết cục
+- 6. Tiếp nhận review — người làm — nhận phát hiện, sửa, phản bác
+- 7. Luật dừng — trước khi thêm reviewer, hook hay vòng lặp
+- 8. Cờ đỏ — khi thấy mình viện cớ bỏ bước
+- Gotchas — ba chỗ hay vấp
+
 ## 1. Bước 0 — phân loại yêu cầu
 
 | Tín hiệu | Tình huống | Đi |
@@ -32,6 +44,10 @@ rewrite_before_public: false
 
 Tình huống cộng dồn: diff migration = A **+** C. Thay đổi một dòng hay thuần thẩm mỹ: **đọc**, không
 mở quy trình review đầy đủ.
+
+**Phân vai:** skill này là quy trình — ai review, thứ tự, khi nào dừng, brief, cách tiếp nhận; lệnh review sẵn có của
+harness (nếu có) là một lượt chạy ngay do người dùng gõ, kết quả của nó là một khía cạnh nữa của cổng review. Review có
+hai việc: bắt lỗi trước khi gộp và giúp người duyệt hiểu thay đổi; bỏ việc sau thì Cổng 2 thành ký cho có.
 
 ## 2. A — Review diff
 
@@ -59,6 +75,10 @@ Gói diff: `git log --oneline`, `git diff --stat`, `git diff -U10 $BASE..HEAD` g
 `.tmp/review-<base7>..<head7>.diff` (hoặc theo đường dẫn module với `-- <đường>`); reviewer đọc **một**
 lần, diff không đi qua ngữ cảnh điều phối. Reviewer là **agent khác** người làm (T1); với sprint, Tech
 Reviewer ở Bước 4 và review theo việc ở Bước 3 (skill `running-sprint`, `references/review.md`).
+
+**`REVIEW.md` của repo.** Có `REVIEW.md` ở `BASE` thì brief chép lệnh `git show <BASE>:REVIEW.md` và reviewer áp nó trước
+khi đọc diff — từ mốc gốc, để nhánh không tự nới luật review của mình; diff sửa chính file này vẫn áp bản `BASE`, ghi
+`RF` Ghi chú và xếp bậc cao; vắng file → mặc định. Khuôn: [references/review-md.md](references/review-md.md).
 
 **Chuyên gia — thêm chỉ khi có tín hiệu**, không bao giờ mặc định; mỗi chuyên gia phải thấy được
 thứ lượt tổng quát không thấy:
@@ -134,6 +154,26 @@ giá (bắt buộc) · kết luận **Đạt / Đạt có điều kiện / Khôn
 sửa; Nên sửa → `CO`; reviewer sai → phản bác có bằng chứng (mục 6), không bỏ im lặng. Không tự review
 diff trong phiên điều phối thay cho reviewer — đốt ngữ cảnh điều phối và không độc lập.
 
+### 5.1 Vòng sau — hội tụ
+
+- **Vòng ≥2 đọc hẹp:** reviewer nhận diff từ mốc vòng trước tới `HEAD` cùng bảng `RF` cũ, phán từng `RF` *đã xử lý / chưa*,
+  chỉ bắt lỗi mới trong diff sửa. Review theo việc giữ nguyên `running-sprint` mục 4.4.
+- **Lớp lỗi:** `RF` thuộc lớp có thể lặp ghi `lớp: <tên>`; người làm sửa mọi chỗ cùng lớp trong diff và nêu số chỗ;
+  vòng sau reviewer kiểm cả lớp, không chỉ dòng đã báo.
+- **Không đăng lại** `RF` đã có kết cục (5.2) cùng khoá gộp (đoạn mã + file), trừ khi diff sửa đem bằng chứng mới — nêu bằng chứng đó.
+- Khuyến nghị 3 vòng, không trần cứng (`AGENTS.md`). Hết vòng 3 còn Chặn hay Phải sửa: không tự mở vòng 4 — dừng vòng
+  tự động, ghi một câu xem lại cách làm kèm lớp lỗi lặp, báo người dùng chọn làm tiếp hay dừng và bàn giao.
+
+### 5.2 Nhãn và kết cục
+
+- **`có từ trước`** (nhãn ở cột `Nhãn`, không phải mức; `RF` vẫn đúng một mức): lỗi đã có ở `BASE` (`git show <BASE>:<file>`
+  hay `git blame`) và diff không làm nặng thêm → không chặn sprint, kết cục `có từ trước → CO` kèm dòng `RQ-`. Là Chặn về
+  bảo mật hay mất dữ liệu thì báo ngay mức Chặn, điều phối mở `BR` theo điều kiện dừng (b); không hoãn thành `CO` im lặng.
+- **Năm kết cục**, mỗi `RF` đúng một khi trình Cổng 2: *đã sửa* (sha + test hồi quy đỏ rồi xanh) · *bác kèm lý do*
+  (bằng chứng `file:dòng`) · *để lại → `CO`* · *có từ trước → `CO`* · *mở*. Còn *mở* ở Chặn hay Phải sửa → tiền kiểm Không đạt.
+- **Đo nhiễu:** Retro đếm theo từng reviewer số `RF` bị *bác* trên tổng `RF` của reviewer đó, từ cột "Xử lý" của REPORT.
+- Bậc duyệt, path luôn-cần-người và dòng `Bậc duyệt:` của lời trình: [references/risk-tiers.md](references/risk-tiers.md).
+
 ## 6. Tiếp nhận review — người làm
 
 ```
@@ -174,7 +214,7 @@ diff trong phiên điều phối thay cho reviewer — đốt ngữ cảnh đi�
 - Không xếp chồng reviewer đọc cùng một thứ theo cùng một cách — tranh luận trên cùng văn bản không
   thêm thông tin, chỉ nhân chi phí ("sân khấu nhiều agent").
 - Không chạy review đầy đủ cho sửa một dòng hay thẩm mỹ: đọc.
-- Không bật hook review tự động khi người dùng không yêu cầu — vòng lặp đốt hạn mức.
+- Không bật hook review tự động khi người dùng không yêu cầu — vòng lặp đốt hạn mức; hook xác định (format, chặn path, quét khoá) thì được — skill `hooks-guardrails`.
 - Lệnh review có tính phí của harness (nếu có) do **người dùng** kích; chỉ nhắc nó tồn tại.
 - Báo trung thực: reviewer nào đã chạy, bỏ reviewer nào vì sao, đã xác minh gì ↔ còn là giả thuyết.
 
@@ -192,3 +232,9 @@ diff trong phiên điều phối thay cho reviewer — đốt ngữ cảnh đi�
 | "Sửa trước, test sau cho kịp giờ" | sửa và test hồi quy là một lựa chọn; chưa có test thì chưa sửa xong, `RF` chưa đóng |
 | "Không kịp thì thêm test `xfail` rồi đóng `RF` cho REPORT sạch" | bỏ qua = bỏ cả sửa lẫn test; lỗi giữ chưa giải, nói thẳng ở Cổng 2 |
 | "Mục rõ thì làm ngay cho kịp giờ, mục mơ hồ hỏi sau" | còn mục chưa rõ thì chưa sửa mục nào; mục mơ hồ có thể đổi cách làm mục rõ |
+
+## Gotchas
+
+- `REVIEW.md` đọc từ `BASE` bằng `git show`, không từ cây làm việc: nhánh sửa file này không tự nới luật review của mình.
+- Khuyến nghị 3 vòng, không trần cứng: hết vòng 3 còn Chặn hay Phải sửa thì báo người, không mở vòng 4, không đóng im lặng.
+- `có từ trước` và `lớp:` là nhãn, không phải mức; lỗi có từ trước mà là bảo mật hay mất dữ liệu vẫn là Chặn.
