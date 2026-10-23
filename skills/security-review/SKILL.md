@@ -141,6 +141,10 @@ Mỗi bề mặt mới có ít nhất một test cho mỗi hàng rào, viết th
 `.env.example`; thông tin đăng nhập test đánh dấu rõ và chỉ dùng trong test; khoá công khai thật sự công
 khai; SHA/MD5 dùng làm checksum, không phải băm mật khẩu. Luôn xét ngữ cảnh trước khi gắn `RF`; loại
 một phát hiện vì dương tính giả thì ghi lý do.
+Đóng một `RF` bảo mật mức Chặn hay Phải sửa vì dương tính giả cần **agent khác người làm**
+(reviewer bảo mật hoặc Analyst) ghi một câu lý do kèm `file:dòng`; người làm không tự đóng. `RF` chỉ chuyển *đã sửa* khi có
+sha của commit sửa và test hồi quy đã thấy đỏ trên mã cũ rồi xanh (`code-review` mục 6); thiếu test thì còn *mở*. Còn `RF`
+bảo mật mở ở mức Chặn hay Phải sửa thì tiền kiểm Không đạt, chưa có menu gộp.
 
 ## 7. Khi nào dừng và hỏi
 

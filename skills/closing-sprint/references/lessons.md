@@ -17,7 +17,7 @@ Trước khi rút bài học, đọc lại ba thứ của sprint — đây là r
 |---|---|
 | Mọi dòng `Phán quyết:` trong PROGRESS | phán quyết nào sai, tốn gì? phán quyết nào lẽ ra là `CQ` ở Cổng 1? |
 | Khối "Đang mở" của REQUESTS — dòng có nguồn `từ SPR-xx/COn` (nợ để lại; không mở REPORT cũ) | nợ nào đã mở quá hai sprint — làm hay bỏ? sprint này trả được nợ nào? |
-| Số vòng kiểm định, lý do mỗi vòng | lỗi bị bắt ở vòng nào, lẽ ra bắt sớm hơn ở đâu (PLAN, review PLAN, review theo việc)? |
+| Số vòng kiểm định, lý do mỗi vòng | lỗi bị bắt ở vòng nào; với mỗi lỗi bắt muộn, **tầng nào lẽ ra bắt** — tự kiểm, review PLAN, review theo việc, lượt bảo mật, cổng review toàn nhánh, kiểm cây sắp gộp, sau phát hành — và sửa tại nguồn bằng gì (skill · lint · `REVIEW.md` · test · hook)? |
 | Số lần hỏi người ngoài cổng (mục tiêu 0) | hỏi vì thiếu luật, thiếu ngữ cảnh, hay thiếu can đảm phán quyết? |
 
 Ghi vào REPORT mục Review & Retro: đạt gì · làm tốt · chưa tốt · thử lần sau · token phiên (mốc).

@@ -23,7 +23,7 @@ rewrite_before_public: false  # both private-derived files were rewritten clean-
 | # | Việc | Ai | Chi tiết |
 |---|---|---|---|
 | 1 | **Tiền kiểm** — bằng chứng đủ chưa, theo cỡ và rủi ro | Analyst | [references/preflight.md](references/preflight.md) |
-| 2 | **REPORT** theo mẫu; mỗi `CO` ghi luôn thành một dòng `RQ-` `mới` trong REQUESTS (tóm tắt ghi `từ SPR-xx/COn`, cột Đề xuất của REPORT ghi mã `RQ-`); trình **Cổng 2** bằng lời trình chuẩn, kèm dòng **đề xuất phiên bản** (mục 1.1) | Analyst | `method/process.md` mục 7 |
+| 2 | **REPORT** theo mẫu; mỗi `CO` ghi luôn thành một dòng `RQ-` `mới` trong REQUESTS (tóm tắt ghi `từ SPR-xx/COn`, cột Đề xuất của REPORT ghi mã `RQ-`); trình **Cổng 2** bằng lời trình chuẩn, kèm dòng **đề xuất phiên bản** (mục 1.1); lời trình có dòng `Bậc duyệt:` theo [code-review/references/risk-tiers.md](../code-review/references/risk-tiers.md) | Analyst | `method/process.md` mục 7 |
 | 3 | Người dùng kết luận **Đạt / Đạt có điều kiện / Không đạt** → ghi `gate_2`, `gate_2_at`, `gate_2_quote` nguyên văn | — | Không đạt → vòng mới hoặc sprint mới; dừng ở đây |
 | 4 | **Cập nhật hồ sơ:** spec sống `FS-` (gộp delta Thêm / Sửa / Bỏ của SPEC theo comment đầu mẫu `feature-spec.md`; hành vi hiện hành, tiêu chí đang giữ, giới hạn đã biết, lịch sử sprint) · SPRINTS cột Đóng · REQUESTS trạng thái `xong` · spec sống `status` · chạy công cụ `index` · **dòng sổ tập trung** (mục 1.2) | Analyst | chỉ sau Cổng 2 Đạt / Đạt có điều kiện |
 | 5 | **Đồng bộ tài liệu** của dự án với diff nhánh | Implementer | [references/docs-sync.md](references/docs-sync.md) |
@@ -146,7 +146,7 @@ không bớt lựa chọn; "bỏ việc" chỉ xảy ra khi người dùng **t�
    người dùng duyệt rõ sha mới bằng lời trong chat, như mục 3 đòi cho gộp. Xác thực hay mạng hỏng → sửa nguyên nhân rồi
    thử lại.
 3. **Thân PR** viết từ REPORT: tóm tắt **theo chủ đề** (không dán danh sách commit) · kết quả kiểm (lệnh và số đếm thật;
-   `VR` Chưa chạy nói rõ) · phát hiện còn mở và việc để lại (`CO`, `RQ-`) · tài liệu đã đồng bộ · cách hoàn tác. Nối
+   `VR` Chưa chạy nói rõ) · rủi ro còn lại (REPORT mục 3) · phát hiện còn mở và việc để lại (`CO`, `RQ-`) · tài liệu đã đồng bộ · cách hoàn tác. Nối
    issue: `Closes #N` chỉ khi **mọi** tiêu chí của issue đã xong và đã kiểm; còn phần hoãn hay dở → `Linked to #N` hay
    `Refs #N` kèm nêu phần còn lại. Tiêu đề không mang số phiên bản khi người dùng chưa quyết số. Đọc lại thân và tiêu đề
    trước khi gửi: không secret, không đường máy, không PII (PR có thể công khai). Báo URL; giữ worktree để sửa theo phản hồi.
