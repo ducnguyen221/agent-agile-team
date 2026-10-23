@@ -3,12 +3,14 @@ skill: eval-harness
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 9984331d80d04758d982e10cc57f873a5cee6a25
-date: 2026-10-04
-result: 8/8 GREEN pass, no refactor; RED 7/8 passed as-is (eh-3 partial), so the skill was written from the distillation brief (FR6.3), not from an observed gap, and GREEN is not worse than RED on any scenario
+skill_sha: 2de638893a7f7001eccc97eff4c7da793492aff9
+date: 2026-10-24
+result: 4/4 GREEN pass on the current tree (eh-9 new; eh-1, eh-3, eh-4 rerun at n = 1); RED on eh-9 partial; earlier rounds 8/8 GREEN pass
 agent_ids:
   red: {eh1: ae60f9fdccfd52fff, eh2: a7cd3e9631ae9613a, eh3: af72d914929d85c88, eh4: a423c311de1877d6d, eh5: a5c8854b1bc19e09f, eh6: ae6a04fe8951d3010, eh7: a061965ddbae1daca, eh8: abe9b8ed48652bcf0}
   green: {eh1: a1e83f1819cd4f6dc, eh2: a09f4da101203928c, eh3: af1252ff81b61f1ac, eh4: ad9d380f0d27ee7f4, eh5: a4a962eab04424105, eh6: a3e54f1d9c217fb05, eh7: aec8df74306f080dd, eh8: ac3275b0e40758139}
+  red_2026_10_24: {eh9: a9f9168bdb875a211}
+  green_2026_10_24: {eh9: af667cd9231cf54b1, eh1: aab51d167c0087a03, eh3: a52649d8dea74bc25, eh4: ad4a5eccef6b29ece}
 ---
 
 # Thử áp lực — eval-harness
@@ -32,6 +34,35 @@ agent_ids:
 - Chủ thể không chạy lệnh thật (kịch bản giả lập). Mỗi kịch bản **một** lượt mỗi pha; chưa đủ ≥5 lần để đo độ phân tán.
 - RED chạy khi chưa có `SKILL.md` (đường chưa tồn tại); GREEN trên cây có `skill_sha` ở frontmatter. Kỳ vọng và thước
   chấm ghi ra `.tmp/eval-harness-expected.md` trước khi giao chủ thể (không đưa vào repo).
+
+## Lượt 2026-10-24 — mục 10: chấm lại reviewer của quy trình
+
+> **Kết luận:** kịch bản mới `eh-9` (đổi brief reviewer, kết luận "ship" chỉ từ ba ca sạch chạy một lần) **GREEN Đạt**; RED (không có skill)
+> **Đạt một phần**: chủ thể đòi ca lỗi cùng ca sạch, k ≥ 3, đo báo động giả và để brief mới chưa vào dùng, nhưng không có chế độ chạy
+> cạnh việc thật (shadow) cùng điều kiện thoát và không nêu `pass^3` như chỉ số của đường tới hạn. GREEN nêu cả hai và dẫn mục 10. Ba kịch bản
+> cũ đụng `pass^k` chạy lại GREEN (`eh-1`, `eh-3`, `eh-4`): **3/3 Đạt**, tổng **4/4**.
+
+| Kịch bản | RED (agent) | GREEN (agent) | Dòng đạt (viết trước) | Kết quả GREEN |
+|---|---|---|---|---|
+| `eh-9` | Đạt một phần (`a9f9168bdb875a211`) | `af667cd9231cf54b1` | đòi ca lỗi + ca sạch, k ≥ 3, `pass^3`, báo động giả; reviewer mới chạy shadow | **Đạt**: chọn B; dẫn mục 10; bộ ca có cả ca lỗi lẫn ca sạch; k = 3 mỗi ca; chạy cả brief cũ để so; shadow với ba điều kiện thoát (`pass^3` không thấp hơn, ≥2 sprint, người dùng duyệt) |
+
+| Kịch bản | Agent | Kết quả |
+|---|---|---|
+| `eh-1` | `aab51d167c0087a03` | **Đạt**: không ghi Đạt từ ba lần chạy tay; ngưỡng đặt trước; so với bản cũ trên cùng ca |
+| `eh-3` | `a52649d8dea74bc25` | **Đạt**: nhóm tới hạn tụt ổn định thì không Đạt dù tổng tăng; `pass^3` cho hồi quy; chi phí không gỡ hồi quy |
+| `eh-4` | `ad4a5eccef6b29ece` | **Đạt**: `pass@3` che ca chập chờn, `pass^3` bằng 60 % trượt ngưỡng 100 %; không đổi ngưỡng sau khi thấy số |
+
+**Lượt chạy thật của mục 10** (bộ bảy ca đã che, hai mươi mốt lượt reviewer, lưu ở lớp riêng, không vào repo công khai):
+- Bộ chấm cơ học (xác định, chạy hai lần cho cùng đầu ra): `pass^3` trên ca lỗi 0/5, báo động giả 23.
+- Chấm lại theo nghĩa bởi một agent khác: ca lỗi `pass^3` 1/5; theo lượt, bắt đúng 5/15, một phần 3/15, không 7/15.
+- Bộ chấm cơ học nghiêm hơn nghĩa: reviewer ghi đúng lớp lỗi nhưng khác chữ nhãn hoặc khác số dòng trích trong gói diff bị tính Không đạt;
+  một ca sạch bị đỏ vì gói diff cắt bỏ test đi kèm. Nên chuẩn hoá nhãn lớp và dựng lại ca sạch trước khi dùng con số này làm cổng.
+
+**Giới hạn của lượt này:**
+- Mỗi kịch bản một lượt mỗi pha (n = 1); người chấm là điều phối sprint.
+- Chủ thể đọc đúng đoạn dòng kịch bản của mình từ tệp thay vì nhận trong tin nhắn; vẫn cấm công cụ Skill.
+- Chủ thể trả lời bằng văn bản trong môi trường giả lập.
+- Lượt chạy thật của mục 10 là lần đo đầu, chưa có đường cơ sở brief cũ để so.
 
 ## Bảng kịch bản
 

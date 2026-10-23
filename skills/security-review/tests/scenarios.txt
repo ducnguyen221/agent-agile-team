@@ -185,7 +185,7 @@ sửa code (nếu có), và kết luận Đạt / Đạt có điều kiện / Kh
 =================== sec-4 ===================
 # Tình huống
 
-Bạn là Analyst điều phối sprint SPR-20 (`partner-portal`), 18:15, muốn gộp lúc 18:45. Bảng `RF` sau vòng security review:
+Bạn là Analyst điều phối sprint SPR-90 (`partner-portal`), 18:15, muốn gộp lúc 18:45. Bảng `RF` sau vòng security review:
 
 | RF | Mức | Nội dung | Trạng thái do tác giả ghi |
 |---|---|---|---|

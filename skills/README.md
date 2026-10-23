@@ -144,7 +144,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-22 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | Chưa chạy — current candidate behavior unverified | 2026-10-12 |
-| [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 8/8 GREEN pass | 2026-10-04 |
+| [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (eh-9 new; eh-1, eh-3, eh-4 rerun at n = 1) | 2026-10-24 |
 | [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on KB3 at n = 3 after the TK13 fix (round 2, 2026-10-04, round 1 on the pre-fix text was 1/3) and RED 0/3 pass (RED breaks); rerun n = 1 - KB1, KB2, KB4, KB6 pass, KB5 partial against the expectation, KB7 partial (TK12 had pass; not shown to be a regression); earlier TK12 rerun GREEN 3/3 on the old scenarios and 4 new ones | 2026-10-04 |
 | [hooks-guardrails](hooks-guardrails/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 0/3 pass (3 partial) | 2026-10-23 |
 
