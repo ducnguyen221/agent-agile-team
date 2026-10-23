@@ -1779,6 +1779,15 @@ class Engine:
 # --- Quét đường dẫn ------------------------------------------------------------------------------------
 
 
+def _has_sprint_document(folder: Path) -> bool:
+    """`folder` có FILE mang đúng tên tài liệu sprint, so đúng hoa/thường như trên Linux (`spec.md` thì không)?"""
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        return False
+    return any(name in SPRINT_DOC_NAMES and (folder / name).is_file() for name in names)
+
+
 def _under_sprint_evidence(root: Path, rel: tuple, beside: dict) -> bool:
     """`rel` đi qua một thư mục `evidence` nằm cạnh tài liệu sprint (FR4.1)? `root` không bao giờ tính (FR4.2)."""
     for index, part in enumerate(rel):
@@ -1786,7 +1795,7 @@ def _under_sprint_evidence(root: Path, rel: tuple, beside: dict) -> bool:
             continue
         parent = root.joinpath(*rel[:index])
         if parent not in beside:
-            beside[parent] = any((parent / name).is_file() for name in SPRINT_DOC_NAMES)
+            beside[parent] = _has_sprint_document(parent)
         if beside[parent]:
             return True
     return False

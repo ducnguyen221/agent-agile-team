@@ -1993,6 +1993,25 @@ def test_skipped_evidence_covers_nested_files_and_every_sprint_document_name(tmp
         assert _evidence_hits(check.check_paths([project], include_evidence=True)), name
 
 
+def test_sprint_document_names_are_matched_case_exact_on_every_os(tmp_path):
+    """Tên tài liệu sprint so đúng hoa/thường: `spec.md` không làm `evidence/` bị bỏ (Windows và Linux như nhau)."""
+    lower = tmp_path / "lower"
+    (lower / "evidence").mkdir(parents=True)
+    write_lf(lower / "spec.md", "# x\n")
+    write_lf(lower / "evidence" / "y.md", EVIDENCE_NOTE)
+    assert _evidence_hits(check.check_paths([lower]))
+    exact = tmp_path / "exact"
+    (exact / "evidence").mkdir(parents=True)
+    write_lf(exact / "SPEC.md", "# x\n")
+    write_lf(exact / "evidence" / "y.md", EVIDENCE_NOTE)
+    assert _evidence_hits(check.check_paths([exact])) == []
+    folder = tmp_path / "folder"
+    (folder / "SPEC.md").mkdir(parents=True)
+    (folder / "evidence").mkdir()
+    write_lf(folder / "evidence" / "y.md", EVIDENCE_NOTE)
+    assert _evidence_hits(check.check_paths([folder]))  # thư mục tên SPEC.md không phải tài liệu sprint
+
+
 def test_include_evidence_flag_scans_evidence_again_through_main(tmp_path, capsys):
     """Cờ `--include-evidence` đi qua `main(argv)` tới `check_paths`: phát hiện trong `evidence/` quay lại."""
     root = _evidence_sprint(tmp_path)
