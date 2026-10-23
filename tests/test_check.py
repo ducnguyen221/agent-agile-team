@@ -30,12 +30,14 @@ def apply_case(root: Path, case: dict) -> None:
         delegate_plan(root)
     elif case.get("base") == "delegated-report":
         delegate_report(root)
-    if "replace" in case:
+    pairs = ([case["replace"]] if "replace" in case else []) + case.get("replaces", [])  # `replaces`: nhiều cặp, thay lần lượt
+    if pairs:
         target = root / case.get("target", case["file"])
-        old, new = case["replace"]
         text = target.read_text(encoding="utf-8")
-        assert old in text, f"ca {case['rule']}: không thấy chuỗi cần thay trong {target.name}"
-        write_lf(target, text.replace(old, new, 1))
+        for old, new in pairs:
+            assert old in text, f"ca {case['rule']}: không thấy chuỗi cần thay trong {target.name}"
+            text = text.replace(old, new, 1)
+        write_lf(target, text)
     for rel, content in case.get("write", {}).items():
         path = root / rel
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -1685,6 +1687,72 @@ def test_delegated_spec_does_not_need_the_record_section(tmp_path):
         "  files: []\n"
         "  revoked_at: null\n"))
     assert codes(check.check_paths([root]).findings) == []
+
+
+def test_gate_1_delegated_on_spec_and_plan_at_once_is_clean(tmp_path):
+    """Bảo vệ hồi quy (DN5 phương án A): Cổng 1 duyệt thay ghi ở cả SPEC (agent-c) lẫn PLAN (agent-d), mỗi tài liệu
+    một người kiểm định khác nhau trong `roles` của chính nó; không phát hiện nào."""
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "SPEC.md", 'gate_1_quote: "duyệt"\n', (
+        'gate_1_quote: "duyệt thay: chọn phương án a — xem mục Bản ghi duyệt thay ở PLAN"\n'
+        "gate_1_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint."\n'
+        "  grant_at: 2026-02-01 08:30 +07\n"
+        "  scope: [gate_1]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-c\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"))
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+# --- Quét thư mục sprint không tính `evidence/` (FR4) ---------------------------------------------------
+
+EVIDENCE_NOTE = """---
+id: evidence-note
+doc: spec
+---
+
+# Ghi chú bằng chứng viết tay
+
+Nội dung thiếu khung của SPEC (không có `title`, `sprint`...).
+"""
+
+
+def _evidence_sprint(tmp_path: Path) -> Path:
+    root = make_sprint(tmp_path)
+    (root / "evidence").mkdir()
+    write_lf(root / "evidence" / "x.md", EVIDENCE_NOTE)
+    return root
+
+
+def _paths_of(report) -> list:
+    return sorted(Path(f.path).as_posix() for f in report.findings)
+
+
+def test_scanning_a_sprint_folder_skips_its_evidence_folder(tmp_path):
+    """FR4.1: thư mục có SPEC/PLAN... không quét `evidence/` cạnh nó (đỏ ở mốc c7e81b0)."""
+    root = _evidence_sprint(tmp_path)
+    inside = [p for p in _paths_of(check.check_paths([root])) if "/evidence/" in p]
+    assert inside == [], inside
+
+
+def test_evidence_file_named_explicitly_is_still_checked(tmp_path):
+    """FR4.2 (bảo vệ hồi quy): chỉ định đích danh file hoặc chính thư mục `evidence/` thì vẫn kiểm."""
+    root = _evidence_sprint(tmp_path)
+    assert check.check_paths([root / "evidence" / "x.md"]).findings
+    assert check.check_paths([root / "evidence"]).findings
+
+
+def test_evidence_folder_beside_no_sprint_document_is_still_scanned(tmp_path):
+    """FR4.1 (bảo vệ hồi quy): `evidence/` không nằm cạnh tài liệu sprint là tài liệu thật, vẫn quét."""
+    root = tmp_path / "project"
+    (root / "evidence").mkdir(parents=True)
+    write_lf(root / "evidence" / "x.md", EVIDENCE_NOTE)
+    assert [p for p in _paths_of(check.check_paths([root])) if "/evidence/" in p]
 
 
 def test_delegation_record_labels_must_sit_in_the_record_section(tmp_path):
