@@ -1,6 +1,6 @@
 ---
 name: eval-harness
-description: Use when a feature that calls the product's own model (a prompt, a tool-using assistant, an agent chain) needs pass/fail criteria, a regression check after a prompt or model change, or someone claims "evals are green" or "pass rate went up". Not for pressure-testing a skill or a rule (that is `writing-skills`) and not for ordinary unit tests (`tdd`).
+description: Use when a feature that calls the product's own model (a prompt, a tool-using assistant, an agent chain) needs pass/fail criteria, a regression check after a prompt or model change, or someone claims "evals are green" or "pass rate went up", or when a reviewer brief, review agent or reviewer model changes and must be re-scored on past misses and known-clean diffs (incident to eval, shadow mode). Not for pressure-testing a skill or a rule (that is `writing-skills`) and not for ordinary unit tests (`tdd`).
 metadata:
   group: meta
   roles: [architect, qa]
@@ -22,6 +22,7 @@ rewrite_before_public: false
 | Việc | Skill |
 |---|---|
 | tính năng của **sản phẩm** gọi mô hình: prompt, trợ lý có công cụ, chuỗi agent — đo chất lượng, hồi quy, so phiên bản mô hình | skill này |
+| brief hay agent reviewer của quy trình — chấm lại trên lỗi đã lọt và diff sạch | skill này, mục 10 |
 | thử xem agent có **làm theo một skill hay luật** (RED không skill → GREEN có skill) | `writing-skills` |
 | hàm, API, giao diện xác định | `tdd`, `e2e-testing` |
 | ghi kết quả vào REPORT, hạn chế khi đóng sprint | `verify-before-done`, `closing-sprint` |
@@ -119,3 +120,30 @@ nhanh (mỗi lần đổi) và nhóm đầy đủ (trước phát hành).
 | "Đáp án cuối đúng, khỏi soi log" | đúng do may; chấm vết công cụ |
 | "Mô hình không ổn định, tăng số lần chạy" | có thể là dữ liệu môi trường; cố định đầu ra công cụ |
 | "Trọng tài mô hình chấm cả dữ liệu cá nhân" | code + người chấm; trọng tài không phải cổng bảo mật |
+
+## 10. Reviewer của quy trình: incident → eval, nhiễu, shadow
+
+Brief, thẻ agent và model của reviewer cũng chạy bằng mô hình: đổi một trong ba thì **chấm lại**, không tin cảm giác.
+
+- **Tập ca:** *ca lỗi* = diff từng làm lọt lỗi, kèm lỗi kỳ vọng; *ca sạch* = diff đã biết không có lỗi Chặn/Phải sửa.
+  Mỗi lần lỗi lọt qua review thêm một ca mới. Người chấm là **mã**: ca lỗi Đạt khi có ≥1 `RF` mức ≥ mức tối thiểu trỏ đúng
+  file và dòng trong ±3, hoặc đúng lớp; ca sạch Đạt khi 0 `RF` Chặn/Phải sửa (Nên sửa và Ghi chú đếm là nhiễu).
+- **Chạy:** k ≥3 mỗi ca, mỗi lượt một reviewer mới. Báo `pass^3` từng ca lỗi và số báo động giả từng ca sạch, so với lần
+  chạy trước trên cùng tập. Lượt rỗng hay hỏng là Chưa chạy.
+- **Lưu:** tập ca sống ở lớp riêng; che tên người, máy, đường home, repo nội bộ bằng chỗ giữ (`<người>`, `<máy>`, `<home>`,
+  `<repo-a>`); repo công khai chỉ giữ khuôn một ca:
+
+```
+id: ie-1
+loai: loi | sach
+nguon: <sprint + mã phát hiện hay bài học>
+base: <sha gốc>
+head: <sha lỗi>
+ban_va: <sha | dựng lại>
+loi_ky_vong: <file:dòng> · <lớp> · <mức tối thiểu>
+che: <chỗ giữ đã dùng>
+```
+
+- **Shadow:** reviewer mới chạy cạnh reviewer đang dùng; `RF` của nó mang nhãn `shadow`, không vào vòng sửa, không chặn;
+  Analyst ghi so sánh (trùng · thêm đúng · báo động giả). Thoát shadow khi cả ba: trên tập ca, `pass^3` ca lỗi không thấp
+  hơn và báo động giả không nhiều hơn reviewer đang dùng · đã chạy shadow ≥2 sprint · người dùng duyệt bằng lời (một `DN`).
