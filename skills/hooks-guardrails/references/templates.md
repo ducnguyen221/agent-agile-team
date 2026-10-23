@@ -31,7 +31,7 @@ Nơi đặt: `.claude/settings.json` (chung cho repo) hoặc `.claude/settings.l
 Cách gỡ: xoá phần tử `PreToolUse` này khỏi tệp (hoặc xoá tệp `.claude/settings.local.json` nếu chỉ chứa khối này). Matcher liệt kê
 tên đúng; đừng viết `Edit.*` vì nó khớp cả `NotebookEdit` và tên khác có chứa `Edit`.
 
-`"onFailure": "block"` (khoá của tài liệu Claude Code, từ bản 2.1.295) làm hook lỗi hoặc hết giờ cũng chặn; thiếu khoá này, hook hết giờ không chặn và tool vẫn chạy. Đừng `--allow-name` đúng một tên trong danh sách cấm (vd `.env`): allow bỏ luật tên nên mở toang tên đó; chỉ allow tên phụ như `.env.local`.
+`"onFailure": "block"` (khoá của tài liệu Claude Code, từ bản 2.1.295) làm hook lỗi hoặc hết giờ cũng chặn; thiếu khoá này, hook hết giờ không chặn và tool vẫn chạy. Đừng `--allow-name` đúng một tên trong danh sách cấm (vd `.env`): allow bỏ luật tên nên mở toang tên đó; chỉ allow tên phụ như `.env.local`. Allow chỉ khớp tên nguyên văn (không phân biệt hoa thường): `.env.example ` (dấu cách cuối) hay `.env.example:x` vẫn bị chặn. Hook chặn kèm `bad hook input (TypeError)` mà payload không hỏng là bug của script: đặt biến môi trường `PROTECT_PATHS_DEBUG=1` để in traceback ra stderr (vẫn chặn như cũ).
 
 ## 2. Chặn path — Codex
 

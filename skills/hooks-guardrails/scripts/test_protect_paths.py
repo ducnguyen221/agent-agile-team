@@ -191,6 +191,36 @@ def test_any_exception_fails_closed(monkeypatch, error):
     assert json.loads(out)["decision"] == "deny"
 
 
+@pytest.mark.parametrize("fmt", ["claude", "codex", "antigravity"])
+def test_debug_env_prints_traceback_but_still_blocks(monkeypatch, fmt):
+    def boom(payload):
+        raise TypeError("loi lap trinh")
+
+    monkeypatch.setattr(protect_paths, "extract_paths", boom)
+    monkeypatch.delenv("PROTECT_PATHS_DEBUG", raising=False)
+    rc, out, err = run(fmt, write("src/app.py"))
+    assert "Traceback" not in err  # mặc định: không đổi hành vi
+    assert "blocked: bad hook input (TypeError)" in out + err
+    monkeypatch.setenv("PROTECT_PATHS_DEBUG", "1")
+    rc, out, err = run(fmt, write("src/app.py"))
+    assert "Traceback" in err
+    assert "TypeError: loi lap trinh" in err
+    assert "blocked: bad hook input (TypeError)" in out + err
+    assert rc == (0 if fmt == "antigravity" else 2)
+    if fmt == "antigravity":
+        assert json.loads(out)["decision"] == "deny"
+
+
+@pytest.mark.parametrize("value", ["", "0"])
+def test_debug_env_off_values(monkeypatch, value):
+    def boom(payload):
+        raise TypeError("x")
+
+    monkeypatch.setattr(protect_paths, "extract_paths", boom)
+    monkeypatch.setenv("PROTECT_PATHS_DEBUG", value)
+    assert "Traceback" not in run("claude", write("src/app.py"))[2]
+
+
 @pytest.mark.parametrize("fmt", ["claude", "antigravity"])
 def test_script_deep_json_never_traceback(fmt):
     """Chạy script thật như harness gọi: JSON lồng sâu không bao giờ thoát 1 hay in traceback."""
@@ -238,8 +268,27 @@ def test_windows_name_normalisation_blocked(path, rule):
     assert rule in err
 
 
-def test_windows_normalisation_keeps_allow_and_posix_colon():
-    assert run("claude", write("C:/repo/.env.example "))[0] == 0  # sau chuẩn hoá là .env.example: được phép
+@pytest.mark.parametrize("name", [".env.example ", ".env.example:x", ".env.example.", ".env.example::$DATA",
+                                  ".env.example. ."])
+def test_allow_matches_exact_name_only(name):
+    """Allow chỉ áp cho tên nguyên văn: biến thể chỉ khớp sau chuẩn hoá Win32 vẫn bị luật `.env.*` chặn (POSIX: file khác)."""
+    rc, out, err = run("claude", write("C:/repo/" + name))
+    assert rc == 2
+    assert "name:.env.*" in err
+
+
+@pytest.mark.parametrize("name", [".env.example", ".ENV.EXAMPLE", ".Env.Example"])
+def test_allow_exact_name_passes_any_case(name):
+    assert run("claude", write("C:/repo/" + name))[0] == 0
+
+
+def test_custom_allow_name_matches_exact_name_only():
+    assert run("claude", write("C:/repo/.env.local"), "--allow-name", ".env.local")[0] == 0
+    for name in (".env.local ", ".env.local:x", ".env.local."):
+        assert run("claude", write("C:/repo/" + name), "--allow-name", ".env.local")[0] == 2
+
+
+def test_windows_normalisation_keeps_posix_colon():
     assert run("claude", write("C:/repo/a:b.pem"))[0] == 2  # POSIX: dấu ':' là ký tự thường, tên nguyên văn vẫn khớp *.pem
     assert run("claude", write("C:/repo/a:b.txt"))[0] == 0
     assert run("claude", write("C:/repo/src/app.py"))[0] == 0
@@ -267,6 +316,44 @@ def test_glob_with_many_segments_is_capped_and_fast():
     rc, out, err = run("claude", write("docs/locked/" + "a/" * 1000 + "x.txt"), "--deny-glob", "docs/locked/*")
     assert rc == 2
     assert time.perf_counter() - started < 1.0
+
+
+def test_absolute_glob_with_leading_slash_matches_absolute_path():
+    """Glob tuyệt đối có `/` đầu chỉ khớp được qua so cả đường (đuôi dựng từ các đoạn mất `/` đầu)."""
+    glob = ("--deny-glob", "/abs/docs/locked/*")
+    rc, out, err = run("claude", write("/abs/docs/locked/x.txt"), *glob)
+    assert rc == 2
+    assert "glob:/abs/docs/locked/*" in err
+    assert run("claude", write("/abs/docs/open/x.txt"), *glob)[0] == 0
+    rc, out, err = run("claude", write("C:\\repo\\docs\\locked\\x.txt"), "--deny-glob", "C:/repo/docs/locked/*")
+    assert rc == 2
+
+
+@pytest.mark.parametrize("argv, fmt", [
+    (["--format", "claude"], "claude"),
+    (["--format=claude"], "claude"),
+    (["--format", "codex"], "claude"),
+    (["--format=codex"], "claude"),
+    (["--format", "antigravity"], "antigravity"),
+    (["--format=antigravity"], "antigravity"),
+    (["--fo=antigravity"], "antigravity"),  # argparse chấp nhận viết tắt
+    (["--f", "antigravity"], "antigravity"),
+    (["--", "antigravity"], "claude"),
+    (["--deny-glob", "antigravity/*", "--format", "claude"], "claude"),
+    (["--deny-glob=antigravity/*", "--format=codex"], "claude"),
+    (["--allow-name", "antigravity", "--format=antigravity"], "antigravity"),
+    ([], "claude"),
+])
+def test_last_resort_picks_format_from_argv(capsys, argv, fmt):
+    code = protect_paths._last_resort(argv)
+    captured = capsys.readouterr()
+    if fmt == "antigravity":
+        assert code == 0
+        assert json.loads(captured.out)["decision"] == "deny"
+    else:
+        assert code == 2
+        assert "blocked: bad hook input" in captured.err
+        assert captured.out == ""
 
 
 def test_last_resort_formats(capsys):
@@ -301,6 +388,35 @@ def test_main_block_wires_last_resort(monkeypatch):
     with pytest.raises(SystemExit) as exit_info:
         runpy.run_path(script, run_name="__main__")
     assert exit_info.value.code == 2
+
+
+@pytest.mark.parametrize("flags, code, stream", [
+    (["--format", "claude"], 2, "err"),
+    (["--format", "codex"], 2, "err"),
+    (["--format", "antigravity"], 0, "out"),
+    (["--format=antigravity"], 0, "out"),
+])
+def test_main_block_last_resort_per_harness(monkeypatch, flags, code, stream):
+    """Khối `__main__` thật cho từng harness: ngắt giữa chừng vẫn ra đúng định dạng chặn (antigravity: JSON `deny`, thoát 0)."""
+    script = str(Path(protect_paths.__file__))
+
+    def interrupted(self, *args, **kwargs):
+        raise KeyboardInterrupt
+
+    out, err = io.StringIO(), io.StringIO()
+    monkeypatch.setattr(sys, "argv", [script, *flags])
+    monkeypatch.setattr(argparse.ArgumentParser, "parse_args", interrupted)
+    monkeypatch.setattr(sys, "stdout", out)
+    monkeypatch.setattr(sys, "stderr", err)
+    with pytest.raises(SystemExit) as exit_info:
+        runpy.run_path(script, run_name="__main__")
+    assert exit_info.value.code == code
+    if stream == "out":
+        assert json.loads(out.getvalue())["decision"] == "deny"
+        assert err.getvalue() == ""
+    else:
+        assert "blocked: bad hook input" in err.getvalue()
+        assert out.getvalue() == ""
 
 
 def test_main_block_normal_run(monkeypatch):

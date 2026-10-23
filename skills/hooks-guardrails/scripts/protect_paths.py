@@ -5,6 +5,8 @@ Khớp: claude/codex in `blocked: <đường> (<luật>)` ở stderr rồi thoá
 Không khớp: claude/codex thoát 0, không in; antigravity in `{}`. Đóng khi lỗi: JSON hỏng hay MỌI ngoại lệ khác
 (JSON lồng quá sâu, hết bộ nhớ…) đều chặn đúng định dạng của harness, không bao giờ thoát 1 kèm traceback.
 Khoá đường đọc từ payload: file_path, path, notebook_path (Claude Code), TargetFile (Antigravity); dòng vá của Codex.
+Gỡ lỗi: đặt biến môi trường PROTECT_PATHS_DEBUG=1 để in traceback ra stderr khi gặp ngoại lệ ngoài dự kiến (vẫn chặn như cũ);
+không đặt thì "bad hook input (TypeError)" có thể là bug của script chứ không phải payload hỏng.
 """
 
 from __future__ import annotations
@@ -12,7 +14,9 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import json
+import os
 import sys
+import traceback
 from typing import TextIO
 
 DEFAULT_DENY_NAMES = (".env", ".env.*", "*.pem", "*.key", "id_rsa", "id_rsa.*")
@@ -84,13 +88,15 @@ def match_rule(path: str, deny_globs: tuple[str, ...] = (),
     """Tên luật chặn đường này (`name:<mẫu>`, `segment:<tên>`, `glob:<mẫu>`) hoặc None.
 
     Chỉ so chuỗi, không chạm hệ thống file. Tên trong `allow_names` bỏ qua luật tên, không bỏ qua luật đoạn đường và glob.
+    Allow chỉ khớp tên NGUYÊN VĂN (không phân biệt hoa thường): `.env.example ` hay `.env.example:x` không được allow dù
+    Win32 ghi chúng thành `.env.example` (trên POSIX đó là file khác, vẫn bị `.env.*` chặn).
     Có `deny_globs` mà đường quá 1024 đoạn thì chặn (`limit:`), để việc so đuôi không thành bậc hai.
     Tên và đoạn đường được so cả ở dạng nguyên văn lẫn dạng Win32 (bỏ dấu cách/dấu chấm cuối, bỏ luồng `::$DATA`)."""
     path = _norm(path)
     parts = [p for p in path.split("/") if p and p != "."]
     name = parts[-1] if parts else ""
     names = _variants(name) if name else ()
-    if names and not any(_fits(n, a) for n in names for a in allow_names):
+    if names and not any(_fits(name, a) for a in allow_names):
         for pattern in DEFAULT_DENY_NAMES:
             if any(_fits(n, pattern) for n in names):
                 return "name:" + pattern
@@ -141,12 +147,25 @@ def main(argv: list[str] | None = None, stdin: TextIO = sys.stdin, stdout: TextI
     try:
         return _check(args, stdin, stdout, stderr)
     except Exception as exc:  # RecursionError, MemoryError, lỗi ghi stdout…: đóng khi lỗi, không thoát 1
+        if os.environ.get("PROTECT_PATHS_DEBUG", "") not in ("", "0"):  # bug thật khỏi lẫn với payload hỏng
+            traceback.print_exc(file=stderr)
         return _deny(args.format, "blocked: {} ({})".format(BAD_INPUT, type(exc).__name__), stdout, stderr)
+
+
+def _format_arg(argv: list[str]) -> str:
+    """Giá trị của `--format` (dạng `--format X` hay `--format=X`, argparse cho viết tắt `--f`); không có thì rỗng.
+
+    Không dò chuỗi `antigravity` ở chỗ khác (vd giá trị `--deny-glob`) và không dựa vào argparse (nó là thứ có thể đã văng)."""
+    for index, arg in enumerate(argv):
+        flag, equals, value = arg.partition("=")
+        if len(flag) > 2 and "--format".startswith(flag):
+            return value if equals else (argv[index + 1] if index + 1 < len(argv) else "")
+    return ""
 
 
 def _last_resort(argv: list[str]) -> int:
     """Lưới cuối khi chính `main` văng (kể cả lúc từ chối): vẫn ra định dạng chặn của harness."""
-    fmt = "antigravity" if "antigravity" in argv else "claude"
+    fmt = "antigravity" if _format_arg(argv) == "antigravity" else "claude"
     try:
         return _deny(fmt, "blocked: " + BAD_INPUT, sys.stdout, sys.stderr)
     except BaseException:  # noqa: BLE001 — stream hỏng: chỉ còn mã thoát
