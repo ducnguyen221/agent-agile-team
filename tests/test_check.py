@@ -72,7 +72,7 @@ def delegate_plan(root: Path) -> None:
         "  grant_at: 2026-02-01 08:30 +07\n"
         "  scope: [gate_1]\n"
         "  expires: sprint_end\n"
-        "  by: agent-r\n"
+        "  by: agent-d\n"
         "  tier: T1\n"
         "  files: []\n"
         "  revoked_at: null\n"), DELEGATION_RECORD)
@@ -90,7 +90,7 @@ def delegate_report(root: Path) -> None:
         "  grant_at: 2026-02-02 08:00 +07\n"
         "  scope: [gate_2]\n"
         "  expires: sprint_end\n"
-        "  by: agent-r\n"
+        "  by: agent-d\n"
         "  tier: T1\n"
         "  files: []\n"
         "  revoked_at: null\n"), DELEGATION_RECORD)
@@ -1680,7 +1680,7 @@ def test_delegated_spec_does_not_need_the_record_section(tmp_path):
         "  grant_at: 2026-02-01 08:30 +07\n"
         "  scope: [gate_1]\n"
         "  expires: sprint_end\n"
-        "  by: agent-r\n"
+        "  by: agent-c\n"
         "  tier: T1\n"
         "  files: []\n"
         "  revoked_at: null\n"))
