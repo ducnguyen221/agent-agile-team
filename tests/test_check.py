@@ -1690,8 +1690,9 @@ def test_delegated_spec_does_not_need_the_record_section(tmp_path):
 
 
 def test_gate_1_delegated_on_spec_and_plan_at_once_is_clean(tmp_path):
-    """Bảo vệ hồi quy (DN5 phương án A): Cổng 1 duyệt thay ghi ở cả SPEC (agent-c) lẫn PLAN (agent-d), mỗi tài liệu
-    một người kiểm định khác nhau trong `roles` của chính nó; không phát hiện nào."""
+    """Bảo vệ hồi quy (DN5 phương án A): một người kiểm định T1 (agent-d) ghi Cổng 1 duyệt thay ở cả SPEC lẫn PLAN.
+    agent-d có trong `roles` của PLAN nhưng KHÔNG có trong `roles` của SPEC (agent-a, agent-c); SPEC không đòi `by`
+    khớp `roles`, nên không phát hiện nào. Nếu sau này FR2 áp nhầm cho SPEC thì test này đỏ."""
     root = make_sprint(tmp_path)
     delegate_plan(root)
     _rewrite(root / "SPEC.md", 'gate_1_quote: "duyệt"\n', (
@@ -1702,11 +1703,20 @@ def test_gate_1_delegated_on_spec_and_plan_at_once_is_clean(tmp_path):
         "  grant_at: 2026-02-01 08:30 +07\n"
         "  scope: [gate_1]\n"
         "  expires: sprint_end\n"
-        "  by: agent-c\n"
+        "  by: agent-d\n"
         "  tier: T1\n"
         "  files: []\n"
         "  revoked_at: null\n"))
+    assert ", agent-d]" not in (root / "SPEC.md").read_text(encoding="utf-8")  # agent-d không giữ vai nào trong roles của SPEC
     assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_delegation_by_executor_reports_exactly_self_review(tmp_path):
+    """FR2.2 (phán quyết điều phối): người duyệt thay trùng nhãn vai thực thi chỉ bị `self-review`, không báo kép."""
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "  by: agent-d\n", "  by: agent-b\n")
+    assert codes(check.check_paths([root]).findings) == ["self-review"]
 
 
 # --- Quét thư mục sprint không tính `evidence/` (FR4) ---------------------------------------------------

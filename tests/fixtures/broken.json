@@ -134,8 +134,8 @@
      "replace": ["gate_1_quote: \"duyệt\"\n", "gate_1_quote: \"duyệt\"\ndelegation:\n  grant: \"Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint.\"\n  scope: [gate_1]\n"]},
     {"name": "duyệt thay mà thiếu risk_tags", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["risk_tags: []\n", ""]},
     {"name": "duyệt thay mà risk_tags là chuỗi đơn", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["risk_tags: []", "risk_tags: secret"]},
+    {"name": "duyệt thay mà risk_tags là danh sách lẫn số", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["risk_tags: []", "risk_tags: [rules, 1]"]},
     {"name": "người duyệt thay không có trong roles", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["  by: agent-d\n", "  by: agent-x\n"]},
-    {"name": "người duyệt thay chỉ giữ vai thực thi", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["  tech-reviewer: [T1, agent-d]", "  researcher: [T1, agent-d]"]},
     {"name": "người duyệt thay giữ vai kiểm định nhưng không phải T1", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["  tech-reviewer: [T1, agent-d]", "  tech-reviewer: [T2, agent-d]"]},
     {"name": "cổng còn pending mà delegation có khoá lạ", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replaces": [["status: approved", "status: draft"], ["gate_1: approved", "gate_1: pending"], ["  files: []\n", "  files: []\n  note: x\n"]]}
   ]
