@@ -1343,6 +1343,17 @@ class Engine:
         if held:
             self.add(path, doc.key_line("delegation.by"), "self-review",
                      f"người duyệt thay '{by}' cũng giữ vai thực thi ({', '.join(held)}) của cùng tài liệu")
+        elif doc.kind in ("plan", "report", "sprint"):  # SPEC không đòi: Cổng 1 duyệt thay ghi ở cả SPEC lẫn PLAN (DN5)
+            if not isinstance(roles, dict):
+                return bad("roles" if "roles" in data else mode_key, "tài liệu duyệt thay phải có khối roles để đối chiếu delegation.by")
+            mine = {r: v for r, v in roles.items() if isinstance(v, list) and len(v) >= 2 and v[1] == by}
+            if not mine:
+                return bad("delegation.by", f"người duyệt thay '{by}' không giữ vai nào trong roles của tài liệu")
+            tiers = [v[0] for r, v in mine.items() if r in VERIFIERS or re.fullmatch(r"[a-z]+-specialist", r)]
+            if "T1" not in tiers:
+                if not tiers:
+                    return bad("delegation.by", f"người duyệt thay '{by}' không giữ vai kiểm định nào trong roles của tài liệu")
+                return bad("delegation.by", f"người duyệt thay '{by}' giữ vai kiểm định nhưng tier là {', '.join(map(str, tiers))}, phải là T1")
         files = block.get("files", [])
         if not isinstance(files, list):
             return bad("delegation.files", f"delegation.files: {files!r} phải là danh sách")

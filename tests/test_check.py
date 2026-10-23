@@ -1719,6 +1719,102 @@ def test_delegation_by_executor_reports_exactly_self_review(tmp_path):
     assert codes(check.check_paths([root]).findings) == ["self-review"]
 
 
+PLAN_ROLES = "roles:\n  architect: [T1, agent-b]\n  tech-reviewer: [T1, agent-d]\n"
+
+
+def _delegated_plan_roles(tmp_path: Path, roles_block: str) -> Path:
+    """PLAN duyệt thay (`by: agent-d`) với khối `roles` thay bằng `roles_block`."""
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", PLAN_ROLES, roles_block)
+    return root
+
+
+def _delegation_hits(root: Path) -> list:
+    return [f for f in check.check_paths([root]).findings if f.rule == "gate-delegation-invalid"]
+
+
+@pytest.mark.parametrize("roles_block", ["", "roles: agent-d\n"], ids=["roles vắng", "roles không phải khối"])
+def test_delegated_plan_without_a_roles_block_is_invalid(tmp_path, roles_block):
+    """FR2 (tài liệu duyệt thay thiếu `roles`): không có khối để đối chiếu thì báo, không bỏ qua im lặng."""
+    hits = _delegation_hits(_delegated_plan_roles(tmp_path, roles_block))
+    assert len(hits) == 1 and "roles" in hits[0].message, [f.render() for f in hits]
+
+
+def test_delegation_by_holding_verifier_roles_of_two_tiers_is_clean(tmp_path):
+    """FR2.3: `by` giữ hai vai kiểm định khác tier (một T1, một T2): đủ vì có MỘT vai T1."""
+    root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  tech-reviewer: [T2, agent-d]\n"
+                                           "  business-reviewer: [T1, agent-d]\n")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_delegation_by_holding_a_specialist_t1_role_is_clean(tmp_path):
+    """FR2.3: vai `*-specialist` tier T1 là vai kiểm định hợp lệ cho người duyệt thay."""
+    root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  security-specialist: [T1, agent-d]\n")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+@pytest.mark.parametrize("role", ["tech-reviewer", "security-specialist"])
+def test_delegation_by_holding_only_a_t3_verifier_role_is_invalid(tmp_path, role):
+    """FR2.3: vai kiểm định nhưng tier T3 (không có vai T1 nào) thì báo, nêu tier thật."""
+    root = _delegated_plan_roles(tmp_path, f"roles:\n  architect: [T1, agent-b]\n  {role}: [T3, agent-d]\n")
+    hits = _delegation_hits(root)
+    assert len(hits) == 1 and "tier là T3" in hits[0].message, [f.render() for f in hits]
+
+
+
+def test_delegation_by_holding_no_verifier_role_is_invalid(tmp_path):
+    """FR2.1/FR2.3: `by` có trong roles nhưng chỉ ở vai không phải vai kiểm định (nhãn vai lạ) thì báo, không rơi qua."""
+    root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  mentor: [T1, agent-d]\n")
+    hits = _delegation_hits(root)
+    assert len(hits) == 1 and "không giữ vai kiểm định nào" in hits[0].message, [f.render() for f in hits]
+
+
+def test_delegation_by_missing_from_roles_names_the_label(tmp_path):
+    """FR2.1 trên PLAN thật: nhãn không có trong `roles` bị báo đúng một lần, nêu nhãn."""
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "  by: agent-d\n", "  by: agent-z\n")
+    hits = _delegation_hits(root)
+    assert len(hits) == 1 and "agent-z" in hits[0].message and "không giữ vai nào" in hits[0].message
+
+
+def test_delegated_report_checks_by_against_roles(tmp_path):
+    """REPORT cũng bị đối chiếu: `by` hợp lệ (agent-d, T1) sạch; đổi nhãn lạ thì báo."""
+    root = make_sprint(tmp_path)
+    delegate_report(root)
+    assert codes(check.check_paths([root]).findings) == []
+    _rewrite(root / "REPORT.md", "  by: agent-d\n", "  by: agent-z\n")
+    assert len(_delegation_hits(root)) == 1
+
+
+def _delegated_sprint(tmp_path: Path, by: str) -> Path:
+    """`SPRINT.md` hai phần ở Cổng 1 duyệt thay (`delegation.by` = `by`), roles: agent-a, agent-e, agent-d."""
+    text = two_part_sprint().replace('gate_1_quote: "sửa chữ ở màn hình tra đơn cho đúng chính tả"\n', (
+        'gate_1_quote: "duyệt thay: sửa chữ — xem mục Bản ghi duyệt thay"\n'
+        "gate_1_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 1 của SPR-02 tới hết sprint."\n'
+        "  grant_at: 2026-01-20 08:30 +07\n"
+        "  scope: [gate_1]\n"
+        "  expires: sprint_end\n"
+        f"  by: {by}\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"), 1)
+    assert "gate_1_mode: delegated" in text
+    put(tmp_path, "SPRINT.md", text + DELEGATION_RECORD)
+    return tmp_path
+
+
+def test_delegated_sprint_file_accepts_a_t1_verifier_and_rejects_a_stranger(tmp_path):
+    """`SPRINT.md` (kind sprint) cũng chịu FR2: tech-reviewer T1 (agent-d) sạch, nhãn không có trong roles bị báo."""
+    root = _delegated_sprint(tmp_path, "agent-d")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+    _rewrite(root / "SPRINT.md", "  by: agent-d\n", "  by: agent-z\n")
+    assert len(_delegation_hits(root)) == 1
+
+
 # --- Quét thư mục sprint không tính `evidence/` (FR4) ---------------------------------------------------
 
 EVIDENCE_NOTE = """---

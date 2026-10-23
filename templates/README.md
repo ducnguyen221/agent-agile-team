@@ -90,7 +90,7 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
 | `roles` | tài liệu sprint | khối lồng; khoá vai → `[tier, agent]` hoặc `[tier, agent, "note"]` (mục 3.1) |
 | `gate_1` · `gate_1_at` · `gate_1_quote` | SPEC, PLAN, SPRINT | `pending` · `approved` · `changes_requested`; thời điểm và câu duyệt nguyên văn, chưa có thì `null` |
 | `gate_1_mode` · `gate_2_mode` | SPEC, PLAN, SPRINT (Cổng 1) · REPORT, SPRINT (Cổng 2) | `human` (mặc định khi vắng) · `delegated` (T1 duyệt thay theo lời cấp, [method/process.md](../method/process.md) mục 3); giá trị khác → `frontmatter-value`. `delegated` buộc `gate_N_quote` bắt đầu `duyệt thay:` và `risk_tags` khai hợp lệ |
-| `delegation` | nơi có `gate_N_mode: delegated` | khối lồng một cấp, chỉ tám khoá sau — khoá lạ cũng báo: `grant` (lời cấp nguyên văn) · `grant_at` · `scope` (`[gate_1]`, `[gate_2]` hoặc cả hai) · `expires` (`sprint_end` hoặc `YYYY-MM-DD`) · `by` (nhãn agent T1) · `tier` (`T1`) · `files` (file luật nêu đích danh, `[]` nếu không) · `revoked_at` (`null` hoặc thời điểm thu hồi). Thời điểm dạng `YYYY-MM-DD` hoặc `YYYY-MM-DD HH:MM +TZ` |
+| `delegation` | nơi có `gate_N_mode: delegated` | khối lồng một cấp, chỉ tám khoá sau — khoá lạ cũng báo: `grant` (lời cấp nguyên văn) · `grant_at` · `scope` (`[gate_1]`, `[gate_2]` hoặc cả hai) · `expires` (`sprint_end` hoặc `YYYY-MM-DD`) · `by` (nhãn agent T1 giữ vai kiểm định T1 trong `roles` của chính PLAN, REPORT hoặc `SPRINT.md`; SPEC không đòi) · `tier` (`T1`) · `files` (file luật nêu đích danh, `[]` nếu không) · `revoked_at` (`null` hoặc thời điểm thu hồi). Thời điểm dạng `YYYY-MM-DD` hoặc `YYYY-MM-DD HH:MM +TZ` |
 | `verdict` | REPORT, SPRINT | kết luận vòng kiểm định cuối: `pending` · `pass` (Đạt) · `conditional_pass` (Đạt có điều kiện) · `fail` (Không đạt) |
 | `gate_2` · `gate_2_at` · `gate_2_quote` | REPORT, SPRINT | kết luận của chủ sản phẩm, cùng bộ giá trị với `verdict`; thời điểm, câu nguyên văn |
 | `review_round` | PROGRESS, REPORT, SPRINT | số nguyên ≥ 0 — vòng kiểm định hiện tại |
@@ -119,6 +119,8 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
 - Luật `check` dựa vào: trong một file, không nhãn `agent` nào (trừ `pending`) vừa giữ vai thực thi vừa giữ
   vai kiểm định (mức Chặn). Một agent được giữ nhiều vai thực thi.
 - Người duyệt thay (`delegation.by`) cũng không được trùng nhãn một vai thực thi trong `roles` của cùng file: mức Chặn, cùng luật `self-review`.
+  Ở tài liệu có bản ghi duyệt thay (PLAN, REPORT, `SPRINT.md`) `by` còn phải giữ ít nhất một vai kiểm định tier T1 trong `roles` của chính tài liệu
+  (nhiều vai kiểm định khác tier: đủ một vai T1); `roles` vắng, nhãn lạ hoặc chỉ vai tier khác T1 → Phải sửa `gate-delegation-invalid`. SPEC không đòi.
 - **Độc lập kiểm định:** file có `VR` (REPORT, SPRINT) thì nhãn `qa` phải khác nhãn `implementer` và
   `architect`. Trùng nhãn → Phải sửa, trừ khi việc cỡ **rất nhỏ** và dòng `VR` ghi rõ "tự kiểm, chưa độc lập"; khi đó
   `verdict` tối đa `conditional_pass`. Cỡ nhỏ trở lên không có tự kiểm: `qa` trùng nhãn người làm vẫn là Phải sửa dù
