@@ -1949,6 +1949,64 @@ def test_evidence_folder_beside_no_sprint_document_is_still_scanned(tmp_path):
     assert [p for p in _paths_of(check.check_paths([root])) if "/evidence/" in p]
 
 
+def _evidence_hits(report) -> list:
+    return sorted({p for p in _paths_of(report) if "/evidence/" in p})  # mỗi file một lần, không đếm số phát hiện
+
+
+def test_skipped_evidence_covers_nested_files_and_every_sprint_document_name(tmp_path):
+    """FR4.1: bỏ cả file lồng sâu dưới `evidence/`; mỗi tên tài liệu sprint đủ làm `evidence/` bị bỏ."""
+    root = _evidence_sprint(tmp_path)
+    (root / "evidence" / "tk1" / "deep").mkdir(parents=True)
+    write_lf(root / "evidence" / "tk1" / "deep" / "y.md", EVIDENCE_NOTE)
+    assert _evidence_hits(check.check_paths([root])) == []
+    assert len(_evidence_hits(check.check_paths([root], include_evidence=True))) == 2
+    for name in ("SPEC.md", "PLAN.md", "PROGRESS.md", "REPORT.md", "SPRINT.md"):
+        project = tmp_path / ("p-" + name)
+        (project / "evidence").mkdir(parents=True)
+        write_lf(project / name, "# x\n")
+        write_lf(project / "evidence" / "x.md", EVIDENCE_NOTE)
+        assert _evidence_hits(check.check_paths([project])) == [], name
+        assert _evidence_hits(check.check_paths([project], include_evidence=True)), name
+
+
+def test_include_evidence_flag_scans_evidence_again_through_main(tmp_path, capsys):
+    """Cờ `--include-evidence` đi qua `main(argv)` tới `check_paths`: phát hiện trong `evidence/` quay lại."""
+    root = _evidence_sprint(tmp_path)
+    plain = check.main([str(root)])
+    plain_out = capsys.readouterr().out
+    flagged = check.main([str(root), "--include-evidence"])
+    flagged_out = capsys.readouterr().out
+    assert "/evidence/" not in plain_out and plain == 0
+    assert "/evidence/x.md" in flagged_out and flagged == 1
+
+    def count(out):
+        return int(out.splitlines()[-1].split("file .md, ")[1].split(" phát hiện")[0])
+
+    assert count(flagged_out) > count(plain_out)
+
+
+def test_evidence_agile_json_is_skipped_when_scanning_a_sprint_folder(tmp_path):
+    """`.agile.json` dưới `evidence/` cạnh tài liệu sprint bị bỏ như `*.md`; `--include-evidence` quét lại."""
+    root = _evidence_sprint(tmp_path)
+    (root / "evidence" / ".agile.json").write_text("{bad", encoding="utf-8")
+    assert "config-syntax" not in rules_of(check.check_paths([root]))
+    assert "config-syntax" in rules_of(check.check_paths([root], include_evidence=True))
+    assert "config-syntax" in rules_of(check.check_paths([root / "evidence"]))  # evidence/ làm gốc thì vẫn kiểm
+
+
+def test_valid_sprint_folder_without_evidence_is_unchanged(tmp_path):
+    """Thư mục sprint hợp lệ không có `evidence/`: cờ không đổi kết quả."""
+    root = make_sprint(tmp_path)
+    assert check.check_paths([root]).findings == []
+    assert check.check_paths([root], include_evidence=True).findings == []
+
+
+def test_include_evidence_is_not_accepted_with_self_mode(capsys):
+    with pytest.raises(SystemExit) as err:
+        check.main(["--self", "--include-evidence"])
+    assert err.value.code == 2
+
+
 def test_delegation_record_labels_must_sit_in_the_record_section(tmp_path):
     """Nhãn nằm ở mục khác phía sau không thay cho nhãn trong mục `Bản ghi duyệt thay`."""
     root = make_sprint(tmp_path)

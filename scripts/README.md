@@ -18,7 +18,7 @@ python scripts/init.py <gốc-dự-án> --apply             # ghi .agile.json + 
 python scripts/init.py <gốc-dự-án> --apply --sprint <slug> (--title "<mục tiêu>" | --title-file <file>) [--tiny]
        [--size tiny|small|medium|large] [--risk normal|high] [--risk-tags a,b] [--request RQ-NNN] [--feature FS-NNN]
        [--date YYYY-MM-DD]
-python scripts/check.py <file.md|.agile.json|thư-mục> [...]   # thư mục: quét đệ quy *.md và mọi .agile.json
+python scripts/check.py <file.md|.agile.json|thư-mục> [...] [--include-evidence]   # thư mục: quét đệ quy *.md và mọi .agile.json
 python scripts/check.py <thư-mục-pilot> --routing-manifest <manifest.json>
 python scripts/check.py --self [--root <repo>]
 python scripts/index.py <gốc-dự-án> [--check]          # --check: không ghi, thoát 1 nếu sổ chưa cập nhật
@@ -31,6 +31,14 @@ chạy `python -X utf8 scripts/init.py …` từ PowerShell. `init` cảnh báo 
 U+FFFD hoặc `?` kẹp giữa hai chữ (`c?ch`); câu hỏi hợp lệ như "Có nên cache?" không bị cảnh báo.
 
 Dòng sprint đầu tiên `init` ghi vào SPRINTS thay luôn comment dòng ví dụ của mẫu (mẫu dặn xoá khi ghi dòng thật).
+
+**Quét thư mục không tính `evidence/`.** Khi `check.py` quét một **thư mục**, nó bỏ qua thư mục con tên `evidence`
+**nằm cạnh tài liệu sprint** — tức thư mục cha trực tiếp của `evidence/` có `SPEC.md`, `PLAN.md`, `PROGRESS.md`,
+`REPORT.md` hoặc `SPRINT.md`. Hồ sơ kèm (log, dossier, ghi chú) ở đó không phải tài liệu sprint, nên số phát hiện
+của một thư mục sprint bằng tổng bốn tài liệu của nó. Quy tắc áp cho cả `*.md` và `.agile.json` dưới `evidence/`.
+Thư mục `evidence` ở chỗ khác (cha không có tài liệu sprint) là tài liệu thật của dự án và vẫn được quét. Cờ
+`--include-evidence` quét lại cả `evidence/` cạnh tài liệu sprint (hành vi cũ). Đường file truyền đích danh, hoặc
+chính thư mục `evidence/` truyền làm gốc quét, luôn được kiểm, có cờ hay không. `--self` không đổi và không nhận cờ này.
 
 ## Mã thoát
 

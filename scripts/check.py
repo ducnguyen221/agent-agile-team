@@ -184,6 +184,9 @@ DROPPED = re.compile(r"[(—–:-]\s*bỏ\s*(?:\)|$)")  # trạng thái `bỏ` c
 AGENTS_MAX_LINES = 120
 AGENTS_MAX_BYTES = 10 * 1024
 SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache", ".tmp"}
+# Thư mục `evidence` cạnh tài liệu sprint là hồ sơ kèm, không phải tài liệu sprint: quét thư mục thì bỏ qua (FR4.1).
+EVIDENCE_DIR = "evidence"
+SPRINT_DOC_NAMES = ("SPEC.md", "PLAN.md", "PROGRESS.md", "REPORT.md", "SPRINT.md")
 OPEN_START, OPEN_END = "<!-- agile:open:start -->", "<!-- agile:open:end -->"  # khối do `index` sinh
 SPAN_HINT = (" — có dấu huyền kề bên: mã nằm trong code span lồng nhau hoặc ngắt dòng? Code span chứa dấu huyền"
              " thì bọc ngoài bằng hai dấu huyền")
@@ -1775,22 +1778,38 @@ class Engine:
 # --- Quét đường dẫn ------------------------------------------------------------------------------------
 
 
-def _walk(root: Path, pattern: str):
+def _under_sprint_evidence(root: Path, rel: tuple, beside: dict) -> bool:
+    """`rel` đi qua một thư mục `evidence` nằm cạnh tài liệu sprint (FR4.1)? `root` không bao giờ tính (FR4.2)."""
+    for index, part in enumerate(rel):
+        if part != EVIDENCE_DIR:
+            continue
+        parent = root.joinpath(*rel[:index])
+        if parent not in beside:
+            beside[parent] = any((parent / name).is_file() for name in SPRINT_DOC_NAMES)
+        if beside[parent]:
+            return True
+    return False
+
+
+def _walk(root: Path, pattern: str, include_evidence: bool = False):
+    beside: dict = {}
     for path in sorted(root.rglob(pattern)):
         rel = path.relative_to(root).parts[:-1]
         if any(part in SKIP_DIRS or part.startswith(".") for part in rel):
             continue
+        if not include_evidence and _under_sprint_evidence(root, rel, beside):
+            continue
         yield path
 
 
-def check_paths(paths, env=None, routing_manifest=None) -> Report:
+def check_paths(paths, env=None, routing_manifest=None, include_evidence: bool = False) -> Report:
     engine = Engine(env)
     for raw in paths:
         path = Path(raw)
         if path.is_dir():
-            for config in _walk(path, c.CONFIG_NAME):
+            for config in _walk(path, c.CONFIG_NAME, include_evidence):
                 engine.check_config(config.parent)
-            for md in _walk(path, "*.md"):
+            for md in _walk(path, "*.md", include_evidence):
                 engine.check_file(md)
         elif path.is_file():
             if path.name == c.CONFIG_NAME:
@@ -2045,11 +2064,15 @@ def main(argv=None, env=None) -> int:
     parser.add_argument("--self", dest="self_mode", action="store_true", help="kiểm lõi sạch của repo này")
     parser.add_argument("--root", default=str(c.REPO), help="gốc repo cho --self (mặc định: repo chứa script)")
     parser.add_argument("--routing-manifest", help="manifest applicability độc lập của pilot routing")
+    parser.add_argument("--include-evidence", action="store_true",
+                        help="khi quét thư mục: quét cả thư mục evidence/ nằm cạnh tài liệu sprint (mặc định bỏ qua)")
     args = parser.parse_args(argv)
     if not args.self_mode and not args.paths:
         parser.error("cần ít nhất một đường dẫn, hoặc --self")
     if args.self_mode and args.paths:
         parser.error("--self không nhận đường dẫn; dùng --root <repo> để chọn repo")
+    if args.self_mode and args.include_evidence:
+        parser.error("--include-evidence chỉ dùng khi quét đường dẫn; --self không đổi")
     if args.self_mode and args.routing_manifest:
         parser.error("--routing-manifest chỉ dùng khi kiểm đường dẫn pilot")
     if args.self_mode:
@@ -2059,7 +2082,8 @@ def main(argv=None, env=None) -> int:
             print("WARNING NOT_CONFIGURED: AGENT_AGILE_DENYLIST chưa đặt, file không đọc được hoặc rỗng — "
                   "luật leak-denylist Chưa chạy (không phải Đạt).", file=sys.stderr)
     else:
-        report = check_paths(args.paths, env, routing_manifest=args.routing_manifest)
+        report = check_paths(args.paths, env, routing_manifest=args.routing_manifest,
+                             include_evidence=args.include_evidence)
     for error in report.errors:
         print(f"{error} [lỗi đầu vào]")
     for finding in report.findings:
