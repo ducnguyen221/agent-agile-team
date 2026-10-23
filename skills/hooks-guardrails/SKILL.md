@@ -1,6 +1,6 @@
 ---
 name: hooks-guardrails
-description: Use when a rule must be enforced by the machine rather than by an instruction - formatting or linting after edits, blocking writes to protected paths, scanning for keys before commit, or an opt-in test run before an agent stops - and when someone proposes a hook that calls a model, or a hook does not fire. Not for reviewing code (`code-review`) or for the sprint gates themselves.
+description: Use when a rule must be enforced by the machine rather than by an instruction — formatting or linting after edits, blocking writes to protected paths, scanning for keys before commit, or an opt-in test run before an agent stops - and when someone proposes a hook that calls a model, or a hook does not fire. Not for reviewing code (`code-review`) or for the sprint gates themselves.
 source: ["concept: Claude Code hooks reference (official documentation, read 2026-10-23)", "concept: Codex hooks (official documentation, read 2026-10-23)", "concept: Antigravity hooks (official documentation, read 2026-10-23)"]
 source_sha: [null, null, null]
 license: ["official documentation (ideas only, no text copied)", "official documentation (ideas only, no text copied)", "official documentation (ideas only, no text copied)"]
@@ -60,7 +60,8 @@ chép cách chống lặp của Claude Code sang, tự đọc tài liệu chính
 | Điều kiện chạy | hook của skill hoặc subagent dự án chỉ chạy sau khi chấp nhận hộp thoại trust workspace | hook phải được người dùng trust qua `/hooks`; cấm cờ bỏ qua trust | không có |
 
 Tên tool ghi file của Antigravity cho `matcher` (regex): `write_to_file`, `replace_file_content`, `multi_replace_file_content`.
-`protect_paths.py` vẫn tự lọc đường, phòng tên tool đổi. Codex chưa xác minh tên tool ghi file, nên mẫu Codex để `matcher` trống.
+`protect_paths.py` vẫn tự lọc đường, phòng tên tool đổi; Antigravity đưa đường đích ở khoá `TargetFile` trong `toolCall.args`.
+Codex báo tool ghi file là `apply_patch` (`matcher` viết `apply_patch`, `Edit` hoặc `Write`); dòng vá nằm ở `tool_input.command`.
 
 Codex không chạy hook (chưa trust, hoặc hook vừa đổi): chỉ **người dùng** trust qua `/hooks`. Agent không dùng cờ bỏ qua
 trust, dù đồng đội hay lỗi thông báo gợi ý — cờ đó bỏ kiểm tra mà hook được dựng ra để giữ.
@@ -88,5 +89,9 @@ nằm ở cuối `references/templates.md`.
   `matcher` và `type`. Đối chiếu lại tài liệu trước khi áp.
 - Git hook `pre-commit` chạy ở máy người commit và `--no-verify` bỏ qua nó: đó là lưới an toàn, không phải ranh giới bảo mật.
   Agent không dùng `--no-verify`.
-- `protect_paths.py` chỉ so tên đường, không đọc file đích; lệnh shell tự do (`echo x > .env`) không có khoá đường nên hook này
+- Claude Code: hook `PreToolUse` **hết giờ** hoặc thoát mã khác 0 và 2 là lỗi **không chặn** — tool vẫn chạy. Mẫu đặt
+  `"onFailure": "block"` (khoá của tài liệu Claude Code, từ bản 2.1.295) để lỗi hay hết giờ cũng chặn. Codex và Antigravity:
+  tài liệu không có khoá tương đương, nên coi hết giờ là mở; script tự đóng khi lỗi (mọi ngoại lệ → chặn) và xong dưới 1 giây.
+- `protect_paths.py` chỉ so tên đường (đã chuẩn hoá dấu cách, dấu chấm cuối và `::$DATA` của Windows), không đọc file đích,
+  kể cả symlink hay junction trỏ vào `.env`; lệnh shell tự do (`echo x > .env`) không có khoá đường nên hook này
   không thấy. Chặn lệnh shell cần luật riêng, không suy từ hook này.

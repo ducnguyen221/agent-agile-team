@@ -20,7 +20,7 @@ Nơi đặt: `.claude/settings.json` (chung cho repo) hoặc `.claude/settings.l
       {
         "matcher": "Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [
-          { "type": "command", "command": "python <đường>/protect_paths.py --format claude", "timeout": 10 }
+          { "type": "command", "command": "python <đường>/protect_paths.py --format claude", "timeout": 10, "onFailure": "block" }
         ]
       }
     ]
@@ -30,6 +30,8 @@ Nơi đặt: `.claude/settings.json` (chung cho repo) hoặc `.claude/settings.l
 
 Cách gỡ: xoá phần tử `PreToolUse` này khỏi tệp (hoặc xoá tệp `.claude/settings.local.json` nếu chỉ chứa khối này). Matcher liệt kê
 tên đúng; đừng viết `Edit.*` vì nó khớp cả `NotebookEdit` và tên khác có chứa `Edit`.
+
+`"onFailure": "block"` (khoá của tài liệu Claude Code, từ bản 2.1.295) làm hook lỗi hoặc hết giờ cũng chặn; thiếu khoá này, hook hết giờ không chặn và tool vẫn chạy. Đừng `--allow-name` đúng một tên trong danh sách cấm (vd `.env`): allow bỏ luật tên nên mở toang tên đó; chỉ allow tên phụ như `.env.local`.
 
 ## 2. Chặn path — Codex
 
@@ -41,6 +43,7 @@ xem và trust hook qua `/hooks`; hook đổi nội dung thì trust lại. Đừn
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "apply_patch|Edit|Write",
         "hooks": [
           { "type": "command", "command": "python <đường>/protect_paths.py --format codex", "timeout": 10 }
         ]
@@ -50,9 +53,9 @@ xem và trust hook qua `/hooks`; hook đổi nội dung thì trust lại. Đừn
 }
 ```
 
-`matcher` để trống vì tên tool ghi file của Codex chưa được xác minh ở bản đối chiếu: hook chạy cho mọi tool, và
-`protect_paths.py` tự lọc theo đường (kể cả dòng `*** Update File:` trong lệnh vá). Biết tên tool rồi thì thêm `matcher` để đỡ
-tốn một lần gọi Python cho mỗi tool.
+Tài liệu Codex: sửa file đi qua tool `apply_patch`, và `matcher` viết `apply_patch`, `Edit` hoặc `Write` đều trúng; dòng vá
+(`*** Add File:`, `*** Update File:`, `*** Delete File:`, `*** Move to:`) nằm ở `tool_input.command`, script đọc từ đó. Để `matcher`
+trống vẫn an toàn (hook chạy cho mọi tool, script tự lọc), chỉ tốn một lần gọi Python mỗi tool.
 
 Cách gỡ: xoá phần tử `PreToolUse` này, rồi mở `/hooks` kiểm không còn mục tương ứng.
 
@@ -74,6 +77,8 @@ Nơi đặt: `.agents/hooks.json` (workspace) hoặc `~/.gemini/config/hooks.jso
   }
 }
 ```
+
+Script đọc đường đích ở khoá `TargetFile` của `toolCall.args` (cả ba tool ghi file dùng khoá này).
 
 Lưu ý: tên sự kiện, `matcher` (regex trên tên tool) và `type: command` khớp tài liệu chính chủ; dạng lồng `hooks` và trường
 `timeout` giả định giống hai harness kia — đối chiếu lại trước khi áp. Khi không chặn, script in `{}`; hành vi `{}` ở
@@ -163,7 +168,10 @@ thì dùng chuỗi JSON đơn rồi `| python …` và đọc `$LASTEXITCODE`):
 ```sh
 printf '%s' '{"tool_name":"Write","tool_input":{"file_path":"C:/repo/.env"}}' | python <đường>/protect_paths.py --format claude; echo "thoát $?"
 printf '%s' '{"tool_name":"Write","tool_input":{"file_path":"C:/repo/.env.example"}}' | python <đường>/protect_paths.py --format claude; echo "thoát $?"
+printf '%s' '{"toolCall":{"name":"write_to_file","args":{"TargetFile":"C:/repo/.env"}}}' | python <đường>/protect_paths.py --format antigravity; echo "thoát $?"
 ```
+
+Dòng thứ ba là payload Antigravity thật: in JSON `"decision": "deny"` và thoát 0.
 
 Kỳ vọng: dòng đầu in `blocked: C:/repo/.env (name:.env)` và `thoát 2`; dòng sau không in gì và `thoát 0`. Đổi `--format
 antigravity` thì dòng đầu in JSON có `"decision": "deny"` và thoát 0, dòng sau in `{}`. Phép thử này chứng minh script, chưa chứng
