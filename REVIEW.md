@@ -18,7 +18,7 @@ Reviewer đọc bản này ở mốc gốc của nhánh (`git show <BASE>:REVIEW
 
 ## Không báo
 
-- Điều `scripts/check.py` hoặc `pytest` đã bắt được.
+- Điều `scripts/check.py` hoặc `pytest` đang đỏ vì chính lỗi đó (máy đã bắt); lỗi lọt qua cả hai thì vẫn báo.
 - File sinh, `samples/`, bản vendor trong `.venv/`.
 
 ## Trần

@@ -161,7 +161,7 @@ diff trong phiên điều phối thay cho reviewer — đốt ngữ cảnh đi�
 - **Lớp lỗi:** `RF` thuộc lớp có thể lặp ghi `lớp: <tên>`; người làm sửa mọi chỗ cùng lớp trong diff và nêu số chỗ;
   vòng sau reviewer kiểm cả lớp, không chỉ dòng đã báo.
 - **Không đăng lại** `RF` đã có kết cục (5.2) cùng khoá gộp (đoạn mã + file), trừ khi diff sửa đem bằng chứng mới — nêu bằng chứng đó.
-- Khuyến nghị 3 vòng, không trần cứng (`AGENTS.md`). Hết vòng 3 còn Chặn hay Phải sửa: không tự mở vòng 4 — dừng vòng
+- Ba vòng là điểm dừng của vòng tự động, không phải trần cứng (`AGENTS.md`: khuyến nghị 3 vòng). Hết vòng 3 còn Chặn hay Phải sửa: không tự mở vòng 4 — dừng vòng
   tự động, ghi một câu xem lại cách làm kèm lớp lỗi lặp, báo người dùng chọn làm tiếp hay dừng và bàn giao.
 
 ### 5.2 Nhãn và kết cục
