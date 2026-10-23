@@ -1866,6 +1866,38 @@ def test_delegation_by_holding_a_specialist_t1_role_is_clean(tmp_path):
     assert [f.render() for f in check.check_paths([root]).findings] == []
 
 
+LISTED_SPECIALISTS = ["security-specialist", "data-specialist", "backend-specialist", "frontend-specialist"]
+
+
+def test_delegation_listed_specialists_match_the_documented_four():
+    """FR2.3: tập chuyên đề kiểm định hợp lệ cho duyệt thay đúng bốn chuyên đề đã liệt kê ở roles/README.md."""
+    assert sorted(check.DELEGATION_SPECIALISTS) == sorted(LISTED_SPECIALISTS)
+
+
+@pytest.mark.parametrize("role", LISTED_SPECIALISTS)
+def test_delegation_by_holding_each_listed_specialist_t1_is_clean(tmp_path, role):
+    """FR2.3: từng chuyên đề đã liệt kê, tier T1, là vai kiểm định hợp lệ cho người duyệt thay."""
+    root = _delegated_plan_roles(tmp_path, f"roles:\n  architect: [T1, agent-b]\n  {role}: [T1, agent-d]\n")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+@pytest.mark.parametrize("role", LISTED_SPECIALISTS)
+@pytest.mark.parametrize("tier", ["T2", "T3"])
+def test_delegation_by_holding_a_listed_specialist_below_t1_is_invalid(tmp_path, role, tier):
+    """FR2.3: chuyên đề đã liệt kê nhưng tier T2/T3 vẫn không đủ."""
+    root = _delegated_plan_roles(tmp_path, f"roles:\n  architect: [T1, agent-b]\n  {role}: [{tier}, agent-d]\n")
+    hits = _delegation_hits(root)
+    assert len(hits) == 1 and f"tier là {tier}" in hits[0].message, [f.render() for f in hits]
+
+
+def test_delegation_by_holding_an_unlisted_specialist_is_invalid(tmp_path):
+    """FR2.3: `foo-specialist` tự chế khớp cú pháp `roles` nhưng không phải chuyên đề đã liệt kê: không làm người duyệt thay."""
+    root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  foo-specialist: [T1, agent-d]\n")
+    hits = _delegation_hits(root)
+    assert len(hits) == 1 and "không giữ vai kiểm định nào" in hits[0].message and "foo-specialist" in hits[0].message, [f.render() for f in hits]
+    assert [f.rule for f in check.check_paths([root]).findings if f.rule == "roles-invalid"] == []
+
+
 @pytest.mark.parametrize("role", ["tech-reviewer", "security-specialist"])
 def test_delegation_by_holding_only_a_t3_verifier_role_is_invalid(tmp_path, role):
     """FR2.3: vai kiểm định nhưng tier T3 (không có vai T1 nào) thì báo, nêu tier thật."""

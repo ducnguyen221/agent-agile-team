@@ -9,8 +9,8 @@ Chưa gắn số phiên bản; số phiên bản và manifest chốt khi phát h
 
 - **Sửa — kiểm duyệt thay (`scripts/check.py`):** khi `gate_N_mode: delegated` và cổng đã kết luận, `check.py` đòi `risk_tags` khai
   hợp lệ (danh sách chuỗi; áp cho mọi tài liệu có cổng duyệt thay, kể cả SPEC) và đòi `delegation.by` giữ ít nhất một vai kiểm
-  định (`business-reviewer`, `tech-reviewer` hoặc `*-specialist`) có tier T1 trong `roles` của PLAN, REPORT hoặc SPRINT (SPEC không
-  bị đòi). Cũng khi `gate_N_mode: delegated`, khoá lạ trong khối `delegation` được báo cả khi cổng còn mở (`pending`): chỉ khoá lạ đầu
+  định (`business-reviewer`, `tech-reviewer` hoặc `*-specialist`, vai chuyên đề phải thuộc danh sách chuyên đề đã liệt kê) có tier T1 trong
+  `roles` của PLAN, REPORT hoặc SPRINT (SPEC không bị đòi). Cũng khi `gate_N_mode: delegated`, khoá lạ trong khối `delegation` được báo cả khi cổng còn mở (`pending`): chỉ khoá lạ đầu
   tiên, một lần cho mỗi tài liệu. Cổng `human` không đổi.
 - **Sửa — quét thư mục sprint:** `check.py` không còn tính `evidence/` cạnh tài liệu sprint; thêm cờ `--include-evidence` để
   quét lại như cũ (không dùng cùng `--self`); tên tài liệu sprint được so đúng hoa thường.

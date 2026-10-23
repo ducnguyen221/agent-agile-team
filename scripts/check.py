@@ -118,6 +118,7 @@ GATE1_VALUES = {"pending", "approved", "changes_requested"}
 VERDICT_VALUES = {"pending", "pass", "conditional_pass", "fail"}
 GATE_MODES = {"human", "delegated"}  # vắng `gate_N_mode` = human; chỉ `delegated` kích các luật duyệt thay
 DELEGATION_FORBIDDEN_TAGS = {"secret", "auth"}  # vùng cấm duyệt thay (SPEC 7.3)
+DELEGATION_SPECIALISTS = {"security-specialist", "data-specialist", "backend-specialist", "frontend-specialist"}  # chuyên đề kiểm định đã liệt kê (roles/README.md)
 DELEGATION_RECORD = "Bản ghi duyệt thay"  # tiêu đề cấp 2 ở plan, report, sprint
 DELEGATION_LABELS = ("Phương án chọn:", "Phương án bị loại:", "Nếu sai thì tốn gì:")
 DELEGATION_QUOTE = "duyệt thay:"  # tiền tố bắt buộc của `gate_N_quote`
@@ -1357,10 +1358,12 @@ class Engine:
             mine = {r: v for r, v in roles.items() if isinstance(v, list) and len(v) >= 2 and v[1] == by}
             if not mine:
                 return bad("delegation.by", f"người duyệt thay '{by}' không giữ vai nào trong roles của tài liệu")
-            tiers = [v[0] for r, v in mine.items() if r in VERIFIERS or re.fullmatch(r"[a-z]+-specialist", r)]
+            tiers = [v[0] for r, v in mine.items() if r in VERIFIERS or r in DELEGATION_SPECIALISTS]
+            unlisted = sorted(r for r in mine if r not in VERIFIERS and r not in DELEGATION_SPECIALISTS and re.fullmatch(r"[a-z]+-specialist", r))
             if "T1" not in tiers:
                 if not tiers:
-                    return bad("delegation.by", f"người duyệt thay '{by}' không giữ vai kiểm định nào trong roles của tài liệu")
+                    hint = f" (chuyên đề ngoài danh sách: {', '.join(unlisted)})" if unlisted else ""
+                    return bad("delegation.by", f"người duyệt thay '{by}' không giữ vai kiểm định nào trong roles của tài liệu{hint}")
                 return bad("delegation.by", f"người duyệt thay '{by}' giữ vai kiểm định nhưng tier là {', '.join(map(str, tiers))}, phải là T1")
         files = block.get("files", [])
         if not isinstance(files, list):
