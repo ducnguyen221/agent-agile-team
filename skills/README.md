@@ -39,9 +39,9 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
   để `check` không quét như tài liệu; file chứa khoá, mật khẩu hay token làm mồi thì dòng thứ hai ghi rõ
   chúng là **GIÁ TRỊ GIẢ**.
 
-**Hiện trạng thử:** cả 32 skill đã có tệp thử đã chạy — bảng ở mục 4.
+**Hiện trạng thử:** cả 33 skill đã có tệp thử đã chạy — bảng ở mục 4.
 
-## 3. Mục lục — 32 skill
+## 3. Mục lục — 33 skill
 
 ### Quy trình
 
@@ -103,7 +103,7 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | [writing-skills](writing-skills/SKILL.md) | tạo/sửa skill, viết description hoặc thử áp lực, đề xuất nâng bài học thành skill, chẩn đoán phiên/sprint chạy sai |
 | [eval-harness](eval-harness/SKILL.md) | tiêu chí đạt/hỏng và kiểm hồi quy cho tính năng có gọi mô hình của sản phẩm (đánh giá kết quả mô hình, không phải thử áp lực skill) |
 
-## 4. Hiện trạng thử — 32 skill
+## 4. Hiện trạng thử — 33 skill
 
 Đọc từ frontmatter của tệp thử, không từ trí nhớ (`tests/test_skill_tests.py` đối chiếu bảng này với frontmatter). Tệp kỷ luật:
 cột `result` là đoạn đầu (số kịch bản Đạt), chi tiết RED và GREEN ở chính tệp. Tệp truy xuất: một thước chung — `strict` là

@@ -1,7 +1,7 @@
 {
   "name": "agent-agile-team",
   "version": "0.4.0",
-  "description": "An agile method for AI agent teams: a six-step process with two human gates (approve spec and plan, accept the report), role cards assigned by tier instead of model name, the rule that whoever does the work never grades it, sprint and project-registry templates, 32 skills and three standard-library tools (init, check, index). Core rules live in AGENTS.md, which Codex reads from the repository root; the 13 agents in agents/ (read-only, except `build-fixer`, which may edit files at T2) are role cards a session reads on demand. Private distribution.",
+  "description": "An agile method for AI agent teams: a six-step process with two human gates (approve spec and plan, accept the report), role cards assigned by tier instead of model name, the rule that whoever does the work never grades it, sprint and project-registry templates, 33 skills and three standard-library tools (init, check, index). Core rules live in AGENTS.md, which Codex reads from the repository root; the 13 agents in agents/ (read-only, except `build-fixer`, which may edit files at T2) are role cards a session reads on demand. Private distribution.",
   "author": {
     "name": "Nguyễn Quang Đức",
     "email": "ducnguyen.ams@gmail.com",

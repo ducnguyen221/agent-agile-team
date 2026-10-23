@@ -21,7 +21,7 @@ the rest and records it.
 - **Documents an agent can search cheaply:** four sprint documents (SPEC, PLAN, PROGRESS, REPORT; a very small
   job uses one two-section `SPRINT.md`, a small job one four-section `SPRINT.md`) and three project registries (requests, sprints, living specs) with an
   "open now" block at the top. Every item has a two-letter code (`FR3.2`, `TK4`, `RF2`).
-- **32 skills and 13 agents** for process, engineering technique, verification, communication and token
+- **33 skills and 13 agents** for process, engineering technique, verification, communication and token
   economy; the agents only read, except `build-fixer`, which may edit files (T2).
 - **Three standard-library Python tools:** `init` builds the skeleton without overwriting anything,
   `check` enforces the document rules, `index` regenerates the "open now" blocks.
