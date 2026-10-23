@@ -1895,7 +1895,34 @@ def test_delegation_by_holding_an_unlisted_specialist_is_invalid(tmp_path):
     root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  foo-specialist: [T1, agent-d]\n")
     hits = _delegation_hits(root)
     assert len(hits) == 1 and "không giữ vai kiểm định nào" in hits[0].message and "foo-specialist" in hits[0].message, [f.render() for f in hits]
-    assert [f.rule for f in check.check_paths([root]).findings if f.rule == "roles-invalid"] == []
+    bad_roles = [f for f in check.check_paths([root]).findings if f.rule == "roles-invalid"]
+    assert len(bad_roles) == 1 and "foo-specialist" in bad_roles[0].message, [f.render() for f in bad_roles]
+
+
+def test_delegation_mixed_listed_t2_and_unlisted_t1_tier_message_carries_the_hint(tmp_path):
+    """FR2.3: giữ chuyên đề đã liệt kê tier T2 và chuyên đề ngoài danh sách tier T1: thông điệp tier vẫn nêu chuyên đề ngoài danh sách."""
+    root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  data-specialist: [T2, agent-d]\n"
+                                           "  foo-specialist: [T1, agent-d]\n")
+    hits = _delegation_hits(root)
+    assert len(hits) == 1 and "tier là T2" in hits[0].message and "chuyên đề ngoài danh sách: foo-specialist" in hits[0].message, \
+        [f.render() for f in hits]
+
+
+def test_roles_unlisted_specialist_sharing_a_label_with_an_executor_is_roles_invalid_not_self_review(tmp_path):
+    """Vai `foo-specialist` là vai lạ: báo `roles-invalid` và bị bỏ khỏi `holders`, nên cùng nhãn với `analyst` không còn `self-review`."""
+    root = _delegated_plan_roles(tmp_path, "roles:\n  analyst: [T1, agent-b]\n  foo-specialist: [T1, agent-b]\n")
+    rules = [f.rule for f in check.check_paths([root]).findings]
+    assert "roles-invalid" in rules and "self-review" not in rules, rules
+
+
+@pytest.mark.parametrize("role", LISTED_SPECIALISTS)
+def test_roles_listed_specialists_stay_valid_and_count_for_self_review(tmp_path, role):
+    """Bốn chuyên đề đã liệt kê vẫn hợp lệ ở `roles` (0 `roles-invalid`) và cùng nhãn với vai thực thi thì vẫn `self-review`."""
+    ok = _delegated_plan_roles(tmp_path / "ok", f"roles:\n  architect: [T1, agent-b]\n  {role}: [T1, agent-d]\n")
+    assert [f.rule for f in check.check_paths([ok]).findings if f.rule == "roles-invalid"] == []
+    same = _delegated_plan_roles(tmp_path / "same", f"roles:\n  architect: [T1, agent-b]\n  {role}: [T1, agent-b]\n")
+    rules = [f.rule for f in check.check_paths([same]).findings]
+    assert "self-review" in rules and "roles-invalid" not in rules, rules
 
 
 @pytest.mark.parametrize("role", ["tech-reviewer", "security-specialist"])

@@ -118,7 +118,7 @@ GATE1_VALUES = {"pending", "approved", "changes_requested"}
 VERDICT_VALUES = {"pending", "pass", "conditional_pass", "fail"}
 GATE_MODES = {"human", "delegated"}  # vắng `gate_N_mode` = human; chỉ `delegated` kích các luật duyệt thay
 DELEGATION_FORBIDDEN_TAGS = {"secret", "auth"}  # vùng cấm duyệt thay (SPEC 7.3)
-DELEGATION_SPECIALISTS = {"security-specialist", "data-specialist", "backend-specialist", "frontend-specialist"}  # chuyên đề kiểm định đã liệt kê (roles/README.md)
+DELEGATION_SPECIALISTS = {"security-specialist", "data-specialist", "backend-specialist", "frontend-specialist"}  # danh sách chuyên đề kiểm định (dùng chung cho roles, self-review và người duyệt thay)
 DELEGATION_RECORD = "Bản ghi duyệt thay"  # tiêu đề cấp 2 ở plan, report, sprint
 DELEGATION_LABELS = ("Phương án chọn:", "Phương án bị loại:", "Nếu sai thì tốn gì:")
 DELEGATION_QUOTE = "duyệt thay:"  # tiền tố bắt buộc của `gate_N_quote`
@@ -1246,7 +1246,7 @@ class Engine:
         holders: dict = {}
         for role, value in roles.items():
             rline = doc.key_line(f"roles.{role}")
-            if role not in EXECUTORS | VERIFIERS and not re.fullmatch(r"[a-z]+-specialist", role):
+            if role not in EXECUTORS | VERIFIERS | DELEGATION_SPECIALISTS:
                 self.add(doc.path, rline, "roles-invalid", f"vai '{role}' không có trong danh sách vai")
                 continue
             if (not isinstance(value, list) or len(value) not in (2, 3) or value[0] not in c.TIERS
@@ -1259,7 +1259,7 @@ class Engine:
             if agent == "pending":
                 continue
             executes = held & EXECUTORS
-            verifies = {r for r in held if r in VERIFIERS or r.endswith("-specialist")}
+            verifies = held & (VERIFIERS | DELEGATION_SPECIALISTS)
             if executes and verifies:
                 self.add(doc.path, line, "self-review",
                          f"agent '{agent}' vừa thực thi ({', '.join(sorted(executes))}) vừa kiểm định ({', '.join(sorted(verifies))})")
@@ -1359,12 +1359,12 @@ class Engine:
             if not mine:
                 return bad("delegation.by", f"người duyệt thay '{by}' không giữ vai nào trong roles của tài liệu")
             tiers = [v[0] for r, v in mine.items() if r in VERIFIERS or r in DELEGATION_SPECIALISTS]
-            unlisted = sorted(r for r in mine if r not in VERIFIERS and r not in DELEGATION_SPECIALISTS and re.fullmatch(r"[a-z]+-specialist", r))
+            unlisted = sorted(r for r in mine if r.endswith("-specialist") and r not in DELEGATION_SPECIALISTS)
+            hint = f" (chuyên đề ngoài danh sách: {', '.join(unlisted)})" if unlisted else ""
             if "T1" not in tiers:
                 if not tiers:
-                    hint = f" (chuyên đề ngoài danh sách: {', '.join(unlisted)})" if unlisted else ""
                     return bad("delegation.by", f"người duyệt thay '{by}' không giữ vai kiểm định nào trong roles của tài liệu{hint}")
-                return bad("delegation.by", f"người duyệt thay '{by}' giữ vai kiểm định nhưng tier là {', '.join(map(str, tiers))}, phải là T1")
+                return bad("delegation.by", f"người duyệt thay '{by}' giữ vai kiểm định nhưng tier là {', '.join(map(str, tiers))}, phải là T1{hint}")
         files = block.get("files", [])
         if not isinstance(files, list):
             return bad("delegation.files", f"delegation.files: {files!r} phải là danh sách")

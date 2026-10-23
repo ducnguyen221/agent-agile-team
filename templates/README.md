@@ -112,7 +112,7 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
 
 - Vai thực thi: `analyst`, `architect`, `implementer`, `qa`, `researcher`. Vai kiểm định: `business-reviewer`,
   `tech-reviewer` và chuyên đề `<tên>-specialist` (`security-specialist`, `data-specialist`,
-  `backend-specialist`, `frontend-specialist`).
+  `backend-specialist`, `frontend-specialist`; tên chuyên đề khác → `roles-invalid`).
 - `tier` là `T1` · `T2` · `T3`. `agent` là **nhãn phiên hoặc subagent** (`agent-a`), không phải tên model —
   hai phiên của cùng một model là hai agent khác nhau. Chưa giao thì `pending`. Model và effort thực tế ghi ở cột
   "Vai · tier · model · effort" của PROGRESS (và của bảng trạng thái trong `SPRINT.md`): effort là số 1–5 theo

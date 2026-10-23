@@ -11,7 +11,7 @@ Chưa gắn số phiên bản; số phiên bản và manifest chốt khi phát h
   hợp lệ (danh sách chuỗi; áp cho mọi tài liệu có cổng duyệt thay, kể cả SPEC) và đòi `delegation.by` giữ ít nhất một vai kiểm
   định (`business-reviewer`, `tech-reviewer` hoặc `*-specialist`, vai chuyên đề phải thuộc danh sách chuyên đề đã liệt kê) có tier T1 trong
   `roles` của PLAN, REPORT hoặc SPRINT (SPEC không bị đòi). Cũng khi `gate_N_mode: delegated`, khoá lạ trong khối `delegation` được báo cả khi cổng còn mở (`pending`): chỉ khoá lạ đầu
-  tiên, một lần cho mỗi tài liệu. Cổng `human` không đổi.
+  tiên, một lần cho mỗi tài liệu. Khối `roles` và luật `self-review` cũng chỉ nhận bốn chuyên đề đã liệt kê (tên khác bị báo vai lạ). Cổng `human` không đổi.
 - **Sửa — quét thư mục sprint:** `check.py` không còn tính `evidence/` cạnh tài liệu sprint; thêm cờ `--include-evidence` để
   quét lại như cũ (không dùng cùng `--self`); tên tài liệu sprint được so đúng hoa thường.
 - **Thay đổi — mẫu PROGRESS và SPRINT:** cột "Vai · tier · model · effort" thay cho "Vai · tier · model"; effort là số 1–5
