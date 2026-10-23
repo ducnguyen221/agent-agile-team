@@ -1285,6 +1285,7 @@ class Engine:
 
     def _delegation(self, doc: Doc, gate: str) -> None:
         """Cổng `delegated` đã kết luận phải có hồ sơ duyệt thay đủ (SPEC 7.3); báo lỗi đầu tiên của cổng rồi dừng.
+        Cổng `delegated` còn mở (chưa kết luận) chỉ bị kiểm khoá lạ trong khối `delegation`.
         Vắng `gate_N_mode` hoặc `human` → không kiểm gì (hồ sơ cũ giữ nguyên kết quả)."""
         data, path = doc.data, doc.path
         mode_key, quote_key = f"{gate}_mode", f"{gate}_quote"

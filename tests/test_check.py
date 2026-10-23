@@ -1750,6 +1750,30 @@ def test_sprint_file_reports_an_unknown_delegation_key_once(tmp_path, gate_1_don
     assert len(hits) == 1 and "delegation.note" in hits[0].message, [f.render() for f in hits]
 
 
+def test_unknown_delegation_key_is_deduplicated_per_document_path(tmp_path):
+    """Khoá dedup giữ cả đường dẫn: SPEC và PLAN cùng có khoá lạ `note` ở cổng `delegated` còn mở → mỗi file một phát hiện."""
+    root = make_sprint(tmp_path)
+    _pending_delegated_plan(root)
+    _rewrite(root / "PLAN.md", "  files: []\n", "  files: []\n  note: x\n")
+    _rewrite(root / "SPEC.md", 'gate_1_quote: "duyệt"\n', (
+        'gate_1_quote: "duyệt thay: chọn phương án a — xem mục Bản ghi duyệt thay ở PLAN"\n'
+        "gate_1_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint."\n'
+        "  grant_at: 2026-02-01 08:30 +07\n"
+        "  scope: [gate_1]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-c\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"
+        "  note: x\n"))
+    _rewrite(root / "SPEC.md", "gate_1: approved", "gate_1: pending")
+    hits = _delegation_hits(root)
+    assert sorted(h.path.name for h in hits) == ["PLAN.md", "SPEC.md"], [f.render() for f in hits]
+    assert all("delegation.note" in h.message for h in hits)
+
+
 def test_delegation_stops_at_first_problem_per_gate(tmp_path):
     root = make_sprint(tmp_path)
     delegate_plan(root)
