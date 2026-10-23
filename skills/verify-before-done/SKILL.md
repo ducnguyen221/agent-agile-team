@@ -42,6 +42,20 @@ Dạng câu báo: `<lệnh>` → `<kết quả then chốt>` (mã thoát, số �
 Báo xong một `TK` **có đổi mã** thì bước 2 là vòng sáu pha build · kiểu · lint · test · bảo mật · diff:
 `references/loop.md`.
 
+### 2.1 Bậc cổng — chọn theo rủi ro
+
+Chọn bậc **thấp nhất đủ cho rủi ro**; bậc cao hơn không thay năm bước trên, nó thêm người hay máy kiểm lại.
+
+| Bậc | Cổng | Mạnh vì | Dùng khi |
+|---|---|---|---|
+| 1 | lời dặn trong brief ("chạy X, dán output") | rẻ | việc rất nhỏ, đảo ngược được |
+| 2 | điều kiện xong viết trước: lệnh + ngưỡng (`SC`, dòng Cách kiểm của `TK`) | đo được, không suy | mặc định cho mọi `TK` |
+| 3 | hook xác định chạy đúng lệnh đó (Stop-hook test, tuỳ chọn theo repo, mặc định tắt) | máy chạy, agent không quên được | repo đã bật và người dùng đã giao (`hooks-guardrails`) |
+| 4 | subagent ngữ cảnh mới cố bác bỏ kết quả | độc lập với người làm | `risk: high`, path luôn-cần-người, tuyên bố khó đảo ngược |
+
+Việc `risk: high` hay chạm path luôn-cần-người cần bậc 4. Bậc 3 không thay review và không tự cài: chỉ đề xuất, cài khi người dùng giao.
+Bậc 4 brief chỉ nêu tuyên bố và cách tái hiện, không dán lời "xong rồi" của người làm.
+
 ## 3. Tuyên bố nào cần bằng chứng nào
 
 | Tuyên bố | Cần | Không đủ |
@@ -54,6 +68,7 @@ Báo xong một `TK` **có đổi mã** thì bước 2 là vòng sáu pha build 
 | Agent khác làm xong | diff trong VCS + chạy lại phép kiểm | agent báo "thành công" |
 | Đạt yêu cầu | đối chiếu từng `FR`/`SC` (mục 6) | test xanh |
 | Coverage đạt ngưỡng | lệnh đo coverage + số | "đã viết thêm test" |
+| Giao diện khớp thiết kế | ảnh chụp **cùng viewport** đặt cạnh ảnh thiết kế + danh sách khác biệt theo vùng (`web-qa` chế độ So thiết kế) | "nhìn giống", ảnh không có thiết kế để so |
 | Sổ tập trung khớp hồ sơ (dự án khai `ledger.project`) | `check` **trên gốc dự án** (có `.agile.json`) mới chạy **sau khi ghi sổ**: không `ledger-stale`, không `ledger-missing-row` | lần `check` hôm qua, "chắc khớp", "ghi sổ lúc đóng sprint" |
 
 ## 4. Test hồi quy: vòng gỡ sửa → hỏng
@@ -128,5 +143,6 @@ ghi `VR` · trình Cổng 2.
 - `references/loop.md` — sáu pha của vòng kiểm cho `TK` có đổi mã, mẫu báo cáo từng pha.
 - `method/evidence.md` mục 8 — cổng giao hàng: năm kiểm cơ học trước khi trình Cổng 2.
 - `method/review-gate.md` — cổng review chia theo khía cạnh, gộp theo bằng chứng, kiểm đối kháng.
+- `hooks-guardrails` (skill) — hook xác định cho bậc 3: mẫu cấu hình, chặn path, thử hook trước khi bật; không hook nào gọi model.
 - `roles/verifier/dual-review.md` — việc có `risk_tags` là `rules`, `secret` hoặc `auth` phải có **hai** reviewer độc
   lập cùng rubric, cả hai Đạt mới Đạt.
