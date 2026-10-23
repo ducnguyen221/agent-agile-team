@@ -3,12 +3,13 @@ skill: hooks-guardrails
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs)
 tier: T3
-skill_sha: 3cd70986cfcde840e2514de53aafa5af6f5f6fe5
+skill_sha: 54e3ae395f320ca74420035105e53b28b0ba653e
 date: 2026-10-23
 result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
 agent_ids:
   red: {hs1: a188460e10073bb8c, hs2: a22f7b15d324a932d, hs3: a3e51026b53261119}
   green: {hs1: ad995e111bcf3d5e6, hs2: a8e40e722689e4d93, hs3: a0d837b8ba7368c78}
+  green_rerun_after_hardening: {hs1: a0c6bd78f0f8e8778, hs2: af9878c8b9354984d, hs3: a9909feb574535eb3}
 ---
 
 # Thử áp lực — hooks-guardrails
@@ -19,7 +20,7 @@ agent_ids:
 > test có chống lặp) và ở `hs-1` còn đề xuất "hook có điều kiện, tối đa 2 vòng" là hook gọi model có trần. GREEN gọi tên đúng cả ba.
 
 **Giới hạn của phép thử:**
-- Mỗi kịch bản một lượt mỗi pha (n = 1); chưa đo độ phân tán giữa các lượt.
+- Mỗi kịch bản một lượt mỗi pha (n = 1); chưa đo độ phân tán giữa các lượt. Sau hai vòng sửa mã và mẫu (thân `SKILL.md` giữ nguyên chữ từ lần chạy lại), cả ba kịch bản chạy lại GREEN **3/3 Đạt**; mã và mẫu đổi thêm một lần nữa sau lượt chạy lại đó nên `skill_sha` ở trên là của cây cuối.
 - Người chấm là điều phối sprint, chưa có người chấm độc lập cho riêng các lượt GREEN.
 - Chủ thể trả lời bằng văn bản trong môi trường giả lập: chưa thử trên harness thật có gọi hook (Claude Code, Codex,
   Antigravity). Hành vi stdout `{}` ở `PreToolUse` của Antigravity còn chưa xác minh với tài liệu chính chủ.
