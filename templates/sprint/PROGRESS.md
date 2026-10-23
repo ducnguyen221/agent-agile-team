@@ -39,12 +39,13 @@ links:
 
 <!-- Trạng thái: Chưa chạy · Đang làm · Đạt · Không đạt · Không áp dụng (kèm lý do) · bỏ.
      "Chưa chạy" và "Không áp dụng" KHÔNG BAO GIỜ tính là Đạt.
-     Bằng chứng = file:dòng, hoặc lệnh + kết quả vừa chạy. Cột model ghi model thực tế đã giao. -->
+     Bằng chứng = file:dòng, hoặc lệnh + kết quả vừa chạy. Cột "Vai · tier · model · effort" ghi vai, tier, model và effort
+     thực tế đã giao; effort là số 1–5 (`method/effort-scale.md`), chưa giao thì ghi `—`. -->
 
-| Việc | Vai · tier · model | Trạng thái | Bằng chứng |
+| Việc | Vai · tier · model · effort | Trạng thái | Bằng chứng |
 |---|---|---|---|
-| TK1 (hàm tra cứu đơn) | Implementer · T2 · model-x | Đạt | `pytest tests/test_orders.py` → 6 passed; coverage 92% |
-| TK2 (màn hình tra cứu) | Implementer · T2 · model-x | Chưa chạy | — |
+| TK1 (hàm tra cứu đơn) | Implementer · T2 · model-x · 3 | Đạt | `pytest tests/test_orders.py` → 6 passed; coverage 92% |
+| TK2 (màn hình tra cứu) | Implementer · T2 · model-x · 3 | Chưa chạy | — |
 
 ## 2. Nhật ký
 

@@ -114,8 +114,9 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
   `tech-reviewer` và chuyên đề `<tên>-specialist` (`security-specialist`, `data-specialist`,
   `backend-specialist`, `frontend-specialist`).
 - `tier` là `T1` · `T2` · `T3`. `agent` là **nhãn phiên hoặc subagent** (`agent-a`), không phải tên model —
-  hai phiên của cùng một model là hai agent khác nhau. Chưa giao thì `pending`. Model thực tế ghi ở cột
-  "Vai · tier · model" của PROGRESS.
+  hai phiên của cùng một model là hai agent khác nhau. Chưa giao thì `pending`. Model và effort thực tế ghi ở cột
+  "Vai · tier · model · effort" của PROGRESS (và của bảng trạng thái trong `SPRINT.md`): effort là số 1–5 theo
+  `method/effort-scale.md`, ví dụ `Implementer · T2 · model-x · 3`; chưa giao thì ghi `—`.
 - Luật `check` dựa vào: trong một file, không nhãn `agent` nào (trừ `pending`) vừa giữ vai thực thi vừa giữ
   vai kiểm định (mức Chặn). Một agent được giữ nhiều vai thực thi.
 - Người duyệt thay (`delegation.by`) cũng không được trùng nhãn một vai thực thi trong `roles` của cùng file: mức Chặn, cùng luật `self-review`.
