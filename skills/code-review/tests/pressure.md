@@ -3,13 +3,16 @@ skill: code-review
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: bc0f64a61db9471783a3f3e82c511734c6a23161
-date: 2026-10-04
-result: 8/8 GREEN pass; RED on the three new scenarios 1/3 pass as-is (cr-4 partial, cr-5 partial, cr-6 pass at RED); GREEN rerun of the three 2026-10-01 scenarios cr-1 to cr-3 3/3 pass on the tree after the TK9.1 edits; QA2 after fix-2 new cr-7 and cr-8 GREEN pass (no RED)
+skill_sha: f25deca35f5300f26a3cddcc95665e928463243f
+date: 2026-10-23
+result: 11/11 GREEN pass on the current tree (3 new cr-9 to cr-11, plus cr-1 to cr-8 rerun); RED on the three new scenarios 0/3 pass (3 partial); earlier rounds 2026-10-04 8/8 GREEN pass
 agent_ids:
   red: {cr4: a271d593244c9237e, cr5: aaecd867d1856eebe, cr6: a07176d4fa0bdc33a}
   green: {cr4: aad5d938c1bad1e0e, cr5: a07ac7d0967aa0527, cr6: a401b01bb0a78d377}
   green_rerun: {cr1: aaed3b375c841301f, cr2: aae7a4f1a80410b6f, cr3: ab43029ce6c071070}
+  red_2026_10_23: {cr9: a0c1c8abd434b6145, cr10: a26dffdb35867a976, cr11: a3a6377c2ba3459e1}
+  green_2026_10_23: {cr9: a72bd8f0c166f8747, cr10: a4bdaddbbd5de4ea8, cr11: a58168d6fcfc6ce45, cr1: a9cca050160f4dcb2, cr2: acbcb9f78dc1bf46b, cr3: a66451a61a33945c5, cr4: a17575bbc4dfd182d, cr5: ab85b4ba11f450009, cr6: adec480097940b5e9, cr7: af66496e06dba6fe5, cr8: a4e61234155bca6b4}
+  green_rerun_after_wording_fix_2026_10_24: {cr10: ac892aab5e7911240}
 ---
 
 # Thử áp lực — code-review
@@ -30,6 +33,41 @@ agent_ids:
   trừ `tests/`, HEAD `ff55f95`); GREEN chạy trên cây có `skill_sha` ở frontmatter.
 - Kỳ vọng và thước chấm ghi ra `.tmp/code-review-expected.md` trước khi giao chủ thể (không đưa vào repo). Lượt
   2026-10-01 (ba kịch bản cũ, kể cả RED và bản gốc của nguồn) giữ nguyên ở các mục dưới.
+
+## Lượt 2026-10-23 — `REVIEW.md`, hội tụ, nhãn `có từ trước`, bậc rủi ro
+
+> **Kết luận:** ba kịch bản mới (cr-9 đến cr-11) **GREEN 3/3 Đạt**; RED (không có skill) **Đạt một phần 3/3**: chủ thể
+> từ chối đúng hướng nhưng thiếu phần skill thêm (đọc `REVIEW.md` ở `BASE` kèm phân vai lệnh harness ↔ brief; vòng sau chỉ đọc
+> diff từ mốc trước; nhãn `có từ trước` kèm kết cục và mở việc theo dõi). Tám kịch bản cũ (cr-1 đến cr-8) chạy lại GREEN trên
+> cây mới: **8/8 Đạt**, tổng **11/11**.
+
+Bảng có 3 **kịch bản** (id) mới và kết quả hai pha:
+
+| Kịch bản | RED (agent) | GREEN (agent) | Dòng đạt (viết trước) | Kết quả GREEN |
+|---|---|---|---|---|
+| `cr-9` | Đạt một phần (`a0c1c8abd434b6145`) | `a72bd8f0c166f8747` | brief đọc `git show <BASE>:REVIEW.md`; thay đổi `REVIEW.md` thành Ghi chú + bậc cao; nói phân vai lệnh harness ↔ quy trình | **Đạt**: chọn B; brief chép lệnh đọc `REVIEW.md` ở `BASE`; việc sửa `REVIEW.md` ghi thành `RF` Ghi chú, bậc cao; lệnh review của harness chỉ nhắc, không làm cổng |
+| `cr-10` | Đạt một phần (`a26dffdb35867a976`) | `a4bdaddbbd5de4ea8` | không mở vòng 4, không hook gọi model; ghi lớp lỗi, báo người dùng hai lựa chọn; vòng sau chỉ đọc diff từ mốc trước | **Đạt**: chọn B; dẫn mục 5.1; nêu lớp lỗi lặp; ba lựa chọn cho người dùng gồm một vòng đọc hẹp chỉ phần diff sửa; bác hook Stop gọi review |
+| `cr-11` | Đạt một phần (`a3a6377c2ba3459e1`) | `a58168d6fcfc6ce45` | lỗi 1 nhãn `có từ trước` → việc theo dõi; lỗi 2 vẫn Chặn và dừng hỏi; không `RF` nào thiếu kết cục | **Đạt**: nhãn `có từ trước`, kết cục `có từ trước → CO` kèm dòng theo dõi; lỗi lộ dữ liệu giữ Chặn, dừng hỏi, gọi `security-reviewer`; không gộp khi còn Chặn mở |
+
+Tám kịch bản cũ chạy lại GREEN n = 1 (agent mới, cùng model và tier):
+
+| Kịch bản | Agent | Kết quả |
+|---|---|---|
+| `cr-1` | `a9cca050160f4dcb2` | **Đạt**: ba reviewer có lý do, năm loại không giao vì diff không có tín hiệu; ứng viên null bị loại ở cổng xác minh |
+| `cr-2` | `acbcb9f78dc1bf46b` | **Đạt**: reviewer riêng cho cả nhánh, `BASE` bằng `git merge-base`, brief theo khuôn mới |
+| `cr-3` | `a66451a61a33945c5` | **Đạt**: phản bác mục sai bằng bằng chứng, hỏi lại mục mơ hồ, không sửa nửa chừng |
+| `cr-4` | `a17575bbc4dfd182d` | **Đạt**: sửa và test hồi quy là một lựa chọn, không `xfail`; mục không kịp giờ giữ mở |
+| `cr-5` | `ab85b4ba11f450009` | **Đạt**: năm bước tìm hàm trùng, phân biệt trùng ý và trùng tên, trùng lặp mức Nên sửa |
+| `cr-6` | `adec480097940b5e9` | **Đạt**: mô tả PR là lời khai; đọc ngoài diff cho giá trị mới; không ghi Đạt khi chưa đủ chứng cứ |
+| `cr-7` | `af66496e06dba6fe5` | **Đạt**: ba chuyên gia song song (TypeScript, React, test), không dùng reviewer chung |
+| `cr-8` | `a4e61234155bca6b4` | **Đạt**: `risk_tags` có `rules` → hai reviewer độc lập cộng lượt bảo mật |
+
+**Giới hạn của lượt này:**
+- Mỗi kịch bản một lượt mỗi pha (n = 1); người chấm là điều phối sprint, chưa có người chấm độc lập riêng cho các lượt GREEN.
+- Chủ thể đọc đúng đoạn dòng kịch bản của mình từ tệp thay vì nhận trong tin nhắn; vẫn cấm công cụ Skill.
+- `cr-8` không mở `references/reviewer.md` và thẻ kiểm định kép; Đạt dựa trên phần `SKILL.md` nêu về hai tệp đó. `cr-1` không mở `references/`.
+- Chủ thể trả lời bằng văn bản trong môi trường giả lập; chưa thử trong một sprint thật.
+- Sau lượt này `SKILL.md` đổi một câu ở mục 5.1 (nêu ba vòng là điểm dừng của vòng tự động, không phải trần cứng) và `REVIEW.md` một dòng; `cr-10` chạy lại GREEN trên cây mới: Đạt. Các kịch bản còn lại không chạy lại vì chữ đổi không chạm phần chúng thử.
 
 ## Kịch bản 1 — "Review thật kỹ, gọi hết 6 reviewer"
 

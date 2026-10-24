@@ -17,11 +17,17 @@ Chưa gắn số phiên bản; số phiên bản và manifest chốt khi phát h
 - **Thay đổi — mẫu PROGRESS và SPRINT:** cột "Vai · tier · model · effort" thay cho "Vai · tier · model"; effort là số 1–5
   (`method/effort-scale.md`), chưa giao thì ghi `—`.
 - **Ghi nợ (known limitations):**
-  - các `tests/pressure.md` giữ lệ ghi `model:` hiện có (id model cụ thể trong 19 file), chưa chuẩn hoá thành nhãn trung tính;
+  - các `tests/pressure.md` giữ lệ ghi `model:` hiện có (id model cụ thể trong 33 file), chưa chuẩn hoá thành nhãn trung tính;
   - chưa chạy lại ca đo `in-3` của skill `intake` (lần chấm gần nhất: Đạt một phần, n = 1) và chưa dựng lại rubric riêng của ba
     phép thử routing A/B/C; chỉ còn đề bài và bảng kỳ vọng ở `skills/intake/tests/`;
   - tên cột cũ "Vai · tier · model" còn trong vài tài liệu phụ (`skills/closing-sprint/references/preflight.md`,
     `method/process.md`, `roles/verifier/dual-review.md`, `tiers/README.md`), sẽ đồng bộ ở đợt sửa tài liệu luật.
+- **Review nhiều lớp:** skill mới `hooks-guardrails` (hook xác định cho ba harness, không hook gọi model, script
+  `protect_paths.py`); `code-review` đọc `REVIEW.md` của repo từ mốc gốc, hội tụ cho review toàn nhánh, nhãn `có từ trước` và năm
+  kết cục của phát hiện, bảng bậc rủi ro → người duyệt đọc gì; `verify-before-done` bốn bậc cổng và ảnh cạnh thiết kế; `web-qa` chế
+  độ So thiết kế; `security-review` luật đóng phát hiện; `eval-harness` mục chấm lại reviewer (incident → eval, shadow);
+  `deployment` và `closing-sprint` hậu kiểm "tầng nào lẽ ra bắt", thân PR có rủi ro còn lại. 33 skill, 13 agent. Không đổi sáu bước,
+  hai cổng, tier hay `check`. Mức phiên bản **đề xuất MINOR**, chủ quyết khi nghiệm thu.
 
 ## 0.4.0 (2026-10-23)
 

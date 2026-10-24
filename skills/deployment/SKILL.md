@@ -65,6 +65,8 @@ mặc định khi chưa có.
   huỷ → dừng tăng nấc, hoàn tác theo lệnh đã ghi (nếu người dùng đã duyệt sẵn kế hoạch hoàn tác kèm điều kiện huỷ đó; chưa thì trình lệnh và chờ gật, mục 4), rồi điều tra (skill `debugging`); không "chờ thêm chút xem có tự hết".
 - **Sau:** smoke test trên production, so số đo với nền; ghi thành `VR` gồm lệnh + kết quả mới chạy
   (`method/evidence.md`). Lỗi lọt qua deploy → ghi vào REQUESTS theo skill `bug-triage`.
+  Sự cố hay lỗi lọt: hậu kiểm một câu *tầng nào lẽ ra bắt* (`closing-sprint` `references/lessons.md` mục 1) thành `LN`, và đưa
+  lỗi đó thành một ca của tập chấm lại reviewer (`eval-harness` mục 10).
 
 ## 4. Điều kiện dừng
 
@@ -115,6 +117,9 @@ Mức là gợi ý theo **hậu quả nếu bỏ qua**; quyết cuối theo `met
 Liên quan: skill `github-ops` (workflow CI), `security-review` và agent `security-reviewer` (secret, CVE,
 header bảo mật), `error-handling` (log không lộ secret), `database-migrations` (thứ tự schema ↔ code),
 `closing-sprint` (deploy sau Cổng 2), `debugging` (container chết, health chập chờn).
+
+Lệnh và dịch vụ riêng của một nền tảng cloud: dùng skill riêng của nền tảng đó nếu môi trường có; skill này giữ phần trung tính
+(chiến lược, hoàn tác, điều kiện huỷ).
 
 ## 8. Sẵn sàng production
 

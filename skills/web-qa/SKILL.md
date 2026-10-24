@@ -1,6 +1,6 @@
 ---
 name: web-qa
-description: Use when a web app must be checked in a real browser - verifying a branch or deployment, a UAT round, "test the site", regression against a previous run, or a bug report that needs reproduction steps and screenshots - and the job is to report, not to fix.
+description: Use when a web app must be checked in a real browser - verifying a branch or deployment, a UAT round, "test the site", comparing a page against a design image, regression against a previous run, or a bug report that needs reproduction steps and screenshots - and the job is to report, not to fix.
 source: ["garrytan/gstack qa-only/SKILL.md.tmpl", "garrytan/gstack qa/SKILL.md.tmpl and qa/sections exploratory, scope, qa-patterns, browser-verify (report-only ideas: boundaries and charters, counting rules for the score, exact replay, re-verification; the fix loop, atomic commits, repair tiers, self-regulation score and TODO edits dropped; task `TK8` (frontend and QA skills), sprint `SPR-04` (method wave 3))", "affaan-m/ECC skills/browser-qa/SKILL.md (ideas: blast radius, vitals thresholds, breakpoints, limits of automated accessibility checks; ship verdict labels and tool names dropped)", "affaan-m/ECC skills/click-path-audit/SKILL.md (idea only: final state versus the promise of the label, observed as black-box symptoms; source tracing dropped)"]
 source_sha: [96764e80a641e28141ec8297223768029f5bf483, f30b7b788a210d217ea3125bf3001b29cbc2a463, ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
 base_sha: 4c0fdc5736a49b6223a7dfc7626d5495cf55185c
@@ -87,7 +87,7 @@ mật khẩu, token thật vào báo cáo** — luôn `[ĐÃ CHE]`. Cần tài k
 | Tham số | Mặc định |
 |---|---|
 | URL đích | suy từ nhánh (cổng dev đã biết của dự án → URL staging/preview), không đoán quá 3 cổng; không có thì hỏi |
-| Chế độ | Đầy đủ · Nhanh · Hồi quy (so với baseline) · Theo diff |
+| Chế độ | Đầy đủ · Nhanh · Hồi quy (so với baseline) · Theo diff · So thiết kế (so với ảnh thiết kế) |
 | Thư mục bằng chứng | nơi cấu hình dự án chỉ định; mặc định `<thư mục sprint>/qa/<YYYY-MM-DD>/` với `screenshots/` |
 | Đăng nhập | không, trừ khi được giao tài khoản test |
 | Trần thời gian | Nhanh khoảng 30 giây · Đầy đủ khoảng 15 phút (nói trần ở đầu báo cáo); hết trần thì dừng, phần dở là Chưa chạy |
@@ -126,6 +126,10 @@ baseline → phần hồi quy Chưa chạy, phần kiểm độc lập vẫn ch�
 **Kiểm lại sau sửa** (vòng mới sau khi Implementer sửa): chạy lại **đúng** các bước tái hiện của phát hiện cũ từ cùng
 trạng thái đầu, cộng một luồng lân cận đang chạy tốt. Ảnh sau dùng tên mới (không ghi đè ảnh trước); so cây truy cập,
 URL và lỗi console với ảnh trước. Vẫn chỉ báo cáo: đã hết lỗi hay chưa, có lỗi mới hay không.
+
+**So thiết kế** (có ảnh thiết kế hoặc ảnh chuẩn đã duyệt): chụp đúng viewport của ảnh, so theo vùng, mỗi vùng Khớp / Lệch /
+Chưa chạy, mỗi Lệch một `RF` nhóm Giao diện kèm cặp ảnh và số đo; ảnh khác cỡ viewport hay vắng ảnh → Chưa chạy, không co giãn
+ảnh để so. Cách làm: [references/design-compare.md](references/design-compare.md).
 
 ## 5. Sáu pha
 

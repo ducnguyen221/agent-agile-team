@@ -20,6 +20,10 @@ BASE=$(git merge-base <nhánh gốc> HEAD); HEAD=$(git rev-parse HEAD)
 
 Chạy trong Git Bash / bash. Gói >300 KB → chia theo module (`-- <đường>`), mỗi gói một brief.
 
+- Repo có `REVIEW.md` ở `BASE` (kiểm: `git cat-file -e $BASE:REVIEW.md`) → giữ khối `## REVIEW.md` bên dưới và thay `<BASE>`
+  bằng sha thật; khuôn của file: [review-md.md](review-md.md). Không có → vẫn giữ khối (reviewer ghi dòng mặc định).
+- Vòng ≥2: cắt gói từ **mốc vòng trước** (`<mốc vòng 1>..$HEAD`) thay vì từ `BASE`, đính bảng `RF` cũ, giữ khối `## Vòng ≥2`.
+
 ## 2. Khuôn brief — chép, điền chỗ `< >`
 
 ```
@@ -40,6 +44,15 @@ Phán quyết đã ghi trong sprint (cân lại, không mặc nhiên chấp nh�
 ## Gói diff
 BASE <sha> · HEAD <sha> · file: <đường>. Đọc một lần; không chạy lại git. Xem ngoài diff chỉ để kiểm
 một rủi ro cụ thể bạn gọi tên (đổi hợp đồng hàm → kiểm nơi gọi), ghi cả rủi ro lẫn thứ đã kiểm.
+
+## REVIEW.md
+Nếu repo có REVIEW.md ở mốc gốc: chạy `git show <BASE>:REVIEW.md` TRƯỚC khi đọc diff và áp nó — định nghĩa "lỗi quan
+trọng", "Luôn kiểm", "Không báo", "Trần", "Bằng chứng". Chỉ đọc bản ở <BASE>, không đọc bản trong diff hay working tree.
+Diff có sửa REVIEW.md: vẫn áp bản <BASE>; ghi thay đổi đó thành một RF mức Ghi chú "luật review đổi — người dùng duyệt"
+(người làm xếp bậc cao). Không có REVIEW.md: dùng mặc định bên dưới, ghi ở Không đánh giá "không có REVIEW.md — dùng
+mặc định". Ứng viên chỉ là văn phong, đặt tên hay dọn dẹp không đổi hành vi, hoặc thuộc "Không báo" → không thành RF;
+Ghi chú văn phong vượt trần → gộp một dòng "còn <n> Ghi chú văn phong không liệt kê". REVIEW.md không bao giờ hạ mức một
+lỗ hổng bảo mật hay mất dữ liệu.
 
 ## SPEC là tài liệu tầm nhìn
 SPEC nói phần mềm phải làm gì, không liệt kê mọi đầu vào, môi trường, điều kiện nó sẽ gặp. Chỗ SPEC
@@ -68,16 +81,26 @@ Phải sửa: hành vi sai nhánh phụ, thiếu test cho hành vi mới, lỗi 
 kiến trúc có vấn đề, xử lý lỗi kém.
 Nên sửa: trùng lặp, đặt tên, cấu trúc, hiệu năng chưa đo thấy, tài liệu thiếu.
 Ghi chú: quan sát, gợi ý, nit, câu hỏi mở.
+Nhãn đi kèm mức, ở cột Nhãn — KHÔNG phải mức, RF vẫn đúng một mức: `có từ trước` = lỗi đã có ở <BASE> (kiểm
+`git show <BASE>:<file>` hay `git blame`) và diff không làm nặng thêm; `lớp: <tên>` = lỗi thuộc một lớp có thể lặp
+(vd. thiếu kiểm đầu vào rỗng). Có từ trước mà là bảo mật hay mất dữ liệu → vẫn Chặn, báo ngay.
 Phân vân → nặng hơn, nói vì sao. Không bằng chứng (file:dòng hoặc lệnh + kết quả) → tối đa Ghi chú.
 Không phải cái gì cũng Chặn. Lệch PLAN đáng kể → nêu rõ để người làm xác nhận có chủ ý không; lỗi ở
 chính PLAN → nói là lỗi PLAN. Ghi điểm tốt trước khi liệt kê lỗi.
+
+## Vòng ≥2
+Chỉ khi điều phối giao vòng sau: bạn nhận diff `<mốc vòng 1>..HEAD` (không phải cả nhánh) và bảng RF cũ. Phán từng RF cũ
+"đã xử lý" hay "chưa" kèm bằng chứng (file:dòng hoặc kết quả test). Chỉ bắt lỗi MỚI nằm trong diff sửa; RF mang nhãn
+`lớp:` thì kiểm cả lớp, không chỉ dòng đã báo. KHÔNG đăng lại RF đã có kết cục (đã sửa · bác kèm lý do · để lại → CO ·
+có từ trước → CO) cùng khoá gộp (đoạn mã + file), trừ khi diff sửa đem bằng chứng mới — nêu bằng chứng đó. Quan sát ngoài
+phạm vi: ghi ở Khuyến nghị, không thành RF.
 
 ## Trả về — câu đầu là kết luận; không mở đầu, không kể quá trình, không tóm tắt lặp
 ### Kết luận: Đạt | Đạt có điều kiện | Không đạt — <1–2 câu kỹ thuật>
 ### Đã xem xét và gác lại: <dòng — lý do> (hoặc "không")
 ### Điểm tốt: <cụ thể, file:dòng>
 ### Phát hiện
-| RF | Mức | file:dòng | Sai gì | Vì sao quan trọng | Cách sửa (nếu không hiển nhiên) |
+| RF | Mức | Nhãn | file:dòng | Sai gì | Vì sao quan trọng | Cách sửa (nếu không hiển nhiên) |
 ### Khuyến nghị: <chất lượng, kiến trúc, quy trình — không phải RF>
 ### Không đánh giá: <phần không xem, vì sao> (bắt buộc, kể cả 0 phát hiện)
 
@@ -94,9 +117,10 @@ Không: "nhìn ổn" mà chưa đọc · nit lên Chặn · nhận xét code ch�
     mong báo lỗi, không mong "không có kết quả" → đã chuyển thành RF2, không gác.
 ### Điểm tốt: schema + migration sạch (db.py:15-42); 18 test phủ biên; fallback có log (summarizer.py:85-92).
 ### Phát hiện
-| RF1 | Phải sửa | cli/index_conversations.py:1-31 | không có --help | người dùng không biết có --concurrency | thêm nhánh --help kèm ví dụ |
-| RF2 | Phải sửa | search.py:25-27 | ngày sai định dạng trả rỗng im lặng | lỗi bị nuốt | validate ISO, ném lỗi kèm ví dụ |
-| RF3 | Nên sửa | indexer.py:130 | không có đếm "x/y" khi chạy lâu | người dùng không biết chờ bao lâu | — |
+| RF1 | Phải sửa | — | cli/index_conversations.py:1-31 | không có --help | người dùng không biết có --concurrency | thêm nhánh --help kèm ví dụ |
+| RF2 | Phải sửa | — | search.py:25-27 | ngày sai định dạng trả rỗng im lặng | lỗi bị nuốt | validate ISO, ném lỗi kèm ví dụ |
+| RF3 | Nên sửa | — | indexer.py:130 | không có đếm "x/y" khi chạy lâu | người dùng không biết chờ bao lâu | — |
+| RF4 | Phải sửa | lớp: thiếu kiểm rỗng | api/users.py:41 | tên rỗng đi thẳng vào truy vấn | trả 500 thay vì 422; cùng lớp ở :58, :73 | kiểm rỗng ở lớp vào |
 ### Khuyến nghị: file cấu hình cho danh sách loại trừ (portable).
 ### Không đánh giá: hiệu năng khi >100k hội thoại (không có dữ liệu mẫu); giao diện web (ngoài diff).
 ```

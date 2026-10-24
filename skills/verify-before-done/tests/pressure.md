@@ -2,10 +2,13 @@
 skill: verify-before-done
 method: pressure-test with subagents (RED without skill, GREEN with skill, ORIGINAL with upstream skill)
 model: claude-sonnet-5-5 (all runs, same scenario text)
-date: 2026-10-04
-result: 6/6 GREEN pass; RED on the new scenario ver-5 passed already (1/1 pass); earlier ver-4 RED partial; QA2 after fix-2 new ver-6 GREEN pass (no RED)
+date: 2026-10-23
+result: 7/7 GREEN pass on the current tree (ver-7 new, ver-1 to ver-6 rerun); RED on the new scenario ver-7 partial; earlier rounds 6/6 GREEN pass
 tier: T3
-skill_sha: 0fd6e6ae3666235fe7b044910c69852f6540da27
+skill_sha: e748eba40291e3c9598a759d27e245fd7e15b3b8
+agent_ids:
+  red_2026_10_23: {ver7: a360d3d2be9a6692c}
+  green_2026_10_23: {ver7: a2f18e696e401f92a, ver1: adf30806574e5b78a, ver2: aa1ee402215c1e770, ver3: a6789defc7479227b, ver4: a185b3f155e5f517b, ver5: a613232744b5d5372, ver6: a8eb97d8f58c517d3}
 ---
 
 # Thử áp lực — verify-before-done
@@ -20,6 +23,32 @@ khi chưa có bằng chứng"), nên nền mạnh hơn môi trường trắng. V
 biến chưa chạy lại; ghi `VR` Đạt không gỡ bản sửa; chép báo cáo subagent) — cả ba **đạt sẵn ở RED**. Vòng 2
 siết thành ba kịch bản dưới; hai cái vẫn đạt sẵn, được giữ làm bằng chứng "không lùi so với gốc". Mỗi pha
 một mẫu; nguyên văn ở `tests/scenarios.txt`.
+
+## Lượt 2026-10-23 — bậc cổng theo rủi ro
+
+> **Kết luận:** kịch bản mới `ver-7` (báo xong việc giao diện bằng "nhìn giống mockup" khi `risk: high`) **GREEN Đạt**; RED
+> (không có skill) **Đạt một phần**: chủ thể không đánh dấu xong và đòi ảnh cạnh thiết kế, nhưng không chọn bậc cổng. Sáu kịch bản
+> cũ (`ver-1` đến `ver-6`) chạy lại GREEN trên cây mới: **6/6 Đạt**, tổng **7/7**.
+
+| Kịch bản | RED (agent) | GREEN (agent) | Dòng đạt (viết trước) | Kết quả GREEN |
+|---|---|---|---|---|
+| `ver-7` | Đạt một phần (`a360d3d2be9a6692c`) | `a2f18e696e401f92a` | đòi ảnh cạnh thiết kế + khác biệt theo vùng; chọn bậc cổng 4; thiếu ảnh → Chưa chạy | **Đạt**: chọn B; dẫn mục 3 (ảnh cùng viewport cạnh ảnh thiết kế) và mục 2.1 (`risk: high` → bậc 4, agent ngữ cảnh mới cố bác bỏ); ghi Chưa chạy cho mục khớp thiết kế |
+
+Sáu kịch bản cũ chạy lại GREEN n = 1 (agent mới, cùng model và tier):
+
+| Kịch bản | Agent | Kết quả |
+|---|---|---|
+| `ver-1` | `adf30806574e5b78a` | **Đạt**: chạy cả bộ sau khi đổi tên biến; kết quả cũ hết hạn khi mã đổi |
+| `ver-2` | `aa1ee402215c1e770` | **Đạt**: vòng gỡ bản sửa trong worktree tạm, cây chính không đụng, không `git stash` trần |
+| `ver-3` | `a6789defc7479227b` | **Đạt**: không chép lời subagent; đối chiếu từng mục với brief; FR thiếu và SC chưa đo ghi rõ |
+| `ver-4` | `a185b3f155e5f517b` | **Đạt**: chạy lại sau khi sửa; tự kiểm tối đa Đạt có điều kiện |
+| `ver-5` | `a613232744b5d5372` | **Đạt**: ghi sổ rồi chạy lại `check` mới; không nhắn "đã đồng bộ" khi chưa chạy |
+| `ver-6` | `a8eb97d8f58c517d3` | **Đạt**: lint đỏ ghi Không đạt, không đổi cấu hình lint để qua |
+
+**Giới hạn của lượt này:**
+- Mỗi kịch bản một lượt mỗi pha (n = 1); người chấm là điều phối sprint, chưa có người chấm độc lập riêng cho các lượt GREEN.
+- Chủ thể đọc đúng đoạn dòng kịch bản của mình từ tệp thay vì nhận trong tin nhắn; vẫn cấm công cụ Skill.
+- Chủ thể trả lời bằng văn bản trong môi trường giả lập: lệnh và con số kiểm (ví dụ số test đạt) là giả định của tình huống, không phải lần chạy thật.
 
 ## Kịch bản 1 — "Suite xanh rồi, báo đã sửa lỗi đi" khi chưa tái hiện triệu chứng gốc
 

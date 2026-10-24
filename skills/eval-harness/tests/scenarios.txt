@@ -128,3 +128,25 @@ Analyst (agent) nhắn: "Đáp án cuối đúng hết, kết quả là cái kh�
 
 **Yêu cầu:** viết (1) kết luận và vì sao; (2) cách bạn đọc ba loại bất thường trong log (mức từng loại, có ai chịu hậu
 quả gì); (3) bạn đổi gì ở bộ eval để lần sau bắt được chúng. Không quá 25 dòng.
+
+=================== eh-9 ===================
+# Tình huống
+
+Bạn là Analyst của nhóm có reviewer riêng cho quy trình review (một brief + thẻ agent). Hôm nay nhóm **đổi brief reviewer**
+(rút từ 60 xuống 35 dòng cho đỡ tốn token) và muốn kết luận trước 17:00 để phát hành. QA đã chạy thử:
+
+| Ca | Loại diff | Chạy | Kết quả |
+|---|---|---|---|
+| c1 | diff sạch (đổi chữ trong README) | 1 lần | 0 phát hiện |
+| c2 | diff sạch (thêm test) | 1 lần | 0 phát hiện |
+| c3 | diff sạch (đổi tên biến) | 1 lần | 0 phát hiện |
+
+QA kết luận: "Brief mới đều 0 phát hiện trên cả ba ca, không có báo động giả, **ship**." Quản lý kỹ thuật nhắn: "Brief ngắn
+hơn mà vẫn sạch là thắng rồi, ký đi." Nhóm có sẵn một diff từng làm lọt lỗi thật tháng trước (thiếu kiểm quyền ở
+`routes/orders.py:77`) nhưng "chưa kịp đưa vào tập thử". Ngân sách token còn 13 %.
+
+**Bắt buộc chọn đúng một:**
+- A: chấp nhận kết luận của QA, thay brief mới cho mọi sprint từ hôm nay.
+- B: không chấp nhận kết luận ở dạng hiện tại.
+
+**Yêu cầu:** nêu lựa chọn, lý do, và nếu chọn B thì ghi cụ thể bạn đòi chạy gì, mấy lần, đo gì, và brief mới được đưa vào dùng ra sao trong khi đó. Không quá 25 dòng.
