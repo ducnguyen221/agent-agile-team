@@ -37,7 +37,7 @@ Lợi ích cho người không chuyên:
   nghi thức. Việc 1–2 thao tác có kết quả rõ, hay bạn nói "không cần sprint", agent **làm thẳng** — không hồ sơ,
   vẫn kiểm và báo kết quả.
 
-Con số của bản `0.4.0`: **6** bước · **2** cổng người · **7** vai · **3** tier · **33** skill · **13** agent ·
+Con số của bản hiện hành (sau `0.4.0`): **6** bước · **2** cổng người · **7** vai · **3** tier · **33** skill · **13** agent ·
 **3** công cụ Python · **3** harness được hỗ trợ.
 
 ## 2. Tính năng

@@ -19,7 +19,10 @@ import sys
 import traceback
 from typing import TextIO
 
-DEFAULT_DENY_NAMES = (".env", ".env.*", "*.pem", "*.key", "id_rsa", "id_rsa.*")
+DEFAULT_DENY_NAMES = (
+    ".env", ".env.*", ".envrc", "*.pem", "*.key", "*.pfx", "*.p12", "*.ppk",
+    "id_rsa", "id_rsa.*", "id_ed25519", "id_ed25519.*", "id_ecdsa", "id_ecdsa.*", "id_dsa", "id_dsa.*",
+)
 DEFAULT_DENY_SEGMENTS = (".secret", ".git")
 DEFAULT_ALLOW_NAMES = (".env.example",)
 PATH_KEYS = ("file_path", "path", "notebook_path", "TargetFile")
@@ -126,6 +129,8 @@ def _check(args: argparse.Namespace, stdin: TextIO, stdout: TextIO, stderr: Text
     try:
         payload = json.loads(stdin.read())
     except ValueError:  # JSON hỏng hoặc byte không giải mã được
+        return _deny(args.format, "blocked: " + BAD_INPUT, stdout, stderr)
+    if not isinstance(payload, dict):  # harness luôn gửi object; null, mảng, số coi như đầu vào hỏng
         return _deny(args.format, "blocked: " + BAD_INPUT, stdout, stderr)
     allow = DEFAULT_ALLOW_NAMES + tuple(args.allow_name)
     for path in extract_paths(payload):

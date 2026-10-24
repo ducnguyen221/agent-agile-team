@@ -37,7 +37,7 @@ metadata:
 | Thời điểm | Việc | Ghi chú |
 |---|---|---|
 | sau khi sửa file | format hoặc lint đường vừa sửa bằng lệnh của repo | đọc đường từ JSON hook như `scripts/protect_paths.py`; lỗi lint thoát 2 để agent sửa; không hoàn tác thay đổi |
-| trước khi ghi | chặn đường bảo vệ bằng `scripts/protect_paths.py` | cấm mặc định `.env`, `.env.*`, `*.pem`, `*.key`, `id_rsa*`, đoạn `.secret`, `.git`; cho `.env.example`; thêm `--deny-glob`, `--allow-name` |
+| trước khi ghi | chặn đường bảo vệ bằng `scripts/protect_paths.py` | cấm mặc định `.env`, `.env.*`, `.envrc`, `*.pem`, `*.key`, `*.pfx`, `*.p12`, `*.ppk`, `id_rsa*`, `id_ed25519*`, `id_ecdsa*`, `id_dsa*`, đoạn `.secret`, `.git`; cho `.env.example`; thêm `--deny-glob`, `--allow-name` |
 | trước khi commit | quét khoá bằng git hook | không phụ thuộc harness; quét **tên biến** kiểu khoá, mật khẩu, token trong dòng thêm vào |
 | trước khi agent dừng | chạy test | **tuỳ chọn theo repo, mặc định tắt**; phải có chống lặp và trần thời gian |
 
@@ -93,5 +93,8 @@ nằm ở cuối `references/templates.md`.
   `"onFailure": "block"` (khoá của tài liệu Claude Code, từ bản 2.1.295) để lỗi hay hết giờ cũng chặn. Codex và Antigravity:
   tài liệu không có khoá tương đương, nên coi hết giờ là mở; script tự đóng khi lỗi (mọi ngoại lệ → chặn) và xong dưới 1 giây.
 - `protect_paths.py` chỉ so tên đường (đã chuẩn hoá dấu cách, dấu chấm cuối và `::$DATA` của Windows), không đọc file đích,
-  kể cả symlink hay junction trỏ vào `.env`; lệnh shell tự do (`echo x > .env`) không có khoá đường nên hook này
+  kể cả symlink hay junction trỏ vào `.env`, và tên ngắn 8.3 của NTFS (`.env` thành `ENV~1`: tắt 8dot3name hoặc thêm
+  `--deny-glob "*~[0-9]*"` nếu repo cần); lệnh shell tự do (`echo x > .env`) không có khoá đường nên hook này
   không thấy. Chặn lệnh shell cần luật riêng, không suy từ hook này.
+- Script quét dòng vá (`*** Update File: …`) trong mọi chuỗi của payload, nên ghi một tài liệu có chứa đúng dòng đó vào đường
+  `.env` hay đường cấm là chặn nhầm; ghi tài liệu mô tả định dạng vá thì tránh để dòng vá đứng đầu dòng. Chủ ý đóng thay vì mở.

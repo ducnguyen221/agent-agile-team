@@ -59,6 +59,9 @@ trống vẫn an toàn (hook chạy cho mọi tool, script tự lọc), chỉ t�
 
 Cách gỡ: xoá phần tử `PreToolUse` này, rồi mở `/hooks` kiểm không còn mục tương ứng.
 
+Mọi lệnh mẫu dùng `python`; trên máy chỉ có `python3` thì đổi thành `python3` hoặc đường tuyệt đối tới interpreter (Claude Code
+với `onFailure: block` sẽ chặn mọi lần ghi nếu không tìm thấy lệnh; Codex và Antigravity thì hook lỗi coi như mở).
+
 ## 3. Chặn path — Antigravity
 
 Nơi đặt: `.agents/hooks.json` (workspace) hoặc `~/.gemini/config/hooks.json` (toàn máy).
@@ -80,8 +83,8 @@ Nơi đặt: `.agents/hooks.json` (workspace) hoặc `~/.gemini/config/hooks.jso
 
 Script đọc đường đích ở khoá `TargetFile` của `toolCall.args` (cả ba tool ghi file dùng khoá này).
 
-Lưu ý: tên sự kiện, `matcher` (regex trên tên tool) và `type: command` khớp tài liệu chính chủ; dạng lồng `hooks` và trường
-`timeout` giả định giống hai harness kia — đối chiếu lại trước khi áp. Khi không chặn, script in `{}`; hành vi `{}` ở
+Lưu ý: tên sự kiện, `matcher` (regex trên tên tool) và `type: command` khớp tài liệu chính chủ; dạng lồng `hooks`
+giả định giống hai harness kia — đối chiếu lại trước khi áp; khối trên cố ý không đặt `timeout` vì chưa xác minh. Khi không chặn, script in `{}`; hành vi `{}` ở
 `PreToolUse` chưa xác minh, nên thử trên máy: tool vẫn đi qua hỏi duyệt bình thường mới đạt. Muốn chắc hơn thì để `matcher`
 trống để script tự lọc.
 

@@ -17,7 +17,7 @@ Chưa gắn số phiên bản; số phiên bản và manifest chốt khi phát h
 - **Thay đổi — mẫu PROGRESS và SPRINT:** cột "Vai · tier · model · effort" thay cho "Vai · tier · model"; effort là số 1–5
   (`method/effort-scale.md`), chưa giao thì ghi `—`.
 - **Ghi nợ (known limitations):**
-  - các `tests/pressure.md` giữ lệ ghi `model:` hiện có (id model cụ thể trong 19 file), chưa chuẩn hoá thành nhãn trung tính;
+  - các `tests/pressure.md` giữ lệ ghi `model:` hiện có (id model cụ thể trong 33 file), chưa chuẩn hoá thành nhãn trung tính;
   - chưa chạy lại ca đo `in-3` của skill `intake` (lần chấm gần nhất: Đạt một phần, n = 1) và chưa dựng lại rubric riêng của ba
     phép thử routing A/B/C; chỉ còn đề bài và bảng kỳ vọng ở `skills/intake/tests/`;
   - tên cột cũ "Vai · tier · model" còn trong vài tài liệu phụ (`skills/closing-sprint/references/preflight.md`,

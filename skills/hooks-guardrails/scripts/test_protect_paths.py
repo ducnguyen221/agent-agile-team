@@ -77,6 +77,13 @@ def test_bad_json_fails_closed():
     assert "bad hook input" in err
 
 
+@pytest.mark.parametrize("raw", ["null", "[]", "\"x\"", "5"])
+def test_non_object_json_fails_closed(raw):
+    rc, out, err = run("claude", raw)
+    assert rc == 2
+    assert "bad hook input" in err
+
+
 def test_bad_json_antigravity_deny_json():
     rc, out, err = run("antigravity", "not json {")
     assert json.loads(out) == {"decision": "deny", "reason": "blocked: bad hook input"}
@@ -236,7 +243,10 @@ def test_script_deep_json_never_traceback(fmt):
         assert json.loads(done.stdout)["decision"] == "deny"
 
 
-@pytest.mark.parametrize("name", ["id_rsa", "id_rsa.pub", "server.key"])
+@pytest.mark.parametrize(
+    "name",
+    ["id_rsa", "id_rsa.pub", "server.key", "id_ed25519", "id_ecdsa.pub", "id_dsa", "cert.pfx", "store.p12", "k.ppk", ".envrc"],
+)
 def test_default_secret_names_blocked(name):
     rc, out, err = run("claude", write("C:/repo/ssh/" + name))
     assert rc == 2

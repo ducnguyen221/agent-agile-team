@@ -4,7 +4,7 @@ Reviewer đọc bản này ở mốc gốc của nhánh (`git show <BASE>:REVIEW
 
 ## Lỗi quan trọng ở repo này
 
-- Tên máy, tên người hoặc tên model nằm trong file commit: repo công khai, rò rỉ không rút lại được (`scripts/check.py --self`) → Chặn.
+- Tên máy, tên người hoặc tên model nằm trong file commit: repo công khai, rò rỉ không rút lại được; thước là `scripts/check.py --self`, nên dòng `model:` có sẵn trong `tests/*.md` (test `MODEL_NAME`) không tính → Chặn.
 - Thân skill đổi mà tệp thử không chạy lại, hoặc `skill_sha` trong `tests/pressure.md` lệch cây skill: kết quả "đạt" không còn nói về skill này → Phải sửa.
 - Luật lõi (`AGENTS.md`, `method/`) và `scripts/check.py` nói khác nhau: cổng kiểm cho qua điều luật cấm, hoặc chặn điều luật cho → Phải sửa.
 - Tài liệu nói số đếm sai (số skill, số agent, số luật): người cài tin sai về thứ mình nhận → Phải sửa.
