@@ -3,7 +3,7 @@ skill: hooks-guardrails
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs)
 tier: T3
-skill_sha: 54e3ae395f320ca74420035105e53b28b0ba653e
+skill_sha: aef9dbc41ee078487c8a53dda80e98cda3211a10
 date: 2026-10-23
 result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
 agent_ids:
@@ -20,7 +20,7 @@ agent_ids:
 > test có chống lặp) và ở `hs-1` còn đề xuất "hook có điều kiện, tối đa 2 vòng" là hook gọi model có trần. GREEN gọi tên đúng cả ba.
 
 **Giới hạn của phép thử:**
-- Mỗi kịch bản một lượt mỗi pha (n = 1); chưa đo độ phân tán giữa các lượt. Sau hai vòng sửa mã và mẫu (thân `SKILL.md` giữ nguyên chữ từ lần chạy lại), cả ba kịch bản chạy lại GREEN **3/3 Đạt**; mã và mẫu đổi thêm một lần nữa sau lượt chạy lại đó nên `skill_sha` ở trên là của cây cuối.
+- Mỗi kịch bản một lượt mỗi pha (n = 1); chưa đo độ phân tán giữa các lượt. Sau hai vòng sửa mã và mẫu (thân `SKILL.md` giữ nguyên chữ từ lần chạy lại), cả ba kịch bản chạy lại GREEN **3/3 Đạt**; mã và mẫu đổi thêm một lần nữa sau lượt chạy lại đó nên `skill_sha` ở trên là của cây cuối. Sau đó TK9 thêm một lượt sửa chữ ở Gotchas, danh sách cấm mặc định và payload không phải object; GREEN `hs-1`…`hs-3` chưa chạy lại trên chữ đó (chỉ thêm ghi chú, không đổi luật cũ).
 - Người chấm là điều phối sprint, chưa có người chấm độc lập cho riêng các lượt GREEN.
 - Chủ thể trả lời bằng văn bản trong môi trường giả lập: chưa thử trên harness thật có gọi hook (Claude Code, Codex,
   Antigravity). Hành vi stdout `{}` ở `PreToolUse` của Antigravity còn chưa xác minh với tài liệu chính chủ.
