@@ -86,7 +86,7 @@ trình điểm theo ý người nhờ (điểm đo được); (j) máy chủ kh�
 bằng đúng công cụ đó): QA là agent khác người dựng fixture (`ac2f458540dcc48c2`, cùng model và tier). Kỳ vọng viết và băm trước khi chạy. Kết quả:
 3 vùng Khớp (điều hướng, nội dung chính, chân trang lệch 2 px trong dung sai 4 px), 2 vùng Lệch (đầu trang +24 px khoảng đệm; nền nút hành động
 chính khác mã màu) → đúng 2 phát hiện nhóm Giao diện, khớp kỳ vọng. Hạn chế: ảnh cặp là ảnh nguyên khung viewport, chưa cắt theo vùng; một lỗi
-console khi tải chưa được phân tích; một lượt, một người chạy.
+console khi tải chưa được phân tích; một lượt, một người chạy. Lượt bổ sung 2026-10-24 (QA · T3 · `claude-sonnet-5-5`, cùng fixture, Playwright, 1280×720, DPR 1): cắt riêng vùng `#page-header` và `#primary-action` (cộng lề 8 px) từ ảnh thật và ảnh chuẩn; kết quả đo giữ nguyên (đúng 2 phát hiện nhóm Giao diện, chân trang +2 px trong dung sai, 0 phát hiện thừa); lỗi console duy nhất là `favicon.ico` 404 do máy chủ tĩnh của fixture không có favicon, không ảnh hưởng so sánh.
 
 **Giới hạn của lượt này:**
 - Mỗi kịch bản một lượt mỗi pha (n = 1); người chấm là điều phối sprint.

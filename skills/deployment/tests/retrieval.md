@@ -58,7 +58,7 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 | 7 | Compose dev gắn mã nguồn làm mất thư viện đã cài lúc build | tệp compose cho dev | đúng tệp, mục 1–3 | Đạt |
 
 **Thiếu nội dung / mâu thuẫn ghi nhận:**
-- `SKILL.md` mục 3 dẫn tới `eval-harness` mục 10, nhưng ở lượt này `eval-harness` mới có mục 1–9; câu 2 vẫn Đạt hẳn nhờ nêu việc đưa lỗi thành ca kiểm và nói rõ không tìm thấy mục dẫn. Cần chạy lại câu 2 sau khi mục 10 được thêm.
+- `SKILL.md` mục 3 dẫn tới `eval-harness` mục 10, nhưng ở lượt này `eval-harness` mới có mục 1–9; câu 2 vẫn Đạt hẳn nhờ nêu việc đưa lỗi thành ca kiểm và nói rõ không tìm thấy mục dẫn. Cần chạy lại câu 2 sau khi mục 10 được thêm. **Đã chạy lại 2026-10-24 sau khi `eval-harness` có mục 10** (một chủ thể mới, T3, `claude-sonnet-5-5`, không đọc `tests/`): câu 2 vẫn **Đạt hẳn** — trỏ gạch "Sau" ở mục 3, `closing-sprint/references/lessons.md` mục 1 (hậu kiểm tầng nào lẽ ra bắt) và `eval-harness` mục 10; mọi mục dẫn đều tìm thấy. Thiếu nội dung: mục 10 chỉ có khuôn ca cho reviewer của quy trình, chưa có khuôn cho ca kiểm sau triển khai (smoke test nghiệp vụ, vd kiểm đơn trùng); chủ thể suy rộng từ khuôn `ie-N`.
 - Câu 1: hợp đồng API với client cũ (phiên bản hóa API) không có; câu 5: phát hành đồng bộ nhiều dịch vụ để không lệch phiên bản; câu 6: mạng mặc định so với mạng tự tạo; câu 7: ví dụ chỉ có Node.js.
 - Kỳ vọng ghi tên một tệp mạng khác với tên thật của tệp trong skill (người soạn không đọc thân skill); chủ thể trỏ đúng tệp thật, nên không tính là trỏ sai.
 
