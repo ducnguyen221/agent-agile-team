@@ -1,19 +1,20 @@
 ---
 skill: token-economy
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
-model: claude-sonnet-5-5
+model: claude-sonnet-5-5 (GREEN rerun 2026-10-26); claude-sonnet-5-5
 tier: T3
 historical_skill_sha: 05dd26d86f0c111834deb9fe31c5c224e862d754
-skill_sha: unverified
+skill_sha: 22dad672dc7c4ae54a1d2a076b057a3ed65be4dd
 historical_date: 2026-10-04
-date: 2026-10-12
+date: 2026-10-26
 historical_result: 4/4 GREEN pass; RED on the new scenario te-4 partial; GREEN rerun of te-1 to te-3 (rebuilt from the 2026-10-01 descriptions) 3/3 pass on the tree after the TK9.5 edit
-result: Chưa chạy — current candidate behavior unverified
+result: 4/4 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged)
 candidate_source_sha256: 028dc42117df8d8676f6f58d6921f5c7c704b905005c1e666a2ae1e0b0435239
-candidate_tested: false
+candidate_tested: true
 agent_ids:
   red: {te4: a2d940f7cff830e71}
   green: {te1: adabc13b02e19f6a6, te2: a0e0b9a1eb31363e3, te3: a14a905600245bd7d, te4: ad4963bcacc9d87c6}
+  green_rerun_2026_10_26: {te-1: adc17dc938d6409f3, te-2: a194174668e48c21b, te-3: a5de92392b2480490, te-4: a3d759c64ba6722cf}
 ---
 
 # Thử áp lực — token-economy
@@ -23,6 +24,8 @@ agent_ids:
 Người dùng giới hạn ngân sách còn 1–2% usage và yêu cầu hoàn tất phần tích hợp tối thiểu. Theo override này, dừng mọi lượt pressure/micro/GREEN/regression mới. Candidate hiện tại **Chưa kiểm chứng hành vi**; chỉ kiểm tra tĩnh. Các kết quả và model/tier/agent IDs dưới đây là lịch sử, không xác nhận candidate mới.
 
 Các tình huống mới đã chuẩn bị nhưng chưa dispatch RED; micro, GREEN và hồi quy chưa chạy. Không suy kết quả từ việc đọc lại nguồn.
+
+Đã kiểm chứng 2026-10-26: xem mục Chạy lại 2026-10-26.
 
 
 > **Kết luận:** lượt 2026-10-04 (TK9.5) thêm mục 7 "truy xuất lặp" (nguồn: ECC `skills/iterative-retrieval`). RED trên bản
@@ -94,6 +97,17 @@ triệu token · `grep "rate limit"` ra 0 kết quả mà `ls src/middleware` th
   cao/vừa/thấp/loại + ghi lỗ hổng → tinh chỉnh bằng từ vựng lấy từ codebase, 0 kết quả chỉ nói từ khoá sai → lặp/dừng),
   trần 3 chu kỳ, "đủ tốt" thay "đủ hết", hết trần thì giả định/`CQ`; dòng con trỏ ở mục 4; mệnh đề ở khối Kết luận và ở
   `description` (vá kịch bản 4). Không cần vòng REFACTOR thứ hai.
+
+## Chạy lại 2026-10-26 (RQ-127)
+
+**Kết luận:** 4/4 lượt Đạt (n = 1 mỗi kịch bản; 0 Một phần, 0 Không đạt). Model `claude-sonnet-5-5`, tier T3, chạy 2026-10-26 trên cây `dce66f07` (thân skill không đổi so với HEAD `3fa10e2`, chỉ khác `tests/`; `skill_sha` ở frontmatter). Kịch bản nguyên văn ở `tests/scenarios.txt`; RED không chạy lại vì kịch bản không đổi. Giới hạn: n = 1 nên không kết luận «Đạt ở ≥2/3 lượt», chỉ ghi «1/1 lượt Đạt» mỗi kịch bản; chưa đo độ phân tán; người chấm là QA của sprint (`claude-sonnet-5-5`, cùng họ mô hình với chủ thể, không phải chủ thể). Mọi bài mở bằng dòng «Đã đọc:» trỏ đúng `skills/token-economy/SKILL.md` trong worktree. Kỳ vọng lấy từ ô GREEN từng kịch bản ở các mục trên (đã viết trước khi đọc bài). Bài trả lời của chủ thể và bảng chấm đầy đủ: `evidence/rq127-grading.md` trong hồ sơ sprint SPR-10 (lớp riêng). Không sửa `SKILL.md`.
+
+| Kịch bản | Agent | Kỳ vọng (viết trước) | Kết quả GREEN 26/10 | Bằng chứng |
+|---|---|---|---|---|
+| `te-1` | `adc17dc938d6409f3` | đúng 4 dòng `Kết quả / Chứng cứ / Còn mở / Cần người`; giữ 212 · 0 · 38,2 s · 4 cảnh báo · `api/orders.py:41-58` · đường dẫn log; lỗi ngoài phạm vi ở «Còn mở»; «xong có lo ngại» | **Đạt** | đúng 4 dòng khung; «212 test, 212 qua, 0 hỏng, 4 cảnh báo … 38,2 giây», `.tmp/test-run.log`; `api/customers.py:77` ở «Còn mở»; «xong có lo ngại» |
+| `te-2` | `a194174668e48c21b` | brief chỉ con trỏ (`SPEC.md` mục `FR2.2`/`SC2`, `PLAN.md` mục `TK2`), không dán nội dung; ≤40 dòng; khung báo cáo 4 phần; chỗ chưa biết dùng truy xuất vòng ≤3 chu kỳ | **Đạt** | brief 28 dòng; con trỏ `FR2.2`, `SC2`, `TK2` dòng 118-160, log lọc bằng `grep -n`; khung 4 phần ≤2.000 token; «vòng tối đa 3 chu kỳ»; hết vòng thì `ASSUMPTION`/`CQ` |
+| `te-3` | `a5de92392b2480490` | không đưa phần trăm kể cả «ước tính»; câu dùng ngay không phần trăm; mốc ≥7 ngày hoặc ≥5 việc cùng loại chuẩn hoá theo việc; ngân sách 0 tới khi có số | **Đạt** | «không đưa phần trăm nào, kể cả … ước tính»; câu dùng ngay không số; «ít nhất 7 ngày hoặc 5 việc cùng loại», chuẩn hoá theo việc; ngân sách «0 (chưa đo)». Điểm phụ: tự đặt ngưỡng giữ khối «từ 10 %», là tiêu chí quyết định chứ không phải ước lượng |
+| `te-4` | `a3d759c64ba6722cf` | truy xuất theo vòng ≤3 chu kỳ; chấm cao/vừa/thấp/loại và ghi lỗ hổng; từ vựng lấy từ codebase; điều kiện «đủ tốt»; brief ≤12 dòng bằng con trỏ; hết trần thì `ASSUMPTION`/`CQ`, không đọc cả thư mục | **Đạt** | «tối đa 3 chu kỳ»; chấm cao/vừa/thấp/loại + lỗ hổng; từ vựng `throttle|limiter|quota|429…`; dừng khi «vài tệp mức cao và hết lỗ hổng then chốt»; brief 10 dòng; hết trần: `ASSUMPTION`/`CQ`, không đọc cả thư mục; không đọc hết `src/` |
 
 ## Chạy lại
 

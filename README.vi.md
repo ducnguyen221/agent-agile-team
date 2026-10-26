@@ -19,7 +19,7 @@ nhận (mục tiêu, bậc việc, có mở sprint không) và chỉ trả lời
 - **Tài liệu agent tra rẻ:** bốn tài liệu sprint (SPEC, PLAN, PROGRESS, REPORT; việc rất nhỏ dùng một
   `SPRINT.md` hai phần, việc nhỏ một `SPRINT.md` bốn phần) và ba sổ gốc dự án (yêu cầu, sprint, spec sống) có khối "Đang mở" ở đầu. Mọi mục có mã hai chữ cái
   (`FR3.2`, `TK4`, `RF2`).
-- **33 skill và 13 agent** cho quy trình, kỹ thuật, kiểm định, giao tiếp và tối ưu token; agent chỉ đọc, riêng
+- **36 skill và 13 agent** cho quy trình, kỹ thuật, kiểm định, giao tiếp và tối ưu token; agent chỉ đọc, riêng
   `build-fixer` được sửa file (T2).
 - **Ba công cụ Python chỉ dùng thư viện chuẩn:** `init` dựng khung không ghi đè gì, `check` giữ chuẩn tài
   liệu, `index` sinh lại khối "Đang mở".

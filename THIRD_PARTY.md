@@ -4,7 +4,7 @@ Mốc SHA và ngày của từng nguồn, cùng bảng nguồn theo từng skill
 thông báo bản quyền phải mang theo ở [NOTICE](NOTICE). File này ghi **vì sao** mỗi nguồn được dùng theo
 cách đó, các nguồn **chỉ lấy ý**, và lịch sử viết lại phòng sạch (hiện không còn file nào phải viết lại).
 
-## 1. Nguồn chép được (MIT) — đã dùng ở Đợt 1 và Đợt 2
+## 1. Nguồn chép được (MIT, Apache-2.0) — đã dùng ở Đợt 1, Đợt 2 và SPR-10
 
 | Nguồn | Giấy phép | Dùng cho |
 |---|---|---|
@@ -14,6 +14,11 @@ cách đó, các nguồn **chỉ lấy ý**, và lịch sử viết lại phòng
 | `garrytan/gstack` | MIT | Đợt 1: `plan-review`, `security-audit`, `web-qa`, phần `debugging` (điều tra), docs-sync và retro của `closing-sprint`. Đợt 2: ý của `review` (`code-review`), `qa` (`web-qa`), `ship` và `land-and-deploy` (`closing-sprint`) |
 | `supabase/agent-skills` | MIT | Mẫu Postgres trong `postgres` và agent `database-reviewer` (đến qua ECC) |
 | `obra/superpowers-lab` | MIT | Đợt 2: bước tìm hàm trùng lặp bằng tay trong `skills/code-review/references/duplicates.md` (không chép script của nguồn) |
+| `gemini-cli-extensions/sre` (Google) | Apache-2.0 | `SPR-10`: skill `gcp-incident-response` chắt văn bản chỉ dẫn (khám phá phạm vi, bảng chiến lược giảm thiểu, triage log, SLO, postmortem); không mang máy chủ MCP, script hay điều phối subagent. NOTICE mang thông báo; đã viết lại cho khung repo, không còn file nào phải viết lại trước khi công khai |
+| `GoogleCloudPlatform/data-agent-kit-plugin` — skill `gcloud-auth-verification` (Google) | Apache-2.0 | `SPR-10`: skill `gcp-devops` mục 1 (kiểm danh tính `gcloud`) dẫn xuất, viết lại với placeholder; các mục khác của skill tự viết. NOTICE mang thông báo; không còn file nào phải viết lại trước khi công khai |
+| Google SRE Classroom — Generic Mitigations (https://sre.google/classroom/) | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/, © Google) | `SPR-10`: bảng 7 chiến lược giảm thiểu và nhãn rủi ro của `gcp-incident-response`, đã dịch và chắt (đến qua `gemini-cli-extensions/sre`); ghi công ở `SKILL.md` và NOTICE |
+
+Văn bản Apache License 2.0 đi kèm repo ở [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt).
 
 ## 2. Nguồn chỉ lấy ý (không chép văn bản)
 
@@ -31,6 +36,7 @@ cách đó, các nguồn **chỉ lấy ý**, và lịch sử viết lại phòng
 | ISO/IEC/IEEE 29148 | tiêu chuẩn có bản quyền | Không được chép | Mã định danh yêu cầu ổn định → `id-convention` |
 | MoSCoW | phương pháp, không có văn bản gốc để chép | — | Mức ưu tiên viết bằng chữ (Bắt buộc / Nên có / Có thì tốt / Không làm đợt này) → mẫu SPEC, `id-convention` |
 | caveman (`JuliusBrussee/caveman`) | Apache-2.0 | Không cài, chỉ lấy lối viết gọn | Luồng gọn giữa agent → `token-economy` |
+| PageIndex (`VectifyAI/PageIndex`) | MIT | Chỉ cần khái niệm; MCP của môi trường là bản viết lại ngoài repo, không chép code | Cây mục lục có tóm tắt, agent suy luận section và trang, trả lời kèm số trang → `rag-pageindex` |
 | Nguồn văn phong (BLUF, Minto/SCQ, plain language, Google dev style, Diátaxis, Microsoft style, NN/g, hướng dẫn prompting Anthropic) | nhiều loại (phạm vi công cộng, CC BY, CC BY-SA, giữ bản quyền) | Giấy phép từng trang chưa đọc hết — chỉ lấy ý là an toàn dù giả định sai | Kết luận trước, ma trận độ dài, danh sách cấm kèm cách làm thay → `response-style` |
 
 ## 3. Nguồn private — file lấy từ đó phải viết lại trước khi công khai

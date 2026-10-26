@@ -26,6 +26,7 @@ Nguồn MIT đã chốt mốc nhưng chưa chép văn bản (chỉ lấy ý):
 - BMAD-METHOD (bmad-code-org/BMAD-METHOD) — Copyright (c) 2025 BMad Code, LLC (chỉ lấy ý)
 - Spec Kit (github/spec-kit) — Copyright (c) GitHub, Inc. (chỉ lấy ý)
 - OpenSpec (Fission-AI/OpenSpec) — Copyright (c) 2024 OpenSpec Contributors (chỉ lấy ý)
+- PageIndex (VectifyAI/PageIndex) — Copyright (c) 2025 Vectify AI (chỉ lấy ý cho skill rag-pageindex)
 
 Văn bản giấy phép MIT áp cho từng nguồn trên, với dòng Copyright tương ứng:
 
@@ -49,8 +50,19 @@ Văn bản giấy phép MIT áp cho từng nguồn trên, với dòng Copyright 
 
 ------------------------------------------------------------------------------------------------------
 Nguồn Apache-2.0 (chỉ cần NOTICE nếu chép văn bản; Đợt 1 chỉ lấy ý — đã soát 2026-10-01: không file
-nào trong repo chép văn bản từ hai nguồn này)
+nào trong repo chép văn bản từ caveman và open-code-review; hai nguồn Google ở cuối là của SPR-10 và có chắt văn bản)
 ------------------------------------------------------------------------------------------------------
 
 - caveman (JuliusBrussee/caveman) — Apache License 2.0. Chỉ lấy ý cho skill token-economy; chưa chép đoạn nào.
 - open-code-review (alibaba/open-code-review) — Apache License 2.0. Thành phần không mang vào repo.
+- gemini-cli-extensions/sre (Google) — Apache License 2.0. Skill gcp-incident-response chắt văn bản chỉ dẫn từ nguồn này,
+  gồm bảng chiến lược giảm thiểu viết gần nguyên ý; không mang phần chạy (máy chủ MCP, script, điều phối subagent).
+- gcloud-auth-verification (Google, GoogleCloudPlatform/data-agent-kit-plugin) — Apache License 2.0. Skill gcp-devops mục 1 dẫn xuất
+  từ skill này (viết lại, đổi placeholder).
+
+------------------------------------------------------------------------------------------------------
+Nguồn CC BY 4.0 (ghi công, URI giấy phép và nêu rõ đã thay đổi)
+------------------------------------------------------------------------------------------------------
+
+- Google SRE Classroom, Generic Mitigations (Google, https://sre.google/classroom/) — CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), © Google. Bảng chiến lược giảm thiểu và nhãn
+  rủi ro của skill gcp-incident-response dịch và chắt từ đây (qua gemini-cli-extensions/sre); đã thay đổi so với bản gốc.

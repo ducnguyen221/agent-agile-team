@@ -39,9 +39,9 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
   để `check` không quét như tài liệu; file chứa khoá, mật khẩu hay token làm mồi thì dòng thứ hai ghi rõ
   chúng là **GIÁ TRỊ GIẢ**.
 
-**Hiện trạng thử:** cả 33 skill đã có tệp thử đã chạy — bảng ở mục 4.
+**Hiện trạng thử:** 33 trong 36 skill đã có tệp thử đã chạy — bảng ở mục 4; ba skill mới (`rag-pageindex`, `gcp-devops`, `gcp-incident-response`) chưa có tệp thử, sẽ chạy ở TK9 của `SPR-10` rồi mới có hàng ở mục 4.
 
-## 3. Mục lục — 33 skill
+## 3. Mục lục — 36 skill
 
 ### Quy trình
 
@@ -75,6 +75,9 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | [react](react/SKILL.md) | tham chiếu | component, hook, state, form, ranh giới lỗi, test component (+ `references/patterns.md`, `references/testing.md`) |
 | [frontend](frontend/SKILL.md) | tham chiếu | Vite, biến môi trường, proxy dev, chia bundle, định tuyến, state ứng dụng, tải trang (+ `references/vite.md`, `references/delivery.md`) |
 | [e2e-testing](e2e-testing/SKILL.md) | tham chiếu | Playwright: page object, locator, retry, trace, test chập chờn, test hồi quy cho lỗi của mã do AI viết (+ `references/playwright-recipes.md`, `references/ai-regression.md`) |
+| [rag-pageindex](rag-pageindex/SKILL.md) | tham chiếu | hỏi đáp PDF dài qua cây mục lục của MCP pageindex: agent suy luận section/trang, trả lời kèm số trang, không vector, không API key |
+| [gcp-devops](gcp-devops/SKILL.md) | kỷ luật | vận hành Google Cloud (Cloud Run, Cloud SQL, Secret Manager): không đoán định danh, `describe` trước khi đổi, không để lộ secret, placeholder thay giá trị riêng |
+| [gcp-incident-response](gcp-incident-response/SKILL.md) | kỷ luật | sự cố Google Cloud: khám phá phạm vi trước khi chạm, giảm thiểu trước tìm gốc sau (bảng 7 chiến lược), triage log không tràn ngữ cảnh, SLO, postmortem |
 
 ### Kiểm định
 
@@ -103,7 +106,7 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | [writing-skills](writing-skills/SKILL.md) | tạo/sửa skill, viết description hoặc thử áp lực, đề xuất nâng bài học thành skill, chẩn đoán phiên/sprint chạy sai |
 | [eval-harness](eval-harness/SKILL.md) | tiêu chí đạt/hỏng và kiểm hồi quy cho tính năng có gọi mô hình của sản phẩm (đánh giá kết quả mô hình, không phải thử áp lực skill) |
 
-## 4. Hiện trạng thử — 33 skill
+## 4. Hiện trạng thử — 36 skill
 
 Đọc từ frontmatter của tệp thử, không từ trí nhớ (`tests/test_skill_tests.py` đối chiếu bảng này với frontmatter). Tệp kỷ luật:
 cột `result` là đoạn đầu (số kịch bản Đạt), chi tiết RED và GREEN ở chính tệp. Tệp truy xuất: một thước chung — `strict` là
@@ -117,7 +120,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 3/3, 3/3, 3/3 runs Đạt, RED 0/3, 0/3, 3/3 runs Đạt so KB1 and KB2 gave way and KB3 passed as-is, kept as regression; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
 | [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree after 1 REFACTOR round (KB14 new; KB1, KB3, KB8 rerun) | 2026-10-24 |
 | [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass after re-scoring two criteria that over-read the spec (QA first pass 1/3; second run of in-6 pass, second run of in-8 pass (fresh subject, criteria written before dispatch)); RED on af1ad4f 0/3 pass; old scenarios 8/9 | 2026-10-22 |
-| [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | Chưa chạy — current candidate behavior unverified | 2026-10-12 |
+| [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 8/8 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4 | 2026-10-22 |
 | [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix | 2026-10-22 |
 | [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
@@ -135,18 +138,21 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [react](react/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/7 (+4 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [tdd](tdd/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
 | [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
+| [rag-pageindex](rag-pageindex/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-26 |
 | [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 11/11 GREEN pass on the current tree (3 new cr-9 to cr-11, plus cr-1 to cr-8 rerun) | 2026-10-23 |
-| [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
+| [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
 | [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); skill unchanged | 2026-10-04 |
 | [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (sec-4 new; sec-1, sec-2b, sec-3b rerun at n = 1) | 2026-10-24 |
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 7/7 GREEN pass on the current tree (ver-7 new, ver-1 to ver-6 rerun) | 2026-10-23 |
 | [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (wq-7 new, wq-1 to wq-3 rerun at n = 1) plus a real design-compare run that matched its expectation | 2026-10-23 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-22 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
-| [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | Chưa chạy — current candidate behavior unverified | 2026-10-12 |
+| [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
 | [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (eh-9 new; eh-1, eh-3, eh-4 rerun at n = 1) | 2026-10-24 |
 | [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on KB3 at n = 3 after the TK13 fix (round 2, 2026-10-04, round 1 on the pre-fix text was 1/3) and RED 0/3 pass (RED breaks); rerun n = 1 - KB1, KB2, KB4, KB6 pass, KB5 partial against the expectation, KB7 partial (TK12 had pass; not shown to be a regression); earlier TK12 rerun GREEN 3/3 on the old scenarios and 4 new ones | 2026-10-04 |
 | [hooks-guardrails](hooks-guardrails/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 0/3 pass (3 partial) | 2026-10-23 |
+| [gcp-devops](gcp-devops/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 1/3 pass (2 partial) | 2026-10-26 |
+| [gcp-incident-response](gcp-incident-response/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 1/3 pass (2 partial) | 2026-10-26 |
 
 Agent reviewer chuyên đề: [agents/README.md](../agents/README.md). Gặp tên cũ trong hồ sơ lịch sử:
 [docs/MIGRATION.md](../docs/MIGRATION.md).

@@ -46,6 +46,7 @@ trước khi chấm.
   đã bị thu hồi.
 - Chỉ mục dạng cây (mỗi node có tiêu đề, tóm tắt, trang): chất lượng = cây đúng cấp heading, tóm tắt node đủ để
   chọn node, node không trộn ranh giới tài liệu — không phải cosine.
+- Quy trình lập chỉ mục cây và hỏi đáp có trích trang bằng MCP pageindex: `skills/rag-pageindex/SKILL.md` (quy trình A/B).
 
 **Bước 3 — Truy xuất và dựng ngữ cảnh.**
 - Lọc quyền và tenant nằm **trong** truy vấn truy xuất, trước top-k — lọc sau top-k vừa có thể lộ dữ liệu

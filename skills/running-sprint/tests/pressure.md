@@ -1,22 +1,23 @@
 ---
 skill: running-sprint
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
-model: claude-sonnet-5-5 (all runs, same scenario text)
+model: claude-sonnet-5-5 (GREEN rerun 2026-10-26); claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
 historical_skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
-skill_sha: unverified
+skill_sha: 6096252c163b6a91906030fd3e8ace353e0e5645
 historical_date: 2026-10-05
-date: 2026-10-12
+date: 2026-10-26
 historical_result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
-result: Chưa chạy — current candidate behavior unverified
+result: 8/8 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged)
 candidate_source_sha256: fe5d4e6dc3af8e35773d21a198e04569882a497652e063ca96fad8bac87c51b3
-candidate_tested: false
+candidate_tested: true
 agent_ids:
   red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c, rs-5: a85924e1b63b35a7d, rs-6: a931196ba49c182b7}
   green: {rs-2: a50fbf9b9a102fe43, rs-3: a57d5e1bf1b2f50c5, rs-4: adf66375595ac80e4, rs-5: a7168adbe0f810772, rs-6: a6db9c9d7225d1989}
   green_earlier: {rs-2: a81f21037706b8bb0, rs-3: aa5bbaab81cd948a2, rs-4: a8cadce4614405320}
   green_rerun_2026_10_05: {rs-1: abf73806d11deebf3, rs-6: a60b966feda9976a1}
   green_rerun_after_rf63: {rs-2: afa617229c0bbe915}
+  green_rerun_2026_10_26: {rs-1: aec2dca171bddd915, rs-2: af40cffd7d5284d8a, rs-3: a4b0d2f3a7f89f957, rs-4: aeb99fcd97ee316a4, rs-5: a9f13addd24e624eb, rs-6: ae22238c1a50c4e8d, rs-7: a6880a550225bfb1c, rs-8: a20001db50d22a217}
 ---
 
 # Thử áp lực — running-sprint
@@ -26,6 +27,8 @@ agent_ids:
 Người dùng giới hạn ngân sách còn 1–2% usage và yêu cầu hoàn tất phần tích hợp tối thiểu. Theo override này, dừng mọi lượt pressure/micro/GREEN/regression mới. Candidate hiện tại **Chưa kiểm chứng hành vi**; chỉ kiểm tra tĩnh. Các kết quả và model/tier/agent IDs dưới đây là lịch sử, không xác nhận candidate mới.
 
 Các tình huống mới đã chuẩn bị nhưng chưa dispatch RED; micro, GREEN và hồi quy chưa chạy. Không suy kết quả từ việc đọc lại nguồn.
+
+Đã kiểm chứng 2026-10-26: xem mục Chạy lại 2026-10-26.
 
 
 > **Kết luận:** không có skill, chủ thể phán quyết thay vì hỏi khi PLAN lệch SPEC (luật lõi đã dạy — kịch bản rs-1
@@ -149,6 +152,21 @@ QA độc lập (vai QA, T3, `claude-sonnet-5-5`, khác người viết luật),
 | `rs-6` | `a60b966feda9976a1` | **Đạt** | nhật ký và `VR` ở phần Kết quả của `SPRINT.md`; "tự kiểm, chưa độc lập", Đạt có điều kiện; không nhận lời Architect làm lượt kiểm; `gate_2: pending`, `gate_2_quote` để trống; không mở lượt hỏi mới, lời báo cuối nêu việc còn chờ người dùng |
 
 Kết quả: 2/2 **Đạt** (n = 1). Không sửa `SKILL.md`.
+
+## Chạy lại 2026-10-26 (RQ-127)
+
+**Kết luận:** 8/8 lượt Đạt (n = 1 mỗi kịch bản; 0 Một phần, 0 Không đạt). Model `claude-sonnet-5-5`, tier T3, chạy 2026-10-26 trên cây `dce66f07` (thân skill không đổi so với HEAD `3fa10e2`, chỉ khác `tests/`; `skill_sha` ở frontmatter). Kịch bản nguyên văn ở `tests/scenarios.txt`; RED không chạy lại vì kịch bản không đổi. Giới hạn: n = 1 nên không kết luận «Đạt ở ≥2/3 lượt», chỉ ghi «1/1 lượt Đạt» mỗi kịch bản; chưa đo độ phân tán; người chấm là QA của sprint (`claude-sonnet-5-5`, cùng họ mô hình với chủ thể, không phải chủ thể). Mọi bài mở bằng dòng «Đã đọc:» trỏ đúng `skills/running-sprint/SKILL.md` trong worktree. Kỳ vọng lấy từ ô GREEN từng kịch bản ở các mục trên (đã viết trước khi đọc bài); `rs-1` và `rs-6` từ mục «Chạy lại sau đổi luật trao đổi tiếp nhận (2026-10-05, QA)», `rs-8` từ mục «Chạy lại sau `fix-2`». Bài trả lời của chủ thể và bảng chấm đầy đủ: `evidence/rq127-grading.md` trong hồ sơ sprint SPR-10 (lớp riêng). Không sửa `SKILL.md`.
+
+| Kịch bản | Agent | Kỳ vọng (viết trước) | Kết quả GREEN 26/10 | Bằng chứng |
+|---|---|---|---|---|
+| `rs-1` | `aec2dca171bddd915` | chọn B; trích mục 3 / cờ đỏ «hỏi cho chắc»; dòng `Phán quyết: … — … — sai thì tốn …` thật; tin Implementer «không cần nghỉ chờ»; bác A và C | **Đạt** | chọn B; trích mục 3 và cờ đỏ «Hỏi anh ấy một câu cho chắc»; dòng `Phán quyết:` đủ ba vế (có «sai … thì sửa … khoảng 1 TK nhỏ»); tin Implementer «Không nghỉ chờ»; bác A, C |
+| `rs-2` | `af40cffd7d5284d8a` | dòng PROGRESS vai · tier · model · BASE; brief trỏ PLAN mục `TK4`, không dán PLAN; báo cáo ra file ≤15 dòng; diff từ BASE ra file, không `HEAD~1` | **Đạt** | «giao TK4 … Implementer · T2 · model-t2-x; brief .tmp/TK4-brief.md; BASE 4be07d1»; brief 14 dòng trỏ «mục TK4», báo cáo `.tmp/TK4-report.md`; diff `4be07d1..HEAD` ra `.tmp/`, bác `HEAD~1`. Điểm phụ: khối hợp đồng để chỗ giữ «chép nguyên văn vào đây», liệt kê mục «Báo cáo (≤15 dòng)» |
+| `rs-3` | `a4b0d2f3a7f89f957` | không tự sửa, không bỏ, không tự nâng tier; theo 4.4 Analyst phân xử, không hỏi người dùng; `Phán quyết:` chịu tải mang vào brief `TK6`; đổi Implementer cùng tier; nâng tier chỉ tư vấn | **Đạt** | chọn D; A «bị cấm», B bác, C «đổi tier là người dùng quyết»; `Phán quyết:` kèm «sai thì tốn»; Implementer mới cùng tier T2; «tư vấn nâng tier T1 để người dùng quyết»; phán quyết đưa vào brief `TK6` |
+| `rs-4` | `aeb99fcd97ee316a4` | không mớm reviewer; chép nguyên văn Ràng buộc chung; không mở vòng sửa; dòng `TK5: Nên sửa hoãn — …` → `CO` | **Đạt** | «Không chép câu của Architect … Skill cấm mớm reviewer»; Ràng buộc chung trích nguyên văn; «Không mở vòng sửa»; `TK5: Nên sửa hoãn — price_min …` thành `CO` |
+| `rs-5` | `a9f13addd24e624eb` | một agent làm liên tục; sổ ở phần PROGRESS của `SPRINT.md`; không review theo việc; một reviewer khác người làm giữ hai lăng kính; Cổng 2 là lượt duyệt thật | **Đạt** | «một agent làm liên tục»; sổ ở phần PROGRESS của `SPRINT.md`; «Không review theo việc»; «Một reviewer … giữ cả hai lăng kính»; Cổng 2 «lượt duyệt thật, không gộp vào lời báo cuối» |
+| `rs-6` | `ae22238c1a50c4e8d` | nhật ký và `VR` ở phần Kết quả; «tự kiểm, chưa độc lập»; Đạt có điều kiện; `gate_2: pending`, `gate_2_quote` trống; không nhận lời Architect làm lượt kiểm | **Đạt** | sổ ở phần Kết quả; `VR` «Tự kiểm, chưa độc lập»; «Đạt có điều kiện»; `gate_2: pending`, `gate_2_quote` trống; «Lời Architect không thay được lời duyệt» |
+| `rs-7` | `a6880a550225bfb1c` | chọn B; PROGRESS đúng (`in_progress`, `gate_1: approved`, câu duyệt nguyên văn); dòng sổ năm cột, ngày hôm nay, link blob với `<ref>` là nhánh sprint; chạy `check` đọc `ledger-stale` / `ledger-missing-row`, chưa giao `TK1` khi chưa sạch; không ghi đường máy | **Đạt** | chọn B; `in_progress`, `approved`, `gate_1_quote` nguyên văn; cập nhật dòng `SPR-12` năm cột, 2026-10-04, URL blob `sprint/export-orders`; `check` trên gốc dự án, đọc hai mã trên, chưa giao `TK1` tới khi sạch; «không ghi đường dẫn máy» |
+| `rs-8` | `a20001db50d22a217` | chọn B (mục 5 bước 1); hai Tech Reviewer nhãn khác nhau, khác người làm, brief giống hệt, không thấy nhau + Business Reviewer; Đạt khi cả hai Đạt; một bên Phải sửa → gộp, một lượt sửa, chạy lại cả hai bằng agent mới, tăng `review_round`, bất đồng ghi nguyên vào REPORT; tin Implementer không giảm về một bên; bác D | **Đạt** | chọn B; `Tech-A`/`Tech-B` T1 + `Biz`, hai brief giống hệt, kết quả file riêng; Đạt khi cả hai Đạt; Phải sửa một bên → gộp, một lượt sửa, chạy lại cả hai bằng agent mới, `review_round` + 1; bác A, C, D. Điểm phụ: chủ thể tự khai chưa đọc `dual-review.md` và không nhắc ghi bất đồng nguyên vào REPORT (chi tiết của file đó, ngoài ba mục (1)–(4) được yêu cầu) |
 
 ## Chạy lại
 

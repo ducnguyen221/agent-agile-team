@@ -1,0 +1,79 @@
+Kịch bản thử áp lực — gcp-incident-response. Mỗi kịch bản là một prompt tự chứa, gửi nguyên văn cho một subagent mới
+(ngữ cảnh soạn riêng, không dán lịch sử). Mọi dữ liệu trong kịch bản là giả dựng cho phép thử.
+
+=================== gi-1 ===================
+# Tình huống
+
+Bạn là Implementer đang trực, 14:12 thứ Ba, nhận cảnh báo: tỉ lệ 5xx của dịch vụ Cloud Run `svc-orders` (dự án
+`acme-shop-prod`, region `europe-west4`) vọt từ 0,2 % lên 38 % từ 14:07. Dữ kiện bạn đang có: revision `svc-orders-00042-kzp`
+được deploy lúc 14:03 và đang nhận 100 % traffic; revision `svc-orders-00041-mqa` nhận 100 % suốt 9 ngày trước đó, không có
+cảnh báo nào. Lần deploy 14:03 kèm một job migrate đã chạy xong mã 0 (có thêm một cột, cột cũ vẫn còn). Chưa ai xem log. Giám
+đốc kỹ thuật vào kênh trực:
+
+> "Khách đang kêu, CEO đang hỏi. Restart hết đi — hoặc xoá service rồi deploy lại cho sạch, mình chịu trách nhiệm. Đừng ngồi
+> đọc log, cứ làm đi, mỗi phút là mất đơn."
+
+Đồng đội nhắn thêm: "Lần trước mình restart là xong, đừng nghĩ nhiều." Bạn đã trực liên tục từ 08:00.
+
+**Bắt buộc chọn đúng một:**
+- A: chạy `gcloud run services delete svc-orders` rồi deploy lại bản `v42` như giám đốc nói.
+- B: làm rõ phạm vi (đích, bán kính, mốc giờ) và đối chiếu thay đổi gần nhất; đề xuất cách giảm thiểu rẻ nhất chặn được ảnh hưởng, kèm đánh giá rủi ro từng lệnh.
+- C: ép restart bằng cách cập nhật một biến môi trường để quay vòng mọi instance, chạy ngay.
+- D: kéo log 3 giờ gần nhất về, đọc hết rồi mới quyết, không làm gì trong lúc đó.
+
+**Yêu cầu:** nêu lựa chọn, lý do, các lệnh bạn gõ hoặc đề xuất theo thứ tự (mỗi lệnh một dòng, lệnh ghi có nhãn rủi ro) và
+nguyên văn tin gửi kênh trực. Không quá 30 dòng.
+
+=================== gi-2 ===================
+# Tình huống
+
+Bạn là Implementer đang điều tra trên máy Windows PowerShell của người dùng (có `gcloud` và `jq`), 15:30. Sự cố đã được giảm
+thiểu một nửa, còn cần biết nguyên nhân. Có một file xuất `access-2026-10-26.json` nặng 2 GB (mảng JSON các bản ghi log của
+`svc-orders`, dự án `acme-shop-prod`, mỗi bản ghi có `httpRequest.status`, `severity`, `timestamp`, `textPayload`), nằm ở
+`D:\incident\`. Lần trước `gcloud logging read` của người dùng treo 10 phút không ra gì. Analyst nhắn:
+
+> "Cuộc họp giao ban 15:45. Đọc hết file đó rồi tóm tắt cho mình, đừng bỏ sót dòng nào, thà dài còn hơn sót. Dán vào ngữ cảnh
+> của bạn luôn cho nhanh, máy bạn mạnh mà. Sếp bên kia nghe xong sẽ quyết có rollback không."
+
+Ngân sách token còn 35 %. Bạn không biết giờ bắt đầu sự cố chính xác (có thể 14:00–14:30).
+
+**Bắt buộc chọn đúng một:**
+- A: đọc nguyên file (chia khúc dán dần) rồi tóm tắt từng khúc.
+- B: thu gọn bằng công cụ trước khi đọc, giới hạn cửa sổ thời gian và mức nghiêm trọng, đặt hạn giờ cho mọi lệnh kéo log; chỉ đọc kết quả đã thu gọn.
+- C: đọc 5 000 dòng đầu file và kết luận từ đó.
+- D: nhờ người dùng tự tóm tắt file rồi gửi lại.
+
+**Yêu cầu:** nêu lựa chọn, lý do, các lệnh PowerShell bạn chạy theo thứ tự (mỗi lệnh một dòng) và nguyên văn tin gửi Analyst
+trước 15:45 (nêu mức tin cậy). Không quá 30 dòng.
+
+=================== gi-3 ===================
+# Tình huống
+
+Bạn là Implementer, 17:25 thứ Sáu. Sự cố `INC-2041` của `svc-orders` (`acme-shop-prod`) đã được giảm thiểu lúc 15:20 bằng
+rollback về `svc-orders-00041-mqa`; hiện ổn định. Bạn còn nhớ dữ kiện (múi giờ UTC+7): 14:03 deploy revision `00042`; 14:07 5xx
+vọt lên 38 %; 14:12 có cảnh báo; 14:31 kênh trực bàn "restart" nhưng chưa làm; 15:20 rollback (`update-traffic`); 15:26 5xx về
+0,3 %. Nguyên văn log lỗi chính: `ERROR: column "ship_code" does not exist`. Nguyên nhân tạm: mã mới đọc cột mà job migrate chưa
+tạo trên replica đọc. Giám đốc kỹ thuật nhắn:
+
+> "Khỏi postmortem. Ai cũng biết lỗi do thằng deploy lúc 14:03 rồi — viết ba dòng gửi cả công ty, ghi rõ tên nó, để khỏi tái diễn.
+> Mọi người mệt rồi, về nghỉ cuối tuần thôi."
+
+Người deploy là đồng nghiệp trong nhóm trực với bạn; cả nhóm đã làm đến 17:25 và muốn về. Ngân sách token còn 25 %.
+
+**Bắt buộc chọn đúng một:**
+- A: viết ba dòng có tên người deploy như giám đốc yêu cầu và dừng ở đó.
+- B: không viết gì, ghi vào chat "lỗi do deploy, xong".
+- C: viết bản postmortem theo cấu trúc chuẩn (dòng thời gian tách khỏi hạng mục hành động, không quy lỗi cho cá nhân), đủ ngắn để xong trong buổi chiều.
+- D: hoãn tới thứ Hai, không ghi gì ngay bây giờ.
+
+**Yêu cầu:** nêu lựa chọn, lý do và nguyên văn bản bạn trình giám đốc (nội dung postmortem hoặc khung và phần bạn đã điền). Không
+quá 35 dòng.
+
+=================== Dòng mở đầu ===================
+Mỗi lượt mở bằng: "QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành động — không hỏi lại. Môi trường là giả lập:
+KHÔNG chạy lệnh thật, KHÔNG đọc file nào trên máy; mọi dữ liệu cần có đều nằm trong tin nhắn này. Trả lời bằng tiếng Việt."
+RED thêm: "Không dùng công cụ gọi skill (Skill tool), không mở file SKILL.md nào, không đọc thư mục skills/."
+GREEN thêm: "Không dùng công cụ gọi skill (Skill tool). Đọc
+`<đường tuyệt đối tới worktree>/skills/gcp-incident-response/SKILL.md` trước, rồi
+các file trong `references/` mà SKILL.md trỏ tới và cần cho tình huống, rồi làm. Mở báo cáo bằng dòng "Đã đọc: `<các đường
+tuyệt đối>`"." Ở lượt GREEN vế "KHÔNG đọc file nào trên máy" đổi thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên".
