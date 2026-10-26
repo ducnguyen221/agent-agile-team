@@ -39,9 +39,9 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
   để `check` không quét như tài liệu; file chứa khoá, mật khẩu hay token làm mồi thì dòng thứ hai ghi rõ
   chúng là **GIÁ TRỊ GIẢ**.
 
-**Hiện trạng thử:** cả 33 skill đã có tệp thử đã chạy — bảng ở mục 4.
+**Hiện trạng thử:** 33 trong 36 skill đã có tệp thử đã chạy — bảng ở mục 4; ba skill mới (`rag-pageindex`, `gcp-devops`, `gcp-incident-response`) chưa có tệp thử, sẽ chạy ở TK9 của `SPR-10` rồi mới có hàng ở mục 4.
 
-## 3. Mục lục — 33 skill
+## 3. Mục lục — 36 skill
 
 ### Quy trình
 
@@ -75,6 +75,9 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | [react](react/SKILL.md) | tham chiếu | component, hook, state, form, ranh giới lỗi, test component (+ `references/patterns.md`, `references/testing.md`) |
 | [frontend](frontend/SKILL.md) | tham chiếu | Vite, biến môi trường, proxy dev, chia bundle, định tuyến, state ứng dụng, tải trang (+ `references/vite.md`, `references/delivery.md`) |
 | [e2e-testing](e2e-testing/SKILL.md) | tham chiếu | Playwright: page object, locator, retry, trace, test chập chờn, test hồi quy cho lỗi của mã do AI viết (+ `references/playwright-recipes.md`, `references/ai-regression.md`) |
+| [rag-pageindex](rag-pageindex/SKILL.md) | tham chiếu | hỏi đáp PDF dài qua cây mục lục của MCP pageindex: agent suy luận section/trang, trả lời kèm số trang, không vector, không API key |
+| [gcp-devops](gcp-devops/SKILL.md) | kỷ luật | vận hành Google Cloud (Cloud Run, Cloud SQL, Secret Manager): không đoán định danh, `describe` trước khi đổi, không để lộ secret, placeholder thay giá trị riêng |
+| [gcp-incident-response](gcp-incident-response/SKILL.md) | kỷ luật | sự cố Google Cloud: khám phá phạm vi trước khi chạm, giảm thiểu trước tìm gốc sau (bảng 7 chiến lược), triage log không tràn ngữ cảnh, SLO, postmortem |
 
 ### Kiểm định
 
@@ -103,7 +106,7 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | [writing-skills](writing-skills/SKILL.md) | tạo/sửa skill, viết description hoặc thử áp lực, đề xuất nâng bài học thành skill, chẩn đoán phiên/sprint chạy sai |
 | [eval-harness](eval-harness/SKILL.md) | tiêu chí đạt/hỏng và kiểm hồi quy cho tính năng có gọi mô hình của sản phẩm (đánh giá kết quả mô hình, không phải thử áp lực skill) |
 
-## 4. Hiện trạng thử — 33 skill
+## 4. Hiện trạng thử — 36 skill
 
 Đọc từ frontmatter của tệp thử, không từ trí nhớ (`tests/test_skill_tests.py` đối chiếu bảng này với frontmatter). Tệp kỷ luật:
 cột `result` là đoạn đầu (số kịch bản Đạt), chi tiết RED và GREEN ở chính tệp. Tệp truy xuất: một thước chung — `strict` là

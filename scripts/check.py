@@ -1939,7 +1939,7 @@ _CODE_SPAN = re.compile(r"`([^`\n]*)`")
 UPSTREAM_OWNERS = frozenset(o.casefold() for o in (
     "obra", "affaan-m", "garrytan", "github", "Fission-AI", "supabase", "alibaba", "bmad-code-org",
     "JuliusBrussee", "ccusage", "ryoppippi", "yamadashy", "google", "OWASP", "basecamp.com",
-    "rtk-ai", "oraios", "mksglu", "microsoft", "firelex",
+    "rtk-ai", "oraios", "mksglu", "microsoft", "firelex", "VectifyAI", "gemini-cli-extensions", "GoogleCloudPlatform",
 ))
 _SHA = re.compile(r"[0-9a-f]{7,40}")
 _OWNER_REPO = re.compile(r"([A-Za-z0-9][A-Za-z0-9_.-]*)/[A-Za-z0-9][A-Za-z0-9_.-]*")

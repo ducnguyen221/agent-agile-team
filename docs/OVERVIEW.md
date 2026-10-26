@@ -10,7 +10,7 @@ updated: 2026-10-05
 > **Kết luận:** agent-agile-team là một **phương pháp làm phần mềm cho đội AI agent**: bạn giao việc bằng lời
 > thường, xác nhận **một tin trao đổi** lúc tiếp nhận (mục tiêu, bậc việc, có mở sprint không), rồi trả lời đúng
 > **hai lần** (duyệt kế hoạch, nghiệm thu kết quả), đội agent làm phần còn lại, ghi sổ,
-> và nhờ **agent khác** kiểm. Repo gồm luật lõi, 33 skill, 13 agent, bộ mẫu tài liệu và ba công cụ kiểm; cài
+> và nhờ **agent khác** kiểm. Repo gồm luật lõi, 36 skill, 13 agent, bộ mẫu tài liệu và ba công cụ kiểm; cài
 > được trên Claude Code, Codex và Antigravity. Bản hiện tại `0.4.0`, repo công khai (MIT).
 
 File này là nguồn cho trang giới thiệu <https://ducnguyen.vn/agent-agile-team/>. Số liệu và tên file khớp repo
@@ -37,7 +37,7 @@ Lợi ích cho người không chuyên:
   nghi thức. Việc 1–2 thao tác có kết quả rõ, hay bạn nói "không cần sprint", agent **làm thẳng** — không hồ sơ,
   vẫn kiểm và báo kết quả.
 
-Con số của bản hiện hành (sau `0.4.0`): **6** bước · **2** cổng người · **7** vai · **3** tier · **33** skill · **13** agent ·
+Con số của bản hiện hành (sau `0.4.0`): **6** bước · **2** cổng người · **7** vai · **3** tier · **36** skill · **13** agent ·
 **3** công cụ Python · **3** harness được hỗ trợ.
 
 ## 2. Tính năng
@@ -90,17 +90,18 @@ Bảy vai agent chia hai nhóm; mỗi vai có tier; repo không chứa tên mode
 - Cạn hạn mức model: dừng tier đó, ghi vướng mắc, báo bạn — **không tự hạ tier**.
 - Mỗi lần giao việc cho agent con, hồ sơ ghi đủ vai · tier · model · effort thực tế.
 
-### 2.4 Bộ 33 skill và 13 agent
+### 2.4 Bộ 36 skill và 13 agent
 
 Skill là năng lực thường trực: agent rà danh mục trước mỗi hành động và tự gọi skill khớp tình huống.
 
-- **33 skill**, năm nhóm: Quy trình (6: `intake`, `shaping-spec`, `writing-plan`, `running-sprint`,
-  `closing-sprint`, `bug-triage`) · Kỹ thuật (15: `tdd`, `debugging` và 13 skill tham chiếu như `python`,
+- **36 skill**, năm nhóm: Quy trình (6: `intake`, `shaping-spec`, `writing-plan`, `running-sprint`,
+  `closing-sprint`, `bug-triage`) · Kỹ thuật (18: `tdd`, `debugging`, `gcp-devops`, `gcp-incident-response` và 14 skill tham chiếu như `python`,
   `fastapi`, `postgres`, `react`, `deployment`…) · Kiểm định (7: `verify-before-done`, `code-review`,
   `plan-review`, `security-review`, `security-audit`, `web-qa`, `hooks-guardrails`) · Giao tiếp và tối ưu (3: `response-style`,
   `id-convention`, `token-economy`) · Meta (2: `writing-skills`, `eval-harness`).
-- Skill **kỷ luật** (20) có luật sắt và được thử áp lực; skill **tham chiếu** (13) là bảng tra kỹ thuật và được
-  thử truy xuất. Cả 33 đều có tệp thử đã chạy.
+- Skill **kỷ luật** (22) có luật sắt và được thử áp lực; skill **tham chiếu** (14) là bảng tra kỹ thuật và được
+  thử truy xuất. 33 skill đầu có tệp thử đã chạy; ba skill mới (`rag-pageindex`, `gcp-devops`,
+  `gcp-incident-response`) chưa có tệp thử, sẽ chạy ở `SPR-10` TK9.
 - **13 agent** chuyên đề: 12 agent **chỉ đọc** (reviewer theo ngôn ngữ, bảo mật, CSDL, săn lỗi bị nuốt, kiểm
   comment, kiểm test, lần bản đồ code…) và `build-fixer` — agent duy nhất được sửa file, chỉ sửa đúng chỗ lỗi
   build đòi.
@@ -202,7 +203,7 @@ agent-agile-team/
 │   └── standards/       chuẩn code chung và theo ngôn ngữ
 ├── roles/               thẻ vai: executor/ (5) · verifier/ (2 + dual-review + 4 chuyên đề)
 ├── tiers/               ba tier, hợp đồng bảng tier → model và ma trận mẫu (tiers.example.json)
-├── skills/              33 skill, mỗi skill một thư mục skills/<tên>/SKILL.md
+├── skills/              36 skill, mỗi skill một thư mục skills/<tên>/SKILL.md
 ├── agents/              13 agent chuyên đề, mỗi agent một file
 ├── templates/           khuôn hồ sơ: sprint/ (6) · registry/ (5) · project/agile.json
 ├── scripts/             init.py · check.py · index.py (+ _common.py)

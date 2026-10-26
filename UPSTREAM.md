@@ -22,7 +22,7 @@ nào phải xem lại nguồn này. SHA rút gọn 8 ký tự; bản đầy đ�
 
 ### Repo đã dùng hoặc đã xét
 
-Bảng dưới có 23 nguồn dạng repo, chia theo **vai trò**: **distill** (nội dung đã vào skill/agent) · **ý**
+Bảng dưới có 26 nguồn dạng repo, chia theo **vai trò**: **distill** (nội dung đã vào skill/agent) · **ý**
 (chỉ lấy khái niệm) · **chỉ gọi** (công cụ chạy qua `npx`) · **đã loại** (đánh giá rồi không lấy, ghi để
 khỏi đánh giá lại).
 
@@ -50,6 +50,9 @@ khỏi đánh giá lại).
 | `mksglu/context-mode` | đã loại | — | — | 2026-10-04 · `dbfa57d5` (`v1.0.169`) | không — nghiên cứu Đợt 1 ghi ELv2 (không phải giấy phép mở), GitHub báo `NOASSERTION` |
 | `microsoft/LLMLingua` | đã loại | — | — | 2026-10-04 · `5a4c78ae` | không — MIT nhưng cần mô hình nén prompt, quá nặng cho repo phương pháp |
 | `affaan-m/agentshield` | đã loại | — | — | 2026-10-04 · `b0891303` | không — ngoài phạm vi phương pháp |
+| `VectifyAI/PageIndex` | ý, không chép | `rag-pageindex`: cơ chế RAG không vector (cây mục lục có tóm tắt, agent suy luận section/trang, trả lời kèm số trang); MCP `pageindex` của môi trường là bản viết lại gọn, không chép code | ý từ `293730af` (SPR-10) | 2026-10-26 · `293730af` (mốc baseline, HEAD `main` chưa đo) | khi `rag-pageindex` hoặc MCP đổi cách dựng cây |
+| `gemini-cli-extensions/sre` | distill · NOTICE | `gcp-incident-response` (chỉ văn bản: khám phá phạm vi, bảng 7 chiến lược giảm thiểu, triage log, SLO, postmortem; không mang máy chủ MCP, script, điều phối subagent) | SPR-10 · `dd202433` | 2026-10-26 · `dd202433` (commit tồn tại, giấy phép Apache-2.0) | mọi lượt — khi sửa `gcp-incident-response` |
+| `GoogleCloudPlatform/data-agent-kit-plugin` | distill · viết lại · NOTICE | `gcp-devops` mục 1 (kiểm danh tính `gcloud`); skill nguồn `gcloud-auth-verification`, nay tên `google-cloud-auth-verification` (đổi tên ở `a891ebc5`, 2026-08-31) | SPR-10 · `c125eaea` (khối blob `0d0c370a` giống bản salvage 2026-08-23) | 2026-10-26 · `c125eaea` (giấy phép Apache-2.0) | khi sửa mục 1 của `gcp-devops` |
 | squeez | đã loại | — | — | chưa xác định repo — nghiên cứu Đợt 1 chỉ ghi tên | không; xác định repo trước nếu xét lại |
 
 ### Tài liệu web (không có commit)
@@ -67,6 +70,17 @@ Bảng dưới có 9 nhóm nguồn **tài liệu web** — không có SHA, nên 
 | Tài liệu Anthropic (hướng dẫn prompting, context engineering, Claude Code output styles) | ý, chỉ trỏ link | `response-style`, `token-economy` | 2026-10-01 | mỗi lượt — hành vi harness đổi theo bản |
 | Tài liệu chính thức của công cụ (`gh`, PostgreSQL, PgBouncer, golang-migrate, Kubernetes, Docker, Trivy, FastAPI, pytest, PyPA, uv, docs.python.org) | ý, không chép | phần bổ sung của skill kỹ thuật ở `TK11`/`TK13` (`github-ops`, `database-migrations`, `deployment`, `fastapi`, `postgres`, `python`, `worktrees`, `react`, `frontend`, `e2e-testing`) | 2026-10-04 | khi sửa reference tương ứng; nguồn ghi ở mục Nguồn từng file |
 | Bài kỹ thuật của nhà cung cấp (Azure Architecture Center, AWS Builders' Library, Amazon SQS) | ý, không chép | `error-handling`, `deployment` | 2026-10-04 | khi sửa reference tương ứng |
+
+## SPR-10 — ba nguồn thêm cho `rag-pageindex`, `gcp-devops`, `gcp-incident-response`, chốt 2026-10-26
+
+SHA đầy đủ đo bằng `gh api` (chỉ đọc metadata, không tải code). `VectifyAI/PageIndex`: mốc baseline của môi trường,
+`293730afbd4319a683fe4aee439360a2b21b8c3c` (2026-06-22), MIT, thông báo bản quyền "Vectify AI"; chỉ lấy **ý**, MCP là bản
+viết lại ngoài repo này. `gemini-cli-extensions/sre`: `dd2024335e1638dbc58a38d91f339f5e2814967f` (2026-07-31), Apache-2.0;
+`gcp-incident-response` chắt văn bản chỉ dẫn, không mang phần chạy. `GoogleCloudPlatform/data-agent-kit-plugin`:
+`c125eaea039b9440b306b428ee2068d79123ddb7` (2026-06-10), Apache-2.0, là commit cuối đổi `skills/gcloud-auth-verification/SKILL.md`
+trước khi đổi tên; kích thước 1982 byte và mã blob `0d0c370a5c6372db9488640c94a3993c1d17a08e` giống bản salvage của môi trường
+(2026-08-23, từ extension datacloud), nên `gcp-devops` mục 1 dẫn xuất đúng bản này. `gcp-devops` mục 0 và các mục còn lại
+tự viết, không dẫn nguồn.
 
 ## SPR-07 — phân loại và phân công, chốt nguồn 2026-10-12
 
@@ -313,6 +327,9 @@ không giấy phép, phải viết lại trước khi công khai (danh sách fil
 | `frontend` | `affaan-m/ECC` — `skills/frontend-patterns/`, `skills/vite-patterns/` (`references/vite.md`) | `ef648e01` | — | MIT | chép |
 | `e2e-testing` | `affaan-m/ECC` — `skills/e2e-testing/`, `skills/ai-regression-testing/` (`references/ai-regression.md`) | `ef648e01` | — | MIT | chép |
 | `eval-harness` | `affaan-m/ECC` — `skills/eval-harness/` | `ef648e01` | — | MIT | chép |
+| `rag-pageindex` | `VectifyAI/PageIndex` — khái niệm RAG không vector bằng cây mục lục (ghi `concept:`); `source_sha` = `null` | `293730af` | — | MIT | ý |
+| `gcp-devops` | `GoogleCloudPlatform/data-agent-kit-plugin` — `skills/gcloud-auth-verification/` (Google datacloud; chỉ mục 1, ghi `concept:`) | `c125eaea` | — | Apache-2.0 | viết lại; NOTICE |
+| `gcp-incident-response` | `gemini-cli-extensions/sre` — văn bản chỉ dẫn (chỉ văn bản; không mang phần chạy) | `dd202433` | — | Apache-2.0 | chép; NOTICE |
 | agent `python-reviewer` | `affaan-m/ECC` — `agents/python-reviewer.md` | `c70874fa` | `3599962a` | MIT | chép |
 | agent `fastapi-reviewer` | `affaan-m/ECC` — `agents/fastapi-reviewer.md` | `ef648e01` | `3599962a` | MIT | chép |
 | agent `database-reviewer` | `affaan-m/ECC` — `agents/database-reviewer.md` (phần mẫu từ `supabase/agent-skills`) | `ef648e01` | `3599962a` | MIT | chép |

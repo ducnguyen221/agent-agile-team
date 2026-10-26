@@ -5,7 +5,7 @@ metadata:
   group: technique
   roles: [implementer]
 source: ["concept: gcloud-auth-verification (Google datacloud, section 1 only)"]
-source_sha: [null]
+source_sha: ["c125eaea039b9440b306b428ee2068d79123ddb7"]
 license: [Apache-2.0]
 rewrite_before_public: false
 ---
