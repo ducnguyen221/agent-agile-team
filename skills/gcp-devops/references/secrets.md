@@ -37,6 +37,9 @@ gcloud run services update <SERVICE> --region=<REGION> \
    rm -f "$SEC_FILE"; unset NEW_VALUE
    ```
 
+   Trên PowerShell, ghi file vào một thư mục tạm riêng của bạn (không dùng chung thư mục tạm mặc định) và xoá ngay sau
+   `gcloud secrets versions add`; đừng thay bằng pipe vào `--data-file=-`, vì pipe PowerShell thêm CRLF.
+
 3. **Giữ nguyên mount và áp lại để sinh revision mới** — bước người ta hay bỏ. Secret chỉ được đọc lúc **container khởi động**,
    nên `:latest` **không** làm mới revision đang chạy; không có revision mới thì xoay không có tác dụng.
 4. **Kiểm**: revision mới nhận traffic, rồi smoke test.

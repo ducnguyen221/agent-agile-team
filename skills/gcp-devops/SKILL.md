@@ -4,7 +4,7 @@ description: Use when deploying or operating a service on Google Cloud (Cloud Ru
 metadata:
   group: technique
   roles: [implementer]
-source: ["GoogleCloudPlatform/data-agent-kit-plugin — google-cloud-auth-verification skill (section 1 derived; rest original)"]
+source: ["GoogleCloudPlatform/data-agent-kit-plugin — gcloud-auth-verification skill (section 1 derived; rest original)"]
 source_sha: ["c125eaea039b9440b306b428ee2068d79123ddb7"]
 license: [Apache-2.0]
 rewrite_before_public: false
@@ -31,10 +31,10 @@ Bốn luật về định danh và thao tác — mỗi luật là việc làm c�
 
 Hai luật về bí mật:
 
-- **Secret ngoài transcript.** Không trong chat, tham số lệnh, commit message hay kết quả công cụ; mẫu bàn giao qua file ở
-   `references/secrets.md`.
-- **Quét secret trước khi build hoặc push.** Image đọc được trong cả project; khoá nướng vào image còn sống sau khi đã
-   xoay file nguồn.
+- **Giá trị bí mật không đi qua nơi được lưu lại.** Lời nhắn, đối số dòng lệnh, commit message và kết quả công cụ đều bị ghi giữ,
+  nên ở đó chỉ được có *tên* secret, không có giá trị. Cần chuyển giá trị thì qua file quyền hẹp (`references/secrets.md`).
+- **Rà bí mật trước khi đóng gói.** Ai đọc được project đều kéo được image; khoá lọt vào một lớp image vẫn nằm đó dù file nguồn đã
+  đổi. Quét diff và ngữ cảnh build trước khi build hoặc push; lỡ lọt thì coi khoá là đã lộ và xoay.
 
 ## 1. Xác thực và cấu hình
 
