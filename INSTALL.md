@@ -119,7 +119,7 @@ Biến chỉ thấy ở tiến trình **mới** — khởi động lại ứng d
 
 **MCP `pageindex-mcp`:** plugin mang sẵn `.mcp.json` trỏ tới `${PAGEINDEX_MCP_DIR}`, tức thư mục cài pageindex-mcp (có `.venv` riêng, cài bằng `install.ps1` của nó). Muốn dùng thì đặt biến này ở mức tài khoản, ví dụ `setx PAGEINDEX_MCP_DIR "<đường tuyệt đối tới thư mục pageindex-mcp>"`, rồi mở lại ứng dụng. Thiếu biến hoặc thư mục thì chỉ MCP này không khởi động, phần còn lại của plugin vẫn chạy.
 
-Yêu cầu của `.mcp.json`: có `python` trên PATH và `launch.py` trong thư mục pageindex-mcp (bản từ 26/10/2026); thư mục cài cũ chưa có `launch.py` thì cập nhật pageindex-mcp trước. Venv của pageindex-mcp dựng bằng `install.ps1` của chính thư mục đó; mặc định script đăng ký Codex và Antigravity, **không** đăng ký Claude ở mức user khi đã dùng plugin này (sẽ thành hai server trùng tên, khác tiền tố). macOS/Linux cần lệnh `python` trên PATH trỏ Python 3 (ví dụ qua pyenv hoặc brew), vì `.mcp.json` gọi `python …/launch.py`.
+Yêu cầu của `.mcp.json`: có `python` trên PATH và `launch.py` trong thư mục pageindex-mcp (bản từ 26/10/2026); thư mục cài cũ chưa có `launch.py` thì cập nhật pageindex-mcp trước. Venv của pageindex-mcp dựng bằng `install.ps1` của chính thư mục đó; mặc định script đăng ký Codex và Antigravity, **không** đăng ký Claude ở mức user khi đã dùng plugin này (sẽ thành hai server trùng tên, khác tiền tố). macOS/Linux cần lệnh `python` trên PATH trỏ Python 3 (ví dụ qua pyenv hoặc brew), vì `.mcp.json` gọi `python …/launch.py`. `.mcp.json` gọi `python` theo tên trần (tra PATH; trên Windows thư mục hiện hành được tìm trước), nên đảm bảo `python` trên PATH là Python 3 tin cậy.
 
 ## 6. Kiểm
 

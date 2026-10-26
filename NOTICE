@@ -59,3 +59,5 @@ nào trong repo chép văn bản từ caveman và open-code-review; hai nguồn 
   gồm bảng chiến lược giảm thiểu viết gần nguyên ý; không mang phần chạy (máy chủ MCP, script, điều phối subagent).
 - gcloud-auth-verification (Google, GoogleCloudPlatform/data-agent-kit-plugin) — Apache License 2.0. Skill gcp-devops mục 1 dẫn xuất
   từ skill này (viết lại, đổi placeholder).
+- Google SRE Classroom, Generic Mitigations (Google, https://sre.google/classroom/) — CC BY 4.0, © Google. Bảng chiến lược giảm thiểu và nhãn
+  rủi ro của skill gcp-incident-response dịch và chắt từ đây (qua gemini-cli-extensions/sre); đã thay đổi so với bản gốc.

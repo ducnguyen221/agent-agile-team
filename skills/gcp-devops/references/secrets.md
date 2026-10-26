@@ -23,9 +23,18 @@ gcloud run services update <SERVICE> --region=<REGION> \
 2. **Thêm version mới từ byte thô** — đừng pipe, PowerShell nhét CRLF vào.
 
    ```powershell
-   [System.IO.File]::WriteAllBytes("$env:TEMP\sec.bin", [Text.Encoding]::ASCII.GetBytes($newValue))
-   gcloud secrets versions add <SECRET_NAME> --data-file="$env:TEMP\sec.bin"
-   Remove-Item "$env:TEMP\sec.bin" -Force; Clear-Variable newValue
+   $secure = Read-Host "Giá trị mới" -AsSecureString     # người dùng nhập; không hiện ra màn hình
+   $dir = Join-Path $env:TEMP ([guid]::NewGuid().ToString())
+   New-Item -ItemType Directory -Path $dir | Out-Null
+   $file = Join-Path $dir 'value'
+   try {
+     $newValue = [Net.NetworkCredential]::new('', $secure).Password   # chuỗi thường chỉ nằm trong bộ nhớ
+     [System.IO.File]::WriteAllText($file, $newValue, [Text.UTF8Encoding]::new($false))   # UTF-8 không BOM, không CRLF
+     gcloud secrets versions add <SECRET_NAME> --data-file=$file
+   } finally {
+     Remove-Item $dir -Recurse -Force -ErrorAction SilentlyContinue
+     Remove-Variable newValue, secure -ErrorAction SilentlyContinue
+   }
    ```
 
    ```bash
@@ -37,14 +46,14 @@ gcloud run services update <SERVICE> --region=<REGION> \
    rm -f "$SEC_FILE"; unset NEW_VALUE
    ```
 
-   Trên PowerShell, ghi file vào một thư mục tạm riêng của bạn (không dùng chung thư mục tạm mặc định) và xoá ngay sau
-   `gcloud secrets versions add`; đừng thay bằng pipe vào `--data-file=-`, vì pipe PowerShell thêm CRLF.
+   Trên PowerShell, file nằm trong một thư mục tạm riêng tên GUID, khối `finally` luôn xoá cả file lẫn thư mục dù lệnh lỗi;
+   đừng thay bằng pipe vào `--data-file=-`, vì pipe PowerShell thêm CRLF.
 
 3. **Giữ nguyên mount và áp lại để sinh revision mới** — bước người ta hay bỏ. Secret chỉ được đọc lúc **container khởi động**,
    nên `:latest` **không** làm mới revision đang chạy; không có revision mới thì xoay không có tác dụng.
 4. **Kiểm**: revision mới nhận traffic, rồi smoke test.
-5. **Vô hiệu** version cũ (`gcloud secrets versions disable <N> --secret=<SECRET_NAME>`). Disable, không `destroy` — bản bị
-   disable còn khôi phục được 30 ngày.
+5. **Vô hiệu** version cũ (`gcloud secrets versions disable <N> --secret=<SECRET_NAME>`). Disable, không `destroy` — version bị
+   disable có thể enable lại; `destroy` mới mất hẳn.
 
 ## 3. ⚠️ BẪY — credential tách đôi
 

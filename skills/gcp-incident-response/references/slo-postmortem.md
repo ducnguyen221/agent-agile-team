@@ -1,5 +1,7 @@
 # SLO qua REST và postmortem
 
+> Nguồn: distill từ gemini-cli-extensions/sre (Apache-2.0), đã sửa và rút gọn.
+
 Placeholder: `<PROJECT_ID>`, `<SERVICE_ID>` (ID của Service trong Monitoring).
 
 ## Contents

@@ -28,7 +28,7 @@ không phải PDF (.docx, web); review người khác xây RAG (→ agent `rag-p
 
 Cần MCP `pageindex-mcp`. Tên tool gốc: `pi_list_docs`, `pi_pdf_info`, `pi_read_pdf_pages`, `pi_save_index`,
 `pi_get_structure`, `pi_get_pages`, `pi_delete_doc`. **Tên có thể mang tiền tố** tuỳ cách đăng ký (vd qua
-plugin) — tìm theo phần đuôi `pi_*`.
+plugin) — tìm theo phần đuôi `pi_*`. `pi_delete_doc` chỉ khi người dùng yêu cầu rõ; không xoá để «dọn» hay để lập lại chỉ mục mà chưa hỏi.
 **Không thấy tool `pi_*` nào thì nói thiếu**, chỉ cách cài (đặt biến `PAGEINDEX_MCP_DIR` trỏ tới thư mục
 cài pageindex-mcp, xem `INSTALL.md` mục 5, đoạn MCP `pageindex-mcp`) và dừng; không bịa kết quả từ trí nhớ.
 
