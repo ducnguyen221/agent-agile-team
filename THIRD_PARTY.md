@@ -16,7 +16,7 @@ cách đó, các nguồn **chỉ lấy ý**, và lịch sử viết lại phòng
 | `obra/superpowers-lab` | MIT | Đợt 2: bước tìm hàm trùng lặp bằng tay trong `skills/code-review/references/duplicates.md` (không chép script của nguồn) |
 | `gemini-cli-extensions/sre` (Google) | Apache-2.0 | `SPR-10`: skill `gcp-incident-response` chắt văn bản chỉ dẫn (khám phá phạm vi, bảng chiến lược giảm thiểu, triage log, SLO, postmortem); không mang máy chủ MCP, script hay điều phối subagent. NOTICE mang thông báo; đã viết lại cho khung repo, không còn file nào phải viết lại trước khi công khai |
 | `GoogleCloudPlatform/data-agent-kit-plugin` — skill `gcloud-auth-verification` (Google) | Apache-2.0 | `SPR-10`: skill `gcp-devops` mục 1 (kiểm danh tính `gcloud`) dẫn xuất, viết lại với placeholder; các mục khác của skill tự viết. NOTICE mang thông báo; không còn file nào phải viết lại trước khi công khai |
-| Google SRE Classroom — Generic Mitigations (https://sre.google/classroom/) | CC BY 4.0 (© Google) | `SPR-10`: bảng 7 chiến lược giảm thiểu và nhãn rủi ro của `gcp-incident-response`, đã dịch và chắt (đến qua `gemini-cli-extensions/sre`); ghi công ở `SKILL.md` và NOTICE |
+| Google SRE Classroom — Generic Mitigations (https://sre.google/classroom/) | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/, © Google) | `SPR-10`: bảng 7 chiến lược giảm thiểu và nhãn rủi ro của `gcp-incident-response`, đã dịch và chắt (đến qua `gemini-cli-extensions/sre`); ghi công ở `SKILL.md` và NOTICE |
 
 Văn bản Apache License 2.0 đi kèm repo ở [LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt).
 
