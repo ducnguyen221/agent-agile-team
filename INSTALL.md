@@ -119,6 +119,8 @@ Biến chỉ thấy ở tiến trình **mới** — khởi động lại ứng d
 
 **MCP `pageindex-mcp`:** plugin mang sẵn `.mcp.json` trỏ tới `${PAGEINDEX_MCP_DIR}`, tức thư mục cài pageindex-mcp (có `.venv` riêng, cài bằng `install.ps1` của nó). Muốn dùng thì đặt biến này ở mức tài khoản, ví dụ `setx PAGEINDEX_MCP_DIR "<đường tuyệt đối tới thư mục pageindex-mcp>"`, rồi mở lại ứng dụng. Thiếu biến hoặc thư mục thì chỉ MCP này không khởi động, phần còn lại của plugin vẫn chạy.
 
+Yêu cầu của `.mcp.json`: có `python` trên PATH và `launch.py` trong thư mục pageindex-mcp (bản từ 26/10/2026); thư mục cài cũ chưa có `launch.py` thì cập nhật pageindex-mcp trước.
+
 ## 6. Kiểm
 
 ```bash

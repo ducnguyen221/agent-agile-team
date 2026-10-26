@@ -1,8 +1,9 @@
 {
   "mcpServers": {
     "pageindex-mcp": {
-      "command": "${PAGEINDEX_MCP_DIR}\\.venv\\Scripts\\python.exe",
-      "args": ["-u", "${PAGEINDEX_MCP_DIR}\\server.py"]
+      "command": "python",
+      "args": ["${PAGEINDEX_MCP_DIR}/launch.py"],
+      "env": {"PYTHONUNBUFFERED": "1"}
     }
   }
 }
