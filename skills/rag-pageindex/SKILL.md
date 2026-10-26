@@ -30,7 +30,7 @@ Cần MCP `pageindex-mcp`. Tên tool gốc: `pi_list_docs`, `pi_pdf_info`, `pi_r
 `pi_get_structure`, `pi_get_pages`, `pi_delete_doc`. **Tên có thể mang tiền tố** tuỳ cách đăng ký (vd qua
 plugin) — tìm theo phần đuôi `pi_*`.
 **Không thấy tool `pi_*` nào thì nói thiếu**, chỉ cách cài (đặt biến `PAGEINDEX_MCP_DIR` trỏ tới thư mục
-cài pageindex-mcp, xem `INSTALL.md` mục MCP) và dừng; không bịa kết quả từ trí nhớ.
+cài pageindex-mcp, xem `INSTALL.md` mục 5, đoạn MCP `pageindex-mcp`) và dừng; không bịa kết quả từ trí nhớ.
 
 ## 3. Quy trình A — lập chỉ mục (một lần mỗi tài liệu)
 
@@ -39,8 +39,12 @@ cài pageindex-mcp, xem `INSTALL.md` mục MCP) và dừng; không bịa kết q
 3. Dựng cây từ text đã đọc. Mỗi node có 6 trường: `title`, `node_id` (duy nhất trong tài liệu),
    `start_index`, `end_index` (trang PDF, đếm từ 1), `summary` (2–5 câu, **đủ để sau này quyết định có cần
    đọc node đó không**), `nodes` (con). Bám cấu trúc thật (chương, mục), đúng cấp heading, không cắt tùy tiện.
-4. Tự kiểm trước khi lưu (xem mục 7): `node_id` không trùng, dải trang nằm trong tài liệu và không lệch cấp.
-5. `pi_save_index`.
+4. Tự kiểm trước khi lưu: mọi `node_id` duy nhất; `start_index <= end_index`; cả hai nằm trong `page_count`
+   của `pi_pdf_info`; dải của node con nằm trong dải node cha.
+5. Chọn `doc_id`: gọi `pi_list_docs` trước. `pi_save_index` **ghi đè im lặng** khi `doc_id` đã có, và id khác
+   nhau có thể bị rút gọn thành cùng một id lưu. Trùng hay gần trùng thì **hỏi người dùng**, không ghi đè.
+6. `pi_save_index` với 4 tham số bắt buộc `doc_id`, `doc_name`, `pdf_path`, `structure_json` (cây dạng chuỗi
+   JSON); `doc_description` tuỳ chọn.
 
 ## 4. Quy trình B — hỏi đáp
 
@@ -68,6 +72,8 @@ báo người dùng trước**, chờ xác nhận.
 - Chỉ PDF; không .docx.
 - Chất lượng cây phụ thuộc agent dựng; cây sai cấp hoặc tóm tắt mơ hồ thì chọn node sai.
 - MCP không kiểm `node_id` duy nhất hay dải trang hợp lệ: agent tự kiểm trước `pi_save_index`.
+- `pi_get_pages` đọc lại PDF gốc ở đường tuyệt đối đã lưu lúc lập chỉ mục; dời hoặc xoá PDF thì hỏi đáp lỗi —
+  lập lại chỉ mục.
 
 ## 8. Liên quan
 
