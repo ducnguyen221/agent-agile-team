@@ -64,6 +64,7 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | [debugging](debugging/SKILL.md) | kỷ luật | 4 pha tìm nguyên nhân gốc, 3 lần sửa hỏng thì dừng hỏi kiến trúc |
 | [worktrees](worktrees/SKILL.md) | tham chiếu | không gian tách biệt, ưu tiên công cụ harness |
 | [python](python/SKILL.md) | tham chiếu | mẫu Python, uv/ruff/mypy/pytest |
+| [rag-pageindex](rag-pageindex/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-26 |
 | [fastapi](fastapi/SKILL.md) | tham chiếu | bố cục, phụ thuộc, bảo mật, hiệu năng |
 | [postgres](postgres/SKILL.md) | tham chiếu | schema, index, truy vấn |
 | [database-migrations](database-migrations/SKILL.md) | tham chiếu | migration an toàn, mở rộng→chuyển→thu hẹp, diễn tập |
