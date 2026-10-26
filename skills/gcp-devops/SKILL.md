@@ -4,7 +4,7 @@ description: Use when deploying or operating a service on Google Cloud (Cloud Ru
 metadata:
   group: technique
   roles: [implementer]
-source: ["concept: gcloud-auth-verification (Google datacloud, section 1 only)"]
+source: ["GoogleCloudPlatform/data-agent-kit-plugin — google-cloud-auth-verification skill (section 1 derived; rest original)"]
 source_sha: ["c125eaea039b9440b306b428ee2068d79123ddb7"]
 license: [Apache-2.0]
 rewrite_before_public: false
@@ -20,14 +20,20 @@ rewrite_before_public: false
 
 ## 0. Nguyên tắc vận hành (trước mọi lệnh)
 
-1. **Không đoán định danh.** `--project`, `--region` và tên tài nguyên chỉ lấy từ lời người dùng hoặc `gcloud config list`;
-   thiếu thì hỏi. Deploy nhầm project không có nút hoàn tác.
-2. **Không vá danh tính hộ người dùng.** Đăng nhập là việc của người; agent thấy lỗi xác thực thì dừng và nhờ họ xử lý (mục 1).
-3. **Lệnh chuyên dụng thắng lệnh thô.** `gcloud run services update` hơn sửa tay YAML; lệnh Cloud Run hơn gọi REST thẳng.
-4. **Đọc rồi mới ghi.** `describe` tài nguyên trước khi đổi — trạng thái hiện tại là đầu vào an toàn duy nhất cho một thay đổi.
-5. **Secret ngoài transcript.** Không trong chat, tham số lệnh, commit message hay kết quả công cụ; mẫu bàn giao qua file ở
+Bốn luật về định danh và thao tác — mỗi luật là việc làm cùng lý do:
+
+| Luật | Việc làm | Vì sao |
+|---|---|---|
+| Định danh có nguồn kiểm được | project, region, tên dịch vụ chỉ lấy từ lời người dùng hoặc `gcloud config list`; thiếu thì hỏi, không suy từ tên thư mục hay lần chạy trước | lệnh ghi lên nhầm môi trường (hai môi trường trùng tên dịch vụ chẳng hạn) không có nút hoàn tác |
+| Người đăng nhập, agent không đăng nhập hộ | gặp lỗi xác thực thì dừng, tả triệu chứng, nhờ người chạy lệnh đăng nhập (mục 1) | thông tin xác thực do agent dựng hay vá che mất danh tính thật đứng sau mỗi thay đổi |
+| Dùng đúng cấp công cụ | việc đã có lệnh riêng (`gcloud run deploy`, `update-traffic`) thì dùng lệnh đó, không tự dựng bằng REST hay sửa tay file cấu hình | lệnh riêng kiểm tham số và cho đường hoàn tác; đường tự dựng bỏ qua cả hai |
+| Xem trước khi sửa | `describe` tài nguyên, so với điều định đổi, rồi mới ghi | tài nguyên có thể đã lệch trí nhớ hay tài liệu (ai đó sửa tay, lần deploy trước dở dang) |
+
+Hai luật về bí mật:
+
+- **Secret ngoài transcript.** Không trong chat, tham số lệnh, commit message hay kết quả công cụ; mẫu bàn giao qua file ở
    `references/secrets.md`.
-6. **Quét secret trước khi build hoặc push.** Image đọc được trong cả project; khoá nướng vào image còn sống sau khi đã
+- **Quét secret trước khi build hoặc push.** Image đọc được trong cả project; khoá nướng vào image còn sống sau khi đã
    xoay file nguồn.
 
 ## 1. Xác thực và cấu hình
@@ -59,7 +65,7 @@ Với `No credentialed accounts.`, `No account is currently active.` hay `Defaul
 
 - [ ] `gcloud config list`: đúng project và region?
 - [ ] Đã quét secret trên diff; không khoá hay mật khẩu nào nằm trong image hoặc commit
-- [ ] Image build bằng `--config` hoặc `--file`, không `--tag` khi repo có nhiều Dockerfile (`cloud-run-deploy.md`)
+- [ ] Image build bằng `--config` (Dockerfile chọn trong `cloudbuild.yaml`), không `--tag` khi repo có nhiều Dockerfile (`cloud-run-deploy.md`)
 - [ ] Audit job migrate xong; backup đã tạo (`cloud-sql-migration.md`)
 - [ ] Script deploy mở đầu bằng `set -euo pipefail` (`cloud-run-deploy.md`)
 - [ ] Đã ghi tên revision tốt gần nhất để hoàn tác (`cloud-run-deploy.md`)

@@ -1,6 +1,6 @@
 # Cloud SQL — Auth Proxy, backup, job migrate
 
-Placeholder: `<PROJECT_ID>`, `<REGION>`, `<INSTANCE>`, `<JOB>`, `<SERVICE>`, `<SECRET_NAME>`, `<DB_USER>`, `<VERSION>`.
+Placeholder: `<PROJECT_ID>`, `<REGION>`, `<INSTANCE>`, `<JOB>`, `<SERVICE>`, `<SECRET_NAME>`, `<DB_USER>`, `<VERSION>`, `<BINARY>`, `<TAG>`.
 
 ## Contents
 
@@ -13,9 +13,11 @@ trang release của kho `cloud-sql-proxy` (GoogleCloudPlatform) rồi tải đú
 
 ```bash
 # <VERSION>: phiên bản mới nhất; <BINARY>: tên file theo hệ điều hành
-curl -sL -o "$TEMP/cloud-sql-proxy" \
+BIN="$(mktemp -d)/cloud-sql-proxy"      # thư mục tạm quyền 0700
+curl -sL -o "$BIN" \
   "https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/<VERSION>/<BINARY>"
-"$TEMP/cloud-sql-proxy" <PROJECT_ID>:<REGION>:<INSTANCE> --gcloud-auth --port 5433
+chmod +x "$BIN"                          # bỏ bước này trên Windows (file .exe)
+"$BIN" <PROJECT_ID>:<REGION>:<INSTANCE> --gcloud-auth --port 5433
 ```
 
 `--gcloud-auth` dùng lại người dùng đã `gcloud auth login`, tránh một vòng trình duyệt `gcloud auth application-default login`.

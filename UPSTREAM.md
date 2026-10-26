@@ -328,7 +328,7 @@ không giấy phép, phải viết lại trước khi công khai (danh sách fil
 | `e2e-testing` | `affaan-m/ECC` — `skills/e2e-testing/`, `skills/ai-regression-testing/` (`references/ai-regression.md`) | `ef648e01` | — | MIT | chép |
 | `eval-harness` | `affaan-m/ECC` — `skills/eval-harness/` | `ef648e01` | — | MIT | chép |
 | `rag-pageindex` | `VectifyAI/PageIndex` — khái niệm RAG không vector bằng cây mục lục (ghi `concept:`); `source_sha` = `null` | `293730af` | — | MIT | ý |
-| `gcp-devops` | `GoogleCloudPlatform/data-agent-kit-plugin` — `skills/gcloud-auth-verification/` (Google datacloud; chỉ mục 1, ghi `concept:`) | `c125eaea` | — | Apache-2.0 | viết lại; NOTICE |
+| `gcp-devops` | `GoogleCloudPlatform/data-agent-kit-plugin` — `skills/gcloud-auth-verification/` (Google datacloud; mục 1 dẫn xuất, phần còn lại tự viết) | `c125eaea` | — | Apache-2.0 | viết lại; NOTICE |
 | `gcp-incident-response` | `gemini-cli-extensions/sre` — văn bản chỉ dẫn (chỉ văn bản; không mang phần chạy) | `dd202433` | — | Apache-2.0 | chép; NOTICE |
 | agent `python-reviewer` | `affaan-m/ECC` — `agents/python-reviewer.md` | `c70874fa` | `3599962a` | MIT | chép |
 | agent `fastapi-reviewer` | `affaan-m/ECC` — `agents/fastapi-reviewer.md` | `ef648e01` | `3599962a` | MIT | chép |

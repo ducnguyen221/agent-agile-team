@@ -29,10 +29,12 @@ gcloud run services update <SERVICE> --region=<REGION> \
    ```
 
    ```bash
-   # bash: ghi bằng printf (không echo, không xuống dòng) rồi xoá file
-   printf '%s' "$NEW_VALUE" > "$TMPDIR/sec.bin"
-   gcloud secrets versions add <SECRET_NAME> --data-file="$TMPDIR/sec.bin"
-   rm -f "$TMPDIR/sec.bin"; unset NEW_VALUE
+   # bash: người dùng nhập giá trị (không hiện ra màn hình, không vào lịch sử shell); agent không giữ giá trị
+   read -rs NEW_VALUE
+   SEC_FILE="$(mktemp)"                     # quyền 0600
+   printf '%s' "$NEW_VALUE" > "$SEC_FILE"   # không xuống dòng
+   gcloud secrets versions add <SECRET_NAME> --data-file="$SEC_FILE"
+   rm -f "$SEC_FILE"; unset NEW_VALUE
    ```
 
 3. **Giữ nguyên mount và áp lại để sinh revision mới** — bước người ta hay bỏ. Secret chỉ được đọc lúc **container khởi động**,

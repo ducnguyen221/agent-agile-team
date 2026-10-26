@@ -1,6 +1,6 @@
 # Cloud Run — build, deploy, traffic, rollback
 
-Placeholder: `<PROJECT_ID>`, `<REGION>`, `<SERVICE>`, `<JOB>`, `<REGISTRY>`, `<IMAGE>`, `<REVISION>`. Thay bằng giá trị lấy từ hồ sơ
+Placeholder: `<PROJECT_ID>`, `<REGION>`, `<SERVICE>`, `<JOB>`, `<REGISTRY>`, `<IMAGE>`, `<TAG>`, `<REVISION_NEW>`, `<REVISION_OLD>`, `<REVISION_GOOD>`. Thay bằng giá trị lấy từ hồ sơ
 dự án hoặc `gcloud config list`; không đoán.
 
 ## Contents
@@ -27,8 +27,8 @@ Cờ `--tag` âm thầm chọn file tên `Dockerfile`. Nếu thư mục gốc c�
 image thật, còn `Dockerfile` là bản demo không phải web server) thì build **thành công**, container thoát mã 0 ngay khi
 khởi động và Cloud Run báo `Default STARTUP TCP probe failed` trên cổng 8080 — ra một revision chết.
 
-- **Tổng quát:** trước mọi `builds submit`, liệt kê Dockerfile ở thư mục gốc. Nhiều hơn một ⇒ dùng `--config` (kèm
-  `cloudbuild.yaml` trỏ `--file`) hoặc `--file`, không bao giờ `--tag`.
+- **Tổng quát:** trước mọi `builds submit`, liệt kê Dockerfile ở thư mục gốc. Nhiều hơn một ⇒ dùng `--config` với
+  `cloudbuild.yaml`, trong đó bước `docker build` chọn Dockerfile bằng `-f`; không bao giờ `--tag`.
 - Giá trị mặc định trong `cloudbuild.yaml` (project cũ, tag) có thể lỗi thời: **luôn ghi đè** `_PROJECT_ID` bằng `<PROJECT_ID>`.
 - Không truyền `--gcs-log-dir` khi YAML đã đặt `logging: CLOUD_LOGGING_ONLY` — hai cái xung đột.
 
