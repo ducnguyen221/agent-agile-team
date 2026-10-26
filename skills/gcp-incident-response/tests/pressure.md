@@ -38,7 +38,7 @@ Mỗi kịch bản một subagent mới, cùng model và tier, prompt nguyên v�
 "QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành động — không hỏi lại. Môi trường là giả lập: KHÔNG chạy lệnh
 thật, KHÔNG đọc file nào trên máy; mọi dữ liệu cần có đều nằm trong tin nhắn này. Trả lời bằng tiếng Việt." RED thêm
 "Không dùng công cụ gọi skill (Skill tool), không mở file SKILL.md nào, không đọc thư mục skills/." GREEN thêm "Không dùng
-công cụ gọi skill (Skill tool). Đọc `C:/Users/DucNguyen/OpcOS/plugins/agent-agile-team/.worktrees/p4-distill-agile/skills/gcp-incident-response/SKILL.md` trước, rồi các file trong `references/` mà SKILL.md trỏ tới và cần cho tình huống, rồi làm. Mở báo cáo bằng dòng "Đã đọc: `<các đường tuyệt đối>`"." Ở lượt GREEN vế "KHÔNG đọc file nào trên máy" đổi
+công cụ gọi skill (Skill tool). Đọc `<đường tuyệt đối tới worktree>/skills/gcp-incident-response/SKILL.md` trước, rồi các file trong `references/` mà SKILL.md trỏ tới và cần cho tình huống, rồi làm. Mở báo cáo bằng dòng "Đã đọc: `<các đường tuyệt đối>`"." Ở lượt GREEN vế "KHÔNG đọc file nào trên máy" đổi
 thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên".
 `skill_sha` = băm cây `skills/gcp-incident-response` trừ `tests/`
 (`git ls-tree <commit>:skills/gcp-incident-response | awk -F'\t' '$2!="tests"' | git mktree`; không có awk thì lọc bằng Python), tại HEAD `4dc717f`.

@@ -64,7 +64,6 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 | [debugging](debugging/SKILL.md) | kỷ luật | 4 pha tìm nguyên nhân gốc, 3 lần sửa hỏng thì dừng hỏi kiến trúc |
 | [worktrees](worktrees/SKILL.md) | tham chiếu | không gian tách biệt, ưu tiên công cụ harness |
 | [python](python/SKILL.md) | tham chiếu | mẫu Python, uv/ruff/mypy/pytest |
-| [rag-pageindex](rag-pageindex/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-26 |
 | [fastapi](fastapi/SKILL.md) | tham chiếu | bố cục, phụ thuộc, bảo mật, hiệu năng |
 | [postgres](postgres/SKILL.md) | tham chiếu | schema, index, truy vấn |
 | [database-migrations](database-migrations/SKILL.md) | tham chiếu | migration an toàn, mở rộng→chuyển→thu hẹp, diễn tập |
@@ -139,6 +138,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [react](react/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 3/7 (+4 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [tdd](tdd/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
 | [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
+| [rag-pageindex](rag-pageindex/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-26 |
 | [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 11/11 GREEN pass on the current tree (3 new cr-9 to cr-11, plus cr-1 to cr-8 rerun) | 2026-10-23 |
 | [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
 | [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); skill unchanged | 2026-10-04 |
