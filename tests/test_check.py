@@ -1,5 +1,7 @@
 """`check.py` trên tài liệu sprint: bộ sạch thoát 0, mỗi ca hỏng cố ý bị bắt đúng mã luật (SC4)."""
 
+from __future__ import annotations
+
 import json
 import os
 import re
