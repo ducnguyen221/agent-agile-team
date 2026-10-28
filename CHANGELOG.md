@@ -3,9 +3,9 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
-### Chưa phát hành
+## 0.5.0 (2026-10-28)
 
-Chưa gắn số phiên bản; số phiên bản và manifest chốt khi phát hành.
+Gộp các đoạn "Chưa phát hành" sau 0.4.0; thêm skill `gcp-devops`, `gcp-incident-response`, `rag-pageindex` nên tăng MINOR (`method/conventions.md` mục 4.1).
 
 - **Sửa — kiểm duyệt thay (`scripts/check.py`):** khi `gate_N_mode: delegated` và cổng đã kết luận, `check.py` đòi `risk_tags` khai
   hợp lệ (danh sách chuỗi; áp cho mọi tài liệu có cổng duyệt thay, kể cả SPEC) và đòi `delegation.by` giữ ít nhất một vai kiểm
