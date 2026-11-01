@@ -141,7 +141,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [rag-pageindex](rag-pageindex/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-26 |
 | [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 11/11 GREEN pass on the current tree (3 new cr-9 to cr-11, plus cr-1 to cr-8 rerun) | 2026-10-23 |
 | [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
-| [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); skill unchanged | 2026-10-04 |
+| [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); skill unchanged | 2026-11-01 |
 | [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (sec-4 new; sec-1, sec-2b, sec-3b rerun at n = 1) | 2026-10-24 |
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 7/7 GREEN pass on the current tree (ver-7 new, ver-1 to ver-6 rerun) | 2026-10-23 |
 | [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (wq-7 new, wq-1 to wq-3 rerun at n = 1) plus a real design-compare run that matched its expectation | 2026-10-23 |

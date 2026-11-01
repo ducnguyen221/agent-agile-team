@@ -3,14 +3,10 @@ skill: security-audit
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: ca7d9d9b8f12f74565e77b3547b35dac876c0e6a
-date: 2026-10-04
+skill_sha: a9594d3022ed00ced81edbaaf545cb877a53a9bd
+date: 2026-11-01
 result: 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); skill unchanged
-agent_ids:
-  red: {sa-1: ad56eeec1521c5a1e, sa-2: acb193507f26e0716, sa-3: a3a10e2b3dedb527b}
-  green: {sa-1: af0fd32b0d26956e5, sa-2: aeac2d75f426aa7ad, sa-3: a0c57f79fa9e7a882}
-  n3_red: {sa-1: [aa6fecca05fdecabd, a2e22cfa0aa2d3acd, af4841a0e3a4fd81c], sa-2: [a5e3d978c2c5208e4, a28ff0b0e9bd59ddd, a780a5c02cff4d04a], sa-3: [a864addd208b817d9, ada7f98c5593c7d8e, a5b73f6bb53f779b8]}
-  n3_green: {sa-1: [a3d0db9a4cf8e621e, ac326469cdc1c9374, a305fba11979c468f], sa-2: [a5673af04a868d5f0, aa51ce441ab7f3328, aeaa1232cc9429d61], sa-3: [acbdc6b3f3530bfc9, aecc3a2866380c652, abafe21c144c15124]}
+agent_ids: ghi ở hồ sơ SPR-47 (18 lượt: sa-1..sa-3 × RED/GREEN × n=3, mỗi lượt một subagent mới; chấm bởi một subagent Opus riêng)
 ---
 
 # Thử áp lực — security-audit
@@ -97,6 +93,10 @@ GREEN đều giữ nhờ luật nền của máy. Không sửa `SKILL.md`.
 **Giới hạn:** một người chấm (QA, Sonnet 5.5) cùng họ mô hình với chủ thể; không có người chấm hãng khác (Đức chọn không, `CQ3`).
 GREEN sa-1 lượt 2 (`ac326469cdc1c9374`) chấm lỏng ở cột "Bằng chứng" (khai chung ở dòng kết luận) và thiếu thống kê lọc dạng số;
 chấm nghiêm sa-1 GREEN còn 2/3, vẫn Đạt. Chủ thể không ghi file thật (quyền chỉ đọc).
+
+## Chạy lại 2026-11-01 (SPR-47, sau khi thêm Tầng 1b vào Pha 8)
+
+18 lượt (sa-1..sa-3 × RED/GREEN × n=3), mỗi lượt một subagent mới, cùng model, Skill tool cấm; chấm bởi một subagent Opus riêng. Khác lần đầu: mỗi lượt lưu báo cáo bằng một lệnh Write ra thư mục nháp (ngoài fixture), không đổi nội dung audit. Kết quả theo tiêu chí gốc ((j) chỉ áp sa-2): GREEN 9/9, RED 0/9. Thước nghiêm hơn ((j) áp cả sa-1, sa-3): GREEN 5/9 — 4 lượt (sa-1 ×3, sa-3 ×1) chỉ hỏng (j) mức nhẹ vì mở phụ lục giả thuyết dù khai chế độ hằng ngày; không lượt nào fail, không lượt nào nhắc máy quét inspect hay bịa công cụ, nên Tầng 1b không làm lệch hành vi. Gợi ý chưa làm: mục 5 thêm một câu «chế độ hằng ngày không có phụ lục giả thuyết; điều chưa biết ghi vào khoảng trống».
 
 ## Lỗ hổng đã vá sau RED
 
