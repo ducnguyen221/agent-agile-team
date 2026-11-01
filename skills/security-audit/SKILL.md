@@ -104,6 +104,10 @@ công cụ hay ngữ cảnh gọi hàm.
 - *Tầng 1 — trong repo, tự động:* quét `skills/`, `.claude/skills/`, `.agents/skills/`, `.codex/skills/`
   tìm gửi dữ liệu ra mạng (`curl`, `wget`, `fetch`), truy cập biến chứa khoá API, câu kiểu "bỏ qua chỉ dẫn
   trước", "ghi đè hệ thống".
+- *Tầng 1b — cây ngoài (repo hay skill lấy từ bên ngoài, chưa nằm trong repo):* nếu lớp riêng của môi
+  trường có máy quét inspect cho cây ngoài thì chạy nó và lấy **verdict** cùng các phát hiện làm đầu vào
+  của mức Pha 8 (đọc verdict, không đọc mã thoát); không có thì giữ cách đọc tay ở trên. Mức Chặn / Phải
+  sửa / Nên sửa không đổi.
 - *Tầng 2 — thư mục skill toàn cục của harness và cache plugin:* đọc ngoài repo = ngoài phạm vi → **hỏi
   trước** (điều kiện dừng (c)).
 - Mức: lấy cắp thông tin đăng nhập hoặc prompt injection trong skill → Chặn; gọi mạng đáng ngờ, quyền
