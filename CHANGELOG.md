@@ -3,6 +3,16 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+## 0.6.0 (2026-11-01)
+
+Thêm hành vi mới cho skill `security-audit` nên tăng MINOR (`method/conventions.md` mục 4.1).
+
+- **Thêm — `security-audit` Pha 8 Tầng 1b:** khi audit cây mã lấy từ ngoài mà dự án có máy quét tĩnh riêng, chạy máy quét đó trước và
+  đưa phát hiện vào báo cáo, thay vì chỉ đọc tay.
+- **Sửa — `security-audit` mục 5:** chế độ hằng ngày không có phụ lục giả thuyết hay mục «nếu có thì»; mục chưa kiểm ghi đúng một dòng
+  «chưa kiểm».
+- Thử áp lực T3 chạy lại (18 lượt, GREEN 9/9, RED 0/9), `skill_sha` cập nhật trong `skills/security-audit/tests/pressure.md`.
+
 ## 0.5.0 (2026-10-28)
 
 Gộp các đoạn "Chưa phát hành" sau 0.4.0; thêm skill `gcp-devops`, `gcp-incident-response`, `rag-pageindex` nên tăng MINOR (`method/conventions.md` mục 4.1).
