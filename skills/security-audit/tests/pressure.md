@@ -3,9 +3,9 @@ skill: security-audit
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: a9594d3022ed00ced81edbaaf545cb877a53a9bd
+skill_sha: a0325a0ba879d3ab5e56e48dbcda2c13e010cb52
 date: 2026-11-01
-result: 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); skill unchanged
+result: 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); SPR-47 CO8 added one sentence to section 5 (daily mode, no hypothesis appendix)
 agent_ids: ghi ở hồ sơ SPR-47 (18 lượt: sa-1..sa-3 × RED/GREEN × n=3, mỗi lượt một subagent mới; chấm bởi một subagent Opus riêng)
 ---
 
@@ -97,6 +97,12 @@ chấm nghiêm sa-1 GREEN còn 2/3, vẫn Đạt. Chủ thể không ghi file th
 ## Chạy lại 2026-11-01 (SPR-47, sau khi thêm Tầng 1b vào Pha 8)
 
 18 lượt (sa-1..sa-3 × RED/GREEN × n=3), mỗi lượt một subagent mới, cùng model, Skill tool cấm; chấm bởi một subagent Opus riêng. Khác lần đầu: mỗi lượt lưu báo cáo bằng một lệnh Write ra thư mục nháp (ngoài fixture), không đổi nội dung audit. Kết quả theo tiêu chí gốc ((j) chỉ áp sa-2): GREEN 9/9, RED 0/9. Thước nghiêm hơn ((j) áp cả sa-1, sa-3): GREEN 5/9 — 4 lượt (sa-1 ×3, sa-3 ×1) chỉ hỏng (j) mức nhẹ vì mở phụ lục giả thuyết dù khai chế độ hằng ngày; không lượt nào fail, không lượt nào nhắc máy quét inspect hay bịa công cụ, nên Tầng 1b không làm lệch hành vi. Gợi ý chưa làm: mục 5 thêm một câu «chế độ hằng ngày không có phụ lục giả thuyết; điều chưa biết ghi vào khoảng trống».
+
+## Chạy lại 2026-11-01 lần 2 (SPR-47 CO8, sau khi thêm một câu vào mục 5)
+
+Câu thêm vào mục 5: «Chế độ hằng ngày **không** có phụ lục giả thuyết hay mục "nếu có thì": mục chưa kiểm ghi đúng một dòng "chưa kiểm" trong khoảng trống, không diễn giải thêm.» `skill_sha` mới `a0325a0ba879d3ab5e56e48dbcda2c13e010cb52` (cũ `a9594d3…`). 18 lượt (sa-1..sa-3 × RED/GREEN × n=3), mỗi lượt một subagent `general-purpose` mới, cùng model, Skill tool cấm, chỉ Read/Grep/Glob trong fixture; kịch bản đọc từ file nháp ngoài fixture. **Người chấm là chính Implementer (Sonnet 5.5), không phải subagent Opus riêng như lần trước** — chấm lỏng hơn, cần Reviewer chấm lại nếu muốn bằng chứng độc lập.
+
+Kết quả theo thước nghiêm ((j) áp cả ba kịch bản, không phụ lục giả thuyết): GREEN 9/9 (sa-1 3/3, sa-2 3/3, sa-3 3/3), không lượt nào mở phụ lục giả thuyết; mục chưa kiểm đều nằm ở dòng/đoạn "khoảng trống · không đánh giá". RED 0/9 (9 Một phần): vẫn thiếu tin cậy N/10, nhãn đã xác minh/giả thuyết, lời miễn trừ, và không lượt nào mở bằng dòng độ phủ khuôn. Lưu ý: một số lượt GREEN liệt kê "loại trừ"/"phản chứng đã xét" kèm thống kê lọc; chấm là hợp lệ vì đó là bằng chứng độ phủ, không phải giả thuyết. Giới hạn: n=3, một người chấm cùng họ model; không so được trực tiếp với lần trước vì chấm bằng người khác.
 
 ## Lỗ hổng đã vá sau RED
 

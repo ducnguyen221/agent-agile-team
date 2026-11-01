@@ -191,7 +191,7 @@ số phát hiện. Không có phát hiện → ghi đúng câu: "Không có phá
 
 Mỗi phát hiện ghi: mô tả · **kịch bản khai thác từng bước** ("mẫu này không an toàn" không phải phát hiện)
 · tác động · phản chứng đã xét · cách sửa cụ thể. Chế độ toàn diện: giả thuyết ở **phụ lục riêng**, không
-cộng vào tổng.
+cộng vào tổng. Chế độ hằng ngày **không** có phụ lục giả thuyết hay mục «nếu có thì»: mục chưa kiểm ghi đúng một dòng «chưa kiểm» trong khoảng trống, không diễn giải thêm.
 
 **Kết luận:** Đạt / Đạt có điều kiện / Không đạt **cho phạm vi đã đánh giá**. Còn Chặn → Không đạt. Độ
 phủ Một phần → tối đa Đạt có điều kiện, kèm danh sách khoảng trống. Khi audit phục vụ kiểm định một sprint
