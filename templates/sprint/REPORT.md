@@ -159,6 +159,14 @@ REPORT có 1 **carry-over** (CO), đã ghi thành dòng mới trong sổ REQUEST
   attempt so với số manifest yêu cầu, trạng thái đối chiếu ledger, unknown còn lại và việc đổi criteria có
   re-evaluate cả baseline/candidate hay mở experiment mới. Không coi thiếu record là 100% coverage.
 
+## Bản tin autopilot (tuỳ chọn)
+
+<!-- Mục tuỳ chọn, `check` không đòi; người dùng đọc sau, không chặn việc. Sprint bật autopilot ghi theo
+     `method/autopilot.md` mục 8: một dòng mỗi cổng duyệt thay (cổng · kết luận · người ký · đường tới file kết luận) ·
+     hàng chờ người (`BR` chờ người) · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do. -->
+
+Không áp dụng — sprint không bật autopilot.
+
 ## 8. Cổng 2 — nghiệm thu
 
 <!-- Chủ sản phẩm kết luận Đạt / Đạt có điều kiện / Không đạt. Ghi câu nguyên văn + thời điểm vào đây và vào
