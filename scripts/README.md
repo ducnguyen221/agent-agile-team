@@ -8,6 +8,7 @@ Ba công cụ cho dự án áp dụng, chỉ dùng thư viện chuẩn Python (3
 | `init.py` | Dựng `.agile.json`, ba sổ gốc và khung sprint từ `templates/`; mặc định chạy thử, không ghi đè |
 | `check.py` | Kiểm chuẩn tài liệu; `--self` kiểm lõi sạch và ngân sách `AGENTS.md` của chính repo |
 | `index.py` | Sinh lại khối "Đang mở" ở đầu ba sổ gốc |
+| `autopilot_guard.py` | Hook `PreToolUse` của autopilot: từ chối lệnh shell thuộc danh sách loại khi có file dấu `.tmp/autopilot.json`; **chưa đăng ký** vào host nào (mục "Rào máy autopilot") |
 | `_common.py` | Thư viện chung: đọc frontmatter tập con YAML, che mã trong Markdown, đọc `.agile.json`; không chạy trực tiếp |
 
 ## Cách chạy
@@ -39,6 +40,17 @@ của một thư mục sprint bằng tổng số phát hiện của các file `.
 Thư mục `evidence` ở chỗ khác (cha không có tài liệu sprint) là tài liệu thật của dự án và vẫn được quét. Cờ
 `--include-evidence` quét lại cả `evidence/` cạnh tài liệu sprint (hành vi cũ). Đường file truyền đích danh, hoặc
 chính thư mục `evidence/` truyền làm gốc quét, luôn được kiểm, có cờ hay không. `--self` không đổi và không nhận cờ này.
+
+## Rào máy autopilot
+
+`python scripts/autopilot_guard.py --format {claude,codex,antigravity}` đọc sự kiện `PreToolUse` ở stdin. Thiết kế: [`method/autopilot.md`](../method/autopilot.md) mục 5; test: `tests/test_autopilot_guard.py`. **Chưa đăng ký** vào cấu hình host nào: đăng ký là sửa cấu hình harness (hỏi người dùng đủ 5 ý trước); Codex còn cần **người dùng** trust hook qua `/hooks`.
+
+- **Không có file dấu** `.tmp/autopilot.json` (tìm từ thư mục làm việc của sự kiện đi lên, dừng sau cấp đầu tiên có `.git`) → cho qua: Claude/Codex thoát 0 không in, Antigravity in `{}`.
+- **Có file dấu** và lệnh shell khớp mẫu của mục đang bật → chặn trước khi chạy: Claude/Codex thoát 2, stderr `autopilot: '<mục loại>' cần người dùng nói trong chat — lệnh không chạy`; Antigravity thoát 0, stdout JSON `{"decision": "deny", "reason": …}`.
+- **Mẫu có sẵn:** `push`, `tag`, `main_merge`, `irreversible_delete`, `branch_merge_local`; tám mục còn lại là rào hành vi (không có mẫu). Tên mục lấy từ `check.AUTOPILOT_EXCLUSIONS`. Công cụ shell: Claude `Bash`/`PowerShell`, Codex `shell`/`Bash`/`exec_command`, Antigravity `run_command`; khoá lệnh `tool_input.command`/`cmd`, `toolCall.args.CommandLine`.
+- **Đóng an toàn:** file dấu hỏng → chặn mọi lệnh khớp mẫu (lý do nêu "file dấu hỏng"); `exclusions` thiếu mục bắt buộc → hook bổ sung đủ; stdin hỏng hay ngoại lệ → chặn khi có file dấu từ thư mục của tiến trình, không thì cho qua. Không gọi tiến trình con (nhánh hiện tại đọc từ `.git/HEAD`, hỗ trợ worktree).
+- **Giới hạn đã biết:** mẫu là danh sách đóng, tách lệnh thô theo `&&`, `||`, `;`, `|`, `&`, xuống dòng (chặn nhầm `git commit -m "a && git push"`). Hook chỉ mở lớp `bash -c`/`pwsh -Command`/`cmd /c` trực tiếp; đối thủ cố ý (biến môi trường, script, alias git, `python -c`, `cd` rồi `git -C`) lách được. Ngoại lệ dọn `.tmp/` và phần không chặn được: `method/autopilot.md` mục 5.1. Lưới an toàn, không phải ranh giới bảo mật.
+- Gỡ lỗi: `AUTOPILOT_GUARD_DEBUG=1` in traceback ra stderr.
 
 ## Mã thoát
 
