@@ -14,6 +14,7 @@ from conftest import FIXTURES, LEDGER_ENV, REPO, run_script, write_lf
 import check
 
 VALID = FIXTURES / "valid"
+PRODUCT_CODES = FIXTURES / "product-codes"  # anh em của valid/, không phải một sprint sạch cho test khác
 CASES = json.loads((FIXTURES / "broken.json").read_text(encoding="utf-8"))["cases"]
 SPECIAL_CASES = {
     "leak-denylist", "agents-md-budget",
@@ -134,6 +135,29 @@ def test_broken_case_is_caught_with_its_rule(tmp_path, case):
     if "line" in case:
         assert any(f.line == case["line"] for f in hits), rendered
     assert report.exit_code == case["exit"], rendered
+
+
+def test_product_codes_hyphen_ignored():
+    """Khoá quy ước "mã sản phẩm luôn gạch nối" (`method/feature-expansion.md`, SPR-13): `check` không đọc `MOD-06`, `FE-01`…"""
+    text = "\n".join((PRODUCT_CODES / name).read_text(encoding="utf-8") for name in ("SPEC.md", "PLAN.md"))
+    report = check.check_paths([PRODUCT_CODES])
+    assert report.findings == [], [f.render() for f in report.findings]
+    assert report.exit_code == 0
+    for needle in ("MOD-06", "FE-01", "UC-011", "SCR-033", "FR-47", "### FE-10", "**FE-11 ("):  # fixture không bị gỡ mã
+        assert needle in text, f"fixture product-codes thiếu {needle}"
+
+
+def test_product_code_without_hyphen_flagged(tmp_path):
+    """Cùng quy ước: bỏ gạch nối (`FE01`) thì mã lọt vào vùng mã tài liệu sprint nên bị `id-unknown-prefix` bắt."""
+    root = tmp_path / "sprint"
+    shutil.copytree(PRODUCT_CODES, root)
+    spec = root / "SPEC.md"
+    text = spec.read_text(encoding="utf-8")
+    assert "**FE-01 (" in text
+    write_lf(spec, text.replace("**FE-01 (", "**FE01 (", 1))
+    report = check.check_paths([root])
+    assert [f.rule for f in report.findings] == ["id-unknown-prefix"], [f.render() for f in report.findings]
+    assert report.exit_code != 0
 
 
 def test_every_rule_has_a_broken_case():

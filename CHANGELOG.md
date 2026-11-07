@@ -23,6 +23,14 @@ khoá vai mới, không bỏ gì, nên dự kiến MINOR (`method/conventions.md
 - **Thay đổi — Researcher:** hợp đồng chỉ tìm kiếm, xem, đọc, tra cứu, trích xuất; mỗi mục kèm trích ngắn và nguồn, không có thì
   "không tìm thấy", không suy diễn; người tổng hợp kiểm lại số dùng để quyết. Mẫu `templates/sprint/BRIEF.md` mục 5.
 - **Sửa — test:** `MODEL_NAME` nhận id `gemini-*` có hậu tố effort.
+- **Thêm — mở rộng tính năng cho dự án có mã sản phẩm (SPR-13):** `method/feature-expansion.md` — hai không gian mã (sản
+  phẩm / dự án), bảng ánh xạ, đối chiếu 13 điểm của một tài liệu BA thật với kết luận giữ / đổi / hỏi, bảng nhân vật → vai
+  repo (T3 của dự án ≠ T3 của repo), thứ tự lớp gợi ý cho tính năng full-stack, tên phiên `SPR-NN <tên gọi nhớ>`, chuỗi tìm
+  hiểu đọc → tổng hợp → soát → khuyến nghị; mục lục `method/README.md`; nguồn ghi ở `UPSTREAM.md`.
+- **Thêm — quy ước mã sản phẩm luôn gạch nối:** `FE-01`, `SCR-033`, `FR-47`; `check` không đọc dạng này, dạng không gạch nối
+  (`FE01`) bị báo như mã repo. Không đổi `check.py`, `_common.py`, `.agile.json`; hành vi khoá bằng test
+  `test_product_codes_hyphen_ignored`, `test_product_code_without_hyphen_flagged`, ca `id-unknown-prefix-product-code` và fixture
+  `tests/fixtures/product-codes/`. Skill `id-convention` mục 2 thêm đoạn trỏ (description giữ nguyên).
 - **Ghi nợ (known limitations):** `check` chỉ so nhãn trong cùng một file (Advisor/Gate Delegate trùng người làm ở file khác
   không bị bắt); nhánh `gemini` của `MODEL_NAME` còn nhận họ model bất kỳ; `method/process.md` mục "Duyệt thay" và
   `roles/README.md` chưa nêu ngoại lệ "Advisor không làm `delegation.by`".

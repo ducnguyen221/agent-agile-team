@@ -54,6 +54,8 @@ rewrite_before_public: false
 
 **Ngoại lệ duy nhất có danh sách:** tên tier `T1` / `T2` / `T3` (không phải mã mục).
 
+**Mã sản phẩm** (module, tính năng, use case, màn hình, hợp đồng chức năng của sản phẩm — không phải mục của hồ sơ sprint): dự án có loại mã này thì viết **luôn có gạch nối**, tiền tố 2–4 chữ hoa (`FE-01`, `SCR-033`, `FR-47`) và đọc [method/feature-expansion.md](../../method/feature-expansion.md); `check` không đọc dạng này, còn dạng không gạch nối (`FE01`) bị báo như tiền tố tự chế. Mục của hồ sơ sprint vẫn dùng bảng trên — `BUG-3`, `TC-012` vẫn bị cấm.
+
 ## 3. Ghi và nhắc chéo
 
 | Tình huống | Viết |

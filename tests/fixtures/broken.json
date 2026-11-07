@@ -21,6 +21,8 @@
      "replace": ["- Xuất Excel.", "- Xuất Excel (ưu tiên P1)."]},
     {"rule": "id-unknown-prefix", "exit": 1, "file": "SPEC.md",
      "replace": ["| US1 (xuất nhanh) | Là kế toán", "| YC2 (tự chế) | Là ai đó, tôi muốn X, để Y | Nên có |\n| US1 (xuất nhanh) | Là kế toán"]},
+    {"name": "id-unknown-prefix-product-code", "rule": "id-unknown-prefix", "exit": 1, "file": "SPEC.md",
+     "replace": ["- Yêu cầu gốc: RQ-007 (xuất danh sách đơn).", "- **FE01 (mã sản phẩm thiếu gạch nối):** định nghĩa bằng tiền tố ngoài bảng.\n- Yêu cầu gốc: RQ-007 (xuất danh sách đơn)."]},
     {"rule": "id-wrong-doc", "exit": 1, "file": "PLAN.md",
      "replace": ["| RK1 (dấu phẩy trong tên)", "| BR1 (vướng nhầm chỗ) | Ghi vướng mắc trong PLAN | Nên sửa | Chuyển sang PROGRESS |\n| RK1 (dấu phẩy trong tên)"]},
     {"rule": "xref-missing", "exit": 1, "file": "PLAN.md", "line": 50,

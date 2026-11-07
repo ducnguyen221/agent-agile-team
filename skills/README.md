@@ -145,7 +145,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (sec-4 new; sec-1, sec-2b, sec-3b rerun at n = 1) | 2026-10-24 |
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 7/7 GREEN pass on the current tree (ver-7 new, ver-1 to ver-6 rerun) | 2026-10-23 |
 | [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (wq-7 new, wq-1 to wq-3 rerun at n = 1) plus a real design-compare run that matched its expectation | 2026-10-23 |
-| [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-22 |
+| [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-11-07 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
 | [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (eh-9 new; eh-1, eh-3, eh-4 rerun at n = 1) | 2026-10-24 |
