@@ -44,4 +44,4 @@ Muốn thêm chuyên đề mới: thêm thẻ trong `roles/verifier/specialists/
   [skills/token-economy](../skills/token-economy/SKILL.md).
 
 Tên skill trong các thẻ là tên trong repo này (thư mục `skills/`); tên agent ở mục "Skill dùng" của thẻ chuyên đề
-là tên file trong [agents/](../agents/README.md).
+là tên file trong [agents/](../docs/agents.md).

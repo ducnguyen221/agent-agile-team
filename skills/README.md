@@ -154,5 +154,5 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [gcp-devops](gcp-devops/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 1/3 pass (2 partial) | 2026-10-26 |
 | [gcp-incident-response](gcp-incident-response/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 1/3 pass (2 partial) | 2026-10-26 |
 
-Agent reviewer chuyên đề: [agents/README.md](../agents/README.md). Gặp tên cũ trong hồ sơ lịch sử:
+Agent reviewer chuyên đề: [docs/agents.md](../docs/agents.md). Gặp tên cũ trong hồ sơ lịch sử:
 [docs/MIGRATION.md](../docs/MIGRATION.md).

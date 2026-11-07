@@ -8,7 +8,7 @@
 
 | Bạn chạy trong | Luật lõi nạp bằng | Skill nạp bằng | Hướng dẫn |
 |---|---|---|---|
-| Claude Code (terminal, IDE, tab Code của ứng dụng Claude) | `CLAUDE.md` = một dòng `@AGENTS.md` (trong repo); dòng `@import` ở file luật cấp người dùng (mọi phiên) | plugin `.claude-plugin/` | [claude/README.md](claude/README.md) |
+| Claude Code (terminal, IDE, tab Code của ứng dụng Claude) | dòng `@import` ở file luật cấp người dùng (mọi phiên); repo không có `CLAUDE.md` — xem [claude/README.md](claude/README.md) | plugin `.claude-plugin/` | [claude/README.md](claude/README.md) |
 | Codex (CLI hoặc ứng dụng desktop) | tự đọc `AGENTS.md` theo chuỗi thư mục; ngoài repo: bản sinh ghép vào file luật cấp người dùng | plugin `.codex-plugin/` hoặc mở thẳng repo | [codex/README.md](codex/README.md) |
 | Google Antigravity | tự đọc `AGENTS.md` + `GEMINI.md` của workspace; ngoài repo: bản sinh ghép vào file luật cấp người dùng | liên kết từng thư mục skill vào thư mục skill của Antigravity | [antigravity/README.md](antigravity/README.md) |
 | Claude Desktop, tab chat | **chưa hỗ trợ** | — | [claude-desktop/README.md](claude-desktop/README.md) |

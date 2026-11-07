@@ -6,8 +6,13 @@
 
 ## 1. Luật lõi
 
-- Phiên mở **trong thư mục repo**: `CLAUDE.md` của repo là đúng một dòng `@AGENTS.md` — Claude Code không tự
-  đọc `AGENTS.md`, dòng import nạp nó thật. Không cần làm gì thêm.
+- Phiên mở **trong thư mục repo**: repo cố ý không có `CLAUDE.md` (`claude plugin validate --strict` đỏ nếu có). Luật
+  lõi vào qua dòng import cấp người dùng ở dưới — đã có dòng đó thì không cần làm gì thêm. Chưa có thì Claude Code
+  ≥ 2.1.277 tự đọc `AGENTS.md`, nhưng chỉ khi thư mục làm việc và mọi thư mục cha không có `CLAUDE.md`,
+  `.claude/CLAUDE.md` hay `CLAUDE.local.md` (`~/.claude/CLAUDE.md` không tính), và mục *Project instructions*
+  trong `/config` chưa tắt. Không thoả hai điều đó thì tạo `.claude/CLAUDE.md` cục bộ chứa đúng một dòng
+  `@../AGENTS.md` (đường `@` tính từ file chứa nó); `.gitignore` đã bỏ qua file này để nó không vào repo. Gõ
+  `/memory` trong phiên để xem luật đã nạp từ đâu.
 - Phiên ở **dự án khác** (cách dùng thường ngày): thêm một dòng vào file luật cấp người dùng
   `~/.claude/CLAUDE.md`, trỏ tới bản clone của repo, ví dụ:
 

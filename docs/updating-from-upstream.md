@@ -105,7 +105,7 @@
 3. **Distill** theo mục 4, như một sprint.
 4. **Không có nguồn phù hợp** thì tự viết; frontmatter ghi theo [skills/README.md](../skills/README.md) mục 1. Skill
    mới cần tệp thử (`tests/pressure.md` cho skill kỷ luật, `tests/retrieval.md` cho skill tham chiếu) và một dòng ở
-   mục lục + bảng hiện trạng thử của `skills/README.md`; agent mới cần một dòng ở [agents/README.md](../agents/README.md)
+   mục lục + bảng hiện trạng thử của `skills/README.md`; agent mới cần một dòng ở [docs/agents.md](agents.md)
    và chạy thử trên fixture trước khi ghi vào `CHANGELOG.md`.
 5. **Nguồn private hay nội bộ:** không ghi tên trong repo. Dùng nhãn trung tính (như "bộ skill quy trình
    private"), ghi cờ `rewrite_before_public`, để bản đồ thật ở lớp riêng.
