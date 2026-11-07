@@ -1371,3 +1371,15 @@ def test_guard_tmp_cleanup_walk_limits_fail_closed(tmp_path, monkeypatch):
     monkeypatch.setattr(os, "walk", failing_walk)
     assert_blocked(repo, "rm -rf .tmp/shallow", "irreversible_delete")
     monkeypatch.setattr(os, "walk", real_walk)
+
+
+def test_guard_unquoted_heredoc_expands_command_substitution(tmp_path):
+    """RF9 (re-review A vòng 3): nhãn không nháy thì shell mở rộng `$(…)` và backtick trong thân → xét như lệnh lồng; nhãn có nháy thì không."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    for cmd in ("python - <<X\nx = $(git push)\nX", "cat > f <<X\nrun `git push origin main`\nX", "cat <<-X\n\t$(rm -rf build)\n\tX",
+                "python - <<X\na $(echo $(git push)) b\nX", "tee f <<EOF\n$(gh pr merge 3)\nEOF"):
+        rc, _, err = run("claude", claude(cmd, repo))
+        assert rc == 2, (cmd, err)
+    for cmd in ("python - <<'X'\nx = $(git push)\nX", 'python - <<"X"\nx = $(git push)\nX', "cat > f <<\\X\n`git push`\nX",
+                "python - <<X\nx = $(git status) $((1+2)) `ls`\nX", "python - <<X\nplain text git push\nX"):
+        assert_allowed(repo, cmd)

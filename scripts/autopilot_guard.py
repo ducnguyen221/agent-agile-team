@@ -706,10 +706,33 @@ def _heredoc_marks(line: str, quote: str) -> tuple[list["re.Match[str]"], str]:
     return marks, quote
 
 
+def _substitutions(body: str) -> list[str]:
+    """Nội dung các `$(…)` (ngoặc cân bằng, bỏ `$((…))`) và cặp dấu huyền trong `body`: thứ shell sẽ chạy khi mở rộng thân heredoc."""
+    found: list[str] = []
+    index = 0
+    while index < len(body):
+        if body.startswith("$(", index) and not body.startswith("$((", index):
+            depth, end = 1, index + 2
+            while end < len(body) and depth:
+                depth += (body[end] == "(") - (body[end] == ")")
+                end += 1
+            found.append(body[index + 2:end - 1 if depth == 0 else end])
+            index = end
+        elif body[index] == "`":
+            end = body.find("`", index + 1)
+            end = len(body) if end < 0 else end
+            found.append(body[index + 1:end])
+            index = end + 1
+        else:
+            index += 1
+    return found
+
+
 def _strip_heredoc_bodies(text: str) -> str:
     """Thân heredoc đưa vào trình thông dịch không phải shell (`python -`, `node -`, `cat >`) là dữ liệu, không phân tích như lệnh;
     đưa vào `bash`/`sh`/`pwsh`/eval (kể cả `cat <<EOF | bash`) thì giữ lại để xét như lệnh lồng. Chỉ nhận `<<` ngoài nháy và comment;
-    heredoc không có dòng kết thúc khớp đúng nhãn thì giữ nguyên thân để phân tích."""
+    heredoc không có dòng kết thúc khớp đúng nhãn thì giữ nguyên thân để phân tích. Nhãn không nháy (`<<X`, `<<-X`): shell vẫn mở rộng
+    `$(…)` và dấu huyền trong thân nên các lệnh đó được trích ra phân tích; nhãn có nháy (`<<'X'`, `<<"X"`, `<<\\X`) thì bỏ hẳn thân."""
     lines = text.split("\n")
     out: list[str] = []
     index = 0
@@ -737,6 +760,8 @@ def _strip_heredoc_bodies(text: str) -> str:
                 body.append(current)
             if reads_shell or not closed:
                 out.extend(body)
+            elif "\\" not in mark.group(0) and not (mark.group(2) or mark.group(3)):
+                out.extend(_substitutions("\n".join(body)))  # nhãn không nháy: shell mở rộng $(…) và dấu huyền trong thân
     return "\n".join(out)
 
 
@@ -811,7 +836,7 @@ def _command_item(tokens: list[str], redirected: bool, ctx: Context, depth: int)
 
 def _analyze(text: str, ctx: Context, depth: int = 0) -> str | None:
     """Mục loại đầu tiên mà `text` (có thể là lệnh ghép) vi phạm và đang bật; None nếu không."""
-    text = _strip_heredoc_bodies(LINE_CONTINUATION.sub(" ", text))  # nối dòng `git \` + xuống dòng; bỏ thân heredoc của trình không phải shell
+    text = LINE_CONTINUATION.sub(" ", _strip_heredoc_bodies(text))  # nối dòng `git \` + xuống dòng; bỏ thân heredoc của trình không phải shell
     item = _pipe_to_shell(text, ctx, depth)
     if item:
         return item
@@ -919,7 +944,7 @@ def _extra_dirs(text: str, base: str, depth: int = 0) -> list[str]:
     từ ngoài cây có file dấu: đi lên từ chính đường đó tới thư mục có `.git`."""
     scratch = Context(set(), base)
     found: list[str | None] = []
-    for segment in SEPARATORS.split(_strip_heredoc_bodies(LINE_CONTINUATION.sub(" ", text))):
+    for segment in SEPARATORS.split(LINE_CONTINUATION.sub(" ", _strip_heredoc_bodies(text))):
         tokens, _ = _strip_prefixes(tokenize(segment), scratch)
         if not tokens:
             continue
