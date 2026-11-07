@@ -2371,6 +2371,8 @@ ALL_EXCLUSIONS = ("push, tag, version, main_merge, publish, license, irreversibl
                   "user_soul, secret, auth, network_fetch, branch_merge_local")
 WITHOUT_BRANCH_MERGE = "[" + ALL_EXCLUSIONS.replace(", branch_merge_local", "") + "]"
 AUTOPILOT_GRANT = '"Bật autopilot cổng 1 cho SPR-03."'
+GATES_1_2_GRANT = '"Bật autopilot cổng 1+2 cho SPR-03 tới hết sprint."'
+PROGRAM_GRANT = '"Bật autopilot chương trình doi-skill gồm SPR-03…SPR-05 tới 2026-12-31, cổng 1+2."'
 
 
 def autopilot_plan(root: Path, **fields) -> Path:
@@ -2402,18 +2404,20 @@ def test_autopilot_gate_delegate_by_ok(tmp_path):
 
 
 @pytest.mark.parametrize("fields", [
-    {"level": "gate_1_2", "scope": "[gate_1, gate_2]"},
-    {"level": "program", "program": "doi-skill", "expires": "2026-12-31", "scope": "[gate_2, gate_1]",
-     "grant": '"Bật autopilot chương trình doi-skill gồm SPR-03…SPR-05 tới 2026-12-31, cổng 1+2."'},
+    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": GATES_1_2_GRANT},
+    {"level": "program", "program": "doi-skill", "expires": "2026-12-31", "scope": "[gate_2, gate_1]", "grant": PROGRAM_GRANT},
     {"level": "program", "program": "doi-skill", "expires": "2026-12-31", "scope": "[gate_1]",
      "grant": '"Bật autopilot chương trình doi-skill gồm SPR-03…SPR-05 tới 2026-12-31, cổng 1."'},
     {"level": "program", "program": "doi-skill", "expires": "2026-12-31", "scope": "[gate_1, gate_2]",
      "grant": '"BẬT AUTOPILOT chương trình doi-skill tới 2026-12-31, CỔNG 1+2 +NHÁNH."', "exclusions": WITHOUT_BRANCH_MERGE},
     {"grant": '"  BẬT AUTOPILOT cổng 1 cho SPR-03."'},  # tiền tố không phân biệt hoa thường, bỏ khoảng trắng đầu
-    {"grant": '"Bật autopilot cổng 1 cho SPR-03 +nhánh."', "exclusions": WITHOUT_BRANCH_MERGE},
+    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "exclusions": WITHOUT_BRANCH_MERGE,
+     "grant": '"Bật autopilot cổng 1+2 cho SPR-03 tới hết sprint +nhánh."'},
+    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "exclusions": WITHOUT_BRANCH_MERGE,
+     "grant": '"Bật autopilot cổng 1+2 cho SPR-03 +nhánh. "'},  # dấu chấm và khoảng trắng cuối không tính
     {"channel": "host_comment", "sessions_cap": "20", "orchestrator": "null"},
     {"channel": None, "orchestrator": None, "sessions_cap": None},  # ba khoá tuỳ chọn vắng
-], ids=["gate_1_2", "program-1+2", "program-1", "program-casefold", "prefix-case", "branch-merge-allowed", "host_comment", "optional-absent"])
+], ids=["gate_1_2", "program-1+2", "program-1", "program-casefold", "prefix-case", "branch-merge-allowed", "branch-merge-trailing-dot", "host_comment", "optional-absent"])
 def test_autopilot_valid_variants_stay_clean(tmp_path, fields):
     root = make_sprint(tmp_path)
     autopilot_plan(root, **fields)
@@ -2429,21 +2433,22 @@ def test_autopilot_level_invalid(tmp_path, value):
 
 def test_autopilot_program_needs_date(tmp_path):
     root = make_sprint(tmp_path)
-    autopilot_plan(root, level="program", program="doi-skill", expires="sprint_end")
+    autopilot_plan(root, level="program", program="doi-skill", expires="sprint_end", scope="[gate_1, gate_2]", grant=PROGRAM_GRANT)
     _only_hit(root, "expires")
 
 
 @pytest.mark.parametrize("program", ["null", '""', None])
 def test_autopilot_program_level_needs_program_name(tmp_path, program):
     root = make_sprint(tmp_path)
-    autopilot_plan(root, level="program", program=program, expires="2026-12-31")
+    autopilot_plan(root, level="program", program=program, expires="2026-12-31", scope="[gate_1, gate_2]", grant=PROGRAM_GRANT)
     _only_hit(root, "program")
 
 
 @pytest.mark.parametrize("fields", [
-    {"level": "gate_1_2", "scope": "[gate_1]"},
-    {"level": "gate_1_2", "scope": "[]"},
-    {"level": "program", "program": "x", "expires": "2026-12-31", "scope": "[gate_1, gate_2]"},  # grant không có "cổng 1+2"
+    {"level": "gate_1_2", "scope": "[gate_1]", "grant": GATES_1_2_GRANT},
+    {"level": "gate_1_2", "scope": "[]", "grant": GATES_1_2_GRANT},
+    {"level": "program", "program": "x", "expires": "2026-12-31", "scope": "[gate_1, gate_2]",  # grant chỉ có "cổng 1"
+     "grant": '"Bật autopilot chương trình x tới 2026-12-31, cổng 1."'},
     {"level": "program", "program": "x", "expires": "2026-12-31", "scope": "[gate_1]",
      "grant": '"Bật autopilot chương trình x tới 2026-12-31, cổng 1+2."'},
 ], ids=["gate_1_2-missing-gate_2", "empty", "program-extra", "program-missing"])
@@ -2479,6 +2484,30 @@ def test_autopilot_exclusions_duplicate_item(tmp_path):
     root = make_sprint(tmp_path)
     autopilot_plan(root, exclusions=f"[{ALL_EXCLUSIONS}, push]")
     _only_hit(root, "trùng: push")
+
+
+@pytest.mark.parametrize("fields", [
+    {"grant": '"Bật autopilot cổng 1 cho SPR-03 +nhánh."'},  # gate_1 không có Cổng 2 để gộp sau
+    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": '"Bật autopilot cổng 1+2 +nhánh cho SPR-03."'},  # giữa câu
+    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": GATES_1_2_GRANT},  # không có +nhánh
+], ids=["gate_1-with-suffix", "suffix-mid-sentence", "no-suffix"])
+def test_autopilot_branch_merge_local_cannot_be_dropped(tmp_path, fields):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, exclusions=WITHOUT_BRANCH_MERGE, **fields)
+    _only_hit(root, "branch_merge_local")
+
+
+@pytest.mark.parametrize("grant,level,scope", [
+    ('"Bật autopilot cổng 1 cho SPR-03."', "gate_1_2", "[gate_1, gate_2]"),
+    ('"Bật autopilot cổng 1+2 cho SPR-03."', "gate_1", "[gate_1]"),
+    ('"Bật autopilot chương trình x tới 2026-12-31, cổng 1."', "gate_1", "[gate_1]"),
+    ('"Bật autopilot cổng 1 cho SPR-03."', "program", "[gate_1, gate_2]"),
+    ('"Bật autopilot cổng 2 cho SPR-03."', "gate_1", "[gate_1]"),
+], ids=["1-claims-1_2", "1_2-claims-1", "program-claims-1", "1-claims-program", "unrecognized"])
+def test_autopilot_grant_text_must_match_level(tmp_path, grant, level, scope):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, grant=grant, level=level, scope=scope, program="x", expires="2026-12-31")
+    _only_hit(root, "lời cấp nêu mức")
 
 
 def test_autopilot_branch_merge_local_absent_needs_branch_suffix(tmp_path):

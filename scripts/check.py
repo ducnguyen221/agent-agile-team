@@ -1452,6 +1452,11 @@ class Engine:
         level = block["level"]
         if level not in AUTOPILOT_LEVELS:  # `in` trên tuple so ==, nên danh sách/số không lọt
             return "delegation.level", f"delegation.level: {level!r} phải là một trong {list(AUTOPILOT_LEVELS)}"
+        if grant_text.lstrip().startswith(AUTOPILOT_PREFIX):  # chữ mức trong lệnh phải khớp `level` (không nới phạm vi hơn lời người dùng)
+            stated = ("program" if "chương trình" in grant_text else "gate_1_2" if AUTOPILOT_GATES_BOTH in grant_text
+                      else "gate_1" if "cổng 1" in grant_text else None)
+            if stated != level:
+                return "delegation.level", f"autopilot: lời cấp nêu mức {stated!r} mà delegation.level là {level!r}"
         program, expires = block.get("program"), block["expires"]
         if "program" in block and not (program is None or (isinstance(program, str) and program.strip())):
             return "delegation.program", f"delegation.program: {program!r} phải là tên chương trình hoặc null"
@@ -1475,10 +1480,10 @@ class Engine:
         repeated = sorted({e for e in exclusions if exclusions.count(e) > 1})
         if repeated:
             return "delegation.exclusions", f"delegation.exclusions có mục trùng: {', '.join(repeated)}"
-        branch_ok = AUTOPILOT_BRANCH_SUFFIX in grant_text
+        branch_ok = "gate_2" in wanted and grant_text.rstrip(" .\t\r\n").endswith(AUTOPILOT_BRANCH_SUFFIX)  # `+nhánh` đứng cuối câu, chỉ đi với mức có Cổng 2
         missing = [e for e in AUTOPILOT_EXCLUSIONS if e not in exclusions and not (e == "branch_merge_local" and branch_ok)]
         if missing:
-            hint = " (branch_merge_local chỉ được vắng khi lời cấp có +nhánh)" if "branch_merge_local" in missing else ""
+            hint = " (branch_merge_local chỉ được vắng khi mức có gate_2 và lời cấp kết thúc bằng +nhánh)" if "branch_merge_local" in missing else ""
             return "delegation.exclusions", f"delegation.exclusions thiếu mục bắt buộc: {', '.join(missing)}{hint}"
         cap = block.get("sessions_cap")
         if "sessions_cap" in block and not (cap is None or (isinstance(cap, int) and not isinstance(cap, bool) and cap >= 1)):
