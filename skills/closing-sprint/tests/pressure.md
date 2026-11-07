@@ -7,8 +7,8 @@ skill_sha: ec2191fbbe289307bf9020914c0cbfbcc093026c
 date: 2026-11-08
 result: "1/1 GREEN pass; RED 0/1 pass (KB15 partial); SPR-12 2026-11-08 n = 1, earlier rounds in body"
 agent_ids:
-  sonnet_spr12_red_2026_11_08: "không ghi được id (chủ thể trả lời qua file .tmp/spr12/red/<mã>.md, điều phối không nhận id agent)"
-  sonnet_spr12_green_2026_11_08: "không ghi được id (chủ thể trả lời qua file .tmp/spr12/green/<mã>.md, điều phối không nhận id agent)"
+  sonnet_spr12_red_2026_11_08: {KB15: aa346ebbeacd39cec}
+  sonnet_spr12_green_2026_11_08: {KB15: a99fb35b29dfe868c}
   red: {kb1-old: a110b3cb5fe26c308, kb2: ad72f687e517d0f52, kb3-old: a4c783b65f4c6afc4, kb1: ac358e84b4b76a291, kb3: a53c4ed39adae18a1}
   green: {kb1: aab905fbc8857f8d2, kb2: a0e857a7f5a62538f, kb3: aed537646233004cf}
   green_rerun: {kb1: ad921df35269a43e6, kb2: ae27f344f888fc3b1, kb3: afff51b68441f550c}
@@ -27,7 +27,7 @@ agent_ids:
 
 ## Lượt SPR-12 TK5 - lệnh autopilot (2026-11-08)
 
-QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca, 1 ca closing-sprint), mỗi kịch bản một chủ thể mới đọc SKILL.md bằng đường tuyệt đối, cấm công cụ Skill. RED = cây skill tại commit `3a9e2d1` (trước khi sửa); GREEN = cây tại `3e45a8f`. `skill_sha` ở frontmatter = cây `skills/closing-sprint` trừ `tests/` tại HEAD. Tiêu chí đăng ký trước ở `.tmp/spr12/TK5-criteria.md` (ngoài repo commit); chấm chi tiết ở `TK5-red-grades.md`, `TK5-green-grades.md`.
+QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca, 1 ca closing-sprint), mỗi kịch bản một chủ thể mới đọc SKILL.md bằng đường tuyệt đối, cấm công cụ Skill. RED = cây skill tại commit `3a9e2d1` (trước khi sửa); GREEN = cây tại `3e45a8f`. `skill_sha` ở frontmatter = cây `skills/closing-sprint` trừ `tests/` tại HEAD. Tiêu chí đăng ký trước ở hồ sơ sprint SPR-12 ở lớp riêng (`evidence/tk5-pressure/TK5-criteria.md`); chấm chi tiết ở `TK5-red-grades.md`, `TK5-green-grades.md`.
 
 | Ca | RED (skill cũ) | GREEN (skill mới) |
 |---|---|---|

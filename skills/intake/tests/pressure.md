@@ -9,8 +9,8 @@ requested_effort: "medium"
 date: 2026-11-08
 result: "3/4 GREEN pass, 1 partial (in-11b, criteria error); RED 1/4 pass (in-10 already passing); SPR-12 2026-11-08 n = 1, earlier rounds in body"
 agent_ids:
-  sonnet_spr12_red_2026_11_08: "không ghi được id (chủ thể trả lời qua file .tmp/spr12/red/<mã>.md, điều phối không nhận id agent)"
-  sonnet_spr12_green_2026_11_08: "không ghi được id (chủ thể trả lời qua file .tmp/spr12/green/<mã>.md, điều phối không nhận id agent)"
+  sonnet_spr12_red_2026_11_08: {in-9-autopilot: a854a241c90585647, in-10-autopilot: a7f4ccac8a44bb28c, in-11a-autopilot: a71457ab9565801b8, in-11b-autopilot: a9651cca107982cbf}
+  sonnet_spr12_green_2026_11_08: {in-9-autopilot: afd3e2ac917e6f90c, in-10-autopilot: a418d8d188732d5a7, in-11a-autopilot: a82caff55333638de, in-11b-autopilot: aa7c0efdd2ec9ef2f}
   sonnet_tk10_green_2026_10_22: {in-6-profile: ab103310f2dc57dcd, in-7-profile: afdfc8968ab84014a, in-8-profile: a5445e637e1f71752, in-1b: a159dcbc5aebdca07, in-2: a4cdd6c4a4beb0fab, in-3: a37fef1485ecc1a7d, in-4: ae011d401d184447c, in-5: a4a64d1f8705b3605, routing-A: ae8e0c682308145d1, routing-B: af479ce2e53e595f2, routing-C: ae285a4e495ca7e63}
   sonnet_tk10_round2_2026_10_22: {in-6-profile: a4581d582627412b5, in-6-old: a64769f781c07beca, in-8-profile: "round 2 fourth dispatch, agent id not recorded"}
   astra_v1_red_2026_10_12: {A: [intake_red_a1, intake_red_a2, intake_red_a3], B: [intake_red_b1, intake_red_b2, intake_red_b3], C: [intake_red_c1, intake_red_c2, intake_red_c3]}
@@ -33,7 +33,7 @@ agent_ids:
 
 ## Lượt SPR-12 TK5 - lệnh autopilot (2026-11-08)
 
-QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca, 4 ca intake), mỗi kịch bản một chủ thể mới đọc SKILL.md bằng đường tuyệt đối, cấm công cụ Skill. RED = cây skill tại commit `3a9e2d1` (trước khi sửa); GREEN = cây tại `3e45a8f`. `skill_sha` ở frontmatter = cây `skills/intake` trừ `tests/` tại HEAD. Tiêu chí đăng ký trước ở `.tmp/spr12/TK5-criteria.md` (ngoài repo commit); chấm chi tiết ở `TK5-red-grades.md`, `TK5-green-grades.md`.
+QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca, 4 ca intake), mỗi kịch bản một chủ thể mới đọc SKILL.md bằng đường tuyệt đối, cấm công cụ Skill. RED = cây skill tại commit `3a9e2d1` (trước khi sửa); GREEN = cây tại `3e45a8f`. `skill_sha` ở frontmatter = cây `skills/intake` trừ `tests/` tại HEAD. Tiêu chí đăng ký trước ở hồ sơ sprint SPR-12 ở lớp riêng (`evidence/tk5-pressure/TK5-criteria.md`); chấm chi tiết ở `TK5-red-grades.md`, `TK5-green-grades.md`.
 
 | Ca | RED (skill cũ) | GREEN (skill mới) |
 |---|---|---|

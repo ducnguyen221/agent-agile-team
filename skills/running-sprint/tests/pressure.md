@@ -12,8 +12,8 @@ result: "2/2 GREEN pass; RED 1/2 pass (rs-10 already passing, rs-9 partial); SPR
 candidate_source_sha256: fe5d4e6dc3af8e35773d21a198e04569882a497652e063ca96fad8bac87c51b3
 candidate_tested: true
 agent_ids:
-  sonnet_spr12_red_2026_11_08: "không ghi được id (chủ thể trả lời qua file .tmp/spr12/red/<mã>.md, điều phối không nhận id agent)"
-  sonnet_spr12_green_2026_11_08: "không ghi được id (chủ thể trả lời qua file .tmp/spr12/green/<mã>.md, điều phối không nhận id agent)"
+  sonnet_spr12_red_2026_11_08: {rs-9-autopilot: a85684b4ee1cea1f1, rs-10-autopilot: a169666d4f01fc8e8}
+  sonnet_spr12_green_2026_11_08: {rs-9-autopilot: aec12edfd63541495, rs-10-autopilot: aa9af5fc870603d69}
   red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c, rs-5: a85924e1b63b35a7d, rs-6: a931196ba49c182b7}
   green: {rs-2: a50fbf9b9a102fe43, rs-3: a57d5e1bf1b2f50c5, rs-4: adf66375595ac80e4, rs-5: a7168adbe0f810772, rs-6: a6db9c9d7225d1989}
   green_earlier: {rs-2: a81f21037706b8bb0, rs-3: aa5bbaab81cd948a2, rs-4: a8cadce4614405320}
@@ -26,7 +26,7 @@ agent_ids:
 
 ## Lượt SPR-12 TK5 - lệnh autopilot (2026-11-08)
 
-QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca, 2 ca running-sprint), mỗi kịch bản một chủ thể mới đọc SKILL.md bằng đường tuyệt đối, cấm công cụ Skill. RED = cây skill tại commit `3a9e2d1` (trước khi sửa); GREEN = cây tại `3e45a8f`. `skill_sha` ở frontmatter = cây `skills/running-sprint` trừ `tests/` tại HEAD. Tiêu chí đăng ký trước ở `.tmp/spr12/TK5-criteria.md` (ngoài repo commit); chấm chi tiết ở `TK5-red-grades.md`, `TK5-green-grades.md`.
+QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca, 2 ca running-sprint), mỗi kịch bản một chủ thể mới đọc SKILL.md bằng đường tuyệt đối, cấm công cụ Skill. RED = cây skill tại commit `3a9e2d1` (trước khi sửa); GREEN = cây tại `3e45a8f`. `skill_sha` ở frontmatter = cây `skills/running-sprint` trừ `tests/` tại HEAD. Tiêu chí đăng ký trước ở hồ sơ sprint SPR-12 ở lớp riêng (`evidence/tk5-pressure/TK5-criteria.md`); chấm chi tiết ở `TK5-red-grades.md`, `TK5-green-grades.md`.
 
 | Ca | RED (skill cũ) | GREEN (skill mới) |
 |---|---|---|
