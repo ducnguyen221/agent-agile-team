@@ -1,6 +1,6 @@
 ---
 name: closing-sprint
-description: "Use when closing a sprint after verification has no open blockers: run the evidence preflight before gate 2, propose a version bump, and after the user's verdict update living specs, registries and docs; check every review lane on the tree to be merged; offer the branch menu (merge, push + PR, keep); merge only on green CI for that exact commit or user approval; never force-push or delete work; when autopilot is on, write the autopilot bulletin and leave the branch merge to the user unless the command carried `+nhánh`."
+description: "Use when closing a sprint after verification has no open blockers: evidence preflight before gate 2, version proposal, updating living specs, registries and docs after the verdict, checking the tree to be merged, and the branch menu; also when autopilot is on for the sprint being closed."
 metadata:
   group: process
   roles: [analyst, implementer]
@@ -196,4 +196,4 @@ Chi tiết: [method/autopilot.md](../../method/autopilot.md) mục 2, 5, 8. Cổ
 - **Bản tin autopilot** — REPORT mục "Bản tin autopilot" (`SPRINT.md` dùng cùng tiêu đề), người dùng đọc sau, không chặn việc: một dòng mỗi cổng duyệt thay (cổng · kết luận · người ký · đường tới `evidence/gate-N-verdict.md`) · hàng chờ người (`BR` `chờ người`) · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do. Sprint không bật autopilot ghi "Không áp dụng".
 - **Nhánh sprint, menu:** lệnh **không có `+nhánh`** → gộp cục bộ thuộc danh sách loại, kể cả khi Cổng 2 Đạt: bản tin ghi rõ "lệnh không có `+nhánh` nên không gộp", nhánh vào hàng chờ người, menu mục 3 để người dùng trả lời sau. Lệnh **có `+nhánh`** (chỉ với `cổng 1+2`, đứng cuối câu): gộp cục bộ vào nhánh tích hợp **không phải nhánh chính**, **chỉ khi Cổng 2 là Đạt** và CI của đúng commit theo mục 3; Đạt có điều kiện thì nhánh vào hàng chờ người.
 - **Luôn hỏi người, từng lần, dù lệnh nào:** push, PR gộp, tag, tăng phiên bản, gộp vào nhánh chính. Autopilot không có `+push`.
-- Hết hạn hay hết sprint: bỏ sprint khỏi `sprints` của file dấu, rỗng thì xoá, sau cùng.
+- Hết hạn hay hết sprint: bỏ sprint khỏi `sprints` của mọi file dấu (gốc repo và worktree phiên con), file nào rỗng thì xoá, sau cùng.
