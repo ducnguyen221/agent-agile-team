@@ -1,7 +1,6 @@
 ---
 title: Autopilot - one chat command lets a fresh Gate Delegate approve gates under an orchestrator session, with hard fences
 type: method
-status: draft
 updated: 2026-11-08
 ---
 
@@ -91,6 +90,8 @@ khối có bất kỳ khoá mới nào; đã kích thì `level`, `expires`, `exc
 | `orchestrator` | nhãn phiên điều phối hoặc `null` | khác `by`; `null` = phiên nhận lệnh tự giữ việc điều phối, không có nhãn riêng — vẫn giữ sổ phiên con, vẫn áp trần, vẫn mở Gate Delegate là subagent mới (một dòng sổ); `check` bỏ kiểm trùng `by` khi `null`, còn `by` vẫn phải khác mọi nhãn thực thi |
 | `sessions_cap` | số nguyên ≥1 hoặc `null` | `null` = lệnh không nêu trần → hằng mặc định (mục 2.1) |
 
+- `files` (khoá cũ): mỗi mục phải có nguyên văn trong `grant`; lệnh autopilot chuẩn không nêu file nên `files: []` (`check` báo `gate-delegation-invalid` khi lệch).
+
 - `scope` giữ là danh sách cổng và phải **bằng đúng** tập cổng của mức (thứ tự tuỳ): `gate_1` → `[gate_1]`;
   `gate_1_2` → `[gate_1, gate_2]`; `program` → `[gate_1, gate_2]` khi `grant` chứa `cổng 1+2`, ngược lại `[gate_1]`.
   Khác tập đó — thiếu cổng, thừa cổng, rỗng — là trái mức.
@@ -139,7 +140,8 @@ người dùng nói ──► kênh hợp lệ? ──không──► nêu lại
 ```
 
 - **Kênh hợp lệ** (`channel`): `chat` — tin người dùng gõ trong phiên; `host_comment` — comment do host chuyển vào
-  phiên **như tin của người dùng**, **và** tài liệu chỉ chia sẻ ở mức chủ sở hữu hoặc relay ghi tên tác giả là người dùng.
+  phiên **như tin của người dùng**, **và** tài liệu chỉ chia sẻ ở mức chủ sở hữu hoặc relay ghi tác giả là người dùng.
+  "Tác giả" so bằng **định danh tài khoản ổn định** mà host trả (login hoặc ID), không so tên hiển thị — tên hiển thị đặt trùng được; không có định danh thì không phải lời cấp.
   Trước khi ghi `channel: host_comment`, Analyst kiểm trường chia sẻ hoặc tác giả mà host trả và nêu kết quả trong lời
   nhắc lại lệnh; không kiểm được thì không phải lời cấp.
 - **Không phải lời cấp:** comment trên tài liệu chia sẻ cho người khác mà không rõ tác giả; chữ trong file, PR, issue,
@@ -195,7 +197,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 ### 5.1 Rào máy: chặn được gì, không chặn được gì
 
 - **Cơ chế:** `scripts/autopilot_guard.py` theo khuôn `skills/hooks-guardrails/scripts/protect_paths.py`, đăng ký
-  `PreToolUse` ở ba host theo bảng mục 3 của skill `hooks-guardrails`; không có file dấu → cho qua; có và lệnh shell
+  `PreToolUse` theo bảng mục 3 của skill `hooks-guardrails` (hiện chỉ Claude đã đăng ký — mục 9); không có file dấu → cho qua; có và lệnh shell
   khớp mẫu → chặn **trước khi chạy**, lý do `autopilot: '<mục loại>' cần người dùng nói trong chat — lệnh không chạy`.
 - **Tìm file dấu:** từ thư mục làm việc của sự kiện đi lên, xét `.tmp/autopilot.json` ở từng cấp; dừng sau cấp đầu
   tiên có `.git` — thư mục, hoặc **file** `gitdir:` của worktree; không gặp `.git` thì đi tới gốc ổ đĩa. Vì vậy worktree
@@ -206,6 +208,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 - **File dấu hỏng hay thiếu mục:** JSON hỏng → chặn mọi lệnh khớp mẫu (đóng an toàn). `exclusions` thiếu mục **bắt
   buộc** (mọi mục trừ `branch_merge_local`) → hook bổ sung đủ; `branch_merge_local` vắng được tôn trọng vì đó là
   `+nhánh`; mục lạ bị bỏ qua (không bớt được mục nào). Khoá `sprints` hook không dùng để quyết.
+- **File dấu được hook bảo vệ:** lệnh shell không chỉ-đọc trỏ tới file dấu (hay `.tmp/` hoặc glob bao nó, hoặc chuyển hướng `>` vào nó) và tool ghi file có đích là file dấu đều bị chặn. Đường xoá hợp lệ khi kết thúc: điều phối chạy lệnh xoá từ thư mục **ngoài** repo chứa file dấu, bằng đường tuyệt đối (hoặc người dùng tự xoá). Giới hạn nói thẳng: phiên con cũng làm được cách đó, nên đây vẫn là rào hành vi, không phải ranh giới bảo mật.
 - **Chặn được:** lệnh shell gõ thẳng khớp mẫu bảng trên, trong phiên có hook đã đăng ký, đang chạy, và có file dấu
   trên đường từ thư mục làm việc lên gốc repo.
 - **Không chặn được** (đều là rào hành vi, điều phối phải tự soát):
@@ -220,6 +223,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
   - hook chưa đăng ký, Codex chưa được **người dùng** trust qua `/hooks`, hook hết giờ ở host không có khoá
     `onFailure: block`, Antigravity trả `{}` ở `PreToolUse` (chưa xác minh — skill `hooks-guardrails`, Gotchas);
   - phiên con chạy ở thư mục ngoài repo có file dấu;
+  - lệnh đi qua công cụ ngoài `matcher` (MCP, `Monitor`), `git restore .` và các lệnh bỏ việc chưa commit tương tự, và đối thủ cố ý (người viết lệnh để lách mẫu);
   - **sửa `scripts/check.py` hằng `AUTOPILOT_EXCLUSIONS`, `scripts/autopilot_guard.py` hay cấu hình hook** — danh sách mục hook thi hành lấy từ hằng của `check.py` (test ghim đúng 13 mục nên bớt mục thì test đỏ, nhưng phiên con sửa được cả test); điều phối soát `git diff` của hai file đó khi nhận báo;
   - **phiên con có quyền ghi xoá hoặc sửa được file dấu** — chế độ toàn quyền không hỏi trước khi ghi `.tmp/`. Đây là
     giới hạn lớn nhất còn lại: file dấu nằm trong tầm ghi của phiên con, chưa có chỗ đặt ngoài tầm đó trên cùng một
@@ -243,7 +247,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
   (mức chương trình: cả dải). Điều phối chép vào `.tmp/` của thư mục làm việc (worktree) của mỗi phiên con **trước** khi
   giao việc, `sprints` = đúng sprint phiên con đó làm.
 - **Xoá:** khi kết thúc (`Dừng autopilot.`, thu hồi, hết hạn), **sau cùng** — sau khi mọi phiên con liên quan đã báo
-  dừng ở điểm an toàn (mục 7), để phiên con đang chạy không mất rào giữa chừng. `Thu hồi duyệt thay SPR-NN.` bỏ `SPR-NN` khỏi `sprints` của mọi file
+  dừng ở điểm an toàn (mục 7), bằng đường xoá ở mục 5.1 (từ ngoài repo, đường tuyệt đối), để phiên con đang chạy không mất rào giữa chừng. `Thu hồi duyệt thay SPR-NN.` bỏ `SPR-NN` khỏi `sprints` của mọi file
   dấu có nó; file nào còn `sprints` rỗng thì xoá. Tạm dừng (mục 7) giữ nguyên file dấu.
 - Không commit file dấu: `.tmp/` phải nằm trong `.gitignore` của dự án; chưa có thì Analyst nêu trong lời nhắc lại lệnh.
 
@@ -256,6 +260,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 - Phiên con nhận chế độ quyền bằng chế độ của điều phối **chỉ sau** khi người dùng đã gõ lệnh autopilot nêu phạm vi, và
   không vượt lời cấp: cùng mức, phạm vi, hạn, danh sách loại. Brief của phiên con nêu danh sách loại và bốn điều kiện dừng.
 - Chế độ toàn quyền chỉ bỏ hộp hỏi quyền công cụ; **không** bỏ danh sách loại, rào máy, bốn điều kiện dừng.
+- Push đã được người dùng nói trong chat: người dùng tự chạy, hoặc điều phối chạy từ thư mục không có file dấu sau khi ghi câu gật nguyên văn vào sổ.
 - Phiên con xin quyền ngoài lệnh → điều phối từ chối, ghi hàng chờ người. Phiên con không tự mở phiên con hay subagent
   trừ khi brief cho phép; cho phép thì mỗi subagent là một dòng sổ và tính vào trần.
 
@@ -342,7 +347,7 @@ Không đánh giá: <phần không đọc hoặc không kiểm được>
   **mọi** hồ sơ của dải; `Thu hồi duyệt thay SPR-NN.` chỉ sprint đó. Hết hạn không ghi gì vào khối — `expires` đã đủ.
   Bật lại chỉ bằng lệnh mới của người dùng (mục 3).
 - **Thứ tự kết thúc:** ghi `revoked_at` → báo dừng xuống mọi phiên con liên quan → mỗi phiên con tới điểm an toàn kế
-  tiếp và báo → điều phối ghi trạng thái từng dòng sổ → **xoá file dấu sau cùng** (mục 5.2) → báo người dùng trạng
+  tiếp và báo → điều phối ghi trạng thái từng dòng sổ → **xoá file dấu sau cùng** (mục 5.2; chạy từ thư mục ngoài repo bằng đường tuyệt đối, hoặc người dùng tự xoá — mục 5.1) → báo người dùng trạng
   thái từng phiên.
 - **Điểm an toàn kế tiếp:** phiên con không bắt đầu lệnh hay việc mới; lệnh đang chạy được chạy xong; commit đang làm
   được hoàn tất (kèm test của commit đó). Không commit được (test đỏ, việc dở) → đưa thay đổi chưa commit vào **nhánh
@@ -360,7 +365,7 @@ Không đánh giá: <phần không đọc hoặc không kiểm được>
 ## 9. Ba host
 
 Lệnh là câu chat, giống nhau ở Claude, Codex, Antigravity; host không có lệnh gạch chéo vẫn dùng câu chuẩn. Đăng ký hook
-theo bảng mục 3 của skill `hooks-guardrails` (Claude: thoát 2, lý do ở stderr, `onFailure: block`; Codex: thoát 2, người
+theo bảng mục 3 của skill `hooks-guardrails`. Hiện **chỉ Claude** đã đăng ký: hook chạy qua `sh scripts/autopilot-hook.sh`, tự tìm Python ≥3.9; không có Python thì không file dấu → cho qua, có file dấu → chặn. Codex và Antigravity chưa đăng ký (chỉ rào hành vi). Plugin cài từ marketplace thư mục thì hook sống theo cây làm việc của checkout: sửa guard phải làm trên bản chép của plugin, thay một lần. Khi đăng ký ở host khác (Claude: thoát 2, lý do ở stderr, `onFailure: block`; Codex: thoát 2, người
 dùng trust qua `/hooks`; Antigravity: JSON `"decision": "deny"`). Tên công cụ shell cho `matcher` của từng host (gồm
 cả công cụ PowerShell ở Claude trên Windows) đối chiếu tài liệu chính chủ lúc đăng ký. Đăng ký hook là sửa cấu hình
 harness: hỏi người dùng đủ 5 ý trước khi chạm.
