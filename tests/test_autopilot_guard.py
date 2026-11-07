@@ -1380,6 +1380,17 @@ def test_guard_unquoted_heredoc_expands_command_substitution(tmp_path):
                 "python - <<X\na $(echo $(git push)) b\nX", "tee f <<EOF\n$(gh pr merge 3)\nEOF"):
         rc, _, err = run("claude", claude(cmd, repo))
         assert rc == 2, (cmd, err)
-    for cmd in ("python - <<'X'\nx = $(git push)\nX", 'python - <<"X"\nx = $(git push)\nX', "cat > f <<\\X\n`git push`\nX",
+    for cmd in ("python - <<'X'\nx = $(git push)\nX", 'python - <<"X"\nx = $(git push)\nX', "cat > f <<\\X\n`git push` x\nX",
                 "python - <<X\nx = $(git status) $((1+2)) `ls`\nX", "python - <<X\nplain text git push\nX"):
         assert_allowed(repo, cmd)
+
+
+
+def test_guard_continuation_before_heredoc_scan(tmp_path):
+    """RF19 (hồi quy fix 4): `bash` + dấu gạch ngược + xuống dòng + `<<EOF` — nối dòng trước khi dò heredoc, nên thân vẫn được phân tích."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    for cmd in ("bash \\\n<<EOF\ngit push\nEOF", "sh \\\n-s <<EOF\ngit push\nEOF", "bash \\\n<<'EOF'\ngit push\nEOF",
+                "bash -s \\\n  <<-EOF\n\tgit push\n\tEOF"):
+        assert_blocked(repo, cmd, "push")
+    assert_allowed(repo, "python - \\\n<<'EOF'\ngit push\nEOF")  # trình không phải shell: thân vẫn là dữ liệu
+    assert_allowed(repo, "python - \\\n<<EOF\nx\nEOF\ngit status")

@@ -765,6 +765,13 @@ def _strip_heredoc_bodies(text: str) -> str:
     return "\n".join(out)
 
 
+def _join_and_strip(text: str) -> str:
+    """Nối dòng (dấu gạch ngược hay dấu huyền + xuống dòng) TRƯỚC khi dò heredoc (để `bash` + gạch ngược + xuống dòng + `<<EOF` vẫn thấy `bash`), bỏ thân heredoc
+    của trình không phải shell, rồi nối dòng thêm một lần cho phần còn lại. Hệ quả chấp nhận: dấu huyền/gạch ngược cuối dòng trong thân
+    heredoc có nháy cũng bị nối, nên thân đó có thể không còn dòng kết thúc riêng và bị phân tích (chặn nhầm, an toàn)."""
+    return LINE_CONTINUATION.sub(" ", _strip_heredoc_bodies(LINE_CONTINUATION.sub(" ", text)))
+
+
 def _segment_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
     tokens, redirected = _strip_prefixes(tokens, ctx)
     if not tokens:
@@ -836,7 +843,7 @@ def _command_item(tokens: list[str], redirected: bool, ctx: Context, depth: int)
 
 def _analyze(text: str, ctx: Context, depth: int = 0) -> str | None:
     """Mục loại đầu tiên mà `text` (có thể là lệnh ghép) vi phạm và đang bật; None nếu không."""
-    text = LINE_CONTINUATION.sub(" ", _strip_heredoc_bodies(text))  # nối dòng `git \` + xuống dòng; bỏ thân heredoc của trình không phải shell
+    text = _join_and_strip(text)  # nối dòng `git \` + xuống dòng; bỏ thân heredoc của trình không phải shell
     item = _pipe_to_shell(text, ctx, depth)
     if item:
         return item
@@ -944,7 +951,7 @@ def _extra_dirs(text: str, base: str, depth: int = 0) -> list[str]:
     từ ngoài cây có file dấu: đi lên từ chính đường đó tới thư mục có `.git`."""
     scratch = Context(set(), base)
     found: list[str | None] = []
-    for segment in SEPARATORS.split(LINE_CONTINUATION.sub(" ", _strip_heredoc_bodies(text))):
+    for segment in SEPARATORS.split(_join_and_strip(text)):
         tokens, _ = _strip_prefixes(tokenize(segment), scratch)
         if not tokens:
             continue
