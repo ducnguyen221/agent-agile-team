@@ -63,7 +63,7 @@ REPORT có 1 **verification result** (VR):
 
 ### Review PLAN trước Cổng 1
 
-<!-- Từ cỡ vừa: Tech Reviewer review PLAN trước khi trình Cổng 1 (skill plan-review). Ghi ở đây: dòng trạng thái
+<!-- Từ cỡ vừa: Tech Reviewer hoặc Advisor review PLAN (`method/process.md` mục 3) trước khi trình Cổng 1 (skill plan-review). Ghi ở đây: dòng trạng thái
      gộp (kết luận, số phát hiện theo mức, đã gộp vào SPEC/PLAN chưa), bảng RF, phần không đánh giá. Số RF theo
      thứ tự thời gian review (review PLAN đến trước nên giữ các số đầu); không đánh số lại. Cỡ nhỏ hoặc không
      review PLAN thì ghi "Không áp dụng — <lý do>". -->
@@ -71,7 +71,7 @@ REPORT có 1 **verification result** (VR):
 - **Trạng thái gộp:** Đạt có điều kiện — 0 Chặn, 0 Phải sửa, 1 Nên sửa; đã gộp vào PLAN trước Cổng 1, không mở
   vòng review PLAN thứ hai.
 
-Tech Reviewer review PLAN ghi 1 **review finding** (RF):
+Tech Reviewer hoặc Advisor review PLAN ghi 1 **review finding** (RF):
 
 | Mã | Phát hiện | Mức | Bằng chứng | Xử lý |
 |---|---|---|---|---|

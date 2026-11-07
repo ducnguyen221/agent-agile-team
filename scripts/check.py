@@ -125,7 +125,10 @@ DELEGATION_QUOTE = "duyệt thay:"  # tiền tố bắt buộc của `gate_N_quo
 DELEGATION_KEYS = ("grant", "grant_at", "scope", "expires", "by", "tier", "files", "revoked_at")
 MOMENT = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})(?: ([0-9]{2}):([0-9]{2}) ([+-])([0-9]{2})(?::?([0-9]{2}))?)?")
 EXECUTORS = {"analyst", "architect", "implementer", "qa", "researcher"}
-VERIFIERS = {"business-reviewer", "tech-reviewer"}
+VERIFIERS = {"business-reviewer", "tech-reviewer", "gate-delegate"}
+ADVISORS = {"advisor"}  # vai tư vấn: không phải vai kiểm định, không chấm việc của người làm; chỉ so nhãn với ADVISOR_CONFLICTS
+ADVISOR_CONFLICTS = {"analyst", "architect", "gate-delegate"}  # tác giả SPEC/PLAN và người duyệt thay: nhãn `advisor` trùng một trong ba là self-review
+T1_ONLY_ROLES = {"gate-delegate", "advisor"}  # hai vai buộc tier T1
 NEXT_ID_PREFIX = {"requests": "RQ", "specs": "FS", "sprints": "SPR"}
 WIDTH_KEY = {"RQ": "request", "FS": "feature", "SPR": "sprint"}
 
@@ -1246,13 +1249,16 @@ class Engine:
         holders: dict = {}
         for role, value in roles.items():
             rline = doc.key_line(f"roles.{role}")
-            if role not in EXECUTORS | VERIFIERS | DELEGATION_SPECIALISTS:
+            if role not in EXECUTORS | VERIFIERS | ADVISORS | DELEGATION_SPECIALISTS:
                 self.add(doc.path, rline, "roles-invalid", f"vai '{role}' không có trong danh sách vai")
                 continue
             if (not isinstance(value, list) or len(value) not in (2, 3) or value[0] not in c.TIERS
                     or not isinstance(value[1], str) or not value[1]
                     or (len(value) == 3 and not isinstance(value[2], str))):
                 self.add(doc.path, rline, "roles-invalid", f"{role}: {value!r} phải là [T1|T2|T3, nhãn-agent] hoặc thêm \"note\"")
+                continue
+            if role in T1_ONLY_ROLES and value[0] != "T1":
+                self.add(doc.path, rline, "roles-invalid", f"{role}: tier {value[0]} phải là T1")
                 continue
             holders.setdefault(value[1], set()).add(role)
         for agent, held in holders.items():
@@ -1263,6 +1269,10 @@ class Engine:
             if executes and verifies:
                 self.add(doc.path, line, "self-review",
                          f"agent '{agent}' vừa thực thi ({', '.join(sorted(executes))}) vừa kiểm định ({', '.join(sorted(verifies))})")
+            conflicts = held & ADVISOR_CONFLICTS
+            if held & ADVISORS and conflicts:
+                self.add(doc.path, line, "self-review",
+                         f"agent '{agent}' vừa tư vấn (advisor) vừa giữ vai soạn hoặc duyệt thay ({', '.join(sorted(conflicts))})")
 
     def _gates(self, doc: Doc) -> None:
         data = doc.data
@@ -1347,11 +1357,15 @@ class Engine:
         if not isinstance(by, str) or not by.strip() or by == "pending":
             return bad("delegation.by" if "by" in block else "delegation", "delegation.by phải là nhãn agent đã giao (khác rỗng, khác pending)")
         roles = data.get("roles")
-        held = sorted(r for r, v in roles.items()
-                      if r in EXECUTORS and isinstance(v, list) and len(v) >= 2 and v[1] == by) if isinstance(roles, dict) else []
+        def labelled(v):
+            return isinstance(v, list) and len(v) >= 2 and v[1] == by
+        held = sorted(r for r, v in roles.items() if r in EXECUTORS and labelled(v)) if isinstance(roles, dict) else []
+        # Advisor không ký duyệt thay qua nhãn khác; advisor + gate-delegate cùng nhãn thì _roles đã báo, không báo kép
+        if isinstance(roles, dict) and labelled(roles.get("advisor")) and not labelled(roles.get("gate-delegate")):
+            held = sorted(held + ["advisor"])
         if held:
             self.add(path, doc.key_line("delegation.by"), "self-review",
-                     f"người duyệt thay '{by}' cũng giữ vai thực thi ({', '.join(held)}) của cùng tài liệu")
+                     f"người duyệt thay '{by}' cũng giữ vai thực thi hoặc tư vấn ({', '.join(held)}) của cùng tài liệu")
         elif doc.kind in ("plan", "report", "sprint"):  # SPEC không đòi: Cổng 1 duyệt thay ghi ở cả SPEC lẫn PLAN (DN5)
             if not isinstance(roles, dict):
                 return bad("roles" if "roles" in data else mode_key, "tài liệu duyệt thay phải có khối roles để đối chiếu delegation.by")

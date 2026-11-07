@@ -1927,6 +1927,144 @@ def test_roles_listed_specialists_stay_valid_and_count_for_self_review(tmp_path,
     assert "self-review" in rules and "roles-invalid" not in rules, rules
 
 
+# --- Vai `gate-delegate` (kiểm định T1) và `advisor` (tư vấn T1) — SPR-14 TK2 ---------------------------------
+
+SPEC_ROLES = "roles:\n  analyst: [T1, agent-a]\n  business-reviewer: [T1, agent-c]\n"
+
+
+def _spec_roles(tmp_path: Path, roles_block: str) -> Path:
+    """Bộ sạch với khối `roles` của SPEC thay bằng `roles_block`."""
+    root = make_sprint(tmp_path)
+    _rewrite(root / "SPEC.md", SPEC_ROLES, roles_block)
+    return root
+
+
+def test_gate_delegate_by_valid(tmp_path):
+    """`gate-delegate` T1 là vai kiểm định hợp lệ cho `delegation.by`: 0 phát hiện."""
+    root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  gate-delegate: [T1, agent-d]\n")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+@pytest.mark.parametrize("tier", ["T2", "T3"])
+def test_gate_delegate_must_be_t1(tmp_path, tier):
+    """`gate-delegate` tier khác T1 → `roles-invalid`."""
+    root = _spec_roles(tmp_path, SPEC_ROLES + f"  gate-delegate: [{tier}, agent-g]\n")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "roles-invalid"]
+    assert len(hits) == 1 and "gate-delegate" in hits[0].message, [f.render() for f in hits]
+
+
+@pytest.mark.parametrize("tier", ["T2", "T3"])
+def test_advisor_must_be_t1(tmp_path, tier):
+    """`advisor` tier khác T1 → `roles-invalid`."""
+    root = _spec_roles(tmp_path, SPEC_ROLES + f"  advisor: [{tier}, agent-x]\n")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "roles-invalid"]
+    assert len(hits) == 1 and "advisor" in hits[0].message, [f.render() for f in hits]
+
+
+@pytest.mark.parametrize("role", ["analyst", "architect"])
+def test_advisor_same_label_as_analyst_self_review(tmp_path, role):
+    """Nhãn `advisor` trùng nhãn `analyst`/`architect` trong cùng file → `self-review`."""
+    block = SPEC_ROLES + ("" if role == "analyst" else "  architect: [T1, agent-b]\n")
+    label = "agent-a" if role == "analyst" else "agent-b"
+    root = _spec_roles(tmp_path, block + f"  advisor: [T1, {label}]\n")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "self-review"]
+    assert len(hits) == 1 and "advisor" in hits[0].message, [f.render() for f in hits]
+
+
+def test_advisor_distinct_ok(tmp_path):
+    """`advisor` khác nhãn mọi vai khác → 0 phát hiện."""
+    root = _spec_roles(tmp_path, SPEC_ROLES + "  advisor: [T1, agent-x]\n")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_advisor_same_label_as_gate_delegate_self_review(tmp_path):
+    """Advisor không được duyệt thay khuyến nghị của chính mình: nhãn `advisor` trùng `gate-delegate` → `self-review`."""
+    root = _spec_roles(tmp_path, SPEC_ROLES + "  gate-delegate: [T1, agent-r]\n  advisor: [T1, agent-r]\n")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "self-review"]
+    assert len(hits) == 1 and "advisor" in hits[0].message and "gate-delegate" in hits[0].message, [f.render() for f in hits]
+
+
+@pytest.mark.parametrize("reviewer", ["business-reviewer", "tech-reviewer"])
+def test_advisor_same_label_as_reviewer_ok(tmp_path, reviewer):
+    """Nhãn `advisor` trùng Business/Tech Reviewer là hợp lệ (Advisor không chấm việc của người làm)."""
+    block = SPEC_ROLES.replace("business-reviewer: [T1, agent-c]", "business-reviewer: [T1, agent-c]\n  " + f"{reviewer}: [T1, agent-r]") \
+        if reviewer != "business-reviewer" else SPEC_ROLES.replace("agent-c", "agent-r")
+    root = _spec_roles(tmp_path, block + "  advisor: [T1, agent-r]\n")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_advisor_with_implementer_same_label_is_not_self_review(tmp_path):
+    """Advisor chỉ so với Analyst/Architect/Gate Delegate: trùng nhãn `implementer` không phải `self-review` (bắt hồi quy: gộp `ADVISORS` vào `VERIFIERS`)."""
+    root = _spec_roles(tmp_path, SPEC_ROLES + "  implementer: [T2, agent-i]\n  advisor: [T1, agent-i]\n")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+@pytest.mark.parametrize("role", ["analyst", "architect", "implementer", "qa", "researcher"])
+def test_gate_delegate_same_label_as_any_executor_self_review(tmp_path, role):
+    """`gate-delegate` so với mọi vai thực thi: trùng nhãn → `self-review`."""
+    tier = {"architect": "T1", "implementer": "T2"}.get(role, "T3")
+    block = SPEC_ROLES.replace("agent-a", "agent-i") if role == "analyst" else SPEC_ROLES + f"  {role}: [{tier}, agent-i]\n"
+    root = _spec_roles(tmp_path, block + "  gate-delegate: [T1, agent-i]\n")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "self-review"]
+    assert len(hits) == 1 and "gate-delegate" in hits[0].message, [f.render() for f in hits]
+
+
+def test_delegation_by_advisor_only_is_not_a_verifier(tmp_path):
+    """Người duyệt thay chỉ giữ `advisor` thì không đủ và bị chặn `self-review` (Advisor không ký duyệt thay); không được coi
+    `advisor` là vai kiểm định (bắt hồi quy: gộp `ADVISORS` vào `VERIFIERS` sẽ làm mất phát hiện này)."""
+    root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  advisor: [T1, agent-d]\n")
+    findings = check.check_paths([root]).findings
+    assert codes(findings) == ["self-review"], [f.render() for f in findings]
+
+
+@pytest.mark.parametrize("role", ["tech-reviewer", "business-reviewer", "gate-delegate"])
+def test_delegation_by_advisor_label_also_holding_a_verifier_is_self_review(tmp_path, role):
+    """Advisor không được ký duyệt thay qua nhãn khác: `delegation.by` cũng giữ `advisor` thì `self-review`, dù nhãn còn giữ vai kiểm định T1."""
+    root = _delegated_plan_roles(tmp_path, f"roles:\n  architect: [T1, agent-b]\n  advisor: [T1, agent-d]\n  {role}: [T1, agent-d]\n")
+    findings = check.check_paths([root]).findings
+    assert codes(findings) == ["self-review"], [f.render() for f in findings]
+    assert "advisor" in [f for f in findings if f.rule == "self-review"][0].message
+
+
+def test_delegation_by_advisor_label_on_spec_is_self_review(tmp_path):
+    """Như trên với SPEC: Cổng 1 duyệt thay ghi ở SPEC, `by` trùng nhãn `advisor` của chính SPEC."""
+    root = _spec_roles(tmp_path, SPEC_ROLES + "  advisor: [T1, agent-d]\n  tech-reviewer: [T1, agent-d]\n")
+    _rewrite(root / "SPEC.md", 'gate_1_quote: "duyệt"\n', (
+        'gate_1_quote: "duyệt thay: chọn phương án a — xem mục Bản ghi duyệt thay ở PLAN"\n'
+        "gate_1_mode: delegated\n"
+        "delegation:\n"
+        '  grant: "Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint."\n'
+        "  grant_at: 2026-02-01 08:30 +07\n"
+        "  scope: [gate_1]\n"
+        "  expires: sprint_end\n"
+        "  by: agent-d\n"
+        "  tier: T1\n"
+        "  files: []\n"
+        "  revoked_at: null\n"))
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "self-review"]
+    assert len(hits) == 1 and hits[0].path.name == "SPEC.md", [f.render() for f in check.check_paths([root]).findings]
+
+
+def test_delegation_by_advisor_no_regression_without_delegation(tmp_path):
+    """Không hồi quy: `advisor` trùng `tech-reviewer` mà không có `delegation` → 0 phát hiện (nhãn trùng kiểm định là hợp lệ)."""
+    root = _spec_roles(tmp_path, SPEC_ROLES + "  advisor: [T1, agent-c]\n  tech-reviewer: [T1, agent-c]\n")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_delegation_by_gate_delegate_with_another_advisor_label_is_clean(tmp_path):
+    """Không hồi quy: `gate-delegate` là `by`, Advisor mang nhãn khác → 0 phát hiện."""
+    root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  gate-delegate: [T1, agent-d]\n"
+                                           "  advisor: [T1, agent-g]\n")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_roles_without_new_keys_unchanged(tmp_path):
+    """Hồ sơ không có `advisor`/`gate-delegate`: kết quả y hệt trước (bộ sạch sạch; nhãn trùng thực thi/kiểm định vẫn `self-review`)."""
+    assert [f.render() for f in check.check_paths([_spec_roles(tmp_path / "ok", SPEC_ROLES)]).findings] == []
+    bad = _spec_roles(tmp_path / "bad", "roles:\n  analyst: [T1, agent-a]\n  business-reviewer: [T1, agent-a]\n")
+    assert codes(check.check_paths([bad]).findings) == ["self-review"]
+
+
 @pytest.mark.parametrize("role", ["tech-reviewer", "security-specialist"])
 def test_delegation_by_holding_only_a_t3_verifier_role_is_invalid(tmp_path, role):
     """FR2.3: vai kiểm định nhưng tier T3 (không có vai T1 nào) thì báo, nêu tier thật."""

@@ -112,13 +112,17 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
 
 - Vai thực thi: `analyst`, `architect`, `implementer`, `qa`, `researcher`. Vai kiểm định: `business-reviewer`,
   `tech-reviewer` và chuyên đề `<tên>-specialist` (`security-specialist`, `data-specialist`,
-  `backend-specialist`, `frontend-specialist`; tên chuyên đề khác → `roles-invalid`).
+  `backend-specialist`, `frontend-specialist`; tên chuyên đề khác → `roles-invalid`) và `gate-delegate` (vai kiểm định
+  T1, người duyệt thay cổng). Vai tư vấn: `advisor` (T1). `gate-delegate` và `advisor` buộc tier `T1` (khác → `roles-invalid`).
 - `tier` là `T1` · `T2` · `T3`. `agent` là **nhãn phiên hoặc subagent** (`agent-a`), không phải tên model —
   hai phiên của cùng một model là hai agent khác nhau. Chưa giao thì `pending`. Model và effort thực tế ghi ở cột
   "Vai · tier · model · effort" của PROGRESS (và của bảng trạng thái trong `SPRINT.md`): effort là số 1–5 theo
   `method/effort-scale.md`, ví dụ `Implementer · T2 · model-x · 3`; chưa giao thì ghi `—`.
 - Luật `check` dựa vào: trong một file, không nhãn `agent` nào (trừ `pending`) vừa giữ vai thực thi vừa giữ
-  vai kiểm định (mức Chặn). Một agent được giữ nhiều vai thực thi.
+  vai kiểm định (mức Chặn). Một agent được giữ nhiều vai thực thi. Nhãn Advisor trùng nhãn Business Reviewer hay Tech Reviewer
+  là hợp lệ (Advisor không chấm việc của người làm) **trừ khi** nhãn đó là `delegation.by` (Advisor không ký duyệt thay: `self-review`); trùng nhãn Analyst/Architect hoặc Gate Delegate là `self-review`
+  (Advisor không soạn SPEC/PLAN và không duyệt thay khuyến nghị của chính mình). Khoá `advisor` ghi ở `roles` của cả SPEC
+  lẫn PLAN (để `check` so được với `analyst` ở SPEC và `architect` ở PLAN).
 - Người duyệt thay (`delegation.by`) cũng không được trùng nhãn một vai thực thi trong `roles` của cùng file: mức Chặn, cùng luật `self-review`.
   Ở tài liệu có bản ghi duyệt thay (PLAN, REPORT, `SPRINT.md`) `by` còn phải giữ ít nhất một vai kiểm định tier T1 trong `roles` của chính tài liệu
   (nhiều vai kiểm định khác tier: đủ một vai T1); `roles` vắng, nhãn lạ hoặc chỉ vai tier khác T1 → Phải sửa `gate-delegation-invalid`. SPEC không đòi.

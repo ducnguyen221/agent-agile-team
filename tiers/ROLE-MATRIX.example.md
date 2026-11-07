@@ -25,6 +25,12 @@
 | Tech Reviewer | T1 | claude | `<model-id>` | 3 | `high` | override roles.tech-reviewer |
 | Tech Reviewer | T1 | codex | `<model-id>` | 3 | `high` | ô tier T1 |
 | Tech Reviewer | T1 | antigravity | `<model-id>` | 3 | `high` | ô tier T1 |
+| Gate Delegate | T1 | claude | `<model-id>` | 3 | `high` | ô tier T1 |
+| Gate Delegate | T1 | codex | `<model-id>` | 3 | `high` | ô tier T1 |
+| Gate Delegate | T1 | antigravity | `<model-id>` | 3 | `high` | ô tier T1 |
+| Advisor | T1 | claude | `<model-id>` | 3 | `high` | ô tier T1 |
+| Advisor | T1 | codex | `<model-id>` | 3 | `high` | ô tier T1 |
+| Advisor | T1 | antigravity | `<model-id>` | 3 | `high` | ô tier T1 |
 
 ## Thang 1–5 → native
 

@@ -1,7 +1,8 @@
 # roles/ — thẻ vai
 
-> **Kết luận:** một vai người (User) và hai nhóm vai agent — **thực thi** (năm vai: Analyst, Architect,
-> Implementer, QA, Researcher) và **kiểm định** (Business Reviewer, Tech Reviewer + 4 thẻ chuyên đề). Luật cứng:
+> **Kết luận:** một vai người (User) và ba nhóm vai agent — **thực thi** (năm vai: Analyst, Architect,
+> Implementer, QA, Researcher), **kiểm định** (Business Reviewer, Tech Reviewer, Gate Delegate + 4 thẻ chuyên đề) và
+> **tư vấn** (Advisor). Luật cứng:
 > **người làm ra sản phẩm không được kết luận Đạt cho chính nó.** Mỗi thẻ có đúng 8 mục: mục đích ·
 > tier · đầu vào · đầu ra · được làm · không được làm · khi nào dừng · skill dùng.
 
@@ -17,8 +18,10 @@
 | Researcher | Thực thi | T3 | 2 | `researcher` | [executor/researcher.md](executor/researcher.md) |
 | Business Reviewer | Kiểm định | T1 | 3 | `business-reviewer` | [verifier/business-reviewer.md](verifier/business-reviewer.md) |
 | Tech Reviewer | Kiểm định | T1 | 3 | `tech-reviewer` | [verifier/tech-reviewer.md](verifier/tech-reviewer.md) |
+| Gate Delegate | Kiểm định | T1 | 3 | `gate-delegate` | [verifier/gate-delegate.md](verifier/gate-delegate.md) |
 | Dual Review (hai reviewer độc lập cùng rubric, cho việc có `risk_tags` `rules` / `secret` / `auth`) | Kiểm định | T1 | 3 | `tech-reviewer` (+ lời ghi reviewer thứ hai ở `note`) | [verifier/dual-review.md](verifier/dual-review.md) |
 | Chuyên đề security · data · backend · frontend | Kiểm định | T1 | — | `<tên>-specialist` | [verifier/specialists/](verifier/specialists/) |
+| Advisor | Tư vấn | T1 | 3 | `advisor` | [advisor/advisor.md](advisor/advisor.md) |
 
 Muốn thêm chuyên đề mới: thêm thẻ trong `roles/verifier/specialists/` và thêm tên vào `DELEGATION_SPECIALISTS` trong `scripts/check.py`.
 
@@ -26,14 +29,14 @@ Muốn thêm chuyên đề mới: thêm thẻ trong `roles/verifier/specialists/
 
 - **Người làm không tự chấm.** Kiểm định do agent **khác** người làm: phiên hoặc subagent mới, nhận ngữ
   cảnh soạn riêng, không dán lịch sử phiên. Một nhãn agent không vừa giữ vai thực thi vừa giữ vai kiểm
-  định cho cùng một sản phẩm (công cụ `check` so `roles` trong frontmatter).
+  định cho cùng một sản phẩm (công cụ `check` so `roles` trong frontmatter). Advisor không chấm việc người làm: nhãn Advisor trùng nhãn Analyst, Architect hoặc Gate Delegate là `self-review`; trùng Business Reviewer hay Tech Reviewer thì hợp lệ.
 - **QA cũng phải độc lập với người làm:** nhãn `qa` khác nhãn `implementer` và `architect`. Nếu trùng
   (việc **rất nhỏ**, một agent kiêm), mỗi `VR` ghi "tự kiểm, chưa độc lập" và kết luận tối đa là **Đạt có
   điều kiện** cho tới khi agent khác chạy lại. Cỡ nhỏ trở lên không tự kiểm: cỡ nhỏ có **một** reviewer khác
   người làm; `qa` trùng nhãn người làm ở cỡ đó là lỗi (`check` bắt khi `VR` không ghi tự kiểm, hoặc ghi tự kiểm mà `verdict: pass`; ghi tự kiểm ở cỡ nhỏ trở lên vẫn là Phải sửa, do người đọc hồ sơ bắt).
 - Trong việc nhỏ và rất nhỏ, một agent được giữ **nhiều vai thực thi**; Analyst luôn là điều phối.
 - Vai được giao theo **tier**, không theo tên model ([tiers/README.md](../tiers/README.md)); model thực
-  tế ghi vào PROGRESS khi giao việc.
+  tế ghi vào PROGRESS khi giao việc; model chọn theo **bậc model** của vai ([tiers/README.md](../tiers/README.md) mục 8) — bậc không đổi tier.
 - Mọi vai dừng ở đúng bốn điều kiện của [method/process.md](../method/process.md) mục 5 và khi cạn hạn
   mức tier; ngoài ra tự quyết và ghi `Phán quyết:`.
 - Mọi vai trả lời theo [skills/response-style](../skills/response-style/SKILL.md), dùng mã theo

@@ -37,6 +37,8 @@
      "target": "SPEC.md"},
     {"rule": "self-review", "exit": 1, "file": "SPEC.md",
      "replace": ["business-reviewer: [T1, agent-c]", "business-reviewer: [T1, agent-a]"]},
+    {"name": "gate-delegate trùng nhãn implementer", "rule": "self-review", "exit": 1, "file": "SPEC.md",
+     "replace": ["  business-reviewer: [T1, agent-c]", "  business-reviewer: [T1, agent-c]\n  implementer: [T2, agent-i]\n  gate-delegate: [T1, agent-i]"]},
     {"rule": "qa-not-independent", "exit": 1, "file": "REPORT.md",
      "replace": ["qa: [T3, agent-f]", "qa: [T3, agent-e]"]},
     {"rule": "roles-invalid", "exit": 1, "file": "SPEC.md",

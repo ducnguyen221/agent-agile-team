@@ -170,7 +170,7 @@ hơn từ model. Reviewer phải là model hoặc phiên khác người viết.
 
 ## 7. Bàn giao
 
-- Từ cỡ **vừa**: `status: in_review`, Tech Reviewer (agent khác) review PLAN theo skill `plan-review`;
+- Từ cỡ **vừa**: `status: in_review`, Tech Reviewer hoặc Advisor (agent khác; ai review theo `method/process.md` mục 3) review PLAN theo skill `plan-review`;
   Chặn/Phải sửa thì sửa trước khi trình.
 - Trình **Cổng 1** cùng SPEC theo lời trình chuẩn (`method/process.md` mục 3): kết luận → `CQ` → `DN`
   → `RK` Chặn/Phải sửa → ước lượng → đường dẫn. Không dán PLAN vào chat.

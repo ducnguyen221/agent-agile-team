@@ -14,7 +14,7 @@ nhận (mục tiêu, bậc việc, có mở sprint không) và chỉ trả lời
   Việc 1–2 thao tác có kết quả rõ, hay người dùng nói "không cần sprint", thì làm thẳng, không hồ
   sơ. Agent chỉ dừng hỏi ở bốn trường hợp đã nêu tên; hỏi ngoài đó là lỗi quy trình.
 - **Vai theo tier, không theo tên model:** Analyst, Architect, Implementer, QA, Researcher (T3, tìm đọc, không
-  kết luận), Business Reviewer, Tech Reviewer; tier `T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test;
+  kết luận), Business Reviewer, Tech Reviewer, Gate Delegate, Advisor (chín vai, ba nhóm: thực thi, kiểm định, tư vấn); tier `T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test;
   effort là một số 1–5 dùng chung cho mọi hãng. **Người làm không tự chấm.**
 - **Tài liệu agent tra rẻ:** bốn tài liệu sprint (SPEC, PLAN, PROGRESS, REPORT; việc rất nhỏ dùng một
   `SPRINT.md` hai phần, việc nhỏ một `SPRINT.md` bốn phần) và ba sổ gốc dự án (yêu cầu, sprint, spec sống) có khối "Đang mở" ở đầu. Mọi mục có mã hai chữ cái

@@ -8,12 +8,12 @@ license: [MIT, MIT]
 rewrite_before_public: false
 metadata:
   group: verification
-  roles: [tech-reviewer]
+  roles: [tech-reviewer, advisor]
 ---
 
 # Review PLAN trước Cổng 1
 
-> **Kết luận:** Tech Reviewer (agent khác Architect) soi PLAN **trước khi viết dòng code nào**: Bước 0
+> **Kết luận:** Tech Reviewer hoặc Advisor (agent khác Architect; ai review theo `method/process.md` mục 3) soi PLAN **trước khi viết dòng code nào**: Bước 0
 > thách phạm vi luôn chạy trước; rồi bốn phần Kiến trúc · Chất lượng code · Test · Hiệu năng, không bỏ
 > phần nào. Mỗi vấn đề là **một** `RF` riêng kèm 2–3 phương án và **khuyến nghị có chính kiến**. Test là
 > lõi: sơ đồ phủ cho mọi nhánh code và luồng người dùng; **mỗi hành vi có test, không test nào thiếu một
