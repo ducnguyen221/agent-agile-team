@@ -3,6 +3,30 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+### Chưa phát hành
+
+Chưa gắn số phiên bản; đề xuất một lần cho cả ba sprint của RQ-057 (SPR-14, SPR-13, SPR-12) khi phát hành — thêm vai và
+khoá vai mới, không bỏ gì, nên dự kiến MINOR (`method/conventions.md` mục 4.1).
+
+- **Thêm — hai vai T1:** `gate-delegate` (kiểm định: duyệt thay cổng khi được cấp, phiên mới, chỉ đọc hồ sơ) và `advisor`
+  (tư vấn: phản biện SPEC/PLAN trước Cổng 1, không viết, không duyệt), có thẻ `roles/verifier/gate-delegate.md`,
+  `roles/advisor/advisor.md`, hàng trong `AGENTS.md` và `roles/README.md`, ma trận mẫu chín vai.
+- **Thêm — `scripts/check.py`:** khoá vai `gate-delegate` (thuộc `VERIFIERS`, làm `delegation.by` được) và `advisor` (nhóm mới
+  `ADVISORS`); cả hai buộc tier T1 (khác → `roles-invalid`). `self-review` khi nhãn `advisor` trùng `analyst`, `architect` hoặc
+  `gate-delegate`, hoặc khi nhãn `delegation.by` giữ `advisor`; nhãn `gate-delegate` trùng vai thực thi cũng là `self-review`.
+  Hồ sơ không dùng hai khoá này cho kết quả như trước.
+- **Thêm — bậc model:** `tiers/README.md` mục 8 tách **bậc model** (1 thấp → 3 cao, chỉ chọn model và effort) khỏi tier
+  thẩm quyền T1/T2/T3; vai → bậc; cách tra model id qua bảng tier ngoài repo.
+- **Thay đổi — review PLAN:** từ cỡ vừa, Advisor **thay** Tech Reviewer ở lượt review PLAN khi Analyst/Architect chạy ở bậc
+  model 2 trên Codex/Antigravity hoặc tác giả PLAN cùng model với Tech Reviewer (`method/process.md` mục 3); `sizing.md`,
+  thẻ Tech Reviewer, Architect, skill `plan-review`, `writing-plan` trỏ cùng quy tắc (thử áp lực GREEN chạy lại, `skill_sha` mới).
+- **Thay đổi — Researcher:** hợp đồng chỉ tìm kiếm, xem, đọc, tra cứu, trích xuất; mỗi mục kèm trích ngắn và nguồn, không có thì
+  "không tìm thấy", không suy diễn; người tổng hợp kiểm lại số dùng để quyết. Mẫu `templates/sprint/BRIEF.md` mục 5.
+- **Sửa — test:** `MODEL_NAME` nhận id `gemini-*` có hậu tố effort.
+- **Ghi nợ (known limitations):** `check` chỉ so nhãn trong cùng một file (Advisor/Gate Delegate trùng người làm ở file khác
+  không bị bắt); nhánh `gemini` của `MODEL_NAME` còn nhận họ model bất kỳ; `method/process.md` mục "Duyệt thay" và
+  `roles/README.md` chưa nêu ngoại lệ "Advisor không làm `delegation.by`".
+
 ## 0.6.0 (2026-11-01)
 
 Thêm hành vi mới cho skill `security-audit` nên tăng MINOR (`method/conventions.md` mục 4.1).
