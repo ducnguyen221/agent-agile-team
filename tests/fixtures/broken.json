@@ -83,6 +83,8 @@
      "write": {".agile.json": "{\"schema\": 1, \"ledger\": {\"project\": \"order-desk\"}}"}},
     {"name": "thiếu lời cấp", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
      "replace": ["  grant: \"Cho phép T1 duyệt thay Cổng 1 của SPR-03 tới hết sprint.\"\n", ""]},
+    {"name": "autopilot thiếu level và exclusions", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
+     "replace": ["  revoked_at: null\n", "  revoked_at: null\n  channel: chat\n"]},
     {"name": "phạm vi không chứa cổng", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",
      "replace": ["scope: [gate_1]", "scope: [gate_2]"]},
     {"name": "quá hạn", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated",

@@ -2362,3 +2362,214 @@ def test_plain_quote_without_delegation_stays_clean(tmp_path):
     root = make_sprint(tmp_path)
     _rewrite(root / "PLAN.md", 'gate_1_quote: "duyệt"', 'gate_1_quote: "duyệt, chọn phương án a"')
     assert codes(check.check_paths([root]).findings) == []
+
+
+# --- Autopilot trên khối `delegation` (SPR-12 TK3, FR1.13) --------------------------------------------------
+
+AUTOPILOT_FIXTURES = FIXTURES / "autopilot"
+ALL_EXCLUSIONS = ("push, tag, version, main_merge, publish, license, irreversible_delete, rules_unlisted, "
+                  "user_soul, secret, auth, network_fetch, branch_merge_local")
+WITHOUT_BRANCH_MERGE = "[" + ALL_EXCLUSIONS.replace(", branch_merge_local", "") + "]"
+AUTOPILOT_GRANT = '"Bật autopilot cổng 1 cho SPR-03."'
+
+
+def autopilot_plan(root: Path, **fields) -> Path:
+    """PLAN ở Cổng 1 duyệt thay với khối `delegation` autopilot hợp lệ; `fields` ghi đè một khoá (giá trị là chữ YAML thô)
+    hoặc bỏ khoá khi giá trị là `None`. `by` giữ vai `gate-delegate` T1."""
+    delegate_plan(root)
+    path = root / "PLAN.md"
+    _rewrite(path, "  tech-reviewer: [T1, agent-d]\n", "  gate-delegate: [T1, agent-d]\n")
+    block = {"grant": AUTOPILOT_GRANT, "grant_at": "2026-02-01 08:30 +07", "scope": "[gate_1]", "expires": "sprint_end",
+             "by": "agent-d", "tier": "T1", "files": "[]", "revoked_at": "null", "level": "gate_1",
+             "exclusions": f"[{ALL_EXCLUSIONS}]", "channel": "chat", "orchestrator": "agent-orch", "sessions_cap": "null"}
+    block.update(fields)
+    body = "".join(f"  {k}: {v}\n" for k, v in block.items() if v is not None)
+    head, rest = path.read_text(encoding="utf-8").split("delegation:\n", 1)
+    write_lf(path, head + "delegation:\n" + body + rest.split(DELEGATION_BLOCK_END, 1)[1])
+    return path
+
+
+def _only_hit(root: Path, fragment: str) -> None:
+    hits = _delegation_hits(root)
+    assert len(hits) == 1 and fragment in hits[0].message, [f.render() for f in hits]
+    assert "ngoài bảng khoá" not in hits[0].message, hits[0].message  # khoá autopilot là khoá đã biết
+
+
+def test_autopilot_gate_delegate_by_ok(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root)
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+@pytest.mark.parametrize("fields", [
+    {"level": "gate_1_2", "scope": "[gate_1, gate_2]"},
+    {"level": "program", "program": "doi-skill", "expires": "2026-12-31", "scope": "[gate_2, gate_1]",
+     "grant": '"Bật autopilot chương trình doi-skill gồm SPR-03…SPR-05 tới 2026-12-31, cổng 1+2."'},
+    {"level": "program", "program": "doi-skill", "expires": "2026-12-31", "scope": "[gate_1]",
+     "grant": '"Bật autopilot chương trình doi-skill gồm SPR-03…SPR-05 tới 2026-12-31, cổng 1."'},
+    {"level": "program", "program": "doi-skill", "expires": "2026-12-31", "scope": "[gate_1, gate_2]",
+     "grant": '"BẬT AUTOPILOT chương trình doi-skill tới 2026-12-31, CỔNG 1+2 +NHÁNH."', "exclusions": WITHOUT_BRANCH_MERGE},
+    {"grant": '"  BẬT AUTOPILOT cổng 1 cho SPR-03."'},  # tiền tố không phân biệt hoa thường, bỏ khoảng trắng đầu
+    {"grant": '"Bật autopilot cổng 1 cho SPR-03 +nhánh."', "exclusions": WITHOUT_BRANCH_MERGE},
+    {"channel": "host_comment", "sessions_cap": "20", "orchestrator": "null"},
+    {"channel": None, "orchestrator": None, "sessions_cap": None},  # ba khoá tuỳ chọn vắng
+], ids=["gate_1_2", "program-1+2", "program-1", "program-casefold", "prefix-case", "branch-merge-allowed", "host_comment", "optional-absent"])
+def test_autopilot_valid_variants_stay_clean(tmp_path, fields):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, **fields)
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+@pytest.mark.parametrize("value", ["gate_3", "gate-1", "Gate_1", "null", "[gate_1]"])
+def test_autopilot_level_invalid(tmp_path, value):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, level=value)
+    _only_hit(root, "level")
+
+
+def test_autopilot_program_needs_date(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, level="program", program="doi-skill", expires="sprint_end")
+    _only_hit(root, "expires")
+
+
+@pytest.mark.parametrize("program", ["null", '""', None])
+def test_autopilot_program_level_needs_program_name(tmp_path, program):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, level="program", program=program, expires="2026-12-31")
+    _only_hit(root, "program")
+
+
+@pytest.mark.parametrize("fields", [
+    {"level": "gate_1_2", "scope": "[gate_1]"},
+    {"level": "gate_1_2", "scope": "[]"},
+    {"level": "program", "program": "x", "expires": "2026-12-31", "scope": "[gate_1, gate_2]"},  # grant không có "cổng 1+2"
+    {"level": "program", "program": "x", "expires": "2026-12-31", "scope": "[gate_1]",
+     "grant": '"Bật autopilot chương trình x tới 2026-12-31, cổng 1+2."'},
+], ids=["gate_1_2-missing-gate_2", "empty", "program-extra", "program-missing"])
+def test_autopilot_scope_must_equal_level_gates(tmp_path, fields):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, **fields)
+    _only_hit(root, "phạm vi")
+
+
+def test_autopilot_scope_exceeds_level(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, level="gate_1", scope="[gate_1, gate_2]")
+    _only_hit(root, "phạm vi")
+
+
+@pytest.mark.parametrize("value", ["file", "Chat", '""', "null"])
+def test_autopilot_channel_file_rejected(tmp_path, value):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, channel=value)
+    _only_hit(root, "channel")
+
+
+@pytest.mark.parametrize("removed", ["push", "tag", "version", "main_merge", "publish", "license", "irreversible_delete",
+                                     "rules_unlisted", "user_soul", "secret", "auth", "network_fetch"])
+def test_autopilot_exclusions_cannot_shrink(tmp_path, removed):
+    root = make_sprint(tmp_path)
+    kept = [e.strip() for e in ALL_EXCLUSIONS.split(",") if e.strip() != removed]
+    autopilot_plan(root, exclusions=f"[{', '.join(kept)}]")
+    _only_hit(root, removed)
+
+
+def test_autopilot_exclusions_duplicate_item(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, exclusions=f"[{ALL_EXCLUSIONS}, push]")
+    _only_hit(root, "trùng: push")
+
+
+def test_autopilot_branch_merge_local_absent_needs_branch_suffix(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, exclusions=WITHOUT_BRANCH_MERGE)
+    _only_hit(root, "branch_merge_local")
+
+
+@pytest.mark.parametrize("exclusions", [f"[{ALL_EXCLUSIONS}, extra_item]", "push", "[]", "[1, 2]"],
+                         ids=["extra-item", "not-a-list", "empty", "not-strings"])
+def test_autopilot_exclusions_outside_closed_list_or_wrong_shape(tmp_path, exclusions):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, exclusions=exclusions)
+    _only_hit(root, "exclusions")
+
+
+@pytest.mark.parametrize("missing", ["level", "expires", "exclusions"])
+def test_autopilot_grant_requires_level_and_exclusions(tmp_path, missing):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, **{missing: None})
+    _only_hit(root, missing)
+
+
+@pytest.mark.parametrize("key,value", [("channel", "chat"), ("sessions_cap", "5"), ("orchestrator", "agent-orch"), ("program", "x")])
+def test_autopilot_new_key_alone_triggers_the_rules(tmp_path, key, value):
+    """Lời cấp kiểu cũ nhưng có một khoá mới → đã kích, nên thiếu `level` bị báo."""
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "  revoked_at: null\n", f"  revoked_at: null\n  {key}: {value}\n")
+    _only_hit(root, "level")
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "abc", "1.5", "true", "[3]"])
+def test_autopilot_sessions_cap_invalid(tmp_path, value):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, sessions_cap=value)
+    _only_hit(root, "sessions_cap")
+
+
+def test_autopilot_orchestrator_same_as_by(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, orchestrator="agent-d")
+    _only_hit(root, "orchestrator")
+
+
+def test_autopilot_two_errors_reports_first(tmp_path):
+    """`level` đứng trước `channel` và `sessions_cap` trong thứ tự kiểm → chỉ báo `level`."""
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, level="gate_9", sessions_cap="0", channel="file")
+    _only_hit(root, "level")
+
+
+def test_autopilot_keys_are_reported_before_old_checks(tmp_path):
+    """Luật autopilot đứng trước các kiểm cũ: ở đây `tier: T3` (kiểm cũ) cũng sai nhưng chỉ báo `channel`."""
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, tier="T3", channel="file")
+    _only_hit(root, "channel")
+
+
+def test_autopilot_old_checks_still_apply_after_autopilot_rules(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root)
+    _rewrite(root / "PLAN.md", "gate-delegate: [T1, agent-d]", "gate-delegate: [T2, agent-d]")
+    assert _delegation_hits(root), "người duyệt thay không phải T1 phải bị báo"
+
+
+def test_autopilot_rules_apply_to_gate_2_report(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_report(root)
+    _rewrite(root / "REPORT.md", "  revoked_at: null\n", "  revoked_at: null\n  level: gate_1_2\n  exclusions: []\n")
+    _rewrite(root / "REPORT.md", "  scope: [gate_2]\n", "  scope: [gate_2, gate_1]\n")
+    _only_hit(root, "exclusions")
+
+
+def test_autopilot_new_keys_are_known_while_gate_is_pending(tmp_path):
+    root = make_sprint(tmp_path)
+    _pending_delegated_plan(root)
+    _rewrite(root / "PLAN.md", "  files: []\n", "  files: []\n  level: gate_1\n  channel: chat\n")
+    assert _delegation_hits(root) == []
+
+
+def test_legacy_delegation_unchanged():
+    """Hồ sơ duyệt thay thật chỉ có tám khoá cũ: không phát hiện delegation, không Chặn/Phải sửa, thoát 0."""
+    report = check.check_paths([AUTOPILOT_FIXTURES / "legacy-delegation"])
+    assert not [f.render() for f in report.findings if f.rule == "gate-delegation-invalid"]
+    assert [f.render() for f in report.findings if f.level in check.BLOCKING] == []
+    assert report.exit_code == 0
+
+
+@pytest.mark.parametrize("key,value", [("orchestrator", "5"), ("orchestrator", '""'), ("program", "5")])
+def test_autopilot_orchestrator_and_program_wrong_type(tmp_path, key, value):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, **{key: value})
+    _only_hit(root, key)
