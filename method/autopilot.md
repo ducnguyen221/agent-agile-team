@@ -223,7 +223,8 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
   - hook chưa đăng ký, Codex chưa được **người dùng** trust qua `/hooks`, hook hết giờ ở host không có khoá
     `onFailure: block`, Antigravity trả `{}` ở `PreToolUse` (chưa xác minh — skill `hooks-guardrails`, Gotchas);
   - phiên con chạy ở thư mục ngoài repo có file dấu;
-  - trình quét nháy chỉ xấp xỉ (`$'…'`, nháy bên trong `$(…)` có thể bị đọc sai); heredoc đưa vào trình thông dịch không phải shell (vd `python - <<EOF`) được coi là dữ liệu, không phân tích;
+  - trình quét nháy chỉ xấp xỉ (`$'…'`, nháy bên trong `$(…)` có thể bị đọc sai); heredoc đưa vào trình thông dịch không phải shell (vd `python - <<EOF`) được coi là dữ liệu, không phân tích; thân heredoc chỉ được bỏ qua khi nhãn có nháy, còn nhãn không nháy thì `$(…)` và dấu huyền trong thân vẫn được xét;
+  - phép dò file dấu lồng không áp cho `rm -rf <tên trần>` chạy từ `cwd` bên trong `.tmp/`, `cd .tmp/x && rm -rf y`, glob `.tmp/x*`, và thư mục tổ tiên của thư mục có file dấu — điều phối luôn `--clear` trước khi dọn; đích dọn trong `.tmp/` sâu quá 6 cấp, hoặc phép dò lỗi/quá giờ, thì bị chặn (chấp nhận chặn nhầm; lối ra là `--clear` rồi xoá);
   - chuỗi chương trình tuỳ ý xoá hay ghi đè file dấu hoặc chạy lệnh loại: `python -c`, `awk 'BEGIN{system(…)}'`, `perl -e`, `ruby -e`, `node -e`;
   - phiên con tự gọi `--clear` xoá file dấu của mình (hook cho qua lệnh này, nên đó là rào hành vi);
   - công cụ ngoài `matcher` (MCP, `Monitor`), `git restore .` và các lệnh bỏ việc chưa commit tương tự, và đối thủ cố ý (người viết lệnh để lách mẫu);
