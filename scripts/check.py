@@ -1496,8 +1496,9 @@ class Engine:
             return "delegation.orchestrator", "delegation.orchestrator trùng delegation.by (phiên điều phối không ký cổng)"
         files = block.get("files")
         if isinstance(files, list):  # không phải danh sách: kiểm cũ báo
-            for item in files:  # lệnh autopilot chuẩn không nêu file nên `files` thực tế là []
-                if not (isinstance(item, str) and isinstance(grant, str) and item in grant):
+            tokens = {w.rstrip(".") for w in re.split(r"[\s,;:()`'\"]+", grant)} if isinstance(grant, str) else set()
+            for item in files:  # lệnh autopilot chuẩn không nêu file nên `files` thực tế là []; mục phải bằng đúng một từ của lời cấp và trông như đường dẫn (không nhận tên trần như LICENSE)
+                if not (isinstance(item, str) and item.strip() and item in tokens and re.search(r"[./\\]", item)):  # đường dẫn: có dấu chấm hoặc gạch
                     return "delegation.files", f"delegation.files có {item!r} không nêu trong lời cấp"
         return None
 

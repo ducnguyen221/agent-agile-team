@@ -2644,3 +2644,18 @@ def test_legacy_grant_naming_a_file_unchanged(tmp_path):
     _rewrite(root / "PLAN.md", "files: []", "files: [AGENTS.md]")
     _rewrite(root / "PLAN.md", "Cho phép T1 duyệt thay Cổng 1 của SPR-03", "Cho phép T1 duyệt thay Cổng 1 của SPR-03 gồm sửa file luật AGENTS.md")
     assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+@pytest.mark.parametrize("files", ['[""]', "[autopilot]", "[Bật]", '["   "]', "[AGENT]"], ids=["empty", "autopilot", "word", "blank", "substring"])
+def test_autopilot_files_must_be_a_whole_token_of_the_grant(tmp_path, files):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, files=files, grant='"Bật autopilot cổng 1 cho SPR-03, gồm AGENTS.md."')
+    _only_hit(root, "delegation.files có")
+
+
+@pytest.mark.parametrize("grant", ['"Bật autopilot cổng 1 cho SPR-03, gồm (AGENTS.md)."', '"Bật autopilot cổng 1 cho SPR-03 gồm AGENTS.md."'],
+                         ids=["punctuation", "trailing-dot"])
+def test_autopilot_files_token_with_punctuation_in_grant_ok(tmp_path, grant):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, files="[AGENTS.md]", grant=grant)
+    assert [f.render() for f in check.check_paths([root]).findings] == []
