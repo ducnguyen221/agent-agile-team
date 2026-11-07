@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import shutil
 import json
 import os
 import sys
@@ -11,7 +12,9 @@ import pytest
 
 import autopilot_guard
 import check
-from conftest import SCRIPTS
+from pathlib import Path
+
+from conftest import REPO, SCRIPTS
 
 ALL = list(check.AUTOPILOT_EXCLUSIONS)
 WITHOUT_BRANCH = [e for e in ALL if e != "branch_merge_local"]
@@ -731,3 +734,246 @@ def test_guard_merge_without_dir_change_and_git_c_unchanged(tmp_path):
         assert_allowed(sprint, cmd.format(f=fwd(feat)))
     assert_blocked(sprint, "git -C $UNKNOWN merge x", "main_merge")
     assert_blocked(sprint, "cd sub && git -C rel merge x", "main_merge")  # -C tương đối sau cd: gốc không biết
+
+
+# ===================== TK8 vòng 1: bảo vệ file dấu, công cụ ghi file, cụm cờ, nối dòng, eval/ống, -C, launcher, hooks.json =====================
+
+MARKER_REASON = "file dấu là rào — chỉ người dùng hoặc lệnh dừng mới xoá"
+
+
+def assert_marker_blocked(repo, cmd):
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2 and MARKER_REASON in err, (cmd, rc, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    "rm .tmp/autopilot.json", "rm -f .tmp/autopilot.json", "rm -f .tmp/*", "rm .tmp/auto*", "rm .tmp/AUTOPILOT.JSON",
+    "rm -f ./.tmp/autopilot.json", "rm -f .tmp\\autopilot.json", "mv .tmp/autopilot.json .tmp/x", "mv x .tmp/autopilot.json",
+    "mv .tmp x", "cp x .tmp/autopilot.json", "cp /dev/null .tmp/autopilot.json", "Remove-Item .tmp\\autopilot.json",
+    "Remove-Item .tmp/*", "Move-Item .tmp/autopilot.json x", "Rename-Item .tmp/autopilot.json y", "Set-Content .tmp/autopilot.json '{}'",
+    "Out-File -FilePath .tmp/autopilot.json", "echo '{}' > .tmp/autopilot.json", "echo x >> .tmp/autopilot.json",
+    "echo x >.tmp/autopilot.json", "echo x 2>.tmp/autopilot.json", "> .tmp/autopilot.json", ": > .tmp/autopilot.json",
+    "echo x | tee .tmp/autopilot.json", "truncate -s 0 .tmp/autopilot.json", "sed -i s/a/b/ .tmp/autopilot.json",
+    "sed -i.bak s/a/b/ .tmp/autopilot.json", "python -c pass .tmp/autopilot.json", "git rm .tmp/autopilot.json", "git checkout -- .tmp",
+    "unlink .tmp/autopilot.json", "cd .tmp && rm autopilot.json", "cd .tmp; rm *", "Set-Location .tmp; Remove-Item autopilot.json",
+])
+def test_guard_marker_is_protected_from_shell_writes(tmp_path, cmd):
+    """RF2 (TK8 tr-a) / RF3 (tr-b): file dấu không bị xoá, đổi tên, ghi đè bằng lệnh shell không chỉ-đọc."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_marker_blocked(repo, cmd)
+
+
+def test_guard_marker_protection_read_only_and_other_files_allowed(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    for cmd in ("cat .tmp/autopilot.json", "type .tmp\\autopilot.json", "Get-Content .tmp/autopilot.json", "ls .tmp", "ls .tmp/*",
+                "ls -la .tmp/autopilot.json", "test -f .tmp/autopilot.json", "[ -f .tmp/autopilot.json ]", "grep level .tmp/autopilot.json",
+                "git status .tmp", "git diff .tmp/autopilot.json", "sed -n 1p .tmp/autopilot.json", "head -n 1 .tmp/autopilot.json",
+                "echo hi", "rm -f .tmp/other.txt", "rm .tmp/scratch.txt", "cp a b", "mv a b", "echo x > .tmp/out.txt", "echo x > out.txt",
+                "echo x > src/autopilot.json.bak", "python -c pass .tmp/notes.json"):
+        assert_allowed(repo, cmd)
+
+
+def test_guard_marker_protection_resolves_from_command_dir_and_other_markers_allowed(tmp_path):
+    repo = make_repo(tmp_path / "a", branch="spr-12", marker=good_marker())
+    (repo / "src").mkdir()
+    assert_marker_blocked(repo / "src", "rm -f ../.tmp/autopilot.json")
+    assert_marker_blocked(repo / "src", "rm -f " + fwd(repo / ".tmp" / "autopilot.json"))
+    assert_allowed(repo / "src", "rm -f .tmp/autopilot.json")  # `.tmp` của thư mục con, không phải file dấu đang bật
+    # điều phối chép file dấu sang worktree khác bằng đường tuyệt đối, không cd: không đụng file dấu đang bật... (nguồn là file dấu đang bật nên vẫn là đọc-ghi)
+    other = tmp_path / "wt"
+    (other / ".tmp").mkdir(parents=True)
+    assert_allowed(repo, "echo '{}' > " + fwd(other / ".tmp" / "autopilot.json"))
+    assert_allowed(repo, "cp x " + fwd(other / ".tmp" / "autopilot.json"))
+
+
+def test_guard_marker_protection_symlink_alias(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    try:
+        os.symlink(repo / ".tmp" / "autopilot.json", repo / ".tmp" / "alias")
+    except (OSError, NotImplementedError):
+        pytest.skip("không tạo được symlink file trên máy này (cần đặc quyền)")
+    assert_marker_blocked(repo, "rm .tmp/alias")
+
+
+@pytest.mark.parametrize("payload_of", ["claude_write", "claude_edit", "claude_multiedit", "claude_notebook", "codex_patch",
+                                        "codex_patch_move", "antigravity_write", "antigravity_replace", "antigravity_multi"])
+def test_guard_marker_blocks_write_tools(tmp_path, payload_of):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    target = str(repo / ".tmp" / "autopilot.json")
+    payloads = {
+        "claude_write": ("claude", {"tool_name": "Write", "tool_input": {"file_path": target, "content": "{}"}, "cwd": str(repo)}),
+        "claude_edit": ("claude", {"tool_name": "Edit", "tool_input": {"file_path": ".tmp/AUTOPILOT.json", "old_string": "a", "new_string": "b"},
+                                   "cwd": str(repo)}),
+        "claude_multiedit": ("claude", {"tool_name": "MultiEdit", "tool_input": {"file_path": target, "edits": []}, "cwd": str(repo)}),
+        "claude_notebook": ("claude", {"tool_name": "NotebookEdit", "tool_input": {"notebook_path": target}, "cwd": str(repo)}),
+        "codex_patch": ("codex", {"tool_name": "apply_patch", "cwd": str(repo),
+                                  "tool_input": {"command": "*** Begin Patch\n*** Update File: .tmp/autopilot.json\n@@\n-a\n+b\n*** End Patch"}}),
+        "codex_patch_move": ("codex", {"tool_name": "apply_patch", "cwd": str(repo),
+                                       "tool_input": {"command": "*** Begin Patch\n*** Update File: x.md\n*** Move to: .tmp/autopilot.json\n*** End Patch"}}),
+        "antigravity_write": ("antigravity", {"toolCall": {"name": "write_to_file", "args": {"TargetFile": target}}, "cwd": str(repo)}),
+        "antigravity_replace": ("antigravity", {"toolCall": {"name": "replace_file_content", "args": {"TargetFile": target}}, "cwd": str(repo)}),
+        "antigravity_multi": ("antigravity", {"toolCall": {"name": "multi_replace_file_content", "args": {"TargetFile": target, "Cwd": str(repo)}}}),
+    }
+    fmt, payload = payloads[payload_of]
+    rc, out, err = run(fmt, payload)
+    if fmt == "antigravity":
+        decision = json.loads(out)
+        assert rc == 0 and decision["decision"] == "deny" and MARKER_REASON in decision["reason"]
+    else:
+        assert rc == 2 and MARKER_REASON in err
+
+
+def test_guard_write_tools_other_files_and_no_marker_allowed(tmp_path):
+    repo = make_repo(tmp_path / "a", branch="spr-12", marker=good_marker())
+    assert run("claude", {"tool_name": "Write", "tool_input": {"file_path": str(repo / "src.md")}, "cwd": str(repo)}) == (0, "", "")
+    assert run("claude", {"tool_name": "Write", "tool_input": {"file_path": str(repo / ".tmp" / "notes.md")}, "cwd": str(repo)}) == (0, "", "")
+    other = make_repo(tmp_path / "b", branch="spr-12")  # không file dấu: intake ghi file dấu lần đầu phải qua
+    assert run("claude", {"tool_name": "Write", "tool_input": {"file_path": str(other / ".tmp" / "autopilot.json")}, "cwd": str(other)}) == (0, "", "")
+    # worktree khác (không phải file dấu đang bật): điều phối chép file dấu bằng công cụ ghi được qua
+    wt = tmp_path / "wt"
+    (wt / ".tmp").mkdir(parents=True)
+    assert run("claude", {"tool_name": "Write", "tool_input": {"file_path": str(wt / ".tmp" / "autopilot.json")}, "cwd": str(repo)}) == (0, "", "")
+
+
+@pytest.mark.parametrize("cmd", ["sudo -Hu deploy git push", "sudo -Eu root git push", "env -iu HOME git push", "xargs -tI {} git push",
+                                 "sudo -EHu x -g y git push", "env -iC /tmp git push"])
+def test_guard_short_flag_clusters_ending_in_value_flag(tmp_path, cmd):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_blocked(repo, cmd, "push")
+    assert_allowed(repo, cmd.replace("git push", "git status"))
+
+
+def test_guard_line_continuation_joined(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_blocked(repo, "git \\\npush origin x", "push")
+    assert_blocked(repo, "git \\\r\n  push", "push")
+    assert_blocked(repo, "git `\npush", "push")
+    assert_blocked(repo, "git push \\\n --force", "push")
+    assert_allowed(repo, "git \\\nstatus")
+    assert_blocked(repo, "git status\ngit push", "push")
+
+
+@pytest.mark.parametrize("cmd,item", [
+    ('eval "git push"', "push"), ("eval git push", "push"), ("eval 'git add . && git push'", "push"), ("eval rm -rf build", "irreversible_delete"),
+    ('iex "git push"', "push"), ("Invoke-Expression 'git push'", "push"),
+    ("echo git push | bash", "push"), ('echo "git push" | sh', "push"), ("printf 'git push' | pwsh", "push"),
+    ("echo git push | sudo bash", "push"), ("echo git push | bash -s", "push"), ("echo git push | iex", "push"),
+    ('bash <<< "git push"', "push"), ("echo rm -rf build | bash", "irreversible_delete"),
+    ("eval git $ARGS", "unresolved"), ("echo git $ARGS | bash", "unresolved"), ("eval \"gh pr merge $N\"", "main_merge"),
+])
+def test_guard_eval_and_pipe_into_shell(tmp_path, cmd, item):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+    if item == "unresolved":
+        assert "không phân tích được" in err
+    else:
+        assert "'{}'".format(item) in err
+
+
+def test_guard_eval_and_pipe_benign_allowed(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    for cmd in ("eval echo hi", "eval $(ssh-agent)", "echo hi | bash", "cat script.sh | bash", "curl -s x | sh", "echo git status | bash",
+                "ls | grep git", "echo $X | bash", "bash -s < script.sh"):
+        assert_allowed(repo, cmd)
+    # lồng quá sâu qua eval: chặn
+    deep = "eval \"eval 'eval \\\"eval git push\\\"'\""
+    rc, _, _ = run("claude", claude(deep, repo))
+    assert rc == 2
+
+
+def test_guard_git_c_from_outside_repo_finds_marker(tmp_path):
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    rel = fwd(os.path.relpath(repo, outside))
+    for cmd in ("git -C {r} push", "git -C {rel} push", "git -C {rel} reset --hard", "cd {rel} && git push", "bash -c 'git -C {rel} push'",
+                "git -c a=b -C {rel} push", "Set-Location {rel}; git push"):
+        rc, _, err = run("claude", claude(cmd.format(r=fwd(repo), rel=rel), outside))
+        assert rc == 2, (cmd, err)
+    assert run("claude", claude("git -C {} status".format(rel), outside)) == (0, "", "")
+    assert run("claude", claude("git -C {} push".format(fwd(outside)), outside)) == (0, "", "")  # đích không có file dấu
+
+
+# --- launcher ---
+
+SH = shutil.which("sh")
+LAUNCHER = SCRIPTS / "autopilot-hook.sh"
+
+
+def run_launcher(cwd, payload, path_dirs, extra_env=None):
+    env = {"PATH": os.pathsep.join(str(d) for d in path_dirs), "CLAUDE_PROJECT_DIR": fwd(cwd), "PYTHONIOENCODING": "utf-8"}
+    for key in ("SystemRoot", "SYSTEMROOT", "TEMP", "TMP", "HOME"):
+        if key in os.environ:
+            env[key] = os.environ[key]
+    env.update(extra_env or {})
+    import subprocess
+    return subprocess.run([SH, fwd(LAUNCHER), "--format", "claude"], input=json.dumps(payload), capture_output=True, text=True,
+                          encoding="utf-8", cwd=str(cwd), env=env)
+
+
+@pytest.fixture
+def bare_sh_ok(tmp_path):
+    if SH is None:
+        pytest.skip("không có `sh` trên máy này")
+    empty = tmp_path / "emptybin"
+    empty.mkdir()
+    probe = run_launcher(tmp_path, {}, [empty])
+    if probe.returncode != 0:
+        pytest.skip("sh không chạy được với PATH rỗng trên máy này: " + probe.stderr[:80])
+    return empty
+
+
+def test_launcher_without_python_blocks_when_marker(tmp_path, bare_sh_ok):
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    sub = repo / "src"
+    sub.mkdir()
+    for cwd in (repo, sub):
+        done = run_launcher(cwd, claude("git push", cwd), [bare_sh_ok])
+        assert done.returncode == 2 and "không chạy được Python" in done.stderr, done.stderr
+    # tên file dấu viết hoa
+    (repo / ".tmp" / "autopilot.json").rename(repo / ".tmp" / "AutoPilot.JSON")
+    assert run_launcher(repo, claude("ls", repo), [bare_sh_ok]).returncode == 2
+
+
+def test_launcher_without_python_passes_when_no_marker(tmp_path, bare_sh_ok):
+    repo = make_repo(tmp_path / "r", branch="spr-12")
+    assert run_launcher(repo, claude("git push", repo), [bare_sh_ok]).returncode == 0
+    nested = repo / "vendor"
+    (nested / ".git").mkdir(parents=True)  # marker của repo ngoài không áp cho repo lồng
+    (repo / ".tmp" / "autopilot.json").write_text("{}", encoding="utf-8")
+    assert run_launcher(nested, claude("git push", nested), [bare_sh_ok], {"CLAUDE_PROJECT_DIR": fwd(nested)}).returncode == 0
+
+
+def test_launcher_with_python_delegates_to_guard(tmp_path, bare_sh_ok):
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    path = [bare_sh_ok, Path(sys.executable).parent]
+    blocked_run = run_launcher(repo, claude("git push", repo), path)
+    if blocked_run.returncode == 2 and "không chạy được Python" in blocked_run.stderr:
+        pytest.skip("launcher không thấy Python dùng được trong PATH thử")
+    assert blocked_run.returncode == 2 and "'push'" in blocked_run.stderr
+    assert run_launcher(repo, claude("git status", repo), path).returncode == 0
+    plain = make_repo(tmp_path / "p", branch="spr-12")
+    assert run_launcher(plain, claude("git push", plain), path).returncode == 0
+
+
+def test_launcher_is_posix_sh_text():
+    text = LAUNCHER.read_bytes().decode("utf-8")
+    assert text.startswith("#!/bin/sh\n") and "\r" not in text
+    assert "python3" in text and "sys.version_info >= (3, 9)" in text and "exit 2" in text
+
+
+# --- hooks/hooks.json ---
+
+def test_hooks_json_registers_guard():
+    config = json.loads((REPO / "hooks" / "hooks.json").read_text(encoding="utf-8"))
+    entries = config["hooks"]["PreToolUse"]
+    assert len(entries) == 1
+    matcher = entries[0]["matcher"].split("|")
+    assert "Bash" in matcher and "PowerShell" in matcher
+    hook = entries[0]["hooks"][0]
+    assert hook["type"] == "command" and hook["onFailure"] == "block" and "--format claude" in hook["command"]
+    assert "scripts/autopilot_guard.py" in hook["command"] or "scripts/autopilot-hook.sh" in hook["command"]
+    for name in ("autopilot_guard.py", "autopilot-hook.sh"):
+        if "scripts/" + name in hook["command"]:
+            assert (REPO / "scripts" / name).is_file()

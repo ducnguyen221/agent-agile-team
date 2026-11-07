@@ -8,6 +8,9 @@ không in; antigravity in `{}`). Có file dấu và lệnh khớp mục loại �
 antigravity in JSON `deny` ở stdout, thoát 0. Lý do: `autopilot: '<mục loại>' cần người dùng nói trong chat — lệnh không chạy`.
 
 Mục có mẫu lệnh: push, tag, main_merge, irreversible_delete, branch_merge_local. Các mục khác là rào hành vi (không có mẫu).
+Ngoài danh sách loại, hook bảo vệ chính file dấu: lệnh shell không chỉ-đọc có đối số trỏ tới file dấu (hoặc `.tmp/` bao nó, hay glob khớp
+nó) và công cụ ghi file (`Write`, `Edit`, `MultiEdit`, `NotebookEdit`, `apply_patch`, `write_to_file`, `replace_file_content`…) có đường
+đích là file dấu đều bị chặn với lý do `file dấu là rào`. Việc đăng ký matcher cho công cụ ghi file thuộc cấu hình harness (chưa làm).
 Tên mục lấy từ `check.AUTOPILOT_EXCLUSIONS` (một nguồn; test ghim đúng 13 mục). Không gọi tiến trình con; nhánh hiện tại đọc từ
 file `.git/HEAD` của thư mục mà lệnh git thật sự chạy (theo `cd`, `git -C`; không xác định được thì coi là nhánh chính).
 
@@ -70,6 +73,25 @@ UNSAFE_PATH_CHARS = set(",$%`~{}()<>!^\"'\n\r;|&")
 GLOB_CHARS = set("*?[")
 MAX_UNWRAP = 3
 NESTED = "nested"  # đơn vị chặn riêng: lồng shell quá sâu, không phân tích được
+MARKER = "marker"  # đơn vị chặn riêng: đụng tới chính file dấu
+UNRESOLVED = "unresolved"  # đơn vị chặn riêng: chuỗi đưa vào shell có git/gh nhưng không phân tích được
+SPECIAL_ITEMS = frozenset({NESTED, MARKER, UNRESOLVED})
+WRITE_TOOLS = frozenset({"write", "edit", "multiedit", "notebookedit", "apply_patch", "write_to_file", "replace_file_content",
+                         "multi_replace_file_content"})
+PATH_KEYS = ("file_path", "path", "notebook_path", "TargetFile")
+PATCH_PREFIXES = ("*** Add File: ", "*** Update File: ", "*** Delete File: ", "*** Move to: ")
+REDIRECT = re.compile(r"^(?:[0-9]*|&)>>?\|?(.*)$", re.S)
+DYNAMIC_CHARS = set("$%`")
+LINE_CONTINUATION = re.compile(r"[\\`]\r?\n")
+PIPE = re.compile(r"(?<!\|)\|(?!\|)")
+EVAL_COMMANDS = frozenset({"eval", "iex", "invoke-expression"})
+READ_ONLY_COMMANDS = frozenset({
+    "cat", "type", "get-content", "gc", "ls", "dir", "get-childitem", "gci", "stat", "head", "tail", "less", "more", "wc", "grep", "egrep",
+    "fgrep", "rg", "select-string", "sls", "file", "diff", "cmp", "sha256sum", "sha1sum", "md5sum", "get-item", "gi", "test-path", "findstr",
+    "test", "[", "[[", "jq", "echo", "printf", "write-output", "write-host", "realpath", "readlink", "basename", "dirname", "cut", "sort",
+    "uniq", "nl", "od", "hexdump", "xxd", "strings", "get-filehash", "find", "awk"})
+READ_ONLY_GIT = frozenset({"status", "log", "diff", "show", "ls-files", "check-ignore", "blame", "ls-tree", "cat-file", "rev-parse",
+                           "grep", "describe", "shortlog", "rev-list"})
 
 
 def known_exclusions() -> tuple[str, ...]:
@@ -182,8 +204,9 @@ def _resolve_dir(base: str | None, target: str | None) -> str | None:
 class Context:
     """Trạng thái một lần phân tích: mục đang chặn, thư mục lệnh chạy, gốc repo, thư mục git đang làm việc."""
 
-    def __init__(self, active: set[str], cwd: str) -> None:
+    def __init__(self, active: set[str], cwd: str, marker: str | None = None) -> None:
         self.active = active
+        self.marker = os.path.abspath(marker) if marker else None
         self.cwd = os.path.abspath(cwd)
         self.root = find_repo_root(self.cwd)
         self.forced_main = False  # đã gặp `git checkout|switch main|master` trong lệnh ghép
@@ -379,7 +402,7 @@ def _changes_dir(name: str, token: str) -> bool:
     short = {"env": "-C", "sudo": "-D"}.get(name)
     if short is None:
         return False
-    return token.startswith(short) or token.startswith("--ch")
+    return token.startswith(short) or token.startswith("--ch") or bool(re.fullmatch(r"-[A-Za-z]+" + short[1], token))
 
 
 def _strip_prefixes(tokens: list[str], ctx: Context) -> tuple[list[str], bool]:
@@ -417,9 +440,11 @@ def _strip_prefixes(tokens: list[str], ctx: Context) -> tuple[list[str], bool]:
             elif token.startswith("-") and len(token) > 1:
                 if _changes_dir(name, token):  # env -C/--chdir, sudo -D/--chdir (mọi dạng, kể cả dính): đổi thư mục như cd
                     ctx.enter()
-                    index += 2 if token in CHDIR_OPTIONS[name] else 1
+                    cluster = bool(re.fullmatch(r"-[A-Za-z]+" + ("C" if name == "env" else "D"), token))
+                    index += 2 if token in CHDIR_OPTIONS[name] or cluster else 1
                 else:
-                    index += 2 if token in value_opts else 1
+                    takes = token in value_opts or (bool(re.fullmatch(r"-[A-Za-z]{2,}", token)) and "-" + token[-1] in value_opts)
+                    index += 2 if takes else 1
             else:
                 break
         else:
@@ -431,15 +456,119 @@ def _strip_prefixes(tokens: list[str], ctx: Context) -> tuple[list[str], bool]:
     return tokens, redirected
 
 
+def _marker_ref(text: str, ctx: Context) -> bool:
+    """`text` (đối số hay đích chuyển hướng) trỏ tới file dấu đang bật, thư mục `.tmp/` bao nó, hay glob khớp nó? So không phân biệt hoa thường.
+    Đã có thao tác đổi thư mục thì không giải được đường tương đối: so theo tên (đóng an toàn)."""
+    if not text or ctx.marker is None or DYNAMIC_CHARS & set(text):
+        return False
+    norm = text.replace("\\", "/")
+    name = os.path.basename(ctx.marker).lower()
+    is_glob = bool(GLOB_CHARS & set(os.path.basename(norm.rstrip("/"))))
+    if ctx.cwd_changed:
+        comps = [c.lower() for c in norm.split("/") if c not in ("", ".")]
+        if not comps:
+            return False
+        last = comps[-1]
+        if last in (name, ".tmp"):
+            return True
+        return is_glob and fnmatch.fnmatchcase(name, last) and (len(comps) == 1 or comps[-2] == ".tmp")
+    full = os.path.normpath(norm if os.path.isabs(norm) else os.path.join(ctx.cwd, norm))
+    mark = os.path.normpath(ctx.marker)
+    tmp = os.path.dirname(mark)
+    low, mark_low, tmp_low = full.lower(), mark.lower(), tmp.lower()
+    if low in (mark_low, tmp_low):
+        return True
+    if is_glob:
+        return os.path.dirname(low) == tmp_low and fnmatch.fnmatchcase(name, os.path.basename(low))
+    try:
+        if os.path.lexists(full):
+            real = os.path.realpath(full).lower()
+            return real in (os.path.realpath(mark).lower(), os.path.realpath(tmp).lower())
+    except OSError:
+        return True
+    return False
+
+
+def _read_only(name: str, args: list[str], ctx: Context) -> bool:
+    if name in READ_ONLY_COMMANDS:
+        return True
+    if name == "sed":
+        return not any(a == "--in-place" or a.startswith("--in-place=") or (a.startswith("-") and _cluster(a.split("=")[0], "i")) or a.startswith("-i") for a in args)
+    if name == "git":
+        return _git_parse(args, ctx, False)[0] in READ_ONLY_GIT
+    return False
+
+
+def _marker_item(tokens: list[str], ctx: Context) -> str | None:
+    """MARKER nếu lệnh ghi vào file dấu qua chuyển hướng, hoặc là lệnh không chỉ-đọc có đối số trỏ tới file dấu."""
+    if ctx.marker is None or not tokens:
+        return None
+    name = _exe_name(tokens[0])
+    refs = False
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        redirect = REDIRECT.match(token)
+        if redirect:
+            target = redirect.group(1)
+            if not target and index + 1 < len(tokens):
+                index += 1
+                target = tokens[index]
+            if _marker_ref(target, ctx):
+                return MARKER
+        elif index > 0 and not token.startswith("<") and _marker_ref(token, ctx):
+            refs = True
+        index += 1
+    return MARKER if refs and not _read_only(name, tokens[1:], ctx) else None
+
+
 def _segment_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
     tokens, redirected = _strip_prefixes(tokens, ctx)
     if not tokens:
         return None
+    return _command_item(tokens, redirected, ctx, depth) or _marker_item(tokens, ctx)
+
+
+def _nested_string(text: str, ctx: Context, depth: int) -> str | None:
+    """Chuỗi được đưa vào shell (eval, ống vào bash): xét như lệnh lồng; không phân tích được mà có git/gh kèm biến → chặn."""
+    if not text.strip():
+        return None
+    if depth >= MAX_UNWRAP:
+        return NESTED
+    item = _analyze(text, ctx, depth + 1)
+    if item:
+        return item
+    names = {_exe_name(t) for t in tokenize(text)}
+    return UNRESOLVED if names & {"git", "gh"} and DYNAMIC_CHARS & set(text) else None
+
+
+def _pipe_to_shell(text: str, ctx: Context, depth: int) -> str | None:
+    """`echo "git push" | bash`: vế trước ống (bỏ tên lệnh đầu) là chuỗi đưa vào shell."""
+    parts = PIPE.split(text)
+    for index in range(1, len(parts)):
+        stage, _ = _strip_prefixes(tokenize(re.split(r"&&|;|\n", parts[index])[0]), Context(set(), ctx.cwd))
+        if not stage:
+            continue
+        name = _exe_name(stage[0])
+        takes_script = any(a.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", a) for a in stage[1:])
+        if (name in SHELL_WRAPPERS or name in EVAL_COMMANDS) and not takes_script:
+            source = tokenize(re.split(r"&&|;|\n|\|\|", parts[index - 1])[-1])
+            item = _nested_string(" ".join(source[1:]), ctx, depth)
+            if item:
+                return item
+    return None
+
+
+def _command_item(tokens: list[str], redirected: bool, ctx: Context, depth: int) -> str | None:
     name, args = _exe_name(tokens[0]), tokens[1:]
     if name in CD_COMMANDS:
         ctx.enter()
         return None
+    if name in EVAL_COMMANDS:
+        return _nested_string(" ".join(args), ctx, depth)
     if name in SHELL_WRAPPERS:
+        if "<<<" in args and args.index("<<<") + 1 < len(args):  # bash <<< "git push"
+            return _nested_string(" ".join(args[args.index("<<<") + 1:]), ctx, depth)
         for index, arg in enumerate(args):
             if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", arg):
                 return _analyze(" ".join(args[index + 1:]), ctx, depth + 1) if depth < MAX_UNWRAP else NESTED
@@ -467,9 +596,13 @@ def _segment_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
 
 def _analyze(text: str, ctx: Context, depth: int = 0) -> str | None:
     """Mục loại đầu tiên mà `text` (có thể là lệnh ghép) vi phạm và đang bật; None nếu không."""
+    text = LINE_CONTINUATION.sub(" ", text)  # `git \` + xuống dòng, PowerShell dấu huyền + xuống dòng: nối trước khi tách
+    item = _pipe_to_shell(text, ctx, depth)
+    if item:
+        return item
     for segment in SEPARATORS.split(text):
         item = _segment_item(tokenize(segment), ctx, depth)
-        if item == NESTED or (item and item in ctx.active):
+        if item and (item in SPECIAL_ITEMS or item in ctx.active):
             return item
     return None
 
@@ -530,6 +663,10 @@ def _event_dirs(payload: dict) -> tuple[str, str]:
 
 
 def reason_for(item: str, broken: bool) -> str:
+    if item == MARKER:
+        return "autopilot: file dấu là rào — chỉ người dùng hoặc lệnh dừng mới xoá"
+    if item == UNRESOLVED:
+        return "autopilot: chuỗi lệnh đưa vào shell có git/gh nhưng không phân tích được — cần người dùng nói trong chat — lệnh không chạy"
     if item == NESTED:
         return "autopilot: lệnh lồng quá {} lớp shell, không phân tích được — cần người dùng nói trong chat — lệnh không chạy".format(MAX_UNWRAP)
     lead = "autopilot: file dấu hỏng, " if broken else "autopilot: "
@@ -545,6 +682,64 @@ class _Failed(Exception):
         self.label = label
 
 
+def _extra_dirs(text: str, base: str, depth: int = 0) -> list[str]:
+    """Thư mục mà lệnh trỏ tới (`git -C <dir>`, `cd <dir>`) để dò thêm file dấu khi lệnh chạy từ ngoài repo."""
+    scratch = Context(set(), base)
+    found: list[str | None] = []
+    for segment in SEPARATORS.split(LINE_CONTINUATION.sub(" ", text)):
+        tokens, _ = _strip_prefixes(tokenize(segment), scratch)
+        if not tokens:
+            continue
+        name, args = _exe_name(tokens[0]), tokens[1:]
+        if name == "git":
+            index = 0
+            while index < len(args) and args[index].startswith("-"):
+                if args[index] == "-C" and index + 1 < len(args):
+                    found.append(_resolve_dir(base, args[index + 1]))
+                index += 2 if args[index] in GIT_VALUE_OPTIONS else 1
+        elif name in CD_COMMANDS:
+            found.append(_resolve_dir(base, next((a for a in args if not a.startswith("-")), None)))
+        elif name in SHELL_WRAPPERS and depth < MAX_UNWRAP:
+            for index, arg in enumerate(args):
+                if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", arg):
+                    found.extend(_extra_dirs(" ".join(args[index + 1:]), base, depth + 1))
+                    break
+    return [d for d in found if d]
+
+
+def _write_paths(payload: dict) -> list[str]:
+    """Đường đích của công cụ ghi file: giá trị chuỗi ở khoá đường (mọi độ sâu) cộng dòng vá của Codex."""
+    found: list[str] = []
+
+    def walk(node: object) -> None:
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key in PATH_KEYS and isinstance(value, str):
+                    found.append(value)
+                walk(value)
+        elif isinstance(node, list):
+            for item in node:
+                walk(item)
+        elif isinstance(node, str):
+            for line in node.splitlines():
+                line = line.lstrip()
+                for prefix in PATCH_PREFIXES:
+                    if line.startswith(prefix):
+                        found.append(line[len(prefix):].strip())
+
+    walk(payload)
+    return found
+
+
+def _is_marker_path(path: str, base: str, marker: str) -> bool:
+    norm = path.replace("\\", "/")
+    full = os.path.normpath(norm if os.path.isabs(norm) else os.path.join(base, norm))
+    mark = os.path.normpath(marker)
+    if full.lower() == mark.lower():
+        return True
+    return os.path.lexists(full) and os.path.realpath(full).lower() == os.path.realpath(mark).lower()
+
+
 def _evaluate(raw: str) -> str | None:
     payload = json.loads(raw)
     if not isinstance(payload, dict):
@@ -553,18 +748,25 @@ def _evaluate(raw: str) -> str | None:
     try:
         dirs = _event_dirs(payload)
         name = _tool_name(payload)
+        command_dir, session_dir = dirs
+        marker = find_marker(command_dir) or (find_marker(session_dir) if session_dir != command_dir else None)
+        if name is not None and name.lower() in WRITE_TOOLS:
+            if marker is not None and any(_is_marker_path(p, command_dir, marker) for p in _write_paths(payload)):
+                return reason_for(MARKER, False)
+            return None
         if name is not None and name.lower() not in SHELL_TOOLS:
             return None
         commands = _commands(payload)
         if not commands:
             return None
-        command_dir, session_dir = dirs
-        marker = find_marker(command_dir) or (find_marker(session_dir) if session_dir != command_dir else None)
+        for text in commands:
+            if marker is None:
+                marker = next((m for d in _extra_dirs(text, command_dir) for m in [find_marker(d)] if m), None)
         if marker is None:
             return None
         active, broken = load_active(marker)
         for text in commands:
-            item = _analyze(text, Context(active, command_dir))
+            item = _analyze(text, Context(active, command_dir, marker))
             if item:
                 return reason_for(item, broken)
         return None
