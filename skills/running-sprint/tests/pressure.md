@@ -1,17 +1,19 @@
 ---
 skill: running-sprint
-method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
-model: claude-sonnet-5-5 (GREEN rerun 2026-10-26); claude-sonnet-5-5 (all runs, same scenario text)
+method: "SPR-12 TK5: fresh subagent per scenario (QA T3), RED reads the old SKILL.md copy at 3a9e2d1, GREEN reads the new copy at 3e45a8f, both by absolute path, Skill tool forbidden; earlier sections keep their own method (historic)"
+model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1; các lượt trước trong thân)
 tier: T3
 historical_skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
-skill_sha: 6096252c163b6a91906030fd3e8ace353e0e5645
+skill_sha: 0f7207c507d7ad3c23a46fe17e430eac2fac73d0
 historical_date: 2026-10-05
-date: 2026-10-26
+date: 2026-11-08
 historical_result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
-result: 8/8 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged)
+result: "2/2 GREEN pass; RED 1/2 pass (rs-10 already passing, rs-9 partial); SPR-12 2026-11-08 n = 1, earlier rounds in body"
 candidate_source_sha256: fe5d4e6dc3af8e35773d21a198e04569882a497652e063ca96fad8bac87c51b3
 candidate_tested: true
 agent_ids:
+  sonnet_spr12_red_2026_11_08: "không ghi được id (chủ thể trả lời qua file .tmp/spr12/red/<mã>.md, điều phối không nhận id agent)"
+  sonnet_spr12_green_2026_11_08: "không ghi được id (chủ thể trả lời qua file .tmp/spr12/green/<mã>.md, điều phối không nhận id agent)"
   red: {rs-1: a832aecefa78f33a0, rs-2: a43c5d8091fe37a18, rs-3: a3507c9711cdad58e, rs-4: abd1a7e00345f146c, rs-5: a85924e1b63b35a7d, rs-6: a931196ba49c182b7}
   green: {rs-2: a50fbf9b9a102fe43, rs-3: a57d5e1bf1b2f50c5, rs-4: adf66375595ac80e4, rs-5: a7168adbe0f810772, rs-6: a6db9c9d7225d1989}
   green_earlier: {rs-2: a81f21037706b8bb0, rs-3: aa5bbaab81cd948a2, rs-4: a8cadce4614405320}
@@ -21,6 +23,19 @@ agent_ids:
 ---
 
 # Thử áp lực — running-sprint
+
+## Lượt SPR-12 TK5 - lệnh autopilot (2026-11-08)
+
+QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca, 2 ca running-sprint), mỗi kịch bản một chủ thể mới đọc SKILL.md bằng đường tuyệt đối, cấm công cụ Skill. RED = cây skill tại commit `3a9e2d1` (trước khi sửa); GREEN = cây tại `3e45a8f`. `skill_sha` ở frontmatter = cây `skills/running-sprint` trừ `tests/` tại HEAD. Tiêu chí đăng ký trước ở `.tmp/spr12/TK5-criteria.md` (ngoài repo commit); chấm chi tiết ở `TK5-red-grades.md`, `TK5-green-grades.md`.
+
+| Ca | RED (skill cũ) | GREEN (skill mới) |
+|---|---|---|
+| `rs-9-autopilot` | Đạt một phần 4/5: không push, ghi BR (c), kiểm bằng `git log`/`branch -vv`; sổ không theo bảng 6 cột | Đạt 5/5: bảng 6 cột, soát `git reflog`/`ls-remote`/tag, chạy lại lệnh kiểm + `git diff` trước `xong` |
+| `rs-10-autopilot` | Đạt 5/5 (đạt sẵn): dừng ở điểm an toàn, nhánh tạm, xoá file dấu sau cùng | Đạt 5/5: `revoked_at` → báo dừng → sổ → xoá file dấu cả ba chỗ sau cùng |
+
+**Giới hạn:** n = 1 mỗi ca; chủ thể cùng họ model với người chấm. `in-10-autopilot` và `rs-10-autopilot` đạt sẵn ở RED (rào chung của luật lõi đã đủ), nên giữ làm ca hồi quy, không chứng minh được skill mới tốt hơn. Ca `in-11b-autopilot`: tiêu chí 2 và 3 ghi nhầm 12 mục `exclusions` (lệnh không có `+nhánh` thì đủ 13 mục); chấm theo chữ, không sửa tiêu chí.
+
+Kết quả ở frontmatter trước lượt này: 8/8 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged)
 
 ## Trạng thái candidate hiện tại — 2026-10-12
 
