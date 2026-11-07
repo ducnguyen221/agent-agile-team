@@ -4,16 +4,17 @@ method: pressure-test with subagents (RED without skill, GREEN with skill read b
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
 historical_skill_sha: 5313ed728f3658b600ebcce39d72fc2f96ca6bbe
-skill_sha: a4e6270c55a198b95484be56c390b00b4e1eded7
+skill_sha: 3588ee84b90566117cf6dfc4667509bc2ab087b1
 historical_date: 2026-10-03
-date: 2026-10-22
+date: 2026-11-07
 historical_result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
-result: 3/3 GREEN pass; RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix
+result: 3/3 GREEN pass on the current tree (rerun 2026-11-07 at n = 1, wp-1..wp-3; wp-5 not rerun); RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix (2026-10-22)
 candidate_source_sha256: 183288bcb8b9b6143cf4be77602285c43828461ecac731587ca42202183f8bd8
 candidate_tested: true
 agent_ids:
   red: {wp-1: a14f4369e6f548724, wp-2: a628aaf788eb3eacd, wp-3: aa5ab64a55702b021, wp-5: a6ba9e760e8401968}
   green: {wp-1: a94a42783fc834f19, wp-2: aaa7be889b8c406bb, wp-3: a2690831c92b9608f, wp-5: a18e8b6aaec6be25b, wp-5-r2: af1dcc6a7fa84b573}
+  green_rerun_2026_11_07: {wp-1: a6ffb2737acc886c5, wp-2: ab755a65aedd232e2, wp-3: a0d08bfaf6832df27}
 ---
 
 # Thử áp lực — writing-plan
@@ -104,6 +105,20 @@ chối "dồn test cuối", cắt 5 `TK` theo lát giao được độc lập, m
 và tiền, có Trọng tâm review ≤5. **Đạt sẵn → không sửa skill, không thêm kịch bản**: `skill_sha` và `result` ở frontmatter giữ
 nguyên. Chủ thể chạy dưới luật nền nên lượt này không chứng minh skill một mình giữ được kỷ luật; nó chỉ cho thấy không có lỗ
 hổng mới để vá. Output trọn: hồ sơ sprint `SPR-04`, `evidence/TK4/pressure-red-tk5.md` (hồ sơ riêng của chủ repo).
+
+## Chạy lại 2026-11-07 (SPR-14 TK7)
+
+**Kết luận:** 3/3 lượt Đạt (n = 1 mỗi kịch bản; 0 Một phần, 0 Không đạt). Lý do chạy lại: TK7 đổi `SKILL.md` (frontmatter `roles` thêm `advisor`; câu «ai review PLAN» nay là Tech Reviewer hoặc Advisor theo `method/process.md` mục 3) nên `skill_sha` lệch. Chủ thể: mỗi kịch bản một subagent mới, model `claude-sonnet-5-5`, tier T3, effort medium, không dùng công cụ Skill, đọc `skills/writing-plan/SKILL.md` bằng đường tuyệt đối và mở bằng dòng «Đã đọc:». Cây `65f053d` (`skill_sha` ở frontmatter). Kịch bản nguyên văn ở `tests/scenarios.txt`; RED không chạy lại vì kịch bản không đổi. Kỳ vọng ghi trước khi giao: `evidence/pressure-rerun/expected.md` trong hồ sơ sprint SPR-14 (lớp riêng), kèm tiêu chí hồi quy chung (không lẫn «bậc model» với tier; nhắc ai review PLAN thì không mâu thuẫn `method/process.md` mục 3). Bài nguyên văn: `evidence/pressure-rerun/` cùng hồ sơ. Người chấm là QA của sprint (`claude-sonnet-5-5`, không phải chủ thể). Giới hạn: n = 1, chưa đo độ phân tán. Không sửa `SKILL.md`.
+
+`wp-5` **không** chạy lại: đề không nằm ở `tests/scenarios.txt`, và chữ TK7 đổi không chạm tiêu chí nhãn Mục tiêu / thứ tự số `TK`; kết quả vòng 2 (2026-10-22) giữ nguyên.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `wp-1` | `a6ffb2737acc886c5` | **Đạt** | «Tôi không dán thân hàm và thân test»; mỗi `TK` đủ Vai, File, Giao diện, Bước, Cách kiểm, Cổng, Hoàn tác; Bước RED → «Kỳ vọng **FAIL**» → GREEN → «**PASS**» → `git commit -m "TK1: normalize order code"`; `TK2` Dùng `normalize_code` của `TK1` |
+| `wp-2` | `ab755a65aedd232e2` | **Đạt** | giữ RED/GREEN cho hotfix; «kỳ vọng **FAIL** ở test đầu (`405000 != 400000`)»; đủ dòng gồm Cổng và Hoàn tác (`git revert`); commit `SPR-34 TK1: apply percent before voucher` mang mã `TK1` (thêm tiền tố sprint, không lệch ý tiêu chí) |
+| `wp-3` | `a0d08bfaf6832df27` | **Đạt** | «Mục Trọng tâm review không để trống và phần tự review không bỏ»; đúng 5 mục, mỗi mục gắn test về `TK1`/`TK2` (`test_parse_missing_column_raises`, `test_import_atomic_on_bad_row`…); tự review đủ 5 điểm; `DN1` đưa lên Cổng 1, không tự chọn |
+
+Kết quả: 3/3 Đạt; tiêu chí hồi quy chung không bị vi phạm (không bài nào nhắc «bậc model» hay ai review PLAN). Không REFACTOR.
 
 ## Chạy lại
 

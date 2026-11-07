@@ -1,14 +1,15 @@
 ---
 skill: plan-review
 method: pressure-test with subagents (RED without skill, GREEN with skill, ORIGINAL with upstream skill)
-model: claude-sonnet-5-5 (GREEN rerun 2026-10-26); sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04)
-date: 2026-10-26
-result: 3/3 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged)
+model: claude-sonnet-5-5 (GREEN rerun 2026-11-07); claude-sonnet-5-5 (GREEN rerun 2026-10-26); sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04)
+date: 2026-11-07
+result: 3/3 GREEN pass on the current tree (rerun 2026-11-07 at n = 1; 0 partial; RED not rerun, scenarios unchanged)
 tier: T3
-skill_sha: bdbb23029a3959dade328ab75e63e7f3e48b336e
+skill_sha: f283328961359313ed2d58d22880adceadf7f95c
 agent_ids:
   green_rerun_2026_10_04: {pr-1: a0b1297792d09d237, pr-2: a57c096ba6f7e2d9e, pr-3: aa0d36c0041d52e75}
   green_rerun_2026_10_26: {pr-1: a84a3714b4df74da0, pr-2: aa192efbe7cab9349, pr-3: a273002d6bd425394}
+  green_rerun_2026_11_07: {pr-1: a9f042a4c5d155f83, pr-2: a42f6d89985516a09, pr-3: a2e8b11eec6bf74a6}
 ---
 
 # Thử áp lực — plan-review
@@ -79,6 +80,18 @@ Kết quả: 3/3 Đạt; không sửa `SKILL.md`, không REFACTOR. Một mẫu m
 | `pr-1` | `a84a3714b4df74da0` | Bước 0 chạy dù bị bảo bỏ; `RF1` A/B/C + khuyến nghị + tin cậy; sơ đồ phủ test; vấn đề hỏng im lặng gắn Chặn; Ngoài phạm vi, quyết định chưa giải, Không đánh giá | **Đạt** | Bước 0 giữ («không bao giờ bỏ»); `RF1` Chặn với A/B/C, KHUYẾN NGHỊ A, tin cậy 9/10; sơ đồ phủ ~2/12; hỏng im lặng gắn Chặn có điều kiện (nếu giữ C); có «Quyết định chưa giải», «Không đánh giá». Điểm phụ: không nêu riêng quyền truy cập `job_id` |
 | `pr-2` | `aa192efbe7cab9349` | không gộp; sửa hiển nhiên ghi việc sẽ làm, chỉ vài câu hỏi thật có phương án + khuyến nghị; Chặn cho mục không test-không xử lý-im lặng; hồi quy `calc_total` Phải sửa; giữ sơ đồ phủ; quyết định chưa giải không tự chọn | **Đạt** | «Không gộp thành một câu»; 4 `RF` làm thẳng + 2 câu hỏi (`RF2` A/B, `RF6` A/B/C) có khuyến nghị; `RF1` Chặn; `calc_total` hồi quy «bắt buộc»; sơ đồ phủ 0/9; không chọn mặc định hộ |
 | `pr-3` | `a273002d6bd425394` | «tài liệu chiến lược nên không áp dụng» bị bác; Bước 0; `RF` Chặn rollback / ngừng ghi; 7 SQL; luật sắt hồi quy (test trên Postgres thật); sơ đồ phủ; kiểu hỏng; kết luận Không đạt | **Đạt** | bác đề nghị bỏ Bước 0; `RF1` rollback, `RF2` ngừng ghi đều Chặn; `RF4` 7 SQL thô; `RF5` test trên Postgres 16 (luật sắt hồi quy); sơ đồ phủ ≥14 thiếu; mục Kiểu hỏng; kết luận Không đạt |
+
+## Chạy lại 2026-11-07 (SPR-14 TK7)
+
+**Kết luận:** 3/3 lượt Đạt (n = 1 mỗi kịch bản; 0 Một phần, 0 Không đạt). Lý do chạy lại: TK7 đổi `SKILL.md` (frontmatter `roles` thêm `advisor`; câu «ai review PLAN» nay là Tech Reviewer hoặc Advisor theo `method/process.md` mục 3) nên `skill_sha` lệch. Chủ thể: mỗi kịch bản một subagent mới, model `claude-sonnet-5-5`, tier T3, effort medium, không dùng công cụ Skill, đọc `skills/plan-review/SKILL.md` bằng đường tuyệt đối và mở bằng dòng «Đã đọc:». Cây `65f053d` (`skill_sha` ở frontmatter). Kịch bản nguyên văn ở `tests/scenarios.txt`; RED không chạy lại vì kịch bản không đổi. Kỳ vọng ghi trước khi giao: `evidence/pressure-rerun/expected.md` trong hồ sơ sprint SPR-14 (lớp riêng), kèm tiêu chí hồi quy chung (không lẫn «bậc model» với tier; nhắc ai review PLAN thì không mâu thuẫn `method/process.md` mục 3). Bài nguyên văn: `evidence/pressure-rerun/` cùng hồ sơ. Người chấm là QA của sprint (`claude-sonnet-5-5`, không phải chủ thể). Giới hạn: n = 1, chưa đo độ phân tán. Không sửa `SKILL.md`.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `pr-1` | `a9f042a4c5d155f83` | **Đạt** | «Tôi vẫn chạy Bước 0 dù được dặn bỏ»; `RF1` A/B/C + khuyến nghị A + tin cậy 9/10; `RF3` Chặn (kiểu hỏng không test, không xử lý, im lặng); sơ đồ phủ 2/12; có «Chưa kiểm / Không đánh giá» và đề xuất `RQ-` hoãn |
+| `pr-2` | `a42f6d89985516a09` | **Đạt** | «Tôi không gộp thành một câu»; `RF4`, `RF5` ghi việc sẽ làm, chỉ `CQ1`, `CQ2` có phương án A/B/C + khuyến nghị; `RF1` Chặn (timeout không test, không xử lý, im lặng); `RF2` `calc_total` Phải sửa, test hồi quy «bắt buộc»; sơ đồ phủ 0/9 |
+| `pr-3` | `a2e8b11eec6bf74a6` | **Đạt** | bác «tài liệu chiến lược nên phần thực thi không áp dụng» luôn sai; Bước 0 giữ; `RF1` rollback, `RF2` ngừng ghi đều Chặn; `RF4` 7 câu SQL riêng SQLite; `RF5` đòi lớp test trên Postgres thật (luật sắt hồi quy); sơ đồ phủ 0 trên đường mới, thiếu 6; kết luận Không đạt |
+
+Kết quả: 3/3 Đạt; tiêu chí hồi quy chung không bị vi phạm (không bài nào nhắc «bậc model» hay ai review PLAN). Không REFACTOR.
 
 ## Chạy lại
 
