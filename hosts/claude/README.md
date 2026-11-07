@@ -47,6 +47,11 @@ claude --plugin-dir ~/agent-agile-team                    # macOS, bash
 claude --plugin-dir "$HOME\agent-agile-team"              # Windows PowerShell
 ```
 
+**Hook autopilot.** Plugin kèm `hooks/hooks.json`: hook `PreToolUse` cho `Bash|PowerShell` chạy
+`scripts/autopilot_guard.py --format claude`. Hook chỉ chặn khi có `.tmp/autopilot.json` (dấu autopilot đang bật);
+không có file đó thì thoát 0 và không làm gì. Cần Python trong `PATH`. Codex và Antigravity chưa có hook này:
+xem [method/autopilot.md](../../method/autopilot.md).
+
 ## 3. Kiểm, cập nhật, gỡ
 
 - **Kiểm:** mở phiên **mới**, hỏi agent "luật lõi agent-agile-team nói gì về hai cổng?" — trả lời đúng là luật
