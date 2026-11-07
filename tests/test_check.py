@@ -140,11 +140,11 @@ def test_broken_case_is_caught_with_its_rule(tmp_path, case):
 def test_product_codes_hyphen_ignored():
     """Khoá quy ước "mã sản phẩm luôn gạch nối" (`method/feature-expansion.md`, SPR-13): `check` không đọc `MOD-06`, `FE-01`…"""
     text = "\n".join((PRODUCT_CODES / name).read_text(encoding="utf-8") for name in ("SPEC.md", "PLAN.md"))
-    for needle in ("MOD-06", "FE-01", "UC-011", "SCR-033", "FR-47", "### FE-10", "**FE-11 ("):
-        assert needle in text, f"fixture product-codes thiếu {needle}"
     report = check.check_paths([PRODUCT_CODES])
     assert report.findings == [], [f.render() for f in report.findings]
     assert report.exit_code == 0
+    for needle in ("MOD-06", "FE-01", "UC-011", "SCR-033", "FR-47", "### FE-10", "**FE-11 ("):  # fixture không bị gỡ mã
+        assert needle in text, f"fixture product-codes thiếu {needle}"
 
 
 def test_product_code_without_hyphen_flagged(tmp_path):
