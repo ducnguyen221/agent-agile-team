@@ -78,10 +78,10 @@ Agent khuyến nghị bậc trong tin trao đổi lúc tiếp nhận; bạn xác
 
 ### 2.3 Vai và tier — giao việc theo năng lực, không theo tên model
 
-Bảy vai agent chia hai nhóm; mỗi vai có tier; repo không chứa tên model thật.
+Chín vai agent chia ba nhóm; mỗi vai có tier; repo không chứa tên model thật.
 
 - **Thực thi:** Analyst (điều phối, T1) · Architect (T1) · Implementer (T2) · QA (T3) · Researcher (T3, tìm đọc, không kết luận). **Kiểm định:** Business
-  Reviewer (T1) · Tech Reviewer (T1), kéo thêm 4 thẻ chuyên đề security · data · backend · frontend khi rủi ro cao.
+  Reviewer (T1) · Tech Reviewer (T1) · Gate Delegate (T1, duyệt thay cổng khi được cấp quyền), kéo thêm 4 thẻ chuyên đề security · data · backend · frontend khi rủi ro cao. **Tư vấn:** Advisor (T1, cố vấn khi được hỏi, không soạn SPEC/PLAN, không chấm việc của người làm, không duyệt thay).
 - Tier: `T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test. Bảng tier → model nằm **ngoài repo**, trỏ
   bằng biến môi trường `AGENT_AGILE_TIERS` (bảng schema 1 hoặc 2; hình ma trận vai × hãng ở `tiers/ROLE-MATRIX.example.md`);
   thiếu bảng thì agent dùng chỉ định của bạn trong chat, không đoán.

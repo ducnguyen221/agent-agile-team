@@ -120,7 +120,7 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
   `method/effort-scale.md`, ví dụ `Implementer · T2 · model-x · 3`; chưa giao thì ghi `—`.
 - Luật `check` dựa vào: trong một file, không nhãn `agent` nào (trừ `pending`) vừa giữ vai thực thi vừa giữ
   vai kiểm định (mức Chặn). Một agent được giữ nhiều vai thực thi. Nhãn Advisor trùng nhãn Business Reviewer hay Tech Reviewer
-  là hợp lệ (Advisor không chấm việc của người làm); trùng nhãn Analyst/Architect hoặc Gate Delegate là `self-review`
+  là hợp lệ (Advisor không chấm việc của người làm) **trừ khi** nhãn đó là `delegation.by` (Advisor không ký duyệt thay: `self-review`); trùng nhãn Analyst/Architect hoặc Gate Delegate là `self-review`
   (Advisor không soạn SPEC/PLAN và không duyệt thay khuyến nghị của chính mình). Khoá `advisor` ghi ở `roles` của cả SPEC
   lẫn PLAN (để `check` so được với `analyst` ở SPEC và `architect` ở PLAN).
 - Người duyệt thay (`delegation.by`) cũng không được trùng nhãn một vai thực thi trong `roles` của cùng file: mức Chặn, cùng luật `self-review`.

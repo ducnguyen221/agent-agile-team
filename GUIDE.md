@@ -20,7 +20,7 @@ hoặc bản trang web <https://ducnguyen.vn/agent-agile-team/>.
   (mọi sprint, mã `SPR-01`…), SPECS (mọi tính năng đang chạy, mã `FS-001`…). Đầu mỗi sổ có khối "Đang mở" để
   agent tra nhanh.
 - **Vai và tier** — agent nhận vai (Analyst điều phối, Architect, Implementer, QA, Researcher tìm đọc không kết luận,
-  Business Reviewer, Tech Reviewer); mỗi vai có **tier** (`T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test) thay vì tên
+  Business Reviewer, Tech Reviewer, Gate Delegate, Advisor — chín vai, ba nhóm: thực thi, kiểm định, tư vấn); mỗi vai có **tier** (`T1` tư duy · `T2` thực thi · `T3` việc vặt và chạy test) thay vì tên
   model. Ai làm thì **không** tự chấm việc của mình.
 
 ## 2. Dựng khung cho dự án (một lần)

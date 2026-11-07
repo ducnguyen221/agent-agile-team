@@ -1357,11 +1357,15 @@ class Engine:
         if not isinstance(by, str) or not by.strip() or by == "pending":
             return bad("delegation.by" if "by" in block else "delegation", "delegation.by phải là nhãn agent đã giao (khác rỗng, khác pending)")
         roles = data.get("roles")
-        held = sorted(r for r, v in roles.items()
-                      if r in EXECUTORS and isinstance(v, list) and len(v) >= 2 and v[1] == by) if isinstance(roles, dict) else []
+        def labelled(v):
+            return isinstance(v, list) and len(v) >= 2 and v[1] == by
+        held = sorted(r for r, v in roles.items() if r in EXECUTORS and labelled(v)) if isinstance(roles, dict) else []
+        # Advisor không ký duyệt thay qua nhãn khác; advisor + gate-delegate cùng nhãn thì _roles đã báo, không báo kép
+        if isinstance(roles, dict) and labelled(roles.get("advisor")) and not labelled(roles.get("gate-delegate")):
+            held = sorted(held + ["advisor"])
         if held:
             self.add(path, doc.key_line("delegation.by"), "self-review",
-                     f"người duyệt thay '{by}' cũng giữ vai thực thi ({', '.join(held)}) của cùng tài liệu")
+                     f"người duyệt thay '{by}' cũng giữ vai thực thi hoặc tư vấn ({', '.join(held)}) của cùng tài liệu")
         elif doc.kind in ("plan", "report", "sprint"):  # SPEC không đòi: Cổng 1 duyệt thay ghi ở cả SPEC lẫn PLAN (DN5)
             if not isinstance(roles, dict):
                 return bad("roles" if "roles" in data else mode_key, "tài liệu duyệt thay phải có khối roles để đối chiếu delegation.by")
