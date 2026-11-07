@@ -184,7 +184,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 | `push` | đẩy lên remote | máy | `git push` |
 | `tag` | tạo, sửa tag | máy | mọi `git tag` **trừ** dạng chỉ đọc: `git tag` trần, có `-l`/`--list`, `-v`/`--verify`, `--contains`, `--no-contains`, `--merged`, `--no-merged`, `--points-at`; `git tag -d`/`--delete` chặn với lý do `irreversible_delete` |
 | `main_merge` | gộp vào nhánh chính | máy | `git merge`, `git pull` khi nhánh hiện tại là `main`/`master`; trong lệnh ghép, `git merge`/`git pull` đứng **sau** một phần `git checkout` hay `git switch` tới `main`/`master` (xét như đang ở nhánh chính); `gh pr merge` |
-| `irreversible_delete` | xoá không đảo ngược | máy, một phần | `rm` có `-r`/`-R`/`--recursive`; `git reset --hard`; `git branch -D`; `git clean` có `-f`/`--force`; `git tag -d`/`--delete`; `git worktree remove` có `-f`/`--force`; PowerShell `Remove-Item` và bí danh (`ri`, `rm`, `del`, `rmdir`, `rd`) có tham số bắt đầu `-r` (`-Recurse` viết tắt); `rmdir /s`, `rd /s` |
+| `irreversible_delete` | xoá không đảo ngược | máy, một phần | `rm` có `-r`/`-R`/`--recursive`; `git reset --hard`; `git branch -D`; `git clean` có `-f`/`--force`; `git tag -d`/`--delete`; `git worktree remove` có `-f`/`--force`; PowerShell `Remove-Item` và bí danh (`ri`, `rm`, `del`, `rmdir`, `rd`) có tham số bắt đầu `-r` (`-Recurse` viết tắt); `rmdir /s`, `rd /s`. **Cho qua** `rm -r`/`rm -rf`/`Remove-Item -Recurse` khi **mọi** đích là đường con thật sự nằm trong `<gốc repo>/.tmp/` — không phải chính `.tmp/`, không chứa `..`, không trỏ tới file dấu `.tmp/autopilot.json`; còn lại vẫn chặn (giới hạn đã biết: phiên con vẫn xoá được file dấu bằng xoá từng file, mục 5.1) |
 | `branch_merge_local` | gộp cục bộ nhánh sprint | máy | `git merge` bất kỳ khi mục còn trong `exclusions` |
 | `version` | tăng số phiên bản | hành vi | — |
 | `publish` | đăng công khai, phát hành | hành vi | — |
@@ -204,8 +204,8 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
   tiên có `.git` — thư mục, hoặc **file** `gitdir:` của worktree; không gặp `.git` thì đi tới gốc ổ đĩa. Vì vậy worktree
   không thấy file dấu ở gốc repo chính — điều phối phải chép file dấu vào từng worktree (mục 5.2).
 - **Lệnh ghép:** tách thô theo `&&`, `||`, `;`, `|` và xuống dòng, không hiểu dấu nháy, rồi xét từng phần theo thứ tự.
-  Chấp nhận chặn nhầm (vd `git commit -m "a && git push"`): đổi câu commit, không viết bộ phân tích shell. Dọn file
-  tạm trong `.tmp/` lúc autopilot bật thì xoá từng file (không đệ quy); thư mục tạm còn lại dọn sau khi kết thúc.
+  Chấp nhận chặn nhầm (vd `git commit -m "a && git push"`): đổi câu commit, không viết bộ phân tích shell. Dọn thư mục
+  tạm bên trong `.tmp/` lúc autopilot bật được cho qua theo ngoại lệ ở dòng `irreversible_delete` của bảng mục 5.
 - **File dấu hỏng hay thiếu mục:** JSON hỏng → chặn mọi lệnh khớp mẫu (đóng an toàn). `exclusions` thiếu mục **bắt
   buộc** (mọi mục trừ `branch_merge_local`) → hook bổ sung đủ; `branch_merge_local` vắng được tôn trọng vì đó là
   `+nhánh`; mục lạ bị bỏ qua (không bớt được mục nào). Khoá `sprints` hook không dùng để quyết.
