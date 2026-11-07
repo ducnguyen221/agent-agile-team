@@ -182,7 +182,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 |---|---|---|---|
 | `push` | đẩy lên remote | máy | `git push`, `git subtree push` |
 | `tag` | tạo, sửa tag | máy | `gh release create`; mọi `git tag` **trừ** dạng chỉ đọc: `git tag` trần, có `-l`/`--list`, `-v`/`--verify`, `--contains`, `--no-contains`, `--merged`, `--no-merged`, `--points-at`; `git tag -d`/`--delete` chặn với lý do `irreversible_delete` |
-| `main_merge` | gộp vào nhánh chính | máy | `git merge`, `git pull` khi nhánh hiện tại là `main`/`master`; nhánh đọc từ `.git/HEAD` của thư mục mà lệnh git thật sự chạy: nhánh đọc từ `.git/HEAD` của thư mục lệnh, trừ khi trước lệnh đó trong cùng lệnh ghép (kể cả subshell, `bash -c` lồng) có **bất kỳ** thao tác đổi thư mục (`cd`, `pushd`, `popd`, `Set-Location`, `Push-Location`, `Pop-Location`, `env -C`/`--chdir`, `sudo -D`/`--chdir`, mọi dạng kể cả dính) thì coi là `main` — hook không tính đường đi, cái giá là chặn nhầm gộp hợp lệ có `cd` phía trước (chạy `git merge` ở lệnh riêng sau khi đã đứng đúng thư mục); `git -C <dir>` thì đọc nhánh của `<dir>`; `--git-dir`, `--work-tree`, `GIT_DIR=` gán ngay trước lệnh, đích không xác định (biến, `-`) cũng coi là `main`; `git pull` thiếu `+nhánh` chặn ở mọi nhánh với lý do `branch_merge_local`; trong lệnh ghép, `git merge`/`git pull` đứng **sau** một phần `git checkout` hay `git switch` tới `main`/`master` (xét như đang ở nhánh chính); `gh pr merge` (`-R`/`--repo` ở vị trí nào cũng nhận ra) |
+| `main_merge` | gộp vào nhánh chính | máy | `git merge`, `git pull` khi nhánh hiện tại là `main`/`master`; nhánh đọc từ `.git/HEAD` của thư mục mà lệnh git thật sự chạy, trừ khi trước lệnh đó trong cùng lệnh ghép (kể cả subshell, `bash -c` lồng) có **bất kỳ** thao tác đổi thư mục (`cd`, `pushd`, `popd`, `Set-Location`, `Push-Location`, `Pop-Location`, `env -C`/`--chdir`, `sudo -D`/`--chdir`, mọi dạng kể cả dính) thì coi là `main` — hook không tính đường đi, cái giá là chặn nhầm gộp hợp lệ có `cd` phía trước (chạy `git merge` ở lệnh riêng sau khi đã đứng đúng thư mục); `git -C <dir>` thì đọc nhánh của `<dir>`; `--git-dir`, `--work-tree`, `GIT_DIR=` gán ngay trước lệnh, đích không xác định (biến, `-`) cũng coi là `main`; `git pull` thiếu `+nhánh` chặn ở mọi nhánh với lý do `branch_merge_local`; trong lệnh ghép, `git merge`/`git pull` đứng **sau** một phần `git checkout` hay `git switch` tới `main`/`master` (xét như đang ở nhánh chính); `gh pr merge` (`-R`/`--repo` ở vị trí nào cũng nhận ra) |
 | `irreversible_delete` | xoá không đảo ngược | máy, một phần | `rm` có cụm cờ chứa `r`/`R` (`-rf`, `-fr`, `-Rf`, `-r -f`) hay `--recursive`; `git reset --hard`; `git branch -D`; `git clean` có `-f`/`--force`; `git tag -d`/`--delete`; `git worktree remove` có `-f`/`--force`; PowerShell `Remove-Item` và bí danh (`ri`, `rm`, `del`, `rmdir`, `rd`) có tham số bắt đầu `-r` (`-Recurse` viết tắt); `rmdir /s`, `rd /s`; `find … -delete`; `find … -exec`/`-execdir` mà lệnh sau nó thuộc mục này. **Cho qua** `rm -r`/`rm -rf`/`Remove-Item -Recurse`/`rmdir /s` khi **mọi** đích là đường con thật sự nằm trong `<gốc repo>/.tmp/` (`<gốc repo>` = thư mục chứa `.git` đầu tiên khi đi lên từ thư mục làm việc của sự kiện) — không phải chính `.tmp/`, không chứa `..`, không trỏ tới file dấu `.tmp/autopilot.json`; đích xét **theo chuỗi trước khi shell mở rộng**: glob chỉ ở thành phần cuối và không được khớp `autopilot.json` (`.tmp/*`, `.tmp/a*` chặn; `.tmp/out*` qua); glob được mở rộng bằng cách liệt kê thư mục ở thư mục lệnh và **từng mục khớp** phải qua kiểm `realpath` (không mở rộng được hoặc có mục ra ngoài `.tmp/` hay là file dấu thì chặn); tên file dấu so không phân biệt hoa thường, đích có `$`, `%`, `~`, dấu phẩy, ngoặc nhọn thì chặn; đã gặp `cd` trước đó trong lệnh ghép thì không còn ngoại lệ; không theo liên kết: `realpath` của đích (và của `.tmp/`) phải còn nằm trong `.tmp/` thật, ra ngoài hoặc trỏ tới file dấu thì chặn; còn lại vẫn chặn (giới hạn đã biết: phiên con vẫn xoá được file dấu bằng xoá từng file, mục 5.1) |
 | `branch_merge_local` | gộp cục bộ nhánh sprint | máy | `git merge` bất kỳ khi mục còn trong `exclusions` |
 | `version` | tăng số phiên bản | hành vi | — |
@@ -208,7 +208,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 - **File dấu hỏng hay thiếu mục:** JSON hỏng → chặn mọi lệnh khớp mẫu (đóng an toàn). `exclusions` thiếu mục **bắt
   buộc** (mọi mục trừ `branch_merge_local`) → hook bổ sung đủ; `branch_merge_local` vắng được tôn trọng vì đó là
   `+nhánh`; mục lạ bị bỏ qua (không bớt được mục nào). Khoá `sprints` hook không dùng để quyết.
-- **File dấu được hook bảo vệ:** lệnh shell không chỉ-đọc trỏ tới file dấu (hay `.tmp/` hoặc glob bao nó, hoặc chuyển hướng `>` vào nó) và tool ghi file có đích là file dấu đều bị chặn. Mọi đường xoá bằng lệnh shell đều bị chặn, kể cả từ ngoài repo bằng đường tuyệt đối. Đường kết thúc duy nhất bằng máy: `python scripts/autopilot_guard.py --clear <thư mục làm việc>` (xoá đúng `.tmp/autopilot.json` của thư mục đó; hook cho qua lệnh này). Chỉ điều phối gọi, sau `Dừng autopilot.` hoặc thu hồi, xoá sau cùng (mục 7); hoặc người dùng tự xoá. Giới hạn nói thẳng: phiên con cũng gọi được, nên đây vẫn là rào hành vi, không phải ranh giới bảo mật.
+- **File dấu được hook bảo vệ:** các đường xoá/ghi đè nhận dạng được bị chặn, kể cả từ ngoài repo bằng đường tuyệt đối: lệnh shell không chỉ-đọc có đối số trỏ tới file dấu (hay `.tmp/` bao nó, hay glob khớp nó), chuyển hướng `>` vào nó, `find … -exec`, và tool ghi file (`Write`, `Edit`, `MultiEdit`, `NotebookEdit`) có đích là file dấu. `cp` được cho qua khi file dấu chỉ là **nguồn** (điều phối chép vào thư mục phiên con — mục 5.2). Đường kết thúc duy nhất bằng máy: `python scripts/autopilot_guard.py --clear <thư mục làm việc>` (xoá đúng `.tmp/autopilot.json` của thư mục đó; hook cho qua lệnh này). Chỉ điều phối gọi, sau `Dừng autopilot.` hoặc thu hồi, xoá sau cùng (mục 7); hoặc người dùng tự xoá. Giới hạn nói thẳng: phiên con cũng gọi được, và danh sách nhận dạng không đủ (xem "Không chặn được"), nên đây là rào hành vi, không phải ranh giới bảo mật.
 - **Chặn được:** lệnh shell gõ thẳng khớp mẫu bảng trên, trong phiên có hook đã đăng ký, đang chạy, và có file dấu
   trên đường từ thư mục làm việc lên gốc repo.
 - **Không chặn được** (đều là rào hành vi, điều phối phải tự soát):
@@ -223,14 +223,16 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
   - hook chưa đăng ký, Codex chưa được **người dùng** trust qua `/hooks`, hook hết giờ ở host không có khoá
     `onFailure: block`, Antigravity trả `{}` ở `PreToolUse` (chưa xác minh — skill `hooks-guardrails`, Gotchas);
   - phiên con chạy ở thư mục ngoài repo có file dấu;
+  - chuỗi chương trình tuỳ ý xoá hay ghi đè file dấu hoặc chạy lệnh loại: `python -c`, `awk 'BEGIN{system(…)}'`, `perl -e`, `ruby -e`, `node -e`;
   - phiên con tự gọi `--clear` xoá file dấu của mình (hook cho qua lệnh này, nên đó là rào hành vi);
-  - lệnh đi qua công cụ ngoài `matcher` (MCP, `Monitor`), `git restore .` và các lệnh bỏ việc chưa commit tương tự, và đối thủ cố ý (người viết lệnh để lách mẫu);
+  - công cụ ngoài `matcher` (MCP, `Monitor`), `git restore .` và các lệnh bỏ việc chưa commit tương tự, và đối thủ cố ý (người viết lệnh để lách mẫu);
+  - đường vào nhánh chính cục bộ chưa nhận dạng: `git fetch . HEAD:main`, `git checkout -B main`, `git rebase`/`git reset` khi đang ở `main` — điều phối soát `git log main` khi nhận báo;
   - **sửa `scripts/check.py` hằng `AUTOPILOT_EXCLUSIONS`, `scripts/autopilot_guard.py` hay cấu hình hook** — danh sách mục hook thi hành lấy từ hằng của `check.py` (test ghim đúng 13 mục nên bớt mục thì test đỏ, nhưng phiên con sửa được cả test); điều phối soát `git diff` của hai file đó khi nhận báo;
   - **phiên con có quyền ghi xoá hoặc sửa được file dấu** — chế độ toàn quyền không hỏi trước khi ghi `.tmp/`. Đây là
     giới hạn lớn nhất còn lại: file dấu nằm trong tầm ghi của phiên con, chưa có chỗ đặt ngoài tầm đó trên cùng một
     tài khoản máy. Bù bằng kiểm: điều phối **kiểm sự có mặt và nội dung file dấu** trong thư mục của phiên con **khi
     giao** và **khi nhận báo**; thiếu hoặc lệch → coi phiên con đã ra khỏi rào: dừng phiên đó, ghi `BR` loại (c),
-    soát `git reflog`, nhánh remote, tag mới để biết lệnh loại đã chạy chưa.
+    soát `git reflog`, nhánh remote, tag mới để biết lệnh loại đã chạy chưa. Lưu ý: `--clear` rồi ghi lại file dấu y hệt làm phép kiểm "có mặt" mất tác dụng, nên phép soát `git reflog` và remote là chính.
 - Rào máy là lưới an toàn, không phải ranh giới bảo mật; bảo vệ nhánh chính phía remote (nếu có) mới là rào cuối.
 
 ### 5.2 File dấu `.tmp/autopilot.json`
@@ -245,7 +247,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 - Sáu khoá: năm khoá chép từ khối `delegation` (`level`, `scope`, `expires`, `exclusions`, `grant_at`) và `sprints` —
   danh sách sprint mà thư mục này đang chạy dưới lệnh. Không chứa secret, không chứa lời cấp nguyên văn.
 - **Một file dấu mỗi thư mục làm việc.** `intake` ghi ở gốc repo lúc nhận lệnh hợp lệ, `sprints` = mọi sprint của lệnh
-  (mức chương trình: cả dải). Điều phối chép vào `.tmp/` của thư mục làm việc (worktree) của mỗi phiên con **trước** khi
+  (mức chương trình: cả dải). Điều phối chép (`cp` được hook cho qua khi file dấu chỉ là nguồn) vào `.tmp/` của thư mục làm việc (worktree) của mỗi phiên con **trước** khi
   giao việc, `sprints` = đúng sprint phiên con đó làm.
 - **Xoá:** khi kết thúc (`Dừng autopilot.`, thu hồi, hết hạn), **sau cùng** — sau khi mọi phiên con liên quan đã báo
   dừng ở điểm an toàn (mục 7), bằng `--clear` (mục 5.1), để phiên con đang chạy không mất rào giữa chừng. `Thu hồi duyệt thay SPR-NN.` bỏ `SPR-NN` khỏi `sprints` của mọi file
@@ -276,6 +278,7 @@ Bảng trong PROGRESS mục "Sổ phiên con", một dòng mỗi lần giao:
 - Trạng thái: `đang chạy` · `xong` · `dừng ở điểm an toàn` · `dừng khẩn` · `cạn hạn mức` · `lỗi`.
 - Điều phối kiểm **kết quả và diff thật** (chạy lại lệnh kiểm, đọc `git diff`) trước khi ghi `xong`; lời tự báo của phiên
   con không phải bằng chứng.
+- Khi nhận báo của phiên con, điều phối kiểm thêm: (1) file dấu còn và đúng nội dung; (2) `git reflog`, nhánh và tag remote không có thao tác loại; (3) grep transcript và báo cáo của phiên con tìm `--clear`. Brief phiên con cấm gọi `--clear` bằng tên. Nói thẳng: `--clear` rồi ghi lại file dấu y hệt làm phép kiểm (1) mất tác dụng, nên (2) là phép kiểm chính.
 - Mỗi phiên con một nhánh riêng; nhánh chỉ được gộp theo `+nhánh` (mục 2). Điều phối liệt kê mọi nhánh chờ gộp trong bản tin.
 
 ### 6.3 Gate Delegate — người ký duy nhất
@@ -366,7 +369,7 @@ Không đánh giá: <phần không đọc hoặc không kiểm được>
 ## 9. Ba host
 
 Lệnh là câu chat, giống nhau ở Claude, Codex, Antigravity; host không có lệnh gạch chéo vẫn dùng câu chuẩn. Đăng ký hook
-theo bảng mục 3 của skill `hooks-guardrails`. Hiện **chỉ Claude** đã đăng ký: hook chạy qua `sh scripts/autopilot-hook.sh`, tự tìm Python ≥3.9; không có Python thì không file dấu → cho qua, có file dấu → chặn. Codex và Antigravity chưa đăng ký (chỉ rào hành vi). Plugin cài từ marketplace thư mục thì hook sống theo cây làm việc của checkout: sửa guard phải làm trên bản chép của plugin, thay một lần. Khi đăng ký ở host khác (Claude: thoát 2, lý do ở stderr, `onFailure: block`; Codex: thoát 2, người
+theo bảng mục 3 của skill `hooks-guardrails`. Hiện **chỉ Claude** đã đăng ký: hook chạy qua `sh scripts/autopilot-hook.sh` (trên Windows là `sh` của Git Bash), thử `python3`, `python`, `py -3`; không có Python dùng được hoặc guard lỗi thì không file dấu → cho qua, có file dấu → chặn. Giới hạn đã biết: máy Windows không có `sh` trong PATH của hook thì hook không chạy — kiểm trên host trước khi cài. Chi phí đo: khoảng 0,59 giây mỗi lệnh qua launcher (0,19 giây gọi thẳng Python), áp cho cả tool ghi file. Codex và Antigravity chưa đăng ký (chỉ rào hành vi). Plugin cài từ marketplace thư mục thì hook sống theo cây làm việc của checkout: sửa guard phải làm trên bản chép của plugin, thay một lần. Khi đăng ký ở host khác (Claude: thoát 2, lý do ở stderr, `onFailure: block`; Codex: thoát 2, người
 dùng trust qua `/hooks`; Antigravity: JSON `"decision": "deny"`). Tên công cụ shell cho `matcher` của từng host (gồm
 cả công cụ PowerShell ở Claude trên Windows) đối chiếu tài liệu chính chủ lúc đăng ký. Đăng ký hook là sửa cấu hình
 harness: hỏi người dùng đủ 5 ý trước khi chạm.
