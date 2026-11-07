@@ -1090,52 +1090,76 @@ def outside(tmp_path):
     return folder
 
 
+def stage_launcher(folder, guard_text=None):
+    """Chép launcher đang thử vào `folder` (như thư mục scripts của plugin), kèm guard giả nếu có; trả đường launcher đã chép."""
+    folder.mkdir(parents=True, exist_ok=True)
+    staged = folder / "autopilot-hook.sh"
+    staged.write_bytes(LAUNCHER.read_bytes())
+    if guard_text is not None:
+        (folder / "autopilot_guard.py").write_text(guard_text, encoding="utf-8")
+    return staged
+
+
+def run_staged(staged, cwd, payload, path_dirs, stdin_text=None):
+    import subprocess
+    env = {"PATH": os.pathsep.join(str(d) for d in path_dirs), "CLAUDE_PROJECT_DIR": fwd(cwd)}
+    for key in ("SystemRoot", "SYSTEMROOT", "TEMP", "TMP", "HOME"):
+        if key in os.environ:
+            env[key] = os.environ[key]
+    data = stdin_text if stdin_text is not None else json.dumps(payload)
+    return subprocess.run([SH, fwd(staged), "--format", "claude"], input=data, capture_output=True, text=True, encoding="utf-8", cwd=str(cwd), env=env)
+
+
 def test_launcher_guard_missing_falls_back_to_marker_probe(tmp_path, bare_sh_ok):
+    staged = stage_launcher(tmp_path / "scripts_no_guard")  # không có autopilot_guard.py cạnh launcher
     plain = make_repo(tmp_path / "p", branch="spr-12")
     marked = make_repo(tmp_path / "m", branch="spr-12", marker=good_marker())
     path = [bare_sh_ok, Path(sys.executable).parent]
-    gone = {"AUTOPILOT_GUARD_PATH": fwd(tmp_path / "no-such-guard.py")}
-    assert run_launcher(plain, claude("git push", plain), path, gone).returncode == 0
-    done = run_launcher(marked, claude("git push", marked), path, gone)
+    assert run_staged(staged, plain, claude("git push", plain), path).returncode == 0
+    done = run_staged(staged, marked, claude("git push", marked), path)
     assert done.returncode == 2 and "autopilot:" in done.stderr
 
 
 def test_launcher_guard_broken_falls_back_to_marker_probe(tmp_path, bare_sh_ok):
-    broken = tmp_path / "broken_guard.py"
-    broken.write_text("def (:\n", encoding="utf-8")
     plain = make_repo(tmp_path / "p", branch="spr-12")
     marked = make_repo(tmp_path / "m", branch="spr-12", marker=good_marker())
     path = [bare_sh_ok, Path(sys.executable).parent]
-    env = {"AUTOPILOT_GUARD_PATH": fwd(broken)}
     if run_launcher(plain, claude("git status", plain), path).returncode != 0:
         pytest.skip("launcher không thấy Python dùng được trong PATH thử")
-    assert run_launcher(plain, claude("git push", plain), path, env).returncode == 0
-    done = run_launcher(marked, claude("git push", marked), path, env)
-    assert done.returncode == 2 and "guard lỗi" in done.stderr
-    crash = tmp_path / "crash_guard.py"
-    crash.write_text("raise RuntimeError('boom')\n", encoding="utf-8")
-    assert run_launcher(plain, claude("git push", plain), path, {"AUTOPILOT_GUARD_PATH": fwd(crash)}).returncode == 0
-    assert run_launcher(marked, claude("git push", marked), path, {"AUTOPILOT_GUARD_PATH": fwd(crash)}).returncode == 2
+    for index, text in enumerate(("def (:\n", "raise RuntimeError('boom')\n", "import no_such_module_xyz\n")):
+        staged = stage_launcher(tmp_path / "scripts_bad_{}".format(index), text)
+        assert run_staged(staged, plain, claude("git push", plain), path).returncode == 0
+        done = run_staged(staged, marked, claude("git push", marked), path)
+        assert done.returncode == 2 and "guard lỗi" in done.stderr, text
 
 
 def test_launcher_passes_guard_exit_codes_and_stdout(tmp_path, bare_sh_ok):
-    fake = tmp_path / "fake_guard.py"
-    fake.write_text("import sys\nprint('seen', sys.stdin.read().strip())\nsys.exit(int(sys.argv[2]))\n", encoding="utf-8")
     repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
     path = [bare_sh_ok, Path(sys.executable).parent]
-    import subprocess
-    env = {"PATH": os.pathsep.join(str(d) for d in path), "AUTOPILOT_GUARD_PATH": fwd(fake), "CLAUDE_PROJECT_DIR": fwd(repo)}
-    for key in ("SystemRoot", "SYSTEMROOT", "TEMP", "TMP", "HOME"):
-        if key in os.environ:
-            env[key] = os.environ[key]
-    done = subprocess.run([SH, fwd(LAUNCHER), "--format", "7"], input="EVENT", capture_output=True, text=True, encoding="utf-8", cwd=str(repo), env=env)
+    code_of = "import sys\nprint('seen', sys.stdin.read().strip())\nsys.exit({})\n"
+    staged = stage_launcher(tmp_path / "scripts_fake", code_of.format(0))
+    done = run_staged(staged, repo, None, path, stdin_text="EVENT")
     if "seen" not in done.stdout:
         pytest.skip("launcher không thấy Python dùng được trong PATH thử")
-    assert "seen EVENT" in done.stdout  # sự kiện đi nguyên vẹn tới guard
-    ok = subprocess.run([SH, fwd(LAUNCHER), "--format", "0"], input="E", capture_output=True, text=True, encoding="utf-8", cwd=str(repo), env=env)
-    assert ok.returncode == 0
-    two = subprocess.run([SH, fwd(LAUNCHER), "--format", "2"], input="E", capture_output=True, text=True, encoding="utf-8", cwd=str(repo), env=env)
+    assert done.returncode == 0 and "seen EVENT" in done.stdout  # sự kiện đi nguyên vẹn tới guard
+    (tmp_path / "scripts_fake" / "autopilot_guard.py").write_text(code_of.format(2), encoding="utf-8")
+    two = run_staged(staged, repo, None, path, stdin_text="E")
     assert two.returncode == 2 and "guard lỗi" not in two.stderr  # mã 2 của guard trả nguyên, không thay bằng lý do dự phòng
+
+
+def test_launcher_has_no_guard_path_override(tmp_path, bare_sh_ok):
+    """RF18: biến môi trường không đổi được guard mà launcher chạy."""
+    assert "AUTOPILOT_GUARD_PATH" not in LAUNCHER.read_text(encoding="utf-8")
+    plain = make_repo(tmp_path / "p", branch="spr-12")
+    marked = make_repo(tmp_path / "m", branch="spr-12", marker=good_marker())
+    path = [bare_sh_ok, Path(sys.executable).parent]
+    evil = tmp_path / "evil.py"
+    evil.write_text("import sys\nsys.exit(0)\n", encoding="utf-8")
+    done = run_launcher(marked, claude("git push", marked), path, {"AUTOPILOT_GUARD_PATH": fwd(evil)})
+    if "không chạy được Python" in done.stderr:
+        pytest.skip("launcher không thấy Python dùng được trong PATH thử")
+    assert done.returncode == 2 and "'push'" in done.stderr  # guard thật vẫn chạy, giả không thay được
+    assert run_launcher(plain, claude("git status", plain), path, {"AUTOPILOT_GUARD_PATH": fwd(evil)}).returncode == 0
 
 
 def test_launcher_clear_does_not_read_stdin(tmp_path, bare_sh_ok):
@@ -1280,3 +1304,70 @@ def test_guard_old_python_guard_falls_back(tmp_path, monkeypatch):
     with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
         assert autopilot_guard._last_resort(["--format", "claude"]) == 0
         assert autopilot_guard._last_resort(["--format=antigravity"]) == 0
+
+
+# ===================== TK8 vòng sửa 3: heredoc theo nháy, file dấu lồng trong .tmp =====================
+
+@pytest.mark.parametrize("cmd", [
+    "echo 'a <<END'\ngit push",
+    'git commit -m "x <<EOF"\ngit push origin HEAD',
+    "echo \"y <<'EOF'\"\ngit push",
+    "echo hi # <<EOF\ngit push",
+    "echo a <<<'x <<EOF'\ngit push",
+    "cat <<EOF\ngit push",  # không có dòng kết thúc: giữ thân để phân tích
+    "python - <<EOF\nprint(1)\ngit push\nEOFX",  # nhãn kết thúc phải khớp đúng
+    "python - <<EOF\nprint(1)\n EOF\ngit push",  # thụt lề không phải dòng kết thúc của <<
+    "echo 'multi\nline <<EOF'\ngit push\nEOF",
+])
+def test_guard_heredoc_only_outside_quotes_and_comments(tmp_path, cmd):
+    """RF16: `<<` trong nháy hay comment, hoặc heredoc không có dòng kết thúc, không được che lệnh thật."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_blocked(repo, cmd, "push")
+
+
+def test_guard_real_heredoc_still_data(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    for cmd in ("python - <<EOF\ngit push\nEOF", "python - <<'EOF'\ngit push\nEOF", "node - <<-EOF\n\tgit push\n\tEOF",
+                "cat > f <<EOF\ngit push\nEOF", "python - <<EOF\nx = '<<'\ngit push\nEOF\ngit status"):
+        assert_allowed(repo, cmd)
+
+
+def test_guard_tmp_cleanup_not_applied_when_target_contains_nested_marker(tmp_path):
+    """RF15/RF17/G3: dọn thư mục trong .tmp/ có chứa .tmp/autopilot.json lồng bên trong thì chặn; --clear từng thư mục rồi mới xoá được."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    nested = repo / ".tmp" / "livetest"
+    (nested / ".tmp").mkdir(parents=True)
+    (nested / ".git").mkdir()
+    (nested / ".tmp" / "AutoPilot.JSON").write_text("{}", encoding="utf-8")
+    deep = repo / ".tmp" / "wrap" / "a" / "b" / "c"
+    (deep / ".tmp").mkdir(parents=True)
+    (deep / ".tmp" / "autopilot.json").write_text("{}", encoding="utf-8")
+    for cmd in ("rm -rf .tmp/livetest", "rm -rf .tmp/wrap", "Remove-Item -Recurse -Force .tmp\\livetest", "rm -rf .tmp/live*", "rm -rf .tmp/wrap/a"):
+        assert_blocked(repo, cmd, "irreversible_delete")
+    assert_allowed(repo, "python {g} --clear {d}".format(g=fwd(SCRIPTS / "autopilot_guard.py"), d=fwd(nested)))
+    assert_allowed(repo, "python {g} --clear {d}".format(g=fwd(SCRIPTS / "autopilot_guard.py"), d=fwd(deep)))
+    assert clear_cli(nested)[0] == 0 and clear_cli(deep)[0] == 0  # chạy thật --clear từng thư mục
+    assert_allowed(repo, "rm -rf .tmp/livetest")
+    assert_allowed(repo, "rm -rf .tmp/wrap")
+    assert_allowed(repo, "rm -rf .tmp/live*")
+
+
+def test_guard_tmp_cleanup_walk_limits_fail_closed(tmp_path, monkeypatch):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    too_deep = repo / ".tmp" / "d" / "1" / "2" / "3" / "4" / "5" / "6" / "7"
+    too_deep.mkdir(parents=True)
+    assert_blocked(repo, "rm -rf .tmp/d", "irreversible_delete")  # sâu quá 6 cấp: không kiểm hết được → coi như có
+    shallow = repo / ".tmp" / "shallow" / "1" / "2"
+    shallow.mkdir(parents=True)
+    (shallow / ".git").mkdir()  # .git bị bỏ qua khi dò
+    assert_allowed(repo, "rm -rf .tmp/shallow")
+    real_walk = os.walk
+
+    def failing_walk(top, **kwargs):
+        if kwargs.get("onerror"):
+            kwargs["onerror"](OSError("denied"))
+        return iter(())
+
+    monkeypatch.setattr(os, "walk", failing_walk)
+    assert_blocked(repo, "rm -rf .tmp/shallow", "irreversible_delete")
+    monkeypatch.setattr(os, "walk", real_walk)

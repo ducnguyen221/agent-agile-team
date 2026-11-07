@@ -5,13 +5,13 @@
 # stdout/stderr của guard). Guard vắng, Python không có, hoặc mọi ứng viên trả mã khác (lỗi cú pháp, import hỏng, traceback) thì KHÔNG
 # trả mã đó mà tự dò file dấu `.tmp/autopilot.json`
 # (không phân biệt hoa thường) đi lên từ $CLAUDE_PROJECT_DIR và $PWD tới thư mục có `.git`: có thì chặn (thoát 2), không thì cho qua (thoát 0).
-# `--clear <thư mục>` không đọc stdin. Biến AUTOPILOT_GUARD_PATH (chỉ dùng trong test) thay đường tới guard.
+# `--clear <thư mục>` không đọc stdin. Guard luôn là autopilot_guard.py cạnh chính launcher (không có biến môi trường đổi đường).
 # Nhánh dự phòng chỉ dùng lệnh dựng sẵn của sh, nên chạy được cả khi PATH rỗng.
 
 here=${0%/*}
 [ "$here" = "$0" ] && here=.
 here=$(cd "$here" 2>/dev/null && pwd) || here=.
-guard=${AUTOPILOT_GUARD_PATH:-$here/autopilot_guard.py}
+guard=$here/autopilot_guard.py
 
 has_marker() {
   cur=${1%/}

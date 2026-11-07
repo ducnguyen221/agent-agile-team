@@ -78,6 +78,7 @@ FIND_EXEC = frozenset({"-exec", "-execdir", "-ok", "-okdir"})
 UNSAFE_PATH_CHARS = set(",$%`~{}()<>!^\"'\n\r;|&")
 GLOB_CHARS = set("*?[")
 MAX_UNWRAP = 3
+MAX_WALK_DEPTH = 6  # độ sâu tối đa khi dò file dấu lồng trong đích dọn .tmp/
 NESTED = "nested"  # đơn vị chặn riêng: lồng shell quá sâu, không phân tích được
 MARKER = "marker"  # đơn vị chặn riêng: đụng tới chính file dấu
 UNRESOLVED = "unresolved"  # đơn vị chặn riêng: chuỗi đưa vào shell có git/gh nhưng không phân tích được
@@ -424,6 +425,28 @@ def tmp_target_ok(target: str, ctx: Context) -> bool:
     return any(_tmp_target_under(target, ctx, r) for r in dict.fromkeys(roots))
 
 
+def _holds_marker_below(path: str) -> bool:
+    """`path` (thư mục) hoặc thư mục con của nó (sâu tối đa MAX_WALK_DEPTH, bỏ `.git`) chứa `.tmp/autopilot.json` (tên không phân biệt hoa
+    thường)? Quá giới hạn độ sâu hay lỗi đọc → coi như có (chặn)."""
+    if not os.path.isdir(path):
+        return False
+    failed = [False]
+
+    def onerror(_exc: OSError) -> None:
+        failed[0] = True
+
+    base_depth = path.rstrip(os.sep).count(os.sep)
+    for dirpath, dirnames, filenames in os.walk(path, onerror=onerror):
+        if failed[0]:
+            return True
+        dirnames[:] = [d for d in dirnames if d.lower() != ".git"]
+        if os.path.basename(dirpath).lower() == MARKER_PARTS[0] and any(f.lower() == MARKER_PARTS[1] for f in filenames):
+            return True
+        if dirpath.rstrip(os.sep).count(os.sep) - base_depth >= MAX_WALK_DEPTH and dirnames:
+            return True
+    return failed[0]
+
+
 def _tmp_target_under(target: str, ctx: Context, root: str) -> bool:
     if not target or UNSAFE_PATH_CHARS & set(target):
         return False
@@ -449,7 +472,7 @@ def _tmp_target_under(target: str, ctx: Context, root: str) -> bool:
     inside = real_tmp + os.sep
     if not is_glob:
         real = os.path.normcase(os.path.realpath(full))
-        return real != marker_real and real.startswith(inside)
+        return real != marker_real and real.startswith(inside) and not _holds_marker_below(real)
     parent = os.path.dirname(full)
     real_parent = os.path.normcase(os.path.realpath(parent))
     if real_parent != real_tmp and not real_parent.startswith(inside):
@@ -462,7 +485,7 @@ def _tmp_target_under(target: str, ctx: Context, root: str) -> bool:
     for entry in names:
         if fnmatch.fnmatchcase(entry.lower(), pattern):
             real = os.path.normcase(os.path.realpath(os.path.join(parent, entry)))
-            if entry.lower() == name or real == marker_real or not real.startswith(inside):
+            if entry.lower() == name or real == marker_real or not real.startswith(inside) or _holds_marker_below(real):
                 return False
     return True
 
@@ -651,17 +674,51 @@ def _copy_destinations(tokens: list[str]) -> set[int]:
     return explicit or ({positional[-1]} if positional else set())
 
 
+def _heredoc_marks(line: str, quote: str) -> tuple[list["re.Match[str]"], str]:
+    """Các `<<`/`<<-` (không phải `<<<`) nằm NGOÀI nháy đơn/kép và ngoài comment `#` của một dòng; trả kèm trạng thái nháy
+    còn mở cuối dòng (chuỗi nhiều dòng)."""
+    marks: list["re.Match[str]"] = []
+    index = 0
+    while index < len(line):
+        char = line[index]
+        if quote:
+            if char == "\\" and quote == '"':
+                index += 2
+                continue
+            if char == quote:
+                quote = ""
+            index += 1
+        elif char in "'\"":
+            quote = char
+            index += 1
+        elif char == "\\":
+            index += 2
+        elif char == "#" and (index == 0 or line[index - 1].isspace()):
+            break
+        elif line.startswith("<<<", index):
+            index += 3
+        elif line.startswith("<<", index):
+            mark = HEREDOC.match(line, index)
+            marks.append(mark) if mark else None
+            index = mark.end() if mark else index + 2
+        else:
+            index += 1
+    return marks, quote
+
+
 def _strip_heredoc_bodies(text: str) -> str:
     """Thân heredoc đưa vào trình thông dịch không phải shell (`python -`, `node -`, `cat >`) là dữ liệu, không phân tích như lệnh;
-    đưa vào `bash`/`sh`/`pwsh`/eval (kể cả `cat <<EOF | bash`) thì giữ lại để xét như lệnh lồng."""
+    đưa vào `bash`/`sh`/`pwsh`/eval (kể cả `cat <<EOF | bash`) thì giữ lại để xét như lệnh lồng. Chỉ nhận `<<` ngoài nháy và comment;
+    heredoc không có dòng kết thúc khớp đúng nhãn thì giữ nguyên thân để phân tích."""
     lines = text.split("\n")
     out: list[str] = []
     index = 0
+    quote = ""
     while index < len(lines):
         line = lines[index]
         out.append(line)
         index += 1
-        marks = list(HEREDOC.finditer(line))
+        marks, quote = _heredoc_marks(line, quote)
         if not marks:
             continue
         stage, _ = _strip_prefixes(tokenize(SEPARATORS.split(line[:marks[0].start()])[-1]), Context(set(), "."))
@@ -670,13 +727,15 @@ def _strip_heredoc_bodies(text: str) -> str:
         for mark in marks:
             delimiter = mark.group(2) or mark.group(3) or mark.group(4)
             body: list[str] = []
+            closed = False
             while index < len(lines):
                 current = lines[index]
                 index += 1
                 if (current.lstrip("\t") if mark.group(1) else current).rstrip("\r") == delimiter:
+                    closed = True
                     break
                 body.append(current)
-            if reads_shell:
+            if reads_shell or not closed:
                 out.extend(body)
     return "\n".join(out)
 
