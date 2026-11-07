@@ -966,14 +966,14 @@ def test_launcher_is_posix_sh_text():
 # --- hooks/hooks.json ---
 
 def test_hooks_json_registers_guard():
+    """Hook sống máy-rộng: đổi lệnh hay matcher ở `hooks/hooks.json` thì cập nhật test này cùng commit."""
     config = json.loads((REPO / "hooks" / "hooks.json").read_text(encoding="utf-8"))
     entries = config["hooks"]["PreToolUse"]
-    assert len(entries) == 1
-    matcher = entries[0]["matcher"].split("|")
-    assert "Bash" in matcher and "PowerShell" in matcher
-    hook = entries[0]["hooks"][0]
-    assert hook["type"] == "command" and hook["onFailure"] == "block" and "--format claude" in hook["command"]
-    assert "scripts/autopilot_guard.py" in hook["command"] or "scripts/autopilot-hook.sh" in hook["command"]
-    for name in ("autopilot_guard.py", "autopilot-hook.sh"):
-        if "scripts/" + name in hook["command"]:
-            assert (REPO / "scripts" / name).is_file()
+    assert [e["matcher"] for e in entries] == ["Bash|PowerShell", "Write|Edit|MultiEdit|NotebookEdit"]
+    assert set(config["hooks"]) == {"PreToolUse"}
+    for entry in entries:
+        assert len(entry["hooks"]) == 1
+        hook = entry["hooks"][0]
+        assert hook["type"] == "command" and hook["timeout"] == 10 and hook["onFailure"] == "block"
+        assert hook["command"] == 'sh "${CLAUDE_PLUGIN_ROOT}/scripts/autopilot-hook.sh" --format claude'
+    assert (REPO / "scripts" / "autopilot-hook.sh").is_file() and (REPO / "scripts" / "autopilot_guard.py").is_file()
