@@ -71,6 +71,15 @@ Bảng dưới có 9 nhóm nguồn **tài liệu web** — không có SHA, nên 
 | Tài liệu chính thức của công cụ (`gh`, PostgreSQL, PgBouncer, golang-migrate, Kubernetes, Docker, Trivy, FastAPI, pytest, PyPA, uv, docs.python.org) | ý, không chép | phần bổ sung của skill kỹ thuật ở `TK11`/`TK13` (`github-ops`, `database-migrations`, `deployment`, `fastapi`, `postgres`, `python`, `worktrees`, `react`, `frontend`, `e2e-testing`) | 2026-10-04 | khi sửa reference tương ứng; nguồn ghi ở mục Nguồn từng file |
 | Bài kỹ thuật của nhà cung cấp (Azure Architecture Center, AWS Builders' Library, Amazon SQS) | ý, không chép | `error-handling`, `deployment` | 2026-10-04 | khi sửa reference tương ứng |
 
+### Tài liệu nội bộ của dự án dùng repo
+
+Bảng dưới có 1 nguồn **tài liệu nội bộ** — tài liệu của dự án người dùng, không công khai, không có SHA trong repo này; chỉ
+lấy ý, không chép văn bản; cột kiểm ghi ngày đọc và kích thước bản đã đọc.
+
+| Nguồn | Vai trò | Nhận nội dung (phần nguồn → file đích) | Đọc gần nhất | Kiểm |
+|---|---|---|---|---|
+| FineFood — tài liệu BA `BA_ARCHITECTURE_CONVENTIONS.md` ở thư mục `docs` của repo dự án FineFood (SPR-13) | ý, không chép | Phần I (ký hiệu, hai không gian) → `method/feature-expansion.md` mục 1, 2, 4 và `skills/id-convention/SKILL.md` mục 2 (đoạn mã sản phẩm) · Phần I.2 (tên phiên) → mục 6 · Phần II (vai, model) → mục 3 bảng nhân vật · Phần III.1 (thứ tự, phụ thuộc) → mục 5 · Phần III.2 (REPORT bốn phần) → mục 3, kết luận giữ · Phần IV (ma trận) → mục 3 điểm 10, 12, 13 · Phần V → không lấy · mọi điểm lệch → mục 8 (đề nghị, chưa gửi) | 2026-11-07 · 184 dòng, 16 394 byte | khi FineFood sửa tài liệu BA — số dòng `BA:<dòng>` ở `method/feature-expansion.md` sẽ lệch |
+
 ## SPR-10 — ba nguồn thêm cho `rag-pageindex`, `gcp-devops`, `gcp-incident-response`, chốt 2026-10-26
 
 SHA đầy đủ đo bằng `gh api` (chỉ đọc metadata, không tải code). `VectifyAI/PageIndex`: mốc baseline của môi trường,
