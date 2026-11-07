@@ -53,9 +53,11 @@ claude --plugin-dir "$HOME\agent-agile-team"              # Windows PowerShell
 ```
 
 **Hook autopilot.** Plugin kèm `hooks/hooks.json`: hook `PreToolUse` cho `Bash|PowerShell` chạy
-`scripts/autopilot_guard.py --format claude`. Hook chỉ chặn khi có `.tmp/autopilot.json` (dấu autopilot đang bật);
-không có file đó thì thoát 0 và không làm gì. Cần Python trong `PATH`. Codex và Antigravity chưa có hook này:
-xem [method/autopilot.md](../../method/autopilot.md).
+`scripts/autopilot-hook.sh --format claude` (launcher, chạy bằng `sh`; Claude Code trên Windows dùng Git Bash, nên máy Windows cần Git for Windows).
+Launcher gọi `scripts/autopilot_guard.py` bằng `python3`, `python` hoặc `py -3` (cần Python 3.9 trở lên nếu có). Hook chỉ chặn khi có
+`.tmp/autopilot.json` (dấu autopilot đang bật); không có file đó thì thoát 0 và không làm gì. Máy không có Python dùng được, hoặc
+guard vắng hay lỗi: launcher tự dò file dấu bằng `sh` và chỉ chặn khi có file dấu, nên không làm hỏng công cụ shell của dự án chưa bật
+autopilot. Codex và Antigravity chưa có hook này: xem [method/autopilot.md](../../method/autopilot.md).
 
 ## 3. Kiểm, cập nhật, gỡ
 

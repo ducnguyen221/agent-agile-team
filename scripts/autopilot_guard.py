@@ -18,6 +18,8 @@ nó) và công cụ ghi file (`Write`, `Edit`, `MultiEdit`, `NotebookEdit`, `app
 Tên mục lấy từ `check.AUTOPILOT_EXCLUSIONS` (một nguồn; test ghim đúng 13 mục). Không gọi tiến trình con; nhánh hiện tại đọc từ
 file `.git/HEAD` của thư mục mà lệnh git thật sự chạy (theo `cd`, `git -C`; không xác định được thì coi là nhánh chính).
 
+Không phân tích chuỗi chương trình tuỳ ý (`awk 'BEGIN{system(…)}'`, `perl -e`, `ruby -e`, `node -e`, `python -c`): giới hạn đã biết.
+
 GIỚI HẠN ĐÃ BIẾT: mẫu là danh sách đóng, tách lệnh thô theo `&&`, `||`, `;`, `|`, `&`, xuống dòng, ngoặc và dấu huyền, không hiểu
 dấu nháy (chấp nhận chặn nhầm). Chỉ mở lớp `bash -c`/`pwsh -Command`/`cmd /c` trực tiếp, tối đa MAX_UNWRAP lớp (quá thì chặn).
 Đối thủ cố ý (biến môi trường, script, alias git, `python -c`, thoát ký tự `g\\it`, ghép chuỗi tên lệnh) lách được; đây là lưới
@@ -90,6 +92,9 @@ REDIRECT_INSIDE = re.compile(r">>?\|?")
 LINE_CONTINUATION = re.compile(r"[\\`]\r?\n")
 PIPE = re.compile(r"(?<!\|)\|(?!\|)")
 EVAL_COMMANDS = frozenset({"eval", "iex", "invoke-expression"})
+COPY_COMMANDS = frozenset({"cp", "copy", "copy-item", "cpi"})  # file dấu chỉ là NGUỒN thì được chép (điều phối chép vào thư mục phiên con)
+HEREDOC = re.compile(r"<<(?!<)(-?)\s*(?:'([^']+)'|\"([^\"]+)\"|\\?([A-Za-z_][\w.-]*))")
+PIPE_INTO_SHELL = re.compile(r"\|\s*(?:sudo\s+)?(?:bash|sh|zsh|dash|ksh|pwsh|powershell)\b")
 READ_ONLY_COMMANDS = frozenset({
     "cat", "type", "get-content", "gc", "ls", "dir", "get-childitem", "gci", "stat", "head", "tail", "less", "more", "wc", "grep", "egrep",
     "fgrep", "rg", "select-string", "sls", "file", "diff", "cmp", "sha256sum", "sha1sum", "md5sum", "get-item", "gi", "test-path", "findstr",
@@ -360,6 +365,9 @@ def _git_item(args: list[str], ctx: Context, redirected: bool) -> str | None:
         return "irreversible_delete" if any(_cluster(a, "D") for a in rest) or (force and delete) else None
     if sub == "clean":
         return "irreversible_delete" if "--force" in rest or any(_cluster(a, "f") for a in rest) else None
+    if sub == "stash":  # `-u`/`--include-untracked`/`-a`/`--all` cất cả file chưa theo dõi: file dấu (trong .tmp/) bị lấy đi
+        stashes_untracked = "--include-untracked" in rest or "--all" in rest or any(_cluster(a, "ua") for a in rest)
+        return MARKER if stashes_untracked else None
     if sub == "worktree":
         forced = "--force" in rest or any(_cluster(a, "f") for a in rest)
         return "irreversible_delete" if rest[:1] == ["remove"] and forced else None
@@ -411,8 +419,13 @@ def _delete_parts(name: str, args: list[str]) -> tuple[bool, list[str]]:
 def tmp_target_ok(target: str, ctx: Context) -> bool:
     """Đích xoá nằm thật sự dưới `<gốc repo>/.tmp/` (ngoại lệ dọn tạm, method/autopilot.md mục 5). Glob ở thành phần cuối được
     mở rộng bằng `os.listdir`: mỗi mục khớp phải nằm thật trong `.tmp/` (theo `realpath`) và không phải file dấu."""
-    root = ctx.root
-    if not root or not target or UNSAFE_PATH_CHARS & set(target):
+    marker_root = os.path.dirname(os.path.dirname(ctx.marker)) if ctx.marker else None
+    roots = [r for r in (ctx.root, marker_root if marker_root and _has_git(marker_root) else None) if r]
+    return any(_tmp_target_under(target, ctx, r) for r in dict.fromkeys(roots))
+
+
+def _tmp_target_under(target: str, ctx: Context, root: str) -> bool:
+    if not target or UNSAFE_PATH_CHARS & set(target):
         return False
     norm = target.replace("\\", "/")
     if ".." in norm.split("/"):
@@ -518,6 +531,8 @@ def _marker_ref(text: str, ctx: Context) -> bool:
     Đã có thao tác đổi thư mục thì không giải được đường tương đối: so theo tên (đóng an toàn)."""
     if not text or ctx.marker is None or DYNAMIC_CHARS & set(text):
         return False
+    if text.startswith("~"):
+        text = os.path.expanduser(text)
     norm = text.replace("\\", "/")
     name = os.path.basename(ctx.marker).lower()
     is_glob = bool(GLOB_CHARS & set(os.path.basename(norm.rstrip("/"))))
@@ -546,6 +561,41 @@ def _marker_ref(text: str, ctx: Context) -> bool:
     return False
 
 
+def _covers_marker(text: str, ctx: Context) -> bool:
+    """Điểm bắt đầu của `find` là file dấu, `.tmp/` bao nó hay một thư mục tổ tiên của nó? Đã đổi thư mục thì `.`/`..` cũng tính."""
+    if ctx.marker is None or not text or DYNAMIC_CHARS & set(text):
+        return False
+    if _marker_ref(text, ctx):
+        return True
+    norm = text.replace("\\", "/")
+    if ctx.cwd_changed:
+        return norm.strip("/") in ("", ".", "..")
+    full = os.path.normpath(norm if os.path.isabs(norm) else os.path.join(ctx.cwd, norm)).lower()
+    return os.path.normpath(ctx.marker).lower().startswith(full.rstrip(os.sep) + os.sep)
+
+
+def _find_item(args: list[str], ctx: Context, depth: int) -> str | None:
+    if "-delete" in args:
+        return "irreversible_delete"
+    starts: list[str] = []
+    for arg in args:
+        if arg.startswith("-") or arg in ("(", ")", "!", ","):
+            break
+        starts.append(arg)
+    for index, arg in enumerate(args):
+        if arg in FIND_EXEC:
+            rest = args[index + 1:]
+            item = _segment_item(rest, ctx, depth)
+            if item:
+                return item
+            stripped, _ = _strip_prefixes(list(rest), Context(set(), ctx.cwd))
+            if stripped and not _read_only(_exe_name(stripped[0]), stripped[1:], ctx):
+                if any(_covers_marker(t, ctx) for t in (starts or ["."])):
+                    return MARKER
+            return None
+    return None
+
+
 def _read_only(name: str, args: list[str], ctx: Context) -> bool:
     if name in READ_ONLY_COMMANDS:
         return True
@@ -561,7 +611,7 @@ def _marker_item(tokens: list[str], ctx: Context) -> str | None:
     if ctx.marker is None or not tokens:
         return None
     name = _exe_name(tokens[0])
-    refs = False
+    ref_at: list[int] = []
     index = 0
     while index < len(tokens):
         token = tokens[index]
@@ -577,9 +627,58 @@ def _marker_item(tokens: list[str], ctx: Context) -> str | None:
             if _marker_ref(token[REDIRECT_INSIDE.search(token).end():], ctx):
                 return MARKER
         elif index > 0 and not token.startswith("<") and _marker_ref(token, ctx):
-            refs = True
+            ref_at.append(index)
         index += 1
-    return MARKER if refs and not _read_only(name, tokens[1:], ctx) else None
+    if name in COPY_COMMANDS:
+        ref_at = [i for i in ref_at if i in _copy_destinations(tokens)]
+    return MARKER if ref_at and not _read_only(name, tokens[1:], ctx) else None
+
+
+def _copy_destinations(tokens: list[str]) -> set[int]:
+    """Vị trí token là ĐÍCH của cp/Copy-Item: giá trị sau `-Destination`/`-t`/`--target-directory`, không thì đối số vị trí cuối."""
+    explicit: set[int] = set()
+    positional: list[int] = []
+    for index in range(1, len(tokens)):
+        token = tokens[index]
+        low = token.lower()
+        before = tokens[index - 1].lower() if index > 1 else ""
+        if before in ("-t", "--target-directory") or re.fullmatch(r"-dest[a-z]*", before):
+            explicit.add(index)
+        elif low.startswith("--target-directory="):
+            explicit.add(index)
+        elif not token.startswith("-"):
+            positional.append(index)
+    return explicit or ({positional[-1]} if positional else set())
+
+
+def _strip_heredoc_bodies(text: str) -> str:
+    """Thân heredoc đưa vào trình thông dịch không phải shell (`python -`, `node -`, `cat >`) là dữ liệu, không phân tích như lệnh;
+    đưa vào `bash`/`sh`/`pwsh`/eval (kể cả `cat <<EOF | bash`) thì giữ lại để xét như lệnh lồng."""
+    lines = text.split("\n")
+    out: list[str] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        out.append(line)
+        index += 1
+        marks = list(HEREDOC.finditer(line))
+        if not marks:
+            continue
+        stage, _ = _strip_prefixes(tokenize(SEPARATORS.split(line[:marks[0].start()])[-1]), Context(set(), "."))
+        reads_shell = bool(stage) and _exe_name(stage[0]) in SHELL_WRAPPERS | EVAL_COMMANDS
+        reads_shell = reads_shell or bool(PIPE_INTO_SHELL.search(line[marks[-1].end():]))
+        for mark in marks:
+            delimiter = mark.group(2) or mark.group(3) or mark.group(4)
+            body: list[str] = []
+            while index < len(lines):
+                current = lines[index]
+                index += 1
+                if (current.lstrip("\t") if mark.group(1) else current).rstrip("\r") == delimiter:
+                    break
+                body.append(current)
+            if reads_shell:
+                out.extend(body)
+    return "\n".join(out)
 
 
 def _segment_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
@@ -640,12 +739,7 @@ def _command_item(tokens: list[str], redirected: bool, ctx: Context, depth: int)
     if name == "gh":
         return _gh_item(args)
     if name == "find":
-        if "-delete" in args:
-            return "irreversible_delete"
-        for index, arg in enumerate(args):
-            if arg in FIND_EXEC:
-                return _segment_item(args[index + 1:], ctx, depth)
-        return None
+        return _find_item(args, ctx, depth)
     if name in DELETE_COMMANDS:
         recursive, targets = _delete_parts(name, args)
         if not recursive:
@@ -658,7 +752,7 @@ def _command_item(tokens: list[str], redirected: bool, ctx: Context, depth: int)
 
 def _analyze(text: str, ctx: Context, depth: int = 0) -> str | None:
     """Mục loại đầu tiên mà `text` (có thể là lệnh ghép) vi phạm và đang bật; None nếu không."""
-    text = LINE_CONTINUATION.sub(" ", text)  # `git \` + xuống dòng, PowerShell dấu huyền + xuống dòng: nối trước khi tách
+    text = _strip_heredoc_bodies(LINE_CONTINUATION.sub(" ", text))  # nối dòng `git \` + xuống dòng; bỏ thân heredoc của trình không phải shell
     item = _pipe_to_shell(text, ctx, depth)
     if item:
         return item
@@ -744,11 +838,29 @@ class _Failed(Exception):
         self.label = label
 
 
+def _path_candidates(args: list[str], base: str) -> list[str]:
+    """Đối số trông như đường (có dấu `/` `\\`, bắt đầu bằng `.` hay `~`) của lệnh không chỉ-đọc, kể cả đích chuyển hướng: để dò file dấu."""
+    found: list[str] = []
+    for arg in args:
+        redirect = REDIRECT.match(arg)
+        text = redirect.group(1) if redirect else arg
+        if not text or text.startswith("-") or DYNAMIC_CHARS & set(text):
+            continue
+        if text.startswith("~"):
+            text = os.path.expanduser(text)
+        if "/" in text or "\\" in text or text.startswith(".") or os.path.isabs(text):
+            resolved = _resolve_dir(base, text)
+            if resolved:
+                found.append(resolved)
+    return found
+
+
 def _extra_dirs(text: str, base: str, depth: int = 0) -> list[str]:
-    """Thư mục mà lệnh trỏ tới (`git -C <dir>`, `cd <dir>`) để dò thêm file dấu khi lệnh chạy từ ngoài repo."""
+    """Thư mục và đường mà lệnh trỏ tới (`git -C <dir>`, `cd <dir>`, đối số đường của lệnh không chỉ-đọc) để dò thêm file dấu khi lệnh chạy
+    từ ngoài cây có file dấu: đi lên từ chính đường đó tới thư mục có `.git`."""
     scratch = Context(set(), base)
     found: list[str | None] = []
-    for segment in SEPARATORS.split(LINE_CONTINUATION.sub(" ", text)):
+    for segment in SEPARATORS.split(_strip_heredoc_bodies(LINE_CONTINUATION.sub(" ", text))):
         tokens, _ = _strip_prefixes(tokenize(segment), scratch)
         if not tokens:
             continue
@@ -766,6 +878,13 @@ def _extra_dirs(text: str, base: str, depth: int = 0) -> list[str]:
                 if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", arg):
                     found.extend(_extra_dirs(" ".join(args[index + 1:]), base, depth + 1))
                     break
+        if name != "git" and name not in CD_COMMANDS and (name == "find" or not _read_only(name, args, scratch)):
+            found.extend(_path_candidates(args, base))
+        if tokens and any(REDIRECT.match(t) for t in tokens):  # `lệnh > đích` kể cả lệnh chỉ-đọc như echo
+            found.extend(_path_candidates([t for t in tokens if REDIRECT.match(t)], base))
+            for index, token in enumerate(tokens[:-1]):
+                if REDIRECT.match(token) and not REDIRECT.match(token).group(1):
+                    found.extend(_path_candidates([tokens[index + 1]], base))
     return [d for d in found if d]
 
 
@@ -811,9 +930,21 @@ def _evaluate(raw: str) -> str | None:
         dirs = _event_dirs(payload)
         name = _tool_name(payload)
         command_dir, session_dir = dirs
-        marker = find_marker(command_dir) or (find_marker(session_dir) if session_dir != command_dir else None)
+        markers: list[str] = []
+
+        def add(found: str | None) -> None:
+            if found and all(os.path.normcase(found) != os.path.normcase(m) for m in markers):
+                markers.append(found)
+
+        add(find_marker(command_dir))
+        if session_dir != command_dir:
+            add(find_marker(session_dir))
         if name is not None and name.lower() in WRITE_TOOLS:
-            if marker is not None and any(_is_marker_path(p, command_dir, marker) for p in _write_paths(payload)):
+            paths = _write_paths(payload)
+            for path in paths:  # đường tuyệt đối vào cây khác: dò file dấu đi lên từ chính đường đó
+                add(find_marker(os.path.normpath(os.path.expanduser(path) if path.startswith("~") else (
+                    path if os.path.isabs(path) else os.path.join(command_dir, path)))))
+            if any(_is_marker_path(p, command_dir, m) for m in markers for p in paths):
                 return reason_for(MARKER, False)
             return None
         if name is not None and name.lower() not in SHELL_TOOLS:
@@ -822,15 +953,14 @@ def _evaluate(raw: str) -> str | None:
         if not commands:
             return None
         for text in commands:
-            if marker is None:
-                marker = next((m for d in _extra_dirs(text, command_dir) for m in [find_marker(d)] if m), None)
-        if marker is None:
-            return None
-        active, broken = load_active(marker)
-        for text in commands:
-            item = _analyze(text, Context(active, command_dir, marker))
-            if item:
-                return reason_for(item, broken)
+            for directory in _extra_dirs(text, command_dir):
+                add(find_marker(directory))
+        for marker in markers:
+            active, broken = load_active(marker)
+            for text in commands:
+                item = _analyze(text, Context(active, command_dir, marker))
+                if item:
+                    return reason_for(item, broken)
         return None
     except Exception as exc:
         raise _Failed(dirs, type(exc).__name__) from exc
@@ -905,7 +1035,7 @@ if __name__ == "__main__":  # pragma: no cover
         for stream in (sys.stdin, sys.stdout, sys.stderr):
             if hasattr(stream, "reconfigure"):
                 stream.reconfigure(encoding="utf-8")
-        code = main()
+        code = _last_resort(sys.argv) if sys.version_info < (3, 9) else main()  # Python quá cũ: chỉ dò file dấu, không phân tích
     except SystemExit:
         raise
     except BaseException:  # noqa: BLE001

@@ -1,22 +1,17 @@
 #!/bin/sh
 # Launcher cho hook autopilot (scripts/autopilot_guard.py): POSIX sh, không cần Python để chạy.
-# Thử lần lượt `python3`, `python`, `py -3`, mỗi cái phải là Python >= 3.9; cái đầu tiên đạt thì `exec` nó với
-# autopilot_guard.py và các tham số của launcher (stdin đi thẳng). Không có cái nào đạt: tự dò file dấu `.tmp/autopilot.json`
-# (không phân biệt hoa thường) đi lên từ $CLAUDE_PROJECT_DIR và $PWD tới thư mục có `.git`; có thì chặn (thoát 2), không thì cho qua (thoát 0).
-# Chỉ dùng lệnh dựng sẵn của sh ở nhánh dự phòng, nên chạy được cả khi PATH rỗng.
+# Đọc sự kiện ở stdin một lần vào biến, rồi gọi thẳng guard bằng `python3`, `python`, `py -3` theo thứ tự (không dò phiên bản bằng tiến trình
+# riêng, để mỗi lệnh chỉ tốn một lần khởi động Python; guard tự xử khi Python quá cũ). Guard trả 0 hoặc 2 thì trả nguyên mã (kèm
+# stdout/stderr của guard). Guard vắng, Python không có, hoặc mọi ứng viên trả mã khác (lỗi cú pháp, import hỏng, traceback) thì KHÔNG
+# trả mã đó mà tự dò file dấu `.tmp/autopilot.json`
+# (không phân biệt hoa thường) đi lên từ $CLAUDE_PROJECT_DIR và $PWD tới thư mục có `.git`: có thì chặn (thoát 2), không thì cho qua (thoát 0).
+# `--clear <thư mục>` không đọc stdin. Biến AUTOPILOT_GUARD_PATH (chỉ dùng trong test) thay đường tới guard.
+# Nhánh dự phòng chỉ dùng lệnh dựng sẵn của sh, nên chạy được cả khi PATH rỗng.
 
 here=${0%/*}
 [ "$here" = "$0" ] && here=.
 here=$(cd "$here" 2>/dev/null && pwd) || here=.
-guard="$here/autopilot_guard.py"
-
-for candidate in "python3" "python" "py -3"; do
-  # shellcheck disable=SC2086 -- `py -3` cần tách từ
-  if $candidate -c 'import sys; sys.exit(0 if sys.version_info >= (3, 9) else 1)' >/dev/null 2>&1; then
-    # shellcheck disable=SC2086
-    exec $candidate "$guard" "$@"
-  fi
-done
+guard=${AUTOPILOT_GUARD_PATH:-$here/autopilot_guard.py}
 
 has_marker() {
   cur=${1%/}
@@ -45,8 +40,41 @@ has_marker() {
   done
 }
 
+reason="autopilot: không chạy được Python để kiểm lệnh — chặn vì đang bật autopilot"
+
+if [ -f "$guard" ]; then
+  stdin_needed=1
+  [ "$1" = "--clear" ] && stdin_needed=0
+  event=
+  if [ "$stdin_needed" = 1 ]; then
+    while IFS= read -r line || [ -n "$line" ]; do
+      event="$event$line
+"
+    done
+  fi
+  for candidate in "python3" "python" "py -3"; do
+    found=$(command -v "${candidate%% *}" 2>/dev/null) || continue
+    case $found in
+      *[Ww]indows[Aa]pps*) continue ;; # stub của Microsoft Store (không phải Python thật, mỗi lần gọi tốn ~0,2 s)
+    esac
+    if [ "$stdin_needed" = 1 ]; then
+      # shellcheck disable=SC2086 -- `py -3` cần tách từ
+      printf '%s' "$event" | $candidate "$guard" "$@"
+    else
+      # shellcheck disable=SC2086
+      $candidate "$guard" "$@" </dev/null
+    fi
+    code=$?
+    if [ "$code" = 0 ] || [ "$code" = 2 ]; then
+      exit "$code"
+    fi
+    # 126/127: không chạy được lệnh; mã khác (traceback, lỗi cú pháp, Python quá cũ, stub của Store): thử ứng viên kế rồi mới dò bằng sh
+    [ "$code" = 126 ] || [ "$code" = 127 ] || reason="autopilot: guard lỗi — chặn vì đang bật autopilot"
+  done
+fi
+
 if has_marker "$CLAUDE_PROJECT_DIR" || has_marker "$PWD"; then
-  echo "autopilot: không chạy được Python để kiểm lệnh — chặn vì đang bật autopilot" >&2
+  echo "$reason" >&2
   exit 2
 fi
 exit 0

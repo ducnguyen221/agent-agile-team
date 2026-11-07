@@ -898,7 +898,7 @@ def test_guard_git_c_from_outside_repo_finds_marker(tmp_path):
 # --- launcher ---
 
 SH = shutil.which("sh")
-LAUNCHER = SCRIPTS / "autopilot-hook.sh"
+LAUNCHER = Path(os.environ.get("AUTOPILOT_LAUNCHER_PATH", str(SCRIPTS / "autopilot-hook.sh")))
 
 
 def run_launcher(cwd, payload, path_dirs, extra_env=None):
@@ -960,7 +960,7 @@ def test_launcher_with_python_delegates_to_guard(tmp_path, bare_sh_ok):
 def test_launcher_is_posix_sh_text():
     text = LAUNCHER.read_bytes().decode("utf-8")
     assert text.startswith("#!/bin/sh\n") and "\r" not in text
-    assert "python3" in text and "sys.version_info >= (3, 9)" in text and "exit 2" in text
+    assert "python3" in text and "py -3" in text and "exit 2" in text and "has_marker" in text
 
 
 # --- hooks/hooks.json ---
@@ -1079,3 +1079,204 @@ def test_guard_still_blocks_every_other_marker_removal(tmp_path):
     for cmd in ("rm {d}/.tmp/autopilot.json", "rm -rf {d}/.tmp", "Remove-Item {d}/.tmp/autopilot.json", "mv {d}/.tmp/autopilot.json {d}/x"):
         rc, _, err = run("claude", claude(cmd.format(d=fwd(repo)), repo))
         assert rc == 2, cmd
+
+
+# ===================== TK8 vòng sửa 2: launcher dự phòng, find, đường tuyệt đối từ ngoài, cp nguồn, heredoc, stash =====================
+
+@pytest.fixture
+def outside(tmp_path):
+    folder = tmp_path / "outside"
+    folder.mkdir()
+    return folder
+
+
+def test_launcher_guard_missing_falls_back_to_marker_probe(tmp_path, bare_sh_ok):
+    plain = make_repo(tmp_path / "p", branch="spr-12")
+    marked = make_repo(tmp_path / "m", branch="spr-12", marker=good_marker())
+    path = [bare_sh_ok, Path(sys.executable).parent]
+    gone = {"AUTOPILOT_GUARD_PATH": fwd(tmp_path / "no-such-guard.py")}
+    assert run_launcher(plain, claude("git push", plain), path, gone).returncode == 0
+    done = run_launcher(marked, claude("git push", marked), path, gone)
+    assert done.returncode == 2 and "autopilot:" in done.stderr
+
+
+def test_launcher_guard_broken_falls_back_to_marker_probe(tmp_path, bare_sh_ok):
+    broken = tmp_path / "broken_guard.py"
+    broken.write_text("def (:\n", encoding="utf-8")
+    plain = make_repo(tmp_path / "p", branch="spr-12")
+    marked = make_repo(tmp_path / "m", branch="spr-12", marker=good_marker())
+    path = [bare_sh_ok, Path(sys.executable).parent]
+    env = {"AUTOPILOT_GUARD_PATH": fwd(broken)}
+    if run_launcher(plain, claude("git status", plain), path).returncode != 0:
+        pytest.skip("launcher không thấy Python dùng được trong PATH thử")
+    assert run_launcher(plain, claude("git push", plain), path, env).returncode == 0
+    done = run_launcher(marked, claude("git push", marked), path, env)
+    assert done.returncode == 2 and "guard lỗi" in done.stderr
+    crash = tmp_path / "crash_guard.py"
+    crash.write_text("raise RuntimeError('boom')\n", encoding="utf-8")
+    assert run_launcher(plain, claude("git push", plain), path, {"AUTOPILOT_GUARD_PATH": fwd(crash)}).returncode == 0
+    assert run_launcher(marked, claude("git push", marked), path, {"AUTOPILOT_GUARD_PATH": fwd(crash)}).returncode == 2
+
+
+def test_launcher_passes_guard_exit_codes_and_stdout(tmp_path, bare_sh_ok):
+    fake = tmp_path / "fake_guard.py"
+    fake.write_text("import sys\nprint('seen', sys.stdin.read().strip())\nsys.exit(int(sys.argv[2]))\n", encoding="utf-8")
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    path = [bare_sh_ok, Path(sys.executable).parent]
+    import subprocess
+    env = {"PATH": os.pathsep.join(str(d) for d in path), "AUTOPILOT_GUARD_PATH": fwd(fake), "CLAUDE_PROJECT_DIR": fwd(repo)}
+    for key in ("SystemRoot", "SYSTEMROOT", "TEMP", "TMP", "HOME"):
+        if key in os.environ:
+            env[key] = os.environ[key]
+    done = subprocess.run([SH, fwd(LAUNCHER), "--format", "7"], input="EVENT", capture_output=True, text=True, encoding="utf-8", cwd=str(repo), env=env)
+    if "seen" not in done.stdout:
+        pytest.skip("launcher không thấy Python dùng được trong PATH thử")
+    assert "seen EVENT" in done.stdout  # sự kiện đi nguyên vẹn tới guard
+    ok = subprocess.run([SH, fwd(LAUNCHER), "--format", "0"], input="E", capture_output=True, text=True, encoding="utf-8", cwd=str(repo), env=env)
+    assert ok.returncode == 0
+    two = subprocess.run([SH, fwd(LAUNCHER), "--format", "2"], input="E", capture_output=True, text=True, encoding="utf-8", cwd=str(repo), env=env)
+    assert two.returncode == 2 and "guard lỗi" not in two.stderr  # mã 2 của guard trả nguyên, không thay bằng lý do dự phòng
+
+
+def test_launcher_clear_does_not_read_stdin(tmp_path, bare_sh_ok):
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    path = [bare_sh_ok, Path(sys.executable).parent]
+    import subprocess
+    env = {"PATH": os.pathsep.join(str(d) for d in path), "CLAUDE_PROJECT_DIR": fwd(repo)}
+    for key in ("SystemRoot", "SYSTEMROOT", "TEMP", "TMP", "HOME"):
+        if key in os.environ:
+            env[key] = os.environ[key]
+    done = subprocess.run([SH, fwd(LAUNCHER), "--clear", fwd(repo)], stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding="utf-8",
+                          cwd=str(tmp_path), env=env, timeout=30)
+    if "không chạy được Python" in done.stderr:
+        pytest.skip("launcher không thấy Python dùng được trong PATH thử")
+    assert done.returncode == 0 and not (repo / ".tmp" / "autopilot.json").exists()
+
+
+@pytest.mark.parametrize("cmd,item", [
+    ("find .tmp -type f -exec rm {} +", "marker"), ("find .tmp -exec rm {} \\;", "marker"), ("find . -exec rm {} +", "marker"),
+    ("find .tmp -execdir mv {} /tmp +", "marker"), ("find . -name '*.json' -exec sed -i s/a/b/ {} +", "marker"),
+    ("find .tmp -name '*.json' -delete", "irreversible_delete"),
+])
+def test_guard_find_exec_over_marker_dir(tmp_path, cmd, item):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+    assert (MARKER_REASON if item == "marker" else "'irreversible_delete'") in err
+
+
+def test_guard_find_exec_elsewhere_or_read_only_allowed(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    (repo / "build").mkdir()
+    for cmd in ("find build -exec rm {} +", "find . -name '*.py'", "find .tmp -exec grep level {} +", "find . -exec cat {} +",
+                "find .tmp -name x -print", "find build -type f -exec ls {} +"):
+        assert_allowed(repo, cmd)
+
+
+def test_guard_absolute_paths_from_outside_the_tree(tmp_path, outside):
+    """RF12: sự kiện có cwd ngoài cây có file dấu; đường tuyệt đối/tương đối vào cây đó vẫn bị bảo vệ."""
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    r, rel = fwd(repo), fwd(os.path.relpath(repo, outside))
+    for cmd in ("rm {r}/.tmp/autopilot.json", "rm -f {r}/.tmp/*", "rm -f {rel}/.tmp/autopilot.json", "rm -f '{r}/.tmp/AUTOPILOT.JSON'",
+                "mv {r}/.tmp/autopilot.json {r}/x", "mv {r}/.tmp {r}/old", "mv {rel}/.tmp x", "Remove-Item {r}\\.tmp\\autopilot.json",
+                "echo x > {r}/.tmp/autopilot.json", "cp x {r}/.tmp/autopilot.json", "find {r}/.tmp -exec rm {{}} +",
+                "bash -c 'rm {r}/.tmp/autopilot.json'"):
+        rc, _, err = run("claude", claude(cmd.format(r=r, rel=rel), outside))
+        assert rc == 2 and MARKER_REASON in err, (cmd, err)
+    for cmd in ("rm -rf {r}", "rm -rf {rel}", "rm -rf {r}/build", "rm -rf {r}/.tmp", "git -C {r} reset --hard"):
+        rc, _, err = run("claude", claude(cmd.format(r=r, rel=rel), outside))
+        assert rc == 2 and "irreversible_delete" in err, (cmd, err)
+    # chỉ-đọc và cây khác không bị chặn
+    for cmd in ("cat {r}/.tmp/autopilot.json", "ls {r}/.tmp", "rm -f {o}/x.txt", "rm -rf {o}/y"):
+        assert_allowed(outside, cmd.format(r=r, o=fwd(outside)))
+    # dọn thư mục tạm bên trong .tmp của cây đó bằng đường tuyệt đối: cho qua (không đụng file dấu)
+    (repo / ".tmp" / "scratch").mkdir()
+    assert_allowed(outside, "rm -rf {r}/.tmp/scratch".format(r=r))
+    assert_allowed(outside, "echo x > {r}/.tmp/notes.txt".format(r=r))
+
+
+def test_guard_write_tool_absolute_path_from_outside(tmp_path, outside):
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    for target in (str(repo / ".tmp" / "autopilot.json"), fwd(os.path.relpath(repo / ".tmp" / "autopilot.json", outside))):
+        rc, _, err = run("claude", {"tool_name": "Write", "tool_input": {"file_path": target, "content": "{}"}, "cwd": str(outside)})
+        assert rc == 2 and MARKER_REASON in err, target
+    assert run("claude", {"tool_name": "Write", "tool_input": {"file_path": str(repo / "a.md")}, "cwd": str(outside)}) == (0, "", "")
+    # đích là cây không có file dấu (điều phối chép file dấu vào worktree mới): qua
+    fresh = tmp_path / "fresh"
+    (fresh / ".tmp").mkdir(parents=True)
+    assert run("claude", {"tool_name": "Write", "tool_input": {"file_path": str(fresh / ".tmp" / "autopilot.json")}, "cwd": str(outside)}) == (0, "", "")
+
+
+def test_guard_clear_command_from_outside_still_allowed(tmp_path, outside):
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    cmd = "python {g} --clear {r}".format(g=fwd(SCRIPTS / "autopilot_guard.py"), r=fwd(repo))
+    assert_allowed(outside, cmd)
+
+
+def test_guard_cp_marker_as_source_only(tmp_path):
+    """N2 (TK8 re-review B): điều phối chép file dấu vào worktree phiên con (nguồn = file dấu) qua; đích = file dấu đang bật, mv: chặn."""
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    wt = tmp_path / "wt"
+    (wt / ".tmp").mkdir(parents=True)
+    r, w = fwd(repo), fwd(wt)
+    for cmd in ("cp {r}/.tmp/autopilot.json {w}/.tmp/autopilot.json", "cp .tmp/autopilot.json {w}/.tmp/", "cp -f .tmp/autopilot.json {w}/.tmp/x.json",
+                "Copy-Item .tmp/autopilot.json {w}/.tmp/autopilot.json", "Copy-Item -Path .tmp/autopilot.json -Destination {w}/.tmp/autopilot.json",
+                "cp -t {w}/.tmp .tmp/autopilot.json", "cp {r}/.tmp/autopilot.json {w}/.tmp/autopilot.json"):
+        assert_allowed(repo, cmd.format(r=r, w=w))
+    for cmd in ("cp {w}/.tmp/autopilot.json {r}/.tmp/autopilot.json", "cp x .tmp/autopilot.json", "cp .tmp/autopilot.json .tmp/autopilot.json",
+                "cp -t .tmp x", "Copy-Item x -Destination .tmp/autopilot.json", "Copy-Item x .tmp\\autopilot.json",
+                "mv .tmp/autopilot.json {w}/.tmp/autopilot.json", "Move-Item .tmp/autopilot.json {w}", "cp .tmp/autopilot.json x > .tmp/autopilot.json"):
+        assert_marker_blocked(repo, cmd.format(r=r, w=w))
+
+
+@pytest.mark.parametrize("cmd", [
+    "python - <<EOF\ngit push\nEOF", "python - <<'EOF'\nrm -rf build\ngit push\nEOF", "node - <<-EOF\n\tgit push\n\tEOF",
+    "cat > notes.txt <<EOF\ngit push\nEOF", "python3 - <<\"PY\"\nsubprocess.run(['git','push'])\ngit push\nPY",
+    "python - <<EOF\ngit push\nEOF\ngit status", "cat <<EOF\ngit push\nEOF", "tee out.txt <<EOF\ngit push\nEOF",
+])
+def test_guard_heredoc_body_for_non_shell_is_data(tmp_path, cmd):
+    """N3: thân heredoc cho python/node/cat… là dữ liệu, không bị coi là lệnh."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_allowed(repo, cmd)
+
+
+@pytest.mark.parametrize("cmd,item", [
+    ("bash <<EOF\ngit push\nEOF", "push"), ("sh <<'EOF'\nrm -rf build\nEOF", "irreversible_delete"), ("bash -s <<-EOF\n\tgit push\n\tEOF", "push"),
+    ("pwsh <<EOF\ngit push\nEOF", "push"), ("cat <<EOF | bash\ngit push\nEOF", "push"), ("python - <<EOF\nx\nEOF\ngit push", "push"),
+    ("cat > f <<EOF\nx\nEOF\ngit push", "push"), ("eval <<EOF\ngit push\nEOF", "push"),
+    ("python - <<EOF\nx\nEOF\ncat <<EOF2 > .tmp/autopilot.json\ny\nEOF2", "marker"),
+])
+def test_guard_heredoc_body_for_shell_still_analyzed(tmp_path, cmd, item):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+    assert (MARKER_REASON if item == "marker" else "'{}'".format(item)) in err
+
+
+@pytest.mark.parametrize("cmd", ["git stash -u", "git stash --include-untracked", "git stash -a", "git stash --all", "git stash push -u",
+                                 "git stash push --include-untracked -m x", "git stash -ua", "git -C . stash -u"])
+def test_guard_stash_with_untracked_blocked(tmp_path, cmd):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_marker_blocked(repo, cmd)
+
+
+def test_guard_stash_plain_allowed(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    for cmd in ("git stash", "git stash list", "git stash pop", "git stash push -m x", "git stash show -p"):
+        assert_allowed(repo, cmd)
+
+
+def test_guard_old_python_guard_falls_back(tmp_path, monkeypatch):
+    """Python < 3.9: không phân tích, chỉ dò file dấu từ thư mục tiến trình (hàm lưới cuối)."""
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    plain = tmp_path / "p"
+    plain.mkdir()
+    import contextlib
+    monkeypatch.chdir(repo)
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        assert autopilot_guard._last_resort(["--format", "claude"]) == 2
+    monkeypatch.chdir(plain)
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        assert autopilot_guard._last_resort(["--format", "claude"]) == 0
+        assert autopilot_guard._last_resort(["--format=antigravity"]) == 0
