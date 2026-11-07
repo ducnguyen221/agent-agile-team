@@ -567,8 +567,10 @@ def test_guard_merge_in_non_main_dir_allowed(tmp_path):
     sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
     other = make_repo(tmp_path / "o", branch="spr-13")
     rel = fwd(os.path.relpath(other, sprint))
-    for cmd in ("cd {o} && git merge x", "git -C {o} merge x", "git -C {o} pull", "cd {r} && git pull"):
+    for cmd in ("git -C {o} merge x", "git -C {o} pull"):
         assert_allowed(sprint, cmd.format(o=fwd(other), r=rel))
+    for cmd in ("cd {o} && git merge x", "cd {r} && git pull"):  # đổi thư mục rồi gộp: chặn nhầm có chủ đích
+        assert_blocked(sprint, cmd.format(o=fwd(other), r=rel), "main_merge")
     mainrepo = make_repo(tmp_path / "m", branch="main", marker=good_marker(WITHOUT_BRANCH))
     assert_allowed(mainrepo, "git -C {} merge x".format(fwd(other)))  # từ thư mục main, -C sang nhánh sprint → đọc nhánh sprint
 
@@ -662,8 +664,8 @@ def test_guard_cd_visited_dirs_all_count(tmp_path):
     feat = make_repo(tmp_path / "f", branch="spr-13")
     # đã từng vào thư mục main (kể cả trong subshell) rồi mới sang nhánh khác: đóng an toàn
     assert_blocked(sprint, "cd {m}; (cd {f}); git merge x".format(m=fwd(mainrepo), f=fwd(feat)), "main_merge")
-    # chỉ đi qua các thư mục không phải main: qua
-    assert_allowed(sprint, "cd {f} && git merge x".format(f=fwd(feat)))
+    # quy tắc vòng 3: có đổi thư mục thì coi là main, kể cả khi chỉ đi qua thư mục không phải main
+    assert_blocked(sprint, "cd {f} && git merge x".format(f=fwd(feat)), "main_merge")
     # git -C vẫn đọc nhánh của chính thư mục đó, bất kể cd trước
     main_marked = make_repo(tmp_path / "mm", branch="main", marker=good_marker(WITHOUT_BRANCH))
     assert_allowed(main_marked, "git -C {f} merge x".format(f=fwd(feat)))
@@ -682,11 +684,11 @@ def test_guard_other_directory_changers(tmp_path, cmd):
     assert_blocked(sprint, cmd.format(main=fwd(mainrepo)), "main_merge")
 
 
-def test_guard_directory_changers_to_non_main_allowed(tmp_path):
+def test_guard_directory_changers_to_non_main_still_blocked(tmp_path):
     sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
     feat = make_repo(tmp_path / "f", branch="spr-13")
     for cmd in ("Push-Location {f}; git merge x", "env -C {f} git merge x", "sudo -D {f} git merge x", "env --chdir={f} git pull"):
-        assert_allowed(sprint, cmd.format(f=fwd(feat)))
+        assert_blocked(sprint, cmd.format(f=fwd(feat)), "main_merge")
 
 
 def test_guard_pull_is_a_merge_when_branch_merge_local_listed(tmp_path):
@@ -701,3 +703,31 @@ def test_guard_pull_is_a_merge_when_branch_merge_local_listed(tmp_path):
     plus = make_repo(tmp_path / "p", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
     assert_allowed(plus, "git pull")  # +nhánh: gộp cục bộ ngoài nhánh chính được phép
     assert_allowed(default, "git fetch")
+
+
+# ===================== vòng sửa 3: mọi thao tác đổi thư mục trước merge/pull (không -C) = main =====================
+
+@pytest.mark.parametrize("cmd", [
+    "(cd sub); cd {rel}; git merge x",  # N2-RF1: cd tương đối tính từ cd trong subshell
+    "cd sub && cd {rel} && git merge x",
+    "env -C{rel} git merge x",  # N2-RF2: viết dính
+    "sudo -D{rel} git merge x",
+    "env --chdir{rel} git merge x", "env --ch={rel} git merge x", "sudo --chdir={rel} git pull",
+    "cd sub; git merge x", "Set-Location sub; git merge x", "sl sub; git pull", "chdir sub && git merge x", "pushd sub; git merge x",
+    "bash -c 'cd sub'; git merge x", "popd; git pull",
+])
+def test_guard_any_dir_change_before_merge_counts_as_main(tmp_path, cmd):
+    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
+    (sprint / "sub").mkdir()
+    mainrepo = make_repo(tmp_path / "m", branch="main")
+    assert_blocked(sprint, cmd.format(rel=fwd(os.path.relpath(mainrepo, sprint))), "main_merge")
+
+
+def test_guard_merge_without_dir_change_and_git_c_unchanged(tmp_path):
+    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
+    feat = make_repo(tmp_path / "f", branch="spr-13")
+    for cmd in ("git merge spr-12-tk3", "git pull", "git add -A && git commit -m x && git merge spr-12-tk3",
+                "git -C {f} merge x", "cd {f} && git -C {f} merge x", "git merge x && cd sub"):
+        assert_allowed(sprint, cmd.format(f=fwd(feat)))
+    assert_blocked(sprint, "git -C $UNKNOWN merge x", "main_merge")
+    assert_blocked(sprint, "cd sub && git -C rel merge x", "main_merge")  # -C tương đối sau cd: gốc không biết
