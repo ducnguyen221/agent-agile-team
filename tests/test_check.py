@@ -2486,6 +2486,17 @@ def test_autopilot_exclusions_duplicate_item(tmp_path):
     _only_hit(root, "trùng: push")
 
 
+@pytest.mark.parametrize("grant", [
+    '"Bật autopilot cho SPR-03."',  # vắng chữ mức = cổng 1 (method/autopilot.md mục 2)
+    '"Bật autopilot cổng 1 cho SPR-03 (chương trình dời skill)."',  # chữ mức chỉ tính ngay sau tiền tố
+    '"  bật autopilot   cổng 1 cho SPR-03."',
+], ids=["no-level-word", "program-word-in-free-text", "spaces-casefold"])
+def test_autopilot_level_word_default_and_position(tmp_path, grant):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, grant=grant)
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
 @pytest.mark.parametrize("fields", [
     {"grant": '"Bật autopilot cổng 1 cho SPR-03 +nhánh."'},  # gate_1 không có Cổng 2 để gộp sau
     {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": '"Bật autopilot cổng 1+2 +nhánh cho SPR-03."'},  # giữa câu
@@ -2503,7 +2514,8 @@ def test_autopilot_branch_merge_local_cannot_be_dropped(tmp_path, fields):
     ('"Bật autopilot chương trình x tới 2026-12-31, cổng 1."', "gate_1", "[gate_1]"),
     ('"Bật autopilot cổng 1 cho SPR-03."', "program", "[gate_1, gate_2]"),
     ('"Bật autopilot cổng 2 cho SPR-03."', "gate_1", "[gate_1]"),
-], ids=["1-claims-1_2", "1_2-claims-1", "program-claims-1", "1-claims-program", "unrecognized"])
+    ('"Bật autopilot cho SPR-03."', "gate_1_2", "[gate_1, gate_2]"),  # vắng mức = gate_1
+], ids=["1-claims-1_2", "1_2-claims-1", "program-claims-1", "1-claims-program", "unrecognized", "default-claims-1_2"])
 def test_autopilot_grant_text_must_match_level(tmp_path, grant, level, scope):
     root = make_sprint(tmp_path)
     autopilot_plan(root, grant=grant, level=level, scope=scope, program="x", expires="2026-12-31")

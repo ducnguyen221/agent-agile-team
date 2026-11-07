@@ -1453,8 +1453,9 @@ class Engine:
         if level not in AUTOPILOT_LEVELS:  # `in` trên tuple so ==, nên danh sách/số không lọt
             return "delegation.level", f"delegation.level: {level!r} phải là một trong {list(AUTOPILOT_LEVELS)}"
         if grant_text.lstrip().startswith(AUTOPILOT_PREFIX):  # chữ mức trong lệnh phải khớp `level` (không nới phạm vi hơn lời người dùng)
-            stated = ("program" if "chương trình" in grant_text else "gate_1_2" if AUTOPILOT_GATES_BOTH in grant_text
-                      else "gate_1" if "cổng 1" in grant_text else None)
+            rest = grant_text.lstrip()[len(AUTOPILOT_PREFIX):].lstrip()  # chữ mức chỉ tính khi đứng ngay sau tiền tố
+            stated = ("program" if rest.startswith("chương trình") else "gate_1_2" if rest.startswith(AUTOPILOT_GATES_BOTH)
+                      else "gate_1" if rest.startswith("cổng 1") or not rest.startswith("cổng ") else None)  # vắng mức = gate_1; cổng lạ = None
             if stated != level:
                 return "delegation.level", f"autopilot: lời cấp nêu mức {stated!r} mà delegation.level là {level!r}"
         program, expires = block.get("program"), block["expires"]
