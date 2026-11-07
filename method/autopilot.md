@@ -208,7 +208,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 - **File dấu hỏng hay thiếu mục:** JSON hỏng → chặn mọi lệnh khớp mẫu (đóng an toàn). `exclusions` thiếu mục **bắt
   buộc** (mọi mục trừ `branch_merge_local`) → hook bổ sung đủ; `branch_merge_local` vắng được tôn trọng vì đó là
   `+nhánh`; mục lạ bị bỏ qua (không bớt được mục nào). Khoá `sprints` hook không dùng để quyết.
-- **File dấu được hook bảo vệ:** lệnh shell không chỉ-đọc trỏ tới file dấu (hay `.tmp/` hoặc glob bao nó, hoặc chuyển hướng `>` vào nó) và tool ghi file có đích là file dấu đều bị chặn. Đường xoá hợp lệ khi kết thúc: điều phối chạy lệnh xoá từ thư mục **ngoài** repo chứa file dấu, bằng đường tuyệt đối (hoặc người dùng tự xoá). Giới hạn nói thẳng: phiên con cũng làm được cách đó, nên đây vẫn là rào hành vi, không phải ranh giới bảo mật.
+- **File dấu được hook bảo vệ:** lệnh shell không chỉ-đọc trỏ tới file dấu (hay `.tmp/` hoặc glob bao nó, hoặc chuyển hướng `>` vào nó) và tool ghi file có đích là file dấu đều bị chặn. Mọi đường xoá bằng lệnh shell đều bị chặn, kể cả từ ngoài repo bằng đường tuyệt đối. Đường kết thúc duy nhất bằng máy: `python scripts/autopilot_guard.py --clear <thư mục làm việc>` (xoá đúng `.tmp/autopilot.json` của thư mục đó; hook cho qua lệnh này). Chỉ điều phối gọi, sau `Dừng autopilot.` hoặc thu hồi, xoá sau cùng (mục 7); hoặc người dùng tự xoá. Giới hạn nói thẳng: phiên con cũng gọi được, nên đây vẫn là rào hành vi, không phải ranh giới bảo mật.
 - **Chặn được:** lệnh shell gõ thẳng khớp mẫu bảng trên, trong phiên có hook đã đăng ký, đang chạy, và có file dấu
   trên đường từ thư mục làm việc lên gốc repo.
 - **Không chặn được** (đều là rào hành vi, điều phối phải tự soát):
@@ -223,6 +223,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
   - hook chưa đăng ký, Codex chưa được **người dùng** trust qua `/hooks`, hook hết giờ ở host không có khoá
     `onFailure: block`, Antigravity trả `{}` ở `PreToolUse` (chưa xác minh — skill `hooks-guardrails`, Gotchas);
   - phiên con chạy ở thư mục ngoài repo có file dấu;
+  - phiên con tự gọi `--clear` xoá file dấu của mình (hook cho qua lệnh này, nên đó là rào hành vi);
   - lệnh đi qua công cụ ngoài `matcher` (MCP, `Monitor`), `git restore .` và các lệnh bỏ việc chưa commit tương tự, và đối thủ cố ý (người viết lệnh để lách mẫu);
   - **sửa `scripts/check.py` hằng `AUTOPILOT_EXCLUSIONS`, `scripts/autopilot_guard.py` hay cấu hình hook** — danh sách mục hook thi hành lấy từ hằng của `check.py` (test ghim đúng 13 mục nên bớt mục thì test đỏ, nhưng phiên con sửa được cả test); điều phối soát `git diff` của hai file đó khi nhận báo;
   - **phiên con có quyền ghi xoá hoặc sửa được file dấu** — chế độ toàn quyền không hỏi trước khi ghi `.tmp/`. Đây là
@@ -247,7 +248,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
   (mức chương trình: cả dải). Điều phối chép vào `.tmp/` của thư mục làm việc (worktree) của mỗi phiên con **trước** khi
   giao việc, `sprints` = đúng sprint phiên con đó làm.
 - **Xoá:** khi kết thúc (`Dừng autopilot.`, thu hồi, hết hạn), **sau cùng** — sau khi mọi phiên con liên quan đã báo
-  dừng ở điểm an toàn (mục 7), bằng đường xoá ở mục 5.1 (từ ngoài repo, đường tuyệt đối), để phiên con đang chạy không mất rào giữa chừng. `Thu hồi duyệt thay SPR-NN.` bỏ `SPR-NN` khỏi `sprints` của mọi file
+  dừng ở điểm an toàn (mục 7), bằng `--clear` (mục 5.1), để phiên con đang chạy không mất rào giữa chừng. `Thu hồi duyệt thay SPR-NN.` bỏ `SPR-NN` khỏi `sprints` của mọi file
   dấu có nó; file nào còn `sprints` rỗng thì xoá. Tạm dừng (mục 7) giữ nguyên file dấu.
 - Không commit file dấu: `.tmp/` phải nằm trong `.gitignore` của dự án; chưa có thì Analyst nêu trong lời nhắc lại lệnh.
 
@@ -347,7 +348,7 @@ Không đánh giá: <phần không đọc hoặc không kiểm được>
   **mọi** hồ sơ của dải; `Thu hồi duyệt thay SPR-NN.` chỉ sprint đó. Hết hạn không ghi gì vào khối — `expires` đã đủ.
   Bật lại chỉ bằng lệnh mới của người dùng (mục 3).
 - **Thứ tự kết thúc:** ghi `revoked_at` → báo dừng xuống mọi phiên con liên quan → mỗi phiên con tới điểm an toàn kế
-  tiếp và báo → điều phối ghi trạng thái từng dòng sổ → **xoá file dấu sau cùng** (mục 5.2; chạy từ thư mục ngoài repo bằng đường tuyệt đối, hoặc người dùng tự xoá — mục 5.1) → báo người dùng trạng
+  tiếp và báo → điều phối ghi trạng thái từng dòng sổ → **xoá file dấu sau cùng** (mục 5.2; bằng `python scripts/autopilot_guard.py --clear <thư mục làm việc>` hoặc người dùng tự xoá — mục 5.1) → báo người dùng trạng
   thái từng phiên.
 - **Điểm an toàn kế tiếp:** phiên con không bắt đầu lệnh hay việc mới; lệnh đang chạy được chạy xong; commit đang làm
   được hoàn tất (kèm test của commit đó). Không commit được (test đỏ, việc dở) → đưa thay đổi chưa commit vào **nhánh
