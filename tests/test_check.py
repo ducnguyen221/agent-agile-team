@@ -1977,9 +1977,16 @@ def test_advisor_distinct_ok(tmp_path):
     assert [f.render() for f in check.check_paths([root]).findings] == []
 
 
-@pytest.mark.parametrize("reviewer", ["business-reviewer", "tech-reviewer", "gate-delegate"])
+def test_advisor_same_label_as_gate_delegate_self_review(tmp_path):
+    """Advisor không được duyệt thay khuyến nghị của chính mình: nhãn `advisor` trùng `gate-delegate` → `self-review`."""
+    root = _spec_roles(tmp_path, SPEC_ROLES + "  gate-delegate: [T1, agent-r]\n  advisor: [T1, agent-r]\n")
+    hits = [f for f in check.check_paths([root]).findings if f.rule == "self-review"]
+    assert len(hits) == 1 and "advisor" in hits[0].message and "gate-delegate" in hits[0].message, [f.render() for f in hits]
+
+
+@pytest.mark.parametrize("reviewer", ["business-reviewer", "tech-reviewer"])
 def test_advisor_same_label_as_reviewer_ok(tmp_path, reviewer):
-    """Nhãn `advisor` trùng một vai kiểm định là hợp lệ (bắt hồi quy: gộp `ADVISORS` vào `VERIFIERS`)."""
+    """Nhãn `advisor` trùng Business/Tech Reviewer là hợp lệ (Advisor không chấm việc của người làm)."""
     block = SPEC_ROLES.replace("business-reviewer: [T1, agent-c]", "business-reviewer: [T1, agent-c]\n  " + f"{reviewer}: [T1, agent-r]") \
         if reviewer != "business-reviewer" else SPEC_ROLES.replace("agent-c", "agent-r")
     root = _spec_roles(tmp_path, block + "  advisor: [T1, agent-r]\n")
@@ -1987,7 +1994,7 @@ def test_advisor_same_label_as_reviewer_ok(tmp_path, reviewer):
 
 
 def test_advisor_with_implementer_same_label_is_not_self_review(tmp_path):
-    """Advisor chỉ so với Analyst/Architect: trùng nhãn `implementer` không phải `self-review`."""
+    """Advisor chỉ so với Analyst/Architect/Gate Delegate: trùng nhãn `implementer` không phải `self-review` (bắt hồi quy: gộp `ADVISORS` vào `VERIFIERS`)."""
     root = _spec_roles(tmp_path, SPEC_ROLES + "  implementer: [T2, agent-i]\n  advisor: [T1, agent-i]\n")
     assert [f.render() for f in check.check_paths([root]).findings] == []
 
@@ -2003,7 +2010,7 @@ def test_gate_delegate_same_label_as_any_executor_self_review(tmp_path, role):
 
 
 def test_delegation_by_advisor_only_is_not_a_verifier(tmp_path):
-    """Người duyệt thay chỉ giữ `advisor` thì không đủ: `advisor` không phải vai kiểm định."""
+    """Người duyệt thay chỉ giữ `advisor` thì không đủ: `advisor` không phải vai kiểm định (bắt hồi quy: gộp `ADVISORS` vào `VERIFIERS`)."""
     root = _delegated_plan_roles(tmp_path, "roles:\n  architect: [T1, agent-b]\n  advisor: [T1, agent-d]\n")
     hits = _delegation_hits(root)
     assert len(hits) == 1 and "không giữ vai kiểm định nào" in hits[0].message, [f.render() for f in hits]

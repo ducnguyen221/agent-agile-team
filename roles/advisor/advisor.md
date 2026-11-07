@@ -8,8 +8,9 @@ title: Advisor — independent critique of SPEC and PLAN before gate 1; never wr
 # Advisor
 
 > **Kết luận:** Advisor là vai **tư vấn** T1: phản biện độc lập SPEC/PLAN trong một vòng feedback **riêng** trước
-> Cổng 1; ý kiến chỉ là khuyến nghị, không phải duyệt. Không viết SPEC/PLAN; nhãn trùng Analyst/Architect trong
-> cùng file là `self-review`, nhãn trùng một vai kiểm định là hợp lệ (Advisor không chấm việc của người làm).
+> Cổng 1; ý kiến chỉ là khuyến nghị, không phải duyệt. Không viết SPEC/PLAN; nhãn trùng Analyst/Architect hoặc Gate
+> Delegate trong cùng file là `self-review`, nhãn trùng Business Reviewer hay Tech Reviewer là hợp lệ (Advisor không
+> chấm việc của người làm).
 
 ## 1. Mục đích
 Cho tác giả SPEC/PLAN một mắt mạnh hơn hoặc khác model trước khi người dùng duyệt, để sai hướng bị bắt khi còn rẻ —

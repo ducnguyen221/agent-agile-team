@@ -22,7 +22,8 @@ NOT_RUN = re.compile(r"(?:not run|pending|chưa chạy|dự kiến)|(?:tbd|todo|
 # Danh sách trắng (TK12.1, RF167): đoạn đầu của `result` phải bắt đầu bằng một trạng thái hợp lệ: số dạng `k/n`, `strict`,
 # `pass`/`passed`, `fail`/`failed`, `partial`, `Đạt`, `Không đạt`, `Một phần` (tập chốt từ giá trị thật của mọi
 # `tests/pressure.md`, `tests/retrieval.md`: `3/3 GREEN pass…`, `strict k/n…`); `model` phải bắt đầu bằng tên model
-# (`claude-<tên>`, GPT có major 1–99 + minor 0–99 tuỳ chọn và đúng một family (hoặc gpt-5.5), bí danh Claude).
+# (`claude-<tên>`, GPT có major 1–99 + minor 0–99 tuỳ chọn và đúng một family (hoặc gpt-5.5), Gemini `gemini-<major>[.<minor>]-<family>-low|medium|high`
+# (family là chữ thường tuỳ ý, chưa khoá họ), bí danh Claude).
 # Đây là hợp đồng hình tên của metadata, không phải kiểm registry/runtime; không khoá vào danh sách version hiện tại.
 RESULT_STATE = re.compile(r"(?:\d+/\d+|strict|pass(?:ed)?|fail(?:ed)?|partial|đạt|không đạt|một phần)(?!\w)", re.I)
 MODEL_NAME = re.compile(

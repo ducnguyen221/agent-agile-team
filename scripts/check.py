@@ -126,8 +126,8 @@ DELEGATION_KEYS = ("grant", "grant_at", "scope", "expires", "by", "tier", "files
 MOMENT = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})(?: ([0-9]{2}):([0-9]{2}) ([+-])([0-9]{2})(?::?([0-9]{2}))?)?")
 EXECUTORS = {"analyst", "architect", "implementer", "qa", "researcher"}
 VERIFIERS = {"business-reviewer", "tech-reviewer", "gate-delegate"}
-ADVISORS = {"advisor"}  # vai tư vấn: không phải vai kiểm định, không chấm việc của người làm; chỉ so nhãn với AUTHORS
-AUTHORS = {"analyst", "architect"}  # tác giả SPEC/PLAN: nhãn `advisor` trùng một trong hai là self-review
+ADVISORS = {"advisor"}  # vai tư vấn: không phải vai kiểm định, không chấm việc của người làm; chỉ so nhãn với ADVISOR_CONFLICTS
+ADVISOR_CONFLICTS = {"analyst", "architect", "gate-delegate"}  # tác giả SPEC/PLAN và người duyệt thay: nhãn `advisor` trùng một trong ba là self-review
 T1_ONLY_ROLES = {"gate-delegate", "advisor"}  # hai vai buộc tier T1
 NEXT_ID_PREFIX = {"requests": "RQ", "specs": "FS", "sprints": "SPR"}
 WIDTH_KEY = {"RQ": "request", "FS": "feature", "SPR": "sprint"}
@@ -1269,10 +1269,10 @@ class Engine:
             if executes and verifies:
                 self.add(doc.path, line, "self-review",
                          f"agent '{agent}' vừa thực thi ({', '.join(sorted(executes))}) vừa kiểm định ({', '.join(sorted(verifies))})")
-            authors = held & AUTHORS
-            if held & ADVISORS and authors:
+            conflicts = held & ADVISOR_CONFLICTS
+            if held & ADVISORS and conflicts:
                 self.add(doc.path, line, "self-review",
-                         f"agent '{agent}' vừa tư vấn (advisor) vừa soạn SPEC/PLAN ({', '.join(sorted(authors))})")
+                         f"agent '{agent}' vừa tư vấn (advisor) vừa giữ vai soạn hoặc duyệt thay ({', '.join(sorted(conflicts))})")
 
     def _gates(self, doc: Doc) -> None:
         data = doc.data
