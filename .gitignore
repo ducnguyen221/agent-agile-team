@@ -34,5 +34,6 @@ __pycache__/
 Thumbs.db
 desktop.ini
 /.claude/settings.local.json
+/.claude/CLAUDE.md
 /.idea/
 /.vscode/

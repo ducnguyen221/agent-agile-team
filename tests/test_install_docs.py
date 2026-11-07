@@ -147,6 +147,15 @@ def test_no_root_claude_md():
     assert not (REPO / "CLAUDE.md").exists()
 
 
+def test_agents_dir_holds_only_agents():
+    """Mọi file `.md` trong `agents/` thành một agent; file không frontmatter (như README cũ, nay ở `docs/agents.md`)
+    hiện thành agent rác và làm `claude plugin validate --strict` đỏ."""
+    files = sorted((REPO / "agents").glob("*.md"))
+    assert files
+    bare = [p.name for p in files if not p.read_text(encoding="utf-8").startswith("---")]
+    assert not bare, f"agents/ có file không frontmatter: {bare}"
+
+
 def test_gemini_md_only_points_to_agents_md():
     text = read("GEMINI.md")
     assert "AGENTS.md" in text
