@@ -125,7 +125,10 @@ DELEGATION_QUOTE = "duyệt thay:"  # tiền tố bắt buộc của `gate_N_quo
 DELEGATION_KEYS = ("grant", "grant_at", "scope", "expires", "by", "tier", "files", "revoked_at")
 MOMENT = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})(?: ([0-9]{2}):([0-9]{2}) ([+-])([0-9]{2})(?::?([0-9]{2}))?)?")
 EXECUTORS = {"analyst", "architect", "implementer", "qa", "researcher"}
-VERIFIERS = {"business-reviewer", "tech-reviewer"}
+VERIFIERS = {"business-reviewer", "tech-reviewer", "gate-delegate"}
+ADVISORS = {"advisor"}  # vai tư vấn: không phải vai kiểm định, không chấm việc của người làm; chỉ so nhãn với AUTHORS
+AUTHORS = {"analyst", "architect"}  # tác giả SPEC/PLAN: nhãn `advisor` trùng một trong hai là self-review
+T1_ONLY_ROLES = {"gate-delegate", "advisor"}  # hai vai buộc tier T1
 NEXT_ID_PREFIX = {"requests": "RQ", "specs": "FS", "sprints": "SPR"}
 WIDTH_KEY = {"RQ": "request", "FS": "feature", "SPR": "sprint"}
 
@@ -1246,13 +1249,16 @@ class Engine:
         holders: dict = {}
         for role, value in roles.items():
             rline = doc.key_line(f"roles.{role}")
-            if role not in EXECUTORS | VERIFIERS | DELEGATION_SPECIALISTS:
+            if role not in EXECUTORS | VERIFIERS | ADVISORS | DELEGATION_SPECIALISTS:
                 self.add(doc.path, rline, "roles-invalid", f"vai '{role}' không có trong danh sách vai")
                 continue
             if (not isinstance(value, list) or len(value) not in (2, 3) or value[0] not in c.TIERS
                     or not isinstance(value[1], str) or not value[1]
                     or (len(value) == 3 and not isinstance(value[2], str))):
                 self.add(doc.path, rline, "roles-invalid", f"{role}: {value!r} phải là [T1|T2|T3, nhãn-agent] hoặc thêm \"note\"")
+                continue
+            if role in T1_ONLY_ROLES and value[0] != "T1":
+                self.add(doc.path, rline, "roles-invalid", f"{role}: tier {value[0]} phải là T1")
                 continue
             holders.setdefault(value[1], set()).add(role)
         for agent, held in holders.items():
@@ -1263,6 +1269,10 @@ class Engine:
             if executes and verifies:
                 self.add(doc.path, line, "self-review",
                          f"agent '{agent}' vừa thực thi ({', '.join(sorted(executes))}) vừa kiểm định ({', '.join(sorted(verifies))})")
+            authors = held & AUTHORS
+            if held & ADVISORS and authors:
+                self.add(doc.path, line, "self-review",
+                         f"agent '{agent}' vừa tư vấn (advisor) vừa soạn SPEC/PLAN ({', '.join(sorted(authors))})")
 
     def _gates(self, doc: Doc) -> None:
         data = doc.data

@@ -22,6 +22,8 @@ ROLE_NAMES = {
     "researcher": "Researcher",
     "business-reviewer": "Business Reviewer",
     "tech-reviewer": "Tech Reviewer",
+    "gate-delegate": "Gate Delegate",
+    "advisor": "Advisor",
 }
 
 
@@ -117,12 +119,17 @@ def test_example_role_tiers_match_cards():
 def test_role_matrix_example_shape():
     assert _matrix_header(MATRIX) == MATRIX_COLUMNS
     rows = _matrix_rows(MATRIX)
-    roles = check.EXECUTORS | check.VERIFIERS
+    roles = check.EXECUTORS | check.VERIFIERS | check.ADVISORS
     assert len(rows) == len(roles) * 3
     pairs = {(r["Vai"], r["Vendor"]) for r in rows}
     assert len(pairs) == len(rows)
     assert pairs == {(ROLE_NAMES[r], h) for r in roles for h in HARNESSES}
     assert all(r["Model"] == "`<model-id>`" for r in rows)
+
+
+def test_new_role_cards_are_t1():
+    assert _card_tier("gate-delegate") == "T1"
+    assert _card_tier("advisor") == "T1"
 
 
 def test_role_matrix_example_tiers_match_cards():
