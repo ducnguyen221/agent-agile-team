@@ -22,7 +22,7 @@ Từ SPEC đã có, thiết kế kiến trúc và chia việc sao cho Implemente
 
 ## 3. Đầu vào
 SPEC · spec sống và ADR hiện có · mã nguồn liên quan (đọc) · ràng buộc chung của dự án · kết quả review
-PLAN của Tech Reviewer (từ cỡ vừa).
+PLAN của Tech Reviewer hoặc Advisor (từ cỡ vừa — [method/process.md](../../method/process.md) mục 3).
 
 ## 4. Đầu ra
 PLAN (mục tiêu · kiến trúc · ràng buộc chung · trọng tâm review ≤5 · `TK` · `RK` · `DN` · ước lượng) ·

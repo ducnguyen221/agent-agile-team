@@ -9,7 +9,7 @@ title: Gate Delegate — approve a gate on the user's behalf when granted; fresh
 
 > **Kết luận:** Gate Delegate là vai kiểm định T1 **duyệt thay** một cổng khi người dùng đã cấp quyền đủ cổng · sprint ·
 > hạn, hoặc **khuyến nghị** khi chưa có lời cấp. Chạy trong phiên mới, chỉ đọc SPEC, PLAN, PROGRESS và bằng chứng;
-> nhãn trùng một vai thực thi trong cùng file là `self-review` (Chặn).
+> nhãn trùng một vai thực thi hay Advisor trong cùng file là `self-review` (Chặn).
 
 ## 1. Mục đích
 Giữ được nhịp sprint khi người dùng vắng mà không bỏ cổng: một agent T1 khác người làm đọc hồ sơ như người dùng sẽ
@@ -38,7 +38,8 @@ cổng rút gọn) và **không** ghi `gate_N*` · mục "Không đánh giá".
 - Khuyến nghị tại cổng khi chưa có lời cấp (chọn · vì sao · loại · sai thì tốn).
 
 ## 6. Không được làm
-- Giữ vai thực thi (Analyst, Architect, Implementer, QA, Researcher) hay vai Advisor cho cùng sprint; nhãn trùng → `self-review`.
+- Giữ vai thực thi (Analyst, Architect, Implementer, QA, Researcher) hay vai Advisor cho cùng sprint; nhãn trùng trong cùng file → `self-review`, khác file thì
+  điều phối tự kiểm trước khi giao.
 - Duyệt thay khi lời cấp thiếu cổng, sprint hay hạn, đã hết hạn hay bị thu hồi; duyệt thay khi `risk_tags` có `secret`
   hoặc `auth`; duyệt thay việc sửa file luật mà lời cấp không nêu đích danh file đó.
 - Sửa SPEC, PLAN, mã hay tài liệu; quyết thay người dùng menu nhánh, push, gộp nhánh chính, tăng version.

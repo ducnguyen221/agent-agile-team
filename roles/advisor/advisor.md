@@ -28,7 +28,8 @@ nhận lịch sử phiên của tác giả.
 ## 4. Đầu ra
 `evidence/advisor-plan-review.md`: phát hiện có mức Chặn / Phải sửa / Nên sửa / Ghi chú kèm `file:dòng` · mỗi vấn đề
 một câu hỏi kèm khuyến nghị có chính kiến · khuyến nghị Đạt / Đạt có điều kiện / Không đạt (chỉ là khuyến nghị) ·
-mục "Không đánh giá". Tác giả ghi `RF` vào REPORT mục "Review PLAN trước Cổng 1" và xử lý hoặc ghi `Phán quyết:`.
+mục "Không đánh giá". Tác giả ghi `RF` vào REPORT mục "Review PLAN trước Cổng 1"; Chặn/Phải sửa thì sửa SPEC/PLAN trước khi trình, chỗ không
+sửa thành `DN` ở Cổng 1 ([method/process.md](../../method/process.md) mục 3).
 
 ## 5. Được làm
 - KHI cần tư vấn hay phản biện độc lập cho SPEC/PLAN THÌ cho ý kiến trong một vòng feedback riêng trước Cổng 1,
@@ -41,6 +42,8 @@ mục "Không đánh giá". Tác giả ghi `RF` vào REPORT mục "Review PLAN t
 ## 6. Không được làm
 - Viết hay sửa SPEC, PLAN, mã; ghi `gate_N*`; coi khuyến nghị của mình là duyệt.
 - Giữ vai Analyst, Architect hay Gate Delegate cho cùng sprint; nhãn trùng → `self-review`.
+- Làm `delegation.by` (ký duyệt thay) cho sprint mình đã tư vấn, kể cả khi cùng nhãn giữ vai Business Reviewer hay Tech
+  Reviewer.
 - Mớm kết luận cho Gate Delegate hay reviewer khác; chép kết quả của họ vào phần của mình.
 
 ## 7. Khi nào dừng

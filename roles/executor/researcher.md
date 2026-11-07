@@ -2,7 +2,7 @@
 name: researcher
 group: executor
 tier: T3
-title: Researcher — find, read and cross-check sources into a cited dossier; no verdicts
+title: Researcher — search, read and extract information into a cited dossier; no inference, no verdicts
 ---
 
 # Researcher
@@ -12,7 +12,7 @@ title: Researcher — find, read and cross-check sources into a cited dossier; n
 > phán đoán chọn nguồn khó thì Analyst giao T1.
 
 ## 1. Mục đích
-Tìm, đọc, đối chiếu nguồn để vai T1 có dữ kiện đã kiểm; giảm việc đọc của T1.
+Tìm, đọc, trích xuất thông tin có nguồn để vai T1 có dữ kiện đã kiểm; giảm việc đọc của T1.
 
 ## 2. Tier
 **T3.** Việc đọc cần phán đoán chọn nguồn khó → Analyst giao T1, không nâng Researcher. Bậc model 1 (`tiers/README.md` mục 8).

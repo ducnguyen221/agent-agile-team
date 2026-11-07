@@ -127,7 +127,7 @@ Hai trục tách nhau: **tier** nói vai được làm gì, **bậc model** nói
 | 1 | Researcher · Implementer · QA |
 | 2 | Analyst · Architect · Tech Reviewer |
 | 3 | Advisor · Gate Delegate |
-| không gán | Business Reviewer, phiên điều phối (theo ô `T1` của bảng tier) |
+| không gán | Business Reviewer (theo ô `T1` của bảng tier); phiên chính điều phối các phiên phụ không phải vai, model do người dùng chọn |
 
 **Bậc model → model**, mô tả theo độ mạnh:
 
@@ -138,7 +138,8 @@ Hai trục tách nhau: **tier** nói vai được làm gì, **bậc model** nói
 | 3 | model mạnh nhất về suy luận |
 
 Ánh xạ bậc model → model id cụ thể nằm ở bảng tier ngoài repo (`AGENT_AGILE_TIERS`) và ma trận sinh của lớp riêng; repo
-chỉ giữ `<model-id>`.
+chỉ giữ `<model-id>`. Tra model id của từng vai ở `ROLE-MATRIX.md` cạnh bảng tier (sinh từ `AGENT_AGILE_TIERS`); vai chưa có
+khoá `roles.<vai>` trong bảng thì lấy ô tier của vai — ô đó lệch bậc thì Analyst ghi `note` `model: <lý do>` khi giao.
 
 KHI giao một vai THÌ model thuộc bậc model của vai trên nền tảng đó; effort tăng **trong** bậc (nâng 4 khi cỡ lớn, rủi
 ro cao hoặc đầu bài mơ hồ). Ngoài bậc = chỉ định của chủ sản phẩm, ghi `note` `model: <lý do>`. Ô model của bảng tier
