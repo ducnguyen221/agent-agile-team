@@ -61,11 +61,6 @@ def run(fmt, payload, *extra):
     return rc, out.getvalue(), err.getvalue()
 
 
-def blocked(payload, fmt="claude"):
-    rc, out, err = run(fmt, payload)
-    return rc, out, err
-
-
 def assert_blocked(repo, cmd, item):
     rc, _, err = run("claude", claude(cmd, repo))
     assert rc == 2, (cmd, err)
@@ -79,8 +74,19 @@ def assert_allowed(repo, cmd):
 
 # --- đối chiếu hằng với check.py -------------------------------------------------------------------------------
 
+PINNED_EXCLUSIONS = {"push", "tag", "version", "main_merge", "publish", "license", "irreversible_delete", "rules_unlisted",
+                     "user_soul", "secret", "auth", "network_fetch", "branch_merge_local"}
+
+
 def test_guard_uses_check_exclusions():
     assert autopilot_guard.known_exclusions() == check.AUTOPILOT_EXCLUSIONS
+
+
+def test_guard_exclusions_pinned_to_thirteen():
+    """Bớt một mục ở `check.AUTOPILOT_EXCLUSIONS` sẽ tắt chặn im lặng: ghim danh sách viết tay để test đỏ."""
+    assert len(PINNED_EXCLUSIONS) == 13
+    assert set(autopilot_guard.known_exclusions()) == PINNED_EXCLUSIONS
+    assert set(check.AUTOPILOT_EXCLUSIONS) == PINNED_EXCLUSIONS and len(check.AUTOPILOT_EXCLUSIONS) == 13
 
 
 # --- các test PLAN -----------------------------------------------------------------------------------------------
@@ -338,7 +344,7 @@ def test_guard_tmp_cleanup_exception(tmp_path):
     (repo / ".tmp" / "scratch").mkdir()
     for cmd in ("rm -rf .tmp/scratch", "rm -fr .tmp/scratch", "rm -r -f .tmp/scratch", "rm --recursive .tmp/scratch",
                 "rm -rf ./.tmp/scratch", "rm -rf .tmp/scratch/", "rm -rf .tmp\\scratch", "Remove-Item -Recurse -Force .tmp\\scratch",
-                "rm -rf .tmp/a .tmp/b", "rm -rf '.tmp/with space'", "rm -rf .tmp/out*", "rm -rf .tmp/scratch/*",
+                "rm -rf .tmp/a .tmp/b", "rm -rf '.tmp/with space'", "rm -rf .tmp/out*", "rm -rf .tmp/scratch/*", "rm -rf .tmp/ab[c]",
                 "rm -rf " + str(repo / ".tmp" / "scratch"), "rmdir /s /q .tmp\\scratch"):
         assert_allowed(repo, cmd)
 
@@ -347,16 +353,12 @@ def test_guard_tmp_cleanup_exception(tmp_path):
     "rm -rf .tmp", "rm -rf .tmp/", "rm -rf .tmp/.", "rm -rf .tmp/*", "rm -rf .tmp/a*", "rm -rf .tmp/autopilot.json",
     "rm -rf .tmp/AUTOPILOT.JSON", "rm -rf .tmp/../src", "rm -rf .tmp/x/../../src", "rm -rf .tmp/scratch ..", "rm -rf .tmp/scratch build",
     "rm -rf src/.tmp/x", "rm -rf /tmp/x", "rm -rf .tmp/$X", "rm -rf .tmp/x,../y", "rm -rf ~/.tmp/x", "rm -rf .tmp/{a,b}",
-    "rm -rf .tmp/*/x/../..", "rm -rf .tm*/x", "rm -rf .tmp/ab[c]", "cd src && rm -rf .tmp/scratch",
+    "rm -rf .tmp/*/x/../..", "rm -rf .tm*/x", "cd src && rm -rf .tmp/scratch",
     "rm -rf .tmpx/a", "rm -rf", "Remove-Item -Recurse .tmp",
 ])
 def test_guard_tmp_exception_not_applied(tmp_path, cmd):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     (repo / "src").mkdir()
-    # `.tmp/ab[c]` khớp ký tự lớp glob trong thành phần cuối: không chứa autopilot.json nên được qua; giữ ngoài danh sách chặn.
-    if cmd == "rm -rf .tmp/ab[c]":
-        assert_allowed(repo, cmd)
-        return
     assert_blocked(repo, cmd, "irreversible_delete")
 
 
@@ -430,13 +432,23 @@ def test_guard_unexpected_exception_closed_with_marker(tmp_path, monkeypatch):
     assert run("claude", claude("git status", plain))[0] == 0
 
 
-def test_guard_deep_command_nesting_stops(tmp_path):
-    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    cmd = "git push"
-    for _ in range(6):
+def _nest(cmd, layers):
+    for _ in range(layers):
         cmd = 'bash -c "{}"'.format(cmd.replace('"', "'"))
-    rc, _, _ = run("claude", claude(cmd, repo))
-    assert rc in (0, 2)  # lồng quá sâu: dừng mở lớp, không văng ngoại lệ, không treo
+    return cmd
+
+
+def test_guard_deep_command_nesting_fails_closed(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    rc, _, err = run("claude", claude(_nest("git push", 3), repo))  # trong giới hạn: mở hết lớp, thấy push
+    assert rc == 2 and "'push'" in err
+    rc, _, err = run("claude", claude(_nest("git push", 4), repo))  # quá giới hạn: không phân tích được → chặn
+    assert rc == 2 and "lồng" in err and "hook gặp lỗi" not in err
+    rc, _, err = run("claude", claude(_nest("git status", 6), repo))
+    assert rc == 2 and "lồng" in err
+    plain = tmp_path / "plain"
+    plain.mkdir()
+    assert run("claude", claude(_nest("git push", 6), plain)) == (0, "", "")  # không có file dấu → qua
 
 
 def test_guard_cli_subprocess(tmp_path):
@@ -449,3 +461,183 @@ def test_guard_cli_subprocess(tmp_path):
     ok = subprocess.run([sys.executable, str(SCRIPTS / "autopilot_guard.py"), "--format", "antigravity"], input="{broken",
                         capture_output=True, text=True, encoding="utf-8", cwd=str(tmp_path))
     assert ok.returncode == 0 and ok.stdout.strip() == "{}"
+
+
+# ===================== vòng sửa 1 (S-RF1…S-RF9, T-RF1…T-RF4) =====================
+
+def codex(cmd, cwd=None, workdir=None):
+    payload = {"tool_name": "shell", "tool_input": {"command": cmd}}
+    if cwd is not None:
+        payload["cwd"] = str(cwd)
+    if workdir is not None:
+        payload["tool_input"]["workdir"] = str(workdir)
+    return payload
+
+
+def fwd(path):
+    return str(path).replace("\\", "/")
+
+
+def test_guard_workdir_beats_session_cwd(tmp_path):
+    """S-RF1 / T-RF3: thư mục của lệnh (workdir) quyết định, không phải cwd của phiên."""
+    repo = make_repo(tmp_path / "a", branch="spr-12", marker=good_marker())
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    rc, _, err = run("codex", codex(["bash", "-lc", "git push"], cwd=elsewhere, workdir=repo))
+    assert rc == 2 and "'push'" in err
+    # cwd phiên trong repo có file dấu, workdir nơi không có: file dấu của phiên vẫn áp (thấy ở đâu cũng bật)
+    rc, _, err = run("codex", codex(["bash", "-lc", "git push"], cwd=repo, workdir=elsewhere))
+    assert rc == 2
+    # nhánh đọc ở workdir: phiên ở worktree sprint, lệnh chạy ở bản checkout main
+    mainrepo = make_repo(tmp_path / "m", branch="main", marker=good_marker(WITHOUT_BRANCH))
+    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
+    rc, _, err = run("codex", codex("git merge spr-12", cwd=sprint, workdir=mainrepo))
+    assert rc == 2 and "'main_merge'" in err
+    assert run("codex", codex("git merge x", cwd=mainrepo, workdir=sprint)) == (0, "", "")
+    # workdir tương đối ghép với cwd phiên; Antigravity: Cwd trong args thắng cwd phiên
+    (repo / "sub").mkdir()
+    rc, _, err = run("codex", {"tool_name": "shell", "cwd": str(repo), "tool_input": {"command": "git push", "workdir": "sub"}})
+    assert rc == 2
+    ag = {"toolCall": {"name": "run_command", "args": {"CommandLine": "git push", "Cwd": str(repo)}}, "cwd": str(elsewhere)}
+    assert json.loads(run("antigravity", ag)[1])["decision"] == "deny"
+
+
+def test_guard_error_after_event_dir_probes_event_dir(tmp_path, monkeypatch):
+    """T-RF1 / S-RF4: lỗi sau khi có thư mục sự kiện → dò file dấu ở thư mục sự kiện, không phải thư mục tiến trình."""
+    repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
+    away = tmp_path / "away"
+    away.mkdir()
+    monkeypatch.chdir(away)
+
+    def boom():
+        raise ImportError("check không nhập được")
+
+    monkeypatch.setattr(autopilot_guard, "known_exclusions", boom)
+    rc, _, err = run("claude", claude("git push", repo))
+    assert rc == 2 and "ImportError" in err
+    rc, out, _ = run("antigravity", {"toolCall": {"name": "run_command", "args": {"CommandLine": "git push", "Cwd": str(repo)}}})
+    assert rc == 0 and json.loads(out)["decision"] == "deny"
+    assert run("claude", claude("git push", away)) == (0, "", "")  # thư mục sự kiện không file dấu: lỗi không chặn
+    monkeypatch.undo()
+    monkeypatch.chdir(away)
+    monkeypatch.setattr(autopilot_guard, "_analyze", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
+    rc, _, err = run("claude", claude("git status", repo))
+    assert rc == 2 and "RuntimeError" in err
+
+
+@pytest.mark.parametrize("cmd", [
+    "timeout 60 git push", "timeout -s KILL 30 git push", "timeout --signal=KILL 5 git push", "timeout -k 5 60 git push",
+    "env -i git push", "env -u HOME git push", "env FOO=bar BAZ=1 git push", "env -i FOO=1 git push", "env -S 'git push'",
+    "sudo -u deploy git push", "sudo -E git push", "sudo -u x -g y git push", "sudo --user=x git push",
+    "nice -n 10 git push", "nice -10 git push", "command -p git push", "nohup git push", "time git push", "time -p git push",
+    "ls | xargs -0 git push", "xargs -n 1 -I {} git push", "echo x | xargs -r git push",
+    "stdbuf -oL git push", "exec git push", "/usr/bin/env git push", "sudo env FOO=1 timeout 5 git push",
+])
+def test_guard_prefix_wrappers_with_their_arguments(tmp_path, cmd):
+    """S-RF2 / T-RF6: tiền tố kèm cờ và đối số vẫn lộ lệnh thật."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_blocked(repo, cmd, "push")
+
+
+def test_guard_prefix_wrappers_other_items(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_blocked(repo, "timeout 60 rm -rf build", "irreversible_delete")
+    assert_blocked(repo, "ls | xargs -0 rm -rf", "irreversible_delete")
+    assert_blocked(repo, "sudo -u x gh pr merge 3", "main_merge")
+    assert_allowed(repo, "timeout 60 git status")
+    assert_allowed(repo, "env -i FOO=1 ls")
+    assert_allowed(repo, "sudo -u x ls")
+
+
+@pytest.mark.parametrize("cmd", [
+    "cd {main} && git merge spr-12", "cd {main}; git pull", "pushd {main} && git merge x", "Set-Location {main}; git merge x",
+    "git -C {main} merge spr-12", "git -C {main} pull", "git -C {main} -c user.name=x merge y",
+    "cd {rel} && git merge x", "cd $UNKNOWN && git merge x", "git -C $UNKNOWN merge x", "cd && git merge x", "cd - && git merge x",
+    "GIT_DIR={main}/.git git merge x", "git --git-dir={main}/.git merge x", "git --work-tree {main} merge x",
+])
+def test_guard_merge_reads_branch_of_target_dir(tmp_path, cmd):
+    """T-RF2: lệnh chạy ở worktree sprint nhưng cd/-C sang bản checkout main, hay không xác định được thư mục → coi là main."""
+    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
+    mainrepo = make_repo(tmp_path / "m", branch="main")
+    rel = fwd(os.path.relpath(mainrepo, sprint))
+    assert_blocked(sprint, cmd.format(main=fwd(mainrepo), rel=rel), "main_merge")
+
+
+def test_guard_merge_in_non_main_dir_allowed(tmp_path):
+    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
+    other = make_repo(tmp_path / "o", branch="spr-13")
+    rel = fwd(os.path.relpath(other, sprint))
+    for cmd in ("cd {o} && git merge x", "git -C {o} merge x", "git -C {o} pull", "cd {r} && git pull"):
+        assert_allowed(sprint, cmd.format(o=fwd(other), r=rel))
+    mainrepo = make_repo(tmp_path / "m", branch="main", marker=good_marker(WITHOUT_BRANCH))
+    assert_allowed(mainrepo, "git -C {} merge x".format(fwd(other)))  # từ thư mục main, -C sang nhánh sprint → đọc nhánh sprint
+
+
+@pytest.mark.parametrize("cmd", ["gh -R o/r pr merge 12", "gh --repo o/r pr merge 12", "gh pr -R o/r merge 12",
+                                 "gh pr --repo=o/r merge 12", "gh pr merge 12 -R o/r", "gh -Ro/r pr merge 1", "gh pr merge"])
+def test_guard_gh_repo_flag_any_position(tmp_path, cmd):
+    """S-RF5 / T-RF5."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_blocked(repo, cmd, "main_merge")
+
+
+def test_guard_gh_repo_flag_not_merge(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    for cmd in ("gh -R o/r pr view 12", "gh pr -R o/r list", "gh -R merge pr view"):
+        assert_allowed(repo, cmd)
+
+
+def test_guard_more_patterns(tmp_path):
+    """S-RF6: git subtree push, gh release create, find -exec/-delete."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_blocked(repo, "git subtree push --prefix=x origin main", "push")
+    assert_blocked(repo, "gh release create v1.0 --notes x", "tag")
+    assert_blocked(repo, "gh -R o/r release create v1", "tag")
+    assert_blocked(repo, "find . -name '*.o' -delete", "irreversible_delete")
+    assert_blocked(repo, "find build -exec rm -rf {} +", "irreversible_delete")
+    assert_blocked(repo, "find build -type d -execdir rm -r {} +", "irreversible_delete")
+    assert_allowed(repo, "git subtree split --prefix=x")
+    assert_allowed(repo, "gh release list")
+    assert_allowed(repo, "gh release view v1")
+    assert_allowed(repo, "find . -name '*.py'")
+    assert_allowed(repo, "find . -name x -exec grep foo {} +")
+
+
+def test_guard_marker_name_case_insensitive(tmp_path):
+    """S-RF7: tên file dấu so không phân biệt hoa thường trên mọi hệ."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    assert_blocked(repo, "rm -rf .tmp/Autopilot.JSON", "irreversible_delete")
+    assert_blocked(repo, "rm -rf .tmp/AUTOPILOT*", "irreversible_delete")
+    assert_blocked(repo, "rm -rf .tmp/autopilot.js?n", "irreversible_delete")
+
+
+def test_guard_tmp_glob_expands_and_checks_each_match(tmp_path):
+    """S-RF3 / T-RF7: đích glob mở rộng theo thư mục lệnh; mỗi mục khớp phải nằm thật trong .tmp/."""
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (repo / ".tmp" / "keep1").mkdir()
+    (repo / ".tmp" / "keep2").mkdir()
+    assert_allowed(repo, "rm -rf .tmp/keep*")
+    assert_allowed(repo, "rm -rf .tmp/nomatch*")  # không khớp gì: không xoá gì
+    link_dir(outside, repo / ".tmp" / "lnk")
+    assert_blocked(repo, "rm -rf .tmp/ln*", "irreversible_delete")
+    assert_blocked(repo, "rm -rf .tmp/l*", "irreversible_delete")
+    assert_blocked(repo, "rm -rf .tmp/ln*/", "irreversible_delete")
+    assert_blocked(repo, "rm -rf .tmp/lnk/", "irreversible_delete")
+    assert_blocked(repo, "Remove-Item -Recurse -Force .tmp\\ln*", "irreversible_delete")
+    assert_blocked(repo, "rm -rf .tmp/[kl]*", "irreversible_delete")  # khớp keep* lẫn lnk
+    assert_allowed(repo, "rm -rf .tmp/keep[12]")
+
+
+def test_guard_tmp_glob_unreadable_parent_blocks(tmp_path, monkeypatch):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    real = os.listdir
+
+    def failing(path="."):
+        if str(path).endswith(".tmp"):
+            raise OSError("denied")
+        return real(path)
+
+    monkeypatch.setattr(os, "listdir", failing)
+    assert_blocked(repo, "rm -rf .tmp/keep*", "irreversible_delete")

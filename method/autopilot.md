@@ -181,10 +181,10 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 
 | `exclusions` | Việc | Rào | Mẫu hook nhận dạng (khi có file dấu) |
 |---|---|---|---|
-| `push` | đẩy lên remote | máy | `git push` |
-| `tag` | tạo, sửa tag | máy | mọi `git tag` **trừ** dạng chỉ đọc: `git tag` trần, có `-l`/`--list`, `-v`/`--verify`, `--contains`, `--no-contains`, `--merged`, `--no-merged`, `--points-at`; `git tag -d`/`--delete` chặn với lý do `irreversible_delete` |
-| `main_merge` | gộp vào nhánh chính | máy | `git merge`, `git pull` khi nhánh hiện tại là `main`/`master`; trong lệnh ghép, `git merge`/`git pull` đứng **sau** một phần `git checkout` hay `git switch` tới `main`/`master` (xét như đang ở nhánh chính); `gh pr merge` |
-| `irreversible_delete` | xoá không đảo ngược | máy, một phần | `rm` có cụm cờ chứa `r`/`R` (`-rf`, `-fr`, `-Rf`, `-r -f`) hay `--recursive`; `git reset --hard`; `git branch -D`; `git clean` có `-f`/`--force`; `git tag -d`/`--delete`; `git worktree remove` có `-f`/`--force`; PowerShell `Remove-Item` và bí danh (`ri`, `rm`, `del`, `rmdir`, `rd`) có tham số bắt đầu `-r` (`-Recurse` viết tắt); `rmdir /s`, `rd /s`. **Cho qua** `rm -r`/`rm -rf`/`Remove-Item -Recurse`/`rmdir /s` khi **mọi** đích là đường con thật sự nằm trong `<gốc repo>/.tmp/` (`<gốc repo>` = thư mục chứa `.git` đầu tiên khi đi lên từ thư mục làm việc của sự kiện) — không phải chính `.tmp/`, không chứa `..`, không trỏ tới file dấu `.tmp/autopilot.json`; đích xét **theo chuỗi trước khi shell mở rộng**: glob chỉ ở thành phần cuối và không được khớp `autopilot.json` (`.tmp/*`, `.tmp/a*` chặn; `.tmp/out*` qua), đích có `$`, `%`, `~`, dấu phẩy, ngoặc nhọn thì chặn; đã gặp `cd` trước đó trong lệnh ghép thì không còn ngoại lệ; không theo liên kết: `realpath` của đích (và của `.tmp/`) phải còn nằm trong `.tmp/` thật, ra ngoài hoặc trỏ tới file dấu thì chặn; còn lại vẫn chặn (giới hạn đã biết: phiên con vẫn xoá được file dấu bằng xoá từng file, mục 5.1) |
+| `push` | đẩy lên remote | máy | `git push`, `git subtree push` |
+| `tag` | tạo, sửa tag | máy | `gh release create`; mọi `git tag` **trừ** dạng chỉ đọc: `git tag` trần, có `-l`/`--list`, `-v`/`--verify`, `--contains`, `--no-contains`, `--merged`, `--no-merged`, `--points-at`; `git tag -d`/`--delete` chặn với lý do `irreversible_delete` |
+| `main_merge` | gộp vào nhánh chính | máy | `git merge`, `git pull` khi nhánh hiện tại là `main`/`master`; nhánh đọc từ `.git/HEAD` của thư mục mà lệnh git thật sự chạy: sau `cd`/`pushd`/`Set-Location <dir>` hay `git -C <dir>` thì đọc nhánh của `<dir>`, còn `<dir>` không xác định được (biến, `cd -`, `--git-dir`, `--work-tree`, `GIT_DIR=`) thì coi là `main`; trong lệnh ghép, `git merge`/`git pull` đứng **sau** một phần `git checkout` hay `git switch` tới `main`/`master` (xét như đang ở nhánh chính); `gh pr merge` (`-R`/`--repo` ở vị trí nào cũng nhận ra) |
+| `irreversible_delete` | xoá không đảo ngược | máy, một phần | `rm` có cụm cờ chứa `r`/`R` (`-rf`, `-fr`, `-Rf`, `-r -f`) hay `--recursive`; `git reset --hard`; `git branch -D`; `git clean` có `-f`/`--force`; `git tag -d`/`--delete`; `git worktree remove` có `-f`/`--force`; PowerShell `Remove-Item` và bí danh (`ri`, `rm`, `del`, `rmdir`, `rd`) có tham số bắt đầu `-r` (`-Recurse` viết tắt); `rmdir /s`, `rd /s`; `find … -delete`; `find … -exec`/`-execdir` mà lệnh sau nó thuộc mục này. **Cho qua** `rm -r`/`rm -rf`/`Remove-Item -Recurse`/`rmdir /s` khi **mọi** đích là đường con thật sự nằm trong `<gốc repo>/.tmp/` (`<gốc repo>` = thư mục chứa `.git` đầu tiên khi đi lên từ thư mục làm việc của sự kiện) — không phải chính `.tmp/`, không chứa `..`, không trỏ tới file dấu `.tmp/autopilot.json`; đích xét **theo chuỗi trước khi shell mở rộng**: glob chỉ ở thành phần cuối và không được khớp `autopilot.json` (`.tmp/*`, `.tmp/a*` chặn; `.tmp/out*` qua); glob được mở rộng bằng cách liệt kê thư mục ở thư mục lệnh và **từng mục khớp** phải qua kiểm `realpath` (không mở rộng được hoặc có mục ra ngoài `.tmp/` hay là file dấu thì chặn); tên file dấu so không phân biệt hoa thường, đích có `$`, `%`, `~`, dấu phẩy, ngoặc nhọn thì chặn; đã gặp `cd` trước đó trong lệnh ghép thì không còn ngoại lệ; không theo liên kết: `realpath` của đích (và của `.tmp/`) phải còn nằm trong `.tmp/` thật, ra ngoài hoặc trỏ tới file dấu thì chặn; còn lại vẫn chặn (giới hạn đã biết: phiên con vẫn xoá được file dấu bằng xoá từng file, mục 5.1) |
 | `branch_merge_local` | gộp cục bộ nhánh sprint | máy | `git merge` bất kỳ khi mục còn trong `exclusions` |
 | `version` | tăng số phiên bản | hành vi | — |
 | `publish` | đăng công khai, phát hành | hành vi | — |
@@ -203,7 +203,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 - **Tìm file dấu:** từ thư mục làm việc của sự kiện đi lên, xét `.tmp/autopilot.json` ở từng cấp; dừng sau cấp đầu
   tiên có `.git` — thư mục, hoặc **file** `gitdir:` của worktree; không gặp `.git` thì đi tới gốc ổ đĩa. Vì vậy worktree
   không thấy file dấu ở gốc repo chính — điều phối phải chép file dấu vào từng worktree (mục 5.2).
-- **Lệnh ghép:** tách thô theo `&&`, `||`, `;`, `|` và xuống dòng, không hiểu dấu nháy, rồi xét từng phần theo thứ tự.
+- **Lệnh ghép:** tách thô theo `&&`, `||`, `;`, `|`, `&`, xuống dòng, ngoặc tròn và dấu huyền, không hiểu dấu nháy, rồi xét từng phần theo thứ tự. Tiền tố kèm cờ/đối số của nó (`timeout 60`, `env -i VAR=x`, `sudo -u x`, `nice -n 5`, `command -p`, `xargs …`, `nohup`, `time`) được bỏ trước khi xét. `bash -c`/`sh -c`/`pwsh -Command`/`cmd /c` được mở lớp trực tiếp, tối đa ba lớp; lồng sâu hơn thì chặn.
   Chấp nhận chặn nhầm (vd `git commit -m "a && git push"`): đổi câu commit, không viết bộ phân tích shell. Dọn thư mục
   tạm bên trong `.tmp/` lúc autopilot bật được cho qua theo ngoại lệ ở dòng `irreversible_delete` của bảng mục 5.
 - **File dấu hỏng hay thiếu mục:** JSON hỏng → chặn mọi lệnh khớp mẫu (đóng an toàn). `exclusions` thiếu mục **bắt
@@ -212,14 +212,17 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 - **Chặn được:** lệnh shell gõ thẳng khớp mẫu bảng trên, trong phiên có hook đã đăng ký, đang chạy, và có file dấu
   trên đường từ thư mục làm việc lên gốc repo.
 - **Không chặn được** (đều là rào hành vi, điều phối phải tự soát):
-  - lệnh gián tiếp: script, Makefile, alias git, `sh -c`, `python -c` gọi tiến trình con, PowerShell `&`;
+  - lệnh gián tiếp: script, Makefile, alias git, `python -c` gọi tiến trình con, thoát ký tự (`g\it`), `$(which git)`, `Start-Process`, `Invoke-Expression`;
+  - Codex `write_stdin` (gõ lệnh vào phiên shell đã mở), tool khác chạy lệnh shell ngoài tên đã nhận;
+  - lệnh `gh api` (gộp PR, tạo ref qua API), `gh release edit|delete`;
   - đường vào nhánh chính không qua `merge`/`pull`: `git commit` hay `git cherry-pick` khi đang ở `main`/`master`,
-    `git branch -f main …`, `git update-ref`, `git -C <thư mục khác> merge`; điều phối soát `git log main`/`master`
+    `git branch -f main …`, `git update-ref`; điều phối soát `git log main`/`master`
     khi nhận báo;
   - công cụ không phải shell: ghi file, công cụ MCP (vd gộp PR qua API GitHub), công cụ tải web;
   - hook chưa đăng ký, Codex chưa được **người dùng** trust qua `/hooks`, hook hết giờ ở host không có khoá
     `onFailure: block`, Antigravity trả `{}` ở `PreToolUse` (chưa xác minh — skill `hooks-guardrails`, Gotchas);
   - phiên con chạy ở thư mục ngoài repo có file dấu;
+  - **sửa `scripts/check.py` hằng `AUTOPILOT_EXCLUSIONS`, `scripts/autopilot_guard.py` hay cấu hình hook** — danh sách mục hook thi hành lấy từ hằng của `check.py` (test ghim đúng 13 mục nên bớt mục thì test đỏ, nhưng phiên con sửa được cả test); điều phối soát `git diff` của hai file đó khi nhận báo;
   - **phiên con có quyền ghi xoá hoặc sửa được file dấu** — chế độ toàn quyền không hỏi trước khi ghi `.tmp/`. Đây là
     giới hạn lớn nhất còn lại: file dấu nằm trong tầm ghi của phiên con, chưa có chỗ đặt ngoài tầm đó trên cùng một
     tài khoản máy. Bù bằng kiểm: điều phối **kiểm sự có mặt và nội dung file dấu** trong thư mục của phiên con **khi
