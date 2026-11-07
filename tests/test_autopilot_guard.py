@@ -641,3 +641,63 @@ def test_guard_tmp_glob_unreadable_parent_blocks(tmp_path, monkeypatch):
 
     monkeypatch.setattr(os, "listdir", failing)
     assert_blocked(repo, "rm -rf .tmp/keep*", "irreversible_delete")
+
+
+# ===================== vòng sửa 2 (S-N-RF1, S-N-RF2, T-N-RF1, S-RF6 phần còn) =====================
+
+@pytest.mark.parametrize("cmd", [
+    "(cd {feat} && true); git merge x", "bash -c 'cd {feat}'; git merge x", "cd {feat} | true; git merge x",
+    "(cd {feat}); git pull", "cd {feat} & git merge x", "(cd {main}); cd {feat}; git merge x",
+])
+def test_guard_cd_in_subshell_does_not_hide_main(tmp_path, cmd):
+    """S-N-RF1: cd trong subshell/pipeline/bash -c không đổi thư mục của lệnh sau; thư mục ban đầu là main thì vẫn chặn."""
+    mainrepo = make_repo(tmp_path / "m", branch="main", marker=good_marker(WITHOUT_BRANCH))
+    feat = make_repo(tmp_path / "f", branch="spr-13")
+    assert_blocked(mainrepo, cmd.format(feat=fwd(feat), main=fwd(mainrepo)), "main_merge")
+
+
+def test_guard_cd_visited_dirs_all_count(tmp_path):
+    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
+    mainrepo = make_repo(tmp_path / "m", branch="main")
+    feat = make_repo(tmp_path / "f", branch="spr-13")
+    # đã từng vào thư mục main (kể cả trong subshell) rồi mới sang nhánh khác: đóng an toàn
+    assert_blocked(sprint, "cd {m}; (cd {f}); git merge x".format(m=fwd(mainrepo), f=fwd(feat)), "main_merge")
+    # chỉ đi qua các thư mục không phải main: qua
+    assert_allowed(sprint, "cd {f} && git merge x".format(f=fwd(feat)))
+    # git -C vẫn đọc nhánh của chính thư mục đó, bất kể cd trước
+    main_marked = make_repo(tmp_path / "mm", branch="main", marker=good_marker(WITHOUT_BRANCH))
+    assert_allowed(main_marked, "git -C {f} merge x".format(f=fwd(feat)))
+    assert_blocked(sprint, "git -C {m} merge x".format(m=fwd(mainrepo)), "main_merge")
+
+
+@pytest.mark.parametrize("cmd", [
+    "Push-Location {main}; git merge x", "push-location {main} && git pull", "Pop-Location; git merge x", "popd; git merge x",
+    "env -C {main} git merge spr-12", "env --chdir={main} git merge spr-12", "env --chdir {main} git pull",
+    "sudo -D {main} git merge x", "sudo --chdir={main} git merge x", "env -i -C {main} git merge x",
+])
+def test_guard_other_directory_changers(tmp_path, cmd):
+    """S-N-RF2 / T-N-RF1: Push/Pop-Location, env -C/--chdir, sudo -D/--chdir đổi thư mục như cd."""
+    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
+    mainrepo = make_repo(tmp_path / "m", branch="main")
+    assert_blocked(sprint, cmd.format(main=fwd(mainrepo)), "main_merge")
+
+
+def test_guard_directory_changers_to_non_main_allowed(tmp_path):
+    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
+    feat = make_repo(tmp_path / "f", branch="spr-13")
+    for cmd in ("Push-Location {f}; git merge x", "env -C {f} git merge x", "sudo -D {f} git merge x", "env --chdir={f} git pull"):
+        assert_allowed(sprint, cmd.format(f=fwd(feat)))
+
+
+def test_guard_pull_is_a_merge_when_branch_merge_local_listed(tmp_path):
+    """S-RF6 phần còn: `git pull` gộp cục bộ → khi thiếu `+nhánh` chặn ở mọi nhánh."""
+    default = make_repo(tmp_path / "d", branch="spr-12", marker=good_marker())
+    assert_blocked(default, "git pull", "branch_merge_local")
+    assert_blocked(default, "git pull --ff-only", "branch_merge_local")
+    assert_blocked(default, "git pull origin spr-12", "branch_merge_local")
+    assert_blocked(default, "git -C . pull", "branch_merge_local")
+    onmain = make_repo(tmp_path / "m", branch="main", marker=good_marker())
+    assert_blocked(onmain, "git pull", "main_merge")
+    plus = make_repo(tmp_path / "p", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
+    assert_allowed(plus, "git pull")  # +nhánh: gộp cục bộ ngoài nhánh chính được phép
+    assert_allowed(default, "git fetch")

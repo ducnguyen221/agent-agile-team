@@ -63,7 +63,9 @@ GIT_VALUE_OPTIONS = frozenset({"-C", "-c", "--git-dir", "--work-tree", "--namesp
 GIT_REDIRECT_OPTIONS = frozenset({"--git-dir", "--work-tree"})  # đổi nơi git thật sự làm việc: không đoán được thư mục
 TAG_READ_ONLY = frozenset({"-l", "--list", "-v", "--verify", "--contains", "--no-contains", "--merged", "--no-merged", "--points-at"})
 DELETE_COMMANDS = frozenset({"rm", "ri", "del", "erase", "rmdir", "rd", "remove-item"})
-CD_COMMANDS = frozenset({"cd", "chdir", "pushd", "popd", "set-location", "sl"})
+CD_COMMANDS = frozenset({"cd", "chdir", "pushd", "popd", "set-location", "sl", "push-location", "pop-location"})
+POP_COMMANDS = frozenset({"popd", "pop-location"})  # về thư mục không biết
+CHDIR_OPTIONS = {"env": frozenset({"-C", "--chdir"}), "sudo": frozenset({"-D", "--chdir"})}  # tiền tố đổi thư mục như cd
 FIND_EXEC = frozenset({"-exec", "-execdir", "-ok", "-okdir"})
 UNSAFE_PATH_CHARS = set(",$%`~{}()<>!^\"'\n\r;|&")
 GLOB_CHARS = set("*?[")
@@ -182,14 +184,25 @@ class Context:
         self.active = active
         self.cwd = os.path.abspath(cwd)
         self.root = find_repo_root(self.cwd)
-        self.dir: str | None = self.cwd  # thư mục hiện hành sau các `cd` đã gặp; None = không biết
+        self.dir: str | None = self.cwd  # thư mục sau `cd` gần nhất (để ghép `cd` tương đối); None = không biết
+        self.visited: list[str | None] = [self.cwd]  # mọi thư mục từng vào, gồm cả `cd` trong subshell/pipeline/bash -c
         self.forced_main = False  # đã gặp `git checkout|switch main|master` trong lệnh ghép
         self.cwd_changed = False  # đã gặp `cd`: đường tương đối của lệnh xoá không còn đáng tin
         self._heads: dict[str, bool] = {}
 
-    def on_main(self, directory: str | None) -> bool:
-        """Nhánh hiện tại của repo chứa `directory` là main/master? Không xác định được → True (đóng an toàn)."""
-        if self.forced_main or directory is None:
+    def enter(self, directory: str | None) -> None:
+        """Ghi nhận một lần đổi thư mục (cd, pushd, env -C…). `cd` trong subshell hay vế pipeline không đổi thư mục của lệnh sau,
+        nên lệnh git sau đó xét MỌI thư mục từng vào: một nơi đang ở main (hay không biết) là coi như main."""
+        self.cwd_changed = True
+        self.dir = directory
+        self.visited.append(directory)
+
+    def on_main(self, directories: list[str | None]) -> bool:
+        """Nhánh hiện tại của repo chứa một trong `directories` là main/master? Không xác định được → True (đóng an toàn)."""
+        return self.forced_main or any(self._dir_on_main(d) for d in directories)
+
+    def _dir_on_main(self, directory: str | None) -> bool:
+        if directory is None:
             return True
         root = find_repo_root(directory)
         if root is None:
@@ -219,9 +232,10 @@ class Context:
         return head[len(prefix):] in MAIN_BRANCHES
 
 
-def _git_parse(args: list[str], ctx: Context, redirected: bool) -> tuple[str, list[str], str | None]:
-    """(lệnh con, đối số còn lại, thư mục git làm việc). `-C` đổi thư mục; `--git-dir`/`--work-tree`/GIT_DIR → không biết."""
-    where: str | None = None if redirected else ctx.dir
+def _git_parse(args: list[str], ctx: Context, redirected: bool) -> tuple[str, list[str], list[str | None]]:
+    """(lệnh con, đối số còn lại, các thư mục git có thể làm việc). Không có `-C`: mọi thư mục từng vào (`ctx.visited`);
+    `-C <dir>` đọc nhánh của chính `<dir>` (ghép với từng thư mục từng vào nếu tương đối); `--git-dir`/`--work-tree`/GIT_DIR → không biết."""
+    where: list[str | None] = [None] if redirected else list(ctx.visited)
     index = 0
     while index < len(args):
         arg = args[index]
@@ -229,9 +243,10 @@ def _git_parse(args: list[str], ctx: Context, redirected: bool) -> tuple[str, li
             return arg, args[index + 1:], where
         flag = arg.split("=", 1)[0]
         if flag in GIT_REDIRECT_OPTIONS:
-            where = None
+            where = [None]
         elif arg == "-C":
-            where = _resolve_dir(where, args[index + 1] if index + 1 < len(args) else None)
+            target = args[index + 1] if index + 1 < len(args) else None
+            where = [_resolve_dir(w, target) for w in where]
         index += 2 if arg in GIT_VALUE_OPTIONS else 1
     return "", [], where
 
@@ -256,8 +271,8 @@ def _git_item(args: list[str], ctx: Context, redirected: bool) -> str | None:
         if any(a in ("--abort", "--quit") for a in rest):
             return None
         return "main_merge" if ctx.on_main(where) else ("branch_merge_local" if "branch_merge_local" in ctx.active else None)
-    if sub == "pull":
-        return "main_merge" if ctx.on_main(where) else None
+    if sub == "pull":  # pull = fetch + merge: gộp cục bộ ở mọi nhánh, kể cả `--ff-only`
+        return "main_merge" if ctx.on_main(where) else ("branch_merge_local" if "branch_merge_local" in ctx.active else None)
     if sub == "reset":
         return "irreversible_delete" if "--hard" in rest else None
     if sub == "branch":
@@ -360,7 +375,7 @@ def tmp_target_ok(target: str, ctx: Context) -> bool:
     return True
 
 
-def _strip_prefixes(tokens: list[str]) -> tuple[list[str], bool]:
+def _strip_prefixes(tokens: list[str], ctx: Context) -> tuple[list[str], bool]:
     """Bỏ tiền tố kèm cờ/đối số của nó (`timeout 60`, `env -i VAR=x`, `sudo -u x`, `nice -n 5`, `xargs -0`…).
     Trả (token còn lại, có gán GIT_DIR/GIT_WORK_TREE?)."""
     redirected = False
@@ -393,7 +408,14 @@ def _strip_prefixes(tokens: list[str]) -> tuple[list[str], bool]:
                 redirected = redirected or assign.group(1) in GIT_DIR_VARS
                 index += 1
             elif token.startswith("-") and len(token) > 1:
-                index += 2 if token in value_opts else 1
+                flag = token.split("=", 1)[0]
+                if flag in CHDIR_OPTIONS.get(name, ()):  # env -C/--chdir, sudo -D/--chdir: đổi thư mục như cd
+                    attached = token.partition("=")[2] if "=" in token else None
+                    value = attached if attached is not None else (tokens[index + 1] if index + 1 < len(tokens) else None)
+                    ctx.enter(_resolve_dir(ctx.dir, value))
+                    index += 1 if attached is not None else 2
+                else:
+                    index += 2 if token in value_opts else 1
             else:
                 break
         else:
@@ -406,14 +428,13 @@ def _strip_prefixes(tokens: list[str]) -> tuple[list[str], bool]:
 
 
 def _segment_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
-    tokens, redirected = _strip_prefixes(tokens)
+    tokens, redirected = _strip_prefixes(tokens, ctx)
     if not tokens:
         return None
     name, args = _exe_name(tokens[0]), tokens[1:]
     if name in CD_COMMANDS:
-        ctx.cwd_changed = True
         target = next((a for a in args if not a.startswith("-")), None)
-        ctx.dir = _resolve_dir(ctx.dir, target) if name != "popd" else None
+        ctx.enter(None if name in POP_COMMANDS else _resolve_dir(ctx.dir, target))
         return None
     if name in SHELL_WRAPPERS:
         for index, arg in enumerate(args):
