@@ -977,3 +977,105 @@ def test_hooks_json_registers_guard():
         assert hook["type"] == "command" and hook["timeout"] == 10 and hook["onFailure"] == "block"
         assert hook["command"] == 'sh "${CLAUDE_PLUGIN_ROOT}/scripts/autopilot-hook.sh" --format claude'
     assert (REPO / "scripts" / "autopilot-hook.sh").is_file() and (REPO / "scripts" / "autopilot_guard.py").is_file()
+
+
+# ===================== lối dừng tường minh: --clear =====================
+
+def clear_cli(directory):
+    out, err = io.StringIO(), io.StringIO()
+    rc = autopilot_guard.main(["--clear", str(directory)], stdin=io.StringIO(""), stdout=out, stderr=err)
+    return rc, out.getvalue(), err.getvalue()
+
+
+def test_clear_removes_only_the_marker_file(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    (repo / ".tmp" / "keep.txt").write_text("x", encoding="utf-8")
+    (repo / "autopilot.json").write_text("{}", encoding="utf-8")  # cùng tên nhưng không ở .tmp/
+    rc, out, err = clear_cli(repo)
+    assert rc == 0 and err == "" and "đã xoá" in out and "autopilot.json" in out
+    assert not (repo / ".tmp" / "autopilot.json").exists()
+    assert (repo / ".tmp" / "keep.txt").exists() and (repo / "autopilot.json").exists() and (repo / ".git" / "HEAD").exists()
+    # đã xoá rồi: báo và thoát 0
+    rc, out, _ = clear_cli(repo)
+    assert rc == 0 and "không có file dấu" in out
+    # thư mục không có .tmp
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    rc, out, _ = clear_cli(empty)
+    assert rc == 0 and "không có file dấu" in out
+    # tên viết hoa
+    (repo / ".tmp" / "AutoPilot.JSON").write_text("{}", encoding="utf-8")
+    rc, out, _ = clear_cli(repo)
+    assert rc == 0 and "đã xoá" in out and not (repo / ".tmp" / "AutoPilot.JSON").exists()
+
+
+def test_clear_does_not_touch_a_directory_named_like_the_marker(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12")
+    (repo / ".tmp" / "autopilot.json").mkdir()
+    rc, out, _ = clear_cli(repo)
+    assert rc == 0 and "không có file dấu" in out and (repo / ".tmp" / "autopilot.json").is_dir()
+
+
+def test_clear_oserror_reported(tmp_path, monkeypatch):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+
+    def refuse(path):
+        raise PermissionError("denied")
+
+    monkeypatch.setattr(os, "remove", refuse)
+    rc, _, err = clear_cli(repo)
+    assert rc == 1 and "không xoá được" in err
+
+
+def test_clear_cli_subprocess_needs_no_format(tmp_path):
+    import subprocess
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    done = subprocess.run([sys.executable, str(SCRIPTS / "autopilot_guard.py"), "--clear", str(repo)], capture_output=True, text=True,
+                          encoding="utf-8", cwd=str(tmp_path))
+    assert done.returncode == 0 and not (repo / ".tmp" / "autopilot.json").exists()
+    missing = subprocess.run([sys.executable, str(SCRIPTS / "autopilot_guard.py")], capture_output=True, text=True, encoding="utf-8",
+                             cwd=str(tmp_path), input="{}")
+    assert missing.returncode == 2 and "--format" in missing.stderr  # argparse lỗi tham số
+
+
+def test_guard_allows_clear_command_of_this_plugin(tmp_path):
+    repo = make_repo(tmp_path / "a", branch="spr-12", marker=good_marker())
+    other = make_repo(tmp_path / "b", branch="spr-12", marker=good_marker())
+    guard = fwd(SCRIPTS / "autopilot_guard.py")
+    launcher = fwd(SCRIPTS / "autopilot-hook.sh")
+    for cmd in ("python {g} --clear {d}", "python3 {g} --clear {d}", "py -3 {g} --clear {d}", "python -I {g} --clear {d}",
+                "python -X utf8 {g} --clear {d}", "sh {l} --clear {d}", "bash {l} --clear {d}", "python {g} --clear {d}/",
+                "cd {d} && python {g} --clear {d}", "python {g} --clear ."):
+        assert_allowed(repo, cmd.format(g=guard, l=launcher, d=fwd(other)))
+    # chính file dấu của thư mục đang bật cũng dừng được bằng lối này
+    assert_allowed(repo, "python {g} --clear {d}".format(g=guard, d=fwd(repo)))
+
+
+@pytest.mark.parametrize("cmd", [
+    "python other.py --clear {d}/.tmp/autopilot.json", "python other.py --clear {d}/.tmp", "python {g} other.py --clear {d}/.tmp",
+    "python /elsewhere/autopilot_guard.py --clear {d}/.tmp/autopilot.json",
+    "python {g} --clear {d} > {d}/.tmp/autopilot.json", "python {g} --clear {d}>{d}/.tmp/autopilot.json",
+    "python {g} --format claude --clear {d}/.tmp/autopilot.json",
+])
+def test_guard_blocks_lookalike_clear_commands(tmp_path, cmd):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    rc, _, err = run("claude", claude(cmd.format(g=fwd(SCRIPTS / "autopilot_guard.py"), d=fwd(repo)), repo))
+    assert rc == 2 and "file dấu là rào" in err, (cmd, err)
+
+
+def test_clear_command_recognizer_is_exact():
+    g, launcher = fwd(SCRIPTS / "autopilot_guard.py"), fwd(SCRIPTS / "autopilot-hook.sh")
+    ok = autopilot_guard._is_clear_command
+    assert ok(["python", g, "--clear", "d"]) and ok(["sh", launcher, "--clear", "d"]) and ok(["py", "-3", g, "--clear", "d"])
+    for tokens in (["python", g, "--clear", "d", "--extra"], ["python", g, "--clear"], ["python", g, "--clear", "-x"],
+                   ["ruby", g, "--clear", "d"], ["python", "-c", "pass", g, "--clear", "d"], ["python", "other.py", "--clear", "d"],
+                   ["sh", g, "--clear", "d"], ["python", launcher, "--clear", "d"], ["python", g, "--clear", "d>x"], ["python", g, "--clear", ""],
+                   ["python", g, "--format", "claude"], []):
+        assert not ok(tokens), tokens
+
+
+def test_guard_still_blocks_every_other_marker_removal(tmp_path):
+    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
+    for cmd in ("rm {d}/.tmp/autopilot.json", "rm -rf {d}/.tmp", "Remove-Item {d}/.tmp/autopilot.json", "mv {d}/.tmp/autopilot.json {d}/x"):
+        rc, _, err = run("claude", claude(cmd.format(d=fwd(repo)), repo))
+        assert rc == 2, cmd

@@ -1,6 +1,10 @@
 """Rào máy autopilot — hook PreToolUse từ chối lệnh shell thuộc danh sách loại (method/autopilot.md mục 5). Chỉ thư viện chuẩn.
 
 Gọi: python autopilot_guard.py --format {claude,codex,antigravity}; đọc JSON sự kiện ở stdin.
+Lối dừng tường minh: python autopilot_guard.py --clear <thư mục làm việc> xoá đúng <thư mục>/.tmp/autopilot.json (chỉ file đó; in đường
+đã xoá; không có thì báo và thoát 0). Hook nhận ra lệnh này (đúng script của plugin, đúng dạng `--clear <đường>`, không thêm gì khác)
+và cho qua kể cả khi có file dấu; mọi đường xoá khác vẫn bị chặn. ĐÂY LÀ RÀO HÀNH VI: phiên con gọi được lệnh này về mặt máy, nhưng luật
+cấm — chỉ điều phối (sau `Dừng autopilot.` hay khi thu hồi) hoặc người dùng được gọi, và lần gọi hiện trong transcript để soát.
 Chỉ hoạt động khi có file dấu `.tmp/autopilot.json`: tìm từ thư mục chạy lệnh của sự kiện (`tool_input.workdir`/`cwd`,
 `toolCall.args.Cwd`, rồi `cwd` của phiên) đi lên, dừng sau cấp đầu tiên có `.git` (thư mục hoặc file `gitdir:` của worktree);
 thư mục lệnh và thư mục phiên khác nhau thì thấy file dấu ở đâu cũng bật. Không có file dấu → cho qua (claude/codex thoát 0
@@ -82,6 +86,7 @@ PATH_KEYS = ("file_path", "path", "notebook_path", "TargetFile")
 PATCH_PREFIXES = ("*** Add File: ", "*** Update File: ", "*** Delete File: ", "*** Move to: ")
 REDIRECT = re.compile(r"^(?:[0-9]*|&)>>?\|?(.*)$", re.S)
 DYNAMIC_CHARS = set("$%`")
+REDIRECT_INSIDE = re.compile(r">>?\|?")
 LINE_CONTINUATION = re.compile(r"[\\`]\r?\n")
 PIPE = re.compile(r"(?<!\|)\|(?!\|)")
 EVAL_COMMANDS = frozenset({"eval", "iex", "invoke-expression"})
@@ -92,6 +97,58 @@ READ_ONLY_COMMANDS = frozenset({
     "uniq", "nl", "od", "hexdump", "xxd", "strings", "get-filehash", "find", "awk"})
 READ_ONLY_GIT = frozenset({"status", "log", "diff", "show", "ls-files", "check-ignore", "blame", "ls-tree", "cat-file", "rev-parse",
                            "grep", "describe", "shortlog", "rev-list"})
+
+
+PYTHON_NAME = re.compile(r"^(?:py|python[0-9.]*)$")
+
+
+def clear_marker(directory: str, stdout: TextIO, stderr: TextIO) -> int:
+    """`--clear <dir>`: xoá đúng `<dir>/.tmp/autopilot.json` (tên so không phân biệt hoa thường), không đụng gì khác."""
+    folder = os.path.join(os.path.abspath(directory), MARKER_PARTS[0])
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        names = []
+    removed = []
+    for entry in names:
+        path = os.path.join(folder, entry)
+        if entry.lower() == MARKER_PARTS[1] and (os.path.isfile(path) or os.path.islink(path)):
+            try:
+                os.remove(path)
+            except OSError as exc:
+                stderr.write("không xoá được {}: {}\n".format(path, exc))
+                return 1
+            removed.append(path)
+    if removed:
+        for path in removed:
+            stdout.write("đã xoá {}\n".format(path))
+    else:
+        stdout.write("không có file dấu: {}\n".format(os.path.join(folder, MARKER_PARTS[1])))
+    return 0
+
+
+def _is_clear_command(tokens: list[str]) -> bool:
+    """`python <plugin>/scripts/autopilot_guard.py --clear <đường>` (hay `sh <plugin>/scripts/autopilot-hook.sh --clear <đường>`): đúng
+    script của plugin này, không đối số nào khác, đích không chứa chuyển hướng hay nháy."""
+    if len(tokens) < 4 or tokens[-2] != "--clear":
+        return False
+    target = tokens[-1]
+    if not target or target.startswith("-") or set("<>\"'") & set(target):
+        return False
+    name = _exe_name(tokens[0])
+    here = os.path.dirname(os.path.realpath(__file__))
+    if PYTHON_NAME.match(name):
+        wanted = os.path.join(here, "autopilot_guard.py")
+    elif name in ("sh", "bash"):
+        wanted = os.path.join(here, "autopilot-hook.sh")
+    else:
+        return False
+    script_at = len(tokens) - 3
+    for token in tokens[1:script_at]:
+        if not token.startswith("-") and not (token == "utf8" and "-X" in tokens[1:script_at]):
+            return False
+    script = tokens[script_at]
+    return script.startswith("-") is False and os.path.normcase(os.path.realpath(script)) == os.path.normcase(wanted)
 
 
 def known_exclusions() -> tuple[str, ...]:
@@ -516,6 +573,9 @@ def _marker_item(tokens: list[str], ctx: Context) -> str | None:
                 target = tokens[index]
             if _marker_ref(target, ctx):
                 return MARKER
+        elif ">" in token and not token.startswith("<"):  # chuyển hướng dính liền: `lệnh>đích`
+            if _marker_ref(token[REDIRECT_INSIDE.search(token).end():], ctx):
+                return MARKER
         elif index > 0 and not token.startswith("<") and _marker_ref(token, ctx):
             refs = True
         index += 1
@@ -525,6 +585,8 @@ def _marker_item(tokens: list[str], ctx: Context) -> str | None:
 def _segment_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
     tokens, redirected = _strip_prefixes(tokens, ctx)
     if not tokens:
+        return None
+    if _is_clear_command(tokens):  # lối dừng tường minh của điều phối (rào hành vi, xem docstring)
         return None
     return _command_item(tokens, redirected, ctx, depth) or _marker_item(tokens, ctx)
 
@@ -800,8 +862,13 @@ def _allow(fmt: str, stdout: TextIO) -> int:
 
 def main(argv: list[str] | None = None, stdin: TextIO = sys.stdin, stdout: TextIO = sys.stdout, stderr: TextIO = sys.stderr) -> int:
     parser = argparse.ArgumentParser(description="Rào máy autopilot (PreToolUse).")
-    parser.add_argument("--format", required=True, choices=FORMATS)
+    parser.add_argument("--format", choices=FORMATS)
+    parser.add_argument("--clear", metavar="DIR", help="xoá <DIR>/.tmp/autopilot.json rồi thoát")
     args = parser.parse_args(argv)
+    if args.clear is not None:
+        return clear_marker(args.clear, stdout, stderr)
+    if args.format is None:
+        parser.error("the following arguments are required: --format")
     debug = os.environ.get("AUTOPILOT_GUARD_DEBUG", "") not in ("", "0")
     try:
         reason = _evaluate(stdin.read())
