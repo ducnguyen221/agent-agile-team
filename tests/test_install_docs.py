@@ -1,7 +1,7 @@
 """Tài liệu cài đặt và tài liệu người dùng: prompt dán ngắn, đủ bốn harness, link nội bộ không gãy.
 
 Hỏng kiểu này thì hỏng im lặng: prompt dài tới mức người dùng cắt mất nửa, `INSTALL.md` quên một harness,
-một file đổi tên làm link chết, hay `CLAUDE.md` tự mọc luật riêng lệch `AGENTS.md`. Test đọc đúng những chỗ đó
+một file đổi tên làm link chết, hay `CLAUDE.md` quay lại gốc repo (làm `validate --strict` đỏ). Test đọc đúng những chỗ đó
 (khuôn chuẩn hóa `A5`, `A2`, `A10` — `docs/standardization.md`).
 """
 
@@ -141,8 +141,10 @@ def test_tilde_detector_catches_the_broken_windows_command():
 # --- Con trỏ luật (`A2`)------------------------------------------------------------------------------
 
 
-def test_claude_md_is_exactly_the_import_line():
-    assert read("CLAUDE.md").strip() == "@AGENTS.md"
+def test_no_root_claude_md():
+    """`claude plugin validate --strict` đỏ khi plugin có `CLAUDE.md` ở gốc; luật lõi vào Claude Code qua dòng import
+    cấp người dùng, hoặc bản ≥ 2.1.277 tự đọc `AGENTS.md` (`hosts/claude/README.md`)."""
+    assert not (REPO / "CLAUDE.md").exists()
 
 
 def test_gemini_md_only_points_to_agents_md():

@@ -194,7 +194,6 @@ Luật lõi ở một chỗ, chi tiết tách theo thư mục; mỗi thư mục 
 ```text
 agent-agile-team/
 ├── AGENTS.md            luật lõi — agent đọc mỗi phiên (≤120 dòng, ≤10 KB)
-├── CLAUDE.md            một dòng @AGENTS.md cho Claude Code
 ├── GEMINI.md            con trỏ tới AGENTS.md cho Antigravity
 ├── README.md · README.vi.md   giới thiệu ngắn (Anh · Việt)
 ├── GUIDE.md             sprint đầu tiên — bạn làm gì, agent làm gì
