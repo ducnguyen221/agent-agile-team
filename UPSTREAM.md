@@ -74,7 +74,7 @@ Bảng dưới có 9 nhóm nguồn **tài liệu web** — không có SHA, nên 
 ### Tài liệu nội bộ của dự án dùng repo
 
 Bảng dưới có 1 nguồn **tài liệu nội bộ** — tài liệu của dự án người dùng, không công khai, không có SHA trong repo này; chỉ
-lấy ý, không chép văn bản; cột kiểm ghi ngày đọc và kích thước bản đã đọc.
+lấy ý, không chép văn bản; cột "Đọc gần nhất" ghi ngày đọc và kích thước bản đã đọc, cột "Kiểm" ghi khi nào phải đọc lại.
 
 | Nguồn | Vai trò | Nhận nội dung (phần nguồn → file đích) | Đọc gần nhất | Kiểm |
 |---|---|---|---|---|
