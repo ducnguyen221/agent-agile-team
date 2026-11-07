@@ -29,7 +29,7 @@ Muốn thêm chuyên đề mới: thêm thẻ trong `roles/verifier/specialists/
 
 - **Người làm không tự chấm.** Kiểm định do agent **khác** người làm: phiên hoặc subagent mới, nhận ngữ
   cảnh soạn riêng, không dán lịch sử phiên. Một nhãn agent không vừa giữ vai thực thi vừa giữ vai kiểm
-  định cho cùng một sản phẩm (công cụ `check` so `roles` trong frontmatter). Advisor không chấm việc người làm: nhãn Advisor trùng nhãn Analyst, Architect hoặc Gate Delegate là `self-review`; trùng Business Reviewer hay Tech Reviewer thì hợp lệ.
+  định cho cùng một sản phẩm (công cụ `check` so `roles` trong frontmatter). Advisor không chấm việc người làm: nhãn Advisor trùng nhãn Analyst, Architect hoặc Gate Delegate là `self-review`; trùng Business Reviewer hay Tech Reviewer thì hợp lệ. Advisor không làm người ký duyệt thay (`delegation.by`).
 - **QA cũng phải độc lập với người làm:** nhãn `qa` khác nhãn `implementer` và `architect`. Nếu trùng
   (việc **rất nhỏ**, một agent kiêm), mỗi `VR` ghi "tự kiểm, chưa độc lập" và kết luận tối đa là **Đạt có
   điều kiện** cho tới khi agent khác chạy lại. Cỡ nhỏ trở lên không tự kiểm: cỡ nhỏ có **một** reviewer khác

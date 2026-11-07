@@ -145,7 +145,7 @@ không có nghĩa duyệt kết quả. Agent không được suy một lời "ok
 
 ### Duyệt thay khi được phép
 
-Mặc định **tắt**: vắng `gate_N_mode` nghĩa là `human`, cổng là của người dùng. Chỉ khi người dùng nói câu cấp quyền, Analyst ghi khối `delegation` (lời cấp nguyên văn, thời điểm, phạm vi, hạn, nhãn và tier người duyệt, file luật nêu đích danh); tới cổng trong phạm vi và còn hạn, một agent T1 **khác người làm** ghi kết luận cổng với `gate_N_mode: delegated`, `gate_N_quote` bắt đầu `duyệt thay:`.
+Mặc định **tắt**: vắng `gate_N_mode` nghĩa là `human`, cổng là của người dùng. Chỉ khi người dùng nói câu cấp quyền, Analyst ghi khối `delegation` (lời cấp nguyên văn, thời điểm, phạm vi, hạn, nhãn và tier người duyệt, file luật nêu đích danh); tới cổng trong phạm vi và còn hạn, một agent T1 **khác người làm và không phải Advisor của sprint** ghi kết luận cổng với `gate_N_mode: delegated`, `gate_N_quote` bắt đầu `duyệt thay:`.
 
 - **Câu cấp quyền mẫu** (người dùng nói trong chat, đủ cổng · sprint · hạn):
   `Cho phép T1 duyệt thay Cổng 1 của SPR-NN tới hết sprint.` ·
@@ -175,7 +175,7 @@ delegation:
   buộc `Phương án chọn:` · `Phương án bị loại:` (mỗi phương án một lý do) · `Nếu sai thì tốn gì:`, kèm đường tới lời
   cấp.
 - **Giới hạn:** không miễn bốn điều kiện dừng (mục 5); không thay cổng sửa file luật (5 ý, gật trong chat) trừ file nêu đích
-  danh ở `files`; không hạ cỡ hay rủi ro; người duyệt là T1 và khác mọi nhãn thực thi của tài liệu; nhãn `secret`,
+  danh ở `files`; không hạ cỡ hay rủi ro; người duyệt là T1, khác mọi nhãn thực thi của tài liệu và khác nhãn Advisor (Advisor không làm `delegation.by`); nhãn `secret`,
   `auth` cấm duyệt thay; menu nhánh sau Cổng 2 vẫn hỏi người; người dùng thu hồi bất cứ lúc nào.
 - **`check` kiểm** hồ sơ này bằng luật `gate-delegation-invalid` (và `self-review` khi người duyệt trùng nhãn vai thực thi);
   chi tiết ở [scripts/README.md](../scripts/README.md).
