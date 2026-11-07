@@ -1494,6 +1494,11 @@ class Engine:
             return "delegation.orchestrator", f"delegation.orchestrator: {orchestrator!r} phải là nhãn phiên điều phối hoặc null"
         if isinstance(orchestrator, str) and orchestrator == block.get("by"):
             return "delegation.orchestrator", "delegation.orchestrator trùng delegation.by (phiên điều phối không ký cổng)"
+        files = block.get("files")
+        if isinstance(files, list):  # không phải danh sách: kiểm cũ báo
+            for item in files:  # lệnh autopilot chuẩn không nêu file nên `files` thực tế là []
+                if not (isinstance(item, str) and isinstance(grant, str) and item in grant):
+                    return "delegation.files", f"delegation.files có {item!r} không nêu trong lời cấp"
         return None
 
     def _record_gaps(self, doc: Doc) -> str | None:

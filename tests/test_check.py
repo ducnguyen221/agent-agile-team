@@ -2614,3 +2614,33 @@ def test_autopilot_orchestrator_and_program_wrong_type(tmp_path, key, value):
     root = make_sprint(tmp_path)
     autopilot_plan(root, **{key: value})
     _only_hit(root, key)
+
+
+def test_autopilot_files_not_named_in_grant_rejected(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, files="[AGENTS.md]")
+    _only_hit(root, "delegation.files có 'AGENTS.md' không nêu trong lời cấp")
+
+
+def test_autopilot_files_empty_ok_and_named_file_ok(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, files="[]")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+    named = make_sprint(tmp_path / "named")
+    autopilot_plan(named, files="[AGENTS.md]", grant='"Bật autopilot cổng 1 cho SPR-03, gồm AGENTS.md."')
+    assert [f.render() for f in check.check_paths([named]).findings] == []
+
+
+def test_autopilot_files_item_must_be_a_name_in_the_grant(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, files="[agents.md]")  # khớp nguyên văn, phân biệt hoa thường
+    _only_hit(root, "delegation.files có 'agents.md'")
+
+
+def test_legacy_grant_naming_a_file_unchanged(tmp_path):
+    """Lời cấp kiểu cũ không kích luật mới: file nêu trong lời cấp hợp lệ như trước; không nêu cũng không bị luật autopilot báo."""
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "files: []", "files: [AGENTS.md]")
+    _rewrite(root / "PLAN.md", "Cho phép T1 duyệt thay Cổng 1 của SPR-03", "Cho phép T1 duyệt thay Cổng 1 của SPR-03 gồm sửa file luật AGENTS.md")
+    assert [f.render() for f in check.check_paths([root]).findings] == []
