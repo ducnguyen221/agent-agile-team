@@ -28,3 +28,9 @@
 - Sai thì hại tới đâu, hoàn tác được không, có dữ liệu/người dùng thật không: …
 - Mức tự trị: hỏi mọi bước · trong phạm vi (mặc định) · tự quyết
   (tự quyết không hạ cỡ, không phải lời cấp duyệt thay)
+
+## 5. Khi giao Researcher (bỏ nếu không giao vai này)
+- Câu hỏi cần tra · nơi tìm · giới hạn (không đọc secret, không tải từ cloud): …
+- Hợp đồng: chỉ tìm kiếm, xem, đọc, tra cứu, trích xuất; mỗi mục kèm trích ngắn (≤2 dòng) và nguồn
+  (`file:dòng` hoặc URL + ngày đọc); không có thì ghi "không tìm thấy"; không suy diễn, không kết luận.
+- Số liệu nào sẽ dùng để quyết (người tổng hợp mở nguồn kiểm lại trước khi dùng): …

@@ -23,7 +23,7 @@ Cập nhật hay mở rộng skill/agent: quay lại nguồn gốc trong `UPSTRE
    rất nhỏ / nhỏ / vừa / lớn) · **có mở sprint không**. Chờ xác nhận rồi mới ghi `RQ-` vào REQUESTS (chép câu
    trả lời vào `RQ-`/SPEC), rủi ro (chỉ nâng), **ASSUMPTION**, `CQ` còn lại để Cổng 1. Không hỏi lẻ nhiều lượt.
    Bỏ lượt này khi người dùng đã nói rõ "không cần sprint" hoặc việc là làm thẳng không mơ hồ.
-2. **SPEC rồi PLAN** → **Cổng 1** (người dùng duyệt / điều chỉnh). Từ cỡ vừa, Tech Reviewer review PLAN
+2. **SPEC rồi PLAN** → **Cổng 1** (người dùng duyệt / điều chỉnh). Từ cỡ vừa, Tech Reviewer/Advisor review PLAN
    trước khi trình. Trình tóm tắt: kết luận, `CQ`, `DN`, rủi ro, ước lượng. Duyệt thì ghi
    `gate_1: approved` + `gate_1_quote` nguyên văn. **Không code trước Cổng 1.** T1 khuyến nghị khi được xin;
    duyệt thay chỉ khi người dùng cấp rõ, có phạm vi và hạn — `method/process.md` mục 3.
@@ -58,6 +58,8 @@ và Không áp dụng không bao giờ là Đạt.
 | Researcher | Thực thi | T3 | tìm, đọc, dossier có nguồn; không kết luận |
 | Business Reviewer | Kiểm định | T1 | đáp ứng `US`/`FR`/`SC` |
 | Tech Reviewer (+ security, data, backend, frontend) | Kiểm định | T1 | code, test, bảo mật, dữ liệu; kéo chuyên đề khi rủi ro cao |
+| Gate Delegate | Kiểm định | T1 | duyệt thay cổng khi được cấp; phiên mới, khác người làm |
+| Advisor | Tư vấn | T1 | phản biện SPEC/PLAN trước Cổng 1; không viết, không duyệt |
 
 - **Người làm không tự chấm.** Kiểm định do agent khác (phiên/subagent mới, ngữ cảnh soạn riêng, không dán
   lịch sử). Reviewer được trả 0 phát hiện, phải ghi phần không đánh giá. Việc nhỏ: một agent giữ nhiều

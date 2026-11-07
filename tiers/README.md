@@ -3,13 +3,14 @@
 > **Kết luận:** vai được chỉ định theo **tier** (T1 tư duy · T2 thực thi · T3 việc vặt **và QA / chạy
 > test**), không theo tên model. Lõi chỉ biết ba tên tier; bảng tier → model nằm **ngoài repo** và được
 > đọc lúc giao việc. Cạn hạn mức thì **dừng, ghi `BR`, báo** — không tự hạ tier. Gọi chéo hãng chỉ **tư
-> vấn**, người dùng quyết. Luôn ghi model thực tế khi giao việc.
+> vấn**, người dùng quyết. Luôn ghi model thực tế khi giao việc. Model của từng vai chọn theo **bậc model**
+> (1 thấp → 3 cao) — trục độ mạnh model, khác tier (mục 8).
 
 ## 1. Ba tier
 
 | Tier | Mục đích | Vai mặc định | Việc tiêu biểu |
 |---|---|---|---|
-| `T1` | **Tư duy** — phân tích, thiết kế, kiểm định | Analyst, Architect, Business Reviewer, Tech Reviewer (+ chuyên đề) | tiếp nhận, SPEC, PLAN, ADR, review, phán quyết, REPORT, bài học |
+| `T1` | **Tư duy** — phân tích, thiết kế, kiểm định | Analyst, Architect, Business Reviewer, Tech Reviewer (+ chuyên đề), Gate Delegate, Advisor | tiếp nhận, SPEC, PLAN, ADR, review, phán quyết, REPORT, bài học |
 | `T2` | **Thực thi** — viết mã, viết tài liệu theo plan | Implementer | hiện thực `TK`, test, sửa theo review, tài liệu kỹ thuật |
 | `T3` | **Việc vặt và QA / chạy test** | QA, Researcher | chạy bộ test, đo coverage, kiểm trình duyệt theo kịch bản, đổi tên, dọn file, chạy script sinh, đối chiếu số |
 
@@ -104,6 +105,41 @@ và hãng vào PROGRESS như mục 3. Không có cầu thì ghi "cần người 
 | Cạn hạn mức | Dừng tier đó, `BR`, báo; không hạ tier |
 | Muốn hãng khác | Tư vấn một lần; người dùng quyết |
 | Giao việc | Ghi vai · tier · model vào PROGRESS, nhãn agent vào `roles` |
+| Chọn model cho một vai | model thuộc bậc model của vai trên nền tảng đó (mục 8); ngoài bậc = chỉ định của chủ sản phẩm, ghi `note` |
 | Phân vân tier | Chọn cao hơn, ghi lý do |
 | Bảng schema 1 | Vẫn đọc được: effort lấy từ thẻ vai, nhãn theo thang mặc định |
 | Vendor không có mức effort cần | Hạ chỉ khi bảng ghi `fallback` (ghi `clamped_by_table`); không có → dừng phần đó, báo |
+
+## 8. Bậc model
+
+Hai trục tách nhau: **tier** nói vai được làm gì, **bậc model** nói model mạnh đến đâu. Không tài liệu nào dùng chữ
+«tier» để nói bậc model; bậc không đổi tier của vai.
+
+| Trục | Giá trị | Quyết định | Ghi ở |
+|---|---|---|---|
+| **Tier** (thẩm quyền) | `T1` · `T2` · `T3` | quyền duyệt, suy luận, luật cổng và `check` | `AGENTS.md`, thẻ vai, `roles`, `check.py` |
+| **Bậc model** (độ mạnh model) | 1 (thấp) · 2 · 3 (cao) | chỉ chọn model và effort khi giao | mục này và ô model của bảng tier ngoài repo |
+
+**Vai → bậc model**
+
+| Bậc model | Vai |
+|---|---|
+| 1 | Researcher · Implementer · QA |
+| 2 | Analyst · Architect · Tech Reviewer |
+| 3 | Advisor · Gate Delegate |
+| không gán | Business Reviewer, phiên điều phối (theo ô `T1` của bảng tier) |
+
+**Bậc model → model**, mô tả theo độ mạnh:
+
+| Bậc model | Model |
+|---|---|
+| 1 | model nhanh, rẻ của nền tảng (Antigravity: mức thấp hoặc vừa trong hậu tố id) |
+| 2 | model mạnh, rẻ hơn model mạnh nhất; Tech Reviewer được dùng model bậc 3 khi chủ sản phẩm chỉ định |
+| 3 | model mạnh nhất về suy luận |
+
+Ánh xạ bậc model → model id cụ thể nằm ở bảng tier ngoài repo (`AGENT_AGILE_TIERS`) và ma trận sinh của lớp riêng; repo
+chỉ giữ `<model-id>`.
+
+KHI giao một vai THÌ model thuộc bậc model của vai trên nền tảng đó; effort tăng **trong** bậc (nâng 4 khi cỡ lớn, rủi
+ro cao hoặc đầu bài mơ hồ). Ngoài bậc = chỉ định của chủ sản phẩm, ghi `note` `model: <lý do>`. Ô model của bảng tier
+phải thuộc đúng bậc của vai; ô lệch ghi lý do trong `sources`.

@@ -8,7 +8,7 @@ title: Tech Reviewer — code, tests, security, data, backend, frontend
 # Tech Reviewer
 
 > **Kết luận:** Tech Reviewer kiểm **kỹ thuật**: đúng spec, chất lượng code, phủ test, bảo mật, dữ liệu,
-> backend, frontend; review PLAN trước Cổng 1 từ cỡ vừa; kéo thẻ chuyên đề khi rủi ro cao. Là agent
+> backend, frontend; review PLAN trước Cổng 1 từ cỡ vừa (hai trường hợp chuyển cho Advisor — `method/process.md` mục 3); kéo thẻ chuyên đề khi rủi ro cao. Là agent
 > **khác** người làm; chỉ chấm có bằng chứng; chỉ thêm chuyên gia khi có trigger.
 
 ## 1. Mục đích

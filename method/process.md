@@ -26,7 +26,7 @@ cỡ việc theo [sizing.md](sizing.md). Gặp tên skill cũ trong hồ sơ l�
 | Bước | Tên | Ai làm | Tài liệu ra | Cổng |
 |---|---|---|---|---|
 | 1 | Tiếp nhận | Analyst (T1) | **một** tin trao đổi gom với người dùng; sau xác nhận: dòng `RQ-` trong REQUESTS (hoặc làm thẳng, không hồ sơ) | Không phải cổng — lượt trao đổi tiếp nhận xác nhận mục tiêu, bậc từng việc, có mở sprint không; bỏ khi đã rõ (mục 2) |
-| 2 | SPEC rồi PLAN | Analyst (SPEC), Architect (PLAN), Tech Reviewer (review PLAN từ cỡ vừa) | SPEC, PLAN | **Cổng 1** — duyệt / điều chỉnh |
+| 2 | SPEC rồi PLAN | Analyst (SPEC), Architect (PLAN), Tech Reviewer hoặc Advisor (review PLAN từ cỡ vừa) | SPEC, PLAN | **Cổng 1** — duyệt / điều chỉnh |
 | 3 | Thực thi | Implementer, QA, (Architect) theo từng `TK` | PROGRESS | cổng điều chỉnh nội bộ (không hỏi người) |
 | 4 | Kiểm định | Business Reviewer, Tech Reviewer — **agent khác** người làm (thêm reviewer thứ hai khi `risk_tags` có `rules`/`secret`/`auth`) | `VR`, `RF` | vòng lặp 3 ↔ 4 |
 | 5 | REPORT | Analyst | REPORT | **Cổng 2** — nghiệm thu |
@@ -103,9 +103,10 @@ trình như mọi chỗ khác; ngoại lệ duy nhất là người dùng mở c
   trọng tâm review (≤5) · `TK` (vai + tier, đầu vào/ra, cách kiểm, cổng, hoàn tác, trỏ `FR`/`SC`) ·
   `RK` · `DN` · ước lượng (skill `writing-plan`). PLAN ghi **quyết định** (chữ ký, giá trị, assertion),
   không chép code.
-- Từ cỡ **vừa**, Tech Reviewer review PLAN một lượt trước khi trình (skill `plan-review`): thách thức phạm
+- Từ cỡ **vừa**, Tech Reviewer — hoặc Advisor theo gạch dưới — review PLAN một lượt trước khi trình (skill `plan-review`): thách thức phạm
   vi, kiến trúc, phủ test. Phát hiện mức Chặn/Phải sửa thì sửa PLAN trước khi trình. Phát hiện ghi ở REPORT
   mục "Phát hiện của reviewer", tiểu mục "Review PLAN trước Cổng 1".
+- **Vòng Advisor** (vai tư vấn T1, bậc model 3, thẻ `roles/advisor/advisor.md`): vòng feedback riêng trước Cổng 1; Advisor không viết SPEC/PLAN, ý kiến chỉ là khuyến nghị, không phải duyệt. Từ cỡ vừa, KHI (i) Analyst hoặc Architect chạy ở bậc model 2 trên Codex hoặc Antigravity, hoặc (ii) tác giả PLAN cùng model với Tech Reviewer THÌ vòng Advisor **thay** lượt review PLAN của Tech Reviewer (một lượt, một người chịu, cùng skill `plan-review`, phát hiện ghi cùng chỗ); ngoài hai trường hợp đó Tech Reviewer review PLAN như trên.
 - Giao review PLAN cần model cho tier T1. Chưa có bảng tier (`AGENT_AGILE_TIERS`) thì dùng chỉ định tier →
   model người dùng đã nêu trong chat, ghi nguyên văn vào PROGRESS dòng `Phán quyết:`. Chưa có cả hai → không
   đoán: ghi `DN` "chỉ định tier → model" kèm khuyến nghị, trình ở Cổng 1; review PLAN chạy **ngay sau** khi có

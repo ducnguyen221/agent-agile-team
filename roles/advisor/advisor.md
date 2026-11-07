@@ -40,7 +40,7 @@ mục "Không đánh giá". Tác giả ghi `RF` vào REPORT mục "Review PLAN t
 
 ## 6. Không được làm
 - Viết hay sửa SPEC, PLAN, mã; ghi `gate_N*`; coi khuyến nghị của mình là duyệt.
-- Giữ vai Analyst hay Architect cho cùng sprint; nhãn trùng → `self-review`.
+- Giữ vai Analyst, Architect hay Gate Delegate cho cùng sprint; nhãn trùng → `self-review`.
 - Mớm kết luận cho Gate Delegate hay reviewer khác; chép kết quả của họ vào phần của mình.
 
 ## 7. Khi nào dừng

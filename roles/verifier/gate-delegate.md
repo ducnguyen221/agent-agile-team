@@ -38,7 +38,7 @@ cổng rút gọn) và **không** ghi `gate_N*` · mục "Không đánh giá".
 - Khuyến nghị tại cổng khi chưa có lời cấp (chọn · vì sao · loại · sai thì tốn).
 
 ## 6. Không được làm
-- Giữ vai thực thi (Analyst, Architect, Implementer, QA, Researcher) cho cùng sprint; nhãn trùng → `self-review`.
+- Giữ vai thực thi (Analyst, Architect, Implementer, QA, Researcher) hay vai Advisor cho cùng sprint; nhãn trùng → `self-review`.
 - Duyệt thay khi lời cấp thiếu cổng, sprint hay hạn, đã hết hạn hay bị thu hồi; duyệt thay khi `risk_tags` có `secret`
   hoặc `auth`; duyệt thay việc sửa file luật mà lời cấp không nêu đích danh file đó.
 - Sửa SPEC, PLAN, mã hay tài liệu; quyết thay người dùng menu nhánh, push, gộp nhánh chính, tăng version.
