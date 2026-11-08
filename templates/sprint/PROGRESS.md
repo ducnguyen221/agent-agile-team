@@ -87,3 +87,12 @@ RF3 (truy vấn chưa có chỉ mục) để lại → CO1.*
      khi có nguồn runtime. Attempt thất bại vẫn ghi; bộ ba vòng sửa có counter riêng với vòng reviewer. -->
 
 Không áp dụng — sprint mẫu chưa thuộc pilot routing.
+
+## 6. Sổ phiên con (tuỳ chọn, khi bật autopilot)
+
+<!-- Mục tuỳ chọn, `check` không đòi. Sprint có `delegation` kích luật autopilot thì điền một dòng mỗi lần giao phiên
+     con theo `method/autopilot.md` mục 6.2: phiên · vai · tier · model · effort · thư mục/worktree · nhánh · trạng
+     thái · bằng chứng. Trạng thái: đang chạy · xong · dừng ở điểm an toàn · dừng khẩn · cạn hạn mức · lỗi.
+     Điều phối chạy lại lệnh kiểm và đọc diff thật trước khi ghi `xong`. -->
+
+Không áp dụng — sprint không bật autopilot.

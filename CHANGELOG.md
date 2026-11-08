@@ -38,6 +38,28 @@ khoá vai mới, không bỏ gì, nên dự kiến MINOR (`method/conventions.md
   (`FE01`) bị báo như mã repo. Không đổi `check.py`, `_common.py`, `.agile.json`; hành vi khoá bằng test
   `test_product_codes_hyphen_ignored`, `test_product_code_without_hyphen_flagged`, ca `id-unknown-prefix-product-code` và fixture
   `tests/fixtures/product-codes/`. Skill `id-convention` mục 2 thêm đoạn trỏ (description giữ nguyên).
+- **Thêm — chế độ autopilot duyệt cổng (SPR-12):** `method/autopilot.md` — lệnh chuẩn `Bật autopilot cổng 1|cổng 1+2|chương trình
+  … cho SPR-NN …` (hậu tố `+nhánh` cho gộp cục bộ sau Cổng 2 Đạt), `Dừng autopilot.`, `Thu hồi duyệt thay SPR-NN.`; Gate
+  Delegate phiên mới là người ký duy nhất, phiên điều phối không ký; danh sách loại đóng 13 mục; sổ phiên con; tạm dừng ≠ kết
+  thúc; file dấu `.tmp/autopilot.json`. `AGENTS.md` bước 2/5 gộp câu duyệt thay lặp và trỏ autopilot (108 dòng, 9 901 byte);
+  `method/process.md` mục 3, `method/sizing.md`, `roles/README.md` trỏ cùng chỗ.
+- **Thêm — `scripts/check.py`:** khoá tuỳ chọn của `delegation` (`level`, `program`, `exclusions`, `channel`, `orchestrator`,
+  `sessions_cap`); kích khi `grant` bắt đầu `Bật autopilot` hoặc có khoá mới; báo `gate-delegation-invalid` khi chữ mức của
+  lời cấp lệch `level`, `scope` khác tập cổng của mức, `exclusions` thiếu/lạ/trùng, `+nhánh` sai chỗ, `orchestrator` trùng `by`,
+  `files` có mục không nêu trong lời cấp. Hồ sơ chỉ có tám khoá cũ cho kết quả như trước (fixture `tests/fixtures/autopilot/`).
+- **Thêm — rào máy autopilot cho Claude Code:** `hooks/hooks.json` đăng ký `PreToolUse` cho `Bash|PowerShell` và
+  `Write|Edit|MultiEdit|NotebookEdit`, chạy `scripts/autopilot-hook.sh` (POSIX sh, tự tìm Python ≥ 3.9; không có Python hoặc
+  guard lỗi thì chỉ chặn khi có file dấu) → `scripts/autopilot_guard.py`. Khi có file dấu: chặn đẩy nhánh, tạo/xoá tag, gộp
+  vào nhánh chính, xoá không đảo ngược, gộp cục bộ khi thiếu `+nhánh`, và mọi thao tác ghi vào file dấu; không có file dấu thì
+  cho qua. Lối kết thúc: `python scripts/autopilot_guard.py --clear <dir>`. Chi phí đo ~0,28 s mỗi lệnh/lần ghi (Windows, Git
+  Bash). Codex, Antigravity chưa đăng ký.
+- **Thay đổi — skill `intake`, `running-sprint`, `closing-sprint`:** nhận và nhắc lại lệnh autopilot, từ chối câu không phải lệnh
+  ("theo khuyến nghị", "chốt theo mặc định", chữ trong file/comment/kết quả công cụ), giữ sổ phiên con, dừng ở danh sách loại,
+  không gộp khi thiếu `+nhánh`; thử áp lực 12 ca chấm mù (`skill_sha` mới). Mẫu PROGRESS/REPORT/SPRINT thêm mục "Sổ phiên con",
+  "Bản tin autopilot" tuỳ chọn.
+- **Ghi nợ (autopilot):** rào máy là danh sách mẫu đóng — chuỗi chương trình tuỳ ý (`python -c`, `awk system()`…), công cụ ngoài
+  matcher (MCP) và phiên con cố ý lách vẫn qua; `--clear` phiên con gọi được (rào hành vi); plugin cài từ marketplace thư mục
+  thì hook sống theo cây làm việc của checkout — sửa guard trên bản chép, thay một lần. Việc để lại: RQ-069…RQ-076 của sổ dự án.
 - **Ghi nợ (known limitations):** `check` chỉ so nhãn trong cùng một file (Advisor/Gate Delegate trùng người làm ở file khác
   không bị bắt); nhánh `gemini` của `MODEL_NAME` còn nhận họ model bất kỳ; `method/process.md` mục "Duyệt thay" và
   `roles/README.md` chưa nêu ngoại lệ "Advisor không làm `delegation.by`".

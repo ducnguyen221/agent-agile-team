@@ -69,6 +69,7 @@ PLAN có 1 **task** (TK):
 
 - **2026-01-20 10:00 +07** — Implementer thêm bước cắt khoảng trắng; test xanh.
 - **Vướng mắc:** Không có.
+- **Sổ phiên con (tuỳ chọn):** Không áp dụng — sprint không bật autopilot. <!-- bật thì điền bảng theo `method/autopilot.md` mục 6.2 -->
 
 ## 4. REPORT
 
@@ -84,4 +85,5 @@ REPORT có 1 **verification result** (VR):
 - **Phát hiện:** chưa kiểm.
 - **Cách dùng / đã đổi gì / hoàn tác:** hàm tra đơn trong `orders/lookup.py`; hoàn tác bằng `git revert`.
 - **Bài học · việc để lại:** Không có.
+- **Bản tin autopilot (tuỳ chọn):** Không áp dụng — sprint không bật autopilot. <!-- bật thì ghi theo `method/autopilot.md` mục 8 -->
 - **Cổng 2:** chờ nghiệm thu (khi đóng: câu nguyên văn của người dùng).

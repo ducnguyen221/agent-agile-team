@@ -153,6 +153,9 @@ Mặc định **tắt**: vắng `gate_N_mode` nghĩa là `human`, cổng là c�
   Không phải lời cấp: "ok", "làm luôn", "tự quyết đi", "theo khuyến nghị", mức tự trị *tự quyết* ở Brief — khi đó
   Analyst đề xuất câu cấp quyền ở lời trình cổng kế để người dùng nói lại cho đủ.
 - **Câu thu hồi:** `Thu hồi duyệt thay SPR-NN.` (hiệu lực ngay; ghi `revoked_at`).
+- **Autopilot:** lệnh ngắn `Bật autopilot …` mở rộng câu cấp quyền ở trên (mức, chương trình, danh sách loại,
+  phiên điều phối, rào máy); cú pháp, rào và mẫu brief Gate Delegate ở [autopilot.md](autopilot.md).
+  `Dừng autopilot.` có hiệu lực như câu thu hồi cho mọi sprint của lệnh.
 - **Frontmatter khi đã duyệt thay** (SPEC + PLAN cho Cổng 1; REPORT cho Cổng 2; `SPRINT.md` cho cả hai):
 
 ```yaml
