@@ -3,7 +3,7 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
-### Chưa phát hành
+## 0.7.0 (2026-11-08)
 
 - **Đổi — bỏ `CLAUDE.md` ở gốc:** `claude plugin validate --strict` đỏ khi plugin có `CLAUDE.md` gốc («not loaded as project
   context»). Luật lõi vào Claude Code qua dòng import cấp người dùng như `INSTALL.md` hướng dẫn, hoặc bản ≥ 2.1.277 tự đọc
@@ -12,8 +12,8 @@ version kiểm điều này).
   thành agent rác `agent-agile-team:README` và làm `validate --strict` đỏ. Test khoá: mọi `agents/*.md` phải có
   frontmatter; `.gitignore` bỏ qua `.claude/CLAUDE.md` cục bộ.
 
-Chưa gắn số phiên bản; đề xuất một lần cho cả ba sprint của RQ-057 (SPR-14, SPR-13, SPR-12) khi phát hành — thêm vai và
-khoá vai mới, không bỏ gì, nên dự kiến MINOR (`method/conventions.md` mục 4.1).
+Phát hành một lần cho cả ba sprint của RQ-057 (SPR-14, SPR-13, SPR-12) — thêm vai và khoá vai mới, không bỏ gì, nên tăng MINOR
+(`method/conventions.md` mục 4.1).
 
 - **Thêm — hai vai T1:** `gate-delegate` (kiểm định: duyệt thay cổng khi được cấp, phiên mới, chỉ đọc hồ sơ) và `advisor`
   (tư vấn: phản biện SPEC/PLAN trước Cổng 1, không viết, không duyệt), có thẻ `roles/verifier/gate-delegate.md`,
