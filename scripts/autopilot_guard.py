@@ -1242,7 +1242,7 @@ def _ask(fmt: str, reason: str, stdout: TextIO, stderr: TextIO) -> int:
         stdout.write(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "ask",
                                                          "permissionDecisionReason": reason}}, ensure_ascii=False) + "\n")
         return 0
-    return _deny(fmt, reason, stdout, stderr)
+    return _deny(fmt, reason.replace(git_fence.ASK_TAIL, git_fence.NO_ASK_TAIL), stdout, stderr)
 
 
 def _allow(fmt: str, stdout: TextIO) -> int:

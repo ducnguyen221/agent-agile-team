@@ -26,6 +26,8 @@ LEVELS = ("full", "push-only")
 # Runner: (argv, cwd, giây) -> (mã thoát, stdout); mã thoát âm = không chạy được hay quá giờ.
 Runner = Callable[[list, str, float], tuple]
 
+ASK_TAIL = "Đức bấm cho phép trong phiên mới được chạy"
+NO_ASK_TAIL = "host này chưa có tầng hỏi — Đức tự chạy lệnh này"  # Codex, Antigravity: 'hỏi' thành chặn với lý do này
 NONE, AUTO, ASK, FORBID = "none", "auto", "ask", "forbid"
 _RANK = {NONE: 0, AUTO: 1, ASK: 2, FORBID: 3}
 
@@ -331,7 +333,7 @@ def _verdict(kind: str, code: str, what: str, ctx: FenceContext) -> Verdict:
     """'Hỏi' thành chặn khi đang có file dấu autopilot (FR4.2): không ai bấm được."""
     if kind == ASK and ctx.marker:
         kind = FORBID
-    tail = "cần Đức nói trong chat — lệnh không chạy" if kind == FORBID else "Đức bấm cho phép trong phiên mới được chạy"
+    tail = "cần Đức nói trong chat — lệnh không chạy" if kind == FORBID else ASK_TAIL
     return Verdict(kind, "git-fence: '{}' trong repo được bảo vệ {} [{}]".format(what, tail, code), code)
 
 

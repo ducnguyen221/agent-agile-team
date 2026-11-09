@@ -1462,7 +1462,7 @@ def test_fence_push_without_marker_per_host(tmp_path):
     answer = json.loads(out)["hookSpecificOutput"]
     assert rc == 0 and err == "" and answer["permissionDecision"] == "ask" and "git-fence" in answer["permissionDecisionReason"]
     rc, out, err = run("codex", payload)
-    assert rc == 2 and out == "" and "git-fence" in err
+    assert rc == 2 and out == "" and "git-fence" in err and "Đức tự chạy" in err and "bấm cho phép" not in err
     rc, out, err = run("antigravity", {"toolCall": {"name": "run_command", "args": {"CommandLine": "git push origin HEAD:main", "Cwd": str(repo)}}})
     assert rc == 0 and json.loads(out)["decision"] == "deny"
 
@@ -1573,3 +1573,16 @@ def test_fence_autopilot_reason_text_unchanged_when_marker_blocks_push(tmp_path)
                                             "grant_at": "2026-11-20 09:00 +07", "sprints": ["SPR-20"]})
     rc, _, err = run("claude", claude("git push origin x", repo))
     assert rc == 2 and err.startswith("autopilot: 'push'")
+
+
+def test_launcher_without_python_blocks_in_agile_json_repo(tmp_path, bare_sh_ok):
+    """Rào git thường trực đóng khi guard không chạy được (FR4.8): repo có `.agile.json` mà không có Python thì chặn, repo khác cho qua."""
+    repo = make_repo(tmp_path / "r", branch="spr-12")
+    (repo / ".agile.json").write_text("{}", encoding="utf-8")
+    sub = repo / "src"
+    sub.mkdir()
+    for cwd in (repo, sub):
+        done = run_launcher(cwd, claude("git push", cwd), [bare_sh_ok])
+        assert done.returncode == 2 and "git-fence" in done.stderr, done.stderr
+    plain = make_repo(tmp_path / "p", branch="spr-12")
+    assert run_launcher(plain, claude("git push", plain), [bare_sh_ok]).returncode == 0

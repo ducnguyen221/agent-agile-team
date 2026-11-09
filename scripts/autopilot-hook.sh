@@ -40,6 +40,27 @@ has_marker() {
   done
 }
 
+# Dấu hiệu 2 của rào git thường trực (method/git-permissions.md): có `.agile.json` ở một thư mục tổ tiên tới thư mục có `.git`.
+has_agile() {
+  cur=${1%/}
+  [ -n "$1" ] || return 1
+  while :; do
+    [ -e "$cur/.agile.json" ] && return 0
+    [ -e "$cur/.git" ] && return 1
+    case $cur in
+      */*) ;;
+      *) return 1 ;;
+    esac
+    parent=${cur%/*}
+    if [ -z "$parent" ]; then
+      [ "$cur" = "/" ] && return 1
+      parent=/
+    fi
+    [ "$parent" = "$cur" ] && return 1
+    cur=$parent
+  done
+}
+
 reason="autopilot: không chạy được Python để kiểm lệnh — chặn vì đang bật autopilot"
 
 if [ -f "$guard" ]; then
@@ -75,6 +96,10 @@ fi
 
 if has_marker "$CLAUDE_PROJECT_DIR" || has_marker "$PWD"; then
   echo "$reason" >&2
+  exit 2
+fi
+if has_agile "$CLAUDE_PROJECT_DIR" || has_agile "$PWD"; then
+  echo "git-fence: không chạy được guard (Python hay guard lỗi) — chặn vì repo được bảo vệ (.agile.json); cần Đức nói trong chat" >&2
   exit 2
 fi
 exit 0
