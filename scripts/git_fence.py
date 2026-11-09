@@ -57,12 +57,13 @@ KNOWN_SUBS = frozenset({
     "check-ref-format", "column", "commit-graph", "fmt-merge-msg", "for-each-repo", "get-tar-commit-id", "interpret-trailers", "mailinfo",
     "mailsplit", "merge-file", "merge-index", "merge-tree", "multi-pack-index", "pack-refs", "patch-id", "prune-packed", "stage",
     "verify-commit", "verify-tag", "verify-pack", "show-index", "scalar", "backfill", "survey", "diff-files", "ls-tree", "unpack-file",
+    "filter-branch", "hook", "replay", "lfs", "index-pack", "send-pack", "filter-repo", "update-ref", "mktag", "diff-pairs", "last-modified",
 })  # lệnh con có sẵn của git: tên khác khi repo có `[include]` có thể là alias nằm trong file được nạp thêm
 GIT_INTERNAL_FILES = (".git/config", ".git/hooks", ".git/hooks/pre-push", ".git/hooks/pre-commit", ".git/hooks/commit-msg",
                       ".git/hooks/post-commit", ".git/hooks/post-checkout", ".git/hooks/pre-receive")
 ROOT_PATHSPECS = frozenset({".", "./", ":/", ":/."})  # `git rm -rf .` xoá cả `.agile.json` ở gốc
 RELEVANT_SUBS = frozenset({"push", "subtree", "tag", "remote", "config", "merge", "commit", "pull", "cherry-pick", "reset", "rebase",
-                           "rm", "mv", "update-index", "add", "restore", "checkout", "clean"})
+                           "rm", "mv", "update-index", "add", "restore", "checkout", "clean", "send-pack", "submodule", "bisect", "filter-branch"})
 FILE_SUBS = frozenset({"rm", "mv", "update-index", "add", "restore", "checkout", "clean"})  # chỉ đáng kể khi nhắc tới file bảo vệ
 GH_API_WRITE_FLAGS = frozenset({"-f", "-F", "--field", "--raw-field", "--input"})
 
@@ -373,9 +374,8 @@ def is_guard_path(path: str, base: str, env: Mapping, loose: bool = False) -> bo
     if ENV_LIST in path:
         return True
     lower = norm.lower()
-    if lower.endswith("/.git/config") or lower == ".git/config" or lower.endswith("/.git/hooks") or lower == ".git/hooks" \
-            or "/.git/hooks/" in lower or lower.startswith(".git/hooks/"):
-        return True  # file cấu hình và hook của chính repo: đổi đích đẩy, alias, hook mà không qua `git config`
+    if lower.startswith(".git/") or "/.git/" in lower or lower.endswith("/.git") or lower == ".git":
+        return True  # mọi thứ dưới .git/ (config, hooks, HEAD, refs, info…): đổi đích đẩy, alias, hook, nhánh hiện tại mà không qua lệnh git
     if any(ch in lower for ch in "*?["):
         parts = lower.split("/")
         for count in (2, 3):
@@ -426,6 +426,13 @@ def _brace_variants(name: str, limit: int = 64) -> Optional[list]:
 
 
 def targets_guard_file(text: str, base: str, env: Mapping, loose: bool = False, whole: str = "") -> bool:
+    if "$'" in text or ("$" in text and "$'" in whole):
+        return True  # chuỗi ANSI-C `$'\x2e…'`: không giải được, đóng an toàn
+    unescaped = re.sub(r"\\(.)", r"\1", text)
+    if unescaped != text and targets_guard_file(unescaped, base, env, loose, whole):
+        return True  # `.agi\le.json`
+    if text.startswith(":/") and len(text) > 2:
+        text = text[2:]  # pathspec gốc repo `:/.agil*`
     try:
         variants = _brace_variants(text)
     except RecursionError:
@@ -588,6 +595,14 @@ def push_contract(rest: list, contract: dict, seg: Segment, ctx: FenceContext, s
     return None
 
 
+def _root_like_pathspec(arg: str) -> bool:
+    """Pathspec có thể bao cả gốc repo: `.`, `..`, `sub/..`, `:/`, magic `:(…)`/`:!`/`:^`, hay có biến (`$PWD`)."""
+    if arg in ROOT_PATHSPECS or arg.startswith((":(", ":!", ":^")) or "$" in arg or "`" in arg:
+        return True
+    norm = os.path.normpath(arg.replace("\\", "/")).replace("\\", "/")
+    return norm in (".", "..") or norm.startswith("../") and set(norm.split("/")) <= {".."}
+
+
 def config_override_keys(globals_: list) -> list:
     """Khoá cấu hình đặt ngay trên dòng lệnh (`-c k=v`, `-ck=v`, `--config-env k=VAR`), chữ thường, bỏ phần giá trị."""
     keys, index = [], 0
@@ -621,7 +636,8 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
     paths = [a for a in rest if not a.startswith("-")]
     whole = " ".join(seg.args)
     hits_guard = sub in FILE_SUBS and (any(targets_guard_file(a, ctx.cwd, ctx.env, whole=whole) for a in paths)
-                                       or (sub in ("rm", "mv") and any(a in ROOT_PATHSPECS for a in paths)))
+                                       or (sub in ("rm", "mv") and (any(_root_like_pathspec(a) for a in paths)
+                                                                    or any(a.startswith("--pathspec-from-file") for a in rest))))
     if sub in FILE_SUBS and not overrides and not hits_guard:
         return Verdict()
     directories = seg.where or [None]
@@ -638,8 +654,11 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
         return _verdict(FORBID, "config-override", "git -c " + overrides[0], ctx)
     if hits_guard:
         return _verdict(FORBID, "guard-file", "git {} {}".format(sub, AGILE_JSON), ctx)
-    if sub == "push" or (sub == "subtree" and rest[:1] == ["push"]):
+    if sub in ("send-pack",) or sub == "push" or (sub == "subtree" and rest[:1] == ["push"]):
         return _push_verdict(seg, ctx, sig)
+    if (sub == "filter-branch" or (sub == "bisect" and rest[:1] == ["run"]) or (sub == "submodule" and "foreach" in rest)
+            or (sub == "rebase" and any(a in ("-x", "--exec") or a.startswith("--exec=") for a in rest))):
+        return _verdict(FORBID, "embedded-command", "git {} (chạy lệnh nhúng, không phân tích được)".format(sub), ctx)
     if sub == "tag":
         if any(a in ("-d", "--delete") or re.fullmatch(r"-[A-Za-z]*d[A-Za-z]*", a) for a in rest):
             return _verdict(FORBID, "tag-delete", "tag -d", ctx)
@@ -660,6 +679,16 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
                 skip = True
             elif not arg.startswith("-"):
                 positional.append(arg)
+        files = []
+        for index, arg in enumerate(rest):
+            if arg in ("-f", "--file") and index + 1 < len(rest):
+                files.append(rest[index + 1])
+            elif arg.startswith("--file="):
+                files.append(arg.split("=", 1)[1])
+            elif arg.startswith("-f") and not arg.startswith("--") and len(arg) > 2:
+                files.append(arg[2:])
+        if any(is_guard_path(f, ctx.cwd, ctx.env) for f in files):
+            return _verdict(FORBID, "config-write", "config -f " + files[0], ctx)
         writing_flag = any(a in CONFIG_WRITE for a in rest)
         if any(a in CONFIG_READ for a in rest) and not writing_flag:
             return Verdict()  # cờ đọc rõ ràng (`--get khoá mẫu` có hai đối số vẫn là đọc)
