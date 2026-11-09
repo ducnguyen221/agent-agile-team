@@ -1097,16 +1097,19 @@ def _evaluate(raw: str) -> str | None:
 
 # Biến môi trường được ĐẶT cho git/gh: gán `X=…` đầu từ hoặc sau `;&|(`, `$env:X`, hoặc đi sau env/export/set/declare/setx (không khớp chữ trong nội dung)
 QUOTED_CONTENT = re.compile(r"\"[^\"\n]*\s[^\"\n]*\"|'[^'\n]*\s[^'\n]*'")  # chuỗi trong nháy có khoảng trắng: nội dung văn bản
-SHELL_STRING_BEFORE = re.compile(r"(?:\s-[A-Za-z]*c[A-Za-z]*|eval|\s-command|\s/[ck])\s*\$?$", re.I)  # chuỗi đi sau -c/eval/-Command (kể cả $'…') là LỆNH, không phải nội dung
+# chuỗi đi sau `-c` CỦA MỘT TRÌNH SHELL (không phải `git -c`), eval, -Command, /c (kể cả $'…') là LỆNH, không phải nội dung
+SHELL_STRING_BEFORE = re.compile(r"(?:\b(?:bash|sh|zsh|dash|ksh|csh|tcsh|fish|su|runuser|script|pwsh|powershell|cmd|wsl|busybox)\b[^;&|\n]*\s-[A-Za-z]*c[A-Za-z]*"
+                                 r"|\beval|\s-command|\s/[ck])\s*\$?$", re.I)
 BACKSLASH = chr(92)
+CURLY_QUOTES = frozenset("‘’‚‛“”„")  # PowerShell coi các dấu nháy cong này là nháy
 
 
-def _sub_quoted(fn, text: str, posix: bool = True) -> str:
+def _sub_quoted(fn, text: str, posix: bool = True, any_chunk: bool = False) -> str:
     """Thay từng chuỗi nháy ĐÓNG có khoảng trắng và không xuống dòng bằng `fn(vị_trí_bắt_đầu, chuỗi)`. Quét tuần tự từ trái
     (nháy đơn không thoát được trừ `$'…'`; nháy kép thoát bằng gạch ngược) để `"it's"` hay `'a"b'` không ghép nhầm hai chuỗi.
     `posix=False` (PowerShell/cmd): gạch ngược không phải ký tự thoát. Có `$(` hay dấu huyền trong chuỗi lệnh thì nháy lồng không quét
     chắc được: không thay gì (thấy nhiều hơn, chặn thừa còn hơn lọt)."""
-    if "$(" in text or "`" in text:
+    if "$(" in text or "`" in text or (not posix and CURLY_QUOTES & set(text)):
         return text
     out, index, last, size = [], 0, 0, len(text)
     while index < size:
@@ -1121,7 +1124,7 @@ def _sub_quoted(fn, text: str, posix: bool = True) -> str:
                 end += 2 if (escapes and text[end] == BACKSLASH) else 1
             if end < size and text[end] == ch:
                 chunk = text[index:end + 1]
-                if re.search(r"\s", chunk[1:-1]):
+                if any_chunk or re.search(r"\s", chunk[1:-1]):
                     out.append(text[last:index])
                     out.append(fn(index, chunk))
                     last = end + 1
@@ -1144,7 +1147,7 @@ def _split_segments(text: str, posix: bool = True) -> list:
         if SHELL_STRING_BEFORE.search(text[:start].rstrip()) or "$(" in chunk or "`" in chunk:
             return chunk
         return "x" * len(chunk)
-    masked = _sub_quoted(mask, text, posix)
+    masked = _sub_quoted(mask, text, posix, any_chunk=True)  # mọi chuỗi đóng, kể cả không khoảng trắng (`-c x.y="a;b"`): dấu tách trong nháy không tách lệnh
     pieces, last = [], 0
     for sep in SEPARATORS.finditer(masked):
         pieces.append(text[last:sep.start()])
@@ -1180,6 +1183,8 @@ def _plain_words(tokens: list, segment: str) -> list:
     return fixed
 
 
+DOWNLOAD_TOOLS = frozenset({"curl", "wget", "http", "https", "xh"})  # chỉ các công cụ này mới được bỏ qua giá trị của cờ VALUE_FLAGS (cờ giống nhau nghĩa khác nhau ở công cụ khác: `strace -o log -A git …`)
+START_PROCESS = frozenset({"start-process", "saps", "start"})  # PowerShell: `Start-Process git push,--force,origin,main` (đối số dạng danh sách có dấu phẩy)
 VALUE_FLAGS = frozenset({"-o", "-O", "--output", "-m", "--msg", "--message", "--data", "-H", "--header", "-F", "--form", "-X", "--request",
                          "-A", "--user-agent", "--name", "--title", "--body", "--file"})  # cờ biết chắc nhận một giá trị (không phải lệnh); cờ mơ hồ như -f/-d/-n/-t cố ý KHÔNG có
 
@@ -1202,7 +1207,7 @@ def _collect_nested(text: str, ctx: Context, depth: int, out: list) -> None:
 
 def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     """Gom mọi đoạn lệnh git/gh (và lệnh không chỉ-đọc nhắc tới file bảo vệ) của `text` thành `git_fence.Segment`."""
-    if BACKSLASH in text and getattr(ctx, "posix", None) is None:
+    if (BACKSLASH in text or CURLY_QUOTES & set(text)) and getattr(ctx, "posix", None) is None:
         # gạch ngược là ký tự thoát ở bash nhưng không ở PowerShell/cmd: không biết shell thì xét cả hai cách đọc (hợp hai kết quả, chặn thừa hơn lọt)
         for ctx.posix in (True, False):
             _collect_segments(text, ctx, depth, out)
@@ -1288,11 +1293,13 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         else:
             env = getattr(ctx, "env", os.environ)
             read_only = _read_only(name, args, ctx)
+            if name in START_PROCESS:  # bỏ tên cờ, tách danh sách đối số theo dấu phẩy rồi xét như lệnh lồng
+                _collect_nested(" ".join(a for a in args if not a.startswith("-")).replace(",", " "), ctx, depth, out)
             if (not read_only or (name == "find" and FIND_EXEC & set(args))) and name not in ("man", "which", "where", "whereis", "type", "help", "pip", "npm", "apt", "brew"):
                 # lệnh lạ (su -c, find -exec, wsl, parallel, watch, chrt, flock, ssh…) có thể chạy git/gh phía sau: tìm và phân tích như lệnh lồng
                 for index, arg in enumerate(args):
                     previous = args[index - 1] if index else ""
-                    if previous in VALUE_FLAGS:
+                    if name in DOWNLOAD_TOOLS and previous in VALUE_FLAGS:
                         continue  # giá trị của cờ biết chắc nhận giá trị (`curl -o gh url`, `--msg "git push x"`); cờ lạ/cờ bật-tắt (`watch -n5 git …`, `strace -f git …`) thì vẫn xét
                     if _exe_name(arg) in ("git", "gh"):
                         _collect_nested(" ".join(args[index:]), ctx, depth, out)

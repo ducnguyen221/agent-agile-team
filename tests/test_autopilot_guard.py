@@ -2108,7 +2108,7 @@ def test_env_assignment_after_sudo_flags_or_case_label_voids_the_contract(tmp_pa
     assert run("claude", claude(cmd, repo))[0] == 2, cmd
 
 
-@pytest.mark.parametrize("cmd", ["curl -o gh https://example.com", "python script.py --msg \"git push x\"", "make gh", "pip install gitpython"])
+@pytest.mark.parametrize("cmd", ["curl -o gh https://example.com", "make gh", "pip install gitpython"])
 def test_flag_values_named_git_or_gh_are_not_commands(tmp_path, cmd):
     repo = protected_repo(tmp_path, branch="x")
     assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
@@ -2160,3 +2160,49 @@ def test_ansi_c_quotes_and_nested_quotes_do_not_hide_a_separator(tmp_path, cmd):
 def test_redirect_to_the_guard_file_with_ampersand_form_is_still_seen(tmp_path):
     repo = protected_repo(tmp_path, branch="x")
     assert run("claude", claude("echo x &> .agile.json", repo))[0] == 2
+
+
+# --- security vòng 8 (bản chốt 8c02d24) ----------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("tool", ["Bash", "PowerShell"])
+@pytest.mark.parametrize("cmd", [
+    'git -c x.y="a;b" push --force origin main', "git --namespace='a|b' push --force origin main",
+    'git --no-pager --namespace="a&&b" push --force origin main', 'git -c "x.y=a b;c" push --force origin main',
+    'git -c "x.y=a&b" push --force origin main', 'git --config-env "x;y" push --force origin main',
+])
+def test_quoted_separators_in_git_option_values_do_not_split_the_command(tmp_path, cmd, tool):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo, tool=tool))[0] == 2, cmd
+
+
+def test_quoted_separator_cannot_hide_an_extra_push_ref(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude('git -c x.y="a;b" push origin spr-20-x main', repo))[0] == 2
+
+
+@pytest.mark.parametrize("cmd", ["strace -o log -A git push --force origin main", "strace -F git push --force origin main",
+                                 "unshare -m git push --force origin main", "nsenter -m git push --force origin main"])
+def test_flags_of_unknown_wrappers_are_not_assumed_to_take_a_value(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+@pytest.mark.parametrize("cmd", ["curl -o gh https://example.com", "wget -O git https://example.com"])
+def test_known_download_tools_may_name_their_output_git_or_gh(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
+
+
+def test_powershell_curly_quotes_are_quotes(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    cmd = "echo \"a b” ; git push --force origin main ; echo “c d\""
+    assert run("claude", claude(cmd, repo, tool="PowerShell"))[0] == 2
+    assert run("claude", claude("echo \"a b” ; git push origin main ; echo “c d\"", repo, tool="PowerShell"))[0] == 2
+
+
+@pytest.mark.parametrize("cmd", [
+    "Start-Process git push,--force,origin,main", "Start-Process -FilePath git -ArgumentList push,--force,origin,main", "saps git push,--force,origin,main",
+])
+def test_start_process_argument_lists_are_analysed_as_commands(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo, tool="PowerShell"))[0] == 2, cmd
