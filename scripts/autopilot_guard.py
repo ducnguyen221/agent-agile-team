@@ -67,6 +67,9 @@ PREFIXES = {
     "command": (frozenset(), 0),
     "builtin": (frozenset(), 0),
     "nohup": (frozenset(), 0),
+    "setsid": (frozenset(), 0),
+    "ionice": (frozenset({"-c", "-n", "-p", "-P", "-u", "--class", "--classdata"}), 0),
+    "doas": (frozenset({"-u", "-C"}), 0),
     "time": (frozenset(), 0),
 }
 ENV_ASSIGN = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=")
@@ -1095,6 +1098,7 @@ def _evaluate(raw: str) -> str | None:
 # Biến môi trường được ĐẶT cho git/gh: gán `X=…` đầu từ hoặc sau `;&|(`, `$env:X`, hoặc đi sau env/export/set/declare/setx (không khớp chữ trong nội dung)
 QUOTED_CONTENT = re.compile(r"\"[^\"\n]*\s[^\"\n]*\"|'[^'\n]*\s[^'\n]*'")  # chuỗi trong nháy có khoảng trắng: nội dung văn bản
 ENV_USE = (r"(?i)(?:(?:^|[;&|(])\s*(?:[A-Za-z_]\w*=\S*\s+)*(?:{0}_[A-Z0-9_]*)=|\$env:{0}_|\b(?:env|export|set|setx|declare|typeset)\b[^;&|\n]*\b{0}_[A-Z0-9_]*)")
+VAR_ASSIGN = r"(?:^|[;&|(]|\b(?:export|env|declare|typeset|set|setx)\s+(?:-\S+\s+)*)\s*\$\{?[A-Za-z_]\w*\}?\w*="  # `$G=x`, `${G}SSH=x` ở vị trí gán
 GH_ENV_USE = ENV_USE.format("GH").replace("GH_[A-Z0-9_]*", "GH_(?:REPO|HOST|CONFIG_DIR|ENTERPRISE_HOST|TOKEN|ENTERPRISE_TOKEN)[A-Z0-9_]*")
 HEAD_MOVERS = frozenset({"checkout", "switch", "symbolic-ref", "update-ref", "reset", "rebase", "merge", "pull", "cherry-pick", "revert", "am", "bisect"})
 
@@ -1103,6 +1107,21 @@ class Decision:
     """Quyết định có loại: `deny` (chặn) hay `ask` (Claude hỏi; Codex và Antigravity chưa có tầng hỏi nên thành chặn)."""
     kind: str
     reason: str
+
+
+def _plain_words(tokens: list, segment: str) -> list:
+    """Bỏ che giấu đơn giản ở từ lệnh và lệnh con: gạch ngược chen giữa chữ (git viết thành g, gạch ngược, it), hay `$'push'` (tokenizer đã bỏ nháy nên còn `$push`)."""
+    fixed = []
+    for position, token in enumerate(tokens):
+        if position < 4:
+            word = token
+            if "\\" in word and re.fullmatch(r"[A-Za-z0-9_\\-]+", word):
+                word = re.sub(r"\\(.)", r"\1", word)
+            if word.startswith("$") and "$'" in segment and re.fullmatch(r"\$[A-Za-z0-9_-]+", word):
+                word = word[1:]
+            token = word
+        fixed.append(token)
+    return fixed
 
 
 def _collect_nested(text: str, ctx: Context, depth: int, out: list) -> None:
@@ -1123,8 +1142,11 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     text = text.replace(">|", ">")  # `>|` (ghi đè dù noclobber) là chuyển hướng, không phải ống
     plain = re.sub(r"[\"']", "", QUOTED_CONTENT.sub('""', text))  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X; chuỗi nháy có khoảng trắng là nội dung
     plain_both = (plain, re.sub(r"\\(.)", r"\1", plain))  # `G\IT_X=1` cũng là GIT_X
-    git_env = any(re.search(ENV_USE.format("GIT"), p) or "--exec-path" in p or re.search(r"\$\{?[A-Za-z_]\w*\}?[A-Za-z0-9_]+=", p) for p in plain_both)
+    git_env = any(re.search(ENV_USE.format("GIT"), p) or "--exec-path" in p or re.search(VAR_ASSIGN, p) for p in plain_both)
     gh_env = any(re.search(GH_ENV_USE, p) for p in plain_both)
+    git_env = git_env or getattr(ctx, "git_env_outer", False)  # biến đặt ở lớp ngoài (`GIT_X=1 bash -c '…'`) vẫn tác động lệnh bên trong
+    gh_env = gh_env or getattr(ctx, "gh_env_outer", False)
+    ctx.git_env_outer, ctx.gh_env_outer = git_env, gh_env
     content_free = QUOTED_CONTENT.sub('""', text)  # "x > .git/config" (có khoảng trắng trong nháy) là nội dung in ra, không phải chuyển hướng
     for target in re.findall(r">>?\s*&?\s*([^\s;&|()<>]+)", content_free):  # đích chuyển hướng ở bất kỳ vị trí nào, kể cả `>f`, `&>f`, `>&f`
         if git_fence.targets_guard_file(target, ctx.cwd, getattr(ctx, "env", os.environ), loose=ctx.cwd_changed, whole=text):
@@ -1146,11 +1168,12 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         tokens, redirected = _strip_prefixes(tokenize(segment), ctx)
         if not tokens:
             continue
-        if "$" in tokens[0] or "`" in tokens[0]:  # `env $G=x git push`: từ lệnh là biến — tìm git/gh phía sau và coi như môi trường lạ
+        if any(ch in tokens[0] for ch in "$`\\="):  # `env $G=x git push`, `env FO\O=1 git push`: từ lệnh không phải tên lệnh — tìm git/gh phía sau, coi như môi trường lạ
             for position in range(1, len(tokens)):
                 if _exe_name(tokens[position]) in ("git", "gh"):
                     tokens, redirected = tokens[position:], True
                     break
+        tokens = _plain_words(tokens, segment)
         name, args = _exe_name(tokens[0]), tokens[1:]
         if name in CD_COMMANDS:
             ctx.enter()
@@ -1175,10 +1198,12 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
             # mọi biến GIT_* trong lệnh (GIT_CONFIG_*, GIT_SSH_COMMAND, GIT_CONFIG_GLOBAL…) đổi hành vi của git mà guard không thấy: hợp đồng đích không áp
             out.append(git_fence.Segment("git", args, sub, rest, where, redirected or git_env, globals_,
                                          head_moved=getattr(ctx, "head_moved", False)))
-            effective = git_fence.expand_alias(out[-1])  # alias có thể là `checkout`/`branch -M`…
+            effective = git_fence.expand_alias(out[-1], ctx.cwd)  # alias có thể là `checkout`/`branch -M`…
             if effective.name == "nested" or effective.sub in HEAD_MOVERS or (
                     effective.sub == "branch" and any(a in ("-m", "-M", "--move", "-c", "-C", "--copy") or _cluster(a, "mMcC") for a in effective.rest)):
                 ctx.head_moved = True
+                if any(a in MAIN_BRANCHES or a.endswith(("/main", "/master")) for a in effective.rest):
+                    ctx.forced_main = True  # `branch -M main`, `symbolic-ref HEAD refs/heads/main`: từ đây nhánh hiện tại là nhánh chính
             if sub in ("checkout", "switch") and any(a in MAIN_BRANCHES for a in rest):
                 ctx.forced_main = True
         elif name == "gh":

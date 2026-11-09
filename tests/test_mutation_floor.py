@@ -122,7 +122,7 @@ def drop_protected_branch_check(root: Path) -> None:
 
 
 def drop_alias_expansion(root: Path) -> None:
-    edit(root, "scripts/git_fence.py", "        seg = expand_alias(seg)\n", "")
+    edit(root, "scripts/git_fence.py", "        seg = expand_alias(seg, ctx.cwd)\n", "")
 
 
 MUTATIONS = {

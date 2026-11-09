@@ -243,14 +243,15 @@ def repo_has_include(directory: str) -> bool:
         return False
 
 
-def expand_alias(seg: "Segment") -> "Segment":
+def expand_alias(seg: "Segment", cwd: str = "") -> "Segment":
     """Thay lệnh con là alias của repo bằng lệnh thật (tối đa 5 lớp, hơn thì coi là không phân tích được); alias kiểu `!lệnh-shell` thành đoạn 'nested' (không phân tích được)."""
     for _ in range(5):
-        if seg.name != "git" or not seg.sub or not seg.where or not seg.where[0]:
+        directory = seg.where[0] if seg.where and seg.where[0] else cwd  # thư mục không rõ (sau cd/đổi nhánh): dùng thư mục chạy lệnh để đọc alias
+        if seg.name != "git" or not seg.sub or not directory:
             return seg
-        value = repo_aliases(seg.where[0]).get(seg.sub)
+        value = repo_aliases(directory).get(seg.sub)
         if not value:
-            if seg.sub not in KNOWN_SUBS and repo_has_include(seg.where[0]):
+            if seg.sub not in KNOWN_SUBS and repo_has_include(directory):
                 return Segment("nested")  # lệnh con lạ + config có include: có thể là alias trong file được nạp, không đọc được
             return seg
         if value.startswith("!"):
@@ -595,12 +596,18 @@ def push_contract(rest: list, contract: dict, seg: Segment, ctx: FenceContext, s
     return None
 
 
-def _root_like_pathspec(arg: str) -> bool:
+def _root_like_pathspec(arg: str, base: str = "") -> bool:
     """Pathspec có thể bao cả gốc repo: `.`, `..`, `sub/..`, `:/`, magic `:(…)`/`:!`/`:^`, hay có biến (`$PWD`)."""
     if arg in ROOT_PATHSPECS or arg.startswith((":(", ":!", ":^")) or "$" in arg or "`" in arg:
         return True
     norm = os.path.normpath(arg.replace("\\", "/")).replace("\\", "/")
-    return norm in (".", "..") or norm.startswith("../") and set(norm.split("/")) <= {".."}
+    if norm in (".", "..") or norm.startswith("../") and set(norm.split("/")) <= {".."}:
+        return True
+    if base:
+        found = find_repo(base)
+        if found and real(arg if os.path.isabs(arg) else os.path.join(base, arg)) == real(found[0]):
+            return True  # đường tuyệt đối hay `../<tên repo>` về đúng gốc repo
+    return False
 
 
 def config_override_keys(globals_: list) -> list:
@@ -636,11 +643,16 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
     paths = [a for a in rest if not a.startswith("-")]
     whole = " ".join(seg.args)
     hits_guard = sub in FILE_SUBS and (any(targets_guard_file(a, ctx.cwd, ctx.env, whole=whole) for a in paths)
-                                       or (sub in ("rm", "mv") and (any(_root_like_pathspec(a) for a in paths)
+                                       or (sub in ("rm", "mv") and (any(_root_like_pathspec(a, ctx.cwd) for a in paths)
                                                                     or any(a.startswith("--pathspec-from-file") for a in rest))))
     if sub in FILE_SUBS and not overrides and not hits_guard:
         return Verdict()
     directories = seg.where or [None]
+    short_no_verify = sub == "commit" and any(re.fullmatch(r"-[A-Za-z]*n[A-Za-z]*", a) for a in rest)  # `git commit -n/-nm/-anm` = --no-verify
+    if short_no_verify and not any(ctx.signals_for(d).protected for d in directories):
+        return Verdict()
+    if short_no_verify:
+        return _verdict(FORBID, "no-verify", "commit -n (--no-verify)", ctx)
     if "--no-verify" in seg.args and not any(ctx.signals_for(d).protected for d in directories):
         return Verdict()
     if "--no-verify" in seg.args:
@@ -657,7 +669,8 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
     if sub in ("send-pack",) or sub == "push" or (sub == "subtree" and rest[:1] == ["push"]):
         return _push_verdict(seg, ctx, sig)
     if (sub == "filter-branch" or (sub == "bisect" and rest[:1] == ["run"]) or (sub == "submodule" and "foreach" in rest)
-            or (sub == "rebase" and any(a in ("-x", "--exec") or a.startswith("--exec=") for a in rest))):
+            or (sub == "rebase" and any(a in ("-x", "--exec") or a.startswith("--exec=") or re.fullmatch(r"-[A-Za-z]*x.*", a) and not a.startswith("--")
+                                         for a in rest))):
         return _verdict(FORBID, "embedded-command", "git {} (chạy lệnh nhúng, không phân tích được)".format(sub), ctx)
     if sub == "tag":
         if any(a in ("-d", "--delete") or re.fullmatch(r"-[A-Za-z]*d[A-Za-z]*", a) for a in rest):
@@ -718,6 +731,16 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
     return Verdict()
 
 
+def _gh_slug(repo: Optional[str]) -> Optional[str]:
+    """`owner/repo` từ các dạng -R: `owner/repo`, `host/owner/repo`, `https://host/owner/repo(.git)`."""
+    if not repo:
+        return repo
+    text = re.sub(r"^[A-Za-z][A-Za-z0-9+.-]*://", "", repo.strip())
+    text = re.sub(r"\.git/?$", "", text.rstrip("/"))
+    parts = [p for p in text.split("/") if p]
+    return "/".join(parts[-2:]) if len(parts) >= 2 else text
+
+
 def _gh_plain(args: list) -> tuple:
     """(đối số không phải cờ, repo đích từ -R/--repo hay None, danh sách cờ)."""
     plain, flags, repo, index = [], [], None, 0
@@ -741,7 +764,7 @@ def _gh_plain(args: list) -> tuple:
 
 def _gh_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
     plain, repo, flags = _gh_plain(seg.args)
-    target = repo
+    target = _gh_slug(repo)
     if plain[:1] == ["api"] and len(plain) > 1:
         match = re.match(r"^/?repos/([^/]+/[^/]+)", plain[1])
         target = target or (match.group(1) if match else None)
@@ -795,7 +818,7 @@ def classify(segments: list, ctx: FenceContext) -> Verdict:
     """Quyết định mạnh nhất (cấm > hỏi > tự làm > không đụng) trên mọi đoạn lệnh."""
     best = Verdict()
     for seg in segments:
-        seg = expand_alias(seg)
+        seg = expand_alias(seg, ctx.cwd)
         if seg.name == "git":
             verdict = _git_verdict(seg, ctx)
         elif seg.name == "gh":

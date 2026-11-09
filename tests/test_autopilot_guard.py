@@ -1939,3 +1939,77 @@ def test_gh_combined_short_flags_ending_in_r_name_the_repository(tmp_path, monke
     repo = contract_world(tmp_path, monkeypatch)
     for cmd in ("gh pr create -fR evil/x --title x", "gh pr create -tR evil/x"):
         assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+# --- vòng 5 security (SY1–SY5) -----------------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("cmd", [
+    "export $G=x; git push origin spr-20-x", "G=GIT_CONFIG_COUNT; export $G=1; git push origin spr-20-x", "declare -x $G=x; git push origin spr-20-x",
+    "GIT_SSH_COMMAND=evil bash -c 'git push origin spr-20-x'", 'env GIT_SSH_COMMAND=evil sh -c "git push origin spr-20-x"',
+    "GIT_CONFIG_COUNT=1 eval 'git push origin spr-20-x'",
+])
+def test_environment_set_outside_the_nested_shell_voids_the_contract(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_echo_with_variable_equals_text_is_not_an_assignment(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude('echo "${HOME}=" && git push origin spr-20-x', repo)) == (0, "", "")
+
+
+@pytest.mark.parametrize("cmd", [
+    "env FO\\O=1 git push --force origin x", "env A.B=1 git push --force origin x",
+    "g\\it push --force origin x", "git pu\\sh --force origin x", "git $'push' --force origin x", "$'git' push --force origin x",
+    "setsid git push --force origin x", "ionice -c3 git push --force origin x", "doas git push --force origin x",
+])
+def test_escaped_or_odd_command_words_and_wrappers_still_reach_the_classifier(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_absolute_and_relative_repo_root_pathspecs_for_git_rm_are_denied(tmp_path):
+    repo = protected_repo(tmp_path)
+    for cmd in ("git rm -rf {}".format(fwd(repo)), "git rm -rf ../{}".format(repo.name), "git mv {} ../x".format(fwd(repo))):
+        assert run("claude", claude(cmd, repo))[0] == 2, cmd
+    (repo / "sub").mkdir()
+    assert run("claude", claude("git rm -f sub/x.txt", repo))[0] == 0
+
+
+@pytest.mark.parametrize("cmd", [
+    "git rebase -xmake main", "git rebase -ix main", "git rebase -x'git push' main", "git commit -nm x", "git commit -n -m x", "git commit -anm x",
+])
+def test_attached_exec_flag_and_short_no_verify_are_seen(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_short_n_is_dry_run_for_push_and_not_no_verify(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    rc, out, _ = run("claude", claude("git push -n origin x", repo))
+    assert rc == 0 and "ask" in out  # hỏi như mọi lệnh đẩy, không bị coi là --no-verify
+
+
+@pytest.mark.parametrize("cmd,rc_expected", [("gh pr merge -dR evil/x 1", 0), ("gh release create -dR evil/x v1", 2)])
+def test_gh_merge_and_release_with_combined_flags_are_recognised(tmp_path, monkeypatch, cmd, rc_expected):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / ".git").mkdir()
+    listing = tmp_path / "protected.json"
+    listing.write_text(json.dumps({"repos": [{"remote_urls": ["https://github.com/evil/x.git"]}]}), encoding="utf-8")
+    monkeypatch.setenv(git_fence.ENV_LIST, str(listing))
+    monkeypatch.setattr(git_fence, "default_runner", lambda *a, **k: (1, ""))
+    rc, out, _ = run("claude", claude(cmd, outside))
+    assert rc == rc_expected and (rc == 2 or "ask" in out), cmd  # merge: hỏi; release: chặn
+
+
+def test_gh_repo_flag_with_url_forms_is_normalised(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude("gh pr create -R https://example.com/o/r --title x", repo)) == (0, "", "")
+    assert run("claude", claude("gh pr create -R github.com/evil/x --title x", repo))[0] == 2
+
+
+@pytest.mark.parametrize("cmd", ["git branch -M main && git commit -m x", "git symbolic-ref HEAD refs/heads/main; git commit -m x"])
+def test_commit_after_a_command_that_moves_head_is_treated_as_on_a_protected_branch(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
