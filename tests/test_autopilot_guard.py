@@ -970,7 +970,7 @@ def test_hooks_json_registers_guard():
     config = json.loads((REPO / "hooks" / "hooks.json").read_text(encoding="utf-8"))
     entries = config["hooks"]["PreToolUse"]
     assert [e["matcher"] for e in entries] == ["Bash|PowerShell", "Write|Edit|MultiEdit|NotebookEdit"]
-    assert set(config["hooks"]) == {"PreToolUse"}
+    assert set(config["hooks"]) == {"PreToolUse", "SessionStart"}  # SessionStart: scripts/session-env.sh (SPR-16c), xem tests/test_session_env.py
     for entry in entries:
         assert len(entry["hooks"]) == 1
         hook = entry["hooks"][0]
