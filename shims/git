@@ -1,7 +1,17 @@
 #!/bin/sh
-# Shim git (thu nghiem SPR-16b): kiem argv that roi moi chay git that. Xem scripts/git_shim.py.
+# Shim git (thu nghiem SPR-16b): chi chan khi AGENT_AGILE_SHIM=1 (phien agent); khong thi chay git that ngay (nguoi dung o terminal khong bi anh huong).
 here=${0%/*}
 [ "$here" = "$0" ] && here=.
+if [ -z "$AGENT_AGILE_SHIM" ] || [ "$AGENT_AGILE_SHIM" = 0 ]; then
+  oldifs=$IFS; IFS=:; set -f
+  for d in $PATH; do
+    c=$d/git
+    if [ -x "$c" ] && ! [ "$c" -ef "$0" ]; then IFS=$oldifs; exec "$c" "$@"; fi
+  done
+  IFS=$oldifs
+  echo "git-shim: khong tim thay git that tren PATH" >&2
+  exit 127
+fi
 AGENT_SHIM_DIR=$(cd "$here" 2>/dev/null && pwd) || exit 127
 export AGENT_SHIM_DIR
 for py in python3 python; do

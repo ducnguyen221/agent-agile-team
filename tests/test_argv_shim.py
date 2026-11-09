@@ -17,6 +17,7 @@ import oracle_harness as oracle
 from test_autopilot_guard import protected_repo
 
 SHIMS = REPO / "shims"
+ON = {"AGENT_AGILE_SHIM": "1"}  # shim chỉ chặn trong phiên agent (biến này); không có thì chạy lệnh thật ngay
 
 
 def _bash_works() -> bool:
@@ -82,7 +83,7 @@ def test_shim_blocks_the_shapes_that_reading_the_string_misses(tmp_path, cmd):
     stub = tmp_path / "stub"
     oracle.make_stub(stub)
     log = tmp_path / "log.txt"
-    assert not oracle.danger_in(oracle.run_bash(cmd, repo, log, [SHIMS, stub])), cmd
+    assert not oracle.danger_in(oracle.run_bash(cmd, repo, log, [SHIMS, stub], extra_env=ON)), cmd
 
 
 @needs_bash
@@ -92,7 +93,7 @@ def test_shim_lets_ordinary_commands_reach_the_real_tool(tmp_path):
     oracle.make_stub(stub)
     log = tmp_path / "log.txt"
     for cmd in ("git status", "git log --oneline -3", "git -c core.pager=cat log -1", "git commit -m 'msg (a); b'"):
-        assert oracle.run_bash(cmd, repo, log, [SHIMS, stub]).startswith("RUN "), cmd
+        assert oracle.run_bash(cmd, repo, log, [SHIMS, stub], extra_env=ON).startswith("RUN "), cmd
 
 
 @needs_bash
@@ -104,7 +105,19 @@ def test_differential_shim_has_no_miss_and_no_false_positive(tmp_path):
     stub = tmp_path / "stub"
     oracle.make_stub(stub)
     log = tmp_path / "log.txt"
-    missed = [c for c in danger if oracle.danger_in(oracle.run_bash(c, repo, log, [SHIMS, stub]))]
+    missed = [c for c in danger if oracle.danger_in(oracle.run_bash(c, repo, log, [SHIMS, stub], extra_env=ON))]
     assert missed == []
-    blocked = [c for c in safe if "RUN" in oracle.run_bash(c, repo, log, [stub]) and "RUN" not in oracle.run_bash(c, repo, log, [SHIMS, stub])]
+    blocked = [c for c in safe if "RUN" in oracle.run_bash(c, repo, log, [stub]) and "RUN" not in oracle.run_bash(c, repo, log, [SHIMS, stub], extra_env=ON)]
     assert blocked == []
+
+
+@needs_bash
+def test_shim_is_transparent_without_the_agent_variable(tmp_path):
+    """Người dùng ở terminal (không có AGENT_AGILE_SHIM) không bị ảnh hưởng: ngay cả lệnh nguy hiểm tới `git` thật nguyên vẹn."""
+    repo = protected_repo(tmp_path, branch="x")
+    stub = tmp_path / "stub"
+    oracle.make_stub(stub)
+    log = tmp_path / "log.txt"
+    assert oracle.danger_in(oracle.run_bash("git push --force origin main", repo, log, [SHIMS, stub]))
+    assert oracle.danger_in(oracle.run_bash("git push --force origin main", repo, log, [SHIMS, stub], extra_env={"AGENT_AGILE_SHIM": "0"}))
+    assert not oracle.danger_in(oracle.run_bash("git push --force origin main", repo, log, [SHIMS, stub], extra_env=ON))

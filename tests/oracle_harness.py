@@ -78,11 +78,12 @@ def make_stub(directory: Path) -> Path:
     return stub
 
 
-def run_bash(cmd: str, repo: Path, log: Path, path_dirs: list[Path], timeout: int = 30) -> str:
+def run_bash(cmd: str, repo: Path, log: Path, path_dirs: list[Path], timeout: int = 30, extra_env: dict | None = None) -> str:
     """Chạy `cmd` bằng bash thật trong `repo`, PATH = path_dirs + PATH hiện có; trả nhật ký (sau khi chờ tiến trình nền)."""
     log.write_text("", encoding="utf-8")
     env = dict(os.environ, LOG=str(log).replace("\\", "/"),
                PATH=os.pathsep.join([str(p).replace("\\", "/") for p in path_dirs] + [os.environ["PATH"]]))
+    env.update(extra_env or {})
     try:
         subprocess.run(["bash", "-c", cmd], cwd=str(repo), env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL, timeout=timeout)
@@ -119,13 +120,13 @@ def main(argv: list[str]) -> int:
             if danger_in(run_bash(cmd, repo, log, [stub_dir])):
                 res["danger_executed"] += 1
                 res["e1_miss"] += 0 if guard_blocks(cmd) else 1
-                if shim_dir.is_dir() and danger_in(run_bash(cmd, repo, log, [shim_dir, stub_dir])):
+                if shim_dir.is_dir() and danger_in(run_bash(cmd, repo, log, [shim_dir, stub_dir], extra_env={"AGENT_AGILE_SHIM": "1"})):
                     res["e2_miss"] += 1
         for cmd in safe:
             if "RUN" in run_bash(cmd, repo, log, [stub_dir]):
                 res["safe_executed"] += 1
                 res["e1_fp"] += 1 if guard_blocks(cmd) else 0
-                if shim_dir.is_dir() and "RUN" not in run_bash(cmd, repo, log, [shim_dir, stub_dir]):
+                if shim_dir.is_dir() and "RUN" not in run_bash(cmd, repo, log, [shim_dir, stub_dir], extra_env={"AGENT_AGILE_SHIM": "1"}):
                     res["e2_fp"] += 1
     print(json.dumps(res, indent=1))
     return 0

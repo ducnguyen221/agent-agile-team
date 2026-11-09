@@ -2264,7 +2264,7 @@ def test_dynamic_command_word_without_a_git_subcommand_is_left_alone(tmp_path):
         assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
 
 
-def _shim_run(monkeypatch, repo, cmd, tool="Bash", flag="1"):
+def _shim_run(monkeypatch, repo, cmd, tool="Bash", flag="rewrite"):
     monkeypatch.setenv(autopilot_guard.ENV_SHIM, flag)
     return run("claude", {"tool_name": tool, "tool_input": {"command": cmd, "description": "d"}, "cwd": str(repo)})
 
@@ -2274,6 +2274,7 @@ def test_shim_rewrite_is_off_by_default(tmp_path, monkeypatch):
     monkeypatch.delenv(autopilot_guard.ENV_SHIM, raising=False)
     assert run("claude", claude("git status", repo)) == (0, "", "")
     assert _shim_run(monkeypatch, repo, "git status", flag="0") == (0, "", "")
+    assert _shim_run(monkeypatch, repo, "git status", flag="1") == (0, "", "")  # "1" chỉ bật shim trong PATH, không viết lại lệnh
 
 
 @pytest.mark.parametrize("tool", ["Bash", "PowerShell"])
