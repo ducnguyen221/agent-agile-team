@@ -50,6 +50,7 @@ trông ra sao, hay phải chọn giữa nhiều cách) không phải làm thẳn
   vẫn hợp lệ: `SPRINT.md` cỡ rất nhỏ bốn phần, và bốn file cỡ nhỏ ([templates/README.md](../templates/README.md) mục 4).
 - **Người làm không tự chấm ở mọi bậc.** Việc rất nhỏ không có agent thứ hai thì ghi "tự kiểm, chưa độc lập".
 
+<!-- san-cung:start -->
 ## 2. Rủi ro nâng cỡ
 
 KHI việc chạm **một** trong các vùng sau THÌ ghi nhãn vào `risk_tags`, `risk: high`, cỡ tối thiểu là
@@ -74,6 +75,7 @@ chưa loại trừ tác động lên những ranh giới đó → `external_inpu
 
 Ba nhãn `rules`, `secret`, `auth` kéo thêm một luật nữa: kiểm định kỹ thuật bắt buộc **hai reviewer độc lập** cùng rubric,
 cả hai Đạt mới Đạt ([roles/verifier/dual-review.md](../roles/verifier/dual-review.md)) — cộng với thẻ chuyên đề security ở bảng trên.
+<!-- san-cung:end -->
 
 ## 3. Sprint = một mục tiêu
 

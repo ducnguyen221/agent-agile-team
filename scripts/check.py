@@ -73,6 +73,7 @@ RULES: dict[str, tuple[str, str]] = {
     "ledger-unconfigured": (GHI, "dự án khai sổ tập trung mà máy chưa đặt mẫu đường `AGENT_AGILE_LEDGER`"),
     "leak-denylist": (CHAN, "`--self`: file của repo chứa từ trong danh sách cấm"),
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
+    "hard-floor-marker": (CHAN, "`--self`: cặp mốc `san-cung` ở file luật lệch, mất hoặc thừa so với số cặp quy định"),
     "routing-invalid": (PHAI, "routing evidence marker/JSON/record không hợp lệ"),
     "routing-unknown": (GHI, "routing record có field ngoài schema 1"),
     "routing-manifest-invalid": (PHAI, "routing applicability manifest thiếu hoặc sai hình"),
@@ -2052,6 +2053,18 @@ def run_self(root: Path, denylist_path: Path | None) -> Report:
         if lines > AGENTS_MAX_LINES or len(data) > AGENTS_MAX_BYTES:
             engine.add(agents, 1, "agents-md-budget",
                        f"{lines} dòng / {len(data)} byte — trần {AGENTS_MAX_LINES} dòng / {AGENTS_MAX_BYTES} byte")
+    if (root / "scripts" / "floor_check.py").is_file():  # repo có máy so sàn: mốc `san-cung` phải đủ và đúng
+        for rel, wanted in rules.FLOOR_ZONES.items():
+            zone_file = root / rel
+            if not zone_file.is_file():
+                engine.add(zone_file, 1, "hard-floor-marker", f"hard-floor-marker: {rel} — file có vùng sàn không còn (cần {wanted} cặp, có 0)")
+                continue
+            spans = rules.zone_spans(c.normalize(zone_file.read_bytes().decode("utf-8", "replace")))
+            if isinstance(spans, str):
+                engine.add(zone_file, 1, "hard-floor-marker", f"hard-floor-marker: {rel} — cặp mốc san-cung lỗi ({spans})")
+            elif len(spans) != wanted:
+                engine.add(zone_file, 1, "hard-floor-marker",
+                           f"hard-floor-marker: {rel} — cặp mốc san-cung lệch/mất/thừa (cần {wanted} cặp, có {len(spans)})")
     engine.report.findings.sort(key=lambda f: (c.display(f.path), f.line, f.rule))
     return engine.report
 

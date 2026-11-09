@@ -56,3 +56,26 @@ jobs:
 
       - name: Samples and templates pass check
         run: python scripts/check.py samples templates
+
+      # Kiểm sàn cứng so với base (SPR-16 FR2.4): mã `floor_check.py` lấy từ BẢN CỦA BASE (git archive), không gọi script nào
+      # của head trước đó. Nhãn `floor-approved` (do Đức gắn) chuyển sang `--mode report`: liệt kê, không chặn.
+      # Khe hở công bố: workflow của PR do head cung cấp nên PR có thể sửa chính bước này (nằm trong FLOOR_FILES, hiện trong
+      # diff); bước này là "rào hành vi có kiểm" cho tới khi SPR-17 nghiệm thu cách chạy workflow-từ-base.
+      - name: Floor vs base (san-cung)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          GH_TOKEN: ${{ github.token }}
+          FLOOR_MODE: ${{ contains(github.event.pull_request.labels.*.name, 'floor-approved') && 'report' || 'strict' }}
+        run: |
+          set -euo pipefail
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')"
+          git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --depth=1 origin "$BASE_REF"
+          base_dir="$(mktemp -d "${RUNNER_TEMP:-/tmp}/floor-base.XXXXXX")"
+          git archive FETCH_HEAD scripts | tar -x -C "$base_dir"
+          if [ ! -f "$base_dir/scripts/floor_check.py" ]; then
+            echo "bootstrap — chưa kiểm so base"
+            exit 0
+          fi
+          "${PYTHON:-python}" -X utf8 "$base_dir/scripts/floor_check.py" --base FETCH_HEAD --mode "$FLOOR_MODE"

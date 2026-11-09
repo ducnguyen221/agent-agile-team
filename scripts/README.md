@@ -9,6 +9,8 @@ Ba công cụ cho dự án áp dụng, chỉ dùng thư viện chuẩn Python (3
 | `check.py` | Kiểm chuẩn tài liệu; `--self` kiểm lõi sạch và ngân sách `AGENTS.md` của chính repo |
 | `index.py` | Sinh lại khối "Đang mở" ở đầu ba sổ gốc |
 | `autopilot_guard.py` | Hook `PreToolUse` của autopilot: từ chối lệnh shell thuộc danh sách loại khi có file dấu `.tmp/autopilot.json`; đã đăng ký cho Claude qua `hooks/hooks.json` (launcher `autopilot-hook.sh`), Codex và Antigravity chưa (mục "Rào máy autopilot") |
+| `_autopilot_rules.py` | Rào autopilot gom một chỗ (SPR-16): hằng `AUTOPILOT_*`/`DELEGATION_*`, `FENCE_FILES`, `FLOOR_ZONES`/`FLOOR_FILES`, `zone_spans`, hàm `autopilot_problem(block)` mà `check.py` gọi; guard và `check` nhập từ đây, guard không nhập `check`; không chạy trực tiếp |
+| `floor_check.py` | `python -X utf8 scripts/floor_check.py --base <ref> [--head <ref>] [--mode strict\|report] [--json] [--root <repo>]`: so vùng giữa mốc `san-cung`, vị trí mốc và nội dung `FLOOR_FILES` của head với base; thoát 0 đạt / `bootstrap` / `report`, 1 vi phạm ở `strict`, 2 lỗi dùng. Bước CI `Floor vs base` giải `git archive <base> scripts` ra thư mục tạm rồi chạy **bản của base** (khe hở workflow-từ-head: xem `.github/workflows/verify.yml`; tới SPR-17 đây là rào hành vi có kiểm) |
 | `_common.py` | Thư viện chung: đọc frontmatter tập con YAML, che mã trong Markdown, đọc `.agile.json`; không chạy trực tiếp |
 
 ## Cách chạy
@@ -144,6 +146,7 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `ledger-unconfigured` | Ghi chú | Dự án khai `ledger.project` mà máy chưa đặt `AGENT_AGILE_LEDGER` — chưa đối chiếu được; không làm đỏ. Dự án không khai khoá thì không có phát hiện nào về sổ, kể cả khi máy đặt biến. Mẫu đường thiếu `{project}` báo `config-invalid` |
 | `leak-denylist` | Chặn | `--self`: file của repo (kể cả tên file) chứa từ cấm — mục chữ khớp nguyên từ, mục có ký tự đường dẫn khớp chuỗi con ([`tests/README.md`](../tests/README.md)); báo số thứ tự từ, không in lại từ |
 | `agents-md-budget` | Phải sửa | `--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 240 byte |
+| `hard-floor-marker` | Chặn | `--self` (chỉ khi repo có `scripts/floor_check.py`): cặp mốc `<!-- san-cung:start -->`/`end` ở `AGENTS.md`, `method/{process,sizing,autopilot}.md` lệch (mở không đóng, lồng, nằm trong khối mã), mất hoặc thừa so với `FLOOR_ZONES` |
 | `routing-invalid` | Phải sửa | Marker routing thiếu khối JSON kế tiếp, JSON sai, record sai schema 1 hoặc thiếu chứng cứ/nguồn độc lập |
 | `routing-unknown` | Ghi chú | Record có field ngoài schema routing 1; checker không diễn giải field lạ |
 | `routing-manifest-invalid` | Phải sửa | `--routing-manifest` thiếu file, JSON sai, hoặc manifest không có task/ref hợp lệ |

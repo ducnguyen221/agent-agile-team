@@ -17,7 +17,7 @@ VALID = FIXTURES / "valid"
 PRODUCT_CODES = FIXTURES / "product-codes"  # anh em của valid/, không phải một sprint sạch cho test khác
 CASES = json.loads((FIXTURES / "broken.json").read_text(encoding="utf-8"))["cases"]
 SPECIAL_CASES = {
-    "leak-denylist", "agents-md-budget",
+    "leak-denylist", "agents-md-budget", "hard-floor-marker",
     "routing-invalid", "routing-unknown", "routing-manifest-invalid", "routing-missing", "routing-duplicate",
 }
 

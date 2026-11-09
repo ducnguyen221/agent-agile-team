@@ -89,6 +89,7 @@ ngay và báo. Lời giao đủ mục tiêu, định nghĩa xong, phạm vi và 
 **Lượt trao đổi là một tin, không phải một chuỗi.** Hỏi lẻ từng câu, chờ, hỏi câu nữa ở bước này là lỗi quy
 trình như mọi chỗ khác; ngoại lệ duy nhất là người dùng mở chế độ làm rõ (skill `shaping-spec` mục 3).
 
+<!-- san-cung:start -->
 ## 3. Bước 2 — SPEC rồi PLAN, Cổng 1
 
 - Mở sprint: ghi dòng `SPR-` vào sổ SPRINTS (cột Mở, Mục tiêu; cột Đóng để trống) và dựng thư mục
@@ -182,6 +183,7 @@ delegation:
   `auth` cấm duyệt thay; menu nhánh sau Cổng 2 vẫn hỏi người; người dùng thu hồi bất cứ lúc nào.
 - **`check` kiểm** hồ sơ này bằng luật `gate-delegation-invalid` (và `self-review` khi người duyệt trùng nhãn vai thực thi);
   chi tiết ở [scripts/README.md](../scripts/README.md).
+<!-- san-cung:end -->
 
 ## 4. Bước 3 — Thực thi và cổng điều chỉnh nội bộ
 
@@ -207,6 +209,7 @@ Một phán quyết sai tốn công làm lại mà người dùng thấy và ho�
 tốn cả buổi của người dùng và không mua được gì. Phán quyết đổi tiêu chí thành công hay vượt phạm vi đã
 duyệt **không** phải phán quyết — đó là điều kiện dừng (d) ở mục 5.
 
+<!-- san-cung:start -->
 ## 5. Bốn điều kiện dừng giữa chừng
 
 Ngoài lượt trao đổi tiếp nhận (mục 2), hai cổng, bốn điều kiện này, mốc sau vòng 3 và cạn hạn mức tier, **không
@@ -227,6 +230,7 @@ Tương tự, cạn hạn mức model của một tier → dừng phần việc 
 tier** ([tiers/README.md](../tiers/README.md)).
 
 Khi duyệt thay đang hiệu lực, bốn điều kiện này không được miễn: gặp điều kiện nào vẫn dừng, ghi `BR`, hỏi người dùng.
+<!-- san-cung:end -->
 
 ## 6. Bước 4 — Kiểm định bởi agent khác, vòng lặp
 
@@ -269,6 +273,7 @@ Handoff đã có quyền thì thông báo rồi làm, không xin lại. Receiver
 giữ lịch sử tổng. Pin/ceiling/quyền thiếu thì chờ đúng quyết định phụ thuộc; việc độc lập vẫn tiếp tục.
 Phần không đạt giữ nguyên mức và evidence; không đổi Chặn/Phải sửa thành CO để vượt Cổng 2.
 
+<!-- san-cung:start -->
 ### 6.1 Thiết kế vòng lặp — khi giao agent chạy lặp
 
 Vòng 3 ↔ 4 ở trên là một vòng lặp có người canh. Mục này áp khi sprint giao cho agent một vòng **tự chạy lặp**: "sửa tới
@@ -309,6 +314,7 @@ bật, vòng là thợ, không phải người nghiệm thu; (2) **trách nhiệ
 (gộp nhầm nhánh chính, phát hành nhầm, chuyển nhầm tiền) thì không giao quyền tự động, khớp điều kiện dừng ở mục 5;
 (3) vòng càng "tự cải tiến, tự viết lại luật của mình" thì người duyệt phải càng **chặt**, không lỏng — máy nhanh quá
 để chặn sau, nên phán đoán của người nằm **trước** hành động như một cổng cứng, không phải miếng vá sau.
+<!-- san-cung:end -->
 
 ## 7. Bước 5 — REPORT và Cổng 2
 

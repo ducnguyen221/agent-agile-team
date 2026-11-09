@@ -37,6 +37,7 @@ Cập nhật hay mở rộng skill/agent: quay lại nguồn gốc trong `UPSTRE
    trong mức, hạn, danh sách loại của lệnh; phiên điều phối không ký — `method/autopilot.md`.
 6. **Bài học** `LN` ghi nơi lớp riêng quy định; quan trọng thì **đề xuất** nâng thành luật/skill, không tự nâng.
 
+<!-- san-cung:start -->
 **Dừng và hỏi chỉ khi:** (a) hành động không đảo ngược, (b) chạm bảo mật/secret, (c) tác động ra ngoài
 phạm vi/worktree đã giao, (d) PLAN hỏng — giả định sai làm đổi tiêu chí thành công. Ghi `BR`, hỏi.
 Ngoài đó và lượt trao đổi tiếp nhận, hỏi là lỗi. **Làm thẳng** (bậc ở `method/sizing.md`): việc 1–2 thao tác có
@@ -47,6 +48,7 @@ file luật vẫn phải được gật). Việc **nhỏ** và **rất nhỏ** d
 chỉ Kế hoạch + Kết quả, Cổng 1 = "đạt theo lời giao" + trích lời giao, Cổng 2 gộp lời báo cuối; nhỏ đủ bốn phần
 và hai cổng. Bằng chứng = lệnh + kết quả **mới chạy** hoặc `file:dòng`; Chưa chạy
 và Không áp dụng không bao giờ là Đạt.
+<!-- san-cung:end -->
 
 ## Vai và tier
 
@@ -97,6 +99,7 @@ và Không áp dụng không bao giờ là Đạt.
 - Phát hiện: **Chặn / Phải sửa / Nên sửa / Ghi chú**. Kết luận: **Đạt / Đạt có điều kiện / Không đạt**.
   Thang cũ chỉ ở bảng quy đổi `method/severity.md`.
 
+<!-- san-cung:start -->
 ## Git và điều cấm
 
 - Không bỏ hook (`--no-verify`), không force-push, không `reset --hard` hay xoá nhánh chưa gộp nếu không
@@ -106,3 +109,4 @@ và Không áp dụng không bao giờ là Đạt.
   người dùng gật.
 - Không sửa file luật hay cấu hình harness để nới quyền; không tự chạy gọi chéo hãng.
 - File tạm trong `.tmp/`, xoá khi xong; không đọc, in, chép giá trị secret.
+<!-- san-cung:end -->

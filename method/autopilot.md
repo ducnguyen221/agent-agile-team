@@ -169,6 +169,7 @@ người dùng nói ──► kênh hợp lệ? ──không──► nêu lại
 | `Dừng autopilot.` | kết thúc mọi sprint của lệnh đang chạy, ghi `revoked_at` (mục 7) |
 | `Thu hồi duyệt thay SPR-21.` giữa chương trình | chỉ SPR-21 dừng; sprint khác của dải chạy tiếp |
 
+<!-- san-cung:start -->
 ## 5. Danh sách loại và hai loại rào
 
 Danh sách là **đóng**: việc không có trong phạm vi lệnh thì mặc định loại. Gặp mục loại, hoặc điều kiện dừng (a)–(c)
@@ -236,6 +237,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
     giao** và **khi nhận báo**; thiếu hoặc lệch → coi phiên con đã ra khỏi rào: dừng phiên đó, ghi `BR` loại (c),
     soát `git reflog`, nhánh remote, tag mới để biết lệnh loại đã chạy chưa. Lưu ý: `--clear` rồi ghi lại file dấu y hệt làm phép kiểm "có mặt" mất tác dụng, nên phép soát `git reflog` và remote là chính.
 - Rào máy là lưới an toàn, không phải ranh giới bảo mật; bảo vệ nhánh chính phía remote (nếu có) mới là rào cuối.
+<!-- san-cung:end -->
 
 ### 5.2 File dấu `.tmp/autopilot.json`
 

@@ -8,6 +8,7 @@ File này thuộc sàn cứng (`FLOOR_FILES`). Nó kiểm bằng đọc văn b�
 from __future__ import annotations
 
 import ast
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -34,7 +35,8 @@ PINNED_EXCLUSIONS = {"push", "tag", "version", "main_merge", "publish", "license
                      "rules_unlisted", "user_soul", "secret", "auth", "network_fetch", "branch_merge_local"}
 PINNED_NAMES = ("DELEGATION_KEYS", "DELEGATION_OPTIONAL_KEYS", "AUTOPILOT_PREFIX", "AUTOPILOT_LEVELS",
                 "AUTOPILOT_EXCLUSIONS", "AUTOPILOT_GATES_BOTH", "AUTOPILOT_BRANCH_SUFFIX", "DELEGATION_CHANNELS",
-                "DATE", "MOMENT", "parse_moment", "autopilot_problem", "FENCE_FILES")
+                "DATE", "MOMENT", "parse_moment", "autopilot_problem", "FENCE_FILES",
+                "FLOOR_ZONES", "FLOOR_FILES", "FLOOR_MARKER_START", "FLOOR_MARKER_END", "zone_spans")
 
 
 def parse(path: Path) -> ast.Module:
@@ -81,7 +83,16 @@ def rules_constant(name: str):
         raise AssertionError(f"fence-def-shadowed: {name} không có trong _autopilot_rules.py")
     node = nodes[-1]
     value = node.value if isinstance(node, (ast.Assign, ast.AnnAssign)) else None
-    return ast.literal_eval(value)
+    return _evaluate(value)
+
+
+def _evaluate(node):
+    """`ast.literal_eval` mở rộng cho tên hằng đã định nghĩa ở module và phép `+` giữa các tuple."""
+    if isinstance(node, ast.Name):
+        return rules_constant(node.id)
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        return _evaluate(node.left) + _evaluate(node.right)
+    return ast.literal_eval(node)
 
 
 def validator_calls(tree: ast.Module) -> list[tuple[ast.Call, ast.AST | None]]:
@@ -212,3 +223,87 @@ def test_exclusions_pinned():
     values = rules_constant("AUTOPILOT_EXCLUSIONS")
     assert len(values) == 13 and len(set(values)) == 13 and set(values) == PINNED_EXCLUSIONS, (
         f"fence-exclusions-changed: AUTOPILOT_EXCLUSIONS khác 13 mục ghim ({sorted(set(values) ^ PINNED_EXCLUSIONS)})")
+
+
+# --- FR2.1: vùng sàn cứng ------------------------------------------------------------------------------------------
+
+PINNED_FLOOR_ZONES = {"AGENTS.md": 2, "method/process.md": 3, "method/sizing.md": 1, "method/autopilot.md": 1}
+PINNED_FLOOR_FILES_EXTRA = (
+    "scripts/floor_check.py", "scripts/merge_ready.py", "scripts/deploy_scan.py", "tests/test_fence_wiring.py",
+    "tests/test_floor_check.py", "tests/test_mutation_floor.py", ".github/workflows/verify.yml",
+)
+# (đường file, số thứ tự cặp mốc) → (SHA-256 của chữ giữa mốc, SHA-256 của hai dòng chữ gần nhất quanh cặp mốc).
+# Sửa chữ trong vùng sàn thì đổi cả băm ở đây trong cùng commit, có lý do và có 5 ý Đức gật cho file luật đó.
+PINNED_ZONE_HASHES = {
+    ("AGENTS.md", 0): (
+        "652736d630df563eeed3216db6ec9ff567eaf3b3ef6a5fabcf48c3902230c2bc",
+        "1b674c5981eda2acbc3b340bec29f1730fce0513d8061f11383ce0d60d4a3f4c"),
+    ("AGENTS.md", 1): (
+        "e9e7efcd8749e8cb34da4fa44745bfbd63af78576b403e2b4d59aa6549c808d5",
+        "5d18f5eaed17becce2a26b0381cb1a0576ec05b6d3d5948bcef94a80abe411bf"),
+    ("method/process.md", 0): (
+        "b2a3f70d7bf37e74f83b80da6704cf411aa55441affc64a0a6dc76f398cae8b4",
+        "ecb48ff6109d5b11438be3eef55f7e9c5d7af45c98a2cf48cf4dea2efc4f1029"),
+    ("method/process.md", 1): (
+        "97cf1aad77f3ee10e8f5927d4f3a4036fe3c7bd7b544344b944e973197458945",
+        "2a61b772d7d11e70c57623ef3447b2dc001d4218b8c2aaa09c181ac31d436c5f"),
+    ("method/process.md", 2): (
+        "bc87da020948b6357969142782239d32acb8ee7b74755c9e1a15222fa2308fec",
+        "b7c7fe0fbd1a77eb08490351e6fe3812eefdec315cb73a9df8fa00de8148ce6a"),
+    ("method/sizing.md", 0): (
+        "dc327e76921c81fcf4266a5285b617b74cb55af89e71eca950067b4d9018acba",
+        "47c90f9685ed7aecfe4ca66bc4e10a217a68813484e3d1eb920f085e292b85d3"),
+    ("method/autopilot.md", 0): (
+        "410e4459259498db20971ecf35d882fad3b3ad5bf7f9711a56f9d6fb3de9390a",
+        "c38c9cc71026a9bddaed433d3c50ed2921e5a09f40b14c941065c9dedd9a2beb"),
+}
+
+
+def _sha(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _spans(text: str) -> list[tuple[int, int]]:
+    """Cặp mốc bằng đọc văn bản (không nhập module rào): dòng mốc mở/đóng, đánh số từ 1."""
+    out, opened = [], 0
+    for number, raw in enumerate(text.split("\n"), 1):
+        line = raw.strip()
+        if line == "<!-- san-cung:start -->":
+            assert not opened, f"fence-zone-nested: dòng {number}"
+            opened = number
+        elif line == "<!-- san-cung:end -->":
+            assert opened, f"fence-zone-unbalanced: dòng {number}"
+            out.append((opened, number))
+            opened = 0
+    assert not opened, "fence-zone-unbalanced: mốc mở không đóng"
+    return out
+
+
+def test_floor_zone_counts_pinned():
+    assert rules_constant("FLOOR_ZONES") == PINNED_FLOOR_ZONES, "fence-floor-zones-changed"
+    files = tuple(rules_constant("FENCE_FILES")) + PINNED_FLOOR_FILES_EXTRA
+    assert tuple(rules_constant("FLOOR_FILES")) == files, "fence-floor-files-changed"
+
+
+def test_floor_zone_hashes():
+    """Chữ giữa mốc và chữ quanh mốc khớp bản ghim: sửa vùng, dời mốc, đổi chữ lân cận đều làm test đỏ."""
+    seen = set()
+    for rel, count in PINNED_FLOOR_ZONES.items():
+        text = (REPO / rel).read_text(encoding="utf-8").replace("\r\n", "\n")
+        spans = _spans(text)
+        assert len(spans) == count, f"fence-zone-count: {rel} cần {count} cặp mốc, có {len(spans)}"
+        lines = text.split("\n")
+        for index, (start, end) in enumerate(spans):
+            inner = "\n".join(lines[start:end - 1])
+            before = start - 2
+            while before >= 0 and not lines[before].strip():
+                before -= 1
+            after = end
+            while after < len(lines) and not lines[after].strip():
+                after += 1
+            around = (lines[before] if before >= 0 else "") + "\n" + (lines[after] if after < len(lines) else "")
+            expected = PINNED_ZONE_HASHES[(rel, index)]
+            assert _sha(inner) == expected[0], f"floor-zone-hash: chữ giữa mốc {rel} #{index} khác bản ghim"
+            assert _sha(around) == expected[1], f"floor-marker-position: chữ quanh mốc {rel} #{index} khác bản ghim"
+            seen.add((rel, index))
+    assert seen == set(PINNED_ZONE_HASHES), "floor-zone-hash: bản ghim có vùng không còn trong file"

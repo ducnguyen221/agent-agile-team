@@ -314,3 +314,81 @@ def test_denylist_whole_word_applies_to_file_names(tmp_path):
     (root / "skills" / "demo" / f"{PLAIN}-notes.md").write_text("# x\n", encoding="utf-8")
     hits = [f for f in check.run_self(root, denylist(tmp_path, PLAIN)).findings if f.rule == "leak-denylist"]
     assert len(hits) == 1 and f"{PLAIN}-notes" in str(hits[0].path)
+
+
+# --- hard-floor-marker (SPR-16 TK3) ---------------------------------------------------------------------------------
+
+START, END = "<!-- san-cung:start -->", "<!-- san-cung:end -->"
+ZONES = {"AGENTS.md": 2, "method/process.md": 3, "method/sizing.md": 1, "method/autopilot.md": 1}
+
+
+def make_floor_repo(tmp_path: Path) -> Path:
+    """Repo thử có máy so sàn (`scripts/floor_check.py`) và bốn file vùng sàn với đủ số cặp mốc."""
+    root = make_repo(tmp_path)
+    (root / "scripts").mkdir()
+    (root / "scripts" / "floor_check.py").write_text("# stub\n", encoding="utf-8")
+    for rel, pairs in ZONES.items():
+        body = "# Tiêu đề\n\n" + "".join(f"{START}\nchữ vùng {i}\n{END}\n\n" for i in range(pairs))
+        (root / rel).write_text(body, encoding="utf-8")
+    return root
+
+
+def floor_hits(root: Path):
+    return [f for f in check.run_self(root, None).findings if f.rule == "hard-floor-marker"]
+
+
+def test_floor_markers_complete_pass(tmp_path):
+    root = make_floor_repo(tmp_path)
+    assert check.run_self(root, None).findings == []
+
+
+def test_floor_marker_missing_is_blocked(tmp_path):
+    root = make_floor_repo(tmp_path)
+    path = root / "method" / "sizing.md"
+    path.write_text(path.read_text(encoding="utf-8").replace(f"{START}\n", "").replace(f"{END}\n", ""), encoding="utf-8")
+    hits = floor_hits(root)
+    assert len(hits) == 1 and hits[0].level == "Chặn" and "cần 1 cặp, có 0" in hits[0].message
+
+
+def test_floor_marker_unbalanced_is_blocked(tmp_path):
+    root = make_floor_repo(tmp_path)
+    path = root / "AGENTS.md"
+    path.write_text(path.read_text(encoding="utf-8").replace(f"{END}\n", "", 1), encoding="utf-8")
+    hits = floor_hits(root)
+    assert hits and "floor-unbalanced" in hits[0].message or "floor-nested" in hits[0].message
+
+
+def test_floor_marker_nested_is_blocked(tmp_path):
+    root = make_floor_repo(tmp_path)
+    path = root / "method" / "autopilot.md"
+    path.write_text(path.read_text(encoding="utf-8").replace("chữ vùng 0\n", f"{START}\nchữ\n"), encoding="utf-8")
+    hits = floor_hits(root)
+    assert hits and "floor-nested" in hits[0].message
+
+
+def test_floor_marker_extra_pair_is_blocked(tmp_path):
+    root = make_floor_repo(tmp_path)
+    path = root / "method" / "process.md"
+    path.write_text(path.read_text(encoding="utf-8") + f"{START}\nthừa\n{END}\n", encoding="utf-8")
+    hits = floor_hits(root)
+    assert len(hits) == 1 and "cần 3 cặp, có 4" in hits[0].message
+
+
+def test_floor_marker_inside_code_fence_is_blocked(tmp_path):
+    root = make_floor_repo(tmp_path)
+    path = root / "method" / "sizing.md"
+    path.write_text("```\n" + path.read_text(encoding="utf-8") + "```\n", encoding="utf-8")
+    hits = floor_hits(root)
+    assert hits and "floor-in-fence" in hits[0].message
+
+
+def test_floor_marker_file_missing_is_blocked(tmp_path):
+    root = make_floor_repo(tmp_path)
+    (root / "method" / "autopilot.md").unlink()
+    hits = floor_hits(root)
+    assert len(hits) == 1 and "không còn" in hits[0].message
+
+
+def test_repo_without_floor_check_is_not_asked_for_markers(tmp_path):
+    root = make_repo(tmp_path)  # không có scripts/floor_check.py: repo dự án khác dùng lõi này không bị đòi mốc
+    assert check.run_self(root, None).findings == []

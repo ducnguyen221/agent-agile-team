@@ -35,6 +35,25 @@ FENCE_FILES: tuple[str, ...] = (
     "hooks/hooks.json",
 )
 
+# Sàn cứng (SPEC SPR-16 FR2): vùng văn bản bọc cặp mốc trong file trộn, và file thuộc sàn nguyên file.
+FLOOR_MARKER_START = "<!-- san-cung:start -->"
+FLOOR_MARKER_END = "<!-- san-cung:end -->"
+FLOOR_ZONES: dict[str, int] = {  # đường file → số cặp mốc quy định
+    "AGENTS.md": 2,
+    "method/process.md": 3,
+    "method/sizing.md": 1,
+    "method/autopilot.md": 1,
+}
+FLOOR_FILES: tuple[str, ...] = FENCE_FILES + (  # `merge_ready.py`, `deploy_scan.py` (SPR-17) chỉ tính khi tồn tại
+    "scripts/floor_check.py",
+    "scripts/merge_ready.py",
+    "scripts/deploy_scan.py",
+    "tests/test_fence_wiring.py",
+    "tests/test_floor_check.py",
+    "tests/test_mutation_floor.py",
+    ".github/workflows/verify.yml",
+)
+
 
 def parse_moment(value) -> tuple | None:
     """`YYYY-MM-DD` hoặc `YYYY-MM-DD HH:MM +TZ` → (ngày như đã viết, thời điểm có múi giờ hoặc `None`); không đọc được → `None`."""
@@ -121,3 +140,35 @@ def autopilot_problem(block: dict) -> tuple[str, str] | None:
             if not (isinstance(item, str) and item.strip() and item in tokens and re.search(r"[./\\]", item)):  # đường dẫn: có dấu chấm hoặc gạch
                 return "delegation.files", f"delegation.files có {item!r} không nêu trong lời cấp"
     return None
+
+
+def zone_spans(text: str) -> list[tuple[int, int]] | str:
+    """Các cặp mốc `san-cung` trong `text`: danh sách `(dòng mốc mở, dòng mốc đóng)` đánh số từ 1, hoặc một mã lỗi
+    (`floor-unbalanced` mở không đóng/đóng không mở, `floor-nested` lồng nhau, `floor-in-fence` mốc nằm trong khối mã).
+    Mốc là cả một dòng (bỏ khoảng trắng hai đầu); mốc nằm giữa dòng chữ hay trong dấu `code` không tính."""
+    spans: list[tuple[int, int]] = []
+    opened = 0
+    fence = ""
+    for number, raw in enumerate(text.split("\n"), 1):
+        line = raw.strip()
+        fenced = re.match(r"(`{3,}|~{3,})", line)
+        if fenced:
+            if not fence:
+                fence = fenced.group(1)[0] * 3
+            elif line.startswith(fence):
+                fence = ""
+            continue
+        if line not in (FLOOR_MARKER_START, FLOOR_MARKER_END):
+            continue
+        if fence:
+            return "floor-in-fence"
+        if line == FLOOR_MARKER_START:
+            if opened:
+                return "floor-nested"
+            opened = number
+        else:
+            if not opened:
+                return "floor-unbalanced"
+            spans.append((opened, number))
+            opened = 0
+    return "floor-unbalanced" if opened else spans
