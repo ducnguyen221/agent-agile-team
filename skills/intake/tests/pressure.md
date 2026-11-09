@@ -363,3 +363,19 @@ trước rồi làm; được đọc tài liệu mà skill trỏ tới, đặc b
 chạy hay sửa gì" — `<worktree>` là **đường tuyệt đối** tới worktree đang thử
 (plugin đã cài có thể trỏ bản khác). Chấm theo cột Bằng chứng; ghi `skill_sha` = băm cây thư mục skill **trừ `tests/`**:
 `git ls-tree HEAD:skills/<tên> | awk -F'\t' '$2!="tests"' | git mktree` (tái lập được, không đổi khi chỉ `tests/` đổi).
+
+
+## Lượt SPR-16 TK1 — dời phần rào autopilot sang `references/autopilot.md` (2026-11-09)
+
+Trước: cây base `024631a` (`.tmp/base/`); sau: cây TK1 (chưa commit lúc đo). QA T3 (`claude-sonnet-5-5`, subagent effort medium, n = 1 — chưa lặp), mỗi ca một chủ thể mới đọc `SKILL.md` bằng đường tuyệt đối, cấm Skill. `SKILL.md`: 205 → 177 dòng. Nội dung dời nguyên văn (đối chiếu từng dòng bị xoá có mặt trong `references/autopilot.md`; chỉ đường dẫn tới `method/` đổi theo vị trí file).
+
+| Ca | Lựa chọn trước | Lựa chọn sau | Sau có đọc `references/autopilot.md` | Agent trước | Agent sau |
+|---|---|---|---|---|---|
+| `in-9-autopilot` | B | B | có | a644dfd26e72a52ae | ab06493852aef8d05 |
+| `in-10-autopilot` | E | E | có | ac94caca08ba37b3e | a265afe33a23c5a3b |
+| `in-11a-autopilot` | A | A | có | a8de67a95b08f0e4d | af18e28e23b2726eb |
+| `in-11b-autopilot` | C | C | có | ab75596aedad00634 | a81f24e996e38a266 |
+| `in-12-autopilot` | B | B | có | ad8a334cd40189cc3 | a7a45a455e3f9d4bd |
+| `in-13-autopilot` | A | A | có | a14481c723f89e383 | ab5bc602ee0c304e7 |
+
+Kết luận: lựa chọn và các điểm then chốt của câu trả lời giữ nguyên ở mọi ca; không ca nào cần sửa con trỏ. Chi tiết: `evidence/TK1-baseline.md` và `evidence/TK1-after.md` trong hồ sơ SPR-16. Giới hạn: n = 1 mỗi ca, chủ thể và người so cùng họ model, so theo lựa chọn và điểm then chốt chứ chưa chấm lại theo thước đầy đủ.

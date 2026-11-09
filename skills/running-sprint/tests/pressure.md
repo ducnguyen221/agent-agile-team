@@ -196,3 +196,16 @@ Kết quả: 2/2 **Đạt** (n = 1). Không sửa `SKILL.md`.
 
 Như `skills/intake/tests/pressure.md` mục "Chạy lại"; GREEN đọc `<worktree>/skills/running-sprint/SKILL.md` bằng
 **đường tuyệt đối** (rs-2 đọc thêm `<worktree>/skills/running-sprint/references/brief.md`).
+
+
+## Lượt SPR-16 TK1 — dời phần rào autopilot sang `references/autopilot.md` (2026-11-09)
+
+Trước: cây base `024631a` (`.tmp/base/`); sau: cây TK1 (chưa commit lúc đo). QA T3 (`claude-sonnet-5-5`, subagent effort medium, n = 1 — chưa lặp), mỗi ca một chủ thể mới đọc `SKILL.md` bằng đường tuyệt đối, cấm Skill. `SKILL.md`: 246 → 235 dòng. Nội dung dời nguyên văn (đối chiếu từng dòng bị xoá có mặt trong `references/autopilot.md`; chỉ đường dẫn tới `method/` đổi theo vị trí file).
+
+| Ca | Lựa chọn trước | Lựa chọn sau | Sau có đọc `references/autopilot.md` | Agent trước | Agent sau |
+|---|---|---|---|---|---|
+| `rs-9-autopilot` | C | C | có | a68f2fe2481a8d189 | ae046e0104201dbf6 |
+| `rs-10-autopilot` | E | E | có | ab9400ed42c5cee62 | ad2e4e449bffa5ddb |
+| `rs-11-autopilot` | A | A | có | a9b2e08e1661da8f1 | a70bd2718e54cfabb |
+
+Kết luận: lựa chọn và các điểm then chốt của câu trả lời giữ nguyên ở mọi ca; không ca nào cần sửa con trỏ. Chi tiết: `evidence/TK1-baseline.md` và `evidence/TK1-after.md` trong hồ sơ SPR-16. Giới hạn: n = 1 mỗi ca, chủ thể và người so cùng họ model, so theo lựa chọn và điểm then chốt chứ chưa chấm lại theo thước đầy đủ.

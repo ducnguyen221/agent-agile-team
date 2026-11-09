@@ -296,3 +296,16 @@ dòng cấm công cụ Skill + đường **tuyệt đối** tới `SKILL.md` tro
 id agent, ngày, và kết quả thật — không ghi "dự kiến".
 
 Phép thay vế mở đầu ở lượt GREEN: phần mở đầu mỗi kịch bản trong `tests/scenarios.txt` nói "KHÔNG đọc file nào trên máy", mâu thuẫn với dòng GREEN bảo đọc `SKILL.md`; khi gửi GREEN đổi vế đó thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên, các file trong `references/` mà `SKILL.md` trỏ tới và tài liệu `method/` mà `SKILL.md` trỏ tới"; dòng GREEN thêm "và tài liệu method/ được trỏ" sau "file references/ được trỏ". Lượt RED giữ nguyên văn; `tests/scenarios.txt` không đổi.
+
+
+## Lượt SPR-16 TK1 — dời phần rào autopilot sang `references/autopilot.md` (2026-11-09)
+
+Trước: cây base `024631a` (`.tmp/base/`); sau: cây TK1 (chưa commit lúc đo). QA T3 (`claude-sonnet-5-5`, subagent effort medium, n = 1 — chưa lặp), mỗi ca một chủ thể mới đọc `SKILL.md` bằng đường tuyệt đối, cấm Skill. `SKILL.md`: 199 → 193 dòng. Nội dung dời nguyên văn (đối chiếu từng dòng bị xoá có mặt trong `references/autopilot.md`; chỉ đường dẫn tới `method/` đổi theo vị trí file).
+
+| Ca | Lựa chọn trước | Lựa chọn sau | Sau có đọc `references/autopilot.md` | Agent trước | Agent sau |
+|---|---|---|---|---|---|
+| `KB15` | D | D | có | a6e8b4e7d6b8433f3 | a348bdd7d3c8ade5f |
+| `KB16` | B | B | có | ae0803c7f2f9bdc0d | a4778dcd45b325798 |
+| `KB17` | E | E | có | a4d38842b6864dd91 | a517a5497ff7a7ee1 |
+
+Kết luận: lựa chọn và các điểm then chốt của câu trả lời giữ nguyên ở mọi ca; không ca nào cần sửa con trỏ. Chi tiết: `evidence/TK1-baseline.md` và `evidence/TK1-after.md` trong hồ sơ SPR-16. Giới hạn: n = 1 mỗi ca, chủ thể và người so cùng họ model, so theo lựa chọn và điểm then chốt chứ chưa chấm lại theo thước đầy đủ.
