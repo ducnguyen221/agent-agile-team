@@ -133,3 +133,31 @@ def test_shim_skips_python_in_repos_without_any_protection_sign(tmp_path):
     oracle.make_stub(stub)
     log = tmp_path / "log.txt"
     assert oracle.danger_in(oracle.run_bash("git push --force origin main", plain, log, [SHIMS, stub], extra_env=ON))
+
+
+def test_clean_path_drops_every_shims_directory_not_only_its_own(tmp_path):
+    """Hai bản plugin (hai thư mục shims/) cùng trên PATH không được gọi vòng nhau."""
+    plug_a, plug_b = tmp_path / "a", tmp_path / "b"
+    for plug in (plug_a, plug_b):
+        (plug / "shims").mkdir(parents=True)
+        (plug / "scripts").mkdir()
+        (plug / "scripts" / "git_shim.py").write_text("", encoding="utf-8")
+    real = tmp_path / "real"
+    real.mkdir()
+    path = os.pathsep.join([str(plug_a / "shims"), str(plug_b / "shims"), str(real)])
+    assert git_shim.clean_path(str(plug_a / "shims"), path) == str(real)
+
+
+@needs_bash
+def test_two_shim_copies_on_path_do_not_call_each_other_forever(tmp_path):
+    other = tmp_path / "other"
+    shutil.copytree(SHIMS, other / "shims")
+    (other / "scripts").mkdir()
+    shutil.copy(REPO / "scripts" / "git_shim.py", other / "scripts" / "git_shim.py")
+    repo = protected_repo(tmp_path, branch="x")
+    stub = tmp_path / "stub"
+    oracle.make_stub(stub)
+    log = tmp_path / "log.txt"
+    for extra in ({}, ON):  # biến tắt (chạy thẳng tới git thật) và bật (đi qua guard)
+        out = oracle.run_bash("git status", repo, log, [SHIMS, other / "shims", stub], timeout=40, extra_env=extra)
+        assert out.startswith("RUN "), extra
