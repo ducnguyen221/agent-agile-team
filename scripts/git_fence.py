@@ -371,11 +371,12 @@ def is_guard_path(path: str, base: str, env: Mapping, loose: bool = False) -> bo
 
 
 def _glob_hits_repo_root(dirname: str, base: str, loose: bool) -> bool:
-    """Glob ở thư mục `dirname` có thể khớp file nằm ở GỐC repo (nơi có `.agile.json`)? `.tmp/scratch/*` thì không."""
+    """Glob ở thư mục `dirname` có thể khớp file nằm ở GỐC repo (nơi có `.agile.json`)? `.tmp/scratch/*` thì không.
+    Đã có `cd` (loose): đường tương đối không giải được, nên chỉ loại khi không có `..`; đường tuyệt đối vẫn giải được."""
     if dirname in ("", "."):
         return True
-    if loose:
-        return False
+    if loose and not os.path.isabs(dirname):
+        return ".." in dirname.split("/")
     found = find_repo(base)
     if not found:
         return False

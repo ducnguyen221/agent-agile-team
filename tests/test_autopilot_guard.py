@@ -1673,6 +1673,7 @@ def test_repo_with_include_makes_unknown_subcommands_unparsed(tmp_path):
     "rm .agil*", "rm .agile.js?n", "rm *.json", "rm $(echo .agile).json", "F=.agile.json; rm $F",
     'echo {} > "$AGENT_AGILE_PROTECTED_REPOS"', "cp /dev/null $AGENT_AGILE_PROTECTED_REPOS",
     "cd sub && rm .agile.json", "mv .agile.json .agile.bak",
+    "cd sub && rm ../.agil*", "cd sub && rm ../*.json", "cd sub && rm *.json", "rm sub/../.agil*", "rm ./*.json",
 ])
 def test_dynamic_and_glob_targets_of_the_guard_files_are_denied(tmp_path, cmd):
     repo = protected_repo(tmp_path)
@@ -1685,3 +1686,12 @@ def test_dynamic_and_glob_targets_of_the_guard_files_are_denied(tmp_path, cmd):
 def test_ordinary_file_commands_in_protected_repo_are_not_blocked(tmp_path, cmd):
     repo = protected_repo(tmp_path)
     assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
+
+
+def test_absolute_glob_at_repo_root_is_denied_even_after_cd(tmp_path):
+    repo = protected_repo(tmp_path)
+    (repo / "sub").mkdir()
+    for cmd in ("rm {}/*.json".format(fwd(repo)), "cd sub && rm {}/.agil*".format(fwd(repo))):
+        rc, _, err = run("claude", claude(cmd, repo))
+        assert rc == 2 and "git-fence" in err, cmd
+    assert run("claude", claude("rm {}/sub/*.o".format(fwd(repo)), repo)) == (0, "", "")
