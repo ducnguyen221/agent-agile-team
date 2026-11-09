@@ -2206,3 +2206,44 @@ def test_powershell_curly_quotes_are_quotes(tmp_path, monkeypatch):
 def test_start_process_argument_lists_are_analysed_as_commands(tmp_path, cmd):
     repo = protected_repo(tmp_path, branch="x")
     assert run("claude", claude(cmd, repo, tool="PowerShell"))[0] == 2, cmd
+
+
+# --- security vòng 9 (bản 55498d5) -----------------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("tool", ["Bash", "PowerShell"])
+@pytest.mark.parametrize("cmd", [
+    "flock /tmp/l -c 'echo a;git push --force origin main'", "flock -c 'cd .;git push --force origin main' /tmp/l",
+    "ash -c 'echo a;git push --force origin main'", "mksh -c \"echo a;git push --force origin main\"",
+    "rbash -c 'cd .;git push --force origin main'", "yash -c 'true&&git push --force origin main'",
+    "xargs -a f ash -c 'cd .;git push --force origin main'", "watch -n1 'cd .;git push --force origin main'",
+])
+def test_shell_strings_of_less_common_wrappers_are_split_before_looking_for_git(tmp_path, cmd, tool):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo, tool=tool))[0] == 2, cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "Start-Process git -ArgumentList '-C','.','push','--force','origin','main'", "Start-Process git -ArgumentList -C,.,push,--force,origin,main",
+    "Start-Process git -ArgumentList '-c','x=y','push','--force','origin','main'", "Start-Process powershell -ArgumentList '-c','git push --force origin main'",
+    "Start-Process -FilePath git -ArgumentList @('push','--force','origin','main')", "Start-Process git @('push','--force','origin','main')",
+])
+def test_start_process_argument_lists_starting_with_a_dash_or_array_syntax(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo, tool="PowerShell"))[0] == 2, cmd
+
+
+@pytest.mark.parametrize("tool", ["Bash", "PowerShell"])
+@pytest.mark.parametrize("cmd", [
+    'echo "a\n";git push --force origin main;echo "b\n"', "echo 'a\n';git push --force origin main;echo 'b\n'",
+    'echo "a\n"&&git push --force origin main&&echo "b\n"',
+])
+def test_multi_line_strings_cannot_pair_quotes_across_lines_and_hide_a_command(tmp_path, cmd, tool):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo, tool=tool))[0] == 2, cmd
+
+
+@pytest.mark.parametrize("cmd", ["docker run --name gh image", "jira create --title \"git push --force origin main\"",
+                                 "svn commit --message \"git push --force origin main\""])
+def test_long_text_flags_hold_text_not_commands(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd

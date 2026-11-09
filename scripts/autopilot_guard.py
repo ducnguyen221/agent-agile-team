@@ -1098,7 +1098,7 @@ def _evaluate(raw: str) -> str | None:
 # Biến môi trường được ĐẶT cho git/gh: gán `X=…` đầu từ hoặc sau `;&|(`, `$env:X`, hoặc đi sau env/export/set/declare/setx (không khớp chữ trong nội dung)
 QUOTED_CONTENT = re.compile(r"\"[^\"\n]*\s[^\"\n]*\"|'[^'\n]*\s[^'\n]*'")  # chuỗi trong nháy có khoảng trắng: nội dung văn bản
 # chuỗi đi sau `-c` CỦA MỘT TRÌNH SHELL (không phải `git -c`), eval, -Command, /c (kể cả $'…') là LỆNH, không phải nội dung
-SHELL_STRING_BEFORE = re.compile(r"(?:\b(?:bash|sh|zsh|dash|ksh|csh|tcsh|fish|su|runuser|script|pwsh|powershell|cmd|wsl|busybox)\b[^;&|\n]*\s-[A-Za-z]*c[A-Za-z]*"
+SHELL_STRING_BEFORE = re.compile(r"(?:\b(?:bash|sh|zsh|dash|ash|ksh|mksh|rbash|yash|csh|tcsh|fish|su|runuser|script|flock|watch|pwsh|powershell|cmd|wsl|busybox)\b[^;&|\n]*\s-[A-Za-z]*c[A-Za-z]*"
                                  r"|\beval|\s-command|\s/[ck])\s*\$?$", re.I)
 BACKSLASH = chr(92)
 CURLY_QUOTES = frozenset("‘’‚‛“”„")  # PowerShell coi các dấu nháy cong này là nháy
@@ -1130,6 +1130,7 @@ def _sub_quoted(fn, text: str, posix: bool = True, any_chunk: bool = False) -> s
                     last = end + 1
                 index = end + 1
                 continue
+            return text  # nháy mở mà không đóng trước khi hết dòng (chuỗi trải nhiều dòng hay nháy lẻ): không dám che gì, kẻo nháy ở dòng sau ghép nhầm và giấu lệnh thật
         index += 1
     out.append(text[last:])
     return "".join(out)
@@ -1185,6 +1186,11 @@ def _plain_words(tokens: list, segment: str) -> list:
 
 DOWNLOAD_TOOLS = frozenset({"curl", "wget", "http", "https", "xh"})  # chỉ các công cụ này mới được bỏ qua giá trị của cờ VALUE_FLAGS (cờ giống nhau nghĩa khác nhau ở công cụ khác: `strace -o log -A git …`)
 START_PROCESS = frozenset({"start-process", "saps", "start"})  # PowerShell: `Start-Process git push,--force,origin,main` (đối số dạng danh sách có dấu phẩy)
+START_PROCESS_NAMES = frozenset({"-filepath", "-argumentlist", "-args", "-wait", "-nonewwindow", "-passthru", "-verb", "-windowstyle", "-workingdirectory",
+                                 "-redirectstandardoutput", "-redirectstandarderror", "-redirectstandardinput", "-usenewenvironment", "-credential", "-loaduserprofile"})
+START_PROCESS_VALUED = frozenset({"-verb", "-windowstyle", "-workingdirectory", "-redirectstandardoutput", "-redirectstandarderror",
+                                  "-redirectstandardinput", "-credential"})  # tham số kèm một giá trị không phải đối số lệnh
+STABLE_VALUE_FLAGS = frozenset({"--name", "--title", "--body", "--message", "--msg"})  # cờ dài có nghĩa ổn định ở mọi công cụ: giá trị kế tiếp là văn bản
 VALUE_FLAGS = frozenset({"-o", "-O", "--output", "-m", "--msg", "--message", "--data", "-H", "--header", "-F", "--form", "-X", "--request",
                          "-A", "--user-agent", "--name", "--title", "--body", "--file"})  # cờ biết chắc nhận một giá trị (không phải lệnh); cờ mơ hồ như -f/-d/-n/-t cố ý KHÔNG có
 
@@ -1214,6 +1220,8 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         ctx.posix = None
         return
     posix = getattr(ctx, "posix", True) is not False
+    if re.search(r"(?i)\b(?:start-process|saps)\b", text):
+        text = re.sub(r"@\(([^()]*)\)", r"\1", text)  # `-ArgumentList @('push','--force')`: ngoặc làm tách đoạn, danh sách rơi khỏi lệnh Start-Process
     text = _join_and_strip(text)
     text = text.replace(">|", ">")  # `>|` (ghi đè dù noclobber) là chuyển hướng, không phải ống
     # chuyển hướng có `&` không phải dấu tách lệnh (nếu tách, phần sau `&` thoát khỏi lệnh git và lọt khỏi hợp đồng đích):
@@ -1293,18 +1301,26 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         else:
             env = getattr(ctx, "env", os.environ)
             read_only = _read_only(name, args, ctx)
-            if name in START_PROCESS:  # bỏ tên cờ, tách danh sách đối số theo dấu phẩy rồi xét như lệnh lồng
-                _collect_nested(" ".join(a for a in args if not a.startswith("-")).replace(",", " "), ctx, depth, out)
+            if name in START_PROCESS:  # bỏ CHỈ tên tham số đã biết (và giá trị của tham số nhận đường), tách danh sách theo dấu phẩy rồi xét như lệnh lồng
+                kept, skip = [], False
+                for arg in args:
+                    if skip:
+                        skip = False
+                    elif arg.lower() in START_PROCESS_NAMES:
+                        skip = arg.lower() in START_PROCESS_VALUED
+                    else:
+                        kept.append(arg)
+                _collect_nested(" ".join(kept).replace(",", " "), ctx, depth, out)
             if (not read_only or (name == "find" and FIND_EXEC & set(args))) and name not in ("man", "which", "where", "whereis", "type", "help", "pip", "npm", "apt", "brew"):
                 # lệnh lạ (su -c, find -exec, wsl, parallel, watch, chrt, flock, ssh…) có thể chạy git/gh phía sau: tìm và phân tích như lệnh lồng
                 for index, arg in enumerate(args):
                     previous = args[index - 1] if index else ""
-                    if name in DOWNLOAD_TOOLS and previous in VALUE_FLAGS:
+                    if previous in STABLE_VALUE_FLAGS or (name in DOWNLOAD_TOOLS and previous in VALUE_FLAGS):
                         continue  # giá trị của cờ biết chắc nhận giá trị (`curl -o gh url`, `--msg "git push x"`); cờ lạ/cờ bật-tắt (`watch -n5 git …`, `strace -f git …`) thì vẫn xét
                     if _exe_name(arg) in ("git", "gh"):
                         _collect_nested(" ".join(args[index:]), ctx, depth, out)
                         break
-                    if re.search(r"\s", arg) and names_git_or_gh(arg):
+                    if re.search(r"\s", arg) and any(names_git_or_gh(piece) for piece in SEPARATORS.split(arg)):  # `-c 'echo a;git push …'`: git sau `;` không khoảng trắng
                         _collect_nested(arg, ctx, depth, out)
                         break
             for index, arg in enumerate(args):
