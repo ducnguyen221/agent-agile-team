@@ -23,6 +23,7 @@ GIT_FENCE = SCRIPTS / "git_fence.py"
 # Bản ghim viết tay: mỗi lần danh sách đổi, đổi cả chỗ này trong cùng commit và nêu lý do ở thông điệp commit.
 PINNED_FENCE_FILES = (
     "method/autopilot.md",
+    "method/git-permissions.md",  # TK7: luật quyền git và gh, thêm cùng commit tạo file
     "skills/intake/references/autopilot.md",
     "skills/running-sprint/references/autopilot.md",
     "skills/closing-sprint/references/autopilot.md",
@@ -33,7 +34,7 @@ PINNED_FENCE_FILES = (
 )
 PINNED_EXCLUSIONS = {"push", "tag", "version", "main_merge", "publish", "license", "irreversible_delete",
                      "rules_unlisted", "user_soul", "secret", "auth", "network_fetch", "branch_merge_local"}
-PINNED_NAMES = ("DELEGATION_KEYS", "DELEGATION_OPTIONAL_KEYS", "AUTOPILOT_PREFIX", "AUTOPILOT_LEVELS",
+PINNED_NAMES = ("DELEGATION_KEYS", "DELEGATION_OPTIONAL_KEYS", "AUTOPILOT_PREFIX", "AUTOPILOT_LEVELS", "AUTOPILOT_PUSH_FLAG",
                 "AUTOPILOT_EXCLUSIONS", "AUTOPILOT_GATES_BOTH", "AUTOPILOT_BRANCH_SUFFIX", "DELEGATION_CHANNELS",
                 "DATE", "MOMENT", "parse_moment", "autopilot_problem", "FENCE_FILES",
                 "FLOOR_ZONES", "FLOOR_FILES", "FLOOR_MARKER_START", "FLOOR_MARKER_END", "zone_spans")
@@ -254,7 +255,7 @@ PINNED_ZONE_HASHES = {
         "dc327e76921c81fcf4266a5285b617b74cb55af89e71eca950067b4d9018acba",
         "47c90f9685ed7aecfe4ca66bc4e10a217a68813484e3d1eb920f085e292b85d3"),
     ("method/autopilot.md", 0): (
-        "410e4459259498db20971ecf35d882fad3b3ad5bf7f9711a56f9d6fb3de9390a",
+        "edcf795eb849f49ed091160b2860be48d2837cca24f16a8a7c02b9576acb0b92",  # TK7 (DN3 a): hàng `push` mục 5 thêm "trừ đúng hợp đồng đích"
         "c38c9cc71026a9bddaed433d3c50ed2921e5a09f40b14c941065c9dedd9a2beb"),
 }
 

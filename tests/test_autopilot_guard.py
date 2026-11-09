@@ -1394,3 +1394,51 @@ def test_guard_continuation_before_heredoc_scan(tmp_path):
         assert_blocked(repo, cmd, "push")
     assert_allowed(repo, "python - \\\n<<'EOF'\ngit push\nEOF")  # trình không phải shell: thân vẫn là dữ liệu
     assert_allowed(repo, "python - \\\n<<EOF\nx\nEOF\ngit status")
+
+
+# --- hợp đồng đích khi tự đẩy (SPR-16 TK7): bốn khoá file dấu --------------------------------------------------------
+
+PUSH_KEYS = {"push_remote": "origin", "push_urls": ["https://example.com/o/r.git"],
+             "push_targets": ["refs/heads/spr-16-x"], "git_common_dir": "/work/repo/.git"}
+NO_PUSH = [e for e in ALL if e not in ("push",)]
+
+
+def write_marker(tmp_path, **extra):
+    data = {"level": "gate_1_2", "scope": ["gate_1", "gate_2"], "expires": "sprint_end", "exclusions": NO_PUSH,
+            "grant_at": "2026-11-20 09:00 +07", "sprints": ["SPR-20"]}
+    data.update(extra)
+    path = tmp_path / "autopilot.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    return str(path)
+
+
+def test_push_contract_loaded_when_push_dropped_and_keys_valid(tmp_path):
+    assert autopilot_guard.load_push_contract(write_marker(tmp_path, **PUSH_KEYS)) == PUSH_KEYS
+
+
+@pytest.mark.parametrize("change", [
+    {"push_remote": None}, {"push_remote": ""}, {"push_urls": []}, {"push_urls": "https://x"}, {"push_urls": [1]},
+    {"push_targets": []}, {"push_targets": ["main"]}, {"push_targets": ["refs/heads/a", 5]}, {"git_common_dir": ""},
+    {"git_common_dir": None}, {"exclusions": ALL},
+], ids=["remote-none", "remote-empty", "urls-empty", "urls-str", "urls-int", "targets-empty", "target-not-ref",
+        "target-mixed", "gitdir-empty", "gitdir-none", "push-still-excluded"])
+def test_push_contract_absent_when_keys_invalid(tmp_path, change):
+    keys = dict(PUSH_KEYS)
+    keys.update(change)
+    assert autopilot_guard.load_push_contract(write_marker(tmp_path, **keys)) is None
+
+
+def test_push_contract_absent_when_a_key_is_missing_or_file_broken(tmp_path):
+    for key in PUSH_KEYS:
+        keys = {k: v for k, v in PUSH_KEYS.items() if k != key}
+        assert autopilot_guard.load_push_contract(write_marker(tmp_path, **keys)) is None
+    broken = tmp_path / "broken.json"
+    broken.write_text("{", encoding="utf-8")
+    assert autopilot_guard.load_push_contract(str(broken)) is None
+    assert autopilot_guard.load_push_contract(str(tmp_path / "missing.json")) is None
+
+
+def test_load_active_still_blocks_push_even_with_contract(tmp_path):
+    """Hợp đồng chỉ mở đường cho `git_fence.push_contract`; `load_active` giữ nguyên: thiếu `push` vẫn được bổ sung đủ."""
+    active, broken = autopilot_guard.load_active(write_marker(tmp_path, **PUSH_KEYS))
+    assert "push" in active and not broken

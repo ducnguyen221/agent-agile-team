@@ -45,3 +45,13 @@ Lõi chỉ quy định bài học `LN` ghi trong REPORT, tự chấm trước kh
 Khai báo của lớp riêng phải nói: đường (hoặc biến) của từng kho, luật dedup và gộp của kho đó, và ai được
 ghi. Agent **không** tự tạo kho mới; bài học đánh dấu quan trọng chỉ được **đề xuất** nâng thành luật,
 skill hay bước quy trình.
+
+## 4. Điểm cắm danh sách repo được bảo vệ (rào git thường trực)
+
+Rào thường trực của [`method/git-permissions.md`](../method/git-permissions.md) nhận một danh sách bảo vệ **ngoài repo**, do người dùng đặt (agent không đặt được):
+
+| Điểm cắm | Dạng | Lõi đọc ở đâu | Thiếu thì |
+|---|---|---|---|
+| Danh sách repo bảo vệ | biến `AGENT_AGILE_PROTECTED_REPOS` = đường tuyệt đối tới file JSON (mẫu: [`templates/protected-repos.example.json`](../templates/protected-repos.example.json)); mỗi mục `git_common_dir` và/hoặc `remote_urls`, `protected_branches` (chỉ thêm), `level` (`full` mặc định, hoặc `push-only`) | `scripts/git_fence.py` mỗi lần hook chạy | dấu hiệu 1 "không xác định", mức `full`; ba dấu hiệu còn lại (`.agile.json` ở gốc, `.agile.json` trong chỉ mục, file dấu autopilot) vẫn áp |
+
+Đặt biến ở **mức Người dùng** của hệ điều hành rồi **khởi động lại ứng dụng** (Claude Code, Codex, Antigravity): hook là tiến trình con của ứng dụng nên không thấy biến chỉ đặt trong profile shell hay một cửa sổ terminal. File danh sách nằm ngoài cây git của repo nó bảo vệ; ghi hay sửa nó bị guard chặn như ghi `.agile.json`.

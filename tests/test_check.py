@@ -2673,3 +2673,33 @@ def test_delegation_fence_file_ignores_zone_only_files_and_plain_delegation(tmp_
     assert "delegation-fence-file" not in rules_of(check.check_paths([root]))
     write_lf(plan, base.replace("risk_tags: []", "risk_tags: [rules]", 1).replace("  files: []\n", "  files: [scripts/floor_check.py]\n", 1))
     assert "delegation-fence-file" in rules_of(check.check_paths([root]))
+
+
+# --- cờ +đẩy-nhánh (SPR-16 TK7, DN3 a) -------------------------------------------------------------------------------
+
+WITHOUT_PUSH = "[" + ALL_EXCLUSIONS.replace("push, ", "", 1) + "]"
+PUSH_GRANT = '"Bật autopilot cổng 1+2 cho SPR-03 tới hết sprint +đẩy-nhánh."'
+
+
+def test_autopilot_push_flag_allows_dropping_push(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, level="gate_1_2", scope="[gate_1, gate_2]", grant=PUSH_GRANT, exclusions=WITHOUT_PUSH)
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+@pytest.mark.parametrize("fields", [
+    {"grant": '"Bật autopilot cổng 1 cho SPR-03 +đẩy-nhánh."'},  # cổng 1 không có Cổng 2 để đẩy sau
+    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": '"Bật autopilot cổng 1+2 +đẩy-nhánh cho SPR-03."'},  # giữa câu
+    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": GATES_1_2_GRANT},  # không có cờ
+    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": '"Bật autopilot cổng 1+2 cho SPR-03 +push."'},  # +push không tồn tại
+], ids=["gate_1-with-flag", "flag-mid-sentence", "no-flag", "plus-push"])
+def test_autopilot_push_cannot_be_dropped_without_flag(tmp_path, fields):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, exclusions=WITHOUT_PUSH, **fields)
+    _only_hit(root, "push")
+
+
+def test_autopilot_push_flag_does_not_drop_branch_merge_local(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, level="gate_1_2", scope="[gate_1, gate_2]", grant=PUSH_GRANT, exclusions=WITHOUT_BRANCH_MERGE)
+    _only_hit(root, "branch_merge_local")

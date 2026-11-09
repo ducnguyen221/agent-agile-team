@@ -1,0 +1,16 @@
+{
+  "_doc": "Mẫu danh sách repo được bảo vệ (method/git-permissions.md mục 2). Đặt bản thật NGOÀI repo, trỏ bằng biến AGENT_AGILE_PROTECTED_REPOS ở mức Người dùng của hệ điều hành. Khớp một trong git_common_dir hoặc remote_urls; protected_branches chỉ thêm vào main/master/nhánh mặc định; level là full (mặc định) hoặc push-only. Agent không được tạo hay sửa file thật.",
+  "repos": [
+    {
+      "git_common_dir": "C:/work/shop/.git",
+      "remote_urls": ["https://github.com/example/shop.git"],
+      "protected_branches": ["release"],
+      "level": "full"
+    },
+    {
+      "git_common_dir": "C:/work/notes/.git",
+      "remote_urls": ["https://github.com/example/notes.git"],
+      "level": "push-only"
+    }
+  ]
+}

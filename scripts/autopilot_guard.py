@@ -215,6 +215,33 @@ def load_active(marker: str) -> tuple[set[str], bool]:
     return required | ({"branch_merge_local"} & {e for e in listed if isinstance(e, str)}), False
 
 
+PUSH_CONTRACT_KEYS = ("push_remote", "push_urls", "push_targets", "git_common_dir")
+
+
+def load_push_contract(marker: str) -> dict | None:
+    """Hợp đồng đích khi tự đẩy (`+đẩy-nhánh`, method/git-permissions.md): dict bốn khoá `push_remote`, `push_urls`,
+    `push_targets`, `git_common_dir` khi file dấu đọc được, `exclusions` là danh sách KHÔNG có `push` và cả bốn khoá đúng
+    kiểu; ngược lại `None` (= không cho đẩy, đóng an toàn). `load_active` không đổi: thiếu `push` vẫn được bổ sung đủ,
+    nên chỉ `git_fence.push_contract` mới mở được một lệnh đẩy cụ thể."""
+    try:
+        with open(marker, encoding="utf-8-sig") as handle:
+            data = json.load(handle)
+    except (OSError, ValueError):
+        return None
+    if not isinstance(data, dict) or not isinstance(data.get("exclusions"), list) or "push" in data["exclusions"]:
+        return None
+    remote, urls, targets, common = (data.get(key) for key in PUSH_CONTRACT_KEYS)
+
+    def texts(value) -> bool:
+        return isinstance(value, list) and bool(value) and all(isinstance(v, str) and v.strip() for v in value)
+
+    if not (isinstance(remote, str) and remote.strip() and texts(urls) and texts(targets)
+            and all(t.startswith("refs/heads/") and len(t) > len("refs/heads/") for t in targets)
+            and isinstance(common, str) and common.strip()):
+        return None
+    return {"push_remote": remote, "push_urls": list(urls), "push_targets": list(targets), "git_common_dir": common}
+
+
 # --- phân tích lệnh -------------------------------------------------------------------------------------------
 
 def tokenize(segment: str) -> list[str]:

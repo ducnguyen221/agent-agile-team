@@ -18,14 +18,16 @@ AUTOPILOT_EXCLUSIONS = ("push", "tag", "version", "main_merge", "publish", "lice
                         "rules_unlisted", "user_soul", "secret", "auth", "network_fetch", "branch_merge_local")  # danh sách đóng 13 mục
 AUTOPILOT_GATES_BOTH = "cổng 1+2"  # trong `grant` của mức program: phạm vi là cả hai cổng
 AUTOPILOT_BRANCH_SUFFIX = "+nhánh"  # hậu tố của lệnh cho phép bỏ `branch_merge_local` khỏi `exclusions`
+AUTOPILOT_PUSH_FLAG = "+đẩy-nhánh"  # hậu tố của lệnh cho phép bỏ `push` khỏi `exclusions` (chỉ đẩy đúng hợp đồng đích, method/git-permissions.md)
 DELEGATION_CHANNELS = ("chat", "host_comment")
 MOMENT = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})(?: ([0-9]{2}):([0-9]{2}) ([+-])([0-9]{2})(?::?([0-9]{2}))?)?")
 DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 
 # Tập file chứa nội dung rào autopilot (SPEC SPR-16 FR1.1); lớn dần theo sprint: `method/git-permissions.md` (TK7) và
-# `scripts/git_fence.py` (TK8) vào đây cùng commit tạo ra chúng. Bản ghim viết tay ở `tests/test_fence_wiring.py`.
+# `scripts/git_fence.py` (TK8) vào đây cùng commit tạo ra chúng (`method/git-permissions.md` đã vào ở TK7). Bản ghim viết tay ở `tests/test_fence_wiring.py`.
 FENCE_FILES: tuple[str, ...] = (
     "method/autopilot.md",
+    "method/git-permissions.md",
     "skills/intake/references/autopilot.md",
     "skills/running-sprint/references/autopilot.md",
     "skills/closing-sprint/references/autopilot.md",
@@ -121,9 +123,13 @@ def autopilot_problem(block: dict) -> tuple[str, str] | None:
     if repeated:
         return "delegation.exclusions", f"delegation.exclusions có mục trùng: {', '.join(repeated)}"
     branch_ok = "gate_2" in wanted and grant_text.rstrip(" .\t\r\n").endswith(AUTOPILOT_BRANCH_SUFFIX)  # `+nhánh` đứng cuối câu, chỉ đi với mức có Cổng 2
-    missing = [e for e in AUTOPILOT_EXCLUSIONS if e not in exclusions and not (e == "branch_merge_local" and branch_ok)]
+    push_ok = "gate_2" in wanted and grant_text.rstrip(" .\t\r\n").endswith(AUTOPILOT_PUSH_FLAG)  # cờ đứng cuối câu, cùng luật `+nhánh`
+    missing = [e for e in AUTOPILOT_EXCLUSIONS if e not in exclusions
+               and not (e == "branch_merge_local" and branch_ok) and not (e == "push" and push_ok)]
     if missing:
         hint = " (branch_merge_local chỉ được vắng khi mức có gate_2 và lời cấp kết thúc bằng +nhánh)" if "branch_merge_local" in missing else ""
+        if "push" in missing:
+            hint += " (push chỉ được vắng khi mức có gate_2 và lời cấp kết thúc bằng +đẩy-nhánh)"
         return "delegation.exclusions", f"delegation.exclusions thiếu mục bắt buộc: {', '.join(missing)}{hint}"
     cap = block.get("sessions_cap")
     if "sessions_cap" in block and not (cap is None or (isinstance(cap, int) and not isinstance(cap, bool) and cap >= 1)):

@@ -38,6 +38,7 @@ Bật autopilot cổng 1 cho SPR-NN.
 Bật autopilot cổng 1+2 cho SPR-NN tới hết sprint, trần 20 phiên.
 Bật autopilot chương trình <tên> gồm SPR-NN…SPR-MM tới YYYY-MM-DD, cổng 1+2, trần N phiên.
 Bật autopilot cổng 1+2 cho SPR-NN tới YYYY-MM-DD, trần N phiên +nhánh.
+Bật autopilot cổng 1+2 cho SPR-NN tới YYYY-MM-DD, trần N phiên +đẩy-nhánh.
 Dừng autopilot.
 Thu hồi duyệt thay SPR-NN.
 ```
@@ -48,16 +49,17 @@ Thu hồi duyệt thay SPR-NN.
 | Hạn | `tới hết sprint` · `tới YYYY-MM-DD` | `hết sprint`; mức `chương trình` **bắt buộc ngày** — thiếu là sai cú pháp |
 | Trần | `trần N phiên`, N nguyên ≥1, đếm **mỗi sprint** (mục 2.1) | hằng mặc định (mục 2.1) |
 | `+nhánh` | đứng cuối câu; cho **gộp cục bộ** nhánh sprint vào nhánh tích hợp (không phải nhánh chính) chỉ khi Cổng 2 là **Đạt** — "Đạt có điều kiện" thì nhánh vào hàng chờ người trong bản tin | gộp nhánh thuộc danh sách loại |
+| `+đẩy-nhánh` | đứng cuối câu; cho **đẩy nhánh sprint** lên remote, chỉ đúng hợp đồng đích của [git-permissions.md](git-permissions.md) mục 6 (một remote, một ref đích, URL đẩy khớp); không cho đẩy nhánh chính, gộp PR, tag | đẩy thuộc danh sách loại |
 
-- Không có `+push`, không có mức "chỉ Cổng 2": push luôn hỏi người **từng lần**; muốn chỉ Cổng 2 thì dùng câu cũ.
-- `+nhánh` chỉ đi với `cổng 1+2` (gộp xảy ra sau Cổng 2 do Gate Delegate ký); đi với `cổng 1` là sai cú pháp.
-- **Lệnh sai cú pháp** (thiếu ngày ở mức chương trình, hạn đã qua, trần không phải số ≥1, `+push`, `+nhánh` với
+- Không có `+push` và không có mức "chỉ Cổng 2": đẩy chỉ tự làm với `+đẩy-nhánh` (đúng hợp đồng đích), mọi lệnh đẩy khác luôn hỏi người **từng lần**; muốn chỉ Cổng 2 thì dùng câu cũ.
+- `+nhánh` và `+đẩy-nhánh` chỉ đi với `cổng 1+2` (gộp hay đẩy xảy ra sau Cổng 2 do Gate Delegate ký); đi với `cổng 1` là sai cú pháp. Mỗi lệnh mang tối đa một cờ cuối câu.
+- **Lệnh sai cú pháp** (thiếu ngày ở mức chương trình, hạn đã qua, trần không phải số ≥1, `+push`, `+nhánh` hay `+đẩy-nhánh` với
   `cổng 1`, mức lạ): **không bật**, nói lại chỗ sai và đề xuất câu đúng. Không đoán ý.
 - **Không phải lệnh:** "ok", "làm luôn", "tự quyết đi", "theo khuyến nghị", "duyệt theo khuyến nghị", "chốt theo mặc
   định", mức tự trị *tự quyết* ở Brief. Trả lời: "Câu này chưa phải lệnh autopilot. Nếu muốn bật, xin nói:
   `Bật autopilot cổng 1 cho SPR-NN.`"
 - **Nhận lệnh:** Analyst chép nguyên văn vào `delegation.grant`, rồi **nhắc lại** trong một tin: mức, phạm vi cổng,
-  sprint, hạn, danh sách loại (nêu `+nhánh` có hay không), trần phiên đang áp — rồi chạy, không chờ thêm.
+  sprint, hạn, danh sách loại (nêu `+nhánh` và `+đẩy-nhánh` có hay không), trần phiên đang áp — rồi chạy, không chờ thêm.
 
 ### 2.1 Trần phiên agent
 
@@ -85,7 +87,7 @@ khối có bất kỳ khoá mới nào; đã kích thì `level`, `expires`, `exc
 |---|---|---|
 | `level` | `gate_1` · `gate_1_2` · `program` | `cổng 1` → `gate_1`; `cổng 1+2` → `gate_1_2`; chương trình → `program` |
 | `program` | tên chương trình hoặc `null` | bắt buộc khác `null` khi `level: program` |
-| `exclusions` | danh sách đóng 13 mục (mục 5) | phải đủ mọi mục; riêng `branch_merge_local` được vắng **chỉ khi** `grant` chứa `+nhánh`; mục ngoài 13 mục hoặc mục trùng → `gate-delegation-invalid`; thứ tự tuỳ |
+| `exclusions` | danh sách đóng 13 mục (mục 5) | phải đủ mọi mục; riêng `branch_merge_local` được vắng **chỉ khi** `grant` chứa `+nhánh`, và riêng `push` được vắng **chỉ khi** `grant` kết thúc bằng `+đẩy-nhánh` (kèm bốn khoá đích ở file dấu, mục 5.2); mục ngoài 13 mục hoặc mục trùng → `gate-delegation-invalid`; thứ tự tuỳ |
 | `channel` | `chat` · `host_comment` | kênh lời cấp đến (mục 4); vắng coi như `chat`; giá trị khác là không hợp lệ |
 | `orchestrator` | nhãn phiên điều phối hoặc `null` | khác `by`; `null` = phiên nhận lệnh tự giữ việc điều phối, không có nhãn riêng — vẫn giữ sổ phiên con, vẫn áp trần, vẫn mở Gate Delegate là subagent mới (một dòng sổ); `check` bỏ kiểm trùng `by` khi `null`, còn `by` vẫn phải khác mọi nhãn thực thi |
 | `sessions_cap` | số nguyên ≥1 hoặc `null` | `null` = lệnh không nêu trần → hằng mặc định (mục 2.1) |
@@ -153,10 +155,11 @@ người dùng nói ──► kênh hợp lệ? ──không──► nêu lại
 | `Bật autopilot cho SPR-20.` | bật mức `cổng 1` (mặc định) |
 | `Bật autopilot cổng 1+2 cho SPR-20 tới hết sprint, trần 20 phiên.` | bật: `gate_1_2`, `[gate_1, gate_2]`, `sessions_cap: 20` |
 | `Bật autopilot cổng 1+2 cho SPR-20 tới 2026-11-30, trần 12 phiên +nhánh.` | bật; `exclusions` không có `branch_merge_local` |
+| `Bật autopilot cổng 1+2 cho SPR-20 tới 2026-11-30, trần 12 phiên +đẩy-nhánh.` | bật; `exclusions` không có `push`, file dấu thêm bốn khoá đích (mục 5.2) |
 | `Bật autopilot chương trình ba-luong gồm SPR-20…SPR-22 tới 2026-11-30, cổng 1+2, trần 22 phiên.` | bật `program` cho ba sprint, mỗi sprint trần 22 |
 | `Bật autopilot chương trình ba-luong gồm SPR-20…SPR-22, cổng 1+2.` | sai cú pháp — thiếu ngày; không bật |
 | `Bật autopilot cổng 1+2 cho SPR-20 tới 2026-11-01.` (đã qua ngày) | hạn quá khứ; không bật, đề xuất ngày mới |
-| `Bật autopilot cổng 1+2 cho SPR-20 +push.` | sai cú pháp — không có `+push`; push luôn hỏi từng lần |
+| `Bật autopilot cổng 1+2 cho SPR-20 +push.` | sai cú pháp — không có `+push`; đẩy chỉ có `+đẩy-nhánh`, mọi lệnh đẩy khác luôn hỏi từng lần |
 | `Bật autopilot cổng 1 cho SPR-20 +nhánh.` | sai cú pháp — `+nhánh` cần `cổng 1+2` |
 | `Bật autopilot cổng 2 cho SPR-20.` | sai cú pháp — không có mức chỉ Cổng 2; đề xuất câu cũ hoặc `cổng 1+2` |
 | `Bật autopilot cổng 1 cho SPR-20, trần 0 phiên.` | sai cú pháp — trần phải ≥1 |
@@ -181,7 +184,7 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 
 | `exclusions` | Việc | Rào | Mẫu hook nhận dạng (khi có file dấu) |
 |---|---|---|---|
-| `push` | đẩy lên remote | máy | `git push`, `git subtree push` |
+| `push` | đẩy lên remote, trừ đúng hợp đồng đích của [git-permissions.md](git-permissions.md) mục 6 khi lệnh có `+đẩy-nhánh` | máy | `git push`, `git subtree push` |
 | `tag` | tạo, sửa tag | máy | `gh release create`; mọi `git tag` **trừ** dạng chỉ đọc: `git tag` trần, có `-l`/`--list`, `-v`/`--verify`, `--contains`, `--no-contains`, `--merged`, `--no-merged`, `--points-at`; `git tag -d`/`--delete` chặn với lý do `irreversible_delete` |
 | `main_merge` | gộp vào nhánh chính | máy | `git merge`, `git pull` khi nhánh hiện tại là `main`/`master`; nhánh đọc từ `.git/HEAD` của thư mục mà lệnh git thật sự chạy, trừ khi trước lệnh đó trong cùng lệnh ghép (kể cả subshell, `bash -c` lồng) có **bất kỳ** thao tác đổi thư mục (`cd`, `pushd`, `popd`, `Set-Location`, `Push-Location`, `Pop-Location`, `env -C`/`--chdir`, `sudo -D`/`--chdir`, mọi dạng kể cả dính) thì coi là `main` — hook không tính đường đi, cái giá là chặn nhầm gộp hợp lệ có `cd` phía trước (chạy `git merge` ở lệnh riêng sau khi đã đứng đúng thư mục); `git -C <dir>` thì đọc nhánh của `<dir>`; `--git-dir`, `--work-tree`, `GIT_DIR=` gán ngay trước lệnh, đích không xác định (biến, `-`) cũng coi là `main`; `git pull` thiếu `+nhánh` chặn ở mọi nhánh với lý do `branch_merge_local`; trong lệnh ghép, `git merge`/`git pull` đứng **sau** một phần `git checkout` hay `git switch` tới `main`/`master` (xét như đang ở nhánh chính); `gh pr merge` (`-R`/`--repo` ở vị trí nào cũng nhận ra) |
 | `irreversible_delete` | xoá không đảo ngược | máy, một phần | `rm` có cụm cờ chứa `r`/`R` (`-rf`, `-fr`, `-Rf`, `-r -f`) hay `--recursive`; `git reset --hard`; `git branch -D`; `git clean` có `-f`/`--force`; `git tag -d`/`--delete`; `git worktree remove` có `-f`/`--force`; PowerShell `Remove-Item` và bí danh (`ri`, `rm`, `del`, `rmdir`, `rd`) có tham số bắt đầu `-r` (`-Recurse` viết tắt); `rmdir /s`, `rd /s`; `find … -delete`; `find … -exec`/`-execdir` mà lệnh sau nó thuộc mục này. **Cho qua** `rm -r`/`rm -rf`/`Remove-Item -Recurse`/`rmdir /s` khi **mọi** đích là đường con thật sự nằm trong `<gốc repo>/.tmp/` (`<gốc repo>` = thư mục chứa `.git` đầu tiên khi đi lên từ thư mục làm việc của sự kiện) — không phải chính `.tmp/`, không chứa `..`, không trỏ tới file dấu `.tmp/autopilot.json`, và **đích hay thư mục con của nó không chứa** `.tmp/autopilot.json` (dọn thư mục thử hay thư mục phiên con nằm dưới `.tmp/` thì `--clear` từng thư mục đó trước, rồi mới `rm -rf`); đích xét **theo chuỗi trước khi shell mở rộng**: glob chỉ ở thành phần cuối và không được khớp `autopilot.json` (`.tmp/*`, `.tmp/a*` chặn; `.tmp/out*` qua); glob được mở rộng bằng cách liệt kê thư mục ở thư mục lệnh và **từng mục khớp** phải qua kiểm `realpath` (không mở rộng được hoặc có mục ra ngoài `.tmp/` hay là file dấu thì chặn); tên file dấu so không phân biệt hoa thường, đích có `$`, `%`, `~`, dấu phẩy, ngoặc nhọn thì chặn; đã gặp `cd` trước đó trong lệnh ghép thì không còn ngoại lệ; không theo liên kết: `realpath` của đích (và của `.tmp/`) phải còn nằm trong `.tmp/` thật, ra ngoài hoặc trỏ tới file dấu thì chặn; còn lại vẫn chặn (giới hạn đã biết: phiên con vẫn xoá được file dấu bằng xoá từng file, mục 5.1) |
@@ -250,6 +253,10 @@ nhánh tích hợp không phải nhánh chính (`main_merge` vẫn loại).
 
 - Sáu khoá: năm khoá chép từ khối `delegation` (`level`, `scope`, `expires`, `exclusions`, `grant_at`) và `sprints` —
   danh sách sprint mà thư mục này đang chạy dưới lệnh. Không chứa secret, không chứa lời cấp nguyên văn.
+- **Bốn khoá đích đẩy** — chỉ khi lệnh có `+đẩy-nhánh` (khi đó `exclusions` không có `push`); vắng khoá nào hay sai kiểu thì không cho đẩy:
+  `push_remote` (tên remote, chuỗi), `push_urls` (danh sách URL đẩy hiệu lực, chuỗi), `push_targets` (danh sách ref đích, mỗi mục dạng
+  `refs/heads/<nhánh sprint>`), `git_common_dir` (realpath thư mục git chung). Guard chỉ cho qua lệnh đẩy khớp cả bảy điều của
+  [git-permissions.md](git-permissions.md) mục 6; không khoá nào chứa secret (URL không mang token).
 - **Một file dấu mỗi thư mục làm việc.** `intake` ghi ở gốc repo lúc nhận lệnh hợp lệ, `sprints` = mọi sprint của lệnh
   (mức chương trình: cả dải). Điều phối chép (`cp` được hook cho qua khi file dấu chỉ là nguồn) vào `.tmp/` của thư mục làm việc (worktree) của mỗi phiên con **trước** khi
   giao việc, `sprints` = đúng sprint phiên con đó làm.
