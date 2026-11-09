@@ -6,7 +6,7 @@
 # trả mã đó mà tự dò file dấu `.tmp/autopilot.json`
 # (không phân biệt hoa thường) đi lên từ $CLAUDE_PROJECT_DIR và $PWD tới thư mục có `.git`: có thì chặn (thoát 2), không thì cho qua (thoát 0).
 # `--clear <thư mục>` không đọc stdin. Guard luôn là autopilot_guard.py cạnh chính launcher (không có biến môi trường đổi đường).
-# Nhánh dự phòng chỉ dùng lệnh dựng sẵn của sh, nên chạy được cả khi PATH rỗng.
+# Nhánh dự phòng dùng lệnh dựng sẵn của sh, và thêm một lời gọi `git ls-files` cho dấu hiệu 3 khi có `git` (không có thì bỏ qua dấu hiệu đó), nên vẫn chạy được khi PATH rỗng.
 
 here=${0%/*}
 [ "$here" = "$0" ] && here=.

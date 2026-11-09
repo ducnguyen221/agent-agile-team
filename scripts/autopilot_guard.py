@@ -1092,6 +1092,8 @@ def _evaluate(raw: str) -> str | None:
 
 # --- rào git thường trực (SPR-16 TK8): gọi `git_fence` trước mọi nhánh trả sớm ----------------------------------------
 
+HEAD_MOVERS = frozenset({"checkout", "switch", "symbolic-ref", "update-ref", "reset", "rebase", "merge", "pull", "cherry-pick", "revert", "am", "bisect"})
+
 @dataclass
 class Decision:
     """Quyết định có loại: `deny` (chặn) hay `ask` (Claude hỏi; Codex và Antigravity chưa có tầng hỏi nên thành chặn)."""
@@ -1114,7 +1116,10 @@ def _collect_nested(text: str, ctx: Context, depth: int, out: list) -> None:
 def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     """Gom mọi đoạn lệnh git/gh (và lệnh không chỉ-đọc nhắc tới file bảo vệ) của `text` thành `git_fence.Segment`."""
     text = _join_and_strip(text)
-    git_env = bool(re.search(r"GIT_[A-Z0-9_]+", text))
+    text = text.replace(">|", ">")  # `>|` (ghi đè dù noclobber) là chuyển hướng, không phải ống
+    plain = re.sub(r"[\"']", "", text)  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X
+    git_env = bool(re.search(r"(?i)GIT_[A-Z0-9_]+", plain)) or "--exec-path" in plain or bool(re.search(r"\$\{?[A-Za-z_]\w*\}?\w*=", plain))
+    gh_env = bool(re.search(r"(?i)GH_[A-Z0-9_]+", plain))
     parts = PIPE.split(text)
     for index in range(1, len(parts)):  # `echo "git push" | bash`
         stage, _ = _strip_prefixes(tokenize(re.split(r"&&|;|\n", parts[index])[0]), Context(set(), ctx.cwd))
@@ -1151,17 +1156,20 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
             if ctx.forced_main:
                 where = [None]
             # mọi biến GIT_* trong lệnh (GIT_CONFIG_*, GIT_SSH_COMMAND, GIT_CONFIG_GLOBAL…) đổi hành vi của git mà guard không thấy: hợp đồng đích không áp
-            out.append(git_fence.Segment("git", args, sub, rest, where, redirected or git_env, globals_))
+            out.append(git_fence.Segment("git", args, sub, rest, where, redirected or git_env, globals_,
+                                         head_moved=getattr(ctx, "head_moved", False)))
+            if sub in HEAD_MOVERS or (sub == "branch" and any(a in ("-m", "-M", "--move", "-c", "-C", "--copy") or _cluster(a, "mMcC") for a in rest)):
+                ctx.head_moved = True
             if sub in ("checkout", "switch") and any(a in MAIN_BRANCHES for a in rest):
                 ctx.forced_main = True
         elif name == "gh":
-            out.append(git_fence.Segment("gh", args))
+            out.append(git_fence.Segment("gh", args, redirected=gh_env))
         else:
             env = getattr(ctx, "env", os.environ)
             read_only = _read_only(name, args, ctx)
             for index, arg in enumerate(args):
-                redirect = REDIRECT.match(arg)
-                if redirect:  # đích chuyển hướng tính cả với lệnh chỉ-đọc (`echo x > .agile.json`)
+                redirect = REDIRECT.match(arg) or (re.search(r">>?(.*)$", arg) if ">" in arg else None)
+                if redirect:  # đích chuyển hướng tính cả với lệnh chỉ-đọc (`echo x > .agile.json`, `echo {}>.agile.json`)
                     target = redirect.group(1) or (args[index + 1] if index + 1 < len(args) else "")
                 elif read_only:
                     continue

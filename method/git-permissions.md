@@ -122,6 +122,8 @@ Rào máy chỉ nhìn thấy **lệnh shell và tool ghi file qua hook đã đă
 - file `.agile.json` và file danh sách: tên viết đúng, glob khớp tên (`.agil*`, `*.json` ở gốc repo), biến chứa tên biến danh sách, hay đích chuyển hướng bị chặn; chuỗi có `$`/dấu huyền chỉ bị chặn khi cả lệnh nhắc tới `.agile` hay biến danh sách (không giải được biến);
 - repo có `[include]` trong config: lệnh con lạ (không phải lệnh có sẵn của git) coi là alias trong file được nạp thêm, không đọc được nên bị chặn;
 - nhánh dự phòng của launcher (Python hay guard lỗi) chỉ dò file dấu, `.agile.json` ở gốc và chỉ mục còn `.agile.json`; **không** đọc danh sách bảo vệ (dấu hiệu 1) nên mất mức bảo vệ đó khi Python lỗi;
+- script, `xargs rm`, `python -c "open('.agile.json','w')"`, `mv . ../x` và mọi cách ghi file không qua lệnh được nhận dạng: không canh được (chỉ lớp (b) ở mục 10 và việc đối chiếu ở Cổng 2);
+- `git` báo `dubious ownership` ở nhánh dự phòng của launcher thì dấu hiệu 3 bị bỏ qua (fail-open ở đúng nhánh dự phòng);
 - nhãn `floor-approved` của PR không gắn với SHA của head: commit đẩy thêm sau khi gắn nhãn vẫn chạy `--mode report`;
 - repo **không có dấu hiệu nào**: guard không đụng — giới hạn đã biết, không phải Đạt;
 - mất dấu hiệu: `.agile.json` bị xoá nhưng danh sách (dấu hiệu 1) hay chỉ mục (dấu hiệu 3) còn thì vẫn được bảo vệ; lệnh hay tool ghi

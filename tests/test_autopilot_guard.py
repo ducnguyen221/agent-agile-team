@@ -1695,3 +1695,87 @@ def test_absolute_glob_at_repo_root_is_denied_even_after_cd(tmp_path):
         rc, _, err = run("claude", claude(cmd, repo))
         assert rc == 2 and "git-fence" in err, cmd
     assert run("claude", claude("rm {}/sub/*.o".format(fwd(repo)), repo)) == (0, "", "")
+
+
+# --- security vòng 3 (SX1–SX7) -----------------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("cmd", [
+    "git_ssh_command=x git push origin spr-20-x",
+    "env 'GI'T_SSH_COMMAND=x git push origin spr-20-x",
+    'env "GIT"_SSH_COMMAND=x git push origin spr-20-x',
+    "G=GIT_; export ${G}SSH_COMMAND=x; git push origin spr-20-x",
+    "git --exec-path=/t push origin spr-20-x",
+    "$env:git_ssh_command='x'; git push origin spr-20-x",
+])
+def test_git_env_variants_still_void_the_push_contract(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    "git branch -M main && git push origin HEAD", "git symbolic-ref HEAD refs/heads/main && git push origin HEAD",
+    "git checkout main && git push origin HEAD", "git switch main; git push origin @", "git update-ref HEAD x && git push origin HEAD",
+])
+def test_push_head_after_a_command_that_moves_head_is_unverified(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+def test_push_head_alone_is_still_allowed_on_the_sprint_branch(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude("git push origin HEAD", repo)) == (0, "", "")
+
+
+@pytest.mark.parametrize("cmd", [
+    "git rm -f .agil*", 'git rm ".agil*"', "git rm -rf .", "git rm -rf :/", "git mv .agil* x", "git rm *.json", "git mv . ../x",
+])
+def test_git_rm_mv_of_the_agile_json_by_glob_or_root_pathspec_is_denied(tmp_path, cmd):
+    repo = protected_repo(tmp_path)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    "git config core.sshCommand x", "git config core.gitProxy x", "git config http.proxy x", "git config credential.helper x",
+    "git config http.extraHeader x", "git config push.default x", "git config core.fsmonitor x",
+    "echo x >> .git/config", "sed -i s/a/b/ .git/config", "cp x .git/config", "tee .git/hooks/pre-push",
+])
+def test_persistent_transport_config_and_git_config_file_writes_are_denied(tmp_path, cmd):
+    repo = protected_repo(tmp_path)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    "rm .agile.{json,bak}", "rm .agile.js{on,}", "echo {} >| .agile.json", "echo {}>>.agile.json", "echo {}>.agile.json",
+    "rm ../r*/.agil*", "rm /mnt/*/*/.agil*", "rm ../*/.agile.json",
+])
+def test_brace_redirect_and_parent_glob_forms_are_denied(tmp_path, cmd):
+    repo = protected_repo(tmp_path)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+@pytest.mark.parametrize("cmd", [
+    "gh pr create -Revil/x --title x", "gh pr create -R=evil/x --title x", "GH_REPO=evil/x gh pr create --title x",
+    "GH_HOST=evil.example gh pr create --title x", "gh_repo=evil/x gh pr create --title x",
+])
+def test_gh_attached_repo_flag_and_gh_environment_void_the_contract(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+def test_gh_pr_create_for_the_verified_repo_passes_with_contract(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude("gh pr create -R o/r --title x", repo)) == (0, "", "")
+
+
+def test_include_repo_does_not_block_more_builtin_subcommands(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    with open(repo / ".git" / "config", "a", encoding="utf-8") as handle:
+        handle.write("[include]\n\tpath = extra.cfg\n")
+    for sub in ("sparse-checkout list", "maintenance run", "range-diff a b", "hash-object f", "var -l", "show-branch", "diff-index HEAD", "cherry", "prune", "repack", "credential fill"):
+        assert run("claude", claude("git " + sub, repo)) == (0, "", ""), sub

@@ -51,7 +51,14 @@ KNOWN_SUBS = frozenset({
     "ls-files", "ls-tree", "cat-file", "rev-parse", "rev-list", "describe", "shortlog", "worktree", "submodule", "bisect", "apply", "am",
     "format-patch", "archive", "bundle", "gc", "fsck", "help", "version", "update-index", "subtree", "notes", "reflog", "diff-tree",
     "show-ref", "for-each-ref", "ls-remote", "symbolic-ref", "name-rev", "merge-base", "count-objects", "check-ignore", "mergetool", "difftool",
+    "sparse-checkout", "maintenance", "range-diff", "hash-object", "var", "show-branch", "diff-index", "cherry", "prune", "repack", "credential",
+    "update-server-info", "pack-objects", "unpack-objects", "mktree", "write-tree", "commit-tree", "read-tree", "checkout-index", "fast-import",
+    "fast-export", "replace", "rerere", "request-pull", "send-email", "stripspace", "whatchanged", "annotate", "bugreport", "check-attr",
+    "check-ref-format", "column", "commit-graph", "fmt-merge-msg", "for-each-repo", "get-tar-commit-id", "interpret-trailers", "mailinfo",
+    "mailsplit", "merge-file", "merge-index", "merge-tree", "multi-pack-index", "pack-refs", "patch-id", "prune-packed", "stage",
+    "verify-commit", "verify-tag", "verify-pack", "show-index", "scalar", "backfill", "survey", "diff-files", "ls-tree", "unpack-file",
 })  # lệnh con có sẵn của git: tên khác khi repo có `[include]` có thể là alias nằm trong file được nạp thêm
+ROOT_PATHSPECS = frozenset({".", "./", ":/", ":/."})  # `git rm -rf .` xoá cả `.agile.json` ở gốc
 RELEVANT_SUBS = frozenset({"push", "subtree", "tag", "remote", "config", "merge", "commit", "pull", "cherry-pick", "reset", "rebase",
                            "rm", "mv", "update-index", "add", "restore", "checkout", "clean"})
 FILE_SUBS = frozenset({"rm", "mv", "update-index", "add", "restore", "checkout", "clean"})  # chỉ đáng kể khi nhắc tới file bảo vệ
@@ -76,6 +83,7 @@ class Segment:
     where: list = field(default_factory=list)
     redirected: bool = False
     globals: list = field(default_factory=list)  # tuỳ chọn đứng trước lệnh con: `-C`, `-c`, `--git-dir`…
+    head_moved: bool = False  # trước lệnh này trong cùng chuỗi đã có lệnh đổi HEAD (checkout, branch -M, symbolic-ref…): `HEAD`/`@` không còn là nhánh đã đọc
 
 
 @dataclass
@@ -361,6 +369,9 @@ def is_guard_path(path: str, base: str, env: Mapping, loose: bool = False) -> bo
         return True
     if ENV_LIST in path:
         return True
+    lower = norm.lower()
+    if lower.endswith("/.git/config") or lower == ".git/config" or "/.git/hooks" in lower or lower.startswith(".git/hooks"):
+        return True  # file cấu hình và hook của chính repo: đổi đích đẩy, alias, hook mà không qua `git config`
     target = list_file(env)
     if not target:
         return False
@@ -375,6 +386,8 @@ def _glob_hits_repo_root(dirname: str, base: str, loose: bool) -> bool:
     Đã có `cd` (loose): đường tương đối không giải được, nên chỉ loại khi không có `..`; đường tuyệt đối vẫn giải được."""
     if dirname in ("", "."):
         return True
+    if any(ch in dirname for ch in "*?[{"):
+        return True  # glob/brace ở chính phần thư mục: không biết khớp thư mục nào, có thể là gốc repo
     if loose and not os.path.isabs(dirname):
         return ".." in dirname.split("/")
     found = find_repo(base)
@@ -384,7 +397,27 @@ def _glob_hits_repo_root(dirname: str, base: str, loose: bool) -> bool:
     return real(full) == real(found[0])
 
 
+def _brace_variants(name: str, limit: int = 64) -> list:
+    """Khai triển brace `{a,b}` kiểu shell (tối đa `limit` biến thể) để so tên file bảo vệ: `.agile.{json,bak}` → `.agile.json`, `.agile.bak`."""
+    match = re.search(r"\{([^{}]*)\}", name)
+    if not match:
+        return [name]
+    out: list = []
+    for alt in match.group(1).split(","):
+        out.extend(_brace_variants(name[:match.start()] + alt + name[match.end():], limit))
+        if len(out) >= limit:
+            break
+    return out[:limit]
+
+
 def targets_guard_file(text: str, base: str, env: Mapping, loose: bool = False, whole: str = "") -> bool:
+    for variant in _brace_variants(text):
+        if _targets_guard_file(variant, base, env, loose, whole):
+            return True
+    return False
+
+
+def _targets_guard_file(text: str, base: str, env: Mapping, loose: bool = False, whole: str = "") -> bool:
     """Đối số hay đích chuyển hướng `text` có thể là file bảo vệ? Ngoài tên đúng còn tính glob khớp tên (`.agil*`, `*.json`) và
     chuỗi có `$`/dấu huyền khi cả lệnh `whole` nhắc tới `.agile`/biến danh sách (không giải được biến: đóng an toàn)."""
     if is_guard_path(text, base, env, loose):
@@ -497,6 +530,8 @@ def push_contract(rest: list, contract: dict, seg: Segment, ctx: FenceContext, s
     if colon and dest in ("HEAD", "@"):
         return "push-target-unknown"
     if not colon and source in ("HEAD", "@"):  # `git push origin HEAD` đẩy nhánh hiện tại cùng tên
+        if seg.head_moved:
+            return "push-target-unknown"  # một lệnh trước đó trong chuỗi đã đổi HEAD: nhánh đọc lúc kiểm không còn là nhánh lúc chạy
         found_now = find_repo(seg.where[0])
         branch_now = current_branch(found_now[1]) if found_now else None
         if not branch_now:
@@ -555,7 +590,9 @@ def config_override_keys(globals_: list) -> list:
 def protected_config_key(key: str) -> bool:
     """Khoá (hay tên section) mà ghi vào là đổi đích đẩy, alias, hook hay nạp thêm cấu hình: `remote.*`, `url.*`, `alias.*`, `include*`, `core.hooksPath`."""
     key = key.lower()
-    return key.split(".")[0] in ("remote", "url", "alias", "include", "includeif") or key == "core.hookspath"
+    first = key.split(".")[0]
+    return first in ("remote", "url", "alias", "include", "includeif", "http", "https", "credential", "push", "receive", "transfer") or key in (
+        "core.hookspath", "core.sshcommand", "core.gitproxy", "core.fsmonitor", "core.askpass")
 
 
 def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
@@ -563,7 +600,11 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
     overrides = [k for k in config_override_keys(seg.globals) if protected_config_key(k)]
     if sub not in RELEVANT_SUBS and "--no-verify" not in seg.args and not overrides:
         return Verdict()  # lệnh đọc/trung tính: không gọi `git` để dò dấu hiệu
-    if sub in FILE_SUBS and not overrides and not any(is_guard_path(a, ctx.cwd, ctx.env) for a in rest if not a.startswith("-")):
+    paths = [a for a in rest if not a.startswith("-")]
+    whole = " ".join(seg.args)
+    hits_guard = sub in FILE_SUBS and (any(targets_guard_file(a, ctx.cwd, ctx.env, whole=whole) for a in paths)
+                                       or (sub in ("rm", "mv") and any(a in ROOT_PATHSPECS for a in paths)))
+    if sub in FILE_SUBS and not overrides and not hits_guard:
         return Verdict()
     directories = seg.where or [None]
     if "--no-verify" in seg.args and not any(ctx.signals_for(d).protected for d in directories):
@@ -577,8 +618,7 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
     level = "full" if any(s.protected and s.level == "full" for s in sigs) else sig.level
     if overrides:
         return _verdict(FORBID, "config-override", "git -c " + overrides[0], ctx)
-    if any(AGILE_JSON == os.path.basename(a.replace("\\", "/")).lower() or is_guard_path(a, ctx.cwd, ctx.env)
-           for a in rest if not a.startswith("-")) and sub in ("rm", "mv", "update-index", "add", "restore", "checkout", "clean"):
+    if hits_guard:
         return _verdict(FORBID, "guard-file", "git {} {}".format(sub, AGILE_JSON), ctx)
     if sub == "push" or (sub == "subtree" and rest[:1] == ["push"]):
         return _push_verdict(seg, ctx, sig)
@@ -641,6 +681,8 @@ def _gh_plain(args: list) -> tuple:
             continue
         if arg.startswith("--repo="):
             repo = arg.split("=", 1)[1]
+        elif arg.startswith("-R") and not arg.startswith("--") and len(arg) > 2:
+            repo = arg[2:].lstrip("=")  # -Rowner/repo, -R=owner/repo
         elif arg.startswith("-"):
             flags.append(arg)
         else:
@@ -689,6 +731,8 @@ def _gh_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
             return Verdict()
     for name, actions in GH_ASK:
         if head == name and action in actions:
+            if seg.redirected:
+                return _verdict(FORBID, "gh-env", "gh với biến GH_* (đổi repo/host đích)", ctx)
             if ctx.marker and ctx.contract is not None and ctx.signals_for(None).listed is True:
                 if target and not any(norm_url(u).endswith("/" + target.lower().strip("/")) for u in ctx.contract["push_urls"]):
                     return _verdict(FORBID, "gh-repo-mismatch", "gh {} {} sang repo khác repo đã xác minh".format(head, action), ctx)
