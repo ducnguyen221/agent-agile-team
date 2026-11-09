@@ -44,23 +44,11 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      # Ghim: pytest 9.x đòi Python >= 3.10; 8.4.2 là bản cuối chạy được cả 3.9 lẫn 3.13 (bộ test đã chạy xanh với nó).
-      - name: Install test runner
-        run: python -m pip install --disable-pip-version-check pytest==8.4.2
-
-      - name: Tests
-        run: python -m pytest -q
-
-      - name: Core is clean (check --self)
-        run: python scripts/check.py --self
-
-      - name: Samples and templates pass check
-        run: python scripts/check.py samples templates
-
       # Kiểm sàn cứng so với base (SPR-16 FR2.4): mã `floor_check.py` lấy từ BẢN CỦA BASE (git archive), không gọi script nào
       # của head trước đó. Nhãn `floor-approved` (do Đức gắn) chuyển sang `--mode report`: liệt kê, không chặn.
+      # Bước đứng NGAY SAU checkout/setup-python, trước mọi bước chạy mã head (Tests, check --self), để mã head chưa kịp ghi GITHUB_ENV/PATH.
       # Khe hở công bố: workflow của PR do head cung cấp nên PR có thể sửa chính bước này (nằm trong FLOOR_FILES, hiện trong
-      # diff); bước này là "rào hành vi có kiểm" cho tới khi SPR-17 nghiệm thu cách chạy workflow-từ-base.
+      # diff); nhãn `floor-approved` không gắn với SHA của head (commit đẩy thêm sau khi gắn nhãn vẫn ở chế độ report); bước này là "rào hành vi có kiểm" cho tới khi SPR-17 nghiệm thu cách chạy workflow-từ-base.
       - name: Floor vs base (san-cung)
         if: github.event_name == 'pull_request'
         shell: bash
@@ -79,3 +67,16 @@ jobs:
             exit 0
           fi
           "${PYTHON:-python}" -X utf8 "$base_dir/scripts/floor_check.py" --base FETCH_HEAD --mode "$FLOOR_MODE"
+
+      # Ghim: pytest 9.x đòi Python >= 3.10; 8.4.2 là bản cuối chạy được cả 3.9 lẫn 3.13 (bộ test đã chạy xanh với nó).
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest==8.4.2
+
+      - name: Tests
+        run: python -m pytest -q
+
+      - name: Core is clean (check --self)
+        run: python scripts/check.py --self
+
+      - name: Samples and templates pass check
+        run: python scripts/check.py samples templates

@@ -629,3 +629,81 @@ def test_broken_list_with_agile_json_and_push_flag_row(tmp_path):
     env = {gf.ENV_LIST: str(bad)}
     assert gf.protection(str(repo), env, fake).protected
     assert push(repo, fake, env=env).code == "push-repo-unverified"
+
+
+# --- vòng 2 kiểm định (Astra RV1–RV5) ---------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("cmd,expected", [
+    ("git -calias.ship=push ship origin HEAD:main", gf.FORBID),
+    ("git -c alias.ship=push ship origin HEAD:main", gf.FORBID),
+    ("git -c remote.origin.url=x status", gf.FORBID),
+    ("git -c url.x.insteadOf=y status", gf.FORBID),
+    ("git -c core.hooksPath=h status", gf.FORBID),
+    ("git -c include.path=x.cfg status", gf.FORBID),
+    ("git --config-env=alias.x=VAR status", gf.FORBID),
+    ("git -c core.editor=x status", gf.NONE),
+    ("git -c color.ui=never log -1", gf.NONE),
+])
+def test_dangerous_command_line_config_is_forbidden_for_any_subcommand(tmp_path, cmd, expected):
+    repo = make_repo(tmp_path, branch="x", agile=True)
+    assert verdict(cmd, repo).kind == expected, cmd
+
+
+@pytest.mark.parametrize("cmd,expected", [
+    ("git config --remove-section alias", gf.FORBID),
+    ("git config --rename-section alias foo", gf.FORBID),
+    ("git config --remove-section remote", gf.FORBID),
+    ("git config --remove-section includeIf.gitdir:x", gf.FORBID),
+    ("git config include.path x.cfg", gf.FORBID),
+    ("git config --get remote.origin.url pattern", gf.NONE),
+    ("git config --get-all remote.origin.url", gf.NONE),
+    ("git config --get-regexp remote", gf.NONE),
+])
+def test_config_section_forms(tmp_path, cmd, expected):
+    repo = make_repo(tmp_path, branch="x", agile=True)
+    assert verdict(cmd, repo).kind == expected, cmd
+
+
+def head_world(tmp_path, branch, targets=(TARGET,)):
+    repo, fake = push_world(tmp_path, branch=branch)
+    return repo, fake, contract_for(repo, push_targets=list(targets))
+
+
+def test_push_head_without_destination_resolves_the_current_branch(tmp_path):
+    repo, fake, contract = head_world(tmp_path, "spr-31-export")
+    assert push(repo, fake, "git push origin HEAD", contract=contract).kind == gf.AUTO
+    assert push(repo, fake, "git push origin @", contract=contract).kind == gf.AUTO
+
+
+def test_push_head_on_a_protected_branch_is_not_a_literal_head_ref(tmp_path):
+    repo, fake, contract = head_world(tmp_path, "main", targets=("refs/heads/HEAD",))
+    for cmd in ("git push origin HEAD", "git push origin @"):
+        assert push(repo, fake, cmd, contract=contract).code == "push-target-unknown", cmd
+
+
+def test_push_head_when_branch_is_unknown_or_dest_is_head(tmp_path):
+    repo, fake, contract = head_world(tmp_path, "spr-31-export", targets=(TARGET, "refs/heads/HEAD"))
+    (repo / ".git" / "HEAD").write_text("0123456789abcdef\n", encoding="utf-8")  # detached
+    assert push(repo, fake, "git push origin HEAD", contract=contract).code == "push-target-unknown"
+    (repo / ".git" / "HEAD").write_text("ref: refs/heads/spr-31-export\n", encoding="utf-8")
+    assert push(repo, fake, "git push origin spr-31-export:HEAD", contract=contract).code == "push-target-unknown"
+
+
+def test_gh_with_contract_must_name_the_verified_repository(tmp_path):
+    repo = make_repo(tmp_path, agile=True)
+    env = listed(repo)
+    contract = contract_for(repo)
+    mismatch = verdict("gh pr create --web -R other/repo", repo, env=env, marker=True, contract=contract)
+    assert mismatch.kind == gf.FORBID and mismatch.code == "gh-repo-mismatch"
+    assert verdict("gh pr create -R acme/shop --title x", repo, env=env, marker=True, contract=contract).kind == gf.AUTO
+    assert verdict("gh pr create --title x", repo, env=env, marker=True, contract=contract).kind == gf.AUTO
+    assert verdict("gh api repos/other/repo/pulls -f title=x", repo, env=env, marker=True, contract=contract).kind == gf.FORBID
+
+
+def test_alias_chain_beyond_the_limit_closes(tmp_path):
+    repo = make_repo(tmp_path, branch="x", agile=True)
+    names = ["a", "b", "c", "d", "e", "f"]
+    for first, second in zip(names, names[1:]):
+        add_alias(repo, first, second)
+    add_alias(repo, "f", "push")
+    assert verdict("git a origin HEAD:main", repo).kind == gf.FORBID

@@ -319,3 +319,11 @@ def test_in_process_marker_problems_and_bootstrap(lab, tmp_path):
     commit(bare, "b")
     code, out = in_process(bare, first)
     assert code == 0 and "bootstrap" in out
+
+
+def test_workflow_floor_step_runs_before_any_head_code():
+    """Bảo mật SC4: bước 'Floor vs base' đứng trước mọi bước chạy mã của head (Tests, check --self), để head không đầu độc môi trường trước đó."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    floor = text.index("name: Floor vs base")
+    for later in ("name: Install test runner", "name: Tests", "name: Core is clean", "name: Samples and templates"):
+        assert floor < text.index(later), later

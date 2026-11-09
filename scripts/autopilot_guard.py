@@ -1114,6 +1114,7 @@ def _collect_nested(text: str, ctx: Context, depth: int, out: list) -> None:
 def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     """Gom mọi đoạn lệnh git/gh (và lệnh không chỉ-đọc nhắc tới file bảo vệ) của `text` thành `git_fence.Segment`."""
     text = _join_and_strip(text)
+    git_env = bool(re.search(r"GIT_[A-Z0-9_]+", text))
     parts = PIPE.split(text)
     for index in range(1, len(parts)):  # `echo "git push" | bash`
         stage, _ = _strip_prefixes(tokenize(re.split(r"&&|;|\n", parts[index])[0]), Context(set(), ctx.cwd))
@@ -1149,7 +1150,8 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
             where = _git_parse(args, ctx, redirected)[2]
             if ctx.forced_main:
                 where = [None]
-            out.append(git_fence.Segment("git", args, sub, rest, where, redirected, globals_))
+            # mọi biến GIT_* trong lệnh (GIT_CONFIG_*, GIT_SSH_COMMAND, GIT_CONFIG_GLOBAL…) đổi hành vi của git mà guard không thấy: hợp đồng đích không áp
+            out.append(git_fence.Segment("git", args, sub, rest, where, redirected or git_env, globals_))
             if sub in ("checkout", "switch") and any(a in MAIN_BRANCHES for a in rest):
                 ctx.forced_main = True
         elif name == "gh":
@@ -1165,7 +1167,7 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
                     continue
                 else:
                     target = arg
-                if target and git_fence.is_guard_path(target, ctx.cwd, env):
+                if target and git_fence.targets_guard_file(target, ctx.cwd, env, loose=ctx.cwd_changed, whole=text):
                     out.append(git_fence.Segment("other", args))
                     break
 

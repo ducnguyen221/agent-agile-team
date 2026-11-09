@@ -22,7 +22,7 @@ REPO = Path(__file__).resolve().parent.parent
 PINNED_SUITES = ("tests/test_fence_wiring.py", "tests/test_floor_check.py", "tests/test_git_fence.py",
                  "tests/test_autopilot_guard.py", "tests/test_check.py")
 KEYWORDS = "fence or floor or marker or autopilot or delegation or push"
-IGNORE = shutil.ignore_patterns(".git", ".tmp", ".claude", "__pycache__", ".pytest_cache", "*.pyc")
+IGNORE = shutil.ignore_patterns(".git", ".tmp", ".claude", "__pycache__", ".pytest_cache", "*.pyc", ".env", ".env.*")
 WIRING = "tests/test_fence_wiring.py"
 
 
@@ -99,6 +99,32 @@ def push_allow_all(root: Path) -> None:
     path.write_bytes((text[:match.end()] + "    return Verdict()\n" + text[match.end():]).encode("utf-8"))
 
 
+def drop_listed_check(root: Path) -> None:
+    """Hợp đồng đích không còn đòi danh tính repo được xác minh bằng danh sách (dấu hiệu 1)."""
+    edit(root, "scripts/git_fence.py", "    return (ctx.signals_for(target) if target else sig).listed is True", "    return True")
+
+
+def drop_targets_check(root: Path) -> None:
+    edit(root, "scripts/git_fence.py", '    if dest not in contract["push_targets"]:\n        return "push-target-unknown"', "    pass")
+
+
+def drop_url_check(root: Path) -> None:
+    edit(root, "scripts/git_fence.py", '        return "push-url-mismatch"', "        pass")
+
+
+def drop_protected_branch_check(root: Path) -> None:
+    """`_on_protected_branch` luôn nói 'không phải nhánh được bảo vệ'."""
+    path = root / "scripts" / "git_fence.py"
+    text = path.read_text(encoding="utf-8")
+    match = re.search(r"^def _on_protected_branch\(.*\) -> bool:\n", text, re.M)
+    assert match, "không thấy _on_protected_branch"
+    path.write_bytes((text[:match.end()] + "    return False\n" + text[match.end():]).encode("utf-8"))
+
+
+def drop_alias_expansion(root: Path) -> None:
+    edit(root, "scripts/git_fence.py", "        seg = expand_alias(seg)\n", "")
+
+
 MUTATIONS = {
     "drop-call": Mutation(drop_call, f"{WIRING}::test_check_calls_rules_validator", (WIRING,)),
     "drop-result": Mutation(drop_result, f"{WIRING}::test_check_uses_validator_result", (WIRING,)),
@@ -108,6 +134,18 @@ MUTATIONS = {
     "remove-fence-file": Mutation(remove_fence_file, f"{WIRING}::test_fence_files_exist", (WIRING,)),
     "guard-imports-check": Mutation(guard_imports_check, f"{WIRING}::test_guard_does_not_import_check", (WIRING,)),
     "drop-exclusion": Mutation(drop_exclusion, f"{WIRING}::test_exclusions_pinned", (WIRING,)),
+    # Thêm sau vòng 2 kiểm định (Astra RV7): đột biến tinh trong git_fence.py, mỗi cái đỏ đúng test ghim của hợp đồng/nhánh/alias.
+    "drop-listed-check": Mutation(drop_listed_check, "tests/test_git_fence.py::test_contract_needs_the_protected_list_to_name_the_repo",
+                                  ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
+    "drop-targets-check": Mutation(drop_targets_check, "tests/test_git_fence.py::test_contract_rejections",
+                                   ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
+    "drop-url-check": Mutation(drop_url_check, "tests/test_git_fence.py::test_contract_pushurl_changed_after_writing",
+                               ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
+    "drop-protected-branch-check": Mutation(drop_protected_branch_check,
+                                            "tests/test_git_fence.py::test_local_history_commands_on_main_are_forbidden_at_full",
+                                            ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
+    "drop-alias-expansion": Mutation(drop_alias_expansion, "tests/test_git_fence.py::test_repo_alias_for_push_is_seen",
+                                     ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
     "push-allow-all": Mutation(push_allow_all, "tests/test_git_fence.py::test_push_to_main_without_marker_in_protected_repo",
                                ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
 }
@@ -147,7 +185,7 @@ def require_killed(slug: str, mutation: Mutation, failed: list, errors: list) ->
 @pytest.fixture(scope="module")
 def pristine(tmp_path_factory) -> Path:
     root = tmp_path_factory.mktemp("pristine") / "repo"
-    shutil.copytree(REPO, root, ignore=IGNORE)
+    shutil.copytree(REPO, root, ignore=IGNORE, symlinks=True)
     return root
 
 

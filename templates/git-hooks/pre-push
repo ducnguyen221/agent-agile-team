@@ -7,6 +7,7 @@
 # Git đưa vào stdin mỗi dòng: <local ref> <local sha> <remote ref> <remote sha>. Chỉ xét <remote ref>.
 # Lách bằng `git push --no-verify` là có thật: đó là lý do còn lớp (b) ở máy chủ (ruleset hay hook pre-receive).
 
+set -f  # tên nhánh có ký tự glob (release/*) không được khai triển theo file trong thư mục hiện tại
 protected="main master"
 extra=$(git config --get agile.protectedBranches 2>/dev/null | tr ',' ' ')
 protected="$protected $extra"

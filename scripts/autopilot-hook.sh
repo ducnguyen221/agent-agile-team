@@ -98,7 +98,15 @@ if has_marker "$CLAUDE_PROJECT_DIR" || has_marker "$PWD"; then
   echo "$reason" >&2
   exit 2
 fi
-if has_agile "$CLAUDE_PROJECT_DIR" || has_agile "$PWD"; then
+# Dấu hiệu 3: chỉ mục còn `.agile.json` (kể cả khi file đã bị xoá khỏi cây làm việc). Cần `git`; không có thì bỏ qua dấu hiệu này.
+# Dấu hiệu 1 (danh sách bảo vệ, JSON) không dò được ở nhánh dự phòng: mất mức bảo vệ đó khi Python lỗi (method/git-permissions.md mục 8).
+has_indexed_agile() {
+  [ -n "$1" ] || return 1
+  command -v git >/dev/null 2>&1 || return 1
+  git -C "$1" ls-files --error-unmatch -- ':/.agile.json' >/dev/null 2>&1
+}
+
+if has_agile "$CLAUDE_PROJECT_DIR" || has_agile "$PWD" || has_indexed_agile "$CLAUDE_PROJECT_DIR" || has_indexed_agile "$PWD"; then
   echo "git-fence: không chạy được guard (Python hay guard lỗi) — chặn vì repo được bảo vệ (.agile.json); cần Đức nói trong chat" >&2
   exit 2
 fi

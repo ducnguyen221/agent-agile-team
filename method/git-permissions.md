@@ -118,6 +118,11 @@ Rào máy chỉ nhìn thấy **lệnh shell và tool ghi file qua hook đã đă
 - sửa chính `.github/workflows/verify.yml` trước khi SPR-17 nghiệm thu workflow-từ-base (bước `Floor vs base` là rào hành vi có kiểm);
 - alias git: alias trong file config **của repo** được khai triển (tối đa 3 lớp; alias `!lệnh-shell` bị chặn là không phân tích được) và ghi khoá `alias.*` bị cấm;
   alias ở cấu hình toàn cục của người dùng thì guard không đọc (file đó nằm trong vùng không đọc), nên một lệnh con lạ có thể là alias đẩy mà guard không thấy;
+- biến môi trường `GIT_*` trong lệnh (`GIT_CONFIG_COUNT`/`GIT_CONFIG_PARAMETERS`, `GIT_SSH_COMMAND`, `GIT_CONFIG_GLOBAL`…) làm hợp đồng đích không áp (`push-repo-unverified`) vì chúng đổi hành vi của `git` mà guard không thấy; `-c` trên dòng lệnh đặt khoá `remote.*`/`url.*`/`alias.*`/`include*`/`core.hooksPath` bị cấm;
+- file `.agile.json` và file danh sách: tên viết đúng, glob khớp tên (`.agil*`, `*.json` ở gốc repo), biến chứa tên biến danh sách, hay đích chuyển hướng bị chặn; chuỗi có `$`/dấu huyền chỉ bị chặn khi cả lệnh nhắc tới `.agile` hay biến danh sách (không giải được biến);
+- repo có `[include]` trong config: lệnh con lạ (không phải lệnh có sẵn của git) coi là alias trong file được nạp thêm, không đọc được nên bị chặn;
+- nhánh dự phòng của launcher (Python hay guard lỗi) chỉ dò file dấu, `.agile.json` ở gốc và chỉ mục còn `.agile.json`; **không** đọc danh sách bảo vệ (dấu hiệu 1) nên mất mức bảo vệ đó khi Python lỗi;
+- nhãn `floor-approved` của PR không gắn với SHA của head: commit đẩy thêm sau khi gắn nhãn vẫn chạy `--mode report`;
 - repo **không có dấu hiệu nào**: guard không đụng — giới hạn đã biết, không phải Đạt;
 - mất dấu hiệu: `.agile.json` bị xoá nhưng danh sách (dấu hiệu 1) hay chỉ mục (dấu hiệu 3) còn thì vẫn được bảo vệ; lệnh hay tool ghi
   nhắm `.agile.json`, chỉ mục cho đường đó (`git rm`, `git mv`, `git update-index`) hay file danh sách bị chặn dù không có file dấu.
