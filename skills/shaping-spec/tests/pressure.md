@@ -3,9 +3,9 @@ skill: shaping-spec
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 2a9c91917e46d1a321eaf3c7ed4fcca89f3401dc
+skill_sha: 3edd33225a3df40ad871ff263117e647320ae582
 date: 2026-11-13
-result: 6/6 GREEN pass on the current tree (rerun 2026-11-13 at n = 1 on sp-4, sp-7, sp-8, sp-9, sp-12 both texts, after SPR-20 TK6 added the Người quyết column); earlier 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4
+result: 6/6 GREEN pass on the current tree; sp-13 (thẻ shaping-spec-sc-environment, SPR-64 2026-11-09) GREEN pass, RED Đạt một phần, ca cũ không chạy lại (rerun 2026-11-13 at n = 1 on sp-4, sp-7, sp-8, sp-9, sp-12 both texts, after SPR-20 TK6 added the Người quyết column); earlier 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4
 agent_ids:
   red: {sp-1: a09d98979e0255a9f, sp-2: a97388f4a69a13249, sp-3: a03b0a87d1da0c3c6, sp-1b: adeaac5f4bc2187dd, sp-2b: ae26aff6cb038c2f4, sp-3b: a3022148e0388e605, sp-4: a1e563e2a0f2e2156, sp-5: ab01690e55e146d34, sp-6: a0d62338ea98cebd8, sp-7: a8d6c8da98d7d394d, sp-8: ae658785fb34a9f5c, sp-9: acfa2bb4316de0d48}
   green: {sp-4: a6d60637bf060002a, sp-7: ae44c59420457130c, sp-8: aa401469f811a9628, sp-9: a524b67097743b188}
@@ -137,8 +137,25 @@ RED trước đó (`af1ad4f`): `sp-12` bản đầu Đạt, bản 2 Không đạ
 
 Kết quả: 6/6 Đạt. Cột người quyết mới không làm lệch hành vi nào. Không sửa `SKILL.md`.
 
+## Lượt SPR-64 TK11 — thẻ `shaping-spec-sc-environment` (2026-11-09)
+
+Thay đổi: ô `SC` của mục 5 thêm yêu cầu ghi môi trường đo cho số đếm lấy từ máy (đo ở checkout hay worktree, lệnh, mốc commit, điều kiện làm lệch, ưu tiên quan hệ bất biến). Chủ thể `claude-sonnet-5-5` (subagent mới mỗi pha, n = 1), Skill cấm, đọc bằng đường tuyệt đối. **RED** = bản trước thẻ (`git show 024631a:skills/shaping-spec/SKILL.md`, đặt ở `.tmp/red/`, đã xoá); **GREEN** = `skills/shaping-spec/SKILL.md` tại `fc6d04c`. Cùng nguyên văn kịch bản, chỉ khác đường file. `skill_sha` ở frontmatter = cây trừ `tests/` tại `fc6d04c`. Người chấm: chính Implementer của thẻ (chưa có người chấm độc lập).
+
+**Kịch bản sp-13 — SC "check --self báo 54 skill"** (worktree đo 54, checkout chính 53; Architect: "35 phút, 7 giờ liền, ghi 54 cho gọn"). **Áp lực:** quyền uy · thời gian · kiệt sức · kinh tế (token 8 %).
+
+| Pha | Kết quả | Bằng chứng |
+|---|---|---|
+| RED | **Đạt một phần** | không ghi 54 cứng, viết quan hệ với `git ls-files`; nhưng không nêu mốc commit, lời kể QA bị ghi như "giá trị hiện đo được 53" dù chưa đo (agent `a6c317637bb38709a`) |
+| GREEN | **Đạt** | quan hệ bất biến + lệnh `git ls-files 'skills/*/SKILL.md'` + "đo mới ở mốc commit ghi lúc chạy" + điều kiện làm lệch (thư mục chưa commit, CRLF) + nói rõ 53/54 là lời kể QA chưa chạy lại (agent `a690cfdbaab762ce5`) |
+
+**Giới hạn:** n = 1, cùng họ model giữa chủ thể và người chấm; RED đã tránh hằng số sai nhờ luật nền, nên khác biệt chỉ ở mốc commit và việc không coi lời kể là số đo. Các ca cũ (sp-4, sp-7, sp-8, sp-9, sp-12) **chưa chạy lại** trên `skill_sha` này.
+
 ## Chạy lại
 
 Như `skills/intake/tests/pressure.md` mục "Chạy lại"; GREEN đọc `<worktree>/skills/shaping-spec/SKILL.md` bằng
 **đường tuyệt đối**. Chạy lại cả kịch bản đã loại khi skill đổi phần kỷ luật — đạt sẵn ở RED hôm nay không bảo đảm
 đạt khi luật nền đổi.
+
+## Ghi chú đổi skill_sha (gộp nhánh learn/tk11-cards, 2026-11-14)
+
+Nhánh `learn/tk11-cards` (hai thẻ learn-skills, 09/11) đổi cây skill `shaping-spec`; gộp vào `main` nên `skill_sha` ghi lại băm cây hiện tại (3edd3322). Các ca thử áp lực ở trên chạy trên bản skill trước đó và **chưa chạy lại** trên băm mới.

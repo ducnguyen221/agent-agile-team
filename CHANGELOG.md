@@ -45,6 +45,12 @@ version kiểm điều này).
 
 ## 0.7.0 (2026-11-08)
 
+**Chưa phát hành, ghi dưới tiêu đề đang mở** (test đồng bộ version đòi mục đầu = version manifest). Đề xuất tăng PATCH (sửa lời hai skill, không thêm khoá hay vai); số do người dùng quyết, chưa đổi ở manifest nào.
+
+- **Sửa — `shaping-spec`, ô `SC`:** số đếm lấy từ máy phải ghi đo ở đâu (checkout hay worktree), lệnh, mốc commit và điều kiện làm lệch (EOL, cache), ưu tiên viết thành quan hệ bất biến hơn hằng số. Nguồn: thẻ `2026-11-09-shaping-spec-sc-environment` (learn-skills, SPR-64).
+- **Sửa — `running-sprint/references/brief.md`:** báo cáo, ảnh và log của `TK` ghi vào thư mục hồ sơ sprint (`paths.sprint_dir`), không vào `.tmp/` hay thư mục bị git bỏ qua; rà secret trước khi ghi. Nguồn: thẻ `2026-11-09-brief-report-in-sprint-dir`.
+- Thử áp lực chạy lại ở `tests/pressure.md` của hai skill (n = 1; ca cũ chưa chạy lại; rs-12 RED đạt sẵn).
+
 - **Đổi — bỏ `CLAUDE.md` ở gốc:** `claude plugin validate --strict` đỏ khi plugin có `CLAUDE.md` gốc («not loaded as project
   context»). Luật lõi vào Claude Code qua dòng import cấp người dùng như `INSTALL.md` hướng dẫn, hoặc bản ≥ 2.1.277 tự đọc
   `AGENTS.md`; `hosts/claude/README.md` nêu điều kiện và cách `.claude/CLAUDE.md` cục bộ. Test khoá `CLAUDE.md` gốc vắng.
