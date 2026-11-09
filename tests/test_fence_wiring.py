@@ -232,7 +232,8 @@ def test_exclusions_pinned():
 PINNED_FLOOR_ZONES = {"AGENTS.md": 2, "method/process.md": 3, "method/sizing.md": 1, "method/autopilot.md": 1}
 PINNED_FLOOR_FILES_EXTRA = (
     "scripts/floor_check.py", "scripts/merge_ready.py", "scripts/deploy_scan.py", "tests/test_fence_wiring.py",
-    "tests/test_floor_check.py", "tests/test_mutation_floor.py", ".github/workflows/verify.yml",
+    "tests/test_floor_check.py", "tests/test_git_fence.py", "tests/test_git_server_layer.py", "tests/test_mutation_floor.py",
+    ".github/workflows/verify.yml",
 )
 # (đường file, số thứ tự cặp mốc) → (SHA-256 của chữ giữa mốc, SHA-256 của hai dòng chữ gần nhất quanh cặp mốc).
 # Sửa chữ trong vùng sàn thì đổi cả băm ở đây trong cùng commit, có lý do và có 5 ý Đức gật cho file luật đó.

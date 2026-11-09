@@ -53,6 +53,8 @@ FLOOR_FILES: tuple[str, ...] = FENCE_FILES + (  # `merge_ready.py`, `deploy_scan
     "scripts/deploy_scan.py",
     "tests/test_fence_wiring.py",
     "tests/test_floor_check.py",
+    "tests/test_git_fence.py",
+    "tests/test_git_server_layer.py",
     "tests/test_mutation_floor.py",
     ".github/workflows/verify.yml",
 )

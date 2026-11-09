@@ -1551,6 +1551,11 @@ def test_fence_runner_failure_closes_push_contract(tmp_path, monkeypatch):
     heads = repo / ".git" / "refs" / "remotes" / "origin"
     heads.mkdir(parents=True)
     (heads / "HEAD").write_text("ref: refs/remotes/origin/main\n", encoding="utf-8")
+    listing = tmp_path / "protected.json"
+    listing.write_text(json.dumps({"repos": [{"git_common_dir": str(repo / ".git")}]}), encoding="utf-8")
+    rc, _, err = run("claude", claude("git push origin spr-20-x", repo))  # chưa đặt biến danh sách: dấu hiệu 1 không xác định
+    assert rc == 2 and "push-repo-unverified" in err
+    monkeypatch.setenv(git_fence.ENV_LIST, str(listing))
     monkeypatch.setattr(git_fence, "default_runner", lambda *a, **k: (-1, ""))
     rc, _, err = run("claude", claude("git push origin spr-20-x", repo))
     assert rc == 2 and "push-url-unverified" in err

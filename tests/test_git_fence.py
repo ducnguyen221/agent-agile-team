@@ -280,8 +280,14 @@ def push_world(tmp_path, branch="spr-31-export", default="main", urls=(URL,)):
     return repo, fake
 
 
-def push(repo, fake, cmd="git push origin spr-31-export", contract=None, **kw):
-    return verdict(cmd, repo, marker=True, contract=contract or contract_for(repo), fake=fake, **kw)
+def listed(repo):
+    """Env của danh sách bảo vệ có đúng `repo` (dấu hiệu 1 đúng): điều kiện để hợp đồng đích được áp (FR4.4)."""
+    return write_list(repo.parent, repo, urls=())
+
+
+def push(repo, fake, cmd="git push origin spr-31-export", contract=None, env="listed", **kw):
+    return verdict(cmd, repo, env=listed(repo) if env == "listed" else env, marker=True, contract=contract or contract_for(repo),
+                   fake=fake, **kw)
 
 
 def test_marker_turns_ask_into_forbid(tmp_path):
@@ -306,14 +312,14 @@ def test_contract_valid_refspec_and_head_forms(tmp_path):
 def test_contract_valid_from_worktree(tmp_path):
     repo, fake = push_world(tmp_path, branch="main")
     tree = make_worktree(repo, tmp_path)
-    assert verdict("git push origin spr-31-export", tree, marker=True, contract=contract_for(repo), fake=fake).kind == gf.AUTO
+    assert verdict("git push origin spr-31-export", tree, env=listed(repo), marker=True, contract=contract_for(repo), fake=fake).kind == gf.AUTO
 
 
 def test_contract_worktree_of_another_repo(tmp_path):
     repo, fake = push_world(tmp_path)
     other = make_repo(tmp_path, name="other", agile=True)
     tree = make_worktree(other, tmp_path, name="otherwt")
-    got = verdict("git push origin spr-31-export", tree, marker=True, contract=contract_for(repo), fake=fake)
+    got = verdict("git push origin spr-31-export", tree, env=listed(repo), marker=True, contract=contract_for(repo), fake=fake)
     assert got.kind == gf.FORBID and got.code == "push-repo-unverified"
 
 
@@ -374,11 +380,11 @@ def test_contract_target_equals_default_branch(tmp_path):
 def test_contract_other_directory_and_env_redirect(tmp_path):
     repo, fake = push_world(tmp_path)
     other = make_repo(tmp_path, name="o2", agile=True)
-    got = verdict(f"git -C {other} push origin spr-31-export", repo, marker=True, contract=contract_for(repo), fake=fake)
+    got = verdict(f"git -C {other} push origin spr-31-export", repo, env=listed(repo), marker=True, contract=contract_for(repo), fake=fake)
     assert got.code == "push-repo-unverified"
-    redirected = verdict("git push origin spr-31-export", repo, marker=True, contract=contract_for(repo), fake=fake, redirected=True)
+    redirected = verdict("git push origin spr-31-export", repo, env=listed(repo), marker=True, contract=contract_for(repo), fake=fake, redirected=True)
     assert redirected.code == "push-repo-unverified"
-    changed = verdict("git push origin spr-31-export", repo, marker=True, contract=contract_for(repo), fake=fake, cd=True)
+    changed = verdict("git push origin spr-31-export", repo, env=listed(repo), marker=True, contract=contract_for(repo), fake=fake, cd=True)
     assert changed.code == "push-repo-unverified"
 
 
@@ -458,7 +464,8 @@ def test_gh_with_marker(tmp_path):
     repo = make_repo(tmp_path, agile=True)
     assert verdict("gh pr merge 12", repo, marker=True).kind == gf.FORBID
     assert verdict("gh pr create --title x", repo, marker=True).kind == gf.FORBID
-    assert verdict("gh pr create --title x", repo, marker=True, contract=contract_for(repo)).kind == gf.AUTO
+    assert verdict("gh pr create --title x", repo, marker=True, contract=contract_for(repo)).kind == gf.FORBID  # chưa có danh sách
+    assert verdict("gh pr create --title x", repo, env=listed(repo), marker=True, contract=contract_for(repo)).kind == gf.AUTO
 
 
 def test_gh_targeting_listed_repo_from_outside(tmp_path):
@@ -582,3 +589,43 @@ def test_writing_alias_config_is_forbidden(tmp_path):
     repo = make_repo(tmp_path, branch="x", agile=True)
     assert verdict("git config alias.p push", repo).kind == gf.FORBID
     assert verdict("git config --global alias.p push", repo).kind == gf.FORBID
+
+
+# --- vòng 1 kiểm định (Fable RF1): hợp đồng đích chỉ áp khi danh tính repo được xác minh bằng danh sách (dấu hiệu 1) ---------------
+
+def test_contract_needs_the_protected_list_to_name_the_repo(tmp_path):
+    repo, fake = push_world(tmp_path)
+    missing = push(repo, fake, env={})  # biến vắng: dấu hiệu 1 không xác định
+    assert missing.kind == gf.FORBID and missing.code == "push-repo-unverified"
+    other = make_repo(tmp_path, name="other", urls=("https://github.com/acme/other.git",))
+    elsewhere = push(repo, fake, env=write_list(tmp_path, other, urls=()))  # danh sách có, nhưng không có repo này
+    assert elsewhere.kind == gf.FORBID and elsewhere.code == "push-repo-unverified"
+    assert push(repo, fake).kind == gf.AUTO  # có trong danh sách: qua
+
+
+def test_contract_refused_when_the_list_file_is_broken(tmp_path):
+    repo, fake = push_world(tmp_path)
+    bad = tmp_path / "bad.json"
+    bad.write_text("{", encoding="utf-8")
+    got = push(repo, fake, env={gf.ENV_LIST: str(bad)})
+    assert got.kind == gf.FORBID and got.code == "push-repo-unverified"
+
+
+def test_indexed_signal_is_read_from_a_linked_worktree(tmp_path):
+    """Hàng 4 của bảng mất dấu hiệu: chỉ mục của worktree liên kết còn `.agile.json` thì repo vẫn được bảo vệ."""
+    main = make_repo(tmp_path)
+    tree = make_worktree(main, tmp_path)
+    fake = Fake({INDEX_CALL: (0, "")})
+    sig = gf.protection(str(tree), {}, fake)
+    assert sig.indexed is True and sig.protected and not sig.config_file
+    assert fake.calls == [INDEX_CALL]
+
+
+def test_broken_list_with_agile_json_and_push_flag_row(tmp_path):
+    """Hàng 8: danh sách hỏng + `.agile.json` còn: vẫn được bảo vệ (dấu hiệu 2) nhưng `+đẩy-nhánh` chặn vì dấu hiệu 1 không xác định."""
+    repo, fake = push_world(tmp_path)
+    bad = tmp_path / "broken-list.json"
+    bad.write_text("{not json", encoding="utf-8")
+    env = {gf.ENV_LIST: str(bad)}
+    assert gf.protection(str(repo), env, fake).protected
+    assert push(repo, fake, env=env).code == "push-repo-unverified"

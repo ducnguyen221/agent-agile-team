@@ -392,6 +392,12 @@ def _flags(rest: list) -> list:
     return [a for a in rest if a.startswith("-")]
 
 
+def _listed(seg: Segment, ctx: FenceContext, sig: Signals) -> bool:
+    """Dấu hiệu 1 đúng cho repo nơi lệnh chạy? Danh sách vắng, hỏng hay không có repo → không xác minh được danh tính repo (FR4.4)."""
+    target = seg.where[0] if seg.where and seg.where[0] else None
+    return (ctx.signals_for(target) if target else sig).listed is True
+
+
 def _push_verdict(seg: Segment, ctx: FenceContext, sig: Signals) -> Verdict:
     rest = seg.rest[1:] if seg.sub == "subtree" else seg.rest
     forced = [a for a in rest if a in FORCE_FLAGS or a.startswith("--force") or re.fullmatch(r"-[A-Za-z]*f[A-Za-z]*", a)
@@ -400,7 +406,7 @@ def _push_verdict(seg: Segment, ctx: FenceContext, sig: Signals) -> Verdict:
         return _verdict(FORBID, "push-forced", "push " + forced[0], ctx)
     if not ctx.marker:
         return _verdict(ASK, "push-ask", "push", ctx)
-    if ctx.contract is None:
+    if ctx.contract is None or not _listed(seg, ctx, sig):
         return _verdict(FORBID, "push-repo-unverified", "push", ctx)
     code = push_contract(rest, ctx.contract, seg, ctx, sig)
     if code is None:
@@ -590,7 +596,7 @@ def _gh_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
             return Verdict()
     for name, actions in GH_ASK:
         if head == name and action in actions:
-            if ctx.marker and ctx.contract is not None:
+            if ctx.marker and ctx.contract is not None and ctx.signals_for(None).listed is True:
                 return Verdict(AUTO)
             return _verdict(ASK, "gh-ask", "gh {} {}".format(head, action), ctx)
     if not head and not flags:
