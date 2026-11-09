@@ -48,7 +48,8 @@ Danh sách là file JSON do **Đức** đặt ngoài repo, đường trong biế
 Đẩy (mọi dạng, kể cả `git subtree push`) · `gh pr merge` · `gh release` · `git tag` có tạo/xoá · `git remote set-url|add|remove|rename`
 · `git config` ghi khoá `remote.*`, `url.*`, `core.hooksPath` · cờ `--no-verify` · và, khi **nhánh hiện tại** là nhánh được
 bảo vệ (`main`, `master`, nhánh mặc định của remote, cộng `protected_branches`): `merge`, `commit`, `pull`, `cherry-pick`,
-`reset`, `rebase`. Nhánh hiện tại đọc từ `.git/HEAD` của thư mục mà lệnh git thật sự chạy.
+`reset`, `rebase`. Nhánh hiện tại đọc từ `.git/HEAD` của thư mục mà lệnh git thật sự chạy. Sau một `cd`/`pushd` trong cùng lệnh, hay khi có `GIT_DIR=`,
+guard không tính được thư mục thật nên **coi là nhánh được bảo vệ** (đóng an toàn, có thể chặn nhầm một `git commit` ở nhánh phụ): viết `git -C <thư mục> …` thay cho `cd`.
 
 ## 4. Bảng quyền
 
