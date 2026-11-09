@@ -146,6 +146,7 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `ledger-unconfigured` | Ghi chú | Dự án khai `ledger.project` mà máy chưa đặt `AGENT_AGILE_LEDGER` — chưa đối chiếu được; không làm đỏ. Dự án không khai khoá thì không có phát hiện nào về sổ, kể cả khi máy đặt biến. Mẫu đường thiếu `{project}` báo `config-invalid` |
 | `leak-denylist` | Chặn | `--self`: file của repo (kể cả tên file) chứa từ cấm — mục chữ khớp nguyên từ, mục có ký tự đường dẫn khớp chuỗi con ([`tests/README.md`](../tests/README.md)); báo số thứ tự từ, không in lại từ |
 | `agents-md-budget` | Phải sửa | `--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 240 byte |
+| `delegation-fence-file` | Phải sửa | Khối `delegation` mà `delegation.files` nêu một file thuộc sàn cứng (`FLOOR_FILES`: `FENCE_FILES`, `floor_check.py`, các test ghim, `verify.yml`…): không duyệt thay được. File chỉ chứa **vùng** sàn (`AGENTS.md`, `method/{process,sizing,autopilot}.md`) không bị luật này báo — `floor_check` so vùng đó với base |
 | `hard-floor-marker` | Chặn | `--self` (chỉ khi repo có `scripts/floor_check.py`): cặp mốc `<!-- san-cung:start -->`/`end` ở `AGENTS.md`, `method/{process,sizing,autopilot}.md` lệch (mở không đóng, lồng, nằm trong khối mã), mất hoặc thừa so với `FLOOR_ZONES` |
 | `routing-invalid` | Phải sửa | Marker routing thiếu khối JSON kế tiếp, JSON sai, record sai schema 1 hoặc thiếu chứng cứ/nguồn độc lập |
 | `routing-unknown` | Ghi chú | Record có field ngoài schema routing 1; checker không diễn giải field lạ |

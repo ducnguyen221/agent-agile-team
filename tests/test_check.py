@@ -2659,3 +2659,17 @@ def test_autopilot_files_token_with_punctuation_in_grant_ok(tmp_path, grant):
     root = make_sprint(tmp_path)
     autopilot_plan(root, files="[AGENTS.md]", grant=grant)
     assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_delegation_fence_file_ignores_zone_only_files_and_plain_delegation(tmp_path):
+    """FR1.5: file chỉ có vùng sàn (`method/sizing.md`) không bị `delegation-fence-file`; khối không nêu file giữ nguyên."""
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    plan = root / "PLAN.md"
+    base = plan.read_text(encoding="utf-8")
+    write_lf(plan, base)
+    assert "delegation-fence-file" not in rules_of(check.check_paths([root]))
+    write_lf(plan, base.replace("risk_tags: []", "risk_tags: [rules]", 1).replace("  files: []\n", "  files: [method/sizing.md]\n", 1))
+    assert "delegation-fence-file" not in rules_of(check.check_paths([root]))
+    write_lf(plan, base.replace("risk_tags: []", "risk_tags: [rules]", 1).replace("  files: []\n", "  files: [scripts/floor_check.py]\n", 1))
+    assert "delegation-fence-file" in rules_of(check.check_paths([root]))

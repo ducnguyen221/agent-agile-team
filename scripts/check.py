@@ -73,6 +73,7 @@ RULES: dict[str, tuple[str, str]] = {
     "ledger-unconfigured": (GHI, "dự án khai sổ tập trung mà máy chưa đặt mẫu đường `AGENT_AGILE_LEDGER`"),
     "leak-denylist": (CHAN, "`--self`: file của repo chứa từ trong danh sách cấm"),
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
+    "delegation-fence-file": (PHAI, "`delegation.files` nêu file thuộc sàn cứng (`FLOOR_FILES`): không duyệt thay được"),
     "hard-floor-marker": (CHAN, "`--self`: cặp mốc `san-cung` ở file luật lệch, mất hoặc thừa so với số cặp quy định"),
     "routing-invalid": (PHAI, "routing evidence marker/JSON/record không hợp lệ"),
     "routing-unknown": (GHI, "routing record có field ngoài schema 1"),
@@ -1313,6 +1314,16 @@ class Engine:
         problem = rules.autopilot_problem(block)
         if problem is not None:
             return bad(*problem)
+        listed = block.get("files")
+        if isinstance(listed, list):  # file thuộc sàn cứng không duyệt thay được; file chỉ có VÙNG sàn do floor_check bảo vệ
+            floor = set(rules.FLOOR_FILES)
+            for item in listed:
+                norm = item.strip().replace("\\", "/") if isinstance(item, str) else ""
+                while norm.startswith("./"):
+                    norm = norm[2:]
+                if norm in floor:
+                    self.add(path, doc.key_line("delegation.files"), "delegation-fence-file",
+                             f"{norm} thuộc sàn cứng, không duyệt thay được")
         grant = block.get("grant")
         if not (isinstance(grant, str) and grant.strip()):
             return bad("delegation.grant" if "grant" in block else "delegation", "thiếu lời cấp nguyên văn (delegation.grant)")

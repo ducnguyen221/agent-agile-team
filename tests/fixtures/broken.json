@@ -143,6 +143,8 @@
     {"name": "duyệt thay mà risk_tags là danh sách lẫn số", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["risk_tags: []", "risk_tags: [rules, 1]"]},
     {"name": "người duyệt thay không có trong roles", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["  by: agent-d\n", "  by: agent-x\n"]},
     {"name": "người duyệt thay giữ vai kiểm định nhưng không phải T1", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replace": ["  tech-reviewer: [T1, agent-d]", "  tech-reviewer: [T2, agent-d]"]},
-    {"name": "cổng còn pending mà delegation có khoá lạ", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replaces": [["status: approved", "status: draft"], ["gate_1: approved", "gate_1: pending"], ["  files: []\n", "  files: []\n  note: x\n"]]}
+    {"name": "cổng còn pending mà delegation có khoá lạ", "rule": "gate-delegation-invalid", "exit": 1, "file": "PLAN.md", "base": "delegated", "replaces": [["status: approved", "status: draft"], ["gate_1: approved", "gate_1: pending"], ["  files: []\n", "  files: []\n  note: x\n"]]},
+    {"name": "duyệt thay nêu file rào của autopilot", "rule": "delegation-fence-file", "exit": 1, "file": "PLAN.md", "base": "delegated", "replaces": [["risk_tags: []", "risk_tags: [rules]"], ["  files: []\n", "  files: [scripts/autopilot_guard.py]\n"]]},
+    {"name": "duyệt thay nêu file sàn viết kiểu ./ và gạch ngược", "rule": "delegation-fence-file", "exit": 1, "file": "PLAN.md", "base": "delegated", "replaces": [["risk_tags: []", "risk_tags: [rules]"], ["  files: []\n", "  files: [\".\\\\hooks/hooks.json\"]\n"]]}
   ]
 }
