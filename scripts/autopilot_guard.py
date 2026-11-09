@@ -1101,19 +1101,24 @@ SHELL_STRING_BEFORE = re.compile(r"(?:\s-[A-Za-z]*c[A-Za-z]*|eval|\s-command|\s/
 BACKSLASH = chr(92)
 
 
-def _sub_quoted(fn, text: str) -> str:
+def _sub_quoted(fn, text: str, posix: bool = True) -> str:
     """Thay từng chuỗi nháy ĐÓNG có khoảng trắng và không xuống dòng bằng `fn(vị_trí_bắt_đầu, chuỗi)`. Quét tuần tự từ trái
-    (nháy đơn không thoát được; nháy kép thoát bằng gạch ngược) để `"it's"` hay `'a"b'` không ghép nhầm hai chuỗi."""
+    (nháy đơn không thoát được trừ `$'…'`; nháy kép thoát bằng gạch ngược) để `"it's"` hay `'a"b'` không ghép nhầm hai chuỗi.
+    `posix=False` (PowerShell/cmd): gạch ngược không phải ký tự thoát. Có `$(` hay dấu huyền trong chuỗi lệnh thì nháy lồng không quét
+    chắc được: không thay gì (thấy nhiều hơn, chặn thừa còn hơn lọt)."""
+    if "$(" in text or "`" in text:
+        return text
     out, index, last, size = [], 0, 0, len(text)
     while index < size:
         ch = text[index]
-        if ch == BACKSLASH:
+        if ch == BACKSLASH and posix:
             index += 2
             continue
         if ch in ("'", '"'):
             end = index + 1
+            escapes = posix and (ch == '"' or (index > 0 and text[index - 1] == "$"))
             while end < size and text[end] != ch and text[end] != "\n":
-                end += 2 if (ch == '"' and text[end] == BACKSLASH) else 1
+                end += 2 if (escapes and text[end] == BACKSLASH) else 1
             if end < size and text[end] == ch:
                 chunk = text[index:end + 1]
                 if re.search(r"\s", chunk[1:-1]):
@@ -1127,19 +1132,19 @@ def _sub_quoted(fn, text: str) -> str:
     return "".join(out)
 
 
-def _blank_content(text: str) -> str:
+def _blank_content(text: str, posix: bool = True) -> str:
     """Thay chuỗi nháy có khoảng trắng bằng `""` (nội dung văn bản), trừ chuỗi là đối số của -c/eval (shell sẽ chạy nó)."""
-    return _sub_quoted(lambda start, chunk: chunk if SHELL_STRING_BEFORE.search(text[:start].rstrip()) else '""', text)
+    return _sub_quoted(lambda start, chunk: chunk if SHELL_STRING_BEFORE.search(text[:start].rstrip()) else '""', text, posix)
 
 
-def _split_segments(text: str) -> list:
+def _split_segments(text: str, posix: bool = True) -> list:
     """Tách đoạn lệnh theo SEPARATORS nhưng KHÔNG tách bên trong chuỗi nháy là nội dung (`-m "feat(guard): …"`); chuỗi của -c/eval
     hay chuỗi có `$(…)`/dấu huyền vẫn tách (shell sẽ chạy phần đó)."""
     def mask(start, chunk):
         if SHELL_STRING_BEFORE.search(text[:start].rstrip()) or "$(" in chunk or "`" in chunk:
             return chunk
         return "x" * len(chunk)
-    masked = _sub_quoted(mask, text)
+    masked = _sub_quoted(mask, text, posix)
     pieces, last = [], 0
     for sep in SEPARATORS.finditer(masked):
         pieces.append(text[last:sep.start()])
@@ -1175,7 +1180,8 @@ def _plain_words(tokens: list, segment: str) -> list:
     return fixed
 
 
-EXEC_FLAGS = frozenset({"-c", "--command", "-e", "--exec", "--"}) | FIND_EXEC  # cờ mà giá trị kế tiếp là lệnh sẽ được chạy
+VALUE_FLAGS = frozenset({"-o", "-O", "--output", "-m", "--msg", "--message", "--data", "-H", "--header", "-F", "--form", "-X", "--request",
+                         "-A", "--user-agent", "--name", "--title", "--body", "--file"})  # cờ biết chắc nhận một giá trị (không phải lệnh); cờ mơ hồ như -f/-d/-n/-t cố ý KHÔNG có
 
 
 def names_git_or_gh(text: str) -> bool:
@@ -1196,17 +1202,27 @@ def _collect_nested(text: str, ctx: Context, depth: int, out: list) -> None:
 
 def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     """Gom mọi đoạn lệnh git/gh (và lệnh không chỉ-đọc nhắc tới file bảo vệ) của `text` thành `git_fence.Segment`."""
+    if BACKSLASH in text and getattr(ctx, "posix", None) is None:
+        # gạch ngược là ký tự thoát ở bash nhưng không ở PowerShell/cmd: không biết shell thì xét cả hai cách đọc (hợp hai kết quả, chặn thừa hơn lọt)
+        for ctx.posix in (True, False):
+            _collect_segments(text, ctx, depth, out)
+        ctx.posix = None
+        return
+    posix = getattr(ctx, "posix", True) is not False
     text = _join_and_strip(text)
     text = text.replace(">|", ">")  # `>|` (ghi đè dù noclobber) là chuyển hướng, không phải ống
-    text = re.sub(r"(\d*)>&(\d+|-)", r"\1>_\2", text)  # `2>&1`, `>&2`: đổi hướng fd, không phải dấu `&` tách lệnh (nếu tách, phần sau `&` thoát khỏi lệnh git)
-    plain = re.sub(r"[\"']", "", _blank_content(text))  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X; chuỗi nháy có khoảng trắng là nội dung
+    # chuyển hướng có `&` không phải dấu tách lệnh (nếu tách, phần sau `&` thoát khỏi lệnh git và lọt khỏi hợp đồng đích):
+    text = re.sub(r"(\d*)>&\s*(\d+|-|\$\S+)", r"\1>_\2", text)  # `2>&1`, `2>& 1`, `>&2`: đổi hướng fd
+    text = re.sub(r"&>(>?)", r">\1", text)  # `&>f`, `&>>f`
+    text = re.sub(r"(\d*)>&\s*", r"\1>", text)  # `>&f`, `>& f`
+    plain = re.sub(r"[\"']", "", _blank_content(text, posix))  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X; chuỗi nháy có khoảng trắng là nội dung
     plain_both = (plain, re.sub(r"\\(.)", r"\1", plain))  # `G\IT_X=1` cũng là GIT_X
     git_env = any(re.search(ENV_USE.format("GIT"), p) or "--exec-path" in p or re.search(VAR_ASSIGN, p) for p in plain_both)
     gh_env = any(re.search(GH_ENV_USE, p) for p in plain_both)
     git_env = git_env or getattr(ctx, "git_env_outer", False)  # biến đặt ở lớp ngoài (`GIT_X=1 bash -c '…'`) vẫn tác động lệnh bên trong
     gh_env = gh_env or getattr(ctx, "gh_env_outer", False)
     ctx.git_env_outer, ctx.gh_env_outer = git_env, gh_env
-    content_free = _blank_content(text)  # "x > .git/config" (có khoảng trắng trong nháy) là nội dung in ra, không phải chuyển hướng
+    content_free = _blank_content(text, posix)  # "x > .git/config" (có khoảng trắng trong nháy) là nội dung in ra, không phải chuyển hướng
     for target in re.findall(r">>?\s*&?\s*([^\s;&|()<>]+)", content_free):  # đích chuyển hướng ở bất kỳ vị trí nào, kể cả `>f`, `&>f`, `>&f`
         if git_fence.targets_guard_file(target, ctx.cwd, getattr(ctx, "env", os.environ), loose=ctx.cwd_changed, whole=text):
             out.append(git_fence.Segment("other", [target]))
@@ -1223,7 +1239,7 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         if (name in SHELL_WRAPPERS or name in EVAL_COMMANDS) and not takes_script:
             source = tokenize(re.split(r"&&|;|\n|\|\|", parts[index - 1])[-1])
             _collect_nested(" ".join(source[1:]), ctx, depth, out)
-    for segment in _split_segments(text):
+    for segment in _split_segments(text, posix):
         tokens, redirected = _strip_prefixes(tokenize(segment), ctx)
         if not tokens:
             continue
@@ -1276,8 +1292,8 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
                 # lệnh lạ (su -c, find -exec, wsl, parallel, watch, chrt, flock, ssh…) có thể chạy git/gh phía sau: tìm và phân tích như lệnh lồng
                 for index, arg in enumerate(args):
                     previous = args[index - 1] if index else ""
-                    if previous.startswith("-") and previous not in EXEC_FLAGS:
-                        continue  # giá trị của một cờ khác (`curl -o gh url`, `--msg "git push x"`) không phải lệnh được chạy
+                    if previous in VALUE_FLAGS:
+                        continue  # giá trị của cờ biết chắc nhận giá trị (`curl -o gh url`, `--msg "git push x"`); cờ lạ/cờ bật-tắt (`watch -n5 git …`, `strace -f git …`) thì vẫn xét
                     if _exe_name(arg) in ("git", "gh"):
                         _collect_nested(" ".join(args[index:]), ctx, depth, out)
                         break

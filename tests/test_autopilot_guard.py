@@ -2119,3 +2119,44 @@ def test_flag_values_named_git_or_gh_are_not_commands(tmp_path, cmd):
 def test_shell_string_forms_with_dollar_quote_or_clustered_flags_are_still_commands(tmp_path, cmd):
     repo = protected_repo(tmp_path, branch="x")
     assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+# --- security vòng 7 (bản sửa ff09ca1) -------------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("cmd", [
+    "watch -n5 git push --force origin main", "watch -d git push --force origin main", "strace -f git push --force origin main",
+    "unbuffer -p git push --force origin main", "parallel -j1 git push --force origin ::: main", "tmux new -d git push --force origin main",
+    "screen -dm git push --force origin main", "systemd-run --user git push --force origin main", "setpriv --reuid=1 git push --force origin main",
+    "caffeinate -i git push --force origin main", "xvfb-run -a git push --force origin main",
+])
+def test_boolean_flags_before_git_do_not_hide_it(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_backslash_is_not_an_escape_in_powershell(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    for cmd in ('echo "C:\\my dir\\" ; git push --force origin main ; echo "a b"', 'echo "C:\\dir\\" ; git push --force origin main ; echo "a b"'):
+        assert run("claude", claude(cmd, repo, tool="PowerShell"))[0] == 2, cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "git push origin spr-20-x &>/dev/null main", "git push origin spr-20-x &> x main", "git push origin spr-20-x &>>x main",
+    "git push origin spr-20-x >&file main", "git push origin spr-20-x >& file main", "git push origin spr-20-x 2>& 1 main",
+])
+def test_ampersand_redirect_forms_do_not_hide_extra_push_arguments(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "echo $'it\\'s' ; git push --force origin main ; echo 'x y'", "echo \"$(printf '\"')\" ; git push --force origin main ; echo \"a b\"",
+])
+def test_ansi_c_quotes_and_nested_quotes_do_not_hide_a_separator(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_redirect_to_the_guard_file_with_ampersand_form_is_still_seen(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude("echo x &> .agile.json", repo))[0] == 2
