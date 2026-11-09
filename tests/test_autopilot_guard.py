@@ -10,13 +10,13 @@ import sys
 
 import pytest
 
+import _autopilot_rules
 import autopilot_guard
-import check
 from pathlib import Path
 
 from conftest import REPO, SCRIPTS
 
-ALL = list(check.AUTOPILOT_EXCLUSIONS)
+ALL = list(_autopilot_rules.AUTOPILOT_EXCLUSIONS)
 WITHOUT_BRANCH = [e for e in ALL if e != "branch_merge_local"]
 
 
@@ -81,15 +81,15 @@ PINNED_EXCLUSIONS = {"push", "tag", "version", "main_merge", "publish", "license
                      "user_soul", "secret", "auth", "network_fetch", "branch_merge_local"}
 
 
-def test_guard_uses_check_exclusions():
-    assert autopilot_guard.known_exclusions() == check.AUTOPILOT_EXCLUSIONS
+def test_guard_uses_rules_exclusions():
+    assert autopilot_guard.known_exclusions() == _autopilot_rules.AUTOPILOT_EXCLUSIONS
 
 
 def test_guard_exclusions_pinned_to_thirteen():
-    """Bớt một mục ở `check.AUTOPILOT_EXCLUSIONS` sẽ tắt chặn im lặng: ghim danh sách viết tay để test đỏ."""
+    """Bớt một mục ở `_autopilot_rules.AUTOPILOT_EXCLUSIONS` sẽ tắt chặn im lặng: ghim danh sách viết tay để test đỏ."""
     assert len(PINNED_EXCLUSIONS) == 13
     assert set(autopilot_guard.known_exclusions()) == PINNED_EXCLUSIONS
-    assert set(check.AUTOPILOT_EXCLUSIONS) == PINNED_EXCLUSIONS and len(check.AUTOPILOT_EXCLUSIONS) == 13
+    assert set(_autopilot_rules.AUTOPILOT_EXCLUSIONS) == PINNED_EXCLUSIONS and len(_autopilot_rules.AUTOPILOT_EXCLUSIONS) == 13
 
 
 # --- các test PLAN -----------------------------------------------------------------------------------------------

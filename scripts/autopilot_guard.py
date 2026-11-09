@@ -15,7 +15,7 @@ Mục có mẫu lệnh: push, tag, main_merge, irreversible_delete, branch_merge
 Ngoài danh sách loại, hook bảo vệ chính file dấu: lệnh shell không chỉ-đọc có đối số trỏ tới file dấu (hoặc `.tmp/` bao nó, hay glob khớp
 nó) và công cụ ghi file (`Write`, `Edit`, `MultiEdit`, `NotebookEdit`, `apply_patch`, `write_to_file`, `replace_file_content`…) có đường
 đích là file dấu đều bị chặn với lý do `file dấu là rào`. Việc đăng ký matcher cho công cụ ghi file thuộc cấu hình harness (chưa làm).
-Tên mục lấy từ `check.AUTOPILOT_EXCLUSIONS` (một nguồn; test ghim đúng 13 mục). Không gọi tiến trình con; nhánh hiện tại đọc từ
+Tên mục lấy từ `_autopilot_rules.AUTOPILOT_EXCLUSIONS` (một nguồn; test ghim đúng 13 mục). Không gọi tiến trình con; nhánh hiện tại đọc từ
 file `.git/HEAD` của thư mục mà lệnh git thật sự chạy (theo `cd`, `git -C`; không xác định được thì coi là nhánh chính).
 
 Không phân tích chuỗi chương trình tuỳ ý (`awk 'BEGIN{system(…)}'`, `perl -e`, `ruby -e`, `node -e`, `python -c`): giới hạn đã biết.
@@ -158,11 +158,11 @@ def _is_clear_command(tokens: list[str]) -> bool:
 
 
 def known_exclusions() -> tuple[str, ...]:
-    """Danh sách đóng 13 mục từ `check.AUTOPILOT_EXCLUSIONS`; nạp muộn để lệnh không có file dấu không trả phí nhập `check`."""
+    """Danh sách đóng 13 mục từ `_autopilot_rules.AUTOPILOT_EXCLUSIONS`; nạp muộn để lệnh không có file dấu không trả phí nhập."""
     here = os.path.dirname(os.path.abspath(__file__))
     if here not in sys.path:
         sys.path.insert(0, here)
-    from check import AUTOPILOT_EXCLUSIONS
+    from _autopilot_rules import AUTOPILOT_EXCLUSIONS
     return tuple(AUTOPILOT_EXCLUSIONS)
 
 
