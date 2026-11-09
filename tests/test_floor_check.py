@@ -262,3 +262,60 @@ def test_workflow_step_only_on_pull_request():
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "if: github.event_name == 'pull_request'" in text
     assert "floor-approved" in text and "git archive" in text
+
+
+# --- gọi trong tiến trình (để đo coverage của floor_check.main; hành vi đã kiểm bằng tiến trình con ở trên) --------------
+
+def in_process(root, base, *extra, head="HEAD"):
+    sys.path.insert(0, str(REPO / "scripts"))
+    import floor_check
+    import io
+    import contextlib
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+        code = floor_check.main(["--root", str(root), "--base", base, "--head", head, *extra])
+    return code, out.getvalue()
+
+
+def test_in_process_strict_report_json_and_errors(lab):
+    root, base = lab
+    line = zone_line(root, "method/sizing.md")
+    edit(root, "method/sizing.md", line, line + " (đã sửa)")
+    put(root, "hooks/hooks.json", "# hooks đã sửa\n")
+    git(root, "mv", "scripts/autopilot_guard.py", "scripts/g2.py")
+    put(root, "scripts/merge_ready.py", "# mới\n")
+    (root / ".github/workflows/verify.yml").unlink()
+    commit(root, "head")
+    code, out = in_process(root, base)
+    assert code == 1
+    for expected in ("floor-zone-changed method/sizing.md", "floor-file-changed hooks/hooks.json", "floor-file-renamed",
+                     "floor-file-added scripts/merge_ready.py", "floor-file-removed .github/workflows/verify.yml"):
+        assert expected in out, out
+    code, out = in_process(root, base, "--mode", "report")
+    assert code == 0 and "floor-changed — cần Đức xác nhận ở Cổng 2" in out
+    code, out = in_process(root, base, "--json")
+    assert code == 1 and '"status": "violations"' in out
+    assert in_process(root, "khong-co-ref")[0] == 2
+    assert in_process(root, base, head=base)[0] == 0
+
+
+def test_in_process_marker_problems_and_bootstrap(lab, tmp_path):
+    root, base = lab
+    text = (root / "AGENTS.md").read_text(encoding="utf-8")
+    put(root, "AGENTS.md", text.replace("<!-- san-cung:start -->\n", "", 1))
+    commit(root, "mất một mốc")
+    code, out = in_process(root, base)
+    assert code == 1 and "floor-marker-moved AGENTS.md" in out
+    git(root, "rm", "-q", "method/process.md")
+    commit(root, "xoá file có vùng")
+    code, out = in_process(root, base)
+    assert "floor-zone-changed method/process.md" in out
+    bare = tmp_path / "bare"
+    bare.mkdir()
+    git(bare, "init", "-q", "-b", "main")
+    put(bare, "x.txt", "x")
+    first = commit(bare, "a")
+    put(bare, "x.txt", "y")
+    commit(bare, "b")
+    code, out = in_process(bare, first)
+    assert code == 0 and "bootstrap" in out

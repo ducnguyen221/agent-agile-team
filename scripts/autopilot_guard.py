@@ -38,7 +38,11 @@ import os
 import re
 import sys
 import traceback
+from dataclasses import dataclass
 from typing import TextIO
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import git_fence  # noqa: E402
 
 FORMATS = ("claude", "codex", "antigravity")
 MARKER_PARTS = (".tmp", "autopilot.json")
@@ -1075,6 +1079,8 @@ def _evaluate(raw: str) -> str | None:
                 add(find_marker(directory))
         for marker in markers:
             active, broken = load_active(marker)
+            if "push" in active and not broken and load_push_contract(marker) is not None:
+                active = active - {"push"}  # `+đẩy-nhánh`: lệnh đẩy do git_fence quyết theo hợp đồng đích (mọi lệnh đẩy lệch hợp đồng bị chặn ở đó)
             for text in commands:
                 item = _analyze(text, Context(active, command_dir, marker))
                 if item:
@@ -1084,10 +1090,138 @@ def _evaluate(raw: str) -> str | None:
         raise _Failed(dirs, type(exc).__name__) from exc
 
 
+# --- rào git thường trực (SPR-16 TK8): gọi `git_fence` trước mọi nhánh trả sớm ----------------------------------------
+
+@dataclass
+class Decision:
+    """Quyết định có loại: `deny` (chặn) hay `ask` (Claude hỏi; Codex và Antigravity chưa có tầng hỏi nên thành chặn)."""
+    kind: str
+    reason: str
+
+
+def _collect_nested(text: str, ctx: Context, depth: int, out: list) -> None:
+    if not text.strip():
+        return
+    if depth >= MAX_UNWRAP:
+        out.append(git_fence.Segment("nested"))
+        return
+    _collect_segments(text, ctx, depth + 1, out)
+    names = {_exe_name(t) for t in tokenize(text)}
+    if names & {"git", "gh"} and DYNAMIC_CHARS & set(text):
+        out.append(git_fence.Segment("nested"))
+
+
+def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
+    """Gom mọi đoạn lệnh git/gh (và lệnh không chỉ-đọc nhắc tới file bảo vệ) của `text` thành `git_fence.Segment`."""
+    text = _join_and_strip(text)
+    parts = PIPE.split(text)
+    for index in range(1, len(parts)):  # `echo "git push" | bash`
+        stage, _ = _strip_prefixes(tokenize(re.split(r"&&|;|\n", parts[index])[0]), Context(set(), ctx.cwd))
+        if not stage:
+            continue
+        name = _exe_name(stage[0])
+        takes_script = any(a.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", a) for a in stage[1:])
+        if (name in SHELL_WRAPPERS or name in EVAL_COMMANDS) and not takes_script:
+            source = tokenize(re.split(r"&&|;|\n|\|\|", parts[index - 1])[-1])
+            _collect_nested(" ".join(source[1:]), ctx, depth, out)
+    for segment in SEPARATORS.split(text):
+        tokens, redirected = _strip_prefixes(tokenize(segment), ctx)
+        if not tokens:
+            continue
+        name, args = _exe_name(tokens[0]), tokens[1:]
+        if name in CD_COMMANDS:
+            ctx.enter()
+        elif name in EVAL_COMMANDS:
+            _collect_nested(" ".join(args), ctx, depth, out)
+        elif name in SHELL_WRAPPERS:
+            if "<<<" in args and args.index("<<<") + 1 < len(args):
+                _collect_nested(" ".join(args[args.index("<<<") + 1:]), ctx, depth, out)
+                continue
+            for index, arg in enumerate(args):
+                if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c", arg):
+                    if depth < MAX_UNWRAP:
+                        _collect_segments(" ".join(args[index + 1:]), ctx, depth + 1, out)
+                    else:
+                        out.append(git_fence.Segment("nested"))
+                    break
+        elif name == "git":
+            globals_, sub, rest = git_fence.split_git_args(args)
+            where = _git_parse(args, ctx, redirected)[2]
+            if ctx.forced_main:
+                where = [None]
+            out.append(git_fence.Segment("git", args, sub, rest, where, redirected, globals_))
+            if sub in ("checkout", "switch") and any(a in MAIN_BRANCHES for a in rest):
+                ctx.forced_main = True
+        elif name == "gh":
+            out.append(git_fence.Segment("gh", args))
+        else:
+            env = getattr(ctx, "env", os.environ)
+            read_only = _read_only(name, args, ctx)
+            for index, arg in enumerate(args):
+                redirect = REDIRECT.match(arg)
+                if redirect:  # đích chuyển hướng tính cả với lệnh chỉ-đọc (`echo x > .agile.json`)
+                    target = redirect.group(1) or (args[index + 1] if index + 1 < len(args) else "")
+                elif read_only:
+                    continue
+                else:
+                    target = arg
+                if target and git_fence.is_guard_path(target, ctx.cwd, env):
+                    out.append(git_fence.Segment("other", args))
+                    break
+
+
+def _fence_decision(payload: dict, env) -> Decision | None:
+    command_dir, session_dir = _event_dirs(payload)
+    name = _tool_name(payload)
+    marker = find_marker(command_dir) or (find_marker(session_dir) if session_dir != command_dir else None)
+    if name is not None and name.lower() in WRITE_TOOLS:
+        paths = _write_paths(payload)
+        reason = git_fence.guarded_write(paths, command_dir, env) if paths else None
+        if reason and git_fence.protection(command_dir, env, git_fence.default_runner, marker=bool(marker)).protected:
+            return Decision("deny", reason)
+        return None
+    if name is not None and name.lower() not in SHELL_TOOLS:
+        return None
+    segments: list = []
+    for text in _commands(payload):
+        ctx = Context(set(), command_dir)
+        ctx.env = env
+        _collect_segments(text, ctx, 0, segments)
+    if not segments:
+        return None
+    contract = load_push_contract(marker) if marker else None
+    verdict = git_fence.classify(segments, git_fence.FenceContext(command_dir, env, git_fence.default_runner,
+                                                                  marker=bool(marker), contract=contract))
+    if verdict.kind == git_fence.FORBID:
+        return Decision("deny", verdict.reason)
+    if verdict.kind == git_fence.ASK:
+        return Decision("ask", verdict.reason)
+    return None
+
+
+def _decide(raw: str, env=None) -> Decision | None:
+    """Rào autopilot (`_evaluate`) trước: lý do cũ giữ nguyên chữ; rồi rào git thường trực. Lỗi của rào git trong repo có dấu hiệu 1/2/4 → chặn."""
+    env = os.environ if env is None else env
+    reason = _evaluate(raw)
+    if reason:
+        return Decision("deny", reason)
+    payload = json.loads(raw)
+    try:
+        return _fence_decision(payload, env)
+    except Exception as exc:  # noqa: BLE001
+        dirs = _event_dirs(payload)
+        marker = any(find_marker(d) for d in dirs)
+        if git_fence.quick_protected(list(dirs), env, marker):
+            return Decision("deny", "git-fence: hook gặp lỗi ({}) trong repo được bảo vệ — lệnh không chạy".format(type(exc).__name__))
+        return None
+
+
 def _unparsed_reason(label: str, dirs: tuple[str, ...]) -> str | None:
     """Đầu vào hỏng hay ngoại lệ: chặn nếu có file dấu từ một trong `dirs` (hoặc không dò được), không thì cho qua."""
     try:
         if all(find_marker(d) is None for d in dirs):
+            if git_fence.quick_protected(list(dirs), os.environ):
+                return "git-fence: hook gặp lỗi ({}) trong repo được bảo vệ — lệnh không chạy".format(label)
             return None
     except Exception:  # noqa: BLE001 — không dò được thì đóng
         pass
@@ -1100,6 +1234,15 @@ def _deny(fmt: str, reason: str, stdout: TextIO, stderr: TextIO) -> int:
         return 0
     stderr.write(reason + "\n")
     return 2
+
+
+def _ask(fmt: str, reason: str, stdout: TextIO, stderr: TextIO) -> int:
+    """Claude: quyết định hỏi (Đức bấm cho phép trong phiên); Codex, Antigravity chưa có tầng hỏi nên thành chặn."""
+    if fmt == "claude":
+        stdout.write(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "ask",
+                                                         "permissionDecisionReason": reason}}, ensure_ascii=False) + "\n")
+        return 0
+    return _deny(fmt, reason, stdout, stderr)
 
 
 def _allow(fmt: str, stdout: TextIO) -> int:
@@ -1118,17 +1261,24 @@ def main(argv: list[str] | None = None, stdin: TextIO = sys.stdin, stdout: TextI
     if args.format is None:
         parser.error("the following arguments are required: --format")
     debug = os.environ.get("AUTOPILOT_GUARD_DEBUG", "") not in ("", "0")
+    decision = None
     try:
-        reason = _evaluate(stdin.read())
+        decision = _decide(stdin.read())
     except _Failed as failed:
         if debug:
             traceback.print_exc(file=stderr)
         reason = _unparsed_reason(failed.label, failed.dirs)
+        decision = Decision("deny", reason) if reason else None
     except Exception as exc:  # JSON hỏng, đầu vào không đọc được: chưa có thư mục sự kiện, dò từ thư mục tiến trình
         if debug:
             traceback.print_exc(file=stderr)
         reason = _unparsed_reason(type(exc).__name__, (os.getcwd(),))
-    return _allow(args.format, stdout) if reason is None else _deny(args.format, reason, stdout, stderr)
+        decision = Decision("deny", reason) if reason else None
+    if decision is None:
+        return _allow(args.format, stdout)
+    if decision.kind == "ask":
+        return _ask(args.format, decision.reason, stdout, stderr)
+    return _deny(args.format, decision.reason, stdout, stderr)
 
 
 def _format_arg(argv: list[str]) -> str:

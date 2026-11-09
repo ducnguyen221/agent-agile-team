@@ -1442,3 +1442,134 @@ def test_load_active_still_blocks_push_even_with_contract(tmp_path):
     """Hợp đồng chỉ mở đường cho `git_fence.push_contract`; `load_active` giữ nguyên: thiếu `push` vẫn được bổ sung đủ."""
     active, broken = autopilot_guard.load_active(write_marker(tmp_path, **PUSH_KEYS))
     assert "push" in active and not broken
+
+
+# --- rào git thường trực qua entrypoint thật `main()` (SPR-16 TK8, FR4.8) ----------------------------------------------
+
+import git_fence  # noqa: E402
+
+
+def protected_repo(tmp_path, branch="main", marker=None):
+    repo = make_repo(tmp_path, branch=branch, marker=marker)
+    (repo / ".agile.json").write_text("{}", encoding="utf-8")
+    return repo
+
+
+def test_fence_push_without_marker_per_host(tmp_path):
+    repo = protected_repo(tmp_path)
+    payload = claude("git push origin HEAD:main", repo)
+    rc, out, err = run("claude", payload)
+    answer = json.loads(out)["hookSpecificOutput"]
+    assert rc == 0 and err == "" and answer["permissionDecision"] == "ask" and "git-fence" in answer["permissionDecisionReason"]
+    rc, out, err = run("codex", payload)
+    assert rc == 2 and out == "" and "git-fence" in err
+    rc, out, err = run("antigravity", {"toolCall": {"name": "run_command", "args": {"CommandLine": "git push origin HEAD:main", "Cwd": str(repo)}}})
+    assert rc == 0 and json.loads(out)["decision"] == "deny"
+
+
+def test_fence_forced_push_and_local_main_commit_are_denied_for_claude(tmp_path):
+    repo = protected_repo(tmp_path)
+    for cmd in ("git push --force origin x", "git commit -m x", "git pull", "gh release create v1"):
+        rc, out, err = run("claude", claude(cmd, repo))
+        assert rc == 2 and "git-fence" in err, cmd
+
+
+def test_fence_neutral_commands_pass_without_touching_git(tmp_path, monkeypatch):
+    repo = protected_repo(tmp_path)
+    calls = []
+    monkeypatch.setattr(git_fence, "default_runner", lambda *a, **k: calls.append(a) or (-1, ""))
+    for cmd in ("git status", "git log -3", "git diff", "ls -la", "gh pr view 1"):
+        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
+    assert calls == []
+
+
+def test_fence_unprotected_repo_is_not_touched(tmp_path, monkeypatch):
+    repo = make_repo(tmp_path)
+    monkeypatch.setattr(git_fence, "default_runner", lambda *a, **k: (1, ""))  # `git ls-files` báo không theo dõi
+    assert run("claude", claude("git push origin HEAD:main", repo)) == (0, "", "")
+
+
+def test_fence_write_tool_on_agile_json_denied_without_marker(tmp_path):
+    repo = protected_repo(tmp_path)
+    payload = {"tool_name": "Write", "tool_input": {"file_path": str(repo / ".agile.json"), "content": "{}"}, "cwd": str(repo)}
+    rc, out, err = run("claude", payload)
+    assert rc == 2 and "git-fence" in err and ".agile.json" in err
+    ok = {"tool_name": "Write", "tool_input": {"file_path": str(repo / "README.md"), "content": "x"}, "cwd": str(repo)}
+    assert run("claude", ok) == (0, "", "")
+
+
+def test_fence_list_file_is_guarded_by_write_tool(tmp_path, monkeypatch):
+    repo = make_repo(tmp_path)
+    listing = tmp_path / "protected.json"
+    listing.write_text(json.dumps({"repos": [{"git_common_dir": str(repo / ".git")}]}), encoding="utf-8")
+    monkeypatch.setenv(git_fence.ENV_LIST, str(listing))
+    payload = {"tool_name": "Edit", "tool_input": {"file_path": str(listing)}, "cwd": str(repo)}
+    rc, _, err = run("claude", payload)
+    assert rc == 2 and "git-fence" in err
+
+
+def test_fence_shell_write_to_agile_json_denied(tmp_path):
+    repo = protected_repo(tmp_path)
+    for cmd in ("echo {} > .agile.json", "rm .agile.json", "git rm --cached .agile.json"):
+        rc, _, err = run("claude", claude(cmd, repo))
+        assert rc == 2, cmd
+    assert run("claude", claude("cat .agile.json", repo)) == (0, "", "")
+
+
+def test_fence_bad_json_in_protected_repo_denies_but_not_elsewhere(tmp_path, monkeypatch):
+    repo = protected_repo(tmp_path)
+    monkeypatch.chdir(repo)
+    rc, _, err = run("claude", "{")
+    assert rc == 2 and "git-fence" in err
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    monkeypatch.chdir(elsewhere)
+    assert run("claude", "{") == (0, "", "")
+
+
+def test_fence_internal_error_in_protected_repo_denies(tmp_path, monkeypatch):
+    repo = protected_repo(tmp_path)
+
+    def boom(*a, **k):
+        raise RuntimeError("x")
+
+    monkeypatch.setattr(git_fence, "classify", boom)
+    rc, _, err = run("claude", claude("git push origin x", repo))
+    assert rc == 2 and "RuntimeError" in err
+    clean = make_repo(tmp_path, name_dir="clean", branch="x") if False else None
+    assert clean is None
+
+
+def test_fence_runner_failure_closes_push_contract(tmp_path, monkeypatch):
+    marker = {"level": "gate_1_2", "scope": ["gate_1", "gate_2"], "expires": "sprint_end", "exclusions": NO_PUSH,
+              "grant_at": "2026-11-20 09:00 +07", "sprints": ["SPR-20"], "push_remote": "origin",
+              "push_urls": ["https://example.com/o/r.git"], "push_targets": ["refs/heads/spr-20-x"], "git_common_dir": ""}
+    repo = protected_repo(tmp_path, branch="spr-20-x", marker=marker)
+    marker["git_common_dir"] = str(repo / ".git")
+    (repo / ".tmp" / "autopilot.json").write_text(json.dumps(marker), encoding="utf-8")
+    (repo / ".git" / "config").write_text('[remote "origin"]\n\turl = https://example.com/o/r.git\n', encoding="utf-8")
+    heads = repo / ".git" / "refs" / "remotes" / "origin"
+    heads.mkdir(parents=True)
+    (heads / "HEAD").write_text("ref: refs/remotes/origin/main\n", encoding="utf-8")
+    monkeypatch.setattr(git_fence, "default_runner", lambda *a, **k: (-1, ""))
+    rc, _, err = run("claude", claude("git push origin spr-20-x", repo))
+    assert rc == 2 and "push-url-unverified" in err
+    monkeypatch.setattr(git_fence, "default_runner", lambda argv, cwd, t: (0, "https://example.com/o/r.git\n"))
+    assert run("claude", claude("git push origin spr-20-x", repo)) == (0, "", "")
+    rc, _, err = run("claude", claude("git push origin HEAD:main", repo))
+    assert rc == 2 and "push-target-unknown" in err
+
+
+def test_fence_nested_shell_commands_are_seen(tmp_path):
+    repo = protected_repo(tmp_path)
+    for cmd in ("bash -c 'git push origin x'", "sh -c \"git commit -m x\"", "echo 'git push origin x' | bash",
+                "cd sub && git commit -m x"):
+        rc, out, err = run("claude", claude(cmd, repo))
+        assert rc == 2 or json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask", cmd
+
+
+def test_fence_autopilot_reason_text_unchanged_when_marker_blocks_push(tmp_path):
+    repo = protected_repo(tmp_path, marker={"level": "gate_1", "scope": ["gate_1"], "expires": "sprint_end", "exclusions": ALL,
+                                            "grant_at": "2026-11-20 09:00 +07", "sprints": ["SPR-20"]})
+    rc, _, err = run("claude", claude("git push origin x", repo))
+    assert rc == 2 and err.startswith("autopilot: 'push'")

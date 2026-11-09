@@ -29,6 +29,7 @@ PINNED_FENCE_FILES = (
     "skills/closing-sprint/references/autopilot.md",
     "scripts/_autopilot_rules.py",
     "scripts/autopilot_guard.py",
+    "scripts/git_fence.py",  # TK8: rào git thường trực, thêm cùng commit tạo file
     "scripts/autopilot-hook.sh",
     "hooks/hooks.json",
 )

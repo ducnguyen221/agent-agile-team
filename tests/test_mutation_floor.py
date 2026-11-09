@@ -91,13 +91,12 @@ def drop_exclusion(root: Path) -> None:
 
 
 def push_allow_all(root: Path) -> None:
+    """Nhánh đẩy của `git_fence` luôn trả 'không đụng': chèn `return Verdict()` ngay sau dòng def của `_push_verdict`."""
     path = root / "scripts" / "git_fence.py"
     text = path.read_text(encoding="utf-8")
-    match = re.search(r"^(?P<indent>[ ]*)def push_contract\(.*\):.*\n", text, re.M)
-    assert match, "không thấy push_contract trong git_fence.py"
-    # chèn `return None` ngay sau dòng def (và docstring nếu có): hợp đồng đích luôn cho qua
-    insert_at = match.end()
-    path.write_bytes((text[:insert_at] + f"{match.group('indent')}    return None\n" + text[insert_at:]).encode("utf-8"))
+    match = re.search(r"^def _push_verdict\(.*\) -> Verdict:\n", text, re.M)
+    assert match, "không thấy _push_verdict trong git_fence.py"
+    path.write_bytes((text[:match.end()] + "    return Verdict()\n" + text[match.end():]).encode("utf-8"))
 
 
 MUTATIONS = {
