@@ -1779,3 +1779,42 @@ def test_include_repo_does_not_block_more_builtin_subcommands(tmp_path):
         handle.write("[include]\n\tpath = extra.cfg\n")
     for sub in ("sparse-checkout list", "maintenance run", "range-diff a b", "hash-object f", "var -l", "show-branch", "diff-index HEAD", "cherry", "prune", "repack", "credential fill"):
         assert run("claude", claude("git " + sub, repo)) == (0, "", ""), sub
+
+
+# --- vòng 4 (Astra RY1–RY5) ---------------------------------------------------------------------------------------------------
+
+def test_alias_does_not_hide_head_moves(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    with open(repo / ".git" / "config", "a", encoding="utf-8") as handle:
+        handle.write("[alias]\n\tp = push\n\tsw = checkout\n")
+    for cmd in ("git branch -M main && git p origin HEAD", "git sw main && git push origin HEAD", "git sw main && git p origin @"):
+        rc, _, err = run("claude", claude(cmd, repo))
+        assert rc == 2, (cmd, err)
+    assert run("claude", claude("git p origin HEAD", repo)) == (0, "", "")
+
+
+@pytest.mark.parametrize("cmd", ["rm .git/confi?", "rm .git/hook?/pre-push", "rm .git/hooks/*", "rm .git/c*", "rm -f .git/hooks/pre-pus?"])
+def test_globs_over_git_config_and_hooks_are_denied(tmp_path, cmd):
+    repo = protected_repo(tmp_path)
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert rc == 2, (cmd, err)
+
+
+def test_git_hooks_prefix_lookalike_is_not_blocked(tmp_path):
+    repo = protected_repo(tmp_path)
+    assert run("claude", claude("rm .git/hooks-backup/x", repo)) == (0, "", "")
+
+
+def test_brace_expansion_beyond_the_limit_closes(tmp_path):
+    repo = protected_repo(tmp_path)
+    many = ",".join(["x"] * 70)
+    for cmd in ("rm .agile.{" + many + ",json}", "rm " + "{" * 1200 + "a" + "}" * 1200, "rm {a,b}{c,d}{e,f}{g,h}{i,j}{k,l}{m,n}{o,p}.txt"):
+        rc, _, err = run("claude", claude(cmd, repo))
+        assert rc == 2 and "Traceback" not in err, cmd[:50]
+
+
+def test_git_and_gh_words_in_content_do_not_void_the_contract(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude("echo GIT_HELLO; git push origin spr-20-x", repo)) == (0, "", "")
+    assert run("claude", claude('git commit -m "ghi chu ve GIT_DIR" && git push origin spr-20-x', repo)) == (0, "", "")
+    assert run("claude", claude("gh pr create --title GH_TEST -R o/r", repo)) == (0, "", "")

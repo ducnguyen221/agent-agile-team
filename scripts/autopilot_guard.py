@@ -1092,6 +1092,8 @@ def _evaluate(raw: str) -> str | None:
 
 # --- rào git thường trực (SPR-16 TK8): gọi `git_fence` trước mọi nhánh trả sớm ----------------------------------------
 
+# Biến môi trường được ĐẶT cho git/gh: gán `X=…` đầu từ hoặc sau `;&|(`, `$env:X`, hoặc đi sau env/export/set/declare/setx (không khớp chữ trong nội dung)
+ENV_USE = (r"(?i)(?:(?:^|[\s;&|(])(?:{0}_[A-Z0-9_]*)=|\$env:{0}_|\b(?:env|export|set|setx|declare|typeset)\b[^;&|\n]*\b{0}_[A-Z0-9_]*)")
 HEAD_MOVERS = frozenset({"checkout", "switch", "symbolic-ref", "update-ref", "reset", "rebase", "merge", "pull", "cherry-pick", "revert", "am", "bisect"})
 
 @dataclass
@@ -1118,8 +1120,8 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     text = _join_and_strip(text)
     text = text.replace(">|", ">")  # `>|` (ghi đè dù noclobber) là chuyển hướng, không phải ống
     plain = re.sub(r"[\"']", "", text)  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X
-    git_env = bool(re.search(r"(?i)GIT_[A-Z0-9_]+", plain)) or "--exec-path" in plain or bool(re.search(r"\$\{?[A-Za-z_]\w*\}?\w*=", plain))
-    gh_env = bool(re.search(r"(?i)GH_[A-Z0-9_]+", plain))
+    git_env = bool(re.search(ENV_USE.format("GIT"), plain)) or "--exec-path" in plain or bool(re.search(r"\$\{?[A-Za-z_]\w*\}?\w*=", plain))
+    gh_env = bool(re.search(ENV_USE.format("GH"), plain))
     parts = PIPE.split(text)
     for index in range(1, len(parts)):  # `echo "git push" | bash`
         stage, _ = _strip_prefixes(tokenize(re.split(r"&&|;|\n", parts[index])[0]), Context(set(), ctx.cwd))
@@ -1158,7 +1160,9 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
             # mọi biến GIT_* trong lệnh (GIT_CONFIG_*, GIT_SSH_COMMAND, GIT_CONFIG_GLOBAL…) đổi hành vi của git mà guard không thấy: hợp đồng đích không áp
             out.append(git_fence.Segment("git", args, sub, rest, where, redirected or git_env, globals_,
                                          head_moved=getattr(ctx, "head_moved", False)))
-            if sub in HEAD_MOVERS or (sub == "branch" and any(a in ("-m", "-M", "--move", "-c", "-C", "--copy") or _cluster(a, "mMcC") for a in rest)):
+            effective = git_fence.expand_alias(out[-1])  # alias có thể là `checkout`/`branch -M`…
+            if effective.name == "nested" or effective.sub in HEAD_MOVERS or (
+                    effective.sub == "branch" and any(a in ("-m", "-M", "--move", "-c", "-C", "--copy") or _cluster(a, "mMcC") for a in effective.rest)):
                 ctx.head_moved = True
             if sub in ("checkout", "switch") and any(a in MAIN_BRANCHES for a in rest):
                 ctx.forced_main = True

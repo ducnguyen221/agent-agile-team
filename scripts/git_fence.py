@@ -58,6 +58,8 @@ KNOWN_SUBS = frozenset({
     "mailsplit", "merge-file", "merge-index", "merge-tree", "multi-pack-index", "pack-refs", "patch-id", "prune-packed", "stage",
     "verify-commit", "verify-tag", "verify-pack", "show-index", "scalar", "backfill", "survey", "diff-files", "ls-tree", "unpack-file",
 })  # lệnh con có sẵn của git: tên khác khi repo có `[include]` có thể là alias nằm trong file được nạp thêm
+GIT_INTERNAL_FILES = (".git/config", ".git/hooks", ".git/hooks/pre-push", ".git/hooks/pre-commit", ".git/hooks/commit-msg",
+                      ".git/hooks/post-commit", ".git/hooks/post-checkout", ".git/hooks/pre-receive")
 ROOT_PATHSPECS = frozenset({".", "./", ":/", ":/."})  # `git rm -rf .` xoá cả `.agile.json` ở gốc
 RELEVANT_SUBS = frozenset({"push", "subtree", "tag", "remote", "config", "merge", "commit", "pull", "cherry-pick", "reset", "rebase",
                            "rm", "mv", "update-index", "add", "restore", "checkout", "clean"})
@@ -254,7 +256,8 @@ def expand_alias(seg: "Segment") -> "Segment":
             return Segment("nested")
         tokens = value.split()
         globals_, sub, rest = split_git_args(tokens + seg.rest)
-        seg = Segment("git", seg.globals + tokens + seg.rest, sub, rest, seg.where, seg.redirected, seg.globals + globals_)
+        seg = Segment("git", seg.globals + tokens + seg.rest, sub, rest, seg.where, seg.redirected, seg.globals + globals_,
+                      head_moved=seg.head_moved)
     return Segment("nested")  # chuỗi alias dài hơn giới hạn: đóng an toàn
 
 
@@ -370,8 +373,15 @@ def is_guard_path(path: str, base: str, env: Mapping, loose: bool = False) -> bo
     if ENV_LIST in path:
         return True
     lower = norm.lower()
-    if lower.endswith("/.git/config") or lower == ".git/config" or "/.git/hooks" in lower or lower.startswith(".git/hooks"):
+    if lower.endswith("/.git/config") or lower == ".git/config" or lower.endswith("/.git/hooks") or lower == ".git/hooks" \
+            or "/.git/hooks/" in lower or lower.startswith(".git/hooks/"):
         return True  # file cấu hình và hook của chính repo: đổi đích đẩy, alias, hook mà không qua `git config`
+    if any(ch in lower for ch in "*?["):
+        parts = lower.split("/")
+        for count in (2, 3):
+            tail = "/".join(parts[-count:])
+            if any(fnmatch.fnmatch(candidate, tail) for candidate in GIT_INTERNAL_FILES):
+                return True  # glob khớp config/hook (`.git/confi?`, `.git/hook?/pre-push`, `.git/hooks/*`)
     target = list_file(env)
     if not target:
         return False
@@ -397,24 +407,32 @@ def _glob_hits_repo_root(dirname: str, base: str, loose: bool) -> bool:
     return real(full) == real(found[0])
 
 
-def _brace_variants(name: str, limit: int = 64) -> list:
+def _brace_variants(name: str, limit: int = 64) -> Optional[list]:
     """Khai triển brace `{a,b}` kiểu shell (tối đa `limit` biến thể) để so tên file bảo vệ: `.agile.{json,bak}` → `.agile.json`, `.agile.bak`."""
+    if name.count("{") > 6:
+        return None  # quá nhiều nhóm brace: không khai triển hết được
     match = re.search(r"\{([^{}]*)\}", name)
     if not match:
         return [name]
     out: list = []
     for alt in match.group(1).split(","):
-        out.extend(_brace_variants(name[:match.start()] + alt + name[match.end():], limit))
-        if len(out) >= limit:
-            break
-    return out[:limit]
+        inner = _brace_variants(name[:match.start()] + alt + name[match.end():], limit)
+        if inner is None:
+            return None
+        out.extend(inner)
+        if len(out) > limit:
+            return None  # vượt giới hạn khai triển: đóng an toàn ở nơi gọi
+    return out
 
 
 def targets_guard_file(text: str, base: str, env: Mapping, loose: bool = False, whole: str = "") -> bool:
-    for variant in _brace_variants(text):
-        if _targets_guard_file(variant, base, env, loose, whole):
-            return True
-    return False
+    try:
+        variants = _brace_variants(text)
+    except RecursionError:
+        return True
+    if variants is None:
+        return True  # brace không khai triển hết được trong giới hạn: coi là có thể khớp file bảo vệ
+    return any(_targets_guard_file(variant, base, env, loose, whole) for variant in variants)
 
 
 def _targets_guard_file(text: str, base: str, env: Mapping, loose: bool = False, whole: str = "") -> bool:
