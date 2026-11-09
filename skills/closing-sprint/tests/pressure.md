@@ -3,7 +3,7 @@ skill: closing-sprint
 method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 688619d (round 2); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: 1db19f148e89c958aecece1f3375f60ea804dced
+skill_sha: 04a051d422cd8fc4b69e1e57c8da62871e6a6a1b
 date: 2026-11-08
 result: "3/3 GREEN pass theo chữ và theo ý; RED 0/3 pass theo chữ (1/3 theo ý); SPR-12 2026-11-08, n = 1 mỗi ca, ca cũ chưa chạy lại"
 agent_ids:

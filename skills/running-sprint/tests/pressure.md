@@ -4,7 +4,7 @@ method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
 historical_skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
-skill_sha: 7ed6fc85cfe8985d8f9a81547cdd96143da3a102
+skill_sha: f729c7ba82bb15c9526aae52c9f9a9d4d21b1bc1
 historical_date: 2026-10-05
 date: 2026-11-08
 historical_result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
