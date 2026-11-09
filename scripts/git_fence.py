@@ -687,9 +687,10 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
                 files.append(arg.split("=", 1)[1])
             elif arg.startswith("-f") and not arg.startswith("--") and len(arg) > 2:
                 files.append(arg[2:])
-        if any(is_guard_path(f, ctx.cwd, ctx.env) for f in files):
-            return _verdict(FORBID, "config-write", "config -f " + files[0], ctx)
         writing_flag = any(a in CONFIG_WRITE for a in rest)
+        if any(is_guard_path(f, ctx.cwd, ctx.env) for f in files) and (writing_flag or len(positional) >= 2) \
+                and not (any(a in CONFIG_READ for a in rest) and not writing_flag):
+            return _verdict(FORBID, "config-write", "config -f " + files[0], ctx)
         if any(a in CONFIG_READ for a in rest) and not writing_flag:
             return Verdict()  # cờ đọc rõ ràng (`--get khoá mẫu` có hai đối số vẫn là đọc)
         if not (writing_flag or len(positional) >= 2):
@@ -722,7 +723,7 @@ def _gh_plain(args: list) -> tuple:
     plain, flags, repo, index = [], [], None, 0
     while index < len(args):
         arg = args[index]
-        if arg in ("-R", "--repo"):
+        if arg in ("-R", "--repo") or re.fullmatch(r"-[A-Za-z]+R", arg):  # -R, --repo, và cụm cờ gộp kết thúc bằng R (-fR owner/repo)
             repo = args[index + 1] if index + 1 < len(args) else None
             index += 2
             continue

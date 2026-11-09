@@ -1093,7 +1093,8 @@ def _evaluate(raw: str) -> str | None:
 # --- rào git thường trực (SPR-16 TK8): gọi `git_fence` trước mọi nhánh trả sớm ----------------------------------------
 
 # Biến môi trường được ĐẶT cho git/gh: gán `X=…` đầu từ hoặc sau `;&|(`, `$env:X`, hoặc đi sau env/export/set/declare/setx (không khớp chữ trong nội dung)
-ENV_USE = (r"(?i)(?:(?:^|[\s;&|(])(?:{0}_[A-Z0-9_]*)=|\$env:{0}_|\b(?:env|export|set|setx|declare|typeset)\b[^;&|\n]*\b{0}_[A-Z0-9_]*)")
+QUOTED_CONTENT = re.compile(r"\"[^\"\n]*\s[^\"\n]*\"|'[^'\n]*\s[^'\n]*'")  # chuỗi trong nháy có khoảng trắng: nội dung văn bản
+ENV_USE = (r"(?i)(?:(?:^|[;&|(])\s*(?:[A-Za-z_]\w*=\S*\s+)*(?:{0}_[A-Z0-9_]*)=|\$env:{0}_|\b(?:env|export|set|setx|declare|typeset)\b[^;&|\n]*\b{0}_[A-Z0-9_]*)")
 GH_ENV_USE = ENV_USE.format("GH").replace("GH_[A-Z0-9_]*", "GH_(?:REPO|HOST|CONFIG_DIR|ENTERPRISE_HOST|TOKEN|ENTERPRISE_TOKEN)[A-Z0-9_]*")
 HEAD_MOVERS = frozenset({"checkout", "switch", "symbolic-ref", "update-ref", "reset", "rebase", "merge", "pull", "cherry-pick", "revert", "am", "bisect"})
 
@@ -1120,15 +1121,16 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     """Gom mọi đoạn lệnh git/gh (và lệnh không chỉ-đọc nhắc tới file bảo vệ) của `text` thành `git_fence.Segment`."""
     text = _join_and_strip(text)
     text = text.replace(">|", ">")  # `>|` (ghi đè dù noclobber) là chuyển hướng, không phải ống
-    plain = re.sub(r"[\"']", "", text)  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X
+    plain = re.sub(r"[\"']", "", QUOTED_CONTENT.sub('""', text))  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X; chuỗi nháy có khoảng trắng là nội dung
     plain_both = (plain, re.sub(r"\\(.)", r"\1", plain))  # `G\IT_X=1` cũng là GIT_X
     git_env = any(re.search(ENV_USE.format("GIT"), p) or "--exec-path" in p or re.search(r"\$\{?[A-Za-z_]\w*\}?[A-Za-z0-9_]+=", p) for p in plain_both)
     gh_env = any(re.search(GH_ENV_USE, p) for p in plain_both)
-    for target in re.findall(r">>?\s*&?\s*([^\s;&|()<>]+)", text):  # đích chuyển hướng ở bất kỳ vị trí nào, kể cả `>f`, `&>f`, `>&f`
+    content_free = QUOTED_CONTENT.sub('""', text)  # "x > .git/config" (có khoảng trắng trong nháy) là nội dung in ra, không phải chuyển hướng
+    for target in re.findall(r">>?\s*&?\s*([^\s;&|()<>]+)", content_free):  # đích chuyển hướng ở bất kỳ vị trí nào, kể cả `>f`, `&>f`, `>&f`
         if git_fence.targets_guard_file(target, ctx.cwd, getattr(ctx, "env", os.environ), loose=ctx.cwd_changed, whole=text):
             out.append(git_fence.Segment("other", [target]))
             break
-    if re.search(r"\bgit\b[^\n;&|]*\b(?:rm|mv)\b[^\n;&|]*:[(!^]", text):  # pathspec magic `:(top)` (dấu ngoặc làm tách đoạn nên xét ở mức chuỗi)
+    if re.search(r"\bgit\b[^\n;&|]*\b(?:rm|mv)\b[^\n;&|]*:[(!^]", content_free):  # pathspec magic `:(top)` (dấu ngoặc làm tách đoạn nên xét ở mức chuỗi)
         out.append(git_fence.Segment("other", ["pathspec-magic"]))
     parts = PIPE.split(text)
     for index in range(1, len(parts)):  # `echo "git push" | bash`

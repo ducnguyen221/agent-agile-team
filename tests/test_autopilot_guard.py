@@ -1908,3 +1908,34 @@ def test_more_builtin_subcommands_with_include(tmp_path):
     for sub in ("update-ref -h", "hook list", "replay -h", "lfs ls-files", "index-pack -h"):
         rc, out, err = run("claude", claude("git " + sub, repo))
         assert (rc, err) == (0, ""), sub
+
+
+# --- vòng 5: chặn nhầm nội dung nháy và cờ gộp của gh ----------------------------------------------------------------------
+
+@pytest.mark.parametrize("cmd", [
+    'echo "x > .git/config"', 'echo "git rm :(top)"', "git config -f .git/config --get user.name",
+    'echo "chuyen huong > .agile.json la cam"', "echo 'a >> .agile.json b'",
+])
+def test_quoted_text_that_only_looks_like_a_forbidden_write_is_allowed(tmp_path, cmd):
+    repo = protected_repo(tmp_path)
+    assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
+
+
+@pytest.mark.parametrize("cmd", ['echo > ".agile.json"', "echo hi >.agile.json", "echo > '.git/config'"])
+def test_quoted_redirect_target_without_spaces_is_still_a_write(tmp_path, cmd):
+    repo = protected_repo(tmp_path)
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_env_assignment_text_inside_arguments_does_not_void_the_contract(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    for cmd in ("echo GIT_DIR=example; git push origin spr-20-x", 'git commit -m "env GIT_DIR=note" && git push origin spr-20-x'):
+        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
+    for cmd in ("A=1 GIT_X=2 git push origin spr-20-x", "FOO=1; GIT_SSH_COMMAND=x git push origin spr-20-x"):
+        assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_gh_combined_short_flags_ending_in_r_name_the_repository(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    for cmd in ("gh pr create -fR evil/x --title x", "gh pr create -tR evil/x"):
+        assert run("claude", claude(cmd, repo))[0] == 2, cmd
