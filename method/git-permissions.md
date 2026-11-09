@@ -116,6 +116,8 @@ Rào máy chỉ nhìn thấy **lệnh shell và tool ghi file qua hook đã đă
   cho thấy hook áp được cho chúng;
 - `gh` nhắm repo khác repo của thư mục làm việc mà không khớp danh sách bảo vệ;
 - sửa chính `.github/workflows/verify.yml` trước khi SPR-17 nghiệm thu workflow-từ-base (bước `Floor vs base` là rào hành vi có kiểm);
+- alias git: alias trong file config **của repo** được khai triển (tối đa 3 lớp; alias `!lệnh-shell` bị chặn là không phân tích được) và ghi khoá `alias.*` bị cấm;
+  alias ở cấu hình toàn cục của người dùng thì guard không đọc (file đó nằm trong vùng không đọc), nên một lệnh con lạ có thể là alias đẩy mà guard không thấy;
 - repo **không có dấu hiệu nào**: guard không đụng — giới hạn đã biết, không phải Đạt;
 - mất dấu hiệu: `.agile.json` bị xoá nhưng danh sách (dấu hiệu 1) hay chỉ mục (dấu hiệu 3) còn thì vẫn được bảo vệ; lệnh hay tool ghi
   nhắm `.agile.json`, chỉ mục cho đường đó (`git rm`, `git mv`, `git update-index`) hay file danh sách bị chặn dù không có file dấu.

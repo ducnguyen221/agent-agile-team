@@ -190,6 +190,44 @@ def config_urls(common: str) -> list:
     return found
 
 
+def repo_aliases(directory: str) -> dict:
+    """Mục `[alias]` trong file config của repo (đọc văn bản; alias toàn cục ở cấu hình người dùng không đọc được, xem giới hạn
+    ở method/git-permissions.md mục 8)."""
+    found = find_repo(directory)
+    aliases: dict = {}
+    if not found:
+        return aliases
+    inside = False
+    try:
+        with open(os.path.join(found[2], "config"), encoding="utf-8", errors="replace") as handle:
+            for line in handle:
+                text = line.strip()
+                if text.startswith("["):
+                    inside = bool(re.match(r"^\[\s*alias\s*\]", text, re.I))
+                elif inside and "=" in text and not text.startswith(("#", ";")):
+                    name, _, value = text.partition("=")
+                    aliases[name.strip()] = value.strip().strip('"')
+    except OSError:
+        pass
+    return aliases
+
+
+def expand_alias(seg: "Segment") -> "Segment":
+    """Thay lệnh con là alias của repo bằng lệnh thật (tối đa 3 lớp); alias kiểu `!lệnh-shell` thành đoạn 'nested' (không phân tích được)."""
+    for _ in range(3):
+        if seg.name != "git" or not seg.sub or not seg.where or not seg.where[0]:
+            return seg
+        value = repo_aliases(seg.where[0]).get(seg.sub)
+        if not value:
+            return seg
+        if value.startswith("!"):
+            return Segment("nested")
+        tokens = value.split()
+        globals_, sub, rest = split_git_args(tokens + seg.rest)
+        seg = Segment("git", seg.globals + tokens + seg.rest, sub, rest, seg.where, seg.redirected, seg.globals + globals_)
+    return seg
+
+
 def norm_url(url: str) -> str:
     """URL chuẩn hoá để so: bỏ scheme, `user@`, đổi `host:path` thành `host/path`, bỏ `.git` và `/` cuối, chữ thường."""
     text = url.strip()
@@ -473,7 +511,7 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
         if not positional:
             return _verdict(FORBID, "config-write", "config --edit", ctx)
         key = positional[0].lower()
-        if key.startswith(("remote.", "url.")) or key == "core.hookspath":
+        if key.startswith(("remote.", "url.", "alias.")) or key == "core.hookspath":
             return _verdict(FORBID, "config-write", "config " + key, ctx)
         return Verdict()
     if sub in ("merge", "commit", "pull", "cherry-pick", "reset", "rebase"):
@@ -564,6 +602,7 @@ def classify(segments: list, ctx: FenceContext) -> Verdict:
     """Quyết định mạnh nhất (cấm > hỏi > tự làm > không đụng) trên mọi đoạn lệnh."""
     best = Verdict()
     for seg in segments:
+        seg = expand_alias(seg)
         if seg.name == "git":
             verdict = _git_verdict(seg, ctx)
         elif seg.name == "gh":

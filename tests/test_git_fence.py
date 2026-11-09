@@ -546,3 +546,39 @@ def test_gh_api_read_forms_pass(tmp_path, cmd):
 def test_config_forms(tmp_path, cmd, expected):
     repo = make_repo(tmp_path, branch="x", agile=True)
     assert verdict(cmd, repo).kind == expected, cmd
+
+
+# --- alias của repo (tự tấn công trước vòng 2) ---------------------------------------------------------------------------
+
+def add_alias(repo, name, value):
+    with open(repo / ".git" / "config", "a", encoding="utf-8") as handle:
+        handle.write('[alias]\n\t{} = {}\n'.format(name, value))
+
+
+def test_repo_alias_for_push_is_seen(tmp_path):
+    repo = make_repo(tmp_path, branch="x", agile=True)
+    add_alias(repo, "p", "push")
+    assert verdict("git p origin HEAD:main", repo).kind == gf.ASK
+    assert verdict("git p --force origin x", repo).kind == gf.FORBID
+    add_alias(repo, "pf", "p --force")
+    assert verdict("git pf origin x", repo).kind == gf.FORBID  # alias của alias
+
+
+def test_repo_alias_with_shell_is_unparsed_and_forbidden(tmp_path):
+    repo = make_repo(tmp_path, branch="x", agile=True)
+    add_alias(repo, "ship", '"!git push origin HEAD:main"')
+    assert verdict("git ship", repo).kind == gf.FORBID
+
+
+def test_repo_alias_for_commit_on_main_is_forbidden_and_harmless_alias_passes(tmp_path):
+    repo = make_repo(tmp_path, agile=True)
+    add_alias(repo, "ci", "commit -m")
+    add_alias(repo, "st", "status -sb")
+    assert verdict("git ci x", repo).kind == gf.FORBID
+    assert verdict("git st", repo).kind == gf.NONE
+
+
+def test_writing_alias_config_is_forbidden(tmp_path):
+    repo = make_repo(tmp_path, branch="x", agile=True)
+    assert verdict("git config alias.p push", repo).kind == gf.FORBID
+    assert verdict("git config --global alias.p push", repo).kind == gf.FORBID
