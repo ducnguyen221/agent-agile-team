@@ -133,4 +133,20 @@ Rào máy chỉ nhìn thấy **lệnh shell và tool ghi file qua hook đã đă
 
 Guard là lớp (a). Lớp (b) không đi qua agent và không phụ thuộc hook: **ruleset GitHub** trên nhánh chính (nơi gói GitHub cho
 phép) hoặc **`pre-push` cục bộ** (`templates/git-hooks/pre-push`). Đức tự đặt ruleset và tự cài `pre-push` vào từng repo thật;
-agent chỉ soạn mẫu và hướng dẫn. Mục hướng dẫn từng bước đặt ruleset nằm ở phần cuối file này, thêm ở TK10.
+agent chỉ soạn mẫu và hướng dẫn. Hướng dẫn từng bước ở mục 11; mẫu `pre-push` và bài thử bằng remote trần ở `tests/test_git_server_layer.py`.
+
+## 11. Đặt ruleset GitHub — việc của người dùng, từng repo
+
+Agent **không** đặt ruleset, không dùng token quản trị. Các bước (giao diện GitHub, quyền quản trị repo):
+
+1. **Settings → Rules → Rulesets → New ruleset → New branch ruleset.** Tên dễ nhận (ví dụ `protect-main`); **Enforcement status: Active**.
+2. **Target branches:** thêm nhánh mặc định và mọi nhánh trong `protected_branches` của danh sách bảo vệ (mục 2), ví dụ `main`, `release/*`.
+3. Bật các quy tắc: **Restrict deletions** · **Block force pushes** · **Require a pull request before merging** (số người duyệt theo repo) ·
+   **Require status checks to pass** và thêm check của workflow `verify` (tên job dạng `<hệ điều hành> · Python <phiên bản>`, chọn từ danh sách sau lần chạy đầu) ·
+   khuyến nghị **Require branches to be up to date before merging**.
+4. **Bypass list: để trống.** Không thêm tài khoản người đang làm việc hằng ngày, không thêm GitHub App hay token của agent — đúng chỗ đó là lỗ hổng.
+5. **Kiểm:** từ một bản sao, `git push origin HEAD:main` phải bị từ chối với thông báo ruleset; đẩy một nhánh sprint rồi mở PR phải được. Ghi kết quả vào REPORT của sprint chạm repo đó.
+
+Nếu gói GitHub của repo **không có** ruleset (repo riêng tư trên gói miễn phí): dùng `templates/git-hooks/pre-push` làm lớp cục bộ, chấp nhận rằng `git push --no-verify` bỏ qua nó (bài thử
+`test_server_layer_still_blocks_when_pre_push_is_bypassed` chỉ chứng minh được khi có hook `pre-receive` ở máy chủ), và ghi vào REPORT rằng lớp (b) chỉ là rào hành vi cho repo đó. Phần GitHub thật
+(ruleset, `pre-receive` thật) chưa được chạy trong SPR-16: bàn giao cho người dùng.
