@@ -35,8 +35,9 @@ GIT_VALUE_OPTIONS = frozenset({"-C", "-c", "--git-dir", "--work-tree", "--namesp
 FORCE_FLAGS = frozenset({"-f", "-d", "--delete", "--mirror", "--all", "--tags", "--prune", "--no-verify"})
 PUSH_OK_FLAGS = frozenset({"-u", "--set-upstream", "-q", "--quiet", "-v", "--verbose", "-n", "--dry-run", "--progress"})
 TAG_READ = frozenset({"-l", "--list", "-v", "--verify", "--contains", "--no-contains", "--merged", "--no-merged", "--points-at"})
-CONFIG_READ = frozenset({"--get", "--get-all", "--get-regexp", "--get-urlmatch", "-l", "--list", "--show-origin", "--show-scope",
-                         "--name-only", "--type", "--default"})
+CONFIG_READ = frozenset({"--get", "--get-all", "--get-regexp", "--get-urlmatch", "--get-color", "--get-colorbool", "-l", "--list"})
+CONFIG_WRITE = frozenset({"--add", "--unset", "--unset-all", "--replace-all", "--rename-section", "--remove-section", "--edit", "-e"})
+CONFIG_VALUE_FLAGS = frozenset({"--type", "--default", "-f", "--file", "--blob", "--comment", "--url"})  # cờ nhận giá trị ở token kế
 REMOTE_WRITE = frozenset({"set-url", "add", "remove", "rm", "rename", "set-head", "set-branches", "prune"})
 GH_READ = (("pr", frozenset({"view", "list", "status", "checks", "diff"})), ("repo", frozenset({"view"})),
            ("release", frozenset({"list", "view"})),
@@ -456,9 +457,21 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
             return _verdict(FORBID, "remote-write", "remote " + action, ctx)
         return Verdict()
     if sub == "config":
-        positional = [a for a in rest if not a.startswith("-")]
-        if any(a in CONFIG_READ for a in rest) or not positional:
+        positional, skip = [], False
+        for arg in rest:
+            if skip:
+                skip = False
+            elif arg in CONFIG_VALUE_FLAGS:
+                skip = True
+            elif not arg.startswith("-"):
+                positional.append(arg)
+        writing = any(a in CONFIG_WRITE for a in rest) or len(positional) >= 2
+        if any(a in CONFIG_READ for a in rest) and not writing:
             return Verdict()
+        if not writing:
+            return Verdict()  # `git config <khoá>` một đối số là đọc
+        if not positional:
+            return _verdict(FORBID, "config-write", "config --edit", ctx)
         key = positional[0].lower()
         if key.startswith(("remote.", "url.")) or key == "core.hookspath":
             return _verdict(FORBID, "config-write", "config " + key, ctx)
@@ -516,12 +529,18 @@ def _gh_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
     action = plain[1] if len(plain) > 1 else None
     if head == "api":
         method = None
+        write_flag = False
         for index, arg in enumerate(seg.args):
             if arg in ("-X", "--method") and index + 1 < len(seg.args):
                 method = seg.args[index + 1].upper()
             elif arg.startswith("--method="):
                 method = arg.split("=", 1)[1].upper()
-        if (method and method != "GET") or any(f in GH_API_WRITE_FLAGS or f.startswith("--input") for f in flags):
+            elif arg.startswith("-X") and not arg.startswith("--") and len(arg) > 2:
+                method = arg[2:].upper()  # -XPUT
+            if (arg in GH_API_WRITE_FLAGS or arg.startswith(("--field=", "--raw-field=", "--input="))
+                    or (arg.startswith(("-f", "-F")) and not arg.startswith("--") and len(arg) > 2)):  # -ftitle=x
+                write_flag = True
+        if (method and method != "GET") or write_flag:
             return _verdict(FORBID, "gh-api-write", "gh api (ghi)", ctx)
         return Verdict()
     if head == "release" and action not in ("list", "view"):

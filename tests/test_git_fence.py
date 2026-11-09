@@ -503,3 +503,46 @@ def test_push_to_main_without_marker_in_protected_repo(tmp_path):
     got = verdict("git push origin HEAD:main", repo)
     assert got.kind == gf.ASK and "push" in got.reason
     assert verdict("git push origin main", repo, marker=True).kind == gf.FORBID
+
+
+# --- vòng 1 kiểm định (Astra RF1, RF2): dạng viết dính giá trị và cờ có giá trị --------------------------------------------
+
+@pytest.mark.parametrize("cmd", [
+    "gh api repos/o/r/pulls/1/merge -XPUT", "gh api repos/o/r/issues -XPOST", "gh api repos/o/r/issues -X POST",
+    "gh api repos/o/r/issues --method=POST", "gh api repos/o/r/issues -ftitle=x", "gh api repos/o/r/issues -Ftitle=x",
+    "gh api repos/o/r/issues --field=title=x", "gh api repos/o/r/issues --raw-field=title=x", "gh api repos/o/r/issues --input=body.json",
+    "gh api repos/o/r/issues -f title=x", "gh api repos/o/r/issues --method DELETE",
+])
+def test_gh_api_write_forms_are_forbidden(tmp_path, cmd):
+    repo = make_repo(tmp_path, agile=True)
+    assert verdict(cmd, repo).kind == gf.FORBID, cmd
+
+
+@pytest.mark.parametrize("cmd", ["gh api repos/o/r", "gh api repos/o/r -XGET", "gh api repos/o/r --method=GET", "gh api -H Accept:x repos/o/r"])
+def test_gh_api_read_forms_pass(tmp_path, cmd):
+    repo = make_repo(tmp_path, agile=True)
+    assert verdict(cmd, repo).kind == gf.NONE, cmd
+
+
+@pytest.mark.parametrize("cmd,expected", [
+    ("git config --type string remote.origin.pushurl https://example.invalid/x", gf.FORBID),
+    ("git config --type=string remote.origin.url x", gf.FORBID),
+    ("git config --default x remote.origin.url y", gf.FORBID),
+    ("git config -f other.cfg remote.origin.url y", gf.FORBID),
+    ("git config --add remote.origin.pushurl x", gf.FORBID),
+    ("git config --unset remote.origin.pushurl", gf.FORBID),
+    ("git config --unset-all url.x.insteadOf", gf.FORBID),
+    ("git config --replace-all core.hooksPath h", gf.FORBID),
+    ("git config --rename-section remote.origin remote.up", gf.FORBID),
+    ("git config --remove-section remote.origin", gf.FORBID),
+    ("git config --edit", gf.FORBID),
+    ("git config --type bool user.autocrlf true", gf.NONE),
+    ("git config remote.origin.url", gf.NONE),
+    ("git config --type string --get remote.origin.url", gf.NONE),
+    ("git config --get-regexp remote", gf.NONE),
+    ("git config --list --show-origin", gf.NONE),
+    ("git config user.name", gf.NONE),
+])
+def test_config_forms(tmp_path, cmd, expected):
+    repo = make_repo(tmp_path, branch="x", agile=True)
+    assert verdict(cmd, repo).kind == expected, cmd
