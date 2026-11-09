@@ -1120,7 +1120,7 @@ def _sub_quoted(fn, text: str, posix: bool = True, any_chunk: bool = False) -> s
         if ch in ("'", '"'):
             end = index + 1
             escapes = posix and (ch == '"' or (index > 0 and text[index - 1] == "$"))
-            while end < size and text[end] != ch and text[end] != "\n":
+            while end < size and text[end] != ch:  # chuỗi được trải nhiều dòng như shell thật (`git commit -m "dòng 1⏎dòng 2"`)
                 end += 2 if (escapes and text[end] == BACKSLASH) else 1
             if end < size and text[end] == ch:
                 chunk = text[index:end + 1]
@@ -1130,7 +1130,7 @@ def _sub_quoted(fn, text: str, posix: bool = True, any_chunk: bool = False) -> s
                     last = end + 1
                 index = end + 1
                 continue
-            return text  # nháy mở mà không đóng trước khi hết dòng (chuỗi trải nhiều dòng hay nháy lẻ): không dám che gì, kẻo nháy ở dòng sau ghép nhầm và giấu lệnh thật
+            return text  # nháy mở mà không bao giờ đóng (nháy lẻ): không dám che gì, kẻo ghép nhầm và giấu lệnh thật
         index += 1
     out.append(text[last:])
     return "".join(out)
@@ -1240,6 +1240,8 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         if git_fence.targets_guard_file(target, ctx.cwd, getattr(ctx, "env", os.environ), loose=ctx.cwd_changed, whole=text):
             out.append(git_fence.Segment("other", [target]))
             break
+    if re.search(r"(?:\$\([^()]*\)|`[^`]*`)[ \t]+(?:" + "|".join(sorted(DYNAMIC_GIT_SUBS)) + r")\b", content_free):
+        out.append(git_fence.Segment("nested"))  # `$(command -v git) push …`: dấu ngoặc làm tách đoạn nên xét ở mức chuỗi (thay thế lệnh đứng ở vị trí từ lệnh, theo sau là lệnh con git)
     if re.search(r"\bgit\b[^\n;&|]*\b(?:rm|mv)\b[^\n;&|]*:[(!^]", content_free):  # pathspec magic `:(top)` (dấu ngoặc làm tách đoạn nên xét ở mức chuỗi)
         out.append(git_fence.Segment("other", ["pathspec-magic"]))
     parts = PIPE.split(text)
@@ -1263,6 +1265,9 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
                 if _exe_name(tokens[position]) in ("git", "gh"):
                     tokens, redirected = tokens[position:], True
                     break
+        if (tokens[0].startswith(("$", "`")) or "$(" in tokens[0]) and DYNAMIC_GIT_SUBS & set(tokens[1:]):
+            out.append(git_fence.Segment("nested"))  # từ lệnh là biến/thay thế (`$G push …`, `$(command -v git) push …`): đường tuyệt đối tới git tránh được shim; đóng an toàn
+            continue
         tokens = _plain_words(tokens, segment)
         name, args = _exe_name(tokens[0]), tokens[1:]
         if name in CD_COMMANDS:
@@ -1411,6 +1416,43 @@ def _ask(fmt: str, reason: str, stdout: TextIO, stderr: TextIO) -> int:
     return _deny(fmt, reason.replace(git_fence.ASK_TAIL, git_fence.NO_ASK_TAIL), stdout, stderr)
 
 
+DYNAMIC_GIT_SUBS = frozenset({"push", "remote", "config", "reset", "rebase", "merge", "pull", "tag", "branch", "commit", "checkout", "switch", "clone", "fetch",
+                              "release", "pr", "api", "repo", "send-pack", "update-ref", "symbolic-ref"})  # lệnh con git/gh: từ lệnh động kèm một trong các từ này bị coi là git/gh không phân tích được
+ENV_SHIM = "AGENT_AGILE_SHIM"  # thử nghiệm SPR-16b: "1" thì lệnh Bash/PowerShell trong repo được bảo vệ được viết lại để thư mục `shims/` đứng đầu PATH
+SHIM_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shims"))
+
+
+def _shim_command(tool: str, command: str, shim_dir: str = SHIM_DIR) -> str:
+    """Lệnh đã viết lại: dòng đặt PATH (chỉ khi chưa có, để PATH không phình qua nhiều lệnh) rồi lệnh gốc nguyên văn."""
+    if tool == "PowerShell":
+        quoted = "'" + shim_dir.replace("'", "''") + "'"
+        return ("$__aat = " + quoted + "; if (-not $env:PATH.StartsWith($__aat)) { $env:PATH = $__aat + [IO.Path]::PathSeparator + $env:PATH }; " + command)
+    path = shim_dir
+    if os.name == "nt":  # Git Bash: đường kiểu MSYS (`C:\a\b` → `/c/a/b`)
+        path = re.sub(r"^([A-Za-z]):", lambda m: "/" + m.group(1).lower(), shim_dir.replace("\\", "/"))
+    quoted = "'" + path.replace("'", "'\\''") + "'"
+    return "_AAT_SHIM=" + quoted + '; case ":$PATH:" in ":$_AAT_SHIM:"*) ;; *) PATH="$_AAT_SHIM:$PATH"; export PATH ;; esac; unset _AAT_SHIM\n' + command
+
+
+def _shim_update(raw: str, env) -> dict | None:
+    """`tool_input` mới (lệnh được đặt shim lên đầu PATH) hay None. Không bao giờ chặn vì lỗi ở đây: mọi lỗi → None."""
+    try:
+        if env.get(ENV_SHIM, "") in ("", "0") or not os.path.isdir(SHIM_DIR):
+            return None
+        payload = json.loads(raw)
+        tool = _tool_name(payload)
+        tool_input = payload.get("tool_input")
+        if tool not in ("Bash", "PowerShell") or not isinstance(tool_input, dict) or not isinstance(tool_input.get("command"), str):
+            return None
+        command_dir, _ = _event_dirs(payload)
+        marker = find_marker(command_dir)
+        if not git_fence.protection(command_dir, env, git_fence.default_runner, marker=bool(marker)).protected:
+            return None
+        return dict(tool_input, command=_shim_command(tool, tool_input["command"]))
+    except Exception:
+        return None
+
+
 def _allow(fmt: str, stdout: TextIO) -> int:
     if fmt == "antigravity":
         stdout.write("{}\n")
@@ -1428,8 +1470,10 @@ def main(argv: list[str] | None = None, stdin: TextIO = sys.stdin, stdout: TextI
         parser.error("the following arguments are required: --format")
     debug = os.environ.get("AUTOPILOT_GUARD_DEBUG", "") not in ("", "0")
     decision = None
+    raw = ""
     try:
-        decision = _decide(stdin.read())
+        raw = stdin.read()
+        decision = _decide(raw)
     except _Failed as failed:
         if debug:
             traceback.print_exc(file=stderr)
@@ -1441,6 +1485,10 @@ def main(argv: list[str] | None = None, stdin: TextIO = sys.stdin, stdout: TextI
         reason = _unparsed_reason(type(exc).__name__, (os.getcwd(),))
         decision = Decision("deny", reason) if reason else None
     if decision is None:
+        update = _shim_update(raw, os.environ) if args.format == "claude" else None
+        if update is not None:  # chỉ viết lại lệnh (không kèm quyết định cho/hỏi): quyền do cơ chế quyền của Claude Code quyết như cũ
+            stdout.write(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "updatedInput": update}}) + "\n")
+            return 0
         return _allow(args.format, stdout)
     if decision.kind == "ask":
         return _ask(args.format, decision.reason, stdout, stderr)

@@ -2247,3 +2247,67 @@ def test_multi_line_strings_cannot_pair_quotes_across_lines_and_hide_a_command(t
 def test_long_text_flags_hold_text_not_commands(tmp_path, cmd):
     repo = protected_repo(tmp_path, branch="x")
     assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
+
+
+# --- SPR-16b: từ lệnh động và viết lại lệnh để đặt shim lên đầu PATH -------------------------------------------------------------
+
+@pytest.mark.parametrize("cmd", ["$(command -v git) push --force origin main", "G=/usr/bin/git; $G push --force origin main",
+                                 "\"$G\" push origin main", "`which git` push --force origin main"])
+def test_dynamic_command_word_with_a_git_subcommand_is_closed_off_in_a_protected_repo(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_dynamic_command_word_without_a_git_subcommand_is_left_alone(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    for cmd in ("$EDITOR notes.txt", "$(date) echo hi", "$HOME/bin/tool --flag"):
+        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
+
+
+def _shim_run(monkeypatch, repo, cmd, tool="Bash", flag="1"):
+    monkeypatch.setenv(autopilot_guard.ENV_SHIM, flag)
+    return run("claude", {"tool_name": tool, "tool_input": {"command": cmd, "description": "d"}, "cwd": str(repo)})
+
+
+def test_shim_rewrite_is_off_by_default(tmp_path, monkeypatch):
+    repo = protected_repo(tmp_path, branch="x")
+    monkeypatch.delenv(autopilot_guard.ENV_SHIM, raising=False)
+    assert run("claude", claude("git status", repo)) == (0, "", "")
+    assert _shim_run(monkeypatch, repo, "git status", flag="0") == (0, "", "")
+
+
+@pytest.mark.parametrize("tool", ["Bash", "PowerShell"])
+def test_shim_rewrite_prefixes_the_original_command_in_a_protected_repo(tmp_path, monkeypatch, tool):
+    repo = protected_repo(tmp_path, branch="x")
+    rc, out, err = _shim_run(monkeypatch, repo, "git status -sb", tool)
+    update = json.loads(out)["hookSpecificOutput"]
+    assert rc == 0 and err == "" and update["hookEventName"] == "PreToolUse" and "permissionDecision" not in update
+    assert update["updatedInput"]["command"].endswith("git status -sb") and "shims" in update["updatedInput"]["command"]
+    assert update["updatedInput"]["description"] == "d"  # trường khác của tool_input giữ nguyên
+
+
+def test_shim_rewrite_leaves_unprotected_repos_and_other_tools_alone(tmp_path, monkeypatch):
+    plain = make_repo(tmp_path, branch="x")  # không dấu hiệu bảo vệ nào
+    assert _shim_run(monkeypatch, plain, "git status") == (0, "", "")
+    repo = protected_repo(tmp_path / "p", branch="x") if (tmp_path / "p").mkdir() is None else None
+    assert _shim_run(monkeypatch, repo, "x", tool="Read") == (0, "", "")
+
+
+def test_shim_rewrite_never_replaces_a_refusal(tmp_path, monkeypatch):
+    repo = protected_repo(tmp_path, branch="x")
+    rc, out, err = _shim_run(monkeypatch, repo, "git push --force origin main")
+    assert rc == 2 and out == "" and "git-fence" in err
+
+
+# --- thông điệp commit nhiều dòng có ngoặc/từ git là văn bản, không phải lệnh (phát hiện khi hook thật chặn commit của chính sprint) ----
+
+def test_multi_line_commit_message_with_parentheses_and_git_words_is_text(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    msg = "SPR-16b: shim git/gh kiem argv (scripts/git_shim.py, shims/)\n\nlenh con git bi dong (AGENT_AGILE_SHIM=1)\n\nCo-Authored-By: A <a@b>"
+    assert run("claude", claude('git commit -m "' + msg + '"', repo)) == (0, "", "")
+    assert run("claude", claude("git add -A && git commit -m '" + msg + "' && git status", repo)) == (0, "", "")
+
+
+def test_multi_line_strings_still_expose_a_real_command_between_two_of_them(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude('echo "a\n";git push --force origin main;echo "b\n"', repo))[0] == 2

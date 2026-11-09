@@ -1,0 +1,13 @@
+#!/bin/sh
+# Shim git (thu nghiem SPR-16b): kiem argv that roi moi chay git that. Xem scripts/git_shim.py.
+here=${0%/*}
+[ "$here" = "$0" ] && here=.
+AGENT_SHIM_DIR=$(cd "$here" 2>/dev/null && pwd) || exit 127
+export AGENT_SHIM_DIR
+for py in python3 python; do
+  found=$(command -v "$py" 2>/dev/null) || continue
+  case $found in *[Ww]indows[Aa]pps*) continue ;; esac
+  exec "$py" "$AGENT_SHIM_DIR/../scripts/git_shim.py" git "$@"
+done
+echo "git-shim: khong co Python - tu choi" >&2
+exit 1
