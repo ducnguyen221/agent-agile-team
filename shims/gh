@@ -1,8 +1,10 @@
 #!/bin/sh
-# Shim gh (thu nghiem SPR-16b): chi chan khi AGENT_AGILE_SHIM=1 (phien agent); khong thi chay gh that ngay (nguoi dung o terminal khong bi anh huong).
+# Shim gh (SPR-16b): kiem argv that roi moi chay gh that. Chi chan khi AGENT_AGILE_SHIM khac rong/0 VA thu muc hien tai nam trong repo co .agile.json
+# (hoac .tmp/autopilot.json, hoac dat AGENT_AGILE_PROTECTED_REPOS); con lai chay gh that ngay, khong khoi dong Python (nguoi dung o terminal khong bi anh huong).
 here=${0%/*}
 [ "$here" = "$0" ] && here=.
-if [ -z "$AGENT_AGILE_SHIM" ] || [ "$AGENT_AGILE_SHIM" = 0 ]; then
+
+run_real() {
   oldifs=$IFS; IFS=:; set -f
   for d in $PATH; do
     c=$d/gh
@@ -11,7 +13,25 @@ if [ -z "$AGENT_AGILE_SHIM" ] || [ "$AGENT_AGILE_SHIM" = 0 ]; then
   IFS=$oldifs
   echo "git-shim: khong tim thay gh that tren PATH" >&2
   exit 127
+}
+
+active=0
+if [ -n "$AGENT_AGILE_SHIM" ] && [ "$AGENT_AGILE_SHIM" != 0 ]; then active=1; fi
+if [ "$active" = 1 ] && [ -z "$AGENT_AGILE_PROTECTED_REPOS" ]; then
+  found=0
+  cur=$PWD
+  while :; do
+    if [ -e "$cur/.agile.json" ] || [ -e "$cur/.tmp/autopilot.json" ]; then found=1; break; fi
+    [ -e "$cur/.git" ] && break
+    parent=${cur%/*}
+    [ -z "$parent" ] && parent=/
+    [ "$parent" = "$cur" ] && break
+    cur=$parent
+  done
+  [ "$found" = 1 ] || active=0
 fi
+[ "$active" = 1 ] || run_real "$@"
+
 AGENT_SHIM_DIR=$(cd "$here" 2>/dev/null && pwd) || exit 127
 export AGENT_SHIM_DIR
 for py in python3 python; do

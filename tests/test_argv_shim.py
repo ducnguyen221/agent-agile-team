@@ -121,3 +121,15 @@ def test_shim_is_transparent_without_the_agent_variable(tmp_path):
     assert oracle.danger_in(oracle.run_bash("git push --force origin main", repo, log, [SHIMS, stub]))
     assert oracle.danger_in(oracle.run_bash("git push --force origin main", repo, log, [SHIMS, stub], extra_env={"AGENT_AGILE_SHIM": "0"}))
     assert not oracle.danger_in(oracle.run_bash("git push --force origin main", repo, log, [SHIMS, stub], extra_env=ON))
+
+
+@needs_bash
+def test_shim_skips_python_in_repos_without_any_protection_sign(tmp_path):
+    """Đường tắt của wrapper: không có .agile.json/.tmp/autopilot.json từ thư mục hiện tại lên tới gốc repo thì chạy git thật ngay (không guard)."""
+    from test_autopilot_guard import make_repo
+
+    plain = make_repo(tmp_path, branch="x")
+    stub = tmp_path / "stub"
+    oracle.make_stub(stub)
+    log = tmp_path / "log.txt"
+    assert oracle.danger_in(oracle.run_bash("git push --force origin main", plain, log, [SHIMS, stub], extra_env=ON))

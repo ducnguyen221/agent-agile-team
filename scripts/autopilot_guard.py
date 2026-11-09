@@ -1418,7 +1418,8 @@ def _ask(fmt: str, reason: str, stdout: TextIO, stderr: TextIO) -> int:
 
 DYNAMIC_GIT_SUBS = frozenset({"push", "remote", "config", "reset", "rebase", "merge", "pull", "tag", "branch", "commit", "checkout", "switch", "clone", "fetch",
                               "release", "pr", "api", "repo", "send-pack", "update-ref", "symbolic-ref"})  # lệnh con git/gh: từ lệnh động kèm một trong các từ này bị coi là git/gh không phân tích được
-ENV_SHIM = "AGENT_AGILE_SHIM"  # thử nghiệm SPR-16b: "1" bật shim (`shims/` phải đã đứng trước trong PATH); "rewrite" còn viết lại lệnh Bash/PowerShell để đặt PATH — chỉ chạy được ở chế độ auto/bypass vì Claude Code hỏi quyền khi lệnh đổi PATH
+ENV_SHIM = "AGENT_AGILE_SHIM"  # SPR-16b: không đặt = tự viết lại lệnh Bash/PowerShell (đặt shim `shims/` lên đầu PATH và bật shim) khi permission_mode là auto/bypassPermissions; "0" tắt hẳn; "1" shim bật bằng cách khác, không viết lại; "rewrite" viết lại ở mọi chế độ (thử)
+SHIM_MODES = ("bypassPermissions", "auto")  # chế độ Claude Code không hỏi quyền khi lệnh đổi PATH (đã thử thật; ở default thì hỏi)
 SHIM_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shims"))
 
 
@@ -1426,20 +1427,23 @@ def _shim_command(tool: str, command: str, shim_dir: str = SHIM_DIR) -> str:
     """Lệnh đã viết lại: dòng đặt PATH (chỉ khi chưa có, để PATH không phình qua nhiều lệnh) rồi lệnh gốc nguyên văn."""
     if tool == "PowerShell":
         quoted = "'" + shim_dir.replace("'", "''") + "'"
-        return ("$__aat = " + quoted + "; if (-not $env:PATH.StartsWith($__aat)) { $env:PATH = $__aat + [IO.Path]::PathSeparator + $env:PATH }; " + command)
+        return ("$env:AGENT_AGILE_SHIM = '1'; $__aat = " + quoted + "; if (-not $env:PATH.StartsWith($__aat)) { $env:PATH = $__aat + [IO.Path]::PathSeparator + $env:PATH }; " + command)
     path = shim_dir
     if os.name == "nt":  # Git Bash: đường kiểu MSYS (`C:\a\b` → `/c/a/b`)
         path = re.sub(r"^([A-Za-z]):", lambda m: "/" + m.group(1).lower(), shim_dir.replace("\\", "/"))
     quoted = "'" + path.replace("'", "'\\''") + "'"
-    return "_AAT_SHIM=" + quoted + '; case ":$PATH:" in ":$_AAT_SHIM:"*) ;; *) PATH="$_AAT_SHIM:$PATH"; export PATH ;; esac; unset _AAT_SHIM\n' + command
+    return "AGENT_AGILE_SHIM=1; export AGENT_AGILE_SHIM; _AAT_SHIM=" + quoted + '; case ":$PATH:" in ":$_AAT_SHIM:"*) ;; *) PATH="$_AAT_SHIM:$PATH"; export PATH ;; esac; unset _AAT_SHIM\n' + command
 
 
 def _shim_update(raw: str, env) -> dict | None:
     """`tool_input` mới (lệnh được đặt shim lên đầu PATH) hay None. Không bao giờ chặn vì lỗi ở đây: mọi lỗi → None."""
     try:
-        if env.get(ENV_SHIM, "") != "rewrite" or not os.path.isdir(SHIM_DIR):
+        flag = env.get(ENV_SHIM, "")
+        if flag in ("0", "1") or not os.path.isdir(SHIM_DIR):  # "0": tắt hẳn; "1": shim bật bằng cách khác (PATH/SessionStart), không viết lại lệnh
             return None
         payload = json.loads(raw)
+        if flag != "rewrite" and payload.get("permission_mode") not in SHIM_MODES:
+            return None  # chế độ default/acceptEdits/plan: Claude Code hỏi quyền khi lệnh đổi PATH, nên không viết lại (rơi về guard đọc chuỗi)
         tool = _tool_name(payload)
         tool_input = payload.get("tool_input")
         if tool not in ("Bash", "PowerShell") or not isinstance(tool_input, dict) or not isinstance(tool_input.get("command"), str):

@@ -2312,3 +2312,36 @@ def test_multi_line_commit_message_with_parentheses_and_git_words_is_text(tmp_pa
 def test_multi_line_strings_still_expose_a_real_command_between_two_of_them(tmp_path):
     repo = protected_repo(tmp_path, branch="x")
     assert run("claude", claude('echo "a\n";git push --force origin main;echo "b\n"', repo))[0] == 2
+
+
+def _mode_run(monkeypatch, repo, mode, flag=None, tool="Bash"):
+    if flag is None:
+        monkeypatch.delenv(autopilot_guard.ENV_SHIM, raising=False)
+    else:
+        monkeypatch.setenv(autopilot_guard.ENV_SHIM, flag)
+    payload = {"tool_name": tool, "tool_input": {"command": "git status -sb"}, "cwd": str(repo)}
+    if mode is not None:
+        payload["permission_mode"] = mode
+    return run("claude", payload)
+
+
+@pytest.mark.parametrize("mode", ["bypassPermissions", "auto"])
+def test_shim_rewrite_is_on_by_default_in_modes_that_do_not_ask_about_path(tmp_path, monkeypatch, mode):
+    repo = protected_repo(tmp_path, branch="x")
+    for tool in ("Bash", "PowerShell"):
+        rc, out, err = _mode_run(monkeypatch, repo, mode, tool=tool)
+        command = json.loads(out)["hookSpecificOutput"]["updatedInput"]["command"]
+        assert rc == 0 and err == "" and command.endswith("git status -sb") and "AGENT_AGILE_SHIM" in command and "shims" in command
+
+
+@pytest.mark.parametrize("mode", ["default", "acceptEdits", "plan", None])
+def test_shim_rewrite_is_skipped_in_modes_that_ask_about_path(tmp_path, monkeypatch, mode):
+    repo = protected_repo(tmp_path, branch="x")
+    assert _mode_run(monkeypatch, repo, mode) == (0, "", "")
+
+
+def test_shim_rewrite_flag_overrides_the_mode_and_zero_or_one_turn_it_off(tmp_path, monkeypatch):
+    repo = protected_repo(tmp_path, branch="x")
+    assert "updatedInput" in _mode_run(monkeypatch, repo, "default", flag="rewrite")[1]
+    for flag in ("0", "1"):
+        assert _mode_run(monkeypatch, repo, "bypassPermissions", flag=flag) == (0, "", "")
