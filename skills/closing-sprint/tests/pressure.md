@@ -3,7 +3,7 @@ skill: closing-sprint
 method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 688619d (round 2); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: 04a051d422cd8fc4b69e1e57c8da62871e6a6a1b
+skill_sha: 6816f9ad359896b89506ea8a4c0ebf81048e5cb9
 date: 2026-11-08
 result: "3/3 GREEN pass theo chữ và theo ý; RED 0/3 pass theo chữ (1/3 theo ý); SPR-12 2026-11-08, n = 1 mỗi ca, ca cũ chưa chạy lại"
 agent_ids:
@@ -309,3 +309,13 @@ Trước: cây base `024631a` (`.tmp/base/`); sau: cây TK1 (chưa commit lúc �
 | `KB17` | E | E | có | a4d38842b6864dd91 | a517a5497ff7a7ee1 |
 
 Kết luận: lựa chọn và các điểm then chốt của câu trả lời giữ nguyên ở mọi ca; không ca nào cần sửa con trỏ. Chi tiết: `evidence/TK1-baseline.md` và `evidence/TK1-after.md` trong hồ sơ SPR-16. Giới hạn: n = 1 mỗi ca, chủ thể và người so cùng họ model, so theo lựa chọn và điểm then chốt chứ chưa chấm lại theo thước đầy đủ.
+
+## Lượt SPR-16 TK7 — cờ `+đẩy-nhánh` (2026-11-09)
+
+QA T3 (`claude-sonnet-5-5`, subagent effort medium, n = 1 — chưa lặp), mỗi ca một chủ thể mới đọc `SKILL.md` bằng đường tuyệt đối, cấm Skill. **RED** = cây trước khi thêm chữ về cờ (`d491ff3`); **GREEN** = cây sau TK7. Ca mới `KB18` ở cuối `tests/scenarios.txt`.
+
+| Ca | Kỳ vọng | RED | GREEN | Agent RED | Agent GREEN |
+|---|---|---|---|---|---|
+| `KB18` | A | C | A | aa06f9bd09e4c77e0 | aa684429bf622e141 |
+
+GREEN: Đẩy `spr-31-export` đúng remote/ref rồi `gh pr create`; không gộp PR, không tag, không đẩy `main`. RED trượt vì skill chưa biết cờ (coi cờ là sai cú pháp hoặc coi push là luôn hỏi). Giới hạn: n = 1, chủ thể và người so cùng họ model; so theo lựa chọn và điểm then chốt.

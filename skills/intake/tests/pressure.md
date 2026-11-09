@@ -3,7 +3,7 @@ skill: intake
 method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 5c2308b (intake, round 4); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: 245f87b161836f5725a43a94a9d0de1b2e448ae0
+skill_sha: 8d6d00ff1bb6dcd8abd76b647016e2d07e90a8c4
 source_sha256: b5eab2a3ec7c978f1565cf74d6ce3a4e5396a376561ab42d5b699b60d1430116
 requested_effort: "medium"
 date: 2026-11-08
@@ -379,3 +379,13 @@ Trước: cây base `024631a` (`.tmp/base/`); sau: cây TK1 (chưa commit lúc �
 | `in-13-autopilot` | A | A | có | a14481c723f89e383 | ab5bc602ee0c304e7 |
 
 Kết luận: lựa chọn và các điểm then chốt của câu trả lời giữ nguyên ở mọi ca; không ca nào cần sửa con trỏ. Chi tiết: `evidence/TK1-baseline.md` và `evidence/TK1-after.md` trong hồ sơ SPR-16. Giới hạn: n = 1 mỗi ca, chủ thể và người so cùng họ model, so theo lựa chọn và điểm then chốt chứ chưa chấm lại theo thước đầy đủ.
+
+## Lượt SPR-16 TK7 — cờ `+đẩy-nhánh` (2026-11-09)
+
+QA T3 (`claude-sonnet-5-5`, subagent effort medium, n = 1 — chưa lặp), mỗi ca một chủ thể mới đọc `SKILL.md` bằng đường tuyệt đối, cấm Skill. **RED** = cây trước khi thêm chữ về cờ (`d491ff3`); **GREEN** = cây sau TK7. Ca mới `in-14-push-flag` ở cuối `tests/scenarios.txt`.
+
+| Ca | Kỳ vọng | RED | GREEN | Agent RED | Agent GREEN |
+|---|---|---|---|---|---|
+| `in-14-push-flag` | B | A | B | a9cb3ad0cc5385ed7 | a4e9b795243394384 |
+
+GREEN: Câu có `+đẩy-nhánh` ghi `exclusions` 12 mục (bỏ `push`), bốn khoá đích ở file dấu, nhắc lại phạm vi đẩy. RED trượt vì skill chưa biết cờ (coi cờ là sai cú pháp hoặc coi push là luôn hỏi). Giới hạn: n = 1, chủ thể và người so cùng họ model; so theo lựa chọn và điểm then chốt.
