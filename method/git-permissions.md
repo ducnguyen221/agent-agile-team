@@ -138,7 +138,7 @@ Rào máy chỉ nhìn thấy **lệnh shell và tool ghi file qua hook đã đă
 | mục 3–5 (nhận dạng, bảng quyền, `gh`) | `git_fence.classify()` → `Verdict(none\|auto\|ask\|forbid)` |
 | mục 6 (hợp đồng đích) | `git_fence.push_contract()` ; bốn khoá đọc bằng `autopilot_guard.load_push_contract()` |
 | mục 2 (danh sách) | `git_fence` đọc `AGENT_AGILE_PROTECTED_REPOS` |
-| điểm vào | `autopilot_guard._evaluate()` gọi `git_fence` **trước** mọi nhánh trả sớm; `_ask` in định dạng hỏi cho Claude |
+| điểm vào | `autopilot_guard._decide()` chạy rào autopilot (`_evaluate`) rồi gọi `_fence_decision()` → `git_fence` cho **mọi** sự kiện (tool ghi file, không file dấu, đầu vào hỏng, lỗi nội bộ trong repo có dấu hiệu 1/2/4 đều đóng); `_ask` in định dạng hỏi cho Claude |
 
 ## 10. Lớp độc lập thứ hai
 

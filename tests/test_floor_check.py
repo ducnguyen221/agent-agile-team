@@ -23,6 +23,21 @@ ZONE_FILES = ("AGENTS.md", "method/process.md", "method/sizing.md", "method/auto
 pytestmark = pytest.mark.skipif(shutil.which("git") is None, reason="không có lệnh git")
 
 
+def _bash_works() -> bool:
+    """`bash` trong PATH chạy được một lệnh thật? (trên Windows, `bash.exe` của WindowsApps là stub WSL không dùng được.)"""
+    exe = shutil.which("bash")
+    if exe is None:
+        return False
+    try:
+        done = subprocess.run([exe, "-c", "echo ok"], capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return done.returncode == 0 and done.stdout.strip() == "ok"
+
+
+BASH_OK = _bash_works()
+
+
 def git(root: Path, *args: str) -> str:
     env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.com",
                GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@example.com", GIT_CONFIG_GLOBAL=os.devnull,
@@ -216,7 +231,7 @@ def ci_step_script() -> str:
     return "\n".join(line[indent:] for line in lines)
 
 
-@pytest.mark.skipif(shutil.which("bash") is None, reason="không có bash")
+@pytest.mark.skipif(not BASH_OK, reason="không có bash chạy được (WSL stub của Windows không tính)")
 def test_ci_step_runs_base_script_not_head_script(lab, tmp_path):
     root, _ = lab
     # base có bản floor_check.py thật; head thay bằng script độc hại in PWNED
@@ -239,7 +254,7 @@ def test_ci_step_runs_base_script_not_head_script(lab, tmp_path):
     assert done.returncode == 1 and "floor-file-changed hooks/hooks.json" in out, out
 
 
-@pytest.mark.skipif(shutil.which("bash") is None, reason="không có bash")
+@pytest.mark.skipif(not BASH_OK, reason="không có bash chạy được (WSL stub của Windows không tính)")
 def test_ci_step_reports_bootstrap_when_base_lacks_script(lab, tmp_path):
     root, _ = lab
     git(root, "rm", "-q", "scripts/floor_check.py")
