@@ -2013,3 +2013,54 @@ def test_gh_repo_flag_with_url_forms_is_normalised(tmp_path, monkeypatch):
 def test_commit_after_a_command_that_moves_head_is_treated_as_on_a_protected_branch(tmp_path, cmd):
     repo = protected_repo(tmp_path, branch="x")
     assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+# --- security vòng 5 (SV1–SV5) --------------------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("cmd", [
+    "git status\nGIT_SSH_COMMAND=x git push origin spr-20-x", "\nFOO=1 GIT_CONFIG_COUNT=1 git push origin spr-20-x",
+    "\nGH_REPO=x/y gh pr create --title x", "sudo GIT_SSH_COMMAND=x git push origin spr-20-x", "time GIT_X=1 git push origin spr-20-x",
+    "! GIT_X=1 git push origin spr-20-x", "command GIT_SSH_COMMAND=x git push origin spr-20-x",
+    "if true; then GIT_X=1 git push origin spr-20-x; fi", "{ GIT_X=1 git push origin spr-20-x; }",
+    "bash -c 'export GIT_SSH_COMMAND=x; git push origin spr-20-x'", "bash -c 'export GH_REPO=x/y; gh pr create --title x'",
+])
+def test_env_assignments_in_any_position_void_the_contract(tmp_path, monkeypatch, cmd):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_pathspec_magic_inside_a_nested_shell_string_is_still_seen(tmp_path):
+    repo = protected_repo(tmp_path)
+    assert run("claude", claude("bash -c 'echo a b; git rm -rf :(top)'", repo))[0] == 2
+
+
+@pytest.mark.parametrize("cmd", [
+    "su -c 'git push --force origin main'", "find . -name x -exec git push --force origin main ;", "wsl git push --force origin main",
+    "parallel git push --force origin main", "watch git push --force origin main", "runuser -l u -c 'git push --force origin main'",
+    "script -c 'git push --force origin main'", "chrt 1 git push --force origin main", "flock f git push --force origin main",
+])
+def test_unknown_wrappers_do_not_hide_git_or_gh(tmp_path, cmd):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude(cmd, repo))[0] == 2, cmd
+
+
+def test_stderr_redirection_after_a_push_does_not_break_the_contract(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    for cmd in ("git push origin spr-20-x 2>&1", "git push origin spr-20-x > out.txt", "git push origin spr-20-x 2>/dev/null"):
+        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
+
+
+def test_gh_repo_flag_keeps_the_host_when_it_is_given(tmp_path, monkeypatch):
+    repo = contract_world(tmp_path, monkeypatch)
+    assert run("claude", claude("gh pr create -R https://evil.com/o/r --title x", repo))[0] == 2
+    assert run("claude", claude("gh pr create -R https://example.com/o/r --title x", repo)) == (0, "", "")
+
+
+def test_parentheses_inside_a_quoted_commit_message_are_text_not_separators(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude('git commit -m "feat(guard): doc ghi .agile.json va them rao"', repo)) == (0, "", "")
+
+
+def test_command_substitution_inside_quotes_is_still_split_and_seen(tmp_path):
+    repo = protected_repo(tmp_path, branch="x")
+    assert run("claude", claude('echo "a $(git push --force origin main) b"', repo))[0] == 2

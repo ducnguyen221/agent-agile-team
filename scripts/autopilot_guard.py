@@ -1097,7 +1097,34 @@ def _evaluate(raw: str) -> str | None:
 
 # Biến môi trường được ĐẶT cho git/gh: gán `X=…` đầu từ hoặc sau `;&|(`, `$env:X`, hoặc đi sau env/export/set/declare/setx (không khớp chữ trong nội dung)
 QUOTED_CONTENT = re.compile(r"\"[^\"\n]*\s[^\"\n]*\"|'[^'\n]*\s[^'\n]*'")  # chuỗi trong nháy có khoảng trắng: nội dung văn bản
-ENV_USE = (r"(?i)(?:(?:^|[;&|(])\s*(?:[A-Za-z_]\w*=\S*\s+)*(?:{0}_[A-Z0-9_]*)=|\$env:{0}_|\b(?:env|export|set|setx|declare|typeset)\b[^;&|\n]*\b{0}_[A-Z0-9_]*)")
+SHELL_STRING_BEFORE = re.compile(r"(?:\s-[A-Za-z]*c|eval|\s-command|\s/[ck])$", re.I)  # chuỗi đi sau -c/eval/-Command là LỆNH, không phải nội dung
+
+
+def _blank_content(text: str) -> str:
+    """Thay chuỗi nháy có khoảng trắng bằng `""` (nội dung văn bản), trừ chuỗi là đối số của -c/eval (shell sẽ chạy nó)."""
+    def repl(match):
+        return match.group(0) if SHELL_STRING_BEFORE.search(text[:match.start()].rstrip()) else '""'
+    return QUOTED_CONTENT.sub(repl, text)
+
+
+def _split_segments(text: str) -> list:
+    """Tách đoạn lệnh theo SEPARATORS nhưng KHÔNG tách bên trong chuỗi nháy là nội dung (`-m "feat(guard): …"`); chuỗi của -c/eval
+    hay chuỗi có `$(…)`/dấu huyền vẫn tách (shell sẽ chạy phần đó)."""
+    def mask(match):
+        chunk = match.group(0)
+        if SHELL_STRING_BEFORE.search(text[:match.start()].rstrip()) or "$(" in chunk or "`" in chunk:
+            return chunk
+        return "x" * len(chunk)
+    masked = QUOTED_CONTENT.sub(mask, text)
+    pieces, last = [], 0
+    for sep in SEPARATORS.finditer(masked):
+        pieces.append(text[last:sep.start()])
+        last = sep.end()
+    pieces.append(text[last:])
+    return pieces
+
+
+ENV_USE = (r"(?i)(?:(?:^|[;&|(\n\r{{!`]|\b(?:then|do|else|elif|if|while|until|sudo|doas|time|command|builtin|nice|nohup|setsid|exec|ionice|stdbuf|timeout|xargs)\b)[ \t]*(?:[A-Za-z_]\w*=\S*[ \t]+)*(?:{0}_[A-Z0-9_]*)=|\$env:{0}_|\b(?:env|export|set|setx|declare|typeset)\b[^;&|\n]*\b{0}_[A-Z0-9_]*)")
 VAR_ASSIGN = r"(?:^|[;&|(]|\b(?:export|env|declare|typeset|set|setx)\s+(?:-\S+\s+)*)\s*\$\{?[A-Za-z_]\w*\}?\w*="  # `$G=x`, `${G}SSH=x` ở vị trí gán
 GH_ENV_USE = ENV_USE.format("GH").replace("GH_[A-Z0-9_]*", "GH_(?:REPO|HOST|CONFIG_DIR|ENTERPRISE_HOST|TOKEN|ENTERPRISE_TOKEN)[A-Z0-9_]*")
 HEAD_MOVERS = frozenset({"checkout", "switch", "symbolic-ref", "update-ref", "reset", "rebase", "merge", "pull", "cherry-pick", "revert", "am", "bisect"})
@@ -1124,6 +1151,10 @@ def _plain_words(tokens: list, segment: str) -> list:
     return fixed
 
 
+def names_git_or_gh(text: str) -> bool:
+    return any(_exe_name(t) in ("git", "gh") for t in tokenize(text))
+
+
 def _collect_nested(text: str, ctx: Context, depth: int, out: list) -> None:
     if not text.strip():
         return
@@ -1140,14 +1171,14 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     """Gom mọi đoạn lệnh git/gh (và lệnh không chỉ-đọc nhắc tới file bảo vệ) của `text` thành `git_fence.Segment`."""
     text = _join_and_strip(text)
     text = text.replace(">|", ">")  # `>|` (ghi đè dù noclobber) là chuyển hướng, không phải ống
-    plain = re.sub(r"[\"']", "", QUOTED_CONTENT.sub('""', text))  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X; chuỗi nháy có khoảng trắng là nội dung
+    plain = re.sub(r"[\"']", "", _blank_content(text))  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X; chuỗi nháy có khoảng trắng là nội dung
     plain_both = (plain, re.sub(r"\\(.)", r"\1", plain))  # `G\IT_X=1` cũng là GIT_X
     git_env = any(re.search(ENV_USE.format("GIT"), p) or "--exec-path" in p or re.search(VAR_ASSIGN, p) for p in plain_both)
     gh_env = any(re.search(GH_ENV_USE, p) for p in plain_both)
     git_env = git_env or getattr(ctx, "git_env_outer", False)  # biến đặt ở lớp ngoài (`GIT_X=1 bash -c '…'`) vẫn tác động lệnh bên trong
     gh_env = gh_env or getattr(ctx, "gh_env_outer", False)
     ctx.git_env_outer, ctx.gh_env_outer = git_env, gh_env
-    content_free = QUOTED_CONTENT.sub('""', text)  # "x > .git/config" (có khoảng trắng trong nháy) là nội dung in ra, không phải chuyển hướng
+    content_free = _blank_content(text)  # "x > .git/config" (có khoảng trắng trong nháy) là nội dung in ra, không phải chuyển hướng
     for target in re.findall(r">>?\s*&?\s*([^\s;&|()<>]+)", content_free):  # đích chuyển hướng ở bất kỳ vị trí nào, kể cả `>f`, `&>f`, `>&f`
         if git_fence.targets_guard_file(target, ctx.cwd, getattr(ctx, "env", os.environ), loose=ctx.cwd_changed, whole=text):
             out.append(git_fence.Segment("other", [target]))
@@ -1164,7 +1195,7 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         if (name in SHELL_WRAPPERS or name in EVAL_COMMANDS) and not takes_script:
             source = tokenize(re.split(r"&&|;|\n|\|\|", parts[index - 1])[-1])
             _collect_nested(" ".join(source[1:]), ctx, depth, out)
-    for segment in SEPARATORS.split(text):
+    for segment in _split_segments(text):
         tokens, redirected = _strip_prefixes(tokenize(segment), ctx)
         if not tokens:
             continue
@@ -1211,6 +1242,15 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
         else:
             env = getattr(ctx, "env", os.environ)
             read_only = _read_only(name, args, ctx)
+            if (not read_only or (name == "find" and FIND_EXEC & set(args))) and name not in ("man", "which", "where", "whereis", "type", "help", "pip", "npm", "apt", "brew"):
+                # lệnh lạ (su -c, find -exec, wsl, parallel, watch, chrt, flock, ssh…) có thể chạy git/gh phía sau: tìm và phân tích như lệnh lồng
+                for index, arg in enumerate(args):
+                    if _exe_name(arg) in ("git", "gh"):
+                        _collect_nested(" ".join(args[index:]), ctx, depth, out)
+                        break
+                    if re.search(r"\s", arg) and names_git_or_gh(arg):
+                        _collect_nested(arg, ctx, depth, out)
+                        break
             for index, arg in enumerate(args):
                 redirect = REDIRECT.match(arg) or (re.search(r">>?(.*)$", arg) if ">" in arg else None)
                 if redirect:  # đích chuyển hướng tính cả với lệnh chỉ-đọc (`echo x > .agile.json`, `echo {}>.agile.json`)

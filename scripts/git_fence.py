@@ -533,10 +533,27 @@ def _push_verdict(seg: Segment, ctx: FenceContext, sig: Signals) -> Verdict:
     return Verdict(FORBID, "git-fence: 'push' không đúng hợp đồng đích ({}) — lệnh không chạy".format(code), code)
 
 
+def _without_redirects(args: list) -> list:
+    """Bỏ token chuyển hướng (`2>`, `>f`, `>>`, `2>&1` đã bị tách ở `&`) và đích đi kèm khỏi danh sách đối số."""
+    kept, skip = [], False
+    for arg in args:
+        if skip:
+            skip = False
+            continue
+        if re.fullmatch(r"\d*>>?\|?", arg):
+            skip = True  # đích nằm ở token kế (với `2>` cuối chuỗi: không còn token nào)
+            continue
+        if re.match(r"^\d*>>?\|?\S", arg):
+            continue
+        kept.append(arg)
+    return kept
+
+
 def push_contract(rest: list, contract: dict, seg: Segment, ctx: FenceContext, sig: Signals) -> Optional[str]:
     """Bảy điều của hợp đồng đích (method/git-permissions.md mục 6). None = cho qua, ngược lại mã chặn."""
     if seg.redirected or any(d is None for d in seg.where) or not seg.where:
         return "push-repo-unverified"
+    rest = _without_redirects(rest)  # `2>&1`, `> out.txt`: chuyển hướng không phải đối số của git push
     if any(g in ("-c", "--config-env") or g.startswith(("-c", "--config-env=")) for g in seg.globals):
         return "push-config-override"
     flags = [a for a in rest if a.startswith("-")]
@@ -741,6 +758,16 @@ def _gh_slug(repo: Optional[str]) -> Optional[str]:
     return "/".join(parts[-2:]) if len(parts) >= 2 else text
 
 
+def _gh_host(repo: Optional[str]) -> Optional[str]:
+    """Máy chủ trong -R khi có (`https://host/o/r`, `host/o/r`); None nếu chỉ là `owner/repo` (dùng máy chủ mặc định của repo)."""
+    if not repo:
+        return None
+    text = re.sub(r"^[A-Za-z][A-Za-z0-9+.-]*://", "", repo.strip())
+    text = re.sub(r"^[^/@]+@", "", text)
+    parts = [p for p in text.split("/") if p]
+    return parts[0].lower() if len(parts) >= 3 else None
+
+
 def _gh_plain(args: list) -> tuple:
     """(đối số không phải cờ, repo đích từ -R/--repo hay None, danh sách cờ)."""
     plain, flags, repo, index = [], [], None, 0
@@ -805,7 +832,9 @@ def _gh_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
             if seg.redirected:
                 return _verdict(FORBID, "gh-env", "gh với biến GH_* (đổi repo/host đích)", ctx)
             if ctx.marker and ctx.contract is not None and ctx.signals_for(None).listed is True:
-                if target and not any(norm_url(u).endswith("/" + target.lower().strip("/")) for u in ctx.contract["push_urls"]):
+                host = _gh_host(repo)
+                if target and (not any(norm_url(u).endswith("/" + target.lower().strip("/")) for u in ctx.contract["push_urls"])
+                               or (host and not any(norm_url(u).startswith(host + "/") for u in ctx.contract["push_urls"]))):
                     return _verdict(FORBID, "gh-repo-mismatch", "gh {} {} sang repo khác repo đã xác minh".format(head, action), ctx)
                 return Verdict(AUTO)
             return _verdict(ASK, "gh-ask", "gh {} {}".format(head, action), ctx)
