@@ -12,9 +12,10 @@ agent_ids:
 
 # Thử áp lực — response-style
 
-> **Kết luận:** 3/3 kịch bản: không có skill thì lỗi (nén mất cảnh báo bảo mật, trả lời 70 dòng không
-> phân lớp, số không nguồn); có skill thì đạt. Cả hai pha chạy cùng model `sonnet`, cùng nguyên văn kịch
-> bản; pha GREEN chỉ thêm một dòng "đọc SKILL.md trước".
+> **Kết luận:** lần chạy lại 2026-11-13 (SPR-21, sau khi `SKILL.md` đổi mô tả và trỏ mục 6–7 sang `explain`): RS-2 3/3, RS-1 1/3,
+> RS-3 2/3 theo cách đọc nghiêm "không ước lượng thời gian/giá không nguồn"; bản skill cũ trượt ngang hoặc hơn (RS-1 0/3, RS-3 1/3),
+> nên không phải thoái lui. Lượt gốc 2026-10-01: không có skill thì lỗi (nén mất cảnh báo bảo mật, trả lời 70 dòng không
+> phân lớp, số không nguồn); có skill thì đạt. Chi tiết ở mục "GREEN chạy lại (2026-11-13…)" cuối file.
 
 **Giới hạn của phép thử:** subagent chạy trong môi trường có luật nền của máy (luật giao tiếp chung),
 nên nền đã khá tốt; ba kịch bản đầu tiên (báo deploy cho người không chuyên, "trả lời 1 dòng", "chưa hiểu

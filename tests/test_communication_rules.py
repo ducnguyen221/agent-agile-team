@@ -45,6 +45,12 @@ def test_method_communication_states_each_rule(needle):
     assert needle.lower() in read(POINTER).lower(), f"`{POINTER}` thiếu nội dung luật: {needle!r}"
 
 
+def test_method_communication_question_template_has_four_parts():
+    section = read(POINTER).split("## 3.", 1)[1].split("\n## ", 1)[0]
+    for part in ("**Cần anh quyết:**", "Chi tiết: [", "**KHUYẾN NGHỊ:**", "| Phương án |"):
+        assert part in section, f"mẫu câu hỏi ở mục 3 thiếu {part!r}"
+
+
 def test_method_communication_is_not_bloated():
     lines = read(POINTER).count("\n")
     assert 40 <= lines <= 150, f"`{POINTER}` dài {lines} dòng, kỳ vọng 40–150"
@@ -76,8 +82,9 @@ def test_explain_skill_has_tests():
 def test_response_style_points_to_explain_and_drops_why_trigger():
     text = read("skills/response-style/SKILL.md")
     desc = re.search(r"^description: (.*)$", text, re.M).group(1)
-    assert 'asks "why"' not in desc, "mô tả response-style còn trigger 'why / không hiểu' (RK6, trùng với explain)"
-    assert "explain" in text, "response-style phải trỏ sang skill `explain`"
+    for phrase in ('"why"', "understand", "/explain"):
+        assert phrase not in desc, f"mô tả response-style còn trigger {phrase} (RK6, trùng với explain)"
+    assert "skill `explain`" in text, "response-style phải trỏ sang skill `explain`"
     assert POINTER in text, f"response-style phải trỏ tới `{POINTER}`"
 
 

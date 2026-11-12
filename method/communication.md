@@ -3,7 +3,8 @@
 > **Kết luận:** agent nói với người theo hai chế độ — **súc tích** (mặc định) và **diễn giải** (khi người đọc cần) —
 > và mỗi tin dựa trên file thì kèm **link tới file đó**, mỗi câu hỏi cần người chốt thì kèm **phương án và khuyến
 > nghị**. Tài liệu sprint có hai lớp: lớp một cho người, lớp hai cho agent. Đây là nơi chuẩn của các luật đó;
-> `AGENTS.md`, skill `response-style`, skill `explain` và mẫu chỉ **trỏ tới**, không chép lại.
+> `AGENTS.md` và mẫu chỉ **trỏ tới**; skill `explain` là quy trình thi hành mục 1, skill `response-style` giữ luật
+> súc tích mặc định, khối rút gọn ở mục 8 của nó là bản chép cho subagent. Hai chỗ nói khác nhau thì file này thắng.
 
 Luật không đổi (nằm ở `AGENTS.md` mục Văn phong phản hồi và skill `response-style` mục 5): dù nén hay diễn giải,
 **không bao giờ mất** báo lỗi, cảnh báo bảo mật, xác nhận thao tác phá hủy, số liệu + đơn vị, đường dẫn, mã lỗi,
@@ -13,9 +14,9 @@ chữ phủ định.
 
 | | Súc tích (mặc định) | Diễn giải |
 |---|---|---|
-| Dấu hiệu vào | không có yêu cầu khác | người dùng gõ `/explain` (kèm đường dẫn thì diễn giải file đó), hoặc nói "giải thích", "diễn giải", "nói dễ hiểu hơn", "chưa hiểu", "tại sao"; hỏi lại cùng một điểm; hậu quả khó hoàn tác |
+| Dấu hiệu vào | không có yêu cầu khác | người dùng gõ `/explain` (kèm đường dẫn thì diễn giải file đó), hoặc nói "giải thích", "diễn giải", "nói dễ hiểu hơn", "chưa hiểu", "tại sao", "nghĩa là gì"; hỏi lại cùng một điểm; phản hồi cho thấy hiểu sai; hậu quả khó hoàn tác |
 | Cách trả lời | theo `skills/response-style`: câu đầu là kết luận, không dẫn nhập, không tóm tắt lặp | viết lại **tin gần nhất** (hoặc đoạn/file người dùng chỉ) bằng lời dễ hiểu — xem skill `explain` |
-| Dấu hiệu thoát | — | người dùng hiểu hoặc chuyển việc: tin sau về súc tích; "diễn giải từ giờ" giữ chế độ cả phiên; "ngắn gọn lại" về mặc định |
+| Dấu hiệu thoát | — | giữ chế độ cho chủ đề đó tới khi người dùng hiểu hoặc chuyển việc, rồi tin sau về súc tích; "diễn giải từ giờ" giữ chế độ cả phiên; "ngắn gọn lại" về mặc định |
 
 - Mặc định phải súc tích để tiết kiệm token; chế độ diễn giải **chỉ bật theo yêu cầu**, trừ việc có hậu quả khó hoàn
   tác (mục 3 dưới đây).
@@ -26,7 +27,10 @@ chữ phủ định.
   không; "Chi tiết kỹ thuật" tách xuống cuối; kết bằng điều người đọc cần quyết kèm khuyến nghị.
 - **Giữ nguyên dữ kiện:** diễn giải làm rõ, không bỏ, không thêm sự kiện. Số liệu + đơn vị, đường dẫn, mã lỗi,
   chữ phủ định, cảnh báo bảo mật của nguồn còn nguyên; cảnh báo và hậu quả khó hoàn tác đưa lên **đầu** tin. Chỗ
-  nguồn mơ hồ thì ghi "nguồn không nói rõ" thay vì đoán.
+  nguồn mơ hồ thì ghi "nguồn không nói rõ" thay vì đoán. **Không thêm số mới**, kể cả số tự tính từ số của nguồn
+  (ví dụ "chậm gấp 4,4 lần" khi nguồn chỉ nêu hai số gốc).
+- **Nguồn dài hơn 200 dòng:** hỏi người dùng muốn phần nào (một câu), không tự cắt. `/explain` khi chưa có tin trước
+  thì hỏi "diễn giải gì?".
 
 ## 2. Link tới file chi tiết
 
@@ -44,8 +48,9 @@ chữ phủ định.
 - **Không để link gãy:** file có thật và dòng nằm trong file tại lúc gửi; file vừa đổi thì dùng mã (`TK4`) thay số
   dòng.
 
-Đúng: `PLAN có 4 **task** (TK) — chi tiết ở [PLAN.md](docs/plans/x/PLAN.md:97):` · Sai: `Xem file PLAN` (không link) ·
-Sai: `` `[PLAN](PLAN.md:97)` `` (link bọc trong khối code).
+Đúng: `PLAN có 4 **task** (TK) — chi tiết ở [PLAN:97](docs/plans/x/PLAN.md:97):` · Sai: `Xem file PLAN` (không link) ·
+Sai: `` `[PLAN:97](docs/plans/x/PLAN.md:97)` `` (link bọc trong khối code). Đích dạng `…md:97` bấm được ở Claude
+Desktop/Code; host khác (Codex, Antigravity, xem trên GitHub) có thể không mở được — đường tương đối vẫn đọc được bằng mắt.
 
 ## 3. Câu hỏi cần người quyết
 
@@ -62,14 +67,16 @@ Mẫu điền sẵn:
 
 ```
 **Cần anh quyết:** chia khúc tệp xuất > 50 MB ngay trong sprint này hay để sprint sau?
-Chi tiết: [PLAN mục TK3](docs/plans/x/PLAN.md:97).
+Chi tiết: [PLAN TK3:97](docs/plans/x/PLAN.md:97).
 | Phương án | Đánh đổi · rủi ro | Công sức | Chọn khi |
 |---|---|---|---|
 | A. Làm ngay | tránh sửa gấp; rủi ro bộ nhớ trên máy 2 GB | +1 phiên | đã có đơn lớn |
 | B. Để sprint sau | xuất lỗi nếu gặp tệp lớn sớm | 0 | chưa có đơn lớn |
+| C. Chặn tệp lớn, báo "lọc theo ngày" | người dùng cuối phải xuất nhiều lần | +0,2 phiên | muốn rẻ nhất |
 **KHUYẾN NGHỊ:** B — chưa có đơn nào > 50 MB. Nếu anh chưa trả lời, em làm tiếp TK1–TK2 và giữ TK3 chờ.
 ```
 
+- Phần 2 (link) bỏ được khi câu hỏi không dựa trên file nào; câu hỏi có/không chỉ cần một dòng hỏi và dòng `KHUYẾN NGHỊ:`.
 - Luôn có khuyến nghị khi người sẽ phải chọn; chưa có thì ghi "chưa có khuyến nghị vì …" và nêu tiêu chí để chọn.
   Cấm "tùy" không kèm tiêu chí.
 - Nhiều câu hỏi cùng lúc thì gom thành **một** tin, nêu số lượng đầu tin ("có 3 **quyết định** (DN) chờ anh:"), mỗi
