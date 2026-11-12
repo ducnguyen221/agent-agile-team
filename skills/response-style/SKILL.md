@@ -1,6 +1,6 @@
 ---
 name: response-style
-description: Use when replying to a person or to another agent, writing a brief for a subagent, or drafting a sprint document, and the length, structure, register or level of detail of the response has to be chosen — including when the reader asks for a one-line answer. (A reader who asks "why", says they do not understand or types /explain wants the skill explain.)
+description: Use when replying to a person or to another agent, writing a brief for a subagent, or drafting a sprint document, and the length, structure, register or level of detail of the response has to be chosen — including when the reader asks for a one-line answer.
 metadata:
   group: "communication"
   roles: "all"
