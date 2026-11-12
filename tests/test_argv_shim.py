@@ -133,3 +133,60 @@ def test_shim_skips_python_in_repos_without_any_protection_sign(tmp_path):
     oracle.make_stub(stub)
     log = tmp_path / "log.txt"
     assert oracle.danger_in(oracle.run_bash("git push --force origin main", plain, log, [SHIMS, stub], extra_env=ON))
+
+
+def test_clean_path_drops_every_shims_directory_not_only_its_own(tmp_path):
+    """Hai bản plugin (hai thư mục shims/) cùng trên PATH không được gọi vòng nhau."""
+    plug_a, plug_b = tmp_path / "a", tmp_path / "b"
+    for plug in (plug_a, plug_b):
+        (plug / "shims").mkdir(parents=True)
+        (plug / "scripts").mkdir()
+        (plug / "scripts" / "git_shim.py").write_text("", encoding="utf-8")
+    real = tmp_path / "real"
+    real.mkdir()
+    path = os.pathsep.join([str(plug_a / "shims"), str(plug_b / "shims"), str(real)])
+    assert git_shim.clean_path(str(plug_a / "shims"), path) == str(real)
+
+
+@needs_bash
+def test_two_shim_copies_on_path_do_not_call_each_other_forever(tmp_path):
+    other = tmp_path / "other"
+    shutil.copytree(SHIMS, other / "shims")
+    (other / "scripts").mkdir()
+    shutil.copy(REPO / "scripts" / "git_shim.py", other / "scripts" / "git_shim.py")
+    repo = protected_repo(tmp_path, branch="x")
+    stub = tmp_path / "stub"
+    oracle.make_stub(stub)
+    log = tmp_path / "log.txt"
+    for extra in ({}, ON):  # biến tắt (chạy thẳng tới git thật) và bật (đi qua guard)
+        out = oracle.run_bash("git status", repo, log, [SHIMS, other / "shims", stub], timeout=40, extra_env=extra)
+        assert out.startswith("RUN "), extra
+
+
+# SPR-18/TK3b: CI đỏ từ trước (main 07d2785, 16c) ở ubuntu/macOS/Windows — hai lỗi của chính bộ test, không phải của shim.
+# (1) stub `git` giả không có bit chạy → `[ -x ]` của shim bỏ qua nó trên Linux/macOS, lệnh lành không tới "git" giả (log rỗng).
+# (2) `subprocess.run(["bash", ...])` trên Windows tìm bash.exe ở System32 (stub WSL) trước PATH; dùng đường dẫn mà shutil.which đã thử chạy được.
+@pytest.mark.skipif(os.name == "nt", reason="Windows không có bit chạy kiểu POSIX")
+def test_make_stub_git_is_executable(tmp_path):
+    stub = oracle.make_stub(tmp_path / "stub")
+    assert os.access(stub, os.X_OK)
+
+
+def test_run_bash_calls_the_bash_that_which_resolved_not_a_bare_name(tmp_path, monkeypatch):
+    seen = []
+    monkeypatch.setattr(oracle.shutil, "which", lambda name, *a, **k: "/probe/bin/bash" if name == "bash" else None)
+    monkeypatch.setattr(oracle.subprocess, "run", lambda argv, **k: seen.append(argv))
+    log = tmp_path / "log.txt"
+    oracle.run_bash("true", tmp_path, log, [tmp_path])
+    assert seen and seen[0][0] == "/probe/bin/bash"
+
+
+# SPR-18/TK3e: runner Windows có `C:\Program Files\Git\bin\bash.exe` (launcher) đứng trước `usr\bin\bash.exe` trên PATH; launcher xếp lại PATH
+# (/mingw64/bin, /usr/bin lên đầu) nên `git` thật thắng shim và stub → log rỗng. Harness phải đặt thư mục shims/stub lên đầu PATH BÊN TRONG shell, sau khi bash đã xếp PATH.
+@pytest.mark.skipif(os.name != "nt" or not os.path.exists(r"C:\Program Files\Git\bin\bash.exe"), reason="chỉ có ý nghĩa với Git for Windows (launcher bin/bash.exe)")
+def test_run_bash_survives_the_git_for_windows_launcher_that_reorders_path(tmp_path, monkeypatch):
+    monkeypatch.setattr(oracle.shutil, "which", lambda name, *a, **k: r"C:\Program Files\Git\bin\bash.exe" if name == "bash" else None)
+    repo = protected_repo(tmp_path, branch="x")
+    stub = tmp_path / "stub"
+    oracle.make_stub(stub)
+    assert oracle.run_bash("git status", repo, tmp_path / "log.txt", [SHIMS, stub], extra_env=ON).startswith("RUN ")

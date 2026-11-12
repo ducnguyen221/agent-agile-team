@@ -95,4 +95,7 @@ Không áp dụng — sprint mẫu chưa thuộc pilot routing.
      thái · bằng chứng. Trạng thái: đang chạy · xong · dừng ở điểm an toàn · dừng khẩn · cạn hạn mức · lỗi.
      Điều phối chạy lại lệnh kiểm và đọc diff thật trước khi ghi `xong`. -->
 
+| Phiên | vai · tier · model · effort | thư mục/worktree | nhánh | trạng thái | bằng chứng |
+|---|---|---|---|---|---|
+
 Không áp dụng — sprint không bật autopilot.
