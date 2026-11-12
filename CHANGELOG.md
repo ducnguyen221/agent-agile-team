@@ -3,6 +3,12 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+## 0.8.0 (2026-11-12)
+
+- **Đổi — shim git/gh tắt mặc định (SPR-18/TK3, SPR-17/DN2):** `AGENT_AGILE_SHIM` vắng = hook PreToolUse KHÔNG viết lại lệnh Bash/PowerShell ở mọi chế độ quyền; `rewrite` viết lại; `0`/`1` như cũ. Hook `SessionStart` (`scripts/session-env.sh`) chỉ ghi PATH khi `AGENT_AGILE_SHIM=1`; `=0` là công tắc tắt. Test cũ ghim viết lại mặc định ở auto/bypass được đảo.
+- **Thêm — rào SPR-16 (chưa nghiệm thu):** gộp nhánh 16c (`claude/spr-16c-session-env`, tức SPR-16/TK12): hook `SessionStart`, shim không gọi vòng khi có hai bản `shims/` trên PATH. Rào autopilot SPR-16 chưa qua Cổng 2; bản này đưa mã vào, chưa khẳng định rào đạt.
+- **Sửa — tài liệu:** `README.md`/`README.vi.md` ghi đúng bản 0.8.0 và tình trạng kho; `templates/sprint/PROGRESS.md` mục 6 có hàng tiêu đề sáu cột "Sổ phiên con" (RQ-075).
+
 ## 0.7.0 (2026-11-08)
 
 - **Đổi — bỏ `CLAUDE.md` ở gốc:** `claude plugin validate --strict` đỏ khi plugin có `CLAUDE.md` gốc («not loaded as project

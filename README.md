@@ -1,7 +1,7 @@
 # agent-agile-team
 
-> **Status: public, version `0.5.0`.** Installable on Claude Code, Codex and Antigravity; not
-> published. Vietnamese version: [README.vi.md](README.vi.md). Skill bodies and method documents are written
+> **Status: version `0.8.0`, private repository (`.agile.json`: `"visibility": "private"`).** Installable on
+> Claude Code, Codex and Antigravity; not published to any plugin marketplace. Vietnamese version: [README.vi.md](README.vi.md). Skill bodies and method documents are written
 > in Vietnamese; frontmatter is English.
 
 An agile method for AI agent teams. One person gives the request in plain words, confirms one consolidated

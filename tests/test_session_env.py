@@ -34,7 +34,7 @@ def test_hooks_json_registers_session_start_next_to_the_pre_tool_use_hooks():
 @needs_sh
 def test_writes_path_and_flag_lines_and_sourcing_twice_keeps_one_shims_entry(tmp_path):
     env_file = tmp_path / "env.sh"
-    done = run_script(env_file)
+    done = run_script(env_file, {"AGENT_AGILE_SHIM": "1"})
     assert done.returncode == 0 and done.stderr == ""
     text = env_file.read_text(encoding="utf-8")
     assert "export AGENT_AGILE_SHIM=1" in text and "shims" in text and text.count("\n") == 2
@@ -57,3 +57,20 @@ def test_does_nothing_without_the_env_file_or_when_switched_off_or_without_shims
     shutil.copy(SCRIPT, copy)
     none = tmp_path / "none.sh"
     assert run_script(none, script=copy).returncode == 0 and not none.exists()  # không có shims/ cạnh script
+
+
+# SPR-18/TK3 (CQ3 b, DN5 A): mặc định TẮT — chỉ chạy khi AGENT_AGILE_SHIM=1; "=0" và mọi giá trị khác (kể cả "rewrite", vắng) không ghi gì.
+@needs_sh
+@pytest.mark.parametrize("extra", [{}, {"AGENT_AGILE_SHIM": "0"}, {"AGENT_AGILE_SHIM": "rewrite"}, {"AGENT_AGILE_SHIM": ""}])
+def test_default_off_writes_nothing_unless_flag_is_one(tmp_path, extra):
+    env_file = tmp_path / "env.sh"
+    done = run_script(env_file, extra)
+    assert done.returncode == 0 and done.stderr == "" and not env_file.exists()
+
+
+@needs_sh
+def test_flag_one_turns_it_on(tmp_path):
+    env_file = tmp_path / "env.sh"
+    assert run_script(env_file, {"AGENT_AGILE_SHIM": "1"}).returncode == 0
+    text = env_file.read_text(encoding="utf-8")
+    assert "export AGENT_AGILE_SHIM=1" in text and "shims" in text

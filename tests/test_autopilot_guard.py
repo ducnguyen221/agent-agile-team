@@ -2325,11 +2325,20 @@ def _mode_run(monkeypatch, repo, mode, flag=None, tool="Bash"):
     return run("claude", payload)
 
 
-@pytest.mark.parametrize("mode", ["bypassPermissions", "auto"])
-def test_shim_rewrite_is_on_by_default_in_modes_that_do_not_ask_about_path(tmp_path, monkeypatch, mode):
+# SPR-18/TK3 (DN2 a, Đức chốt 2026-11-12): đảo test cũ `..._is_on_by_default_in_modes_that_do_not_ask_about_path`. Test cũ ghim viết lại lệnh Bash/PowerShell
+# MẶC ĐỊNH ở auto/bypass; SPR-17/DN15 muốn mặc định KHÔNG viết lại (viết lại đổi lệnh người dùng thấy). Nay chỉ AGENT_AGILE_SHIM=rewrite mới viết lại.
+@pytest.mark.parametrize("mode", ["bypassPermissions", "auto", "default", "acceptEdits", "plan", None])
+def test_shim_default_does_not_rewrite_bash(tmp_path, monkeypatch, mode):
     repo = protected_repo(tmp_path, branch="x")
     for tool in ("Bash", "PowerShell"):
-        rc, out, err = _mode_run(monkeypatch, repo, mode, tool=tool)
+        assert _mode_run(monkeypatch, repo, mode, tool=tool) == (0, "", "")
+
+
+@pytest.mark.parametrize("mode", ["bypassPermissions", "auto"])
+def test_shim_rewrite_flag_rewrites_in_modes_that_do_not_ask_about_path(tmp_path, monkeypatch, mode):
+    repo = protected_repo(tmp_path, branch="x")
+    for tool in ("Bash", "PowerShell"):
+        rc, out, err = _mode_run(monkeypatch, repo, mode, flag="rewrite", tool=tool)
         command = json.loads(out)["hookSpecificOutput"]["updatedInput"]["command"]
         assert rc == 0 and err == "" and command.endswith("git status -sb") and "AGENT_AGILE_SHIM" in command and "shims" in command
 
