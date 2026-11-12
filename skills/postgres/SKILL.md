@@ -38,6 +38,7 @@ metadata:
   planner mới dùng nó. Phần dòng gần bằng cả bảng thì index thường là đủ và ít bất ngờ hơn; đo bằng `EXPLAIN`.
 - Chia bảng chuỗi thời gian theo khoảng (phân vùng) để dọn bằng bỏ phân vùng thay cho `DELETE` hàng loạt: `references/patterns.md` mục 1.
   Tìm chuỗi con (`LIKE '%…%'`, `ILIKE`, bỏ dấu) bằng `pg_trgm` + GIN, `unaccent`, index trên `lower(…)`: mục 2.
+  Tìm theo **từ** có xếp hạng: cột `tsvector` (cột sinh hay trigger) + GIN: mục 7. Kết quả tổng hợp nặng, chấp nhận cũ: view vật chất hoá (`REFRESH … CONCURRENTLY` cần index unique): mục 8.
 - Mỗi khoá ngoại có index ở phía tham chiếu — không có thì `JOIN` và xoá dòng cha phải quét cả bảng con.
 - Cột dùng trong policy RLS có index.
 - Index có giá: mỗi lần ghi phải cập nhật mọi index. Index không được dùng (`idx_scan` gần 0 sau một chu kỳ
@@ -73,6 +74,7 @@ metadata:
   xác định và so bằng so sánh hàng: `WHERE (created_at, id) < ($1, $2) ORDER BY created_at DESC, id DESC LIMIT 50`,
   với index `(created_at DESC, id DESC)`; con trỏ trả cho client là cặp giá trị của dòng cuối. Con trỏ không nhảy tới
   "trang số N" — cần nhảy thì đó là yêu cầu cho `api-design`, đánh đổi bằng `OFFSET` có trần.
+- **Số thứ tự liên tục** (số hoá đơn theo năm): sequence/identity **có lỗ hổng** (rollback, lỗi chèn, sập máy vẫn đốt số) nên không dùng; dùng dòng bộ đếm tăng trong cùng giao dịch, đánh đổi là các giao dịch cùng khoá xếp hàng: `references/patterns.md` mục 9.
 - **Kiểm rồi ghi là đua:** `SELECT` kiểm điều kiện rồi `UPDATE`/`INSERT` ở câu sau để hai giao dịch cùng qua. Dùng câu nguyên tử (`UPDATE … WHERE qty > 0`),
   ràng buộc, khoá dòng, hoặc mức cô lập cao kèm thử lại: `references/patterns.md` mục 4.
 - **Chèn theo lô:** `INSERT` nhiều dòng hoặc `COPY`; không chèn từng dòng trong vòng lặp.
@@ -131,10 +133,10 @@ Mức gợi ý theo hậu quả nếu bỏ qua (`method/severity.md` mục 1).
 
 | Cần | Đọc |
 |---|---|
-| Phân vùng và dọn dữ liệu cũ; `pg_trgm`/`unaccent`; RLS nhiều tenant với một role chung; đua đọc-kiểm-ghi; hàng đợi bền (thuê hết hạn, lô); đổi `timestamp` sang `timestamptz` | `references/patterns.md` |
+| Phân vùng và dọn dữ liệu cũ; `pg_trgm`/`unaccent`; tìm toàn văn `tsvector` (cột sinh hay trigger); view vật chất hoá và `REFRESH CONCURRENTLY`; số thứ tự liên tục và vì sao sequence có lỗ hổng; RLS nhiều tenant với một role chung; đua đọc-kiểm-ghi; hàng đợi bền (thuê hết hạn, lô); đổi `timestamp` sang `timestamptz` | `references/patterns.md` |
 | Đọc `EXPLAIN (ANALYZE, BUFFERS)`; truy vấn tìm khoá ngoại thiếu index, truy vấn chậm, bảng phình, index không dùng; cấu hình mẫu kết nối, timeout (`lock_timeout`), PgBouncer và cách tính số kết nối, giám sát | `references/diagnostics.md` |
 
 Liên quan: agent `database-reviewer` (review đầy đủ), `security-reviewer` (RLS, quyền); skill
 `database-migrations`, `fastapi`, `python`, `api-design`, `security-review`.
 
-Phần mẫu Postgres dựa trên bộ thực hành của đội Supabase (MIT), đến qua nguồn ghi ở frontmatter.
+Phần mẫu Postgres dựa trên bộ thực hành của đội Supabase; thông báo bản quyền ở `NOTICE`.

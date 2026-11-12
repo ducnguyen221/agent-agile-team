@@ -4,7 +4,7 @@
 > **cấu hình chưa đặt** (điểm cắm của lớp riêng), **bản cài chưa theo kịp bản clone**, hoặc **cách shell xử lý** dấu `~`
 > và mã hoá ký tự — không phải lỗi của script.
 
-Cài đặt: [`INSTALL.md`](../INSTALL.md). Điểm cắm: [`hosts/README.md`](../hosts/README.md) mục 2.
+Cài đặt: [`INSTALL.md`](INSTALL.md). Điểm cắm: [`hosts/README.md`](../hosts/README.md) mục 2.
 
 | Triệu chứng | Nguyên nhân | Cách xử lý |
 |---|---|---|

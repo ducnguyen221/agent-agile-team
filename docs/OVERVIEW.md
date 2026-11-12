@@ -14,7 +14,7 @@ updated: 2026-10-05
 > được trên Claude Code, Codex và Antigravity. Bản hiện tại `0.4.0`, repo công khai (MIT).
 
 File này là nguồn cho trang giới thiệu <https://ducnguyen.vn/agent-agile-team/>. Số liệu và tên file khớp repo
-ở bản `0.4.0`; đổi repo thì sửa file này cùng lượt. Người mới cài xong đọc tiếp [`GUIDE.md`](../GUIDE.md).
+ở bản `0.4.0`; đổi repo thì sửa file này cùng lượt. Người mới cài xong đọc tiếp [`GUIDE.md`](GUIDE.md). Vai ba tài liệu: `README.md` ở gốc là cửa vào (giới thiệu và cài), `docs/GUIDE.md` đi một sprint đầu tiên từng bước, file này là toàn cảnh và tra cứu.
 
 ## 1. Định vị và lợi ích
 
@@ -193,8 +193,6 @@ agent-agile-team/
 ├── AGENTS.md            luật lõi — agent đọc mỗi phiên (≤120 dòng, ≤10 KB)
 ├── GEMINI.md            con trỏ tới AGENTS.md cho Antigravity
 ├── README.md · README.vi.md   giới thiệu ngắn (Anh · Việt)
-├── GUIDE.md             sprint đầu tiên — bạn làm gì, agent làm gì
-├── INSTALL.md           hướng dẫn cài dành cho AI agent (prompt dán ở cuối)
 ├── method/              luật chơi: process, sizing, severity, evidence, review-gate, conventions
 │   └── standards/       chuẩn code chung và theo ngôn ngữ
 ├── roles/               thẻ vai: executor/ (5) · verifier/ (2 + dual-review + 4 chuyên đề)
@@ -206,7 +204,7 @@ agent-agile-team/
 ├── tests/               bộ test pytest và fixture
 ├── samples/order-desk/  một dự án mẫu đã dùng thật, kết quả kỳ vọng cố định
 ├── hosts/               cài và nạp theo harness: claude · codex · antigravity · claude-desktop
-├── docs/                OVERVIEW · MIGRATION · standardization · troubleshooting
+├── docs/                OVERVIEW · GUIDE · INSTALL · MIGRATION · standardization · troubleshooting
 ├── NOTICE · LICENSE     bản quyền, giấy phép
 ├── CHANGELOG.md         mục mới nhất đứng đầu, trùng version của manifest
 └── .claude-plugin/ · .codex-plugin/   manifest plugin cho Claude Code và Codex
@@ -235,8 +233,8 @@ Tra nhanh:
 | Tôi muốn … | Mở file … |
 |---|---|
 | hiểu bộ này trong 5 phút | `docs/OVERVIEW.md` (file này), rồi `README.vi.md` |
-| cài lên máy | `INSTALL.md` (dán prompt cho agent) hoặc `hosts/<harness>/README.md` (tự gõ) |
-| chạy sprint đầu tiên | `GUIDE.md` |
+| cài lên máy | `docs/INSTALL.md` (dán prompt cho agent) hoặc `hosts/<harness>/README.md` (tự gõ) |
+| chạy sprint đầu tiên | `docs/GUIDE.md` |
 | biết agent được phép làm gì, dừng khi nào | `AGENTS.md`, rồi `method/process.md` |
 | biết việc này cỡ nào, có cần ADR không | `method/sizing.md`, `method/conventions.md` |
 | xem một hồ sơ sprint mẫu | `samples/order-desk/docs/plans/` |
@@ -295,7 +293,7 @@ Cần **Git** và **Python 3.9+**; ba script không cần cài gói nào (chỉ 
 
 ### 6.1 Cách nhanh nhất: để agent cài
 
-Dán prompt ở cuối [`INSTALL.md`](../INSTALL.md) vào Claude Code, Codex hoặc Antigravity. Agent đọc file đó, làm
+Dán prompt ở cuối [`INSTALL.md`](INSTALL.md) vào Claude Code, Codex hoặc Antigravity. Agent đọc file đó, làm
 lần lượt, và **hỏi trước** mỗi lần cài phần mềm, sửa file luật của harness hay đặt biến môi trường. Cài xong agent
 chép nguyên dòng cuối của `check.py --self` cho bạn.
 
@@ -357,7 +355,7 @@ python3 ~/agent-agile-team/scripts/index.py .           # sinh lại khối "Đa
 ```
 
 `init` không ghi đè file có sẵn; chạy lại không đổi gì. Sau đó giao việc bằng lời thường — ví dụ *"Dùng
-agent-agile-team: thêm chức năng tra cứu đơn theo mã cho dự án này."* — và đọc tiếp [`GUIDE.md`](../GUIDE.md).
+agent-agile-team: thêm chức năng tra cứu đơn theo mã cho dự án này."* — và đọc tiếp [`GUIDE.md`](GUIDE.md).
 
 Cập nhật: `git pull --ff-only` trong bản clone (Claude Code thêm `claude plugin marketplace update agent-agile-team`
 và `claude plugin update agent-agile-team@agent-agile-team` — thiếu hai lệnh này thì bản cài vẫn là skill cũ; Antigravity

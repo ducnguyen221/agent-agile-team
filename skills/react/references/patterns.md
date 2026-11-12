@@ -194,3 +194,115 @@ Boundary giữ lỗi cho tới khi bị reset; fallback cần lối ra, nếu kh
 - Lỗi trong trình xử lý sự kiện hoặc mã bất đồng bộ không tới boundary: `useErrorBoundary().showBoundary(error)` đẩy
   lỗi lên boundary gần nhất (hoặc tự `catch` và hiện thông báo tại chỗ).
 - Đặt boundary theo **vùng độc lập** (một khối biểu đồ, một route), không một cái ở gốc; phần khác của trang vẫn dùng được.
+
+## 8. Effect đọc giá trị mới nhất mà không chạy lại: `useEffectEvent` hoặc ref
+
+Tình huống: effect đăng ký **một lần** (kết nối, bộ đếm giờ, listener) nhưng trình xử lý bên trong phải thấy `props` hay `state` **mới nhất**. Đưa giá trị vào mảng phụ thuộc thì đăng ký lại mỗi lần giá trị đổi; bỏ khỏi mảng thì trình xử lý đọc giá trị **cũ** (closure cũ). Cả hai đều sai.
+
+- **React 19.2 trở lên: `useEffectEvent`.** Bọc phần "chỉ đọc giá trị mới nhất"; gọi nó **từ bên trong effect**; không đưa nó vào mảng phụ thuộc, không truyền xuống component con, không lưu để gọi ở chỗ khác.
+
+```tsx
+function Chat({ roomId, theme }: Props) {
+  const onMessage = useEffectEvent((m: Message) => show(m, theme)); // luôn thấy theme mới nhất
+  useEffect(() => {
+    const conn = connect(roomId);
+    conn.on('message', onMessage);
+    return () => conn.close();
+  }, [roomId]); // đổi theme không nối lại
+}
+```
+
+- **Bản cũ hơn: ref "mới nhất"**, cập nhật sau mỗi lần commit:
+
+```tsx
+const themeRef = useRef(theme);
+useEffect(() => { themeRef.current = theme; });      // sau mỗi render
+useEffect(() => {
+  const conn = connect(roomId);
+  conn.on('message', (m) => show(m, themeRef.current));
+  return () => conn.close();
+}, [roomId]);
+```
+
+  Không ghi `ref.current` ngay trong thân render: render phải thuần (mục 1 của `SKILL.md`).
+- Chỉ dành cho giá trị **không quyết định khi nào effect phải chạy**; giá trị quyết định (`roomId`) vẫn nằm trong mảng phụ thuộc. Dự án ở bản nào thì theo tài liệu bản đó.
+
+## 9. Form với action (React 19): trạng thái chờ và giữ giá trị khi lỗi
+
+- **Trạng thái chờ:** `useFormStatus()` đọc trạng thái của `<form>` **cha gần nhất**, nên phải gọi trong component **con** nằm trong form (ví dụ `SubmitButton`); gọi ngay trong component vẽ `<form>` thì không thấy form đó. Cách khác: `isPending` (phần tử thứ ba của `useActionState`) có sẵn ở chính component chứa form.
+
+```tsx
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return <button disabled={pending}>Gửi</button>;
+}
+```
+
+- **Giữ giá trị đã nhập khi lỗi:** sau khi action chạy xong, React **đặt lại** các ô không kiểm soát (uncontrolled) của form, kể cả khi action trả về lỗi. Muốn giữ: action trả lại giá trị đã gửi trong state, ô đọc từ đó bằng `defaultValue`.
+
+```tsx
+const [state, formAction, isPending] = useActionState(
+  async (_prev: State, fd: FormData) => {
+    const email = String(fd.get('email'));
+    const error = await save(email);
+    return error ? { error, email } : { error: null, email: '' };
+  },
+  { error: null, email: '' },
+);
+return (
+  <form action={formAction}>
+    <input name="email" defaultValue={state.email} />
+    {state.error && <p role="alert">{state.error}</p>}
+    <SubmitButton />
+  </form>
+);
+```
+
+  Đầu vào **kiểm soát** (mục 5 của `SKILL.md`) là cách khác: giá trị nằm trong state của bạn nên không bị đặt lại.
+- **Bản 18** không có các API này: dùng state và `onSubmit` (mục 8 của `SKILL.md`). Kiểm tra phía server vẫn bắt buộc; `useOptimistic` chỉ hiển thị tạm trong lúc chờ rồi quay về giá trị thật khi action xong.
+
+## 10. `use()` với promise: ổn định giữa các lần render, tránh thác tải
+
+- **Promise phải ổn định.** `use(promise)` treo (suspend) tới khi promise xong rồi render lại. Promise tạo **trong** component (`use(fetch(...))`) là promise mới mỗi lần render, nên treo mãi. Tạo promise ở chỗ không chạy lại theo render: Server Component hay loader của khung, một cache theo khoá (thư viện state-server, `cache()` của khung), hoặc nâng lên component cha rồi truyền xuống bằng props.
+- **Thác tải (waterfall):** yêu cầu đặt trong con chỉ bắt đầu khi con được render; cha chờ xong mới render con thì các yêu cầu nối đuôi nhau. Yêu cầu **độc lập** thì khởi động cùng lúc ở nơi tạo promise, truyền xuống, mỗi con `use` promise của mình trong `Suspense` riêng; cần cả hai cùng lúc thì `Promise.all`.
+
+```tsx
+// Server Component hoặc loader: chạy một lần, không lặp theo render ở client
+async function Page({ id }: { id: string }) {
+  const user = fetchUser(id);     // chưa await: bắt đầu ngay
+  const posts = fetchPosts(id);   // bắt đầu cùng lúc
+  return (
+    <>
+      <Suspense fallback={<Spin />}><User p={user} /></Suspense>
+      <Suspense fallback={<Spin />}><Posts p={posts} /></Suspense>
+    </>
+  );
+}
+function User({ p }: { p: Promise<UserData> }) { const u = use(p); return <h1>{u.name}</h1>; }
+```
+
+- `use` đọc được cả Context và gọi được trong điều kiện (khác hook thường). Promise bị từ chối → lỗi nổi lên Error boundary gần nhất (mục 6 của `SKILL.md`), không bọc `try/catch` quanh `use`.
+
+## 11. `React.memo` vô hiệu khi prop mới ở mỗi lần render
+
+`React.memo` so từng prop bằng `Object.is`. Hàm, object hay mảng viết thẳng trong thân component cha (`onSelect={() => select(row.id)}`, `style={{ width: 120 }}`) là **giá trị mới mỗi lần cha render**, nên phép so luôn khác và con vẫn render lại dù đã bọc `memo`. Profiler ghi "props changed" đúng ở các prop đó.
+
+Cách sửa — chỉ làm khi Profiler chứng minh cần (mục 2 của `SKILL.md`):
+
+- **Object hay mảng không phụ thuộc props/state:** hạ ra ngoài component làm hằng (`const CELL_STYLE = { width: 120 }`) hoặc dùng class CSS.
+- **Hàm callback:** một hàm **ổn định** nhận định danh, con gọi `onSelect(row.id)`, thay vì tạo `() => select(row.id)` riêng cho mỗi hàng. Hàm ổn định là `useCallback` có mảng phụ thuộc đúng, hoặc hàm vốn ổn định (`setState`, hàm của store).
+- **Giá trị suy ra từ props/state:** `useMemo` có mảng phụ thuộc đúng.
+- **Dữ liệu từng hàng** giữ nguyên tham chiếu khi không đổi: đừng `map` tạo object mới cho mọi hàng mỗi lần render.
+
+```tsx
+const CELL_STYLE = { width: 120 };
+const Row = memo(function Row({ row, onSelect }: { row: RowData; onSelect: (id: string) => void }) {
+  return <tr style={CELL_STYLE} onClick={() => onSelect(row.id)}>…</tr>;
+});
+function Grid({ rows }: { rows: RowData[] }) {
+  const onSelect = useCallback((id: string) => select(id), [select]); // ổn định
+  return <table><tbody>{rows.map((r) => <Row key={r.id} row={r} onSelect={onSelect} />)}</tbody></table>;
+}
+```
+
+- Hàng nghìn dòng vẫn nặng sau khi sửa: ảo hoá (mục 7 của `SKILL.md`). Dự án đã bật React Compiler thì trình biên dịch tự memo hoá phần lớn trường hợp trên; vẫn đo bằng Profiler trước khi sửa tay.

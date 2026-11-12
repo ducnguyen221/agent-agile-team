@@ -24,8 +24,8 @@ MAX_PROMPT_LINES = 12
 USER_DOCS = (
     "README.md",
     "README.vi.md",
-    "INSTALL.md",
-    "GUIDE.md",
+    "docs/INSTALL.md",
+    "docs/GUIDE.md",
     "docs/README.md",
     "docs/standardization.md",
     "docs/troubleshooting.md",
@@ -62,7 +62,7 @@ def broken_links(text: str, base: Path) -> list[str]:
 
 
 def test_install_has_one_vi_and_one_en_prompt_each_short():
-    blocks = FENCE_TEXT.findall(section(read("INSTALL.md"), "## Prompt copy-dán"))
+    blocks = FENCE_TEXT.findall(section(read("docs/INSTALL.md"), "## Prompt copy-dán"))
     assert len(blocks) == 2, "cần đúng hai prompt: tiếng Việt và tiếng Anh"
     vi, en = blocks
     assert "Cài agent-agile-team" in vi
@@ -75,7 +75,7 @@ def test_install_has_one_vi_and_one_en_prompt_each_short():
 
 
 def test_install_walks_every_numbered_step():
-    text = read("INSTALL.md")
+    text = read("docs/INSTALL.md")
     for number in range(8):
         assert re.search(rf"(?m)^## {number}\. ", text), f"thiếu mục {number}"
     for sub in ("### 4a.", "### 4b.", "### 4c."):
@@ -83,21 +83,21 @@ def test_install_walks_every_numbered_step():
 
 
 def test_install_points_to_every_host_guide_and_they_exist():
-    text = read("INSTALL.md")
+    text = read("docs/INSTALL.md")
     for host in HOSTS:
         assert f"hosts/{host}" in text, f"INSTALL.md không trỏ hosts/{host}"
         assert (REPO / "hosts" / host / "README.md").is_file()
 
 
 def test_install_covers_both_operating_systems_and_both_plug_variables():
-    text = read("INSTALL.md")
+    text = read("docs/INSTALL.md")
     for needle in ("Windows", "macOS", "winget", "brew", "setx", "zsh -lic",
                    "AGENT_AGILE_TIERS", "AGENT_AGILE_DENYLIST"):
         assert needle in text, needle
 
 
 def test_install_asks_before_touching_the_machine():
-    safety = section(read("INSTALL.md"), "## 0. ")
+    safety = section(read("docs/INSTALL.md"), "## 0. ")
     for needle in ("Hỏi trước khi chạm máy", "Không tải-rồi-chạy", "Không đụng bí mật"):
         assert needle in safety
 
@@ -108,7 +108,7 @@ def test_install_asks_before_touching_the_machine():
 
 FENCE_LANG = re.compile(r"(?ms)^```(\w*)\r?\n(.*?)^```")
 TILDE_PATH = re.compile(r"(?<![\w@])~[/\\]")
-WINDOWS_DOCS = ("INSTALL.md", "README.md", "README.vi.md", "GUIDE.md", "hosts/claude/README.md")
+WINDOWS_DOCS = ("docs/INSTALL.md", "README.md", "README.vi.md", "docs/GUIDE.md", "hosts/claude/README.md")
 
 
 def fenced(text: str, lang: str) -> list[str]:
@@ -179,8 +179,10 @@ def test_user_doc_has_no_broken_relative_link(rel):
 
 
 def test_readmes_and_guide_point_to_troubleshooting():
-    for rel in ("README.md", "README.vi.md", "GUIDE.md", "INSTALL.md"):
+    for rel in ("README.md", "README.vi.md"):
         assert "docs/troubleshooting.md" in read(rel), rel
+    for rel in ("docs/GUIDE.md", "docs/INSTALL.md"):  # cùng thư mục docs/: link ngắn
+        assert "(troubleshooting.md)" in read(rel), rel
 
 
 def test_link_checker_catches_a_broken_link(tmp_path):
@@ -192,3 +194,25 @@ def test_link_checker_catches_a_broken_link(tmp_path):
         "```text\n[trong-code](also-missing.md)\n```\n"
     )
     assert broken_links(text, tmp_path) == ["missing.md"]
+
+
+# --- Đường mới của hai tài liệu và con trỏ ở gốc (SPR-19, CQ3 phương án b) ------------------------------------------
+
+
+def test_install_and_guide_live_in_docs():
+    for rel in ("docs/INSTALL.md", "docs/GUIDE.md"):
+        assert (REPO / rel).is_file(), f"thiếu {rel}"
+
+
+def test_root_pointers_are_short_and_point_into_docs():
+    """Liên kết ngoài tới gốc repo (GitHub, hướng dẫn cũ) vẫn sống: `INSTALL.md`, `GUIDE.md` ở gốc chỉ là con trỏ ngắn."""
+    for name in ("INSTALL.md", "GUIDE.md"):
+        text = read(name)
+        assert len(text.splitlines()) <= 8, f"{name} ở gốc phải là con trỏ ngắn (≤ 8 dòng)"
+        assert f"docs/{name}" in text, f"{name} ở gốc không trỏ tới docs/{name}"
+        assert broken_links(text, REPO) == []
+
+
+def test_internal_links_of_moved_docs_resolve_from_docs():
+    for rel in ("docs/INSTALL.md", "docs/GUIDE.md"):
+        assert broken_links(read(rel), (REPO / rel).parent) == [], rel
