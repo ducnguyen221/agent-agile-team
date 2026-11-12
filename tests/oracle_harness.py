@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import random
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -74,6 +75,7 @@ def make_stub(directory: Path) -> Path:
     directory.mkdir(parents=True, exist_ok=True)
     stub = directory / "git"
     stub.write_bytes(b'#!/bin/sh\necho "RUN $*" >> "$LOG"\nexit 0\n')
+    stub.chmod(0o755)  # thiếu bit chạy thì shim (`[ -x ]`) bỏ qua stub trên Linux/macOS và lệnh lành không tới "git" giả
     (directory / "git.cmd").write_bytes(b'@echo off\r\necho RUN %*>> "%LOG%"\r\nexit /b 0\r\n')  # trên Windows, `shutil.which` của shim chỉ thấy tệp có đuôi PATHEXT
     return stub
 
@@ -86,7 +88,7 @@ def run_bash(cmd: str, repo: Path, log: Path, path_dirs: list[Path], timeout: in
     env.pop("AGENT_AGILE_SHIM", None)  # phiên chạy test có thể đã có biến này (hook viết lại lệnh): mỗi lượt tự quyết
     env.update(extra_env or {})
     try:
-        subprocess.run(["bash", "-c", cmd], cwd=str(repo), env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+        subprocess.run([shutil.which("bash") or "bash", "-c", cmd], cwd=str(repo), env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL, timeout=timeout)
     except subprocess.TimeoutExpired:
         pass

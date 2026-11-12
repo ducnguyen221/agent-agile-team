@@ -35,6 +35,7 @@ def _bash_works() -> bool:
     return done.returncode == 0 and done.stdout.strip() == "ok"
 
 
+BASH_EXE = shutil.which("bash")  # đường dẫn đã thử chạy ở trên; không gọi tên trần (Windows tìm bash.exe WSL của System32 trước PATH)
 BASH_OK = _bash_works()
 
 
@@ -247,7 +248,7 @@ def test_ci_step_runs_base_script_not_head_script(lab, tmp_path):
     env = dict(os.environ, BASE_REF="main", FLOOR_MODE="strict", PYTHONIOENCODING="utf-8", GH_TOKEN="x",
                PYTHON=sys.executable.replace("\\", "/"), RUNNER_TEMP=str(tmp_path / "tmp").replace("\\", "/"))
     (tmp_path / "tmp").mkdir()
-    done = subprocess.run(["bash", "-c", ci_step_script()], cwd=root, capture_output=True, text=True,
+    done = subprocess.run([BASH_EXE, "-c", ci_step_script()], cwd=root, capture_output=True, text=True,
                           encoding="utf-8", env=env)
     out = done.stdout + done.stderr
     assert "PWNED" not in out, out
@@ -267,7 +268,7 @@ def test_ci_step_reports_bootstrap_when_base_lacks_script(lab, tmp_path):
     env = dict(os.environ, BASE_REF="main", FLOOR_MODE="strict", PYTHONIOENCODING="utf-8", GH_TOKEN="x",
                PYTHON=sys.executable.replace("\\", "/"), RUNNER_TEMP=str(tmp_path / "tmp").replace("\\", "/"))
     (tmp_path / "tmp").mkdir()
-    done = subprocess.run(["bash", "-c", ci_step_script()], cwd=root, capture_output=True, text=True,
+    done = subprocess.run([BASH_EXE, "-c", ci_step_script()], cwd=root, capture_output=True, text=True,
                           encoding="utf-8", env=env)
     out = done.stdout + done.stderr
     assert done.returncode == 0 and "bootstrap — chưa kiểm so base" in out and "PWNED" not in out, out
@@ -342,3 +343,10 @@ def test_workflow_floor_step_runs_before_any_head_code():
     floor = text.index("name: Floor vs base")
     for later in ("name: Install test runner", "name: Tests", "name: Core is clean", "name: Samples and templates"):
         assert floor < text.index(later), later
+
+
+def test_ci_step_tests_call_the_bash_that_which_resolved():
+    """SPR-18/TK3b: gọi `bash` trần trên Windows CI ra stub WSL của System32 dù `_bash_works` đã thử Git Bash — phải dùng đường dẫn which."""
+    source = Path(__file__).read_text(encoding="utf-8")
+    bare = 'subprocess.run(["bash", ' + '"-c", ci_step_script()]'  # ghép chuỗi để dòng này không tự khớp
+    assert bare not in source

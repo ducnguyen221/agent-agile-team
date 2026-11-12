@@ -161,3 +161,21 @@ def test_two_shim_copies_on_path_do_not_call_each_other_forever(tmp_path):
     for extra in ({}, ON):  # biến tắt (chạy thẳng tới git thật) và bật (đi qua guard)
         out = oracle.run_bash("git status", repo, log, [SHIMS, other / "shims", stub], timeout=40, extra_env=extra)
         assert out.startswith("RUN "), extra
+
+
+# SPR-18/TK3b: CI đỏ từ trước (main 07d2785, 16c) ở ubuntu/macOS/Windows — hai lỗi của chính bộ test, không phải của shim.
+# (1) stub `git` giả không có bit chạy → `[ -x ]` của shim bỏ qua nó trên Linux/macOS, lệnh lành không tới "git" giả (log rỗng).
+# (2) `subprocess.run(["bash", ...])` trên Windows tìm bash.exe ở System32 (stub WSL) trước PATH; dùng đường dẫn mà shutil.which đã thử chạy được.
+@pytest.mark.skipif(os.name == "nt", reason="Windows không có bit chạy kiểu POSIX")
+def test_make_stub_git_is_executable(tmp_path):
+    stub = oracle.make_stub(tmp_path / "stub")
+    assert os.access(stub, os.X_OK)
+
+
+def test_run_bash_calls_the_bash_that_which_resolved_not_a_bare_name(tmp_path, monkeypatch):
+    seen = []
+    monkeypatch.setattr(oracle.shutil, "which", lambda name, *a, **k: "/probe/bin/bash" if name == "bash" else None)
+    monkeypatch.setattr(oracle.subprocess, "run", lambda argv, **k: seen.append(argv))
+    log = tmp_path / "log.txt"
+    oracle.run_bash("true", tmp_path, log, [tmp_path])
+    assert seen and seen[0][0] == "/probe/bin/bash"
