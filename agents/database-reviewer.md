@@ -92,4 +92,4 @@ Cuối báo cáo: **Kết luận** · **Đã chạy:** lệnh + kết quả then
 (ví dụ: "không có CSDL để chạy `EXPLAIN` — nhận định hiệu năng chỉ từ đọc code"). Skill liên quan: `postgres`,
 `database-migrations`.
 
-Một phần mẫu kiểm chuyển thể từ bộ thực hành Postgres của đội Supabase (MIT), qua nguồn ghi ở frontmatter.
+Một phần mẫu kiểm chuyển thể từ bộ thực hành Postgres của đội Supabase (MIT); bản quyền và giấy phép: xem `NOTICE`.
