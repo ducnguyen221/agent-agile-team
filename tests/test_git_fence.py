@@ -253,6 +253,48 @@ def test_push_only_level(tmp_path, cmd, expected):
     assert verdict(cmd, repo, env=env).kind == expected, cmd
 
 
+ENV_CHAIN_CMDS = [
+    "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=branch.main.merge GIT_CONFIG_VALUE_0=refs/heads/feat git pull --ff-only",
+    "GIT_CONFIG_GLOBAL=/x/cfg git pull --ff-only", "GIT_CONFIG_PARAMETERS='a=b' git pull --ff-only",
+    "export GIT_CONFIG_COUNT=1 && git pull --ff-only", '$env:GIT_CONFIG_GLOBAL="x"; git pull --ff-only',
+    "set GIT_CONFIG_GLOBAL=x && git pull --ff-only", "HOME=/x git pull --ff-only", "A=1 B=2 git pull --ff-only",
+    "XDG_CONFIG_HOME=/x git -C . pull --ff-only", "PATH=/x:$PATH git pull --ff-only", "env HOME=/x git pull --ff-only",
+    "setx HOME x; git pull --ff-only", "cd . && USERPROFILE=/x git pull --ff-only",
+]
+
+
+@pytest.mark.parametrize("cmd", ENV_CHAIN_CMDS)
+def test_chain_assigns_env_detects_assignments_anywhere(cmd):
+    assert gf.chain_assigns_env(cmd), cmd
+
+
+@pytest.mark.parametrize("cmd", ["git pull --ff-only", "git -C ../repo pull --ff-only", "cd x && git pull --ff-only", "git pull --ff-only=false"])
+def test_chain_assigns_env_ignores_plain_commands(cmd):
+    assert not gf.chain_assigns_env(cmd), cmd
+
+
+@pytest.mark.parametrize("cmd", ENV_CHAIN_CMDS)
+def test_pull_ff_only_with_env_assignment_in_chain_asks_at_push_only(tmp_path, cmd):
+    """RF-A1: phép gán biến môi trường ở bất kỳ đoạn nào của chuỗi làm `pull --ff-only` mất miễn (tầng chuỗi lệnh gán `env_assigned`)."""
+    repo = make_repo(tmp_path)
+    env = write_list(tmp_path, repo, level="push-only")
+    segment = seg("git pull --ff-only", repo)
+    segment.env_assigned = gf.chain_assigns_env(cmd)
+    assert gf.classify([segment], ctx_for(repo, env)).kind == gf.ASK, cmd
+
+
+def test_pull_ff_only_with_git_dir_redirect_asks_at_push_only(tmp_path):
+    repo = make_repo(tmp_path)
+    env = write_list(tmp_path, repo, level="push-only")
+    assert verdict("git pull --ff-only", repo, env=env, redirected=True).kind == gf.ASK
+
+
+def test_pull_ff_only_with_dash_c_dir_and_no_env_stays_auto(tmp_path):
+    repo = make_repo(tmp_path)
+    env = write_list(tmp_path, repo, level="push-only")
+    assert verdict("git -C . pull --ff-only", repo, env=env).kind == gf.AUTO
+
+
 def test_hoso_commit_on_main_in_push_only_repo(tmp_path):
     """Ca ghi hồ sơ sprint thẳng trên main ở repo mức push-only (DN1 b): commit tự do, đẩy vẫn hỏi."""
     repo = make_repo(tmp_path)

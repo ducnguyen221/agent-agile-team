@@ -88,6 +88,7 @@ class Segment:
     where: list = field(default_factory=list)
     redirected: bool = False
     globals: list = field(default_factory=list)  # tuỳ chọn đứng trước lệnh con: `-C`, `-c`, `--git-dir`…
+    env_assigned: bool = False  # chuỗi lệnh chứa phép gán biến môi trường (`chain_assigns_env`): `pull --ff-only` không được miễn
     head_moved: bool = False  # trước lệnh này trong cùng chuỗi đã có lệnh đổi HEAD (checkout, branch -M, symbolic-ref…): `HEAD`/`@` không còn là nhánh đã đọc
 
 
@@ -261,7 +262,7 @@ def expand_alias(seg: "Segment", cwd: str = "") -> "Segment":
         tokens = value.split()
         globals_, sub, rest = split_git_args(tokens + seg.rest)
         seg = Segment("git", seg.globals + tokens + seg.rest, sub, rest, seg.where, seg.redirected, seg.globals + globals_,
-                      head_moved=seg.head_moved)
+                      head_moved=seg.head_moved, env_assigned=seg.env_assigned)
     return Segment("nested")  # chuỗi alias dài hơn giới hạn: đóng an toàn
 
 
@@ -496,6 +497,19 @@ def _verdict(kind: str, code: str, what: str, ctx: FenceContext) -> Verdict:
         kind = FORBID
     tail = "cần Đức nói trong chat — lệnh không chạy" if kind == FORBID else ASK_TAIL
     return Verdict(kind, "git-fence: '{}' trong repo được bảo vệ {} [{}]".format(what, tail, code), code)
+
+
+ENV_ASSIGN_IN_CHAIN = re.compile(
+    r"(?:^|[;&|(\n\r{!`])[ \t]*[A-Za-z_]\w*="  # `A=1 git …`, `A=1 B=2 git …`, `… && A=1`: phép gán đầu từ lệnh, ở đoạn nào cũng tính
+    r"|\b(?:env|export|declare|typeset|set|sudo|doas)\b[^;&|\n]*\b[A-Za-z_]\w*="  # `export A=1`, `set A=1`, `env A=1 git …`
+    r"|(?i:\bsetx\b|\$env:|\benv:\w|SetEnvironmentVariable)")  # `setx`, PowerShell `$env:A=`, `Set-Item env:A`, `[Environment]::SetEnvironmentVariable`
+
+
+def chain_assigns_env(text: str) -> bool:
+    """Chuỗi lệnh (cả chuỗi, mọi đoạn) có phép gán biến môi trường nào không? Dùng chung cho hai rào để quyết miễn `git pull --ff-only`:
+    biến (`GIT_CONFIG_*`, `HOME`, `XDG_CONFIG_HOME`, `PATH`…) đặt ở bất kỳ đâu trong chuỗi đổi cấu hình/tệp git mà rào không thấy. Dò rộng, chấp nhận
+    hỏi thừa với lệnh gán vô hại."""
+    return bool(ENV_ASSIGN_IN_CHAIN.search(text or ""))
 
 
 def plain_ff_pull(rest: list, globals_: Optional[list] = None) -> bool:
@@ -759,7 +773,7 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
             if sub == "commit":
                 return Verdict(AUTO)
             if sub == "pull":
-                return Verdict(AUTO) if plain_ff_pull(rest, seg.globals) and all(d is not None for d in directories) else _verdict(ASK, "pull-ask", "pull", ctx)
+                return Verdict(AUTO) if plain_ff_pull(rest, seg.globals) and not seg.redirected and not seg.env_assigned and all(d is not None for d in directories) else _verdict(ASK, "pull-ask", "pull", ctx)
             return _verdict(ASK, sub + "-ask", sub + " trên nhánh được bảo vệ", ctx)
         return _verdict(FORBID, "protected-branch-" + sub, sub + " trên nhánh được bảo vệ", ctx)
     return Verdict()

@@ -317,6 +317,7 @@ class Context:
         self.cwd = os.path.abspath(cwd)
         self.root = find_repo_root(self.cwd)
         self.forced_main = False  # đã gặp `git checkout|switch main|master` trong lệnh ghép
+        self.env_chain = False  # chuỗi lệnh có phép gán biến môi trường ở đoạn nào đó (git_fence.chain_assigns_env): `pull --ff-only` không được miễn
         self.cwd_changed = False  # đã gặp thao tác đổi thư mục (cd, pushd, env -C…, kể cả trong subshell/bash -c)
         self._heads: dict[str, bool] = {}
 
@@ -425,7 +426,7 @@ def _local_merge_item(ctx: "Context", where: list, rest: list[str], is_pull: boo
     if ctx.on_main(where):
         if MAIN_LOCAL_MERGE not in ctx.active:
             return "main_merge"
-        if is_pull and git_fence.plain_ff_pull(rest, globals_) and _repo_is_push_only(ctx, where):
+        if is_pull and git_fence.plain_ff_pull(rest, globals_) and not ctx.env_chain and _repo_is_push_only(ctx, where):
             return None
         return MAIN_LOCAL_MERGE
     return "branch_merge_local" if "branch_merge_local" in ctx.active else None
@@ -912,6 +913,7 @@ def _command_item(tokens: list[str], redirected: bool, ctx: Context, depth: int)
 def _analyze(text: str, ctx: Context, depth: int = 0) -> str | None:
     """Mục loại đầu tiên mà `text` (có thể là lệnh ghép) vi phạm và đang bật; None nếu không."""
     text = _join_and_strip(text)  # nối dòng `git \` + xuống dòng; bỏ thân heredoc của trình không phải shell
+    ctx.env_chain = ctx.env_chain or git_fence.chain_assigns_env(text)  # phép gán ở lớp ngoài (`A=1 bash -c '…'`) vẫn tính cho lệnh bên trong
     item = _pipe_to_shell(text, ctx, depth)
     if item:
         return item
@@ -1272,6 +1274,7 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
     git_env = git_env or getattr(ctx, "git_env_outer", False)  # biến đặt ở lớp ngoài (`GIT_X=1 bash -c '…'`) vẫn tác động lệnh bên trong
     gh_env = gh_env or getattr(ctx, "gh_env_outer", False)
     ctx.git_env_outer, ctx.gh_env_outer = git_env, gh_env
+    ctx.env_chain = ctx.env_chain or git_fence.chain_assigns_env(text)
     content_free = _blank_content(text, posix)  # "x > .git/config" (có khoảng trắng trong nháy) là nội dung in ra, không phải chuyển hướng
     for target in re.findall(r">>?\s*&?\s*([^\s;&|()<>]+)", content_free):  # đích chuyển hướng ở bất kỳ vị trí nào, kể cả `>f`, `&>f`, `>&f`
         if git_fence.targets_guard_file(target, ctx.cwd, getattr(ctx, "env", os.environ), loose=ctx.cwd_changed, whole=text):
@@ -1329,7 +1332,7 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
                 where = [None]
             # mọi biến GIT_* trong lệnh (GIT_CONFIG_*, GIT_SSH_COMMAND, GIT_CONFIG_GLOBAL…) đổi hành vi của git mà guard không thấy: hợp đồng đích không áp
             out.append(git_fence.Segment("git", args, sub, rest, where, redirected or git_env, globals_,
-                                         head_moved=getattr(ctx, "head_moved", False)))
+                                         head_moved=getattr(ctx, "head_moved", False), env_assigned=ctx.env_chain))
             effective = git_fence.expand_alias(out[-1], ctx.cwd)  # alias có thể là `checkout`/`branch -M`…
             if effective.name == "nested" or effective.sub in HEAD_MOVERS or (
                     effective.sub == "branch" and any(a in ("-m", "-M", "--move", "-c", "-C", "--copy") or _cluster(a, "mMcC") for a in effective.rest)):

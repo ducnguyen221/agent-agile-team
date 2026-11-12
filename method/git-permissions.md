@@ -37,7 +37,7 @@ Danh sách là file JSON do **Đức** đặt ngoài repo, đường trong biế
 - Khớp **một trong hai** của `git_common_dir` hoặc `remote_urls`. `protected_branches` chỉ **thêm** vào `main`, `master` và nhánh
   mặc định của remote. `level` tuỳ chọn, mặc định `full`.
 - **`full`:** bảng đầy đủ ở mục 4. **`push-only`:** chỉ áp nhóm đẩy, gộp PR, tag, remote, release; **không** chặn `commit` và
-  đúng dạng trần `git pull --ff-only` (không remote, nhánh, cờ khác; tuỳ chọn toàn cục chỉ `-C <thư mục>`) cục bộ trên nhánh chính, và hạ `cherry-pick`, `reset`, `rebase` từ cấm xuống hỏi — nghĩa là mất rào
+  đúng dạng trần `git pull --ff-only` (không remote, nhánh, cờ khác; tuỳ chọn toàn cục chỉ `-C <thư mục>`; và cả chuỗi lệnh **không có phép gán biến môi trường nào** — `A=1 git …`, `export`/`set`/`setx`/`env`, PowerShell `$env:`, ở đoạn lệnh nào cũng tính, hỏi thừa với lệnh gán vô hại là chấp nhận) cục bộ trên nhánh chính, và hạ `cherry-pick`, `reset`, `rebase` từ cấm xuống hỏi — nghĩa là mất rào
   chặn cứng với lệnh viết lại lịch sử cục bộ, còn hỏi từng lần. Mức này dành cho repo mà chủ làm việc thẳng trên `main` (ví dụ kho gốc của một workspace), nơi chặn cứng `commit` sẽ chặn cả việc ghi hồ sơ hằng ngày.
 - Biến phải tới được **tiến trình hook**: đặt ở mức Người dùng của hệ điều hành rồi khởi động lại ứng dụng Claude; đặt trong
   profile PowerShell hay một cửa sổ terminal là không đủ. Biến vắng hay file hỏng → dấu hiệu 1 "không xác định", mức mặc
@@ -131,6 +131,7 @@ Rào máy chỉ nhìn thấy **lệnh shell và tool ghi file qua hook đã đă
 - script, `xargs rm`, `python -c "open('.agile.json','w')"`, `mv . ../x` và mọi cách ghi file không qua lệnh được nhận dạng: không canh được (chỉ lớp (b) ở mục 10 và việc đối chiếu ở Cổng 2);
 - `git` báo `dubious ownership` ở nhánh dự phòng của launcher thì dấu hiệu 3 bị bỏ qua (fail-open ở đúng nhánh dự phòng);
 - nhãn `floor-approved` của PR không gắn với SHA của head: commit đẩy thêm sau khi gắn nhãn vẫn chạy `--mode report`;
+- miễn `git pull --ff-only` ở `push-only` còn một lối: khoá cấu hình `branch.*`/`pull.*` đã nằm sẵn trong config của repo hay config toàn cục (không đặt qua lệnh) có thể đổi nhánh theo dõi mà rào không đọc; `protected_config_key` chưa chặn các khoá này. Việc hoãn (CO), không phải Đạt;
 - repo **không có dấu hiệu nào**: guard không đụng — giới hạn đã biết, không phải Đạt;
 - mất dấu hiệu: `.agile.json` bị xoá nhưng danh sách (dấu hiệu 1) hay chỉ mục (dấu hiệu 3) còn thì vẫn được bảo vệ; lệnh hay tool ghi
   nhắm `.agile.json`, chỉ mục cho đường đó (`git rm`, `git mv`, `git update-index`) hay file danh sách bị chặn dù không có file dấu.

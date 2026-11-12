@@ -185,6 +185,50 @@ def test_pull_ff_only_after_cd_does_not_borrow_the_cwd_level(tmp_path, monkeypat
     assert_blocked(repo, "cd .. && git pull --ff-only", "main-local-merge")
 
 
+# --- RF-A1 (vòng 3): phép gán biến môi trường ở bất kỳ đoạn nào của chuỗi làm `pull --ff-only` mất miễn ----------------
+
+ENV_CHAIN_CMDS = [
+    "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=branch.main.merge GIT_CONFIG_VALUE_0=refs/heads/feat git pull --ff-only",
+    "GIT_CONFIG_GLOBAL=/x/cfg git pull --ff-only", "GIT_CONFIG_PARAMETERS='a=b' git pull --ff-only",
+    "export GIT_CONFIG_COUNT=1 && git pull --ff-only", '$env:GIT_CONFIG_GLOBAL="x"; git pull --ff-only',
+    "set GIT_CONFIG_GLOBAL=x && git pull --ff-only", "HOME=/x git pull --ff-only", "A=1 B=2 git pull --ff-only",
+    "USERPROFILE=/x git pull --ff-only", "XDG_CONFIG_HOME=/x git pull --ff-only", "PATH=/x git pull --ff-only",
+    "env HOME=/x git pull --ff-only", "HOME=/x bash -c 'git pull --ff-only'",
+]
+
+
+def _fence_verdict(cmd, repo):
+    ctx = autopilot_guard.Context(set(), str(repo))
+    ctx.env = {}
+    segments: list = []
+    autopilot_guard._collect_segments(cmd, ctx, 0, segments)
+    return autopilot_guard.git_fence.classify(
+        segments, autopilot_guard.git_fence.FenceContext(str(repo), {}, autopilot_guard.git_fence.default_runner, marker=True, keep_ask=True))
+
+
+@pytest.mark.parametrize("cmd", ENV_CHAIN_CMDS)
+def test_pull_ff_only_with_env_assignment_in_chain_stays_blocked_on_push_only_main(tmp_path, monkeypatch, cmd):
+    repo = make_repo(tmp_path, branch="main", marker=open_marker())
+    _force_level(monkeypatch, "push-only")
+    assert_blocked(repo, cmd, "main-local-merge")
+
+
+@pytest.mark.parametrize("cmd", ENV_CHAIN_CMDS)
+def test_fence_asks_pull_ff_only_with_env_assignment_in_chain_at_push_only(tmp_path, monkeypatch, cmd):
+    repo = make_repo(tmp_path, branch="main", marker=open_marker())
+    _force_level(monkeypatch, "push-only")
+    assert _fence_verdict(cmd, repo).kind == autopilot_guard.git_fence.ASK, cmd
+
+
+@pytest.mark.parametrize("cmd", ["git pull --ff-only", "git -C . pull --ff-only"])
+def test_plain_pull_ff_only_without_env_stays_exempt_in_both_fences(tmp_path, monkeypatch, cmd):
+    repo = make_repo(tmp_path, branch="main", marker=open_marker())
+    _force_level(monkeypatch, "push-only")
+    rc, _, err = run("claude", claude(cmd, repo))
+    assert "main-local-merge" not in err, err
+    assert _fence_verdict(cmd, repo).kind == autopilot_guard.git_fence.AUTO
+
+
 def test_end_to_end_main_session_gets_ask_and_subagent_gets_deny(tmp_path):
     repo = make_repo(tmp_path, branch="release", marker=open_marker())
     main_session = dict(claude("gh label create bug", repo), permission_mode="bypassPermissions")
