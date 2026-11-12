@@ -179,3 +179,14 @@ def test_run_bash_calls_the_bash_that_which_resolved_not_a_bare_name(tmp_path, m
     log = tmp_path / "log.txt"
     oracle.run_bash("true", tmp_path, log, [tmp_path])
     assert seen and seen[0][0] == "/probe/bin/bash"
+
+
+# SPR-18/TK3e: runner Windows có `C:\Program Files\Git\bin\bash.exe` (launcher) đứng trước `usr\bin\bash.exe` trên PATH; launcher xếp lại PATH
+# (/mingw64/bin, /usr/bin lên đầu) nên `git` thật thắng shim và stub → log rỗng. Harness phải đặt thư mục shims/stub lên đầu PATH BÊN TRONG shell, sau khi bash đã xếp PATH.
+@pytest.mark.skipif(os.name != "nt" or not os.path.exists(r"C:\Program Files\Git\bin\bash.exe"), reason="chỉ có ý nghĩa với Git for Windows (launcher bin/bash.exe)")
+def test_run_bash_survives_the_git_for_windows_launcher_that_reorders_path(tmp_path, monkeypatch):
+    monkeypatch.setattr(oracle.shutil, "which", lambda name, *a, **k: r"C:\Program Files\Git\bin\bash.exe" if name == "bash" else None)
+    repo = protected_repo(tmp_path, branch="x")
+    stub = tmp_path / "stub"
+    oracle.make_stub(stub)
+    assert oracle.run_bash("git status", repo, tmp_path / "log.txt", [SHIMS, stub], extra_env=ON).startswith("RUN ")

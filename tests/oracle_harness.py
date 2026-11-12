@@ -84,11 +84,14 @@ def run_bash(cmd: str, repo: Path, log: Path, path_dirs: list[Path], timeout: in
     """Chạy `cmd` bằng bash thật trong `repo`, PATH = path_dirs + PATH hiện có; trả nhật ký (sau khi chờ tiến trình nền)."""
     log.write_text("", encoding="utf-8")
     env = dict(os.environ, LOG=str(log).replace("\\", "/"),
-               PATH=os.pathsep.join([str(p).replace("\\", "/") for p in path_dirs] + [os.environ["PATH"]]))
+               PATH=os.pathsep.join([str(p).replace("\\", "/") for p in path_dirs] + [os.environ["PATH"]]),
+               AAT_DIRS=os.pathsep.join(str(p).replace("\\", "/") for p in path_dirs))
     env.pop("AGENT_AGILE_SHIM", None)  # phiên chạy test có thể đã có biến này (hook viết lại lệnh): mỗi lượt tự quyết
     env.update(extra_env or {})
+    # bash của Git for Windows (launcher bin/bash.exe) xếp lại PATH lúc khởi động: đặt lại thư mục thử lên đầu BÊN TRONG shell
+    prefix = 'export PATH="$(cygpath -p -u "$AAT_DIRS"):$PATH"; ' if os.name == "nt" else 'export PATH="$AAT_DIRS:$PATH"; '
     try:
-        subprocess.run([shutil.which("bash") or "bash", "-c", cmd], cwd=str(repo), env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+        subprocess.run([shutil.which("bash") or "bash", "-c", prefix + cmd], cwd=str(repo), env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL, timeout=timeout)
     except subprocess.TimeoutExpired:
         pass
