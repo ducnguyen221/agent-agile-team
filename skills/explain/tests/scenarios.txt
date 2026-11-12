@@ -4,9 +4,11 @@ Mọi dữ liệu (số, tên, đường dẫn) trong kịch bản là GIÁ TR�
 Dòng [PHA] thay bằng:
   RED:   "Không dùng công cụ gọi skill (Skill tool) và không mở file SKILL.md nào."
   GREEN: giữ nguyên dòng RED (điều kiện nạp thật: agent chỉ có AGENTS.md và danh mục skill của cây đã sửa; KHÔNG tiêm method/communication.md vào prompt).
+Ở lượt GREEN, vế "KHÔNG đọc file nào trên máy" (có trong phần mở đầu mỗi kịch bản) đổi thành "KHÔNG đọc file nào trên máy ngoài các file nêu ở dòng trên" (mâu thuẫn với dòng bảo đọc SKILL.md hoặc file luật).
 Dòng [OUT] thay bằng: "Khi xong, ghi NGUYÊN VĂN câu trả lời gửi người dùng vào file <đường> bằng công cụ ghi file (không thêm gì khác vào file), rồi báo "xong" một dòng."
 (Dòng [OUT] chỉ là giàn giáo để grader đọc bản trả lời; không thuộc kịch bản.)
 Thư mục làm việc giả lập của CM-1, CM-1b, CM-2 là worktree repo plugin; <WT> = đường tuyệt đối tới nó, điền lúc chạy.
+<ĐƯỜNG-NGOÀI> (CM-1b) = đường tuyệt đối tới thư mục hồ sơ sprint nằm ngoài worktree, điền lúc chạy; không ghi đường thật vào repo (cổng chống rò). Lượt RED 2026-11-13 dùng hồ sơ SPEC của SPR-21 ở nơi lưu hồ sơ của máy.
 
 === CM-1 — Tin tóm tắt một PLAN, chi tiết nằm ở file thật (SC1) ===
 
@@ -31,7 +33,7 @@ Hãy trả lời người dùng.
 
 QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành động — không hỏi lại. Môi trường là giả lập: KHÔNG chạy lệnh thật, KHÔNG đọc file nào trên máy; mọi dữ liệu cần có đều nằm trong tin nhắn này. Trả lời bằng tiếng Việt.
 [PHA]
-Thư mục làm việc của phiên: <WT> (repo plugin). Hồ sơ sprint mà người dùng hỏi nằm NGOÀI thư mục đó, ở `C:/Users/DucNguyen/OpcOS/system/workshop-records/agent-agile-team/plans/2026-11-13-v2-agent-user-communication/SPEC.md`. Trích từ file đó (bạn đã đọc): mục 3 FR1 "Luật liên kết file" ở khoảng dòng 75; mục 4 có 8 tiêu chí thành công SC1–SC8; mục 6 có 5 câu hỏi CQ1–CQ5 đã được chủ sản phẩm chốt theo khuyến nghị.
+Thư mục làm việc của phiên: <WT> (repo plugin). Hồ sơ sprint mà người dùng hỏi nằm NGOÀI thư mục đó, ở `<ĐƯỜNG-NGOÀI>/SPEC.md`. Trích từ file đó (bạn đã đọc): mục 3 FR1 "Luật liên kết file" ở khoảng dòng 75; mục 4 có 8 tiêu chí thành công SC1–SC8; mục 6 có 5 câu hỏi CQ1–CQ5 đã được chủ sản phẩm chốt theo khuyến nghị.
 Người dùng nhắn:
 
 > "SPEC của sprint SPR-21 có những gì? Cho anh tóm tắt và chỉ anh chỗ đọc chi tiết."
