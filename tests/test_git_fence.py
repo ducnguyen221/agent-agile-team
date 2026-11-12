@@ -763,11 +763,29 @@ def test_keep_ask_turns_a_marker_git_ask_back_into_ask(tmp_path):
     assert keep(repo, "git tag v1", keep_ask=True).kind == gf.ASK
 
 
-@pytest.mark.parametrize("rest,expected", [
-    (["--ff-only"], True), (["--ff-only", "origin"], True), (["--ff-only", "origin", "feat"], False), (["--ff-only", "--no-ff"], False),
-    (["--ff-only", "--rebase"], False), (["--ff-only", "-r"], False), (["--ff-only", "."], False), (["origin"], False), ([], False)])
-def test_plain_ff_pull_only_moves_the_pointer_along_upstream(rest, expected):
-    assert gf.plain_ff_pull(rest) is expected
+NOT_BARE_PULL = [
+    ["--ff-only", "origin"], ["--ff-only", "origin", "feat"], ["--ff-only", "--no-ff"], ["--ff-only", "--rebase"], ["--ff-only", "-r"],
+    ["--ff-only", "."], ["origin"], [], ["--ff-only", "--no-ff-only"], ["--ff-only", "--ff-only"], ["-ff-only"], ["--ff-only=false"],
+    ["--rebase", "--ff-only"], ["--ff-o"], ["--reb"], ["--squ"], ["--no-com"], ["-qr"], ["--ff-only", "-q"], ["--ff-only", "-v"],
+    ["--ff-only", "../x"], ["--ff-only", "https://h/r.git"], ["--ff-only", "origin", "main"],
+    ["--ff-only", "origin", "refs/heads/a:refs/heads/b"], ["--ff-only", "origin", "+x"], ["--ff-only", "origin", "a..b"],
+    ["--ff-only", "origin", "a:b"], ["--ff-only", "origin", "a b"], ["--ff-only", "origin", "a\x01b"], ["--ff-only", "../wt-feat"]]
+
+
+def test_plain_ff_pull_accepts_only_the_bare_form():
+    assert gf.plain_ff_pull(["--ff-only"]) is True
+    assert gf.plain_ff_pull(["--ff-only"], ["-C", "/repo"]) is True
+
+
+@pytest.mark.parametrize("rest", NOT_BARE_PULL)
+def test_plain_ff_pull_rejects_every_form_other_than_bare(rest):
+    assert gf.plain_ff_pull(rest) is False
+
+
+@pytest.mark.parametrize("globals_", [["-c", "branch.main.merge=refs/heads/feat"], ["-cbranch.main.merge=x"], ["--config-env", "a=B"],
+                                       ["--git-dir", "/x"], ["--work-tree", "/x"], ["--exec-path=/x"], ["-C"], ["--no-pager"]])
+def test_plain_ff_pull_rejects_global_options_other_than_dash_c_dir(globals_):
+    assert gf.plain_ff_pull(["--ff-only"], globals_) is False
 
 
 def test_push_only_pull_ff_only_is_auto_but_override_flag_or_unknown_dir_asks(tmp_path):
@@ -776,6 +794,23 @@ def test_push_only_pull_ff_only_is_auto_but_override_flag_or_unknown_dir_asks(tm
     assert verdict("git pull --ff-only", repo, env=env).kind == gf.AUTO
     assert verdict("git pull --ff-only --no-ff origin x", repo, env=env).kind == gf.ASK
     assert verdict("git pull --ff-only", repo, env=env, cd=True).kind == gf.ASK
+
+
+@pytest.mark.parametrize("cmd", [
+    "git pull --ff-only --no-ff-only", "git -c branch.main.merge=refs/heads/feat pull --ff-only", "git pull --ff-only ../wt-feat",
+    "git pull --ff-only https://h/r.git", "git pull --ff-only origin", "git pull --ff-only origin main", "git pull --ff-only --ff-only",
+    "git pull --rebase --ff-only", "git pull --ff-o", "git pull --reb", "git pull -qr", "git -c x.y=z pull --ff-only",
+    "git --config-env=branch.main.merge=V pull --ff-only"])
+def test_push_only_pull_forms_other_than_bare_are_not_auto_in_the_fence(tmp_path, cmd):
+    repo = make_repo(tmp_path, branch="main", agile=True)
+    env = write_list(tmp_path, repo, level="push-only")
+    assert verdict(cmd, repo, env=env).kind in (gf.ASK, gf.FORBID), cmd
+
+
+def test_push_only_bare_pull_with_dash_c_dir_is_still_auto(tmp_path):
+    repo = make_repo(tmp_path, branch="main", agile=True)
+    env = write_list(tmp_path, repo, level="push-only")
+    assert verdict("git -C {} pull --ff-only".format(repo), repo, env=env).kind == gf.AUTO
 
 
 def test_fence_context_defaults_to_not_keeping_ask(tmp_path):

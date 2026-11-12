@@ -401,7 +401,7 @@ def _git_item(args: list[str], ctx: Context, redirected: bool) -> str | None:
             return None
         return _local_merge_item(ctx, where, rest, False)
     if sub == "pull":  # pull = fetch + merge: gộp cục bộ ở mọi nhánh, kể cả `--ff-only`
-        return _local_merge_item(ctx, where, rest, True)
+        return _local_merge_item(ctx, where, rest, True, git_fence.split_git_args(args)[0])
     if sub == "reset":
         return "irreversible_delete" if "--hard" in rest else None
     if sub == "branch":
@@ -419,13 +419,13 @@ def _git_item(args: list[str], ctx: Context, redirected: bool) -> str | None:
     return None
 
 
-def _local_merge_item(ctx: "Context", where: list, rest: list[str], is_pull: bool) -> str | None:
-    """Mục của `git merge`/`git pull`. Ở `main`: chế độ mở (có `main-local-merge`) chặn mọi gộp cục bộ, trừ `pull --ff-only` của repo
+def _local_merge_item(ctx: "Context", where: list, rest: list[str], is_pull: bool, globals_: list[str] | None = None) -> str | None:
+    """Mục của `git merge`/`git pull`. Ở `main`: chế độ mở (có `main-local-merge`) chặn mọi gộp cục bộ, trừ `git pull --ff-only` TRẦN của repo
     `push-only` (chỉ tiến con trỏ theo remote, không tạo commit gộp); chế độ secure giữ `main_merge`. Nhánh khác: `branch_merge_local` như cũ."""
     if ctx.on_main(where):
         if MAIN_LOCAL_MERGE not in ctx.active:
             return "main_merge"
-        if is_pull and git_fence.plain_ff_pull(rest) and _repo_is_push_only(ctx, where):
+        if is_pull and git_fence.plain_ff_pull(rest, globals_) and _repo_is_push_only(ctx, where):
             return None
         return MAIN_LOCAL_MERGE
     return "branch_merge_local" if "branch_merge_local" in ctx.active else None

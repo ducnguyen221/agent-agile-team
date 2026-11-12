@@ -37,7 +37,7 @@ Danh sách là file JSON do **Đức** đặt ngoài repo, đường trong biế
 - Khớp **một trong hai** của `git_common_dir` hoặc `remote_urls`. `protected_branches` chỉ **thêm** vào `main`, `master` và nhánh
   mặc định của remote. `level` tuỳ chọn, mặc định `full`.
 - **`full`:** bảng đầy đủ ở mục 4. **`push-only`:** chỉ áp nhóm đẩy, gộp PR, tag, remote, release; **không** chặn `commit` và
-  `pull --ff-only` cục bộ trên nhánh chính, và hạ `cherry-pick`, `reset`, `rebase` từ cấm xuống hỏi — nghĩa là mất rào
+  đúng dạng trần `git pull --ff-only` (không remote, nhánh, cờ khác; tuỳ chọn toàn cục chỉ `-C <thư mục>`) cục bộ trên nhánh chính, và hạ `cherry-pick`, `reset`, `rebase` từ cấm xuống hỏi — nghĩa là mất rào
   chặn cứng với lệnh viết lại lịch sử cục bộ, còn hỏi từng lần. Mức này dành cho repo mà chủ làm việc thẳng trên `main` (ví dụ kho gốc của một workspace), nơi chặn cứng `commit` sẽ chặn cả việc ghi hồ sơ hằng ngày.
 - Biến phải tới được **tiến trình hook**: đặt ở mức Người dùng của hệ điều hành rồi khởi động lại ứng dụng Claude; đặt trong
   profile PowerShell hay một cửa sổ terminal là không đủ. Biến vắng hay file hỏng → dấu hiệu 1 "không xác định", mức mặc
@@ -62,7 +62,7 @@ guard không tính được thư mục thật nên **coi là nhánh được b�
 | `git tag` tạo | hỏi (có file dấu: chặn) | như `full` |
 | `git tag -d`, `git remote set-url\|add\|remove\|rename`, `git config` ghi `remote.*`/`url.*`/`core.hooksPath`, `--no-verify` | **cấm** | như `full` |
 | `git merge` cục bộ vào nhánh được bảo vệ | hỏi | hỏi |
-| `git commit`, `git pull` khi đang ở nhánh được bảo vệ | **cấm** | tự làm (`pull` chỉ `--ff-only`) |
+| `git commit`, `git pull` khi đang ở nhánh được bảo vệ | **cấm** | tự làm (`pull` chỉ dạng trần `git pull --ff-only`; dạng khác: hỏi) |
 | `git cherry-pick`, `git reset`, `git rebase` khi đang ở nhánh được bảo vệ | **cấm** | hỏi |
 | `gh pr merge` | hỏi (có file dấu: cấm) | như `full` |
 | `gh release …` | **cấm** | như `full` |

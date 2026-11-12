@@ -166,7 +166,13 @@ def test_keep_ask_false_without_marker_or_with_secure_or_corrupt_marker(tmp_path
 # --- sửa theo soát độc lập (RF2): `pull --ff-only` chỉ miễn khi thật sự chỉ tiến con trỏ theo upstream ----------------
 
 @pytest.mark.parametrize("cmd", ["git pull --ff-only --no-ff origin feat", "git pull --ff-only --rebase", "git pull --ff-only origin feat",
-                                 "git pull --ff-only . feat", "git pull --ff-only --squash origin", "git pull --rebase --ff-only"])
+                                 "git pull --ff-only . feat", "git pull --ff-only --squash origin", "git pull --rebase --ff-only",
+                                 "git pull --ff-only --no-ff-only", "git -c branch.main.merge=refs/heads/feat pull --ff-only",
+                                 "git pull --ff-only ../wt-feat", "git pull --ff-only https://h/r.git", "git pull --ff-only --ff-only",
+                                 "git pull -ff-only", "git pull --ff-only=false", "git pull --ff-o", "git pull --reb", "git pull --squ",
+                                 "git pull --no-com", "git pull -qr", "git pull --ff-only -q", "git pull --ff-only origin main",
+                                 "git pull --ff-only origin refs/heads/a:refs/heads/b", "git pull --ff-only origin +x",
+                                 "git pull --ff-only origin a..b", "git --config-env=a=B pull --ff-only", "git --exec-path=/x pull --ff-only"])
 def test_pull_ff_only_with_override_flag_or_refspec_stays_blocked_on_push_only_main(tmp_path, monkeypatch, cmd):
     repo = make_repo(tmp_path, branch="main", marker=open_marker())
     _force_level(monkeypatch, "push-only")
