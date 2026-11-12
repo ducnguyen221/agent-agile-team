@@ -350,7 +350,9 @@ def test_workflow_floor_step_does_not_call_a_bare_tar():
     text = WORKFLOW.read_text(encoding="utf-8")
     step = text[text.index("name: Floor vs base"):]
     step = step[:step.index("floor_check.py")]
-    assert "| /usr/bin/tar -x" in step and "| tar " not in step
+    assert "/usr/bin/tar -x" in step and "| tar " not in step
+    # GNU tar đọc `D:` trong `-C "D:\a\_temp/..."` là máy từ xa (Windows runner): không đưa đường Windows cho `-C`, vào thư mục bằng `cd` trong subshell.
+    assert "tar -x -C" not in step and '(cd "$base_dir" && /usr/bin/tar -x)' in step
 
 
 def test_ci_step_tests_call_the_bash_that_which_resolved():
