@@ -12,7 +12,7 @@ skill_sha: b0a86387e9d7c0f352a1be4da1cc4a0dd0419de0
 
 > **Kết luận:** nền (không skill) trượt CM-3 (diễn giải đúng dữ kiện) cả 3 lượt; có skill đạt 3/3 ở CM-3, CM-4, CM-4b. **CM-4 và
 > CM-4b nền đã đạt sẵn** (0/3 trượt), nên hai kịch bản này không phân biệt được có/không skill — SC4 chưa chứng minh
-> được bằng phép thử này (CO, chủ: điều phối). Ca "chưa hiểu" để xem skill nào chạy (RK6) **chưa đo**: skill chưa cài vào danh mục
+> được bằng phép thử này (CO, chủ: điều phối). CM-3 được chạy lại trên bản skill cuối (3/3), nhưng bảng lỗi của `SKILL.md` dùng cùng dữ kiện CM-3 (`5 → 20 kết nối`, p95) nên lần chạy lại **bị nhiễm**, không tính bằng chứng độc lập (Tech Review 2, RF3 — chờ quyết: đổi ví dụ rồi chạy lại hoặc giữ kịch bản held-out). CM-4/CM-4b chỉ đo trên cây đầu. Ca "chưa hiểu" để xem skill nào chạy (RK6) **chưa đo**: skill chưa cài vào danh mục
 > của harness, subagent được ép đọc file skill.
 
 Prompt nguyên văn: `tests/scenarios.txt`. RED: "không dùng Skill tool, không mở SKILL.md". GREEN: thêm dòng "đọc

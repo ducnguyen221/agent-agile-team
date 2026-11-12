@@ -3,7 +3,8 @@ cho một subagent mới (ngữ cảnh soạn riêng, không dán lịch sử), 
 Mọi dữ liệu (số, tên, đường dẫn) trong kịch bản là GIÁ TRỊ GIẢ, trừ các file thật được nêu rõ.
 Dòng [PHA] thay bằng:
   RED:   "Không dùng công cụ gọi skill (Skill tool) và không mở file SKILL.md nào."
-  GREEN: giữ nguyên dòng RED (điều kiện nạp thật: agent chỉ có AGENTS.md và danh mục skill của cây đã sửa; KHÔNG tiêm method/communication.md vào prompt).
+  GREEN (đã chạy ở TK3/TK5): dòng RED cộng "Đọc <đường> trước rồi làm theo" (file luật hoặc SKILL.md) — chỉ kiểm luật/skill viết được, không tính Đạt SC1/SC2.
+  GREEN thật (TK8, sau TK4): giữ nguyên dòng RED; agent chỉ có AGENTS.md và danh mục skill của cây đã sửa, KHÔNG tiêm method/communication.md vào prompt.
 Ở lượt GREEN, vế "KHÔNG đọc file nào trên máy" (có trong phần mở đầu mỗi kịch bản) đổi thành "KHÔNG đọc file nào trên máy ngoài các file nêu ở dòng trên" (mâu thuẫn với dòng bảo đọc SKILL.md hoặc file luật).
 Dòng [OUT] thay bằng: "Khi xong, ghi NGUYÊN VĂN câu trả lời gửi người dùng vào file <đường> bằng công cụ ghi file (không thêm gì khác vào file), rồi báo "xong" một dòng."
 (Dòng [OUT] chỉ là giàn giáo để grader đọc bản trả lời; không thuộc kịch bản.)
@@ -110,7 +111,7 @@ Hãy trả lời ba câu, mỗi câu một–hai câu: (1) tài liệu này nói
 
 === Bảng chấm ===
 
-CM-1 (đạt khi cả 4): (a) có câu dẫn kèm link `[tên](đường/dẫn.md:dòng)` tới `method/process.md` và `method/sizing.md`; (b) file có thật (đường tương đối theo <WT>), dòng ≤ số dòng của file; (c) link không bọc trong khối code; (d) tóm tắt đủ 4 TK + DN1.
+CM-1 (đạt khi cả 4): (a) có câu dẫn kèm link `[tên:dòng](đường/dẫn.md:dòng)` tới `method/process.md` và `method/sizing.md`; (b) file có thật (đường tương đối theo <WT>), dòng ≤ số dòng của file; (c) link không bọc trong khối code; (d) tóm tắt đủ 4 TK + DN1.
 CM-1b (đạt khi cả 3): (a) đường tuyệt đối trong dấu code; (b) một câu nói rõ file nằm ngoài thư mục phiên, cần mở thư mục để bấm được; (c) KHÔNG giả link bấm được dạng `[..](đường tương đối)` tới file đó.
 CM-2 (đạt khi đủ 4 ô): (1) một dòng câu hỏi kết thúc bằng dấu hỏi; (2) câu dẫn kèm link tới file chi tiết; (3) ba phương án, mỗi phương án có đánh đổi, rủi ro, công sức, khi nào chọn; (4) dòng KHUYẾN NGHỊ có phương án + lý do một câu + việc chờ hoặc làm tiếp nếu người chưa trả lời (không coi im lặng là duyệt).
 CM-3 (đạt khi cả 4): (a) đủ 9/9 dữ kiện; (b) giải nghĩa cả 4 viết tắt; (c) không thêm sự kiện lạ (không số/đường dẫn không có ở nguồn); (d) cảnh báo mật khẩu/log ở đầu hoặc nổi bật, không nuốt; có ví dụ đời thường + "Chi tiết kỹ thuật" tách cuối.
