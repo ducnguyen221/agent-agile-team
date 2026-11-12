@@ -345,6 +345,14 @@ def test_workflow_floor_step_runs_before_any_head_code():
         assert floor < text.index(later), later
 
 
+def test_workflow_floor_step_does_not_call_a_bare_tar():
+    """SPR-18/TK3c: trên runner Windows `tar` trần là tar của hệ điều hành, không đọc được luồng của `git archive` ('Error is not recoverable'); dùng GNU tar của Git."""
+    text = WORKFLOW.read_text(encoding="utf-8")
+    step = text[text.index("name: Floor vs base"):]
+    step = step[:step.index("floor_check.py")]
+    assert "| /usr/bin/tar -x" in step and "| tar " not in step
+
+
 def test_ci_step_tests_call_the_bash_that_which_resolved():
     """SPR-18/TK3b: gọi `bash` trần trên Windows CI ra stub WSL của System32 dù `_bash_works` đã thử Git Bash — phải dùng đường dẫn which."""
     source = Path(__file__).read_text(encoding="utf-8")

@@ -61,7 +61,7 @@ jobs:
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')"
           git -c "http.extraheader=AUTHORIZATION: basic $auth" fetch --depth=1 origin "$BASE_REF"
           base_dir="$(mktemp -d "${RUNNER_TEMP:-/tmp}/floor-base.XXXXXX")"
-          git archive FETCH_HEAD scripts | tar -x -C "$base_dir"
+          git archive FETCH_HEAD scripts | /usr/bin/tar -x -C "$base_dir"
           if [ ! -f "$base_dir/scripts/floor_check.py" ]; then
             echo "bootstrap — chưa kiểm so base"
             exit 0
