@@ -69,14 +69,19 @@ guard không tính được thư mục thật nên **coi là nhánh được b�
 | `git status`, `log`, `diff`, `fetch`, `branch`, `checkout` sang nhánh khác, `commit` trên nhánh không được bảo vệ | tự làm | tự làm |
 
 "Hỏi": Claude trả quyết định hỏi (Đức bấm cho phép trong phiên = lời gật của phiên đó); Codex và Antigravity chưa có tầng
-hỏi nên "hỏi" là **chặn**, kèm lý do "Đức tự chạy". Với file dấu autopilot, mọi "hỏi" chặn trừ đẩy đúng hợp đồng đích.
+hỏi nên "hỏi" là **chặn**, kèm lý do "Đức tự chạy". Với file dấu autopilot, mọi "hỏi" chặn trừ đẩy đúng hợp đồng đích —
+**ngoại lệ (SPR-20):** file dấu `mode: open`, sự kiện đến từ **phiên chính** của Claude (không `agent_id`, không `agent_type`) ở
+`permission_mode` `auto` hoặc `bypassPermissions` (hai mode đã đo, `baseline-measure.md` mục 5) thì "hỏi" **giữ là hỏi**: Đức bấm trong
+hộp; subagent, Codex, Antigravity, mode chưa đo, file dấu hỏng hay `secure` vẫn chặn.
 Trong phiên không có người bấm (`claude -p`, subagent không giao tiếp, tác vụ nền), "hỏi" thành chặn — xem mục 7.
 
 ## 5. `gh`: ba nhóm
 
-- **Cho qua (đọc):** `pr view|list|status|checks|diff`, `repo view`, `run list|view`, `issue view|list`, `auth status`, `gh api`
-  bằng GET.
-- **Hỏi:** `pr create|comment|review|checkout`, `issue comment` (tự làm khi file dấu có `+đẩy-nhánh`).
+- **Cho qua (đọc):** `pr view|list|status|checks|diff`, `repo view`, `run list|view|watch`, `issue view|list`, `label list`,
+  `auth status`, `gh api` bằng GET.
+- **Hỏi, nhóm A:** `pr create|comment|review|checkout|ready`, `issue comment`, `run rerun` (tự làm khi file dấu có hợp đồng
+  đích khớp: `+đẩy-nhánh` ở `secure`, chế độ mở).
+- **Hỏi, nhóm B (không bao giờ tự làm):** `label create`, `pr edit`, `issue create`.
 - **Cấm:** `gh api` có phương thức ghi (`-X`/`--method` khác GET, `-f`, `-F`, `--input`), `release`, mọi lệnh con ngoài danh
   sách — kể cả alias như `gh ship`. `gh pr merge` xem bảng ở mục 4.
 - `gh` có `-R`/`--repo` hay đường `repos/<chủ>/<repo>`: áp quyền nếu thư mục làm việc là repo được bảo vệ **hoặc** repo đích

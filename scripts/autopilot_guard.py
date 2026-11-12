@@ -1376,6 +1376,22 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
                     break
 
 
+KEEP_ASK_MODES = ("auto", "bypassPermissions")  # `permission_mode` mà phép đo TK1 (13/11) thấy hook "ask" không bị nuốt: evidence/baseline-measure.md mục 5
+
+
+def _keep_ask(payload: dict, marker: str | None) -> bool:
+    """Đề xuất C (SPR-20): "hỏi" của rào git giữ là hỏi khi file dấu ở `mode: open`, sự kiện đến từ phiên chính (không `agent_id`/`agent_type`)
+    của Claude (có `permission_mode` đã đo). Mọi trường hợp khác — subagent, Codex, Antigravity, mode chưa đo, file dấu hỏng/secure — giữ chặn."""
+    if not marker or payload.get("agent_id") or payload.get("agent_type") or payload.get("permission_mode") not in KEEP_ASK_MODES:
+        return False
+    try:
+        with open(marker, encoding="utf-8-sig") as handle:
+            data = json.load(handle)
+    except (OSError, ValueError):
+        return False
+    return isinstance(data, dict) and data.get("mode") == "open"
+
+
 def _fence_decision(payload: dict, env) -> Decision | None:
     command_dir, session_dir = _event_dirs(payload)
     name = _tool_name(payload)
@@ -1396,8 +1412,8 @@ def _fence_decision(payload: dict, env) -> Decision | None:
     if not segments:
         return None
     contract = load_push_contract(marker) if marker else None
-    verdict = git_fence.classify(segments, git_fence.FenceContext(command_dir, env, git_fence.default_runner,
-                                                                  marker=bool(marker), contract=contract))
+    verdict = git_fence.classify(segments, git_fence.FenceContext(command_dir, env, git_fence.default_runner, marker=bool(marker),
+                                                                  contract=contract, keep_ask=_keep_ask(payload, marker)))
     if verdict.kind == git_fence.FORBID:
         return Decision("deny", verdict.reason)
     if verdict.kind == git_fence.ASK:

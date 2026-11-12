@@ -42,9 +42,11 @@ CONFIG_VALUE_FLAGS = frozenset({"--type", "--default", "-f", "--file", "--blob",
 REMOTE_WRITE = frozenset({"set-url", "add", "remove", "rm", "rename", "set-head", "set-branches", "prune"})
 GH_READ = (("pr", frozenset({"view", "list", "status", "checks", "diff"})), ("repo", frozenset({"view"})),
            ("release", frozenset({"list", "view"})),
-           ("run", frozenset({"list", "view"})), ("issue", frozenset({"view", "list"})), ("auth", frozenset({"status"})),
-           ("status", frozenset({None})), ("version", frozenset({None})))
-GH_ASK = (("pr", frozenset({"create", "comment", "review", "checkout"})), ("issue", frozenset({"comment"})))
+           ("run", frozenset({"list", "view", "watch"})), ("issue", frozenset({"view", "list"})), ("auth", frozenset({"status"})),
+           ("label", frozenset({"list"})), ("status", frozenset({None})), ("version", frozenset({None})))
+GH_ASK = (("pr", frozenset({"create", "comment", "review", "checkout", "ready"})), ("issue", frozenset({"comment"})),
+          ("run", frozenset({"rerun"})))  # nhóm A: có file dấu + hợp đồng đích khớp thì tự làm (SPR-20 CQ4)
+GH_ASK_ONLY = (("label", frozenset({"create"})), ("pr", frozenset({"edit"})), ("issue", frozenset({"create"})))  # nhóm B: luôn hỏi, không tự làm
 KNOWN_SUBS = frozenset({
     "status", "log", "diff", "show", "fetch", "branch", "checkout", "switch", "stash", "add", "restore", "rm", "mv", "clean", "init",
     "clone", "remote", "config", "tag", "merge", "commit", "pull", "push", "rebase", "reset", "cherry-pick", "revert", "blame", "grep",
@@ -474,8 +476,9 @@ def guarded_write(paths: list, base: str, env: Mapping) -> Optional[str]:
 
 class FenceContext:
     def __init__(self, cwd: str, env: Mapping, runner: Runner, marker: bool = False, contract: Optional[dict] = None,
-                 budget: Optional[Budget] = None) -> None:
+                 budget: Optional[Budget] = None, keep_ask: bool = False) -> None:
         self.cwd, self.env, self.marker, self.contract = os.path.abspath(cwd), env, marker, contract
+        self.keep_ask = keep_ask  # đề xuất C (SPR-20 FR4.4): sự kiện từ phiên chính, chế độ mở → "hỏi" giữ là hỏi (người bấm), không đổi thành chặn
         self.budget = budget or Budget(runner)
         self.runner = runner
         self._signals: dict = {}
@@ -488,8 +491,8 @@ class FenceContext:
 
 
 def _verdict(kind: str, code: str, what: str, ctx: FenceContext) -> Verdict:
-    """'Hỏi' thành chặn khi đang có file dấu autopilot (FR4.2): không ai bấm được."""
-    if kind == ASK and ctx.marker:
+    """'Hỏi' thành chặn khi đang có file dấu autopilot (FR4.2): không ai bấm được — trừ khi `keep_ask` (phiên chính, chế độ mở, hộp hỏi đã đo)."""
+    if kind == ASK and ctx.marker and not ctx.keep_ask:
         kind = FORBID
     tail = "cần Đức nói trong chat — lệnh không chạy" if kind == FORBID else ASK_TAIL
     return Verdict(kind, "git-fence: '{}' trong repo được bảo vệ {} [{}]".format(what, tail, code), code)
@@ -838,6 +841,11 @@ def _gh_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
                     return _verdict(FORBID, "gh-repo-mismatch", "gh {} {} sang repo khác repo đã xác minh".format(head, action), ctx)
                 return Verdict(AUTO)
             return _verdict(ASK, "gh-ask", "gh {} {}".format(head, action), ctx)
+    for name, actions in GH_ASK_ONLY:
+        if head == name and action in actions:
+            if seg.redirected:
+                return _verdict(FORBID, "gh-env", "gh với biến GH_* (đổi repo/host đích)", ctx)
+            return _verdict(ASK, "gh-ask-b", "gh {} {}".format(head, action), ctx)
     if not head and not flags:
         return Verdict()
     return _verdict(FORBID, "gh-unlisted", "gh " + " ".join(plain[:2]), ctx)

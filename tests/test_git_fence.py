@@ -707,3 +707,61 @@ def test_alias_chain_beyond_the_limit_closes(tmp_path):
         add_alias(repo, first, second)
     add_alias(repo, "f", "push")
     assert verdict("git a origin HEAD:main", repo).kind == gf.FORBID
+
+
+# --- SPR-20 TK5: gh nhóm A/B, "hỏi" giữ là hỏi (đề xuất C) ---------------------------------------------------------
+
+def keep(repo, cmd, env=None, contract=None, keep_ask=True, marker=True, **kw):
+    ctx = gf.FenceContext(str(repo), env or {}, Fake({INDEX_CALL: (0, "")}), marker=marker, contract=contract, keep_ask=keep_ask)
+    return gf.classify([seg(cmd, repo, **kw)], ctx)
+
+
+@pytest.mark.parametrize("cmd", ["gh label list", "gh run watch 5", "gh run list", "gh pr checks 3"])
+def test_gh_read_group_includes_label_list_and_run_watch(tmp_path, cmd):
+    assert verdict(cmd, make_repo(tmp_path, agile=True)).kind == gf.NONE
+
+
+@pytest.mark.parametrize("cmd", ["gh label create bug", "gh pr edit 3 --title x", "gh issue create --title x"])
+def test_gh_group_b_asks_without_marker(tmp_path, cmd):
+    assert verdict(cmd, make_repo(tmp_path, agile=True)).kind == gf.ASK
+
+
+@pytest.mark.parametrize("cmd", ["gh label create bug", "gh pr edit 3 --title x", "gh issue create --title x"])
+def test_gh_group_b_is_forbidden_with_marker_but_asks_when_kept(tmp_path, cmd):
+    repo = make_repo(tmp_path, agile=True)
+    assert keep(repo, cmd, keep_ask=False).kind == gf.FORBID
+    assert keep(repo, cmd, keep_ask=True).kind == gf.ASK
+
+
+def test_gh_group_b_never_becomes_auto_even_with_a_verified_contract(tmp_path):
+    repo = make_repo(tmp_path, agile=True)
+    for cmd in ("gh pr edit 3 --title x", "gh issue create --title x", "gh label create bug"):
+        assert keep(repo, cmd, env=listed(repo), contract=contract_for(repo)).kind == gf.ASK
+
+
+@pytest.mark.parametrize("cmd", ["gh pr ready 3", "gh run rerun 5", "gh pr create --title x", "gh pr comment 1 --body x"])
+def test_gh_group_a_is_auto_with_marker_listed_repo_and_contract(tmp_path, cmd):
+    repo = make_repo(tmp_path, agile=True)
+    assert keep(repo, cmd, env=listed(repo), contract=contract_for(repo), keep_ask=False).kind == gf.AUTO
+
+
+def test_gh_group_a_without_contract_follows_the_keep_rule(tmp_path):
+    repo = make_repo(tmp_path, agile=True)
+    assert keep(repo, "gh run rerun 5", keep_ask=False).kind == gf.FORBID
+    assert keep(repo, "gh run rerun 5", keep_ask=True).kind == gf.ASK
+
+
+def test_keep_ask_does_not_soften_forbidden_commands(tmp_path):
+    repo = make_repo(tmp_path, agile=True)
+    for cmd in ("gh api repos/o/r/issues -X POST", "gh release create v1", "gh pr merge 12", "gh ship 1", "git push --force origin x"):
+        assert keep(repo, cmd, env=listed(repo), contract=contract_for(repo)).kind == gf.FORBID, cmd
+
+
+def test_keep_ask_turns_a_marker_git_ask_back_into_ask(tmp_path):
+    repo = make_repo(tmp_path, branch="x", agile=True)
+    assert keep(repo, "git tag v1", keep_ask=False).kind == gf.FORBID
+    assert keep(repo, "git tag v1", keep_ask=True).kind == gf.ASK
+
+
+def test_fence_context_defaults_to_not_keeping_ask(tmp_path):
+    assert gf.FenceContext(str(tmp_path), {}, Fake(), marker=True).keep_ask is False

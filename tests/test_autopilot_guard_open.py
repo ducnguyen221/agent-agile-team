@@ -128,6 +128,42 @@ def test_open_marker_pull_ff_only_on_main_blocked_when_repo_is_full(tmp_path, mo
     assert_blocked(repo, "git pull --ff-only", "main-local-merge")
 
 
+def _marker_path(repo):
+    return str(repo / ".tmp" / "autopilot.json")
+
+
+@pytest.mark.parametrize("mode", ["auto", "bypassPermissions"])
+def test_keep_ask_main_session_open_marker_measured_modes(tmp_path, mode):
+    repo = make_repo(tmp_path, marker=open_marker())
+    assert autopilot_guard._keep_ask({"permission_mode": mode}, _marker_path(repo)) is True
+
+
+@pytest.mark.parametrize("payload", [
+    {"permission_mode": "auto", "agent_id": "a1"}, {"permission_mode": "auto", "agent_type": "general-purpose"},
+    {"permission_mode": "default"}, {"permission_mode": "plan"}, {}], ids=["agent_id", "agent_type", "default-unmeasured", "plan-unmeasured", "no-mode-codex"])
+def test_keep_ask_false_for_subagent_other_host_or_unmeasured_mode(tmp_path, payload):
+    repo = make_repo(tmp_path, marker=open_marker())
+    assert autopilot_guard._keep_ask(payload, _marker_path(repo)) is False
+
+
+def test_keep_ask_false_without_marker_or_with_secure_or_corrupt_marker(tmp_path):
+    assert autopilot_guard._keep_ask({"permission_mode": "auto"}, None) is False
+    secure = make_repo(tmp_path / "s", marker=good_marker())
+    assert autopilot_guard._keep_ask({"permission_mode": "auto"}, _marker_path(secure)) is False
+    broken = make_repo(tmp_path / "b", marker="{not json")
+    assert autopilot_guard._keep_ask({"permission_mode": "auto"}, _marker_path(broken)) is False
+
+
+def test_end_to_end_main_session_gets_ask_and_subagent_gets_deny(tmp_path):
+    repo = make_repo(tmp_path, branch="release", marker=open_marker())
+    main_session = dict(claude("gh label create bug", repo), permission_mode="auto")
+    subagent = dict(main_session, agent_id="a1")
+    rc_main, out_main, err_main = run("claude", main_session)
+    rc_sub, out_sub, err_sub = run("claude", subagent)
+    assert rc_main == 0 and '"ask"' in out_main, (rc_main, out_main, err_main)
+    assert rc_sub == 2 and "gh-ask-b" in err_sub, (rc_sub, out_sub, err_sub)
+
+
 def test_corrupt_marker_blocks_thirteen(tmp_path):
     repo = make_repo(tmp_path, marker="{not json")
     active, broken = autopilot_guard.load_active(str(repo / ".tmp" / "autopilot.json"))
