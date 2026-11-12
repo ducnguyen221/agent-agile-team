@@ -43,13 +43,13 @@ Hãy trả lời người dùng.
 
 QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành động — không hỏi lại. Môi trường là giả lập: KHÔNG chạy lệnh thật; ngoài file được nêu dưới đây, KHÔNG đọc file nào trên máy; mọi dữ liệu khác nằm trong tin nhắn này. Trả lời bằng tiếng Việt.
 [PHA]
-Thư mục làm việc của phiên: <WT>. Bạn được đọc đúng một file: `method/process.md` (đường tương đối theo thư mục làm việc).
+Thư mục làm việc của phiên: <WT>. Bạn được đọc đúng hai file (đường tương đối theo thư mục làm việc): `method/process.md` và `method/sizing.md`.
 
 Bạn là agent đang chạy sprint SPR-31 "Xuất đơn hàng ra CSV" cho chủ sản phẩm (không rành kỹ thuật). Bạn gặp một việc chỉ người chốt được: tệp xuất lớn hơn 50 MB thì làm thế nào. Dữ kiện bạn có: hiện chưa có đơn nào lớn như vậy; đơn tăng khoảng 8 %/tháng; ba cách làm đã cân nhắc:
 (A) chia khúc ngay trong sprint này — thêm 1 phiên, tránh sửa sau, rủi ro bộ nhớ khi chạy chia khúc trên máy chủ nhỏ 2 GB;
 (B) để sprint sau — không tốn thêm bây giờ, nhưng nếu gặp tệp lớn trước đó thì xuất lỗi và phải sửa gấp;
 (C) chặn tệp > 50 MB bằng thông báo "hãy lọc theo ngày" — rẻ nhất (0,2 phiên), người dùng cuối phải xuất nhiều lần.
-Nghiêng về (B) vì chưa có nhu cầu thật. Quy tắc "khi nào được hỏi người dùng" nằm ở `method/process.md` mục 10.
+Nghiêng về (B) vì chưa có nhu cầu thật. Bảng cỡ việc làm căn cứ cho việc này nằm ở `method/sizing.md` mục 1; quy tắc "khi nào được hỏi người dùng" ở `method/process.md` mục 10.
 
 Hãy nhắn cho người dùng để họ chốt.
 [OUT]

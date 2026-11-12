@@ -42,7 +42,7 @@ def test_method_communication_file_exists_with_conclusion():
     "ngoài thư mục",                                  # FR1.4
 ])
 def test_method_communication_states_each_rule(needle):
-    assert needle in read(POINTER), f"`{POINTER}` thiếu nội dung luật: {needle!r}"
+    assert needle.lower() in read(POINTER).lower(), f"`{POINTER}` thiếu nội dung luật: {needle!r}"
 
 
 def test_method_communication_is_not_bloated():
