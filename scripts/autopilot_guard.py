@@ -425,7 +425,7 @@ def _local_merge_item(ctx: "Context", where: list, rest: list[str], is_pull: boo
     if ctx.on_main(where):
         if MAIN_LOCAL_MERGE not in ctx.active:
             return "main_merge"
-        if is_pull and "--ff-only" in rest and _repo_is_push_only(ctx, where):
+        if is_pull and git_fence.plain_ff_pull(rest) and _repo_is_push_only(ctx, where):
             return None
         return MAIN_LOCAL_MERGE
     return "branch_merge_local" if "branch_merge_local" in ctx.active else None
@@ -434,8 +434,10 @@ def _local_merge_item(ctx: "Context", where: list, rest: list[str], is_pull: boo
 def _repo_is_push_only(ctx: "Context", where: list) -> bool:
     """Mọi thư mục lệnh chạy thuộc repo khai mức `push-only` trong `AGENT_AGILE_PROTECTED_REPOS`; không xác định được → False (đóng)."""
     env = getattr(ctx, "env", os.environ)
+    if not where or any(d is None for d in where):
+        return False  # `cd`, `--git-dir`, GIT_DIR: không biết lệnh chạy ở repo nào, không mượn mức của cwd
     try:
-        dirs = [d for d in where if d] or [ctx.cwd]
+        dirs = [d for d in where if d]
         return all(git_fence.protection(d, env, git_fence.default_runner, marker=True, need_index=False).level == "push-only" for d in dirs)
     except Exception:  # noqa: BLE001
         return False
@@ -1376,20 +1378,20 @@ def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
                     break
 
 
-KEEP_ASK_MODES = ("auto", "bypassPermissions")  # `permission_mode` mà phép đo TK1 (13/11) thấy hook "ask" không bị nuốt: evidence/baseline-measure.md mục 5
+KEEP_ASK_MODES = ("bypassPermissions",)  # chỉ mode mà hộp hỏi không do bộ phân loại tự quyết; `auto` chưa đo ở phiên tương tác (soát RF3) → `CO` trước Cổng 2; evidence/baseline-measure.md mục 5
 
 
 def _keep_ask(payload: dict, marker: str | None) -> bool:
     """Đề xuất C (SPR-20): "hỏi" của rào git giữ là hỏi khi file dấu ở `mode: open`, sự kiện đến từ phiên chính (không `agent_id`/`agent_type`)
     của Claude (có `permission_mode` đã đo). Mọi trường hợp khác — subagent, Codex, Antigravity, mode chưa đo, file dấu hỏng/secure — giữ chặn."""
-    if not marker or payload.get("agent_id") or payload.get("agent_type") or payload.get("permission_mode") not in KEEP_ASK_MODES:
+    if not marker or payload.get("agent_id") is not None or payload.get("agent_type") is not None or payload.get("permission_mode") not in KEEP_ASK_MODES:
         return False
     try:
         with open(marker, encoding="utf-8-sig") as handle:
             data = json.load(handle)
     except (OSError, ValueError):
         return False
-    return isinstance(data, dict) and data.get("mode") == "open"
+    return isinstance(data, dict) and data.get("mode") == "open" and isinstance(data.get("exclusions"), list)  # `exclusions` hỏng = file dấu hỏng
 
 
 def _fence_decision(payload: dict, env) -> Decision | None:

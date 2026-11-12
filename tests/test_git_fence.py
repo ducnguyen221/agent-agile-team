@@ -763,5 +763,20 @@ def test_keep_ask_turns_a_marker_git_ask_back_into_ask(tmp_path):
     assert keep(repo, "git tag v1", keep_ask=True).kind == gf.ASK
 
 
+@pytest.mark.parametrize("rest,expected", [
+    (["--ff-only"], True), (["--ff-only", "origin"], True), (["--ff-only", "origin", "feat"], False), (["--ff-only", "--no-ff"], False),
+    (["--ff-only", "--rebase"], False), (["--ff-only", "-r"], False), (["--ff-only", "."], False), (["origin"], False), ([], False)])
+def test_plain_ff_pull_only_moves_the_pointer_along_upstream(rest, expected):
+    assert gf.plain_ff_pull(rest) is expected
+
+
+def test_push_only_pull_ff_only_is_auto_but_override_flag_or_unknown_dir_asks(tmp_path):
+    repo = make_repo(tmp_path, branch="main", agile=True)
+    env = write_list(tmp_path, repo, level="push-only")
+    assert verdict("git pull --ff-only", repo, env=env).kind == gf.AUTO
+    assert verdict("git pull --ff-only --no-ff origin x", repo, env=env).kind == gf.ASK
+    assert verdict("git pull --ff-only", repo, env=env, cd=True).kind == gf.ASK
+
+
 def test_fence_context_defaults_to_not_keeping_ask(tmp_path):
     assert gf.FenceContext(str(tmp_path), {}, Fake(), marker=True).keep_ask is False

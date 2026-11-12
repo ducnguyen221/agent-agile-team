@@ -498,6 +498,18 @@ def _verdict(kind: str, code: str, what: str, ctx: FenceContext) -> Verdict:
     return Verdict(kind, "git-fence: '{}' trong repo được bảo vệ {} [{}]".format(what, tail, code), code)
 
 
+_PULL_MERGE_FLAGS = frozenset({"--no-ff", "--ff", "--squash", "--rebase", "-r", "--commit", "--no-commit"})
+
+
+def plain_ff_pull(rest: list) -> bool:
+    """`git pull --ff-only` chỉ tiến con trỏ theo upstream: có `--ff-only`, không cờ ghi đè (`--no-ff`, `--rebase`, `--squash`…),
+    không refspec ngoài remote (không kéo nhánh khác vào `main`), remote không phải `.` (nhánh cục bộ)."""
+    if "--ff-only" not in rest or any(a in _PULL_MERGE_FLAGS or a.startswith("--rebase=") for a in rest):
+        return False
+    positional = [a for a in rest if not a.startswith("-")]
+    return len(positional) <= 1 and positional[:1] != ["."]
+
+
 def _on_protected_branch(directory: Optional[str], ctx: FenceContext, sig: Signals) -> bool:
     """Nhánh hiện tại của thư mục là nhánh được bảo vệ? Không xác định được → True (đóng an toàn)."""
     if directory is None:
@@ -745,7 +757,7 @@ def _git_verdict(seg: Segment, ctx: FenceContext) -> Verdict:
             if sub == "commit":
                 return Verdict(AUTO)
             if sub == "pull":
-                return Verdict(AUTO) if "--ff-only" in rest else _verdict(ASK, "pull-ask", "pull", ctx)
+                return Verdict(AUTO) if plain_ff_pull(rest) and all(d is not None for d in directories) else _verdict(ASK, "pull-ask", "pull", ctx)
             return _verdict(ASK, sub + "-ask", sub + " trên nhánh được bảo vệ", ctx)
         return _verdict(FORBID, "protected-branch-" + sub, sub + " trên nhánh được bảo vệ", ctx)
     return Verdict()

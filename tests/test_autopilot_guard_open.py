@@ -132,31 +132,56 @@ def _marker_path(repo):
     return str(repo / ".tmp" / "autopilot.json")
 
 
-@pytest.mark.parametrize("mode", ["auto", "bypassPermissions"])
-def test_keep_ask_main_session_open_marker_measured_modes(tmp_path, mode):
+def test_keep_ask_main_session_open_marker_bypass_mode(tmp_path):
     repo = make_repo(tmp_path, marker=open_marker())
-    assert autopilot_guard._keep_ask({"permission_mode": mode}, _marker_path(repo)) is True
+    assert autopilot_guard._keep_ask({"permission_mode": "bypassPermissions"}, _marker_path(repo)) is True
+
+
+def test_keep_ask_false_when_open_marker_exclusions_key_is_broken(tmp_path):
+    marker = open_marker()
+    marker["exclusions"] = "all"  # soát RF4: khoá hỏng = file dấu hỏng, không giữ hỏi
+    repo = make_repo(tmp_path, marker=marker)
+    assert autopilot_guard._keep_ask({"permission_mode": "bypassPermissions"}, _marker_path(repo)) is False
 
 
 @pytest.mark.parametrize("payload", [
-    {"permission_mode": "auto", "agent_id": "a1"}, {"permission_mode": "auto", "agent_type": "general-purpose"},
-    {"permission_mode": "default"}, {"permission_mode": "plan"}, {}], ids=["agent_id", "agent_type", "default-unmeasured", "plan-unmeasured", "no-mode-codex"])
+    {"permission_mode": "bypassPermissions", "agent_id": "a1"}, {"permission_mode": "bypassPermissions", "agent_id": ""},
+    {"permission_mode": "bypassPermissions", "agent_type": "general-purpose"},
+    {"permission_mode": "auto"}, {"permission_mode": "default"}, {"permission_mode": "plan"}, {}],
+    ids=["agent_id", "agent_id-empty", "agent_type", "auto-unmeasured-interactive", "default-unmeasured", "plan-unmeasured", "no-mode-codex"])
 def test_keep_ask_false_for_subagent_other_host_or_unmeasured_mode(tmp_path, payload):
     repo = make_repo(tmp_path, marker=open_marker())
     assert autopilot_guard._keep_ask(payload, _marker_path(repo)) is False
 
 
 def test_keep_ask_false_without_marker_or_with_secure_or_corrupt_marker(tmp_path):
-    assert autopilot_guard._keep_ask({"permission_mode": "auto"}, None) is False
+    bypass = {"permission_mode": "bypassPermissions"}
+    assert autopilot_guard._keep_ask(bypass, None) is False
     secure = make_repo(tmp_path / "s", marker=good_marker())
-    assert autopilot_guard._keep_ask({"permission_mode": "auto"}, _marker_path(secure)) is False
+    assert autopilot_guard._keep_ask(bypass, _marker_path(secure)) is False
     broken = make_repo(tmp_path / "b", marker="{not json")
-    assert autopilot_guard._keep_ask({"permission_mode": "auto"}, _marker_path(broken)) is False
+    assert autopilot_guard._keep_ask(bypass, _marker_path(broken)) is False
+
+
+# --- sửa theo soát độc lập (RF2): `pull --ff-only` chỉ miễn khi thật sự chỉ tiến con trỏ theo upstream ----------------
+
+@pytest.mark.parametrize("cmd", ["git pull --ff-only --no-ff origin feat", "git pull --ff-only --rebase", "git pull --ff-only origin feat",
+                                 "git pull --ff-only . feat", "git pull --ff-only --squash origin", "git pull --rebase --ff-only"])
+def test_pull_ff_only_with_override_flag_or_refspec_stays_blocked_on_push_only_main(tmp_path, monkeypatch, cmd):
+    repo = make_repo(tmp_path, branch="main", marker=open_marker())
+    _force_level(monkeypatch, "push-only")
+    assert_blocked(repo, cmd, "main-local-merge")
+
+
+def test_pull_ff_only_after_cd_does_not_borrow_the_cwd_level(tmp_path, monkeypatch):
+    repo = make_repo(tmp_path, branch="main", marker=open_marker())
+    _force_level(monkeypatch, "push-only")
+    assert_blocked(repo, "cd .. && git pull --ff-only", "main-local-merge")
 
 
 def test_end_to_end_main_session_gets_ask_and_subagent_gets_deny(tmp_path):
     repo = make_repo(tmp_path, branch="release", marker=open_marker())
-    main_session = dict(claude("gh label create bug", repo), permission_mode="auto")
+    main_session = dict(claude("gh label create bug", repo), permission_mode="bypassPermissions")
     subagent = dict(main_session, agent_id="a1")
     rc_main, out_main, err_main = run("claude", main_session)
     rc_sub, out_sub, err_sub = run("claude", subagent)

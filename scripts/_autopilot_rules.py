@@ -165,6 +165,8 @@ def autopilot_problem(block: dict) -> tuple[str, str] | None:
             return "delegation.grant_at", f"autopilot chế độ mở: grant_at phải từ {MODE_OPEN_EFFECTIVE_DATE} trở đi (chế độ mở có từ ngày đó), đang là {block.get('grant_at')!r}"
         if secure_word:
             return "delegation.mode", "delegation.mode là open mà lời cấp là 'autopilot-secure': sửa mode thành secure"
+        if not grant_text.lstrip().startswith(AUTOPILOT_PREFIX) and level != "gate_1_2":
+            return "delegation.level", f"autopilot chế độ mở: lời cấp không phải lệnh 'Bật autopilot …' thì level phải là gate_1_2 (có Cổng 2), đang là {level!r}"
         try:
             want_mode, open_need = compute_mode(grant) if grant_text.lstrip().startswith(AUTOPILOT_PREFIX) else ("open", frozenset(OPEN_ALWAYS_BLOCKED))
         except ValueError as err:

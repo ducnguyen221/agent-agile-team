@@ -71,8 +71,8 @@ guard không tính được thư mục thật nên **coi là nhánh được b�
 "Hỏi": Claude trả quyết định hỏi (Đức bấm cho phép trong phiên = lời gật của phiên đó); Codex và Antigravity chưa có tầng
 hỏi nên "hỏi" là **chặn**, kèm lý do "Đức tự chạy". Với file dấu autopilot, mọi "hỏi" chặn trừ đẩy đúng hợp đồng đích —
 **ngoại lệ (SPR-20):** file dấu `mode: open`, sự kiện đến từ **phiên chính** của Claude (không `agent_id`, không `agent_type`) ở
-`permission_mode` `auto` hoặc `bypassPermissions` (hai mode đã đo, `baseline-measure.md` mục 5) thì "hỏi" **giữ là hỏi**: Đức bấm trong
-hộp; subagent, Codex, Antigravity, mode chưa đo, file dấu hỏng hay `secure` vẫn chặn.
+`permission_mode` `bypassPermissions` (đã đo ở `claude -p`, `baseline-measure.md` mục 5; `auto` chưa đo phiên tương tác nên giữ chặn)
+thì "hỏi" **giữ là hỏi**: Đức bấm trong hộp; subagent, Codex, Antigravity, mode chưa đo, file dấu hỏng hay `secure` vẫn chặn.
 Trong phiên không có người bấm (`claude -p`, subagent không giao tiếp, tác vụ nền), "hỏi" thành chặn — xem mục 7.
 
 ## 5. `gh`: ba nhóm

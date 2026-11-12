@@ -84,6 +84,14 @@ def test_open_block_valid_and_old_grant_at_invalid():
     assert problem and problem[0] == "delegation.grant_at"
 
 
+def test_open_mode_needs_gate_two_even_when_the_grant_has_no_command_prefix():
+    """Soát RF1: lời cấp không bắt đầu bằng 'Bật autopilot' không được lách điều kiện Cổng 2 của chế độ mở."""
+    block = open_block(grant="duyệt thay Cổng 1 cho SPR-9", level="gate_1", scope=["gate_1"])
+    problem = rules.autopilot_problem(block)
+    assert problem and problem[0] == "delegation.level" and "gate_1_2" in problem[1]
+    assert rules.autopilot_problem(open_block(grant="Mở SPR-9, trần 30 phiên.")) is None
+
+
 def test_exclusions_superset_ok():
     assert rules.autopilot_problem(open_block(exclusions=sorted(OPEN_ALWAYS | {"tag"}))) is None
 
