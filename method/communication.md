@@ -76,7 +76,8 @@ Chi tiết: [PLAN TK3:97](docs/plans/x/PLAN.md:97).
 **KHUYẾN NGHỊ:** B — chưa có đơn nào > 50 MB. Nếu anh chưa trả lời, em làm tiếp TK1–TK2 và giữ TK3 chờ.
 ```
 
-- Phần 2 (link) bỏ được khi câu hỏi không dựa trên file nào; câu hỏi có/không chỉ cần một dòng hỏi và dòng `KHUYẾN NGHỊ:`.
+- Phần 2 (link) chỉ bỏ được khi **không có file nào** chứa căn cứ hay chi tiết của quyết định; có file (dù mới biết
+  tên và mục, chưa biết dòng) thì vẫn link, trỏ cả file khi chưa có `:dòng`. Câu hỏi có/không không cần bảng.
 - Luôn có khuyến nghị khi người sẽ phải chọn; chưa có thì ghi "chưa có khuyến nghị vì …" và nêu tiêu chí để chọn.
   Cấm "tùy" không kèm tiêu chí.
 - Nhiều câu hỏi cùng lúc thì gom thành **một** tin, nêu số lượng đầu tin ("có 3 **quyết định** (DN) chờ anh:"), mỗi

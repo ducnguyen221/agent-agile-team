@@ -68,3 +68,4 @@ Gia hạn tự động chưa bật nên phải làm tay. Làm tay mất khoảng
 | Bỏ cảnh báo vì "nghe đáng sợ" | cảnh báo lên đầu, một câu rõ |
 | Đổi `5 → 20 kết nối` thành "tăng gấp bốn" | giữ số gốc; không thêm số tự tính |
 | Ví dụ làm sai nghĩa kỹ thuật | ví dụ chỉ để hiểu khái niệm; con số và hậu quả vẫn lấy từ nguồn |
+| Giải nghĩa thuật ngữ sai (vd p95 thành "người chậm nhất") | p95 = mức mà 95 % lượt nhanh hơn; không chắc nghĩa thì nói chung chung hoặc "nguồn không nói rõ", đừng đoán |
