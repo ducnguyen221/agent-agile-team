@@ -15,7 +15,7 @@ updated: 2026-11-07
 > có mã sản phẩm: tài liệu này **không áp dụng**.
 
 Nguồn ý: tài liệu BA của dự án FineFood (`docs/BA_ARCHITECTURE_CONVENTIONS.md` của repo FineFood, bản đọc
-2026-11-07, 184 dòng — ghi ở [UPSTREAM.md](../UPSTREAM.md)). Ký hiệu `BA:<dòng>` dưới đây trỏ dòng của bản đó.
+2026-11-07, 184 dòng). Ký hiệu `BA:<dòng>` dưới đây trỏ dòng của bản đó.
 
 ## 1. Hai không gian mã
 

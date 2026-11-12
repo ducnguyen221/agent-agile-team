@@ -12,6 +12,8 @@ rewrite_before_public: false
 
 # Vận hành dịch vụ trên Google Cloud (gcloud · Cloud Run · Cloud SQL · Secret Manager)
 
+> Dẫn xuất có sửa đổi từ tài liệu Apache-2.0 của Google; nguồn, bản quyền và giấy phép: xem NOTICE.
+
 > **Kết luận:** mọi lệnh `gcloud` đổi trạng thái chỉ chạy khi project, region và tên tài nguyên **đến từ người dùng
 > hoặc từ cấu hình thật**, sau khi đã `describe` hiện trạng; danh tính do người dùng dựng, agent không sửa hộ; secret
 > không bao giờ xuất hiện trong lời nhắn, tham số lệnh hay kết quả công cụ. Khi tài liệu hãng và hiện trạng khác nhau,

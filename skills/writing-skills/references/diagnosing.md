@@ -7,7 +7,7 @@
 > **song song theo chiều**. Giả thuyết của bất kỳ ai, kể cả reviewer, chỉ là giả thuyết tới khi có dòng chứng.
 
 Dùng khi người dùng hỏi "tại sao lâu / tốn / làm thừa / bỏ plan", skill không kích hoạt, sprint vượt ước lượng,
-hay cần dữ liệu cho bài học `LN` của bước 6. Viết lại từ phương pháp `diagnosing-superpowers` của Superpowers;
+hay cần dữ liệu cho bài học `LN` của bước 6. Phương pháp viết riêng cho repo này;
 phần gắn với một harness (nơi lưu phiên, định dạng bản ghi, nơi báo lỗi cho nhà phát triển) để lớp riêng.
 
 ## 1. Năm luật cứng

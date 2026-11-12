@@ -1,6 +1,5 @@
 # Giao việc song song
 
-<!-- Nguồn: obra/superpowers skills/dispatching-parallel-agents/SKILL.md @ 8ca22db (MIT). Viết lại. -->
 
 > **Kết luận:** chạy song song **chỉ** khi các việc độc lập — không chung file, không chung state,
 > không phụ thuộc thứ tự; mỗi agent một brief riêng, tự chứa; **gửi trong cùng một lượt** mới là song

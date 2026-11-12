@@ -5,8 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/common/code-review.md @ ef648e01 (MIT). Viết lại, giữ ý; bảng nhãn mức và bảng
-     agent của nguồn đổi sang thang chung của repo (`method/severity.md`) và danh mục reviewer của repo. -->
 
 # Review code: chuẩn chung
 

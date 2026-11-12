@@ -1,9 +1,5 @@
 # Đồng bộ tài liệu sau Cổng 2
 
-<!-- Nguồn: garrytan/gstack document-release/SKILL.md.tmpl @ 96764e8 (MIT), qua bản distill local;
-     luật chạy nền lấy từ HEAD. Viết lại; bỏ bước gắn với harness và sổ manifest của môi trường.
-     Mục 10: ý của affaan-m/ECC commands/update-docs.md @ ef648e01 (MIT), viết lại, bỏ mẫu lệnh của nguồn.
-     Mục 11: ý giữ spec sống từ affaan-m/ECC living-docs-governance @ ef648e01, qua templates/registry/feature-spec.md. -->
 
 > **Kết luận:** đọc **mọi** tài liệu của dự án, đối chiếu diff nhánh, **tự sửa drift sự thật** (đường
 > dẫn, số đếm, bảng, cross-ref), **hỏi** trước thay đổi tường thuật / xoá mục / viết lại >10 dòng / mô

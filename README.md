@@ -71,14 +71,11 @@ install) is [docs/OVERVIEW.md](docs/OVERVIEW.md) (Vietnamese), also published as
 | `templates/` | Sprint documents, project registries, project config |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; tests; a sample project with expected results |
 | `hosts/` | Install and loading per harness, and the host plug points |
-| `docs/` | Repository overview; migration map from older skill names; standardization record; troubleshooting; updating from upstream |
+| `docs/` | Repository overview; migration map from older skill names; standardization record; troubleshooting |
 
 ## Acknowledgments
 
-Distilled from Superpowers (obra), Everything Claude Code (affaan-m), gstack (garrytan), with concepts from
-GitHub Spec Kit, OpenSpec, BMAD-METHOD and Kiro/EARS. Exact commits, licences and per-skill sources:
-[UPSTREAM.md](UPSTREAM.md), [NOTICE](NOTICE), [THIRD_PARTY.md](THIRD_PARTY.md). Updating or extending from
-those sources: [docs/updating-from-upstream.md](docs/updating-from-upstream.md).
+Source credits, copyright notices and licences: [NOTICE](NOTICE).
 
 ## Licence
 

@@ -140,7 +140,7 @@ chữ "dự kiến" · `description` kể bước làm ("then", "first", "steps"
 - [ ] RED ≥3 kịch bản (≥3 áp lực mỗi kịch bản) đã chạy, lỗi ghi nguyên văn; kịch bản đạt sẵn đã thay.
 - [ ] GREEN đạt mọi kịch bản; REFACTOR ghi lỗ hổng đã vá; `tests/pressure.md` theo khuôn.
 - [ ] Dạng câu khớp kiểu lỗi, câu chữ đã micro-test có đối chứng; `description` chỉ điều kiện kích hoạt;
-      frontmatter đủ khoá, nguồn khớp `UPSTREAM.md`.
+      frontmatter đủ khoá, không có khoá nguồn.
 - [ ] `python scripts/check.py --self` không phát hiện nào trên file của skill; dòng mục lục `skills/README.md`
       đề xuất cho người giữ file chung.
 

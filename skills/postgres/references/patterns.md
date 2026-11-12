@@ -8,7 +8,7 @@
 > schema trên bảng thật đi theo `database-migrations`.
 
 Nguồn: tài liệu PostgreSQL (`postgresql.org/docs/current`: Table Partitioning, `pg_trgm`, Row Security Policies, Transaction Isolation,
-Explicit Locking / `SELECT … FOR UPDATE … SKIP LOCKED`, `ALTER TABLE`), bộ thực hành Supabase (MIT, qua ECC) cho mẫu RLS và hàng đợi.
+Explicit Locking / `SELECT … FOR UPDATE … SKIP LOCKED`, `ALTER TABLE`).
 
 ## 1. Chia bảng theo thời gian và dọn dữ liệu cũ
 

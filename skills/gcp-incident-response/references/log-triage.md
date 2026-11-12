@@ -1,6 +1,6 @@
 # Triage log mà không tràn ngữ cảnh
 
-> Nguồn: distill từ gemini-cli-extensions/sre (Apache-2.0), đã sửa và rút gọn.
+> Dẫn xuất có sửa đổi từ tài liệu Apache-2.0 của Google; nguồn, bản quyền và giấy phép: xem NOTICE.
 
 Đưa log GCP thô vào model là cách nhanh nhất để đầy ngữ cảnh và mất mạch điều tra.
 

@@ -5,8 +5,7 @@ thì dùng cờ không ghi cache nếu có, như `-p no:cacheprovider`, `PYTHOND
 `build-fixer` được sửa file (T2, vai Implementer, chỉ sửa đúng chỗ lỗi build đòi). Reviewer, analyzer và
 `code-explorer` là agent **khác** người làm, được Tech Reviewer (hoặc Analyst, Architect với `code-explorer`) kéo
 theo trigger (skill `code-review`, thẻ `roles/verifier/`). Frontmatter không ghi `model:` — tier ghi trong thân
-(T1 tư duy; `build-fixer` T2); model thực tế do bảng tier của môi trường quyết. Nguồn ghi ở frontmatter (`source`, `source_sha`, `base_sha`, `license`,
-`rewrite_before_public`), khớp [UPSTREAM.md](../UPSTREAM.md).
+(T1 tư duy; `build-fixer` T2); model thực tế do bảng tier của môi trường quyết. Nguồn và giấy phép: xem `NOTICE`.
 
 ## Mục lục — 13 agent
 

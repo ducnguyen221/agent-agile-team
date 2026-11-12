@@ -5,8 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/common/security.md @ ef648e01 (MIT). Viết lại, giữ ý; bỏ lời gọi agent riêng của
-     nguồn và nhãn mức kiểu nguồn; quy trình phản ứng nối với điều kiện dừng của luật lõi. -->
 
 # Bảo mật chung
 

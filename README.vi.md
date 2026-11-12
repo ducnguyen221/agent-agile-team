@@ -65,14 +65,11 @@ sau bốn sprint. Tổng quan cả repo cho người mới (tính năng, cách h
 | `templates/` | Mẫu tài liệu sprint, sổ gốc, cấu hình dự án |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; test; dự án mẫu kèm kết quả kỳ vọng |
 | `hosts/` | Cài và nạp theo từng harness, điểm cắm của lớp riêng |
-| `docs/` | Tổng quan repo; bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa; xử lý sự cố; cập nhật từ nguồn gốc |
+| `docs/` | Tổng quan repo; bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa; xử lý sự cố |
 
 ## Ghi nhận
 
-Distill từ Superpowers (obra), Everything Claude Code (affaan-m), gstack (garrytan), lấy ý từ GitHub Spec
-Kit, OpenSpec, BMAD-METHOD và Kiro/EARS. Commit chính xác, giấy phép và nguồn từng skill:
-[UPSTREAM.md](UPSTREAM.md), [NOTICE](NOTICE), [THIRD_PARTY.md](THIRD_PARTY.md). Cập nhật hay mở rộng từ
-các nguồn đó: [docs/updating-from-upstream.md](docs/updating-from-upstream.md).
+Nguồn, thông báo bản quyền và giấy phép: [NOTICE](NOTICE).
 
 ## Giấy phép
 

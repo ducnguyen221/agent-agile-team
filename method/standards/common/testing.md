@@ -5,8 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/common/testing.md @ ef648e01 (MIT). Viết lại, giữ ý; bỏ lời gọi agent riêng của
-     nguồn; ngưỡng coverage đổi sang chữ của luật lõi. -->
 
 # Kiểm thử chung
 

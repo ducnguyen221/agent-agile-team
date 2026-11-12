@@ -5,9 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/react/{coding-style,patterns,security,testing,hooks}.md @ ef648e01 (MIT). Viết lại,
-     giữ ý. `hooks.md` của thư mục react nói về hook React (`useState`, `useEffect`…), không phải hook runtime của
-     nguồn, nên phần đó được giữ ở mục "Hook". Ngưỡng coverage theo tầng của nguồn bỏ, dùng một ngưỡng chung. -->
 
 # Chuẩn React
 

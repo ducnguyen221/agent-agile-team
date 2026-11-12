@@ -9,7 +9,7 @@
 
 Nguồn: tài liệu React (`react.dev`: `useSyncExternalStore`, `useDeferredValue`, `useTransition`, `useContext`,
 "Rendering Lists", "Manipulating the DOM with Refs", "Synchronizing with Effects"), README của
-`react-error-boundary`, và mẫu focus hộp thoại, `useTransition`, `useSyncExternalStore` của nguồn ECC ghi ở frontmatter.
+`react-error-boundary`, và mẫu focus hộp thoại, `useTransition`, `useSyncExternalStore`.
 
 ## 1. Custom hook: chữ ký trả về và quy tắc
 
@@ -162,7 +162,7 @@ function Dialog({ open, onClose, children }: Props) {
 
 - Ưu tiên phần tử `<dialog>` + `showModal()`: trình duyệt lo Esc, vô hiệu phần nền và trả focus. Tự dựng bằng `div`
   thì phải tự làm cả bốn việc: lưu `document.activeElement` vào ref lúc mở, `focus()` phần tử đích, bắt `keydown`
-  cho Esc và Tab, gọi `focus()` về phần tử đã lưu trong hàm dọn (mẫu nguồn ECC); hoặc dùng thư viện đã làm sẵn
+  cho Esc và Tab, gọi `focus()` về phần tử đã lưu trong hàm dọn; hoặc dùng thư viện đã làm sẵn
   (Radix, React Aria) thay vì tự viết bẫy focus.
 - Đặt `aria-labelledby` cho tiêu đề; nút mở là phần tử `button`.
 - Cách test: `references/testing.md` mục 15.

@@ -160,15 +160,12 @@ Số phiên bản `MAJOR.MINOR.PATCH`, mỗi đợt tăng đúng một phần, d
 
 ### 2.10 Nguồn gốc và giấy phép
 
-Repo chưng cất từ các bộ skill mã nguồn mở và ghi dấu vết từng dòng.
+Repo chưng cất từ các bộ skill mã nguồn mở. Nguồn, bản quyền và giấy phép nằm ở `NOTICE`; hồ sơ nguồn từng skill nằm ngoài repo.
 
-- Nguồn chính (MIT): Superpowers, Everything Claude Code, gstack, superpowers-lab, Supabase Agent Skills; lấy
-  ý từ GitHub Spec Kit, OpenSpec, BMAD-METHOD, Kiro/EARS. Mọi skill và agent ghi `source`, `source_sha`,
-  `license` trong frontmatter; `UPSTREAM.md` chốt SHA từng đợt và theo dõi bản mới.
 - Phần từng lấy từ nguồn private đã được **viết lại phòng sạch**: bản cũ gỡ khỏi cây, người viết mới chỉ nhận
   danh sách ý; hiện không còn file nào chờ viết lại.
 - Giấy phép của repo là **MIT**. Nội dung bên thứ ba giữ giấy phép
-  gốc (`NOTICE`, `THIRD_PARTY.md`).
+  gốc (`NOTICE`).
 
 ## 3. Cách hoạt động — một ví dụ
 
@@ -209,8 +206,8 @@ agent-agile-team/
 ├── tests/               bộ test pytest và fixture
 ├── samples/order-desk/  một dự án mẫu đã dùng thật, kết quả kỳ vọng cố định
 ├── hosts/               cài và nạp theo harness: claude · codex · antigravity · claude-desktop
-├── docs/                OVERVIEW · MIGRATION · standardization · troubleshooting · updating-from-upstream
-├── UPSTREAM.md · NOTICE · THIRD_PARTY.md · LICENSE   nguồn gốc, bản quyền, giấy phép
+├── docs/                OVERVIEW · MIGRATION · standardization · troubleshooting
+├── NOTICE · LICENSE     bản quyền, giấy phép
 ├── CHANGELOG.md         mục mới nhất đứng đầu, trùng version của manifest
 └── .claude-plugin/ · .codex-plugin/   manifest plugin cho Claude Code và Codex
 ```
@@ -246,7 +243,7 @@ Tra nhanh:
 | biết mỗi mã (`FR`, `TK`, `VR`…) nghĩa gì | `skills/id-convention/SKILL.md` |
 | biết `check` báo lỗi gì, vì sao | `scripts/README.md` mục "Luật của `check`" |
 | sửa hay thêm skill | `skills/writing-skills/SKILL.md`, `skills/README.md` |
-| biết skill này lấy từ đâu, giấy phép gì | frontmatter của skill, `UPSTREAM.md`, `THIRD_PARTY.md` |
+| biết bản quyền, giấy phép của nội dung bên thứ ba | `NOTICE`, `LICENSE` |
 | gặp tên skill cũ trong hồ sơ lịch sử; nâng cấp từ bản cũ | `docs/MIGRATION.md` |
 | cài rồi mà agent không biết luật; cập nhật rồi mà skill vẫn cũ | `docs/troubleshooting.md` |
 

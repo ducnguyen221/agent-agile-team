@@ -687,53 +687,8 @@ def test_local_grading_paragraph_is_caught():
     assert re.search(r"(?im)^[^|\n]*đáp (?:án )?thay thế[^|\n]*(?:Một phần|Đạt)", two)
 
 
-# TK12.1 (5): mã của hồ sơ riêng (`CO`, `RQ`, `RF`, `TK`, `DN`, `BR`, `VR`, `CQ`, `SPR`) trong `source:` của skill phải nằm trong
-# dấu code kèm tên ngắn trong ngoặc: `TK10` (viết lại phòng sạch), theo AGENTS.md mục "Mã định danh" (RF164).
+# Mã hồ sơ riêng (`CO`, `RF`, `TK`, `DN`, `BR`, `VR`, `CQ`, `SPR`, `RQ`, `FS`): hồ sơ thử không được nêu mã trần của hồ sơ riêng.
 PRIVATE_CODE = re.compile(r"\b(?:(?:SPR|RQ|FS)-\d+|(?:CO|RF|TK|DN|BR|VR|CQ)\d+(?:\.\d+)?)\b")
-# Skill đang nợ dòng `source:` mà làn khác sở hữu SKILL.md: ghi lý do; test dưới đỏ khi hết nợ để người sửa gỡ dòng này.
-SOURCE_CODE_DEBT = {}
-
-
-def source_code_gaps(entries) -> list:
-    """Mã hồ sơ riêng trong các chuỗi `source:` không ở dạng `CODE` (tên ngắn)."""
-    found = []
-    for entry in entries:
-        text = str(entry)
-        for m in PRIVATE_CODE.finditer(text):
-            wrapped = text[max(m.start() - 1, 0):m.start()] == "`" and text[m.end():m.end() + 1] == "`"
-            named = re.match(r"` \([^()]{2,}\)", text[m.end():]) is not None
-            if not (wrapped and named):
-                found.append(m.group(0))
-    return found
-
-
-def source_entries(skill: str) -> list:
-    value = front(REPO / "skills" / skill / "SKILL.md").get("source") or []
-    return value if isinstance(value, list) else [value]
-
-
-@pytest.mark.parametrize("skill", [s for s in SKILLS if s not in SOURCE_CODE_DEBT])
-def test_skill_source_private_codes_carry_a_name_in_code(skill):
-    assert source_code_gaps(source_entries(skill)) == []
-
-
-def test_source_code_debt_is_still_owed():
-    # vòng lặp thay vì parametrize: danh sách nợ rỗng (hết nợ) là trạng thái bình thường, parametrize rỗng sẽ thành ca skip
-    for skill in sorted(SOURCE_CODE_DEBT):
-        assert source_code_gaps(source_entries(skill)), f"`{skill}` hết nợ: gỡ nó khỏi SOURCE_CODE_DEBT"
-
-
-@pytest.mark.parametrize("bad", ["rewrite in SPR-04 TK10: old text", "see CO2 and RQ-021", "`TK10` rewrite", "`CO2`(x)", "`RQ-021` ()",
-                                 "`RF164` (a)", "TK11.2 (name)", "`TK11.2 (name)", "TK10` (name)", "RQ-021` (x y)"])
-def test_source_code_without_code_span_or_name_is_caught(bad):
-    assert source_code_gaps([bad]), f"{bad!r} lọt"
-
-
-@pytest.mark.parametrize("good", ["`TK10` (clean-room rewrite task) in `SPR-04` (wave 3)", "`CO2` (before-public rewrite) and `RQ-021` (same)",
-                                  "affaan-m/ECC skills/api-design/SKILL.md", "concept: ISO/IEC/IEEE 29148 requirement identifiers",
-                                  "concept: BLUF (US Army AR 25-50)", "`TK11.2` (second item)"])
-def test_source_code_in_the_right_form_is_not_blocked(good):
-    assert source_code_gaps([good]) == []
 
 
 # TK12.1 (6): nhãn mức viết thường kiểu nguồn (`high`, `critical`) trong tệp thử phải nằm trong dấu code, không để trần (RF136, RF165).

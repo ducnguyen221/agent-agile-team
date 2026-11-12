@@ -1,8 +1,5 @@
 # Brief reviewer toàn nhánh — khuôn
 
-<!-- Nguồn: obra/superpowers skills/requesting-code-review/code-reviewer.md @ 8ca22db (MIT). Viết lại:
-     thang chung; "Declined to judge" → "Đã xem xét và gác lại"; "Ready to merge" → Đạt / Đạt có điều
-     kiện / Không đạt; thêm mục "Không đánh giá" bắt buộc. -->
 
 > **Kết luận:** reviewer toàn nhánh là **agent khác** người làm (T1), đọc **một** gói diff cắt từ mốc
 > gốc, so với PLAN/SPEC **và** với điều một người dùng hợp lý mong đợi (SPEC im lặng không phải phép),

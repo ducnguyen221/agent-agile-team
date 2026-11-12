@@ -5,9 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/web/{coding-style,design-quality,patterns,performance,security,testing}.md @
-     ef648e01 (MIT). Viết lại, giữ ý; bỏ `hooks.md` của nguồn (cấu hình runtime của nguồn) và lời trỏ tới skill thiết
-     kế riêng của nguồn. -->
 
 # Chuẩn web (giao diện trình duyệt)
 

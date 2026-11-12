@@ -1,7 +1,5 @@
 # Brief cho Implementer — khuôn và hợp đồng
 
-<!-- Nguồn: obra/superpowers skills/subagent-driven-development/implementer-prompt.md @ 8ca22db (MIT);
-     affaan-m/ECC skills/prompt-optimizer (phần tối ưu brief) @ c70874f (MIT). Viết lại theo repo này. -->
 
 > **Kết luận:** brief là **nguồn yêu cầu duy nhất** của một `TK`: mục `TKn` của PLAN (giá trị chính
 > xác chỉ ở đó) + giao diện và phán quyết từ `TK` trước mà PLAN không biết + điều cấm + hợp đồng báo
