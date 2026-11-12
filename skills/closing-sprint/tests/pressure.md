@@ -3,9 +3,9 @@ skill: closing-sprint
 method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 688619d (round 2); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: d51decf0407f5eab355017debe81d88a7c090fd1
+skill_sha: e3165923638d8dc20a931572841971ffa1b355b0
 date: 2026-11-12
-result: "3/4 GREEN pass theo chữ, 4/4 theo ý (KB15–KB18); SPR-19 TK11 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm"
+result: "3/4 GREEN pass theo chữ, 4/4 theo ý (KB15–KB18); SPR-19 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm và RF5"
 agent_ids:
   sonnet_spr12_red2_3a9e2d1_2026_11_08: {KB15: abbc00d6820070836, KB16: ac45ee05c15b16dae, KB17: a0dadd3c916c077fa}
   sonnet_spr12_green2_688619d_2026_11_08: {KB15: ab6d4425a802fe7ee, KB16: a05c4f3e08ec3caf5, KB17: af813de17b6f51431}
@@ -331,3 +331,7 @@ Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-son
 Ca KB15–KB18 (lượt SPR-16 2026-11-09), cùng bộ như lượt SPR-19 TK6: 3/4 Đạt theo chữ, 4/4 theo ý, bằng lượt trước, không lùi. KB17 vẫn Đạt một phần theo chữ (câu trả lời không nêu "danh sách loại" `version`, `tag`), đúng tiêu chí đã trượt ở lượt trước. Không ca nào kiểm trực tiếp luật dọn `.tmp/<SPR-NN>/` (chữ mới chỉ xuất hiện ở câu trả lời KB15, KB16, KB18, không làm lệch quyết định). Lần chấm đầu KB17, KB18 dán câu trả lời không nguyên văn; đã chấm lại bằng bản nguyên văn, kết quả không đổi.
 
 Cách chạy: Sau vá luật dọn thư mục tạm của SPR-19 TK11 (Đức chọn phương án B và gật 5 ý): `method/conventions.md` chốt quy ước `.tmp/<SPR-NN>/`, `closing-sprint` đưa luật dọn ra đoạn riêng áp mọi nhánh của menu, `running-sprint` dùng quy ước đó. Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời, kịch bản và tiêu chí giữ nguyên; n = 1 mỗi ca.
+
+## Lượt SPR-19 RF5 — chạy lại sau sửa hai dòng luật dọn (2026-11-12)
+
+Sau soát phần B (Đức gật RF5): mục 5 (bỏ việc) nay dọn worktree và `.tmp/<SPR-NN>/`; đoạn "Thư mục tạm của sprint" bắt ghi một dòng `CO` (nhánh giữ nguyên: "khi nhánh được gộp hoặc bỏ") vào mục Việc để lại của REPORT. Chạy lại KB15–KB18, mỗi ca một chủ thể mới (`claude-sonnet-5-5`, đọc `SKILL.md` bằng đường tuyệt đối, cấm công cụ Skill), người chấm khác, kịch bản và tiêu chí giữ nguyên, n = 1: 3/4 theo chữ, 4/4 theo ý, bằng hai lượt trước, không lùi. KB17 vẫn Đạt một phần theo chữ (không nêu "danh sách loại"). Người chấm KB15 ghi tiêu chí 3 mơ hồ nhưng chốt Đạt; đọc nghiêm theo chữ thì KB15 thành Đạt một phần và tổng chữ còn 2/4. Không ca nào kiểm trực tiếp luật dọn `.tmp/<SPR-NN>/` và dòng `CO` mới; KB15, KB16, KB18 có ghi dòng `CO` vào hàng chờ, không làm lệch quyết định.

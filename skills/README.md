@@ -113,7 +113,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | Skill | Loại | Tệp thử | `result` | `date` |
 |---|---|---|---|---|
 | [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 3/3, 3/3, 3/3 runs Đạt, RED 0/3, 0/3, 3/3 runs Đạt so KB1 and KB2 gave way and KB3 passed as-is, kept as regression; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
-| [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/4 GREEN pass theo chữ, 4/4 theo ý (KB15–KB18); SPR-19 TK11 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm | 2026-11-12 |
+| [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/4 GREEN pass theo chữ, 4/4 theo ý (KB15–KB18); SPR-19 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm và RF5 | 2026-11-12 |
 | [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 3/6 GREEN pass theo chữ (5/6 theo ý); RED 1/6 pass theo chữ (2/6 theo ý); SPR-12 2026-11-08, n = 1 mỗi ca, ca cũ chưa chạy lại | 2026-11-08 |
 | [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 2/3 GREEN pass theo chữ, 3/3 theo ý (rs-9, rs-10, rs-11); SPR-19 TK11 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm | 2026-11-12 |
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4 | 2026-10-22 |

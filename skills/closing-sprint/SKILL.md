@@ -151,7 +151,7 @@ không bớt lựa chọn; "bỏ việc" chỉ xảy ra khi người dùng **t�
 
 Chỉ khi họ nói rõ. Xác nhận trước, liệt kê thứ mất vĩnh viễn (nhánh, danh sách commit, worktree) và
 yêu cầu gõ đúng từ **`bỏ`**; "ừ, dẹp đi" không tính. Nhận đúng từ → về gốc repo chính, dọn worktree
-(mục 6), `git branch -D <nhánh>`. Đây là điều kiện dừng (a) — ghi `BR` nếu lời yêu cầu không rõ.
+và `.tmp/<SPR-NN>/` (mục 6), `git branch -D <nhánh>`. Đây là điều kiện dừng (a) — ghi `BR` nếu lời yêu cầu không rõ.
 
 ## 6. Dọn worktree theo nguồn gốc
 
@@ -165,7 +165,7 @@ yêu cầu gõ đúng từ **`bỏ`**; "ừ, dẹp đi" không tính. Nhận đ�
 
 **Thư mục tạm của sprint — áp mọi nhánh của menu, không riêng gộp local.** Thư mục tạm của sprint là `.tmp/<SPR-NN>/`
 (quy ước ở `method/conventions.md`). Gộp local → xoá ngay sau khi gộp xanh. Push + PR hay giữ nguyên → chưa xoá được
-(còn có thể sửa theo phản hồi): ghi vào REPORT mục 6 một dòng "dọn `.tmp/<SPR-NN>/` khi PR gộp" kèm tên người làm. `.tmp/`
+(còn có thể sửa theo phản hồi): ghi vào mục *Việc để lại* của REPORT (cỡ nhỏ: phần Kết quả của `SPRINT.md`) một dòng `CO` "dọn `.tmp/<SPR-NN>/` khi PR gộp" (nhánh giữ nguyên: "khi nhánh được gộp hoặc bỏ") kèm tên người làm; như mọi `CO`, nó thành một dòng `RQ-`. `.tmp/`
 nằm trong `.gitignore` nên `git status` không báo; rác ở đây vô hình với mọi cổng, vì vậy phải ghi thành việc có chủ. Chỉ xoá
 thư mục của sprint này: không xoá `.tmp/autopilot.json` (file dấu autopilot) và không xoá `.tmp/<SPR-khác>/`. Hồ sơ sprint
 (SPEC/PLAN/PROGRESS/REPORT) giữ.
