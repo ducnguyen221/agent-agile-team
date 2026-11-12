@@ -5,11 +5,21 @@ ignore** là rác (nhật ký phiên, bản nháp, nơi ghi nhầm); cache đã 
 
 from __future__ import annotations
 
+import os
 import subprocess
+
+import pytest
 
 import check
 
-IGNORE = "/.venv/\n/.tmp/\n/.worktrees/\n.coverage\n.pytest_cache/\n__pycache__/\n"
+
+@pytest.fixture(autouse=True)
+def isolated_git_config(monkeypatch):
+    """Cấu hình git toàn máy của người chạy test không được đổi kết quả (RF3)."""
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+
+IGNORE = "/.venv/\n/.tmp/\n/.worktrees/\n/.claude/worktrees/\n.coverage\n.pytest_cache/\n__pycache__/\n"
 
 
 def git(repo, *args):
@@ -81,4 +91,34 @@ def test_run_self_flags_root_junk_with_its_own_rule(tmp_path):
 def test_this_repo_has_no_root_junk():
     from conftest import REPO
 
-    assert check.root_junk(REPO) == [], "gốc repo có rác chưa theo dõi và chưa ignore"
+    junk = check.root_junk(REPO)
+    assert junk == [], f"rác ở gốc repo (chưa theo dõi, chưa ignore): {junk} — thêm vào .gitignore hoặc xoá"
+
+
+def test_unicode_and_spaced_names_are_reported_readably(tmp_path):
+    repo = git_repo(tmp_path)
+    (repo / "nháp thử.txt").write_text("x", encoding="utf-8")
+    assert check.root_junk(repo) == ["nháp thử.txt"]
+
+
+def test_tracked_unicode_folder_with_new_file_is_not_root_junk(tmp_path):
+    repo = git_repo(tmp_path)
+    (repo / "tài-liệu").mkdir()
+    (repo / "tài-liệu" / "a.md").write_text("x", encoding="utf-8")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "docs")
+    (repo / "tài-liệu" / "b.md").write_text("x", encoding="utf-8")
+    assert check.root_junk(repo) == []
+
+
+def test_user_config_hiding_untracked_files_does_not_blind_the_rule(tmp_path):
+    repo = git_repo(tmp_path)
+    git(repo, "config", "status.showUntrackedFiles", "no")
+    (repo / "junk-probe.txt").write_text("x", encoding="utf-8")
+    assert check.root_junk(repo) == ["junk-probe.txt"]
+
+
+def test_app_worktree_under_dot_claude_is_not_root_junk(tmp_path):
+    repo = git_repo(tmp_path)
+    git(repo, "worktree", "add", "-q", ".claude/worktrees/w", "-b", "w")
+    assert check.root_junk(repo) == []

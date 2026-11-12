@@ -1996,29 +1996,32 @@ def _author_lines(kinds: list, lines: list) -> set:
 
 def root_junk(root: Path) -> list:
     """Tên file/thư mục ở **gốc** repo không được theo dõi và không bị ignore ("rác ở gốc": nhật ký phiên, bản nháp, nơi ghi nhầm).
-    Đo bằng `git status --porcelain --ignored=no`; thư mục chưa theo dõi hiện một mục có `/` cuối. File chưa theo dõi nằm dưới thư mục
-    đã theo dõi không phải rác ở gốc. Không phải repo Git (hoặc `git` lỗi, hoặc `root` không phải gốc của repo) thì trả `[]`."""
+    Đo bằng `git status --porcelain -z --ignored=no --untracked-files=normal` (ghim `core.quotePath=false` và chế độ hiện file chưa theo
+    dõi để cấu hình git của máy không đổi kết quả); thư mục chưa theo dõi hiện một mục có `/` cuối. File chưa theo dõi nằm dưới thư mục
+    gốc đã theo dõi không phải rác ở gốc. Không phải repo Git (hoặc `git` lỗi, hoặc `root` không phải gốc của repo) thì trả `[]`."""
     root = Path(root)
+    base = ["git", "-c", "core.quotePath=false", "-C", str(root)]
     try:
-        top = subprocess.run(["git", "-C", str(root), "rev-parse", "--show-toplevel"], capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
+        top = subprocess.run([*base, "rev-parse", "--show-toplevel"], capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
         if top.returncode != 0 or Path(top.stdout.decode("utf-8", "replace").strip()).resolve() != root.resolve():
             return []
-        out = subprocess.run(["git", "-C", str(root), "status", "--porcelain", "--ignored=no"], capture_output=True, timeout=60,
-                             stdin=subprocess.DEVNULL)
+        status = subprocess.run([*base, "status", "--porcelain", "-z", "--ignored=no", "--untracked-files=normal"], capture_output=True,
+                                timeout=60, stdin=subprocess.DEVNULL)
+        listed = subprocess.run([*base, "ls-files", "-z"], capture_output=True, timeout=60, stdin=subprocess.DEVNULL)
     except (OSError, subprocess.SubprocessError):
         return []
-    if out.returncode != 0:
+    if status.returncode != 0 or listed.returncode != 0:
         return []
+    tracked_roots = {p.split("/", 1)[0] for p in listed.stdout.decode("utf-8", "replace").split("\0") if p}
     junk = []
-    for line in out.stdout.decode("utf-8", "replace").splitlines():
-        if not line.startswith("?? "):
+    for entry in status.stdout.decode("utf-8", "replace").split("\0"):
+        if not entry.startswith("?? "):
             continue
-        parts = line[3:].strip().strip('"').split("/")
-        name = parts[0] + ("/" if len(parts) > 1 else "")
-        if len(parts) > 1 and (root / parts[0]).is_dir() and subprocess.run(
-                ["git", "-C", str(root), "ls-files", "--error-unmatch", "--", parts[0]], capture_output=True,
-                stdin=subprocess.DEVNULL).returncode == 0:
+        path = entry[3:]
+        top_name, is_dir = path.split("/", 1)[0], "/" in path
+        if is_dir and top_name in tracked_roots:
             continue  # thư mục đã theo dõi, chỉ có file mới bên trong: không phải rác ở gốc
+        name = top_name + ("/" if is_dir else "")
         if name not in junk:
             junk.append(name)
     return junk

@@ -55,7 +55,7 @@ Check: `python scripts/check.py --self` ends with `Đạt` (pass). Common proble
 
 ## First sprint
 
-[docs/GUIDE.md](docs/GUIDE.md) walks a newcomer through one sprint (roles: this README is the entry point — intro and install; `docs/GUIDE.md` is one first sprint step by step; `docs/OVERVIEW.md` is the overview and lookup); [`samples/order-desk/`](samples/README.md) shows
+[docs/GUIDE.md](docs/GUIDE.md) walks a newcomer through one sprint. Roles of the three documents: this README is the entry point (intro and install), `docs/GUIDE.md` is one first sprint step by step, `docs/OVERVIEW.md` is the overview and lookup; [`samples/order-desk/`](samples/README.md) shows
 a project after four sprints. A full overview of the repository for newcomers (features, how it works, layout,
 install) is [docs/OVERVIEW.md](docs/OVERVIEW.md) (Vietnamese), also published as a web page at
 <https://ducnguyen.vn/agent-agile-team/>.

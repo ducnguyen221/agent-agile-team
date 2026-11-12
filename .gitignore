@@ -35,5 +35,6 @@ Thumbs.db
 desktop.ini
 /.claude/settings.local.json
 /.claude/CLAUDE.md
+/.claude/worktrees/
 /.idea/
 /.vscode/

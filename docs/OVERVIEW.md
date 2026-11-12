@@ -398,7 +398,7 @@ Trung thực về chỗ chưa tới:
 - **Repo công khai (MIT), chưa có Release công khai.** `0.3.0` là bản đầu tiên mang số không có
   hậu tố `-dev` (quy tắc ở `method/conventions.md` mục 4.1); chưa có Release công khai. Nâng cấp dự án đang dùng
   bản `0.1`/`0.2`: [`docs/MIGRATION.md`](MIGRATION.md) mục 4.
-- **12/13 skill tham chiếu chưa đạt ngưỡng truy xuất** (chỉ `adr` đạt): agent tìm đúng chỗ nhưng nội dung còn
+- **9/14 skill tham chiếu chưa đạt ngưỡng truy xuất** (đạt: `adr`, `deployment`, `rag-pageindex`, và `postgres`, `react` sau lượt thử lại ngày 12/11): agent tìm đúng chỗ nhưng nội dung còn
   thiếu để trả lời hẳn; đang bổ sung và sẽ đổi cách đo trước khi vá tiếp. Trong 91 câu thử chỉ 1 câu Không đạt.
 - **Tệp thử skill chạy trên một dòng model** (tier T3); kết quả có thể khác trên model khác.
 - **Claude Desktop tab chat chưa hỗ trợ**; Codex và Antigravity không nạp `agents/` như agent riêng — đọc như thẻ vai.

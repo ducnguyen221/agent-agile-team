@@ -50,7 +50,7 @@ rồi thêm dòng `@~/agent-agile-team/AGENTS.md` vào `~/.claude/CLAUDE.md` đ�
 
 ## Sprint đầu tiên
 
-[docs/GUIDE.md](docs/GUIDE.md) dẫn người mới (vai: README này là cửa vào — giới thiệu và cài; `docs/GUIDE.md` đi một sprint đầu tiên từng bước; `docs/OVERVIEW.md` là toàn cảnh và tra cứu) đi một sprint; [`samples/order-desk/`](samples/README.md) là một dự án
+[docs/GUIDE.md](docs/GUIDE.md) dẫn người mới đi một sprint. Vai ba tài liệu: README này là cửa vào (giới thiệu và cài), `docs/GUIDE.md` đi một sprint đầu tiên từng bước, `docs/OVERVIEW.md` là toàn cảnh và tra cứu; [`samples/order-desk/`](samples/README.md) là một dự án
 sau bốn sprint. Tổng quan cả repo cho người mới (tính năng, cách hoạt động, cấu trúc, cài đặt):
 [docs/OVERVIEW.md](docs/OVERVIEW.md) — cũng là trang web <https://ducnguyen.vn/agent-agile-team/>.
 
