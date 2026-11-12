@@ -18,11 +18,11 @@ metadata:
 | Người dùng gõ | Nguồn để diễn giải |
 |---|---|
 | `/explain` | tin gần nhất của agent; chưa có tin trước thì hỏi một câu: "diễn giải gì?" |
-| `/explain <đường dẫn>` (vd `/explain PLAN.md`) | file đó; **nguồn dài hơn 200 dòng** thì hỏi người muốn phần nào (một câu), không tự cắt |
+| `/explain <đường dẫn>` (vd `/explain PLAN.md`) | file đó; nguồn quá dài thì hỏi người muốn phần nào (ngưỡng và cách hỏi: `method/communication.md` mục 1) |
 | một đoạn dán kèm | đoạn đó |
 | câu tương đương ("chưa hiểu", "tại sao", "nói dễ hiểu hơn") | tin gần nhất, như `/explain` |
 
-Nguồn mơ hồ chỗ nào thì ghi "nguồn không nói rõ" chỗ đó; không đoán, không thêm sự kiện không có ở nguồn.
+Luật giữ nguyên dữ kiện, chỗ nguồn mơ hồ và việc không thêm số mới: `method/communication.md` mục 1.
 
 ## 2. Cách viết
 
@@ -39,30 +39,25 @@ Nguồn mơ hồ chỗ nào thì ghi "nguồn không nói rõ" chỗ đó; khôn
 
 ## 3. Giữ nguyên dữ kiện
 
-Diễn giải **làm rõ, không bỏ, không thêm**:
-
-- **Còn nguyên:** số liệu + đơn vị, đường dẫn (trong dấu code), mã lỗi, chữ phủ định ("chưa", "không cần"),
-  cảnh báo bảo mật.
-- **Không thêm** số mới, kể cả số tự tính từ số nguồn (ví dụ "chậm gấp 4,4 lần" khi nguồn chỉ nêu hai số gốc), mức
-  độ hay thời gian mà nguồn không nêu.
-- Dài hơn nguồn là bình thường; mất dữ kiện hay thêm dữ kiện là lỗi.
+Trước khi gửi, đối chiếu bản diễn giải với nguồn: mọi số liệu + đơn vị, đường dẫn, mã lỗi, chữ phủ định, cảnh báo bảo
+mật của nguồn còn đủ, và không có số hay dữ kiện mới. Luật: `method/communication.md` mục 1. Dài hơn nguồn là bình thường.
 
 ## 4. Thoát
 
-- Người dùng hiểu hoặc chuyển sang việc khác → tin sau **về súc tích** (`skills/response-style`).
-- "Diễn giải từ giờ" / "trả lời chi tiết từ giờ" → giữ chế độ này cả phiên; "ngắn gọn lại" → về mặc định.
-- Lời yêu cầu trực tiếp của người dùng luôn thắng.
+Dấu hiệu thoát, giữ chế độ cả phiên, về súc tích: `method/communication.md` mục 1. Sau lần diễn giải này, tin kế tiếp
+theo `skills/response-style`.
 
 ## 5. Mẫu
 
-Nguồn: "Replica chỉ chữa nếu báo cáo là nguyên nhân khoá; cần đo 1 ngày."
+Nguồn (mọi dữ kiện bản mẫu dùng): "Chứng chỉ TLS của trang web hết hạn sau 12 ngày. Gia hạn tự động chưa bật. Gia hạn
+tay mất khoảng 10 phút, không cần dừng dịch vụ. Khuyến nghị: gia hạn tay ngay rồi bật gia hạn tự động."
 
 ```
-Chưa nên làm replica — cần đo 1 ngày trước.
-Cơ sở dữ liệu giống một cuốn sổ cái dùng chung: báo cáo cuối tháng lật hết sổ nên người khác không ghi được. Replica
-(bản sao chỉ để đọc) giống photo cuốn sổ cho báo cáo dùng riêng. Nhưng nếu báo cáo không phải thủ phạm thì photo sổ
-cũng không giúp gì. Đo mất 1 ngày, không đụng dữ liệu thật.
-**Cần anh quyết:** cho đo 1 ngày chứ? KHUYẾN NGHỊ: có — đo trước khi tốn tiền làm replica.
+Chứng chỉ TLS của trang web hết hạn sau 12 ngày; nên gia hạn tay ngay.
+Chứng chỉ TLS (giấy xác nhận trang web là thật) giống giấy phép treo ở cửa tiệm: có hạn, hết hạn thì phải đổi.
+Gia hạn tự động chưa bật nên phải làm tay. Làm tay mất khoảng 10 phút, không cần dừng dịch vụ.
+**Cần anh quyết:** cho gia hạn tay ngay chứ?
+**KHUYẾN NGHỊ:** có — gia hạn tay ngay rồi bật gia hạn tự động. Nếu anh chưa trả lời, em chưa làm gì; còn 12 ngày.
 ```
 
 ## 6. Lỗi hay gặp

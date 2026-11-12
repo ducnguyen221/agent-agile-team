@@ -34,9 +34,9 @@ chữ phủ định.
 
 ## 2. Link tới file chi tiết
 
-- **Dạng link:** `[tên ngắn](đường/dẫn.md:dòng)` — đường dẫn **tương đối** theo thư mục làm việc của phiên (dạng
-  `[tên:dòng](đường:dòng)` đúng chỉ dẫn của ứng dụng Claude Desktop); `:dòng` khi trỏ một mục cụ thể (một `TK`,
-  `DN`, `RF`…). Không dùng đường tuyệt đối trong link bấm; không bọc link trong khối code.
+- **Dạng link (một dạng duy nhất):** `[tên:dòng](đường:dòng)` — đúng chỉ dẫn của ứng dụng Claude Desktop; đường
+  dẫn **tương đối** theo thư mục làm việc của phiên; bỏ `:dòng` khi trỏ cả file, thêm `:dòng` khi trỏ một mục cụ thể
+  (một `TK`, `DN`, `RF`…). Không dùng đường tuyệt đối trong link bấm; không bọc link trong khối code.
 - **Khi nào bắt buộc:** tin có (a) danh sách hay bảng mã lấy từ một tài liệu, (b) tóm tắt nội dung một file, (c) câu
   hỏi cần người quyết dựa trên chi tiết trong file, hoặc (d) tin dừng, tin mở sprint, tin cuối. **Trước** danh
   sách, bảng hay câu hỏi đó có một câu dẫn kèm link tới tài liệu nguồn. Câu dẫn của skill `id-convention` ("SPEC
@@ -57,7 +57,7 @@ Desktop/Code; host khác (Codex, Antigravity, xem trên GitHub) có thể không
 Khi agent cần người chốt một việc, tin có đúng bốn phần theo thứ tự:
 
 1. **Một dòng câu hỏi** kết thúc bằng dấu hỏi, mở bằng `**Cần anh quyết:**` (đổi "anh" theo cách người dùng xưng hô).
-2. **Câu dẫn kèm link** tới file chi tiết (mục 2): `Chi tiết: [<tài liệu> mục N](<đường>:<dòng>)`.
+2. **Câu dẫn kèm link** tới file chi tiết (mục 2): `Chi tiết: [<tên>:<dòng>](<đường>:<dòng>)`.
 3. **Phương án** — bảng khi ≥ 3 phương án × ≥ 2 thuộc tính, ngược lại danh sách; mỗi phương án nêu đánh đổi và
    rủi ro, công sức, khi nào nên chọn.
 4. **`KHUYẾN NGHỊ:`** phương án nghiêng về + lý do một câu + việc chờ hoặc việc làm tiếp được nếu người chưa trả
