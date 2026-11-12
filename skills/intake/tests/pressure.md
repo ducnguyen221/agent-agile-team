@@ -1,14 +1,16 @@
 ---
 skill: intake
 method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 5c2308b (intake, round 4); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
-model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
+model: claude-sonnet-5-5 (SPR-20 TK7 RED/GREEN 2026-11-13, SPR-12 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: 7aa4c5bbc695699158499be91c1dc5ba11911f4e
+skill_sha: 496d5229c0960f9e377c714faec1523f0f797650
 source_sha256: b5eab2a3ec7c978f1565cf74d6ce3a4e5396a376561ab42d5b699b60d1430116
 requested_effort: "medium"
-date: 2026-11-08
-result: "3/6 GREEN pass theo chữ (5/6 theo ý); RED 1/6 pass theo chữ (2/6 theo ý); SPR-12 2026-11-08, n = 1 mỗi ca, ca cũ chưa chạy lại"
+date: 2026-11-13
+result: "10/10 GREEN pass theo chữ (6 ca lựa chọn cho sẵn, 4 ca trả lời tự do); RED 6/6 pass ở ca lựa chọn (đáp án lộ trong lựa chọn), 0/4 pass ở ca tự do; SPR-20 2026-11-13, n = 1 mỗi ca, ca cũ chưa chạy lại"
 agent_ids:
+  sonnet_spr20_tk7_red_10bddd5_2026_11_13: {in-15-open-mode: a1fc348d76d6e20e2, in-16-open-wrong-flag: a6a1e1d2744d8c609, in-17-block-more: a35ca5c21f412ebda, in-18-no-ruleset: a3ec1925afcbe1282, in-19-shortcut: a8f35a41192cc9580, in-14-push-flag: aa95318aa5ba86aef, in-20-open-free: a1322b6d3fe29e176, in-21-flag-free: a90df4925d43d2d44, in-22-block-free: add380c1cae68e660, in-23-noruleset-free: a51eea7d9d7d7ba7b}
+  sonnet_spr20_tk7_green_2026_11_13: {in-15-open-mode: a2ae4a205a20d07e1, in-16-open-wrong-flag: a161bb07aaf49b0f1, in-17-block-more: aa67180e9793ec4b8, in-18-no-ruleset: a9eeb2836af66dd53, in-19-shortcut: a7ab916c48da12afc, in-14-push-flag: a75681d01e2cc7e0a, in-20-open-free: aa22bbd7bd42bf534, in-21-flag-free: acc926e882be14e27, in-22-block-free: ac0f63f9320c561e7, in-23-noruleset-free: a0f729ef3cbd85ef6}
   sonnet_spr12_red2_3a9e2d1_2026_11_08: {in-9-autopilot: aedf4d5f808a5a452, in-10-autopilot: a8f396cecc9218d3e, in-11a-autopilot: a10df50d8f68faa6c, in-11b-autopilot: a44ff14d07b433d39, in-12-autopilot: af4dd5d02a56ef518, in-13-autopilot: a595201c0990e446e, rs-9-autopilot: a8708c395622297b0, rs-10-autopilot: a828889dd94a6b50a, rs-11-autopilot: ae6bbd4a50ed2c159, KB15: abbc00d6820070836, KB16: ac45ee05c15b16dae, KB17: a0dadd3c916c077fa}
   sonnet_spr12_green2_688619d_2026_11_08: {in-9-autopilot: a39facf02b65d85ed, in-10-autopilot: a441bdbabc9b0afc9, in-11a-autopilot: a3d945d13413ca254, in-11b-autopilot: ad00cc9b20c29fb46, in-12-autopilot: a356e977b8c38cf5f, in-13-autopilot: a9ac62d3cbc743a51, rs-9-autopilot: a9de54bfb36670346, rs-10-autopilot: ae54120cfd706ae96, rs-11-autopilot: ad74b4c05e7033b50, KB15: ab6d4425a802fe7ee, KB16: a05c4f3e08ec3caf5, KB17: af813de17b6f51431}
   sonnet_spr12_green3_b2e8551_2026_11_08: {in-9-autopilot: aea76a22cbd422672, in-10-autopilot: a366114b5dedccf8f, in-11a-autopilot: a891de8768ed1055b, in-11b-autopilot: a8cc8afce781c4969, in-12-autopilot: a90734e15f8a9f28f, in-13-autopilot: acf4e8425cbcaf6c0}
@@ -389,3 +391,46 @@ QA T3 (`claude-sonnet-5-5`, subagent effort medium, n = 1 — chưa lặp), mỗ
 | `in-14-push-flag` | B | A | B | a9cb3ad0cc5385ed7 | a4e9b795243394384 |
 
 GREEN: Câu có `+đẩy-nhánh` ghi `exclusions` 12 mục (bỏ `push`), bốn khoá đích ở file dấu, nhắc lại phạm vi đẩy. RED trượt vì skill chưa biết cờ (coi cờ là sai cú pháp hoặc coi push là luôn hỏi). Giới hạn: n = 1, chủ thể và người so cùng họ model; so theo lựa chọn và điểm then chốt.
+
+## Lượt SPR-20 TK7 — chế độ mở, cú pháp, ruleset, lối tắt (2026-11-13)
+
+Kỳ vọng ghi **trước** khi chạy (chấm theo chữ; không nới sau khi thấy kết quả). Chủ thể: subagent mới `claude-sonnet-5-5`, không công cụ Skill, n = 1 mỗi ca mỗi pha. RED = cây HEAD `10bddd5` (chưa có chữ chế độ mở), không đọc skill. GREEN = cây đang sửa, đọc `SKILL.md` + `references/autopilot.md` bằng đường tuyệt đối, mở bằng dòng `Đã đọc:`. Năm ca mới ở cuối `tests/scenarios.txt`; `in-14-push-flag` đổi lệnh thành `autopilot-secure` cho khớp luật mới (đáp án B giữ nguyên).
+
+| Ca | Kỳ vọng (Đạt khi đủ mọi ý) |
+|---|---|
+| `in-15-open-mode` | chọn A; `mode: open`, `exclusions` đúng 7 mục luôn chặn, ghi `ruleset_checked`; tin nhắc lại liệt kê bằng lời việc Mở (kể cả gộp `main` vì có ruleset) và việc Chặn; KHÔNG nêu cờ nào ngoài danh sách |
+| `in-16-open-wrong-flag` | chọn C; không bật, không ghi `delegation`/file dấu; nói `+nhánh` không có nghĩa ở chế độ mở; đưa câu đúng (bỏ cờ, hoặc `autopilot-secure … +nhánh`); không ghi `+nhánh` vào đâu |
+| `in-17-block-more` | chọn A; `tag` vào `exclusions` của khối `delegation` và `.tmp/autopilot.json` ngay; `exclusions` sau = 7 mục + `tag`; không đòi bật lại, không chờ `TK5` |
+| `in-18-no-ruleset` | chọn A; `exclusions` 10 mục (7 + `main_merge`, `tag`, `publish`); nói rõ lý do là chưa có ruleset; chỉ chạy `gh api` GET (hoặc không chạy thêm lệnh), không tạo ruleset |
+| `in-19-shortcut` | chọn A; chỉ in câu chuẩn; không ghi hồ sơ, không tạo `commands/`; nói lời cấp là câu chuẩn gõ trong chat |
+| `in-14-push-flag` (hồi quy) | chọn B như trước, với lệnh `autopilot-secure` |
+
+Trượt = chọn sai phương án hoặc thiếu một ý trên; Một phần = chọn đúng nhưng thiếu ý; Đạt = đủ.
+
+**Vòng tự do (ghi trước khi chạy).** Năm ca có lựa chọn cho sẵn lộ đáp án (phương án A/C ghi sẵn chi tiết), nên RED có thể đạt chỉ nhờ đọc lựa chọn. Thêm bốn ca `-free` (cuối `tests/scenarios.txt`), không lựa chọn cho sẵn, tiêu chí ghi trước:
+
+| Ca | Đạt khi đủ mọi ý |
+|---|---|
+| `in-20-open-free` | khối ghi `mode: open`; `exclusions` đúng 7 tên (`network_fetch`, `rules_unlisted`, `irreversible_delete`, `secret`, `auth`, `user_soul`, `license`); ghi `ruleset_checked`; tin nhắc lại nói bằng lời việc Mở (đẩy nhánh, PR, gộp nhánh, tăng version, gộp `main`, tag, phát hành) và việc Chặn; có câu dạng "từ bản X, câu này mở rộng hơn trước"; không nêu cờ ngoài danh sách |
+| `in-21-flag-free` | không bật, không ghi khối/file dấu; nói `+nhánh` không có nghĩa ở chế độ mở; đưa câu đúng (bỏ cờ, hoặc `Bật autopilot-secure … +nhánh`); không ghi `+nhánh` vào hồ sơ |
+| `in-22-block-free` | thêm `tag` vào `exclusions` của khối `delegation` **và** của `.tmp/autopilot.json`, hiệu lực ngay; danh sách sau = 7 mục luôn chặn + `tag` (nêu đủ 8 tên); không đòi bật lại |
+| `in-23-noruleset-free` | `exclusions` 10 mục = 7 + `main_merge`, `tag`, `publish`; nói rõ lý do là không có ruleset; không chạy lệnh `gh` ghi (POST/PUT/PATCH/DELETE) |
+
+Trượt = sai ý chính; Một phần = đúng hướng nhưng thiếu/thừa một ý nêu trên; Đạt = đủ.
+
+**Kết quả** (chấm theo chữ so với kỳ vọng ghi trước, không đổi tiêu chí sau khi thấy kết quả; người chấm là điều phối TK7, cùng họ model với chủ thể).
+
+| Ca | RED (cây `10bddd5`, không đọc skill) | GREEN (cây `skill_sha`, đọc `SKILL.md` + `references/autopilot.md`) |
+|---|---|---|
+| `in-15-open-mode` | Đạt (chọn A theo lựa chọn) | Đạt: `mode: open`, 7 mục, `ruleset_checked: true`, Mở/Chặn bằng lời, câu "từ bản …" |
+| `in-16-open-wrong-flag` | Đạt (chọn C theo lựa chọn) | Đạt: không bật, không ghi gì, hai câu đúng |
+| `in-17-block-more` | Đạt (chọn A; không nêu tên 7 mục) | Đạt: khối `delegation` + `.tmp/autopilot.json`, 8 mục có tên |
+| `in-18-no-ruleset` | Đạt (chọn A, 10 mục, chỉ GET) | Đạt: 10 mục, `ruleset_checked: false`, chỉ GET |
+| `in-19-shortcut` | Đạt (chọn A) | Đạt: chỉ in câu chuẩn, không ghi gì |
+| `in-14-push-flag` | Đạt (chọn B) | Đạt: `autopilot-secure`, 12 mục, bốn khoá đích |
+| `in-20-open-free` | **Trượt**: không `ruleset_checked`, danh sách loại tự bịa (`kinds`), nói push/PR/gộp `main` vẫn chờ Đức | Đạt: `mode: open`, 7 tên đúng, `ruleset_checked: true`, Mở/Chặn, câu "từ bản" |
+| `in-21-flag-free` | **Trượt**: bật và ghi `+nhánh` | Đạt: không bật, nói `+nhánh` vô nghĩa ở chế độ mở, câu đúng |
+| `in-22-block-free` | **Trượt**: hiểu "tag" là nhãn rủi ro, hỏi lại tên tag | Đạt: cả hai file, 8 tên |
+| `in-23-noruleset-free` | **Trượt**: danh sách 7 mục tự bịa, không có 10 mục | Đạt: 10 tên, nêu lý do chưa có ruleset, chỉ GET |
+
+Giới hạn: n = 1 mỗi ca mỗi pha; chủ thể và người chấm cùng họ model; 6 ca lựa chọn cho sẵn lộ đáp án nên RED đạt sẵn (như SPR-12), phần phân biệt RED/GREEN nằm ở 4 ca tự do. Chủ thể GREEN không chạy lệnh nên để nguyên chữ giữ chỗ `<version …>` ở câu "từ bản X" (chưa kiểm chủ thể có tự đọc `.claude-plugin/plugin.json` khi có công cụ chạy) và chưa tự đếm số lần bật chế độ mở. `skill_sha` tính bằng đúng công thức `tree_hash` trên cây làm việc chưa commit; sẽ khớp ở HEAD sau khi điều phối commit nếu không sửa thêm `SKILL.md`/`references/`. Ca cũ (ngoài `in-14`) chưa chạy lại.

@@ -169,4 +169,4 @@ Việc xoá hay ghi đè dữ liệu thì tiêu chí gồm cả **cách khôi ph
 
 ## 6. Lệnh autopilot — nhận, nhắc lại, ghi
 
-ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Mục 6": kênh hợp lệ, cú pháp, ghi `delegation` và file dấu, danh sách loại, lời nhắc lại.
+ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Mục 6": kênh hợp lệ, cú pháp (chế độ mở/chặt, `Chặn thêm`, `Mở SPR-NN`, `/autopilot`), kiểm ruleset, ghi `delegation` và file dấu, danh sách loại, lời nhắc lại.
