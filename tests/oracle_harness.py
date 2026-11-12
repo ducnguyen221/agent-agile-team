@@ -83,6 +83,7 @@ def run_bash(cmd: str, repo: Path, log: Path, path_dirs: list[Path], timeout: in
     log.write_text("", encoding="utf-8")
     env = dict(os.environ, LOG=str(log).replace("\\", "/"),
                PATH=os.pathsep.join([str(p).replace("\\", "/") for p in path_dirs] + [os.environ["PATH"]]))
+    env.pop("AGENT_AGILE_SHIM", None)  # phiên chạy test có thể đã có biến này (hook viết lại lệnh): mỗi lượt tự quyết
     env.update(extra_env or {})
     try:
         subprocess.run(["bash", "-c", cmd], cwd=str(repo), env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,

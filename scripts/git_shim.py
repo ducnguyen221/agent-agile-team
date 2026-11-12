@@ -31,7 +31,9 @@ def clean_path(shim_dir: str | None, path: str) -> str:
     if not shim_dir:
         return path
     drop = os.path.normcase(os.path.realpath(shim_dir))
-    kept = [p for p in path.split(os.pathsep) if p and os.path.normcase(os.path.realpath(p)) != drop]
+    # bỏ cả mọi thư mục shims khác trên PATH (bản plugin khác): shim này mà gọi sang shim kia thì hai bên gọi vòng nhau mãi
+    kept = [p for p in path.split(os.pathsep)
+            if p and os.path.normcase(os.path.realpath(p)) != drop and not os.path.isfile(os.path.join(p, "..", "scripts", "git_shim.py"))]
     return os.pathsep.join(kept)
 
 
