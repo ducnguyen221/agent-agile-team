@@ -1,0 +1,160 @@
+"""Máy kiểm luật trao đổi agent–người (SPR-21, RQ-083): file luật, skill `explain`, mẫu tài liệu, dòng trỏ ở
+`AGENTS.md`, luật `plain-summary` của `check`. Viết trước khi có luật (RED): mỗi test đỏ vì thiếu đúng thứ nó kiểm,
+không vì lỗi nạp. Nhóm `method`/`skill` xanh sau TK3/TK5; nhóm `template`/`agents`/`check` xanh sau TK4/TK6 (chờ SPR-20 gộp `main`)."""
+
+from __future__ import annotations
+
+import datetime
+import re
+import shutil
+from pathlib import Path
+
+import pytest
+
+from conftest import FIXTURES, REPO, write_lf
+import check
+
+VALID = FIXTURES / "valid"
+SECTION = "## Tóm tắt cho người không chuyên"
+POINTER = "method/communication.md"
+AGENTS_MAX_BYTES = 10 * 1024
+
+
+def read(rel: str) -> str:
+    path = REPO / rel
+    assert path.is_file(), f"thiếu file `{rel}`"
+    return path.read_text(encoding="utf-8")
+
+
+# ---- method: file luật và hàng đăng ký -------------------------------------------------------------------------
+
+def test_method_communication_file_exists_with_conclusion():
+    text = read(POINTER)
+    assert text.lstrip().startswith("# "), "file luật phải có tiêu đề cấp 1"
+    assert "> **Kết luận:**" in text, "file luật phải mở bằng khối `> **Kết luận:**`"
+
+
+@pytest.mark.parametrize("needle", [
+    "súc tích", "diễn giải", "/explain",            # FR3: hai chế độ và lệnh
+    "[tên", "đường",                                  # FR1: dạng link
+    "Cần anh quyết", "KHUYẾN NGHỊ", "im lặng",        # FR2: mẫu câu hỏi, im lặng không phải duyệt
+    "Tóm tắt cho người không chuyên",                 # FR4.2: tài liệu hai lớp
+    "ngoài thư mục",                                  # FR1.4
+])
+def test_method_communication_states_each_rule(needle):
+    assert needle in read(POINTER), f"`{POINTER}` thiếu nội dung luật: {needle!r}"
+
+
+def test_method_communication_is_not_bloated():
+    lines = read(POINTER).count("\n")
+    assert 40 <= lines <= 150, f"`{POINTER}` dài {lines} dòng, kỳ vọng 40–150"
+
+
+def test_method_readme_registers_communication():
+    text = read("method/README.md")
+    assert "[communication.md](communication.md)" in text, "`method/README.md` thiếu hàng đăng ký communication.md"
+
+
+# ---- skill: explain và con trỏ ở response-style ----------------------------------------------------------------
+
+def test_explain_skill_exists_with_use_when_description():
+    text = read("skills/explain/SKILL.md")
+    m = re.match(r"---\n(.*?)\n---\n", text, re.S)
+    assert m, "thiếu frontmatter"
+    front = m.group(1)
+    assert re.search(r"^name: explain$", front, re.M), "name phải là `explain`"
+    assert re.search(r"^description: Use when", front, re.M), "description phải bắt đầu bằng `Use when`"
+    assert "/explain" in front, "description phải nêu lệnh `/explain`"
+    assert re.search(r"group: \"?communication\"?", front), "metadata.group phải là communication"
+
+
+def test_explain_skill_has_tests():
+    assert (REPO / "skills/explain/tests/scenarios.txt").is_file()
+    assert (REPO / "skills/explain/tests/pressure.md").is_file(), "skill `explain` thiếu tests/pressure.md"
+
+
+def test_response_style_points_to_explain_and_drops_why_trigger():
+    text = read("skills/response-style/SKILL.md")
+    desc = re.search(r"^description: (.*)$", text, re.M).group(1)
+    assert 'asks "why"' not in desc, "mô tả response-style còn trigger 'why / không hiểu' (RK6, trùng với explain)"
+    assert "explain" in text, "response-style phải trỏ sang skill `explain`"
+    assert POINTER in text, f"response-style phải trỏ tới `{POINTER}`"
+
+
+def test_response_style_brief_block_mentions_links_and_recommendation():
+    text = read("skills/response-style/SKILL.md")
+    block = text.split("## 8.", 1)[1]
+    assert "link" in block.lower(), "khối rút gọn cho subagent thiếu dòng về link (FR5.3)"
+    assert "KHUYẾN NGHỊ" in block, "khối rút gọn cho subagent thiếu dòng về khuyến nghị (FR5.3)"
+
+
+def test_skills_readme_lists_explain():
+    text = read("skills/README.md")
+    assert "(explain/SKILL.md)" in text, "`skills/README.md` thiếu hàng mô tả skill `explain` ở mục lục"
+    assert "(explain/tests/pressure.md)" in text, "`skills/README.md` thiếu hàng `explain` ở bảng hiện trạng thử"
+
+
+# ---- template: mục tóm tắt (TK6) -------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("doc", ["SPEC", "PLAN"])
+def test_templates_have_plain_summary(doc):
+    assert SECTION in read(f"templates/sprint/{doc}.md"), f"mẫu {doc} thiếu mục `{SECTION}`"
+
+
+# ---- agents: đúng một dòng trỏ, trong ngân sách (TK4) ----------------------------------------------------------
+
+def test_agents_md_single_pointer():
+    data = (REPO / "AGENTS.md").read_bytes()
+    text = data.decode("utf-8")
+    assert text.count(POINTER) == 1, f"`AGENTS.md` phải trỏ tới `{POINTER}` đúng 1 lần, thấy {text.count(POINTER)}"
+    assert len(data) <= AGENTS_MAX_BYTES, f"`AGENTS.md` {len(data)} B vượt trần {AGENTS_MAX_BYTES} B"
+
+
+# ---- check: luật plain-summary (TK6) ---------------------------------------------------------------------------
+
+def effective() -> datetime.date:
+    value = getattr(check, "PLAIN_SUMMARY_EFFECTIVE", None)
+    assert value is not None, "`scripts/check.py` chưa có hằng `PLAIN_SUMMARY_EFFECTIVE` (luật plain-summary chưa có)"
+    return value if isinstance(value, datetime.date) else datetime.date.fromisoformat(str(value))
+
+
+def sprint_with(tmp_path: Path, created: datetime.date, extra: str = "") -> Path:
+    root = tmp_path / "sprint"
+    shutil.copytree(VALID, root)
+    spec = root / "SPEC.md"
+    text = spec.read_text(encoding="utf-8")
+    assert "created: 2026-02-01" in text
+    text = text.replace("created: 2026-02-01", f"created: {created.isoformat()}", 1)
+    marker = "## 1. Bối cảnh"
+    assert marker in text
+    write_lf(spec, text.replace(marker, extra + marker, 1) if extra else text)
+    return root
+
+
+def rules_of(root: Path) -> set:
+    return {f.rule for f in check.check_paths([root]).findings}
+
+
+def test_check_flags_missing_plain_summary(tmp_path):
+    root = sprint_with(tmp_path, effective() + datetime.timedelta(days=1))
+    assert "plain-summary" in rules_of(root)
+
+
+def test_check_ignores_old_docs(tmp_path):
+    root = sprint_with(tmp_path, datetime.date(2026, 1, 15))
+    effective()  # đỏ nếu luật chưa có, để test này không xanh giả khi `check` chưa biết luật
+    assert "plain-summary" not in rules_of(root)
+
+
+def test_check_accepts_filled_summary(tmp_path):
+    body = f"{SECTION}\n\nSprint cho người dùng xuất đơn ra CSV để gửi kế toán; xong khi mở được bằng Excel.\n\n"
+    root = sprint_with(tmp_path, effective() + datetime.timedelta(days=1), body)
+    assert "plain-summary" not in rules_of(root)
+
+
+def test_check_treats_template_comment_as_empty(tmp_path):
+    template = read("templates/sprint/SPEC.md")
+    assert SECTION in template, "mẫu SPEC chưa có mục tóm tắt nên chưa lấy được chú thích mẫu"
+    section = template.split(SECTION, 1)[1].split("\n## ", 1)[0]
+    root = sprint_with(tmp_path, effective() + datetime.timedelta(days=1), SECTION + section + "\n")
+    assert "plain-summary" in rules_of(root)
