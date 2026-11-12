@@ -5,7 +5,7 @@ model: claude-sonnet-5-5 (all runs)
 tier: T3
 skill_sha: 33ac596c0429c519940ae4841a86696e5c11ddd9
 date: 2026-11-12
-result: "2/3 GREEN pass theo chữ và ý (gi-1, gi-2); gi-3 0/4 chữ và ý, bản base d603a73 cũng trượt; SPR-19 2026-11-12, n = 1 mỗi ca (gi-3 ×4)"
+result: "2/3 GREEN pass theo chữ và ý (gi-1, gi-2); gi-3 0/4 chữ, 0/4 ý (Đạt một phần); đối chứng ×3 trên cây chính trước TK5 (thân như d603a73): chữ 0/3, ý 3/3, khác điều kiện chấm, chưa kết luận lùi hay không; SPR-19 2026-11-12, n = 1 mỗi ca (gi-3 ×4)"
 agent_ids:
   red: {gi-1: aa0f6c6010b51a558, gi-2: a24967912532f0899, gi-3: a174e87cf03fbdfe6}
   green: {gi-1: a7d7903b0930fc822, gi-2: a0e5c33e85fe16a19, gi-3: a2017469f65c8f75f}
@@ -45,6 +45,6 @@ thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trê
 
 ## Lượt SPR-19 TK6 (2026-11-12)
 
-gi-1 và gi-2 Đạt cả chữ và ý. gi-3 trượt ở cả bốn lượt trên bản SPR-19 (dòng thời gian là bảng markdown thay vì CSV Time/Description/Milestone; câu trả lời dài hơn 35 dòng) nhưng cũng trượt ở ba lượt đối chứng trên bản base `d603a73` (2 Đạt một phần, 1 Không đạt theo chữ; ý 3/3 Đạt): không do đổi chữ SPR-19 mà là chênh so với lượt 2026-10-26 (chấm Đạt) — điều kiện chạy khác (lượt đó có câu "môi trường giả lập"), cần soát lại ca hoặc skill ở sprint khác. Hai lượt SPR-19 đầu có người chấm nhận bản tóm kịch bản thiếu số liệu.
+gi-1 và gi-2 Đạt cả chữ và ý. gi-3 trượt ở cả bốn lượt trên bản SPR-19 (dòng thời gian là bảng markdown thay vì CSV Time/Description/Milestone; câu trả lời dài hơn 35 dòng) và ý cũng 0/4 (Đạt một phần). Đối chứng ×3 chạy trên cây chính trước TK5 (thân hướng dẫn như `d603a73`, chữ nguồn đã đổi một phần; không phải checkout nguyên `d603a73`): chữ 0/3 (2 Đạt một phần, 1 Không đạt), ý 3/3 Đạt, người chấm nhận prompt đầy đủ. Hai lượt SPR-19 đầu có người chấm nhận bản tóm kịch bản thiếu số liệu, nên hai bên khác điều kiện chấm; chưa kết luận lùi hay không so với lượt 2026-10-26 (chấm Đạt, có câu "môi trường giả lập"). Cần chấm lại gi-3 cùng thước cho cả hai bản ở sprint khác.
 
 Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).

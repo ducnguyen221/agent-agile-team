@@ -89,8 +89,8 @@ Phân loại lỗi RED **trước** khi viết; dạng chặn được lỗi nà
 ## 5. `description` và frontmatter
 
 - Frontmatter tiếng Anh, thân tiếng Việt. Khoá: `name` (chữ thường, số, gạch nối; tên theo việc làm, ví dụ
-  `writing-plan`, `debugging`) · `description` · `metadata.group` · `metadata.roles` · `source` (repo + đường
-  file) · `source_sha` · `license` · `rewrite_before_public` (`true` khi nguồn không có giấy phép mở).
+  `writing-plan`, `debugging`) · `description` · `metadata.group` · `metadata.roles` (chuỗi các vai, ví dụ
+  `"implementer, qa"`) · `metadata.kind` (tuỳ chọn). Không ghi khoá nguồn: nguồn distill nằm ngoài repo, ghi công ở `NOTICE`.
 - `description` bắt đầu "Use when…", ngôi thứ ba, **chỉ** điều kiện kích hoạt và triệu chứng, <500 ký tự;
   có từ agent sẽ tìm (thông điệp lỗi, triệu chứng, từ đồng nghĩa); nhắc công nghệ chỉ khi skill gắn công nghệ đó.
 - **Không tóm quy trình vào `description`.** Agent làm theo bản tóm và bỏ thân skill: mô tả "review giữa các

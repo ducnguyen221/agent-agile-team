@@ -12,7 +12,7 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
 | `name` | có | trùng tên thư mục |
 | `description` | có | điều kiện kích hoạt, "Use when…" |
 | `metadata.group` | có | `process` (Quy trình) · `technique` (Kỹ thuật) · `verification` (Kiểm định) · `communication` (Giao tiếp & tối ưu) · `meta` (Meta) |
-| `metadata.roles` | có | danh sách vai dùng skill, hoặc `[all]` |
+| `metadata.roles` | có | chuỗi các vai dùng skill, ngăn bởi dấu phẩy (`"implementer, qa"`), hoặc `"all"` |
 | `metadata.kind` | không | `reference` — skill tham chiếu kỹ thuật (mẫu, bảng tra), không có luật sắt hay cổng; vắng = skill kỷ luật/quy trình |
 
 ## 2. Thử áp lực
@@ -144,10 +144,10 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
 | [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (eh-9 new; eh-1, eh-3, eh-4 rerun at n = 1) | 2026-10-24 |
-| [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass theo chữ và theo ý (KB8, lượt QA2 fix-2 chạy lại); SPR-19 2026-11-12, n = 1 | 2026-11-12 |
+| [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass theo chữ và theo ý (KB8, n = 3 sau sửa SPR-19: 3/3 chữ, 3/3 ý); KB1–KB7 không chạy lại; SPR-19 2026-11-12 | 2026-11-12 |
 | [hooks-guardrails](hooks-guardrails/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 0/3 pass (3 partial) | 2026-10-23 |
 | [gcp-devops](gcp-devops/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass theo ý, 0/3 Đạt hẳn theo chữ (3 Đạt một phần); SPR-19 2026-11-12, n = 1 mỗi ca | 2026-11-12 |
-| [gcp-incident-response](gcp-incident-response/tests/pressure.md) | kỷ luật | `pressure.md` | 2/3 GREEN pass theo chữ và ý (gi-1, gi-2); gi-3 0/4 chữ và ý, bản base d603a73 cũng trượt; SPR-19 2026-11-12, n = 1 mỗi ca (gi-3 ×4) | 2026-11-12 |
+| [gcp-incident-response](gcp-incident-response/tests/pressure.md) | kỷ luật | `pressure.md` | 2/3 GREEN pass theo chữ và ý (gi-1, gi-2); gi-3 0/4 chữ, 0/4 ý (Đạt một phần); đối chứng ×3 trên cây chính trước TK5 (thân như d603a73): chữ 0/3, ý 3/3, khác điều kiện chấm, chưa kết luận lùi hay không; SPR-19 2026-11-12, n = 1 mỗi ca (gi-3 ×4) | 2026-11-12 |
 
 Agent reviewer chuyên đề: [docs/agents.md](../docs/agents.md). Gặp tên cũ trong hồ sơ lịch sử:
 [docs/MIGRATION.md](../docs/MIGRATION.md).

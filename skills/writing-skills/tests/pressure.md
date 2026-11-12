@@ -3,9 +3,9 @@ skill: writing-skills
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 tier: T3 (the RED and first GREEN of 2026-10-01 ran at T2)
 model: claude-sonnet-5-5 (GREEN rerun and KB3 rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
-skill_sha: e94483352b1895ad4a59d45140ea63c3c0043dfc
+skill_sha: 0fe1b691c927efcdea1b8c7da95e11109d6d7f50
 date: 2026-11-12
-result: "1/1 GREEN pass theo chữ và theo ý (KB8, lượt QA2 fix-2 chạy lại); SPR-19 2026-11-12, n = 1"
+result: "1/1 GREEN pass theo chữ và theo ý (KB8, n = 3 sau sửa SPR-19: 3/3 chữ, 3/3 ý); KB1–KB7 không chạy lại; SPR-19 2026-11-12"
 agent_ids:
   green_rerun: {1: a7645bb29eb1a5d5d, 2: a96ae872197ca1cbe, 3: ae8c088ffc5b5e89c}
   kb3_rerun_neutral_c: {red: aa0475ae5a2473a65, green: a0534369da5997176}
@@ -202,3 +202,7 @@ sửa sau compact, 2 vòng review, 150 lần `git status`. Chấm theo cột "B�
 Chỉ chạy ca KB8 của lượt gần nhất (QA2 fix-2): chọn B, viết dòng `Phán quyết:`, không mở `BR`, ghi "Chưa chạy", dẫn đúng `diagnosing.md` mục 1 — Đạt cả chữ và ý. Không chạy lại KB1–KB7 của lượt trước (KB2 cần hai file mẫu không còn trong repo). Dòng checklist "không có khoá nguồn" chỉ được kiểm gián tiếp qua việc đọc `SKILL.md`.
 
 Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).
+
+## Lượt SPR-19 TK7 — chạy lại KB8 sau sửa mục 5 và `diagnosing.md` (2026-11-12)
+
+Sau soát Tech Reviewer: `SKILL.md` mục 5 bỏ khoá nguồn khỏi danh sách khoá frontmatter (thêm `metadata.roles` dạng chuỗi và `metadata.kind`), `references/diagnosing.md` dòng 10 đổi một mệnh đề. Chạy lại KB8 (lượt QA2 fix-2) ba lần độc lập, subagent mới mỗi lần (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối, cấm công cụ Skill, người chấm khác người trả lời: 3/3 Đạt theo chữ, 3/3 theo ý. Lượt 3 chỉ đạt ở mức biên (không đọc `diagnosing.md` nên không dẫn "Báo, không vá"; người chấm vẫn cho Đạt). `pressure.md` không có kịch bản chạm khoá frontmatter, nên phần mục 5 vừa sửa chưa được kiểm trực tiếp. KB1–KB7 của lượt trước không chạy lại (KB2 cần hai file mẫu không còn trong repo); `skill_sha` ở trên ứng với cây hiện tại cho phần đã chạy lại.
