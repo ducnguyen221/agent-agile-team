@@ -4,11 +4,11 @@ method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
 historical_skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
-skill_sha: 2a354ed7e716f8e080f47b867ce1d60bf7fbeb1f
+skill_sha: c4e0a4e131b6c0b460e385bcb820c8abf5ed102a
 historical_date: 2026-10-05
 date: 2026-11-12
 historical_result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
-result: "1/3 GREEN pass theo chữ, 3/3 theo ý (rs-9, rs-10, rs-11); SPR-19 2026-11-12, n = 1 mỗi ca"
+result: "2/3 GREEN pass theo chữ, 3/3 theo ý (rs-9, rs-10, rs-11); SPR-19 TK11 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm"
 candidate_source_sha256: fe5d4e6dc3af8e35773d21a198e04569882a497652e063ca96fad8bac87c51b3
 candidate_tested: true
 agent_ids:
@@ -215,3 +215,9 @@ Kết luận: lựa chọn và các điểm then chốt của câu trả lời g
 Ca rs-9, rs-10, rs-11 (lượt SPR-12 TK5 v2): theo ý 3/3 Đạt; theo chữ chỉ rs-10 Đạt. rs-9 Đạt một phần (thiếu cột "cần ai" là Đức khi ghi BR); rs-11 Đạt một phần (viết "Autopilot vẫn bật" thay vì "tạm dừng"). Lượt SPR-12 ghi 3/3 theo chữ; với n = 1 chưa tách được nhiễu lấy mẫu khỏi lùi thật, không chạy đối chứng trên bản base.
 
 Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).
+
+## Lượt SPR-19 TK11 — chạy lại sau vá luật dọn (2026-11-12)
+
+Ca rs-9, rs-10, rs-11: theo ý 3/3 Đạt; theo chữ 2/3 (rs-9, rs-11 Đạt; rs-10 Đạt một phần: tin cho `agent-qa-2` không nhắc nhánh tạm và cấm `git stash` trần). Trước vá 1/3 chữ, 3/3 ý. Không ca nào chạm `.tmp/<SPR-NN>/`, nên phần mới vá chưa được kiểm trực tiếp. Người chấm rs-9 chấm lỏng hơn lượt trước ở cột "cần ai".
+
+Cách chạy: Sau vá luật dọn thư mục tạm của SPR-19 TK11 (Đức chọn phương án B và gật 5 ý): `method/conventions.md` chốt quy ước `.tmp/<SPR-NN>/`, `closing-sprint` đưa luật dọn ra đoạn riêng áp mọi nhánh của menu, `running-sprint` dùng quy ước đó. Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời, kịch bản và tiêu chí giữ nguyên; n = 1 mỗi ca.

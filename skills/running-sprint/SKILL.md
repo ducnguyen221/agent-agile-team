@@ -121,7 +121,7 @@ bắt đầu → trả lời đủ, không giục.
 - **Review theo việc** — bắt buộc từ cỡ **vừa**, và với mọi `TK` chạm Trọng tâm review hay `risk_tags`;
   cỡ nhỏ được bỏ (review toàn nhánh ở Bước 4 lo). Reviewer là agent khác, nhận ba thứ: brief, báo cáo
   của Implementer, **gói diff** — `git log --oneline BASE..HEAD`, `git diff --stat BASE..HEAD`,
-  `git diff -U10 BASE..HEAD` ghi ra một file trong `.tmp/` (`review-<base7>..<head7>.diff`), reviewer
+  `git diff -U10 BASE..HEAD` ghi ra một file trong `.tmp/<SPR-NN>/` (`review-<base7>..<head7>.diff`), reviewer
   đọc một lần, diff không đi qua ngữ cảnh điều phối. Brief reviewer ở
   [references/review.md](references/review.md): hai phán quyết — **khớp SPEC** và **chất lượng** theo
   thang chung — mỗi phát hiện có `file:dòng`.
@@ -176,7 +176,7 @@ Chặn/Phải sửa chưa sửa hay chưa gác lại có phán quyết.
    Chặn/Phải sửa → lời báo chuẩn `method/process.md` mục 6, người dùng chọn.
 3. Gom **mọi** dòng `Phán quyết:` (tiền kiểm, gác lại, phân xử) vào REPORT mục Review & Retro, theo thứ
    tự, mỗi dòng kèm "sai thì tốn gì". Phán quyết không tới tay người dùng là quyết định trong bóng tối.
-4. → REPORT → Cổng 2 → skill `closing-sprint`. Xoá `.tmp/` của sprint sau khi đóng.
+4. → REPORT → Cổng 2 → skill `closing-sprint`. Dọn `.tmp/<SPR-NN>/` của sprint khi đóng (skill `closing-sprint` mục 6).
 
 ## 6. Chế độ một agent
 
@@ -192,7 +192,7 @@ Giữ nguyên sổ, tiền kiểm, bốn điều kiện dừng, phán quyết. K
   `Phán quyết:`. Thiếu một điều → chưa xong.
 - Hai dòng PROGRESS tối thiểu mỗi `TK`: bắt đầu (`TKn`, BASE) và xong (lệnh test + kết quả thật, commit
   range). Ghi cùng lượt với commit.
-- Output test dài ghi ra `.tmp/` và đọc đuôi; đọc mục `TK` trong PLAN, không đọc lại cả PLAN.
+- Output test dài ghi ra `.tmp/<SPR-NN>/` và đọc đuôi; đọc mục `TK` trong PLAN, không đọc lại cả PLAN.
 - **Review toàn nhánh vẫn bắt buộc** bởi agent khác (mục 5): đó là ngữ cảnh mới duy nhất chế độ này
   mua. Có subagent → giao T1. Không có → tự review theo brief ở `code-review`, ghi "tự review, chưa độc
   lập" vào PROGRESS và REPORT; kết luận sprint tối đa **Đạt có điều kiện** cho tới khi agent khác chạy

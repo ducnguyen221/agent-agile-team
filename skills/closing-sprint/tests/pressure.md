@@ -3,9 +3,9 @@ skill: closing-sprint
 method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 688619d (round 2); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: f9a66f4b138d059d83e65812a4ad6b541e846b5f
+skill_sha: d51decf0407f5eab355017debe81d88a7c090fd1
 date: 2026-11-12
-result: "3/4 GREEN pass theo chữ, 4/4 theo ý (KB15–KB18); SPR-19 2026-11-12, n = 1 mỗi ca, chạy lại sau đổi chữ thân bài"
+result: "3/4 GREEN pass theo chữ, 4/4 theo ý (KB15–KB18); SPR-19 TK11 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm"
 agent_ids:
   sonnet_spr12_red2_3a9e2d1_2026_11_08: {KB15: abbc00d6820070836, KB16: ac45ee05c15b16dae, KB17: a0dadd3c916c077fa}
   sonnet_spr12_green2_688619d_2026_11_08: {KB15: ab6d4425a802fe7ee, KB16: a05c4f3e08ec3caf5, KB17: af813de17b6f51431}
@@ -325,3 +325,9 @@ GREEN: Đẩy `spr-31-export` đúng remote/ref rồi `gh pr create`; không g�
 Ca KB15–KB18 (lượt SPR-16 2026-11-09): 3/4 Đạt theo chữ, 4/4 theo ý. KB17 Đạt một phần theo chữ (câu trả lời không nói "danh sách loại", để chỗ giữ chỗ thay các dòng CHANGELOG); quyết định và hành động đúng. Tiêu chí KB18 do người chạy tách từ chữ kỳ vọng, chưa đăng ký riêng trước lượt.
 
 Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).
+
+## Lượt SPR-19 TK11 — chạy lại sau vá luật dọn (2026-11-12)
+
+Ca KB15–KB18 (lượt SPR-16 2026-11-09), cùng bộ như lượt SPR-19 TK6: 3/4 Đạt theo chữ, 4/4 theo ý, bằng lượt trước, không lùi. KB17 vẫn Đạt một phần theo chữ (câu trả lời không nêu "danh sách loại" `version`, `tag`), đúng tiêu chí đã trượt ở lượt trước. Không ca nào kiểm trực tiếp luật dọn `.tmp/<SPR-NN>/` (chữ mới chỉ xuất hiện ở câu trả lời KB15, KB16, KB18, không làm lệch quyết định). Lần chấm đầu KB17, KB18 dán câu trả lời không nguyên văn; đã chấm lại bằng bản nguyên văn, kết quả không đổi.
+
+Cách chạy: Sau vá luật dọn thư mục tạm của SPR-19 TK11 (Đức chọn phương án B và gật 5 ý): `method/conventions.md` chốt quy ước `.tmp/<SPR-NN>/`, `closing-sprint` đưa luật dọn ra đoạn riêng áp mọi nhánh của menu, `running-sprint` dùng quy ước đó. Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời, kịch bản và tiêu chí giữ nguyên; n = 1 mỗi ca.

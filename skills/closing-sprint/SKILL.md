@@ -25,7 +25,7 @@ metadata:
 | 5 | **Đồng bộ tài liệu** của dự án với diff nhánh | Implementer | [references/docs-sync.md](references/docs-sync.md) |
 | 6 | **Ghi chú phát hành** khi sprint đổi hành vi người dùng thấy hoặc cắt bản | Analyst | [references/release-notes.md](references/release-notes.md) |
 | 7 | **Bài học** `LN`: tự chấm, dedup, lưu nơi lớp riêng quy định; quan trọng → chỉ **đề xuất** nâng | Analyst | [references/lessons.md](references/lessons.md) |
-| 8 | **Kiểm cây sắp gộp** (mục 2), **menu nhánh** (mục 3–4), rồi dọn | Analyst (+ người dùng) | — |
+| 8 | **Kiểm cây sắp gộp** (mục 2), **menu nhánh** (mục 3–4), rồi dọn (worktree và `.tmp/<SPR-NN>/`, mục 6) | Analyst (+ người dùng) | — |
 
 Đạt có điều kiện: điều kiện thành `CO` có chủ và mốc, kèm dòng `RQ-` như bước 2, trước bước 4. Nợ để lại chỉ
 sống ở REQUESTS: retro đọc khối "Đang mở" của sổ, không mở REPORT cũ.
@@ -123,9 +123,9 @@ không bớt lựa chọn; "bỏ việc" chỉ xảy ra khi người dùng **t�
 
 | Chọn | Làm | Lưu ý |
 |---|---|---|
-| 1. Gộp local | từ gốc repo chính: `git checkout <gốc>` → `git pull` → `git merge <nhánh>` → chạy **mọi làn kiểm của mục 2 trên kết quả gộp** → xanh thì dọn worktree (mục 6) rồi `git branch -d <nhánh>` | test hỏng sau gộp → **dừng**, giữ nhánh và worktree, điều tra — chưa push nên còn hoàn tác được; "chắc flaky" không phải lý do đi tiếp |
+| 1. Gộp local | từ gốc repo chính: `git checkout <gốc>` → `git pull` → `git merge <nhánh>` → chạy **mọi làn kiểm của mục 2 trên kết quả gộp** → xanh thì dọn worktree và `.tmp/<SPR-NN>/` (mục 6) rồi `git branch -d <nhánh>` | test hỏng sau gộp → **dừng**, giữ nhánh và worktree, điều tra — chưa push nên còn hoàn tác được; "chắc flaky" không phải lý do đi tiếp |
 | 2. Push + PR | xem mục 4.1 | **ngoài phạm vi** — chỉ khi người dùng gật ở menu |
-| 3. Giữ nguyên | báo "Giữ nhánh `<tên>`; worktree ở `<đường>`" | không dọn gì |
+| 3. Giữ nguyên | báo "Giữ nhánh `<tên>`; worktree ở `<đường>`" | không dọn worktree; `.tmp/<SPR-NN>/` vẫn ghi vào REPORT thành việc dọn có chủ (mục 6) |
 
 ### 4.1 Push và PR
 
@@ -162,7 +162,13 @@ yêu cầu gõ đúng từ **`bỏ`**; "ừ, dẹp đi" không tính. Nhận đ�
   / chuyển về repo chính / xoá — không hoàn tác được) rồi mới dọn.
 - Worktree do harness/môi trường quản → để nguyên; harness có công cụ thoát worktree thì dùng.
 - Worktree khác trông cũ → **không đụng**; chỉ dọn cái của sprint này.
-- Xoá `.tmp/` của sprint. Hồ sơ sprint (SPEC/PLAN/PROGRESS/REPORT) giữ.
+
+**Thư mục tạm của sprint — áp mọi nhánh của menu, không riêng gộp local.** Thư mục tạm của sprint là `.tmp/<SPR-NN>/`
+(quy ước ở `method/conventions.md`). Gộp local → xoá ngay sau khi gộp xanh. Push + PR hay giữ nguyên → chưa xoá được
+(còn có thể sửa theo phản hồi): ghi vào REPORT mục 6 một dòng "dọn `.tmp/<SPR-NN>/` khi PR gộp" kèm tên người làm. `.tmp/`
+nằm trong `.gitignore` nên `git status` không báo; rác ở đây vô hình với mọi cổng, vì vậy phải ghi thành việc có chủ. Chỉ xoá
+thư mục của sprint này: không xoá `.tmp/autopilot.json` (file dấu autopilot) và không xoá `.tmp/<SPR-khác>/`. Hồ sơ sprint
+(SPEC/PLAN/PROGRESS/REPORT) giữ.
 
 ## 7. Cờ đỏ
 
