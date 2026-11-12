@@ -228,4 +228,4 @@ Giữ nguyên sổ, tiền kiểm, bốn điều kiện dừng, phán quyết. K
 
 ## 9. Khi autopilot đang bật
 
-ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Mục 9": file dấu theo phiên con, sổ phiên con, danh sách loại, `Dừng autopilot.` và `Thu hồi duyệt thay`.
+ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Mục 9": file dấu theo phiên con, sổ phiên con, danh sách loại, `Dừng autopilot.`, `Thu hồi duyệt thay`, brief cấm ghi `delegation`; "Mục 10": tin mở sprint.

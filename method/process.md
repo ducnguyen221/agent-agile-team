@@ -131,7 +131,7 @@ Tài liệu: <đường tới SPEC>, <đường tới PLAN>
 Anh trả lời: "duyệt" / "điều chỉnh: <gì>"
 ```
 
-Dòng `Khuyến nghị` chỉ có khi người dùng xin khuyến nghị ở cổng này. Khuyến nghị không đổi trạng thái: cổng vẫn `pending` tới khi người dùng nói. Người dùng chỉ đáp "ok" hay "theo khuyến nghị" là duyệt của người (`gate_1_mode` vắng = `human`), ghi câu nguyên văn — không phải lời cấp quyền duyệt thay.
+Dòng `Khuyến nghị` có khi người dùng xin khuyến nghị ở cổng này, và **luôn có khi autopilot bật** (khối `delegation` có `level`); một câu, nêu phương án chọn, phương án loại, sai thì tốn gì. Khuyến nghị không đổi trạng thái: cổng vẫn `pending` tới khi người dùng nói. Người dùng chỉ đáp "ok" hay "theo khuyến nghị" là duyệt của người (`gate_1_mode` vắng = `human`), ghi câu nguyên văn — không phải lời cấp quyền duyệt thay.
 
 **Kết quả Cổng 1.**
 - *Duyệt* → ghi `gate_1: approved` vào frontmatter SPEC và PLAN, kèm thời điểm `gate_1_at` và **câu
@@ -150,7 +150,8 @@ Mặc định **tắt**: vắng `gate_N_mode` nghĩa là `human`, cổng là c�
 
 - **Câu cấp quyền mẫu** (người dùng nói trong chat, đủ cổng · sprint · hạn):
   `Cho phép T1 duyệt thay Cổng 1 của SPR-NN tới hết sprint.` ·
-  `Cho phép T1 duyệt thay Cổng 1 và Cổng 2 của SPR-NN tới 2026-10-30, gồm sửa file luật AGENTS.md, tiers/README.md.`
+  `Cho phép T1 duyệt thay Cổng 1 và Cổng 2 của SPR-NN tới 2026-10-30, gồm sửa file luật AGENTS.md, tiers/README.md.` ·
+  `Mở SPR-NN, gồm sửa file luật AGENTS.md, tiers/README.md.` (chế độ mở, lời cấp ngắn: mỗi file nêu nguyên văn trong câu)
   Không phải lời cấp: "ok", "làm luôn", "tự quyết đi", "theo khuyến nghị", mức tự trị *tự quyết* ở Brief — khi đó
   Analyst đề xuất câu cấp quyền ở lời trình cổng kế để người dùng nói lại cho đủ.
 - **Câu thu hồi:** `Thu hồi duyệt thay SPR-NN.` (hiệu lực ngay; ghi `revoked_at`).

@@ -79,6 +79,8 @@ RULES: dict[str, tuple[str, str]] = {
     "gate-route-floor": (PHAI, "cổng `delegated` (kể cả còn `pending`) mà bảng 'File luật và file sàn cứng sẽ chạm' khai file sàn cứng, hoặc `risk_tags` có `rules` mà `delegation.files` rỗng: chuyển cổng người, trình lời khuyến nghị"),
     "frontmatter-duplicate-key": (PHAI, "khoá `delegation` lặp trong frontmatter (chỉ một phiên điều phối ghi lời cấp)"),
     "decision-owner-missing": (NEN, "CQ/DN của sprint từ ngày chế độ mở mà bảng thiếu cột hoặc ô 'Người quyết'"),
+    "report-missing-ask-count": (NEN, "REPORT của sprint từ ngày chế độ mở thiếu dòng 'số lượt Đức phải trả lời' (có số)"),
+    "conditional-pass-merged-main": (PHAI, "Cổng 2 'Đạt có điều kiện' mà bản tin autopilot ghi đã gộp `main`: Đạt có điều kiện thì nhánh chờ người"),
     "protected-repos-unconfigured": (GHI, "sprint bật autopilot mở mà máy chưa đặt `AGENT_AGILE_PROTECTED_REPOS`: đẩy ở chế độ mở bị chặn `push-repo-unverified`"),
     "hard-floor-marker": (CHAN, "`--self`: cặp mốc `san-cung` ở file luật lệch, mất hoặc thừa so với số cặp quy định"),
     "routing-invalid": (PHAI, "routing evidence marker/JSON/record không hợp lệ"),
@@ -155,6 +157,12 @@ REQUIRED_HEADINGS = {
     "sprints": ("Đang mở", "Timeline"),
     "specs": ("Đang mở", "Danh mục"),
 }
+
+ASK_COUNT_LINE = re.compile(r"số lượt đức phải trả lời[^0-9\n]*[0-9]", re.IGNORECASE)  # FR7.4: dòng đếm lượt có số
+MERGED_MAIN = re.compile(r"đã gộp[^.\n]*(?:\bmain\b|nhánh chính)")  # FR7.2: bản tin khai đã gộp vào nhánh chính (chữ đã hạ về chữ thường)
+MERGE_COMMIT_LINE = re.compile(r"^[\s>*_-]*commit gộp")  # dòng nhãn "Commit gộp": có mã băm thì là đã gộp
+HEADING_LEVEL = re.compile(r"^(#{1,6})\s")  # dòng tiêu đề Markdown; cấp = số dấu #
+HEX_SHA = re.compile(r"\b[0-9a-f]{7,40}\b")
 
 PLAN_GOAL_LABELS = ("Mục tiêu sprint:", "Kết quả mong muốn / xong khi:", "Rủi ro cần chú ý:")  # SPEC 7.8
 INPUT_FIELD = "**Đầu vào:**"
@@ -1047,6 +1055,7 @@ class Engine:
             self.plan_goal_rule(doc)
         if doc.kind in ("report", "sprint"):
             self.verification_rules(doc)
+            self.stop_message_rules(doc)
 
     def routing_rules(self, doc: Doc) -> None:
         """Read an explicit marker and its immediately following fenced JSON object."""
@@ -1481,6 +1490,52 @@ class Engine:
             if owner_col < 0 or owner_col >= len(cells) or not cells[owner_col].strip():
                 self.add(doc.path, doc.line_no(idx), "decision-owner-missing",
                          f"{m.group(1)}{m.group(2)} thiếu người quyết (cột 'Người quyết': người · cổng · Analyst)")
+
+    def stop_message_rules(self, doc: Doc) -> None:
+        """Tin cuối sprint (FR7.2, FR7.4): dòng đếm lượt (REPORT sprint mới) và lưới bắt gộp `main` khi Đạt có điều kiện."""
+        body, in_comment = [], False
+        for idx, line in enumerate(doc.raw):  # bỏ chú thích HTML: dòng mẫu trong `<!-- -->` không phải dòng thật
+            visible = line
+            while True:
+                if in_comment:
+                    end = visible.find("-->")
+                    if end < 0:
+                        visible = ""
+                        break
+                    visible, in_comment = visible[end + 3:], False
+                start = visible.find("<!--")
+                if start < 0:
+                    break
+                end = visible.find("-->", start)
+                if end < 0:
+                    visible, in_comment = visible[:start], True
+                    break
+                visible = visible[:start] + visible[end + 3:]
+            body.append((idx, visible))
+        created = str(doc.data.get("created", ""))
+        if doc.kind == "report" and DATE.fullmatch(created) and created >= rules.MODE_OPEN_EFFECTIVE_DATE:
+            if not any(ASK_COUNT_LINE.search(text) for _, text in body):
+                self.add(doc.path, doc.key_line("created"), "report-missing-ask-count",
+                         "REPORT thiếu dòng 'số lượt Đức phải trả lời: <số>' (bản tin autopilot, method/autopilot.md mục 8)")
+        if doc.data.get("gate_2") != "conditional_pass":
+            return
+        bulletin_level = 0  # 0 = ngoài mục "Bản tin autopilot"; còn lại = cấp tiêu đề của mục đang đọc
+        for idx, text in body:
+            folded = text.casefold()
+            heading = HEADING_LEVEL.match(text)
+            if heading:
+                level = len(heading.group(1))
+                if "bản tin autopilot" in folded:
+                    bulletin_level = level
+                elif bulletin_level and level <= bulletin_level:
+                    bulletin_level = 0
+                continue
+            if not bulletin_level and "bản tin autopilot" not in folded:  # tin cuối chỉ nằm ở mục bản tin (hoặc dòng mục nhỏ của SPRINT.md)
+                continue
+            if MERGED_MAIN.search(folded) or (MERGE_COMMIT_LINE.search(folded) and HEX_SHA.search(folded)):
+                self.add(doc.path, doc.line_no(idx), "conditional-pass-merged-main",
+                         "Cổng 2 là Đạt có điều kiện mà bản tin ghi đã gộp `main`: Đạt có điều kiện thì nhánh chờ người gộp")
+                return
 
     def protected_repos_note(self, doc: Doc) -> None:
         """FR4.3: sprint bật autopilot mở mà máy chưa đặt danh sách repo được bảo vệ."""

@@ -192,4 +192,4 @@ thư mục của sprint này: không xoá `.tmp/autopilot.json` (file dấu auto
 
 ## 8. Khi autopilot đang bật
 
-ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Mục 8": bản tin autopilot, nhánh sprint và menu, thứ luôn hỏi người, hết hạn.
+ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Mục 8": bản tin autopilot, tin cuối (mẫu), rào bản cài, nhánh sprint và menu, thứ luôn hỏi người, hết hạn.

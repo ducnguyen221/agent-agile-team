@@ -245,7 +245,7 @@ PINNED_ZONE_HASHES = {
         "e9e7efcd8749e8cb34da4fa44745bfbd63af78576b403e2b4d59aa6549c808d5",
         "5d18f5eaed17becce2a26b0381cb1a0576ec05b6d3d5948bcef94a80abe411bf"),
     ("method/process.md", 0): (
-        "b2a3f70d7bf37e74f83b80da6704cf411aa55441affc64a0a6dc76f398cae8b4",
+        "616b5596b01c29ca0ad05eb5ca5e579fc78e7d1e6d1cfc2b3a4a20d0d0abf278",  # SPR-20 TK8: Khuyến nghị có sẵn khi autopilot bật + câu mẫu `Mở SPR-NN` (vùng sàn đã duyệt ở PLAN)
         "ecb48ff6109d5b11438be3eef55f7e9c5d7af45c98a2cf48cf4dea2efc4f1029"),
     ("method/process.md", 1): (
         "97cf1aad77f3ee10e8f5927d4f3a4036fe3c7bd7b544344b944e973197458945",
