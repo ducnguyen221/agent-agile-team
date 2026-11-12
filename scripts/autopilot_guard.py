@@ -89,6 +89,7 @@ MAX_WALK_DEPTH = 6  # độ sâu tối đa khi dò file dấu lồng trong đíc
 NESTED = "nested"  # đơn vị chặn riêng: lồng shell quá sâu, không phân tích được
 MARKER = "marker"  # đơn vị chặn riêng: đụng tới chính file dấu
 UNRESOLVED = "unresolved"  # đơn vị chặn riêng: chuỗi đưa vào shell có git/gh nhưng không phân tích được
+MAIN_LOCAL_MERGE = "main-local-merge"  # mã nội bộ, không nằm trong 13 mục: bật cùng chế độ mở, chặn gộp cục bộ (merge/pull) khi đang đứng ở `main`
 SPECIAL_ITEMS = frozenset({NESTED, MARKER, UNRESOLVED})
 WRITE_TOOLS = frozenset({"write", "edit", "multiedit", "notebookedit", "apply_patch", "write_to_file", "replace_file_content",
                          "multi_replace_file_content"})
@@ -216,6 +217,15 @@ def load_active(marker: str) -> tuple[set[str], bool]:
         return set(known), True
     if not isinstance(data, dict):
         return set(known), True
+    mode = data.get("mode", "secure")
+    if mode == "open":  # SPR-20: chế độ mở chặn 7 mục + mục file dấu ghi + gộp cục bộ vào `main`; mục khác tự chạy trong hợp đồng
+        from _autopilot_rules import OPEN_ALWAYS_BLOCKED  # nạp muộn như `known_exclusions`
+        listed = data.get("exclusions")
+        if not isinstance(listed, list):
+            return set(known) | {MAIN_LOCAL_MERGE}, False  # khoá hỏng ở chế độ mở: đóng an toàn bằng cả 13 mục
+        return set(OPEN_ALWAYS_BLOCKED) | {e for e in listed if isinstance(e, str) and e in known} | {MAIN_LOCAL_MERGE}, False
+    if mode != "secure":
+        return set(known), True  # `mode` lạ = file dấu hỏng
     listed = data.get("exclusions")
     if not isinstance(listed, list):
         return set(known), False
@@ -389,9 +399,9 @@ def _git_item(args: list[str], ctx: Context, redirected: bool) -> str | None:
     if sub == "merge":
         if any(a in ("--abort", "--quit") for a in rest):
             return None
-        return "main_merge" if ctx.on_main(where) else ("branch_merge_local" if "branch_merge_local" in ctx.active else None)
+        return _local_merge_item(ctx, where, rest, False)
     if sub == "pull":  # pull = fetch + merge: gộp cục bộ ở mọi nhánh, kể cả `--ff-only`
-        return "main_merge" if ctx.on_main(where) else ("branch_merge_local" if "branch_merge_local" in ctx.active else None)
+        return _local_merge_item(ctx, where, rest, True)
     if sub == "reset":
         return "irreversible_delete" if "--hard" in rest else None
     if sub == "branch":
@@ -407,6 +417,28 @@ def _git_item(args: list[str], ctx: Context, redirected: bool) -> str | None:
         forced = "--force" in rest or any(_cluster(a, "f") for a in rest)
         return "irreversible_delete" if rest[:1] == ["remove"] and forced else None
     return None
+
+
+def _local_merge_item(ctx: "Context", where: list, rest: list[str], is_pull: bool) -> str | None:
+    """Mục của `git merge`/`git pull`. Ở `main`: chế độ mở (có `main-local-merge`) chặn mọi gộp cục bộ, trừ `pull --ff-only` của repo
+    `push-only` (chỉ tiến con trỏ theo remote, không tạo commit gộp); chế độ secure giữ `main_merge`. Nhánh khác: `branch_merge_local` như cũ."""
+    if ctx.on_main(where):
+        if MAIN_LOCAL_MERGE not in ctx.active:
+            return "main_merge"
+        if is_pull and "--ff-only" in rest and _repo_is_push_only(ctx, where):
+            return None
+        return MAIN_LOCAL_MERGE
+    return "branch_merge_local" if "branch_merge_local" in ctx.active else None
+
+
+def _repo_is_push_only(ctx: "Context", where: list) -> bool:
+    """Mọi thư mục lệnh chạy thuộc repo khai mức `push-only` trong `AGENT_AGILE_PROTECTED_REPOS`; không xác định được → False (đóng)."""
+    env = getattr(ctx, "env", os.environ)
+    try:
+        dirs = [d for d in where if d] or [ctx.cwd]
+        return all(git_fence.protection(d, env, git_fence.default_runner, marker=True, need_index=False).level == "push-only" for d in dirs)
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def _gh_item(args: list[str]) -> str | None:
@@ -950,6 +982,9 @@ def reason_for(item: str, broken: bool) -> str:
         return "autopilot: chuỗi lệnh đưa vào shell có git/gh nhưng không phân tích được — cần người dùng nói trong chat — lệnh không chạy"
     if item == NESTED:
         return "autopilot: lệnh lồng quá {} lớp shell, không phân tích được — cần người dùng nói trong chat — lệnh không chạy".format(MAX_UNWRAP)
+    if item == MAIN_LOCAL_MERGE:
+        return ("autopilot chế độ mở: '{}' (gộp cục bộ vào main; đẩy nhánh rồi gộp qua PR có ruleset, xem method/autopilot.md mục 5) "
+                "cần người dùng nói trong chat — lệnh không chạy").format(item)
     lead = "autopilot: file dấu hỏng, " if broken else "autopilot: "
     return "{}'{}' cần người dùng nói trong chat — lệnh không chạy".format(lead, item)
 
