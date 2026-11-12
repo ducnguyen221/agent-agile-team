@@ -145,7 +145,7 @@ trích bắt đầu bằng `> **Kết luận:**` trước tiêu đề cấp 2 đ
 | Tài liệu | Cụm tiêu đề cấp 2 bắt buộc |
 |---|---|
 | SPEC | Bối cảnh · Câu chuyện người dùng · Yêu cầu chức năng · Tiêu chí thành công · Ngoài phạm vi · Câu hỏi cần làm rõ (Truy vết: Nên có từ cỡ vừa; Đổi hợp đồng / giao diện: bắt buộc khi cỡ lớn hoặc `risk_tags` có `public_api`, cỡ khác xoá mục — `check` chưa kiểm) |
-| PLAN | Mục tiêu · Kiến trúc · Ràng buộc chung · Trọng tâm review · Việc · Rủi ro · Quyết định cần người · Ước lượng |
+| PLAN | Mục tiêu · Kiến trúc · Ràng buộc chung · File luật và file sàn cứng sẽ chạm · Trọng tâm review · Việc · Rủi ro · Quyết định cần người · Ước lượng |
 | PROGRESS | Bảng trạng thái việc · Nhật ký · Vướng mắc · Vòng kiểm định hiện tại |
 | REPORT | Tóm tắt cho người không chuyên · Kết quả kiểm định · Phát hiện của reviewer · Rủi ro còn lại · Cách dùng, đã đổi gì, cách hoàn tác · Bài học · Việc để lại · Review & Retro · Cổng 2 (tiểu mục `### Review PLAN trước Cổng 1` dưới "Phát hiện của reviewer": nơi chuẩn của `RF` review PLAN, nên có từ cỡ vừa — `check` không bắt buộc) |
 | SPRINT (gộp) | theo cỡ — xem bảng hợp đồng `size × doc` dưới |

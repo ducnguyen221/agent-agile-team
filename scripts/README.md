@@ -79,6 +79,7 @@ xuống dòng (LF/CRLF) của file đó; file mới ghi UTF-8 không BOM, LF.
 | `AGENT_AGILE_TIERS` | `init.py` | Đường tới bảng tier → model ngoài repo ([`tiers/README.md`](../tiers/README.md) mục 2). Chưa đặt hoặc trỏ file không có → `init --sprint` in cảnh báo ra stderr (mã thoát không đổi), để Analyst xin chỉ định tier trong chat trước khi cần review PLAN |
 | `AGENT_AGILE_DENYLIST` | `check.py --self` | Đường tới danh sách từ cấm **ngoài repo** (hợp đồng ở [`tests/README.md`](../tests/README.md)). Thiếu, không đọc được hoặc rỗng → in `WARNING NOT_CONFIGURED` ra stderr, luật `leak-denylist` **Chưa chạy** (không tính là Đạt); mã thoát không vì thế mà đổi |
 | `AGENT_AGILE_LEDGER` | `check.py` | Mẫu đường file sổ tập trung của máy, chứa `{project}` (ví dụ `<kho-sổ>/{project}.md`; `~` đầu đường được mở rộng). **Chỉ dự án khai `ledger.project` trong `.agile.json` mới dùng**; không khai thì biến bị bỏ qua. Khai mà chưa đặt → Ghi chú `ledger-unconfigured`; thiếu `{project}` → `config-invalid` |
+| `AGENT_AGILE_PROTECTED_REPOS` | `check.py`, `git_fence.py` | Danh sách repo được bảo vệ do chủ máy đặt (mức `push-only` hoặc `full` theo từng repo). `check` chỉ nhắc: sprint bật autopilot mở mà biến vắng → Ghi chú `protected-repos-unconfigured` |
 
 ## Luật của `check`
 
@@ -149,6 +150,10 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `root-junk` | Phải sửa | `--self`: file hoặc thư mục ở gốc repo không được theo dõi và không bị ignore (đo bằng `git status --porcelain --ignored=no`; cache đã ignore không tính; không phải repo Git thì bỏ qua) |
 | `agents-md-budget` | Phải sửa | `--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 240 byte |
 | `delegation-fence-file` | Phải sửa | Khối `delegation` mà `delegation.files` nêu một file thuộc sàn cứng (`FLOOR_FILES`: `FENCE_FILES`, `floor_check.py`, các test ghim, `verify.yml`…): không duyệt thay được. File chỉ chứa **vùng** sàn (`AGENTS.md`, `method/{process,sizing,autopilot}.md`) không bị luật này báo — `floor_check` so vùng đó với base |
+| `gate-route-floor` | Phải sửa | Cổng `gate_N_mode: delegated` (kể cả còn `pending`, không đợi kết luận) mà bảng `## File luật và file sàn cứng sẽ chạm` của PLAN khai file thuộc `FLOOR_FILES` hoặc có vùng sàn (`FLOOR_ZONES`), hoặc `risk_tags` có `rules` mà `delegation.files` rỗng: cổng đi người, trình lời khuyến nghị. Báo một lần mỗi lý do cho mỗi tài liệu |
+| `frontmatter-duplicate-key` | Phải sửa | Khoá `delegation` lặp ở frontmatter: chỉ phiên điều phối ghi một khối. Thay `frontmatter-syntax` cho đúng trường hợp này; khoá lặp khác vẫn là `frontmatter-syntax` |
+| `decision-owner-missing` | Nên sửa | Bảng `CQ`/`DN` (cột đầu `Mã`) của SPEC/PLAN/SPRINT có `created` từ `MODE_OPEN_EFFECTIVE_DATE` mà thiếu cột hoặc ô `Người quyết` (người · cổng · Analyst). Hồ sơ cũ hơn ngày đó không bị báo |
+| `protected-repos-unconfigured` | Ghi chú | PLAN/SPRINT có khối `delegation.mode: open` mà máy chưa đặt `AGENT_AGILE_PROTECTED_REPOS`: đẩy ở chế độ mở bị chặn `push-repo-unverified`; không làm đỏ |
 | `hard-floor-marker` | Chặn | `--self` (chỉ khi repo có `scripts/floor_check.py`): cặp mốc `<!-- san-cung:start -->`/`end` ở `AGENTS.md`, `method/{process,sizing,autopilot}.md` lệch (mở không đóng, lồng, nằm trong khối mã), mất hoặc thừa so với `FLOOR_ZONES` |
 | `routing-invalid` | Phải sửa | Marker routing thiếu khối JSON kế tiếp, JSON sai, record sai schema 1 hoặc thiếu chứng cứ/nguồn độc lập |
 | `routing-unknown` | Ghi chú | Record có field ngoài schema routing 1; checker không diễn giải field lạ |

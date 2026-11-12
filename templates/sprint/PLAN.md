@@ -60,6 +60,12 @@ links:
   dispatch. Quyết định của chủ về model hoặc effort được ghi theo từng field và scope; thiếu bằng chứng thì
   để unknown có lý do, không gán 0 hay tự suy actual.
 
+## File luật và file sàn cứng sẽ chạm
+
+<!-- Bảng (file, ★ = sàn cứng · vùng/dòng · sửa gì và ảnh hưởng · việc `TK`) cho mọi file luật hoặc file sàn cứng (`method/autopilot.md`, `hooks/hooks.json`, `scripts/git_fence.py`…) PLAN sẽ sửa. Có file sàn cứng thì cổng đi **người**, không duyệt thay (luật `gate-route-floor`). Không chạm thì ghi "Không có." -->
+
+Không có.
+
 ## Trọng tâm review
 
 <!-- TỐI ĐA 5 điểm dễ hỏng mà chưa việc nào kiểm trực tiếp — reviewer soi kỹ nhất ở đây. -->
@@ -104,13 +110,13 @@ PLAN có 1 **risk** (RK):
 
 ## Quyết định cần người
 
-<!-- Chỉ những điểm làm đổi đáng kể kết quả. Mỗi DN có lựa chọn, khuyến nghị kèm lý do. Không có thì ghi "Không có." -->
+<!-- Chỉ những điểm làm đổi đáng kể kết quả. Mỗi DN có lựa chọn, khuyến nghị kèm lý do và **người quyết**: `người` (đổi mục tiêu/phạm vi/tiêu chí, không đảo ngược, tốn tiền hoặc ra ngoài, chạm sàn cứng/secret/xác thực) · `cổng` · `Analyst` (kỹ thuật, đảo ngược được, trong phạm vi đã duyệt, ghi `Phán quyết:`). Không có thì ghi "Không có." -->
 
 PLAN có 1 **decision** (DN) cần người dùng quyết:
 
-| Mã | Câu hỏi | Lựa chọn | Khuyến nghị | Trạng thái |
+| Mã | Câu hỏi | Lựa chọn | Khuyến nghị | Người quyết · trạng thái |
 |---|---|---|---|---|
-| DN1 (chỉ mục mã đơn) | Thêm chỉ mục cho cột mã đơn ngay sprint này? | (a) có · (b) để sprint sau | (b) — bảng còn nhỏ, chưa cần | mở |
+| DN1 (chỉ mục mã đơn) | Thêm chỉ mục cho cột mã đơn ngay sprint này? | (a) có · (b) để sprint sau | (b) — bảng còn nhỏ, chưa cần | người · mở |
 
 ## Ước lượng
 

@@ -9,7 +9,8 @@ Mã thoát: 0 = Đạt (không có Chặn/Phải sửa) · 1 = Không đạt · 
 không đọc được, frontmatter ngoài tập con YAML, `.agile.json` hỏng).
 
 Biến môi trường: `AGENT_AGILE_DENYLIST` — đường tới danh sách từ cấm ngoài repo (chỉ `--self` dùng);
-`AGENT_AGILE_LEDGER` — mẫu đường file sổ tập trung, chứa `{project}` (chỉ dự án khai `ledger.project` mới dùng).
+`AGENT_AGILE_LEDGER` — mẫu đường file sổ tập trung, chứa `{project}` (chỉ dự án khai `ledger.project` mới dùng);
+`AGENT_AGILE_PROTECTED_REPOS` — danh sách repo được bảo vệ của rào git (chỉ để nhắc khi sprint bật autopilot mở).
 Hợp đồng luật: `templates/README.md`; mô tả từng luật: `scripts/README.md`.
 """
 
@@ -75,6 +76,10 @@ RULES: dict[str, tuple[str, str]] = {
     "root-junk": (PHAI, "`--self`: file hoặc thư mục ở gốc repo không được theo dõi và không bị ignore"),
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
     "delegation-fence-file": (PHAI, "`delegation.files` nêu file thuộc sàn cứng (`FLOOR_FILES`): không duyệt thay được"),
+    "gate-route-floor": (PHAI, "cổng `delegated` (kể cả còn `pending`) mà bảng 'File luật và file sàn cứng sẽ chạm' khai file sàn cứng, hoặc `risk_tags` có `rules` mà `delegation.files` rỗng: chuyển cổng người, trình lời khuyến nghị"),
+    "frontmatter-duplicate-key": (PHAI, "khoá `delegation` lặp trong frontmatter (chỉ một phiên điều phối ghi lời cấp)"),
+    "decision-owner-missing": (NEN, "CQ/DN của sprint từ ngày chế độ mở mà bảng thiếu cột hoặc ô 'Người quyết'"),
+    "protected-repos-unconfigured": (GHI, "sprint bật autopilot mở mà máy chưa đặt `AGENT_AGILE_PROTECTED_REPOS`: đẩy ở chế độ mở bị chặn `push-repo-unverified`"),
     "hard-floor-marker": (CHAN, "`--self`: cặp mốc `san-cung` ở file luật lệch, mất hoặc thừa so với số cặp quy định"),
     "routing-invalid": (PHAI, "routing evidence marker/JSON/record không hợp lệ"),
     "routing-unknown": (GHI, "routing record có field ngoài schema 1"),
@@ -128,6 +133,7 @@ DELEGATION_FORBIDDEN_TAGS = {"secret", "auth"}  # vùng cấm duyệt thay (SPEC
 DELEGATION_SPECIALISTS = {"security-specialist", "data-specialist", "backend-specialist", "frontend-specialist"}  # danh sách chuyên đề kiểm định (dùng chung cho roles, self-review và người duyệt thay)
 DELEGATION_RECORD = "Bản ghi duyệt thay"  # tiêu đề cấp 2 ở plan, report, sprint
 DELEGATION_LABELS = ("Phương án chọn:", "Phương án bị loại:", "Nếu sai thì tốn gì:")
+FLOOR_TABLE_HEADING = "file luật và file sàn cứng sẽ chạm"  # tiêu đề cấp 2 của bảng khai file luật trong PLAN (so casefold)
 DELEGATION_QUOTE = "duyệt thay:"  # tiền tố bắt buộc của `gate_N_quote`
 EXECUTORS = {"analyst", "architect", "implementer", "qa", "researcher"}
 VERIFIERS = {"business-reviewer", "tech-reviewer", "gate-delegate"}
@@ -899,7 +905,11 @@ def load_doc(path: Path) -> Doc:
         try:
             doc.fm = c.parse_frontmatter(text)
         except c.SubsetError as exc:
-            doc.load_findings.append(Finding(path, exc.line, "frontmatter-syntax", exc.message))
+            if exc.message == "duplicate key 'delegation'":  # lời cấp chỉ một người ghi (FR7.5): khoá lặp là lỗi riêng, không phải ngoài-tập-con
+                doc.load_findings.append(Finding(path, exc.line, "frontmatter-duplicate-key",
+                                                 "khoá 'delegation' lặp trong frontmatter — chỉ phiên điều phối ghi một khối duy nhất; xoá bản thừa"))
+            else:
+                doc.load_findings.append(Finding(path, exc.line, "frontmatter-syntax", exc.message))
         if doc.fm is None and not doc.load_findings:
             doc.load_findings.append(Finding(path, 1, "frontmatter-missing", f"{path.name} là tài liệu chuẩn nhưng không có frontmatter"))
         kind = doc.data.get("doc")
@@ -1027,7 +1037,10 @@ class Engine:
         self.heading_rules(doc)
         self.id_rules(doc)
         self.lead_rule(doc)
+        if doc.kind in ("spec", "plan", "sprint"):
+            self.owner_rules(doc)
         if doc.kind in ("plan", "sprint"):
+            self.protected_repos_note(doc)
             self.trace_rule(doc)
             self.order_rules(doc)
         if doc.kind == "plan":
@@ -1298,7 +1311,8 @@ class Engine:
             return
         if data.get(mode_key) != "delegated":
             return
-        if not done:  # cổng còn mở: chỉ khoá lạ trong khối (khối vắng/không phải dict/rỗng giữ nguyên, không báo)
+        self._route_floor(doc, gate, done)  # không phụ thuộc thời điểm: chạy cả khi cổng còn `pending`
+        if not done:  # cổng còn mở: khoá lạ trong khối (khối vắng/không phải dict/rỗng giữ nguyên, không báo)
             if isinstance(data.get("delegation"), dict):
                 self._unknown_delegation_key(doc, mode_key)
             return
@@ -1406,6 +1420,74 @@ class Engine:
             return bad("risk_tags", f"risk_tags có {', '.join(sorted(tags & DELEGATION_FORBIDDEN_TAGS))} — vùng cấm duyệt thay")
         if "rules" in tags and not files:
             return bad("delegation.files", "risk_tags có rules mà delegation.files rỗng — file luật phải nêu đích danh trong lời cấp")
+
+    def _route_floor(self, doc: Doc, gate: str, done: bool) -> None:
+        """Định tuyến cổng (SPR-20 FR6.2-FR6.3): cổng `delegated` mà PLAN khai file sàn cứng, hoặc có `rules` mà `delegation.files`
+        rỗng (chỉ khi cổng còn mở; cổng đã kết luận do `_delegation` báo), thì cổng đi người. Mỗi lý do báo một lần cho mỗi tài liệu."""
+        floor = sorted(set(self._declared_files(doc)) & (set(rules.FLOOR_FILES) | set(rules.FLOOR_ZONES)))
+        if floor and (doc.path.resolve(), "route-floor") not in self.delegation_flagged:
+            self.delegation_flagged.add((doc.path.resolve(), "route-floor"))
+            self.add(doc.path, doc.key_line(f"{gate}_mode"), "gate-route-floor",
+                     f"{gate}_mode: delegated nhưng bảng 'File luật và file sàn cứng sẽ chạm' khai file sàn cứng ({', '.join(floor)}) — "
+                     "chuyển cổng người, trình lời khuyến nghị")
+        tags, block = doc.data.get("risk_tags"), doc.data.get("delegation")
+        if (not done and isinstance(tags, list) and "rules" in tags and isinstance(block, dict) and not block.get("files")
+                and (doc.path.resolve(), "route-rules") not in self.delegation_flagged):
+            self.delegation_flagged.add((doc.path.resolve(), "route-rules"))
+            self.add(doc.path, doc.key_line("delegation"), "gate-route-floor",
+                     f"{gate}_mode: delegated, risk_tags có rules mà delegation.files rỗng — file luật phải nêu đích danh; "
+                     "chuyển cổng người, trình lời khuyến nghị")
+
+    @staticmethod
+    def _declared_files(doc: Doc) -> list:
+        """File ở cột đầu của bảng dưới mục 'File luật và file sàn cứng sẽ chạm' (đường nằm trong dấu huyền)."""
+        out, inside = [], False
+        for line in doc.raw:
+            if line.startswith("## "):
+                inside = FLOOR_TABLE_HEADING in line.casefold()
+                continue
+            cells = c.table_cells(line) if inside else None
+            if cells is None or c.is_separator_row(cells):
+                continue
+            for span in re.findall(r"`([^`]+)`", cells[0]):
+                norm = span.strip().replace("\\", "/")
+                while norm.startswith("./"):
+                    norm = norm[2:]
+                if "/" in norm or "." in norm:
+                    out.append(norm)
+        return out
+
+    def owner_rules(self, doc: Doc) -> None:
+        """Người quyết của CQ/DN (FR7.3): chỉ sprint có `created` từ ngày chế độ mở; hồ sơ cũ không đỏ."""
+        created = str(doc.data.get("created", ""))
+        if not (DATE.fullmatch(created) and created >= rules.MODE_OPEN_EFFECTIVE_DATE):
+            return
+        owner_col, in_table, prev_table = -1, False, False
+        for idx, line in enumerate(doc.masked):
+            cells = c.table_cells(line)
+            if cells is None:
+                prev_table = False
+                continue
+            if not prev_table:  # dòng tiêu đề của bảng mới
+                prev_table = True
+                in_table = cells[0].strip("* ").casefold() == "mã"
+                owner_col = next((i for i, cell in enumerate(cells) if "người quyết" in cell.casefold()), -1)
+                continue
+            if not in_table or c.is_separator_row(cells):
+                continue
+            m = CODE_AT_START.match(cells[0].strip("* "))
+            if not m or m.group(1) not in ("CQ", "DN"):
+                continue
+            if owner_col < 0 or owner_col >= len(cells) or not cells[owner_col].strip():
+                self.add(doc.path, doc.line_no(idx), "decision-owner-missing",
+                         f"{m.group(1)}{m.group(2)} thiếu người quyết (cột 'Người quyết': người · cổng · Analyst)")
+
+    def protected_repos_note(self, doc: Doc) -> None:
+        """FR4.3: sprint bật autopilot mở mà máy chưa đặt danh sách repo được bảo vệ."""
+        block = doc.data.get("delegation")
+        if isinstance(block, dict) and block.get("mode") == "open" and not self.env.get("AGENT_AGILE_PROTECTED_REPOS"):
+            self.add(doc.path, doc.key_line("delegation"), "protected-repos-unconfigured",
+                     "sprint bật autopilot mở mà máy chưa đặt AGENT_AGILE_PROTECTED_REPOS — đẩy ở chế độ mở bị chặn push-repo-unverified")
 
     def _unknown_delegation_key(self, doc: Doc, mode_key: str) -> bool:
         """Khối `delegation` có khoá ngoài bảng không; có thì báo một lần cho mỗi (tài liệu, khoá lạ) — khối là CHUNG của

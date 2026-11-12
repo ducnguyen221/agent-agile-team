@@ -48,11 +48,11 @@ gộp làm một `TK` có danh sách file.
 | Kết luận | một câu: cách làm chính + số việc + điều cần người quyết |
 | Mục tiêu | ba dòng nhãn chép đúng chữ mẫu (luật `plan-goal-block` báo khi viết tắt): `Mục tiêu sprint:` một câu (và mục tiêu việc nếu khác) · `Kết quả mong muốn / xong khi:` trỏ `SC` · `Rủi ro cần chú ý:` rủi ro cụ thể, trỏ `RK` |
 | Kiến trúc | 2–3 câu cách làm; thành phần đổi; luồng dữ liệu; quyết định lâu dài → trỏ ADR (`docs/architecture/adr/`) |
-| Ràng buộc chung | luật áp cho MỌI `TK`: ngưỡng phiên bản, giới hạn phụ thuộc, quy ước đặt tên, nền tảng, coverage — chép nguyên văn từ SPEC/dự án |
+| Ràng buộc chung | luật áp cho MỌI `TK`: ngưỡng phiên bản, giới hạn phụ thuộc, quy ước đặt tên, nền tảng, coverage — chép nguyên văn từ SPEC/dự án; kèm bảng "File luật và file sàn cứng sẽ chạm" (file sàn cứng → cổng đi người) |
 | Trọng tâm review | **≤5** lớp đầu vào hay kiểu hỏng SPEC ngụ ý nhưng chưa `TK` nào có test — thứ dễ cắn người dùng nhất lên đầu; mỗi dòng rồi **gắn test về `TK` sở hữu code** (mục 4) |
 | Việc | mỗi `TK` theo mục 4 |
 | Rủi ro | `RK` theo thang Chặn / Phải sửa / Nên sửa / Ghi chú; Chặn hoặc Phải sửa nêu ở Cổng 1 |
-| Quyết định cần người | `DN` chỉ cho điểm làm đổi đáng kể kết quả; có lựa chọn + khuyến nghị; không có thì "Không có." |
+| Quyết định cần người | `DN` chỉ cho điểm làm đổi đáng kể kết quả; có lựa chọn + khuyến nghị + cột **người quyết** (`người` · `cổng` · `Analyst`); không có thì "Không có." |
 | Ước lượng | số phiên agent, số lần hỏi người (mục tiêu 0 ngoài cổng), số vòng kiểm định dự kiến |
 
 SPEC là thẩm quyền; PLAN là lập luận của SPEC. SPEC "im lặng" về một đầu vào không phải phép cho đầu

@@ -69,7 +69,7 @@ Ngoài chế độ làm rõ, hỏi lẻ giữa Bước 2–5 là lỗi quy trìn
 | `FR` | **một `FR` một hành vi**; mỗi kịch bản `FRx.y` dạng **KHI <sự kiện> THÌ <hệ thống> <phản ứng>**; kịch bản là thứ đem đi kiểm | gồm cả đường lỗi, không chỉ đường vui; một `FR` (hay một câu KHI…THÌ) chứa hai phản ứng khác nhau là hai hành vi — tách thành hai `FR`, vì mỗi hành vi cần `VR` riêng và delta Thêm / Sửa / Bỏ trỏ vào từng hành vi |
 | `SC` | đo được: lệnh/thao tác + ngưỡng | mỗi `SC` sẽ có ít nhất một `VR` ở REPORT |
 | Ngoài phạm vi | cái không làm đợt này | không bao giờ rỗng ở cỡ vừa trở lên |
-| `CQ` + ASSUMPTION | mục 3 | mỗi `CQ` có đề xuất |
+| `CQ` + ASSUMPTION | mục 3 | mỗi `CQ` có đề xuất và cột người quyết (`người` · `cổng` · `Analyst`) |
 | Đổi hợp đồng / giao diện (bắt buộc khi cỡ **lớn** hoặc `risk_tags` có `public_api`; cỡ khác xoá mục) | API, sự kiện, schema sẽ đổi; delta **thêm / sửa / bỏ**; **mọi bên dùng** chúng (tra bằng tìm kiếm mã, không đoán) | không có bên dùng nào bị bỏ sót |
 
 Mã theo skill `id-convention`: tiền tố hai chữ, mã kèm tên ngắn lần đầu trong đoạn, không `P1/P2`.

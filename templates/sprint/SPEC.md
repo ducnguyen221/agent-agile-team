@@ -98,14 +98,14 @@ SPEC có 1 **success criterion** (SC):
 
 ## 6. Câu hỏi cần làm rõ
 
-<!-- Gom MỌI điểm chưa rõ vào đây để hỏi một lần ở Cổng 1, không hỏi lẻ. Không có thì ghi "Không có."
+<!-- Gom MỌI điểm chưa rõ vào đây để hỏi một lần ở Cổng 1, không hỏi lẻ. Không có thì ghi "Không có." Mỗi CQ ghi người quyết: `người` · `cổng` · `Analyst`.
      Giả định đang dùng ghi dưới nhãn **ASSUMPTION** để người duyệt chỉ cần lên tiếng nếu không đồng ý. -->
 
 SPEC có 1 **clarification question** (CQ) cần người dùng trả lời ở Cổng 1:
 
-| Mã | Câu hỏi | Đề xuất | Trạng thái |
+| Mã | Câu hỏi | Đề xuất | Người quyết · trạng thái |
 |---|---|---|---|
-| CQ1 (phạm vi người xem) | Khách hàng có được tự tra không, hay chỉ nhân viên? | Chỉ nhân viên trong sprint này | mở |
+| CQ1 (phạm vi người xem) | Khách hàng có được tự tra không, hay chỉ nhân viên? | Chỉ nhân viên trong sprint này | người · mở |
 
 - **ASSUMPTION — nguồn dữ liệu:** trạng thái đơn đọc từ hệ thống hiện có, không tạo kho mới.
 
