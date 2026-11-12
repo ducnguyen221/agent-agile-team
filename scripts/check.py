@@ -1316,8 +1316,8 @@ class Engine:
         if problem is not None:
             return bad(*problem)
         listed = block.get("files")
-        if isinstance(listed, list):  # file thuộc sàn cứng không duyệt thay được; file chỉ có VÙNG sàn do floor_check bảo vệ
-            floor = set(rules.FLOOR_FILES)
+        if isinstance(listed, list):  # file thuộc sàn cứng không duyệt thay được; file chỉ có VÙNG sàn do floor_check bảo vệ, riêng chế độ mở (SPR-20 FR6.4) coi cả file đó là sàn
+            floor = set(rules.FLOOR_FILES) | (set(rules.FLOOR_ZONES) if block.get("mode") == "open" else set())
             for item in listed:
                 norm = item.strip().replace("\\", "/") if isinstance(item, str) else ""
                 while norm.startswith("./"):

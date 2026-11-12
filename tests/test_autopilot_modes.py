@@ -92,3 +92,53 @@ def test_exclusions_superset_ok():
 def test_exclusions_missing_always_blocked_red(removed):
     problem = rules.autopilot_problem(open_block(exclusions=sorted(OPEN_ALWAYS - {removed})))
     assert problem and problem[0] == "delegation.exclusions" and removed in problem[1]
+
+
+# --- ca `check` trên cây hồ sơ (TK3): câu mở sprint, file luật, hồ sơ cũ ---------------------------------------------
+
+import check  # noqa: E402
+from test_check import _rewrite, autopilot_plan, make_sprint  # noqa: E402
+
+OPEN_EXCL = "[" + ", ".join(sorted(OPEN_ALWAYS)) + "]"
+OPEN_SENTENCE = '"Mở SPR-03, gồm sửa file luật {file}, trần 30 phiên."'
+
+
+def _open_plan(tmp_path, **fields):
+    root = make_sprint(tmp_path)
+    base = dict(mode="open", level="gate_1_2", scope="[gate_1, gate_2]", exclusions=OPEN_EXCL, grant_at='"2026-11-13 08:30 +07"')
+    base.update(fields)
+    autopilot_plan(root, **base)
+    _rewrite(root / "PLAN.md", "gate_1_at: 2026-02-01 09:00 +07", "gate_1_at: 2026-11-13 09:00 +07")  # sau ngày hiệu lực của chế độ mở
+    return root
+
+
+def _rules_hit(root):
+    return sorted({f.rule for f in check.check_paths([root]).findings if f.rule.startswith(("delegation-", "gate-delegation"))})
+
+
+def test_open_sentence_naming_a_non_floor_file_is_clean(tmp_path):
+    root = _open_plan(tmp_path, files="[method/task-routing.md]", grant=OPEN_SENTENCE.format(file="method/task-routing.md"))
+    assert _rules_hit(root) == []
+
+
+@pytest.mark.parametrize("floor_file", ["AGENTS.md", "method/process.md", "scripts/git_fence.py"])
+def test_open_sentence_naming_a_floor_or_zone_file_is_flagged(tmp_path, floor_file):
+    root = _open_plan(tmp_path, files=f"[{floor_file}]", grant=OPEN_SENTENCE.format(file=floor_file))
+    assert _rules_hit(root) == ["delegation-fence-file"]
+
+
+def test_open_sentence_files_must_be_in_the_sentence(tmp_path):
+    root = _open_plan(tmp_path, files="[method/task-routing.md]", grant=OPEN_SENTENCE.format(file="method/other.md"))
+    assert _rules_hit(root) == ["gate-delegation-invalid"]
+
+
+def test_open_block_before_effective_date_is_invalid(tmp_path):
+    root = _open_plan(tmp_path, grant_at='"2026-02-01 08:30 +07"')
+    assert _rules_hit(root) == ["gate-delegation-invalid"]
+
+
+def test_secure_zone_file_stays_as_before(tmp_path):
+    """SC8: khối không `mode: open` giữ kết quả cũ — file chỉ có vùng sàn không bị `delegation-fence-file`."""
+    root = make_sprint(tmp_path)
+    autopilot_plan(root, files="[method/sizing.md]", grant='"Bật autopilot cổng 1 cho SPR-03, gồm method/sizing.md."')
+    assert "delegation-fence-file" not in _rules_hit(root)
