@@ -2,10 +2,6 @@
 name: build-fixer
 description: Use when a build, compile, import or type-check is red and the smallest edit that turns it green is wanted - Implementer role, T2; edits only what the error needs. Never suppresses errors, skips or deletes tests, or loosens config; stops after 3 failed fixes or when an API change is needed. Not for refactors, new features or failing tests.
 tools: [Read, Grep, Glob, Bash, Edit]
-source: [affaan-m/ECC agents/build-error-resolver.md, affaan-m/ECC commands/build-fix.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT, MIT]
-rewrite_before_public: false
 ---
 
 # Sửa lỗi build

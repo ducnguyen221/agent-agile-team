@@ -2,10 +2,6 @@
 name: react-reviewer
 description: Use when React or Next.js components changed (.tsx/.jsx) and need an independent review of hooks, state, server/client boundary, accessibility, render performance and React security; read-only, never edits code. Runs beside typescript-reviewer, which owns generic TS type and async rules. Not for browser-driven QA (web-qa).
 tools: [Read, Grep, Glob, Bash]
-source: [affaan-m/ECC agents/react-reviewer.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT]
-rewrite_before_public: false
 ---
 
 # Reviewer React

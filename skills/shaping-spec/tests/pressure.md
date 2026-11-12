@@ -3,7 +3,7 @@ skill: shaping-spec
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: 0230800cc02324f316284ef727d0c5f62ac84845
+skill_sha: d1fdd42859268b64d8b6c341cfe560505302ee74
 date: 2026-10-22
 result: 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4
 agent_ids:

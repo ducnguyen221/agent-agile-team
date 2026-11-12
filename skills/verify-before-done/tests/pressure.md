@@ -5,7 +5,7 @@ model: claude-sonnet-5-5 (all runs, same scenario text)
 date: 2026-10-23
 result: 7/7 GREEN pass on the current tree (ver-7 new, ver-1 to ver-6 rerun); RED on the new scenario ver-7 partial; earlier rounds 6/6 GREEN pass
 tier: T3
-skill_sha: e748eba40291e3c9598a759d27e245fd7e15b3b8
+skill_sha: 217b0c69ce62fb1b2b7a4360777e0aa14125feac
 agent_ids:
   red_2026_10_23: {ver7: a360d3d2be9a6692c}
   green_2026_10_23: {ver7: a2f18e696e401f92a, ver1: adf30806574e5b78a, ver2: aa1ee402215c1e770, ver3: a6789defc7479227b, ver4: a185b3f155e5f517b, ver5: a613232744b5d5372, ver6: a8eb97d8f58c517d3}

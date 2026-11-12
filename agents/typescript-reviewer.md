@@ -2,10 +2,6 @@
 name: typescript-reviewer
 description: Use when TypeScript or JavaScript changed and needs an independent review for type safety, async correctness, error handling, Node security and idioms; read-only, never edits code. For .tsx/.jsx run react-reviewer beside it. Not for Python, for the review process (skill code-review) or for general all-language review (code-reviewer).
 tools: [Read, Grep, Glob, Bash]
-source: [affaan-m/ECC agents/typescript-reviewer.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT]
-rewrite_before_public: false
 ---
 
 # Reviewer TypeScript và JavaScript

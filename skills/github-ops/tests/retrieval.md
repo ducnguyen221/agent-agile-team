@@ -3,7 +3,7 @@ skill: github-ops
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 9f34dfdb2bd232abcbb74d9e4c7f2ed946bc33ec
+skill_sha: 32685c3c432d84fa6218cf4325a9ce3806fbfa29
 date: 2026-10-04
 result: "strict 1/7 (+6 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

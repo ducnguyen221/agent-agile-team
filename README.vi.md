@@ -30,7 +30,7 @@ hãng ([`hosts/README.md`](hosts/README.md)).
 
 ## Cài
 
-Dán prompt ở cuối [INSTALL.md](INSTALL.md) cho agent; agent làm theo file đó và hỏi trước khi chạm vào máy.
+Dán prompt ở cuối [docs/INSTALL.md](docs/INSTALL.md) cho agent; agent làm theo file đó và hỏi trước khi chạm vào máy.
 Tự làm theo từng harness: [`hosts/`](hosts/README.md). Claude Code tóm tắt:
 
 ```bash
@@ -50,7 +50,7 @@ rồi thêm dòng `@~/agent-agile-team/AGENTS.md` vào `~/.claude/CLAUDE.md` đ�
 
 ## Sprint đầu tiên
 
-[GUIDE.md](GUIDE.md) dẫn người mới đi một sprint; [`samples/order-desk/`](samples/README.md) là một dự án
+[docs/GUIDE.md](docs/GUIDE.md) dẫn người mới đi một sprint. Vai ba tài liệu: README này là cửa vào (giới thiệu và cài), `docs/GUIDE.md` đi một sprint đầu tiên từng bước, `docs/OVERVIEW.md` là toàn cảnh và tra cứu; [`samples/order-desk/`](samples/README.md) là một dự án
 sau bốn sprint. Tổng quan cả repo cho người mới (tính năng, cách hoạt động, cấu trúc, cài đặt):
 [docs/OVERVIEW.md](docs/OVERVIEW.md) — cũng là trang web <https://ducnguyen.vn/agent-agile-team/>.
 
@@ -65,14 +65,11 @@ sau bốn sprint. Tổng quan cả repo cho người mới (tính năng, cách h
 | `templates/` | Mẫu tài liệu sprint, sổ gốc, cấu hình dự án |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; test; dự án mẫu kèm kết quả kỳ vọng |
 | `hosts/` | Cài và nạp theo từng harness, điểm cắm của lớp riêng |
-| `docs/` | Tổng quan repo; bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa; xử lý sự cố; cập nhật từ nguồn gốc |
+| `docs/` | Tổng quan repo; bảng tên cũ → tên mới; hồ sơ áp khuôn chuẩn hóa; xử lý sự cố |
 
 ## Ghi nhận
 
-Distill từ Superpowers (obra), Everything Claude Code (affaan-m), gstack (garrytan), lấy ý từ GitHub Spec
-Kit, OpenSpec, BMAD-METHOD và Kiro/EARS. Commit chính xác, giấy phép và nguồn từng skill:
-[UPSTREAM.md](UPSTREAM.md), [NOTICE](NOTICE), [THIRD_PARTY.md](THIRD_PARTY.md). Cập nhật hay mở rộng từ
-các nguồn đó: [docs/updating-from-upstream.md](docs/updating-from-upstream.md).
+Nguồn, thông báo bản quyền và giấy phép: [NOTICE](NOTICE).
 
 ## Giấy phép
 

@@ -2,11 +2,6 @@
 name: silent-failure-hunter
 description: Use when changed code catches, wraps, retries or falls back on errors - network, file, database or queue paths, background jobs, data pipelines - and needs an independent hunt for swallowed errors, misleading fallbacks and lost error context; read-only, never edits code.
 tools: [Read, Grep, Glob, Bash]
-source: [affaan-m/ECC agents/silent-failure-hunter.md]
-source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT]
-rewrite_before_public: false
 ---
 
 # Săn lỗi im lặng

@@ -3,7 +3,7 @@
 > **Kết luận:** hai việc. (1) Gặp tên skill hay agent cũ (`superpowers:*`, `ecc-pack:*`, `dev-process:*`) trong hồ sơ
 > lịch sử — plan, PROGRESS, commit, memory — thì tra bảng ở mục 1–3 để biết thứ tương ứng trong repo này. Tên
 > mới **không có tiền tố**; nhiều skill cũ gộp vào một skill mới; vài skill cũ không còn là skill (thành mẫu,
-> công cụ, thẻ vai) hoặc bị bỏ. Nguồn và SHA của từng skill mới: [UPSTREAM.md](../UPSTREAM.md). (2) Dự án đang dùng
+> công cụ, thẻ vai) hoặc bị bỏ. Nguồn và giấy phép: [NOTICE](../NOTICE). (2) Dự án đang dùng
 > bản `0.1`/`0.2` lên `0.3.0`: các hình hồ sơ cũ được giữ tương thích; những luật kiểm chặt hơn có thể yêu cầu
 > sửa nội dung (ví dụ nhãn thang mức cũ), nên chạy `check` sau nâng cấp. Mục 4 liệt kê từng trường hợp.
 

@@ -2,14 +2,9 @@
 name: deployment
 description: Use when containerizing an app, writing or reviewing a Dockerfile or compose file, setting up a CI/CD pipeline (including multi-service), adding health checks or probes, choosing a rollout strategy (rolling, blue-green, canary), planning a rollback or roll-forward, validating environment config, debugging a container, or preparing a production release.
 metadata:
-  group: technique
-  kind: reference
-  roles: [implementer]
-source: [affaan-m/ECC skills/deployment-patterns/SKILL.md, affaan-m/ECC skills/docker-patterns/SKILL.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT, MIT]
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "implementer"
 ---
 
 # Triển khai

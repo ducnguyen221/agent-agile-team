@@ -1,8 +1,5 @@
 # Bài học — rút, tự chấm, lưu
 
-<!-- Nguồn: affaan-m/ECC commands/learn-eval.md @ c70874f (MIT); ý "retro đọc lại sổ quyết định và
-     nợ hoãn" từ garrytan/gstack retro/SKILL.md.tmpl @ 96764e8 (MIT). Viết lại; nơi lưu là điểm cắm
-     của lớp riêng. -->
 
 > **Kết luận:** bài học `LN` chỉ lưu khi **tái dùng được, cụ thể, đúng phạm vi, chưa có**; trước khi
 > lưu phải **tra trùng** ở nơi lưu hiện có; kết luận một trong bốn — *Lưu* / *Sửa rồi lưu* / *Gộp vào X*

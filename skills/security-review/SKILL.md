@@ -1,14 +1,9 @@
 ---
 name: security-review
 description: Use when code adds or changes attack surface - authentication or authorization, user input or file uploads, secrets or tokens, new API endpoints, payments or sensitive data, third-party integrations - or when risk tags secret, auth, external_input, infra or rules pull the security specialist.
-source: [affaan-m/ECC skills/security-review/SKILL.md, affaan-m/ECC skills/security-review/cloud-infrastructure-security.md]
-source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, c70874fae9eb0e5ad0365beb7e2955899fd1d30f]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT, MIT]
-rewrite_before_public: false
 metadata:
-  group: verification
-  roles: [implementer, tech-reviewer]
+  group: "verification"
+  roles: "implementer, tech-reviewer"
 ---
 
 <!-- Không viết literal "dấu đô-la + chữ số" (kiểu placeholder đánh số) ở bất kỳ đâu trong file này.

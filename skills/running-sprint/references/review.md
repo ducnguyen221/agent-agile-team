@@ -1,8 +1,5 @@
 # Review theo việc và re-review phạm vi hẹp — khuôn brief
 
-<!-- Nguồn: obra/superpowers skills/subagent-driven-development/task-reviewer-prompt.md,
-     re-review-prompt.md @ 8ca22db (MIT). Viết lại: thang chung Chặn / Phải sửa / Nên sửa / Ghi chú;
-     kết luận Đạt / Không đạt; "⚠️ cannot verify" → "Không kiểm được từ diff". -->
 
 > **Kết luận:** review theo việc là **cổng của một `TK`**, không phải review gộp nhánh: reviewer (agent
 > khác) đọc **một** gói diff, trả **hai phán quyết** — khớp SPEC (Đạt / Không đạt) và chất lượng

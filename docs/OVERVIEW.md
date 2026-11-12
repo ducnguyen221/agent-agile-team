@@ -14,7 +14,7 @@ updated: 2026-10-05
 > được trên Claude Code, Codex và Antigravity. Bản hiện tại `0.4.0`, repo công khai (MIT).
 
 File này là nguồn cho trang giới thiệu <https://ducnguyen.vn/agent-agile-team/>. Số liệu và tên file khớp repo
-ở bản `0.4.0`; đổi repo thì sửa file này cùng lượt. Người mới cài xong đọc tiếp [`GUIDE.md`](../GUIDE.md).
+ở bản `0.4.0`; đổi repo thì sửa file này cùng lượt. Người mới cài xong đọc tiếp [`GUIDE.md`](GUIDE.md). Vai ba tài liệu: `README.md` ở gốc là cửa vào (giới thiệu và cài), `docs/GUIDE.md` đi một sprint đầu tiên từng bước, file này là toàn cảnh và tra cứu.
 
 ## 1. Định vị và lợi ích
 
@@ -160,15 +160,12 @@ Số phiên bản `MAJOR.MINOR.PATCH`, mỗi đợt tăng đúng một phần, d
 
 ### 2.10 Nguồn gốc và giấy phép
 
-Repo chưng cất từ các bộ skill mã nguồn mở và ghi dấu vết từng dòng.
+Repo chưng cất từ các bộ skill mã nguồn mở. Nguồn, bản quyền và giấy phép nằm ở `NOTICE`; hồ sơ nguồn từng skill nằm ngoài repo.
 
-- Nguồn chính (MIT): Superpowers, Everything Claude Code, gstack, superpowers-lab, Supabase Agent Skills; lấy
-  ý từ GitHub Spec Kit, OpenSpec, BMAD-METHOD, Kiro/EARS. Mọi skill và agent ghi `source`, `source_sha`,
-  `license` trong frontmatter; `UPSTREAM.md` chốt SHA từng đợt và theo dõi bản mới.
 - Phần từng lấy từ nguồn private đã được **viết lại phòng sạch**: bản cũ gỡ khỏi cây, người viết mới chỉ nhận
   danh sách ý; hiện không còn file nào chờ viết lại.
 - Giấy phép của repo là **MIT**. Nội dung bên thứ ba giữ giấy phép
-  gốc (`NOTICE`, `THIRD_PARTY.md`).
+  gốc (`NOTICE`).
 
 ## 3. Cách hoạt động — một ví dụ
 
@@ -196,8 +193,6 @@ agent-agile-team/
 ├── AGENTS.md            luật lõi — agent đọc mỗi phiên (≤120 dòng, ≤10 KB)
 ├── GEMINI.md            con trỏ tới AGENTS.md cho Antigravity
 ├── README.md · README.vi.md   giới thiệu ngắn (Anh · Việt)
-├── GUIDE.md             sprint đầu tiên — bạn làm gì, agent làm gì
-├── INSTALL.md           hướng dẫn cài dành cho AI agent (prompt dán ở cuối)
 ├── method/              luật chơi: process, sizing, severity, evidence, review-gate, conventions
 │   └── standards/       chuẩn code chung và theo ngôn ngữ
 ├── roles/               thẻ vai: executor/ (5) · verifier/ (2 + dual-review + 4 chuyên đề)
@@ -209,8 +204,8 @@ agent-agile-team/
 ├── tests/               bộ test pytest và fixture
 ├── samples/order-desk/  một dự án mẫu đã dùng thật, kết quả kỳ vọng cố định
 ├── hosts/               cài và nạp theo harness: claude · codex · antigravity · claude-desktop
-├── docs/                OVERVIEW · MIGRATION · standardization · troubleshooting · updating-from-upstream
-├── UPSTREAM.md · NOTICE · THIRD_PARTY.md · LICENSE   nguồn gốc, bản quyền, giấy phép
+├── docs/                OVERVIEW · GUIDE · INSTALL · MIGRATION · standardization · troubleshooting
+├── NOTICE · LICENSE     bản quyền, giấy phép
 ├── CHANGELOG.md         mục mới nhất đứng đầu, trùng version của manifest
 └── .claude-plugin/ · .codex-plugin/   manifest plugin cho Claude Code và Codex
 ```
@@ -238,15 +233,15 @@ Tra nhanh:
 | Tôi muốn … | Mở file … |
 |---|---|
 | hiểu bộ này trong 5 phút | `docs/OVERVIEW.md` (file này), rồi `README.vi.md` |
-| cài lên máy | `INSTALL.md` (dán prompt cho agent) hoặc `hosts/<harness>/README.md` (tự gõ) |
-| chạy sprint đầu tiên | `GUIDE.md` |
+| cài lên máy | `docs/INSTALL.md` (dán prompt cho agent) hoặc `hosts/<harness>/README.md` (tự gõ) |
+| chạy sprint đầu tiên | `docs/GUIDE.md` |
 | biết agent được phép làm gì, dừng khi nào | `AGENTS.md`, rồi `method/process.md` |
 | biết việc này cỡ nào, có cần ADR không | `method/sizing.md`, `method/conventions.md` |
 | xem một hồ sơ sprint mẫu | `samples/order-desk/docs/plans/` |
 | biết mỗi mã (`FR`, `TK`, `VR`…) nghĩa gì | `skills/id-convention/SKILL.md` |
 | biết `check` báo lỗi gì, vì sao | `scripts/README.md` mục "Luật của `check`" |
 | sửa hay thêm skill | `skills/writing-skills/SKILL.md`, `skills/README.md` |
-| biết skill này lấy từ đâu, giấy phép gì | frontmatter của skill, `UPSTREAM.md`, `THIRD_PARTY.md` |
+| biết bản quyền, giấy phép của nội dung bên thứ ba | `NOTICE`, `LICENSE` |
 | gặp tên skill cũ trong hồ sơ lịch sử; nâng cấp từ bản cũ | `docs/MIGRATION.md` |
 | cài rồi mà agent không biết luật; cập nhật rồi mà skill vẫn cũ | `docs/troubleshooting.md` |
 
@@ -298,7 +293,7 @@ Cần **Git** và **Python 3.9+**; ba script không cần cài gói nào (chỉ 
 
 ### 6.1 Cách nhanh nhất: để agent cài
 
-Dán prompt ở cuối [`INSTALL.md`](../INSTALL.md) vào Claude Code, Codex hoặc Antigravity. Agent đọc file đó, làm
+Dán prompt ở cuối [`INSTALL.md`](INSTALL.md) vào Claude Code, Codex hoặc Antigravity. Agent đọc file đó, làm
 lần lượt, và **hỏi trước** mỗi lần cài phần mềm, sửa file luật của harness hay đặt biến môi trường. Cài xong agent
 chép nguyên dòng cuối của `check.py --self` cho bạn.
 
@@ -360,7 +355,7 @@ python3 ~/agent-agile-team/scripts/index.py .           # sinh lại khối "Đa
 ```
 
 `init` không ghi đè file có sẵn; chạy lại không đổi gì. Sau đó giao việc bằng lời thường — ví dụ *"Dùng
-agent-agile-team: thêm chức năng tra cứu đơn theo mã cho dự án này."* — và đọc tiếp [`GUIDE.md`](../GUIDE.md).
+agent-agile-team: thêm chức năng tra cứu đơn theo mã cho dự án này."* — và đọc tiếp [`GUIDE.md`](GUIDE.md).
 
 Cập nhật: `git pull --ff-only` trong bản clone (Claude Code thêm `claude plugin marketplace update agent-agile-team`
 và `claude plugin update agent-agile-team@agent-agile-team` — thiếu hai lệnh này thì bản cài vẫn là skill cũ; Antigravity
@@ -403,7 +398,7 @@ Trung thực về chỗ chưa tới:
 - **Repo công khai (MIT), chưa có Release công khai.** `0.3.0` là bản đầu tiên mang số không có
   hậu tố `-dev` (quy tắc ở `method/conventions.md` mục 4.1); chưa có Release công khai. Nâng cấp dự án đang dùng
   bản `0.1`/`0.2`: [`docs/MIGRATION.md`](MIGRATION.md) mục 4.
-- **12/13 skill tham chiếu chưa đạt ngưỡng truy xuất** (chỉ `adr` đạt): agent tìm đúng chỗ nhưng nội dung còn
+- **9/14 skill tham chiếu chưa đạt ngưỡng truy xuất** (đạt: `adr`, `deployment`, `rag-pageindex`, và `postgres`, `react` sau lượt thử lại ngày 12/11): agent tìm đúng chỗ nhưng nội dung còn
   thiếu để trả lời hẳn; đang bổ sung và sẽ đổi cách đo trước khi vá tiếp. Trong 91 câu thử chỉ 1 câu Không đạt.
 - **Tệp thử skill chạy trên một dòng model** (tier T3); kết quả có thể khác trên model khác.
 - **Claude Desktop tab chat chưa hỗ trợ**; Codex và Antigravity không nạp `agents/` như agent riêng — đọc như thẻ vai.

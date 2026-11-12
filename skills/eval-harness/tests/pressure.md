@@ -3,7 +3,7 @@ skill: eval-harness
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 2de638893a7f7001eccc97eff4c7da793492aff9
+skill_sha: f8ea909b27c6847bfbf8ccea905ed767993f6953
 date: 2026-10-24
 result: 4/4 GREEN pass on the current tree (eh-9 new; eh-1, eh-3, eh-4 rerun at n = 1); RED on eh-9 partial; earlier rounds 8/8 GREEN pass
 agent_ids:

@@ -2,13 +2,8 @@
 name: token-economy
 description: Use when a session is long or the context window is filling, a command or file produces large output, a subagent must report back or be briefed, a phase boundary (SPEC → PLAN → PROGRESS → REPORT) is crossed, or a task starts in a codebase whose files and terms are unknown, or anyone is about to claim a token or cost saving.
 metadata:
-  group: communication
-  roles: [all]
-source: ["affaan-m/ECC skills/context-budget/SKILL.md (via local distill)", "affaan-m/ECC skills/strategic-compact/SKILL.md", "JuliusBrussee/caveman (idea only: terse agent-to-agent register)", "ryoppippi/ccusage (called only)", "yamadashy/repomix (called only)", "affaan-m/ECC skills/iterative-retrieval/SKILL.md"]
-source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, c70874fae9eb0e5ad0365beb7e2955899fd1d30f, f5d729488caa8f6a5b6c8086fe2cccd3e8a63f91, 1597d65298b6ad93abc8fa174c3bcf78ae86e27a, 0b3f82b401bbc520fd1aca67c06d24e40a868d3e, ef648e01899ba3e8dc6371642deaaf64b4477775]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT, MIT, "Apache-2.0 (idea only, no text copied)", "MIT (called only, not copied)", "MIT (called only, not copied)", MIT]
-rewrite_before_public: false
+  group: "communication"
+  roles: "all"
 ---
 
 # Tiết kiệm token

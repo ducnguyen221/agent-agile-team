@@ -155,8 +155,7 @@ contract. Chỉ sau nghiệm thu owner mới retain/extend/drop/promote; release
 
 ## 7. Nguồn và giới hạn
 
-Ý từ [Jeff](https://github.com/firelex/jeff) là chọn trong tập lựa chọn hợp lệ, calibration riêng và khóa
-ngưỡng trước holdout; [Jeff-Code](https://github.com/firelex/jeff-code) gợi tách việc thường lệ và effort.
-Đây là diễn giải phương pháp; không cài model/LoRA/runtime, không dùng tỷ lệ của nguồn làm kết quả tại
-đây, không tự sinh confidence probability. Mốc/giấy phép/cách dùng: [UPSTREAM](../UPSTREAM.md).
+Ý nền là chọn trong tập lựa chọn hợp lệ, calibration riêng và khóa ngưỡng trước holdout, cùng gợi ý tách việc thường lệ và effort.
+Đây là diễn giải phương pháp; không cài model/LoRA/runtime, không dùng tỷ lệ của nguồn làm kết quả tại đây, không tự sinh
+confidence probability. Nguồn ý ghi ở hồ sơ Workshop của repo.
 Thang ordinal, default medium, field override và ba vòng là hợp đồng riêng đã được owner yêu cầu.

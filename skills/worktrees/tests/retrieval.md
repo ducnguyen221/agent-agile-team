@@ -3,7 +3,7 @@ skill: worktrees
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 5d23c6226ea3223dc9b97b21a04e79b3ae786ec7
+skill_sha: f23653b720bffe876ed3fe34d5cfe0b2800a6da8
 date: 2026-10-04
 result: "strict 4/7 (+3 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

@@ -5,9 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/python/{coding-style,patterns,security,testing,fastapi}.md @ ef648e01 (MIT). Viết
-     lại, giữ ý; bộ công cụ theo skill `python` (ruff thay black + isort); bỏ `hooks.md` của nguồn (cấu hình
-     runtime của nguồn). -->
 
 # Chuẩn Python
 

@@ -72,6 +72,7 @@ RULES: dict[str, tuple[str, str]] = {
     "ledger-unreadable": (PHAI, "file sổ không có, không đọc được UTF-8 hoặc không có bảng cột đầu 'Sprint'"),
     "ledger-unconfigured": (GHI, "dự án khai sổ tập trung mà máy chưa đặt mẫu đường `AGENT_AGILE_LEDGER`"),
     "leak-denylist": (CHAN, "`--self`: file của repo chứa từ trong danh sách cấm"),
+    "root-junk": (PHAI, "`--self`: file hoặc thư mục ở gốc repo không được theo dõi và không bị ignore"),
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
     "delegation-fence-file": (PHAI, "`delegation.files` nêu file thuộc sàn cứng (`FLOOR_FILES`): không duyệt thay được"),
     "hard-floor-marker": (CHAN, "`--self`: cặp mốc `san-cung` ở file luật lệch, mất hoặc thừa so với số cặp quy định"),
@@ -1910,7 +1911,6 @@ def _denied(word: str, text: str) -> bool:
 # (mẫu đường dẫn, kiểu, lý do). Kiểu quyết định phần nào của dòng được che trước khi so từ cấm:
 #   file          — bỏ qua cả file (kể cả tên file)
 #   credit-line   — bỏ qua dòng ghi công / bản quyền (`Copyright`, `©`)
-#   upstream-ref  — che code span là `owner/repo` hoặc SHA hex; phần còn lại của dòng vẫn bị quét
 #   old-skill-id  — che code span là mã skill cũ dạng `bộ:tên` hoặc `bộ:*`; phần còn lại vẫn bị quét
 #   model-line    — bỏ qua dòng có chữ `model` (hồ sơ thử ghi model đã chạy)
 #   author-field  — bỏ qua dòng của trường `author` / `owner` (cả khối) và `repository` / `homepage` trong manifest
@@ -1920,8 +1920,6 @@ def _denied(word: str, text: str) -> bool:
 # LICENSE) là ngoại lệ có chủ đích do chủ sản phẩm quyết ngày 02/10/2026: ghi công tác giả ở đúng các chỗ nêu trên.
 LEAK_EXEMPTIONS = (
     ("NOTICE", "file", "giấy phép MIT/Apache-2.0 buộc giữ nguyên thông báo bản quyền của tác giả nguồn"),
-    ("THIRD_PARTY.md", "credit-line", "dòng ghi công và bản quyền theo giấy phép của nguồn bên thứ ba"),
-    ("UPSTREAM.md", "upstream-ref", "tên repo nguồn `owner/repo` và SHA chốt là dấu vết nguồn gốc bắt buộc"),
     ("docs/MIGRATION.md", "old-skill-id", "hồ sơ lịch sử cố ý nêu mã skill cũ để tra tên mới tương ứng"),
     ("skills/*/tests/pressure.md", "model-line", "hồ sơ thử áp lực ghi model đã chạy kịch bản"),
     (".claude-plugin/plugin.json", "author-field", "author-attribution: trường tác giả, repository, homepage của manifest Claude"),
@@ -1932,7 +1930,7 @@ LEAK_EXEMPTIONS = (
     ("LICENSE", "credit-line", "author-attribution: dòng Copyright của chính repo ghi tên tác giả"),
     ("**", "author-url", "author-attribution: đúng hai URL của tác giả (repo GitHub, trang cá nhân) được nêu ở mọi file"),
 )
-LEAK_EXEMPTION_KINDS = frozenset({"file", "credit-line", "upstream-ref", "old-skill-id", "model-line",
+LEAK_EXEMPTION_KINDS = frozenset({"file", "credit-line", "old-skill-id", "model-line",
                                   "author-field", "author-section", "author-url"})
 # Hai URL của tác giả — chỉ đúng hai chuỗi này được che; `owner/repo` viết tắt, repo khác của cùng tài khoản, tên
 # miền khác có cùng tiền tố, email đều vẫn bị quét.
@@ -1945,30 +1943,6 @@ _AUTHOR_KEY = re.compile(r'^\s*"(?:author|owner|repository|homepage)"\s*:')
 _AUTHOR_HEADING = re.compile(r"^##\s+(?:Author|Tác giả)\s*$")
 
 _CODE_SPAN = re.compile(r"`([^`\n]*)`")
-# Chủ (owner) của các nguồn công khai ghi trong UPSTREAM.md — chỉ `owner/repo` của những chủ này được che; owner lạ
-# (kể cả trùng từ cấm) vẫn bị quét. Thêm nguồn mới vào UPSTREAM.md thì thêm chủ vào đây (so khớp không phân biệt hoa thường);
-# `tests/test_provenance.py` đỏ khi Sổ theo dõi của UPSTREAM.md và danh sách này lệch nhau.
-UPSTREAM_OWNERS = frozenset(o.casefold() for o in (
-    "obra", "affaan-m", "garrytan", "github", "Fission-AI", "supabase", "alibaba", "bmad-code-org",
-    "JuliusBrussee", "ccusage", "ryoppippi", "yamadashy", "google", "OWASP", "basecamp.com",
-    "rtk-ai", "oraios", "mksglu", "microsoft", "firelex", "VectifyAI", "gemini-cli-extensions", "GoogleCloudPlatform",
-))
-_SHA = re.compile(r"[0-9a-f]{7,40}")
-_OWNER_REPO = re.compile(r"([A-Za-z0-9][A-Za-z0-9_.-]*)/[A-Za-z0-9][A-Za-z0-9_.-]*")
-
-
-class _UpstreamRef:
-    """Code span được che trong UPSTREAM.md: SHA hex, hoặc `owner/repo` với owner thuộc `UPSTREAM_OWNERS`."""
-
-    @staticmethod
-    def fullmatch(text: str) -> bool:
-        if _SHA.fullmatch(text):
-            return True
-        m = _OWNER_REPO.fullmatch(text)
-        return bool(m) and m.group(1).casefold() in UPSTREAM_OWNERS
-
-
-_UPSTREAM_REF = _UpstreamRef()
 _OLD_SKILL_ID = re.compile(r"[a-z0-9][a-z0-9-]*:(?:\*|[a-z0-9][a-z0-9-]*)")
 _CREDIT = re.compile(r"(?i)\bcopyright\b|©")
 
@@ -1993,9 +1967,7 @@ def _leak_view(kinds: list, line: str) -> str:
             return ""
         if kind == "model-line" and re.search(r"(?i)\bmodel\b", line):
             return ""
-        if kind == "upstream-ref":
-            line = _mask_spans(line, _UPSTREAM_REF)
-        elif kind == "old-skill-id":
+        if kind == "old-skill-id":
             line = _mask_spans(line, _OLD_SKILL_ID)
         elif kind == "author-url":
             line = _AUTHOR_URL.sub(" ", line)
@@ -2020,6 +1992,39 @@ def _author_lines(kinds: list, lines: list) -> set:
             if inside:
                 keep.add(idx)
     return keep
+
+
+def root_junk(root: Path) -> list:
+    """Tên file/thư mục ở **gốc** repo không được theo dõi và không bị ignore ("rác ở gốc": nhật ký phiên, bản nháp, nơi ghi nhầm).
+    Đo bằng `git status --porcelain -z --ignored=no --untracked-files=normal` (ghim `core.quotePath=false` và chế độ hiện file chưa theo
+    dõi để cấu hình git của máy không đổi kết quả); thư mục chưa theo dõi hiện một mục có `/` cuối. File chưa theo dõi nằm dưới thư mục
+    gốc đã theo dõi không phải rác ở gốc. Không phải repo Git (hoặc `git` lỗi, hoặc `root` không phải gốc của repo) thì trả `[]`."""
+    root = Path(root)
+    base = ["git", "-c", "core.quotePath=false", "-C", str(root)]
+    try:
+        top = subprocess.run([*base, "rev-parse", "--show-toplevel"], capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
+        if top.returncode != 0 or Path(top.stdout.decode("utf-8", "replace").strip()).resolve() != root.resolve():
+            return []
+        status = subprocess.run([*base, "status", "--porcelain", "-z", "--ignored=no", "--untracked-files=normal"], capture_output=True,
+                                timeout=60, stdin=subprocess.DEVNULL)
+        listed = subprocess.run([*base, "ls-files", "-z"], capture_output=True, timeout=60, stdin=subprocess.DEVNULL)
+    except (OSError, subprocess.SubprocessError):
+        return []
+    if status.returncode != 0 or listed.returncode != 0:
+        return []
+    tracked_roots = {p.split("/", 1)[0] for p in listed.stdout.decode("utf-8", "replace").split("\0") if p}
+    junk = []
+    for entry in status.stdout.decode("utf-8", "replace").split("\0"):
+        if not entry.startswith("?? "):
+            continue
+        path = entry[3:]
+        top_name, is_dir = path.split("/", 1)[0], "/" in path
+        if is_dir and top_name in tracked_roots:
+            continue  # thư mục đã theo dõi, chỉ có file mới bên trong: không phải rác ở gốc
+        name = top_name + ("/" if is_dir else "")
+        if name not in junk:
+            junk.append(name)
+    return junk
 
 
 def run_self(root: Path, denylist_path: Path | None) -> Report:
@@ -2055,6 +2060,8 @@ def run_self(root: Path, denylist_path: Path | None) -> Report:
                 for n, word in enumerate(words, 1):
                     if _denied(word, low):
                         engine.add(path, idx, "leak-denylist", f"chứa từ cấm số {n} của danh sách (không in lại từ)")
+    for name in root_junk(root):
+        engine.add(root / name.rstrip("/"), 1, "root-junk", f"rác ở gốc repo: `{name}` không được theo dõi và không bị ignore — thêm vào `.gitignore` hoặc xoá")
     agents = root / "AGENTS.md"
     if not agents.is_file():
         engine.add(agents, 1, "agents-md-budget", "không có AGENTS.md ở gốc repo")

@@ -3,7 +3,7 @@ skill: hooks-guardrails
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs)
 tier: T3
-skill_sha: aef9dbc41ee078487c8a53dda80e98cda3211a10
+skill_sha: aa5f96cca2ebc1d7d490a8a231fa3a03a713c1b3
 date: 2026-10-23
 result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
 agent_ids:

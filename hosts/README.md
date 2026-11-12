@@ -13,7 +13,7 @@
 | Google Antigravity | tự đọc `AGENTS.md` + `GEMINI.md` của workspace; ngoài repo: bản sinh ghép vào file luật cấp người dùng | liên kết từng thư mục skill vào thư mục skill của Antigravity | [antigravity/README.md](antigravity/README.md) |
 | Claude Desktop, tab chat | **chưa hỗ trợ** | — | [claude-desktop/README.md](claude-desktop/README.md) |
 
-Cài cho người dùng: agent đọc [`INSTALL.md`](../INSTALL.md). Dùng quy trình lần đầu: [`GUIDE.md`](../GUIDE.md).
+Cài cho người dùng: agent đọc [`docs/INSTALL.md`](../docs/INSTALL.md). Dùng quy trình lần đầu: [`docs/GUIDE.md`](../docs/GUIDE.md).
 
 ## 2. Năm điểm cắm của lớp riêng
 

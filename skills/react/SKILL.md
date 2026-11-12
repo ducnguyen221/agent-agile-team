@@ -2,13 +2,9 @@
 name: react
 description: Use when writing, changing or reviewing React function components, hooks, state placement, forms, Suspense or error boundaries, or component tests (React Testing Library, Vitest, MSW). Not for build tooling, routing or bundle loading (that is `frontend`) and not for browser-driven user flows (that is `e2e-testing`).
 metadata:
-  group: technique
-  kind: reference
-  roles: [implementer, qa]
-source: [affaan-m/ECC skills/react-patterns/SKILL.md, affaan-m/ECC skills/react-testing/SKILL.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT, MIT]
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "implementer, qa"
 ---
 
 # React: component, hook, test component
@@ -38,10 +34,11 @@ nào thì theo tài liệu bản đó.
 - State mới phụ thuộc state cũ thì dùng dạng hàm: `setCount(c => c + 1)`.
 - Mảng phụ thuộc đủ và đúng; muốn "bỏ bớt cho khỏi chạy lại" là dấu hiệu thiết kế sai, không phải chỗ để tắt cảnh báo.
 - **Mặc định không memo.** `useMemo`, `useCallback`, `React.memo` chỉ thêm khi profiler hoặc chuỗi phụ thuộc
-  chứng minh cần; `React.memo` chỉ có lợi khi component render nặng, render thường xuyên và props hay giữ nguyên.
+  chứng minh cần; `React.memo` chỉ có lợi khi component render nặng, render thường xuyên và props hay giữ nguyên. `React.memo` vô hiệu khi prop là hàm/object literal mới mỗi lần render (so `Object.is` luôn khác): cách sửa ở `references/patterns.md` mục 11.
 - Tách custom hook khi cùng một dãy hook xuất hiện ở từ hai component trở lên. Chữ ký trả về, đăng ký nguồn ngoài
   (`localStorage`, `matchMedia`) bằng `useSyncExternalStore`, effect chạy hai lần ở StrictMode: `references/patterns.md` mục 1–2.
 - Ô nhập gõ mượt mà danh sách nặng: `useDeferredValue` + `memo`, `useTransition`: `references/patterns.md` mục 3.
+- Effect đăng ký một lần nhưng trình xử lý phải thấy `props`/`state` mới nhất (đừng nhét vào mảng phụ thuộc, đừng bỏ ra để đọc closure cũ): `useEffectEvent` (React 19.2+) hoặc ref "mới nhất": `references/patterns.md` mục 8.
 
 ## 3. Vị trí state
 
@@ -61,7 +58,7 @@ Cách chọn và dựng store ở tầng ứng dụng: skill `frontend`.
 ## 4. Lấy dữ liệu
 
 Tránh `useEffect` + `fetch` cho dữ liệu ứng dụng: thiếu cache, thử lại, huỷ khi đua yêu cầu, và không nối
-được Suspense. Cần cache + đột biến + vô hiệu hoá → TanStack Query; cache nhẹ + tự làm mới → SWR; thời gian
+được Suspense. React 19 `use(promise)`: promise phải ổn định giữa các lần render (không tạo trong component) và các yêu cầu độc lập phải khởi động cùng lúc để khỏi thác tải: `references/patterns.md` mục 10. Cần cache + đột biến + vô hiệu hoá → TanStack Query; cache nhẹ + tự làm mới → SWR; thời gian
 thực → SSE hoặc WebSocket; bắn-và-quên một lần → `fetch` trong trình xử lý sự kiện.
 
 ## 5. Form
@@ -71,6 +68,7 @@ thực → SSE hoặc WebSocket; bắn-và-quên một lần → `fetch` trong t
   tự dựng state form quá mức đơn giản là bẫy bảo trì.
 - Kiểm tra **hai phía**: giản đồ (Zod) ở client để báo lỗi sớm, server vẫn kiểm lại. Lỗi hiện bằng
   `role="alert"` hoặc liên kết `aria-describedby`, nút gửi khoá trong lúc chờ.
+- **Form với action (React 19):** trạng thái chờ lấy bằng `useFormStatus` trong component **con** của form (hoặc `isPending` của `useActionState`); form tự đặt lại ô không kiểm soát sau action, nên muốn giữ giá trị khi lỗi thì trả giá trị đã gửi trong state và đặt `defaultValue`: `references/patterns.md` mục 9.
 
 ## 6. Suspense và error boundary
 
@@ -106,7 +104,7 @@ thực → SSE hoặc WebSocket; bắn-và-quên một lần → `fetch` trong t
 | Cần | Đọc |
 |---|---|
 | Viết hoặc sửa test component, hook, trang, hộp thoại, boundary; MSW (kể cả phản hồi chậm, DELETE); axe; thứ tự truy vấn; snapshot nên hay không; chọn RTL / trình duyệt thật; bộ lệnh test | `references/testing.md` |
-| Chữ ký custom hook và đăng ký nguồn ngoài (`useSyncExternalStore`); hàm dọn effect và StrictMode; ô nhập đáp tức thì với `useDeferredValue` / `useTransition`; giá trị Provider ổn định, tách Context; vì sao `key` theo chỉ số làm lệch state; focus, ref, `forwardRef`, hộp thoại; reset error boundary | `references/patterns.md` |
+| Chữ ký custom hook và đăng ký nguồn ngoài (`useSyncExternalStore`); hàm dọn effect và StrictMode; effect đọc giá trị mới nhất (`useEffectEvent`, ref); form action (`useFormStatus`, giữ giá trị khi lỗi); `use()` và promise ổn định, thác tải; `React.memo` mất tác dụng vì prop mới mỗi render; ô nhập đáp tức thì với `useDeferredValue` / `useTransition`; giá trị Provider ổn định, tách Context; vì sao `key` theo chỉ số làm lệch state; focus, ref, `forwardRef`, hộp thoại; reset error boundary | `references/patterns.md` |
 
 Liên quan: `frontend` (build Vite, routing, state ứng dụng, hiệu năng tải), `e2e-testing` (luồng nhiều trang
 bằng Playwright), `tdd` (chu trình test trước), `web-qa` (QA kiểm bằng trình duyệt), `typescript-reviewer` và

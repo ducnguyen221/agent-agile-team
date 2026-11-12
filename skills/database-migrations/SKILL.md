@@ -2,14 +2,9 @@
 name: database-migrations
 description: "Use when a database schema or the data inside it has to change: new or reshaped tables, columns, keys, indexes and constraints; a backfill or one-off data repair; a schema change that must not cause downtime; migration tooling and its CI/CD steps, Rails included; a unique index over rows that may be duplicated; a migration under review; or any run against production-scale data."
 metadata:
-  group: technique
-  kind: reference
-  roles: [implementer, tech-reviewer]
-source: [affaan-m/ECC skills/database-migrations/SKILL.md, "concept: migration rehearsal on a production-sized copy (references/rehearsal.md, clean-room rewrite: old text removed first, new writer saw only a noun-phrase idea list; task `TK10` (clean-room rewrite), sprint `SPR-04` (method wave 3))"]
-source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, null]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT, none]
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "implementer, tech-reviewer"
 ---
 
 # Migration cơ sở dữ liệu

@@ -2,12 +2,8 @@
 name: code-review
 description: Use when code must be reviewed — a diff, a branch, a PR, "check my changes", a pre-merge or pre-deploy pass, a task review inside a sprint, or a bug hunt without a diff — to decide which reviewer runs, in what order, when to stop, how to brief the reviewer, and how the author receives the findings — including when tempted to fix the clear review items first while others are still unclear, or when a repository REVIEW.md, a follow-up review round or a pre-existing finding is involved.
 metadata:
-  group: verification
-  roles: [analyst, tech-reviewer, implementer]
-source: ["obra/superpowers skills/requesting-code-review/ (SKILL.md, code-reviewer.md)", "obra/superpowers skills/receiving-code-review/SKILL.md", "private-process-skills skills/code-review-routing/SKILL.md (private copy, locally written: routing table and verify gate)", "obra/superpowers-lab skills/finding-duplicate-functions/SKILL.md", "garrytan/gstack review/SKILL.md (step on approved fixes with regression tests), review/sections/shared-code-reuse.md (caller evidence idea)"]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 4c0fdc5736a49b6223a7dfc7626d5495cf55185c, 51111f74f24058117752d9aa917cb19859f8ec86, f30b7b788a210d217ea3125bf3001b29cbc2a463]
-license: [MIT, MIT, none, MIT, MIT]
-rewrite_before_public: false
+  group: "verification"
+  roles: "analyst, tech-reviewer, implementer"
 ---
 
 # Review mã
@@ -162,7 +158,7 @@ diff trong phiên điều phối thay cho reviewer — đốt ngữ cảnh đi�
   vòng sau reviewer kiểm cả lớp, không chỉ dòng đã báo.
 - **Không đăng lại** `RF` đã có kết cục (5.2) cùng khoá gộp (đoạn mã + file), trừ khi diff sửa đem bằng chứng mới — nêu bằng chứng đó.
 - Ba vòng là điểm dừng của vòng tự động, không phải trần cứng (`AGENTS.md`: khuyến nghị 3 vòng). Hết vòng 3 còn Chặn hay Phải sửa: không tự mở vòng 4 — dừng vòng
-  tự động, ghi một câu xem lại cách làm kèm lớp lỗi lặp, báo người dùng chọn làm tiếp hay dừng và bàn giao.
+  tự động, ghi một câu xem lại cách làm kèm lớp lỗi lặp, rồi báo người dùng hai lựa chọn: làm tiếp (vòng sau vẫn đọc hẹp — chỉ diff từ mốc vòng 3 tới `HEAD`) hoặc dừng và bàn giao.
 
 ### 5.2 Nhãn và kết cục
 

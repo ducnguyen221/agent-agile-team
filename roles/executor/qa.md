@@ -59,8 +59,6 @@ tìm test gây nhiễu) · `response-style` · `id-convention` · `token-economy
 
 ## 9. Đo và ghi coverage
 
-<!-- Ý từ affaan-m/ECC commands/test-coverage.md @ ef648e01 (MIT), viết lại; bỏ mẫu lệnh theo công cụ, bước tự sinh test của
-     QA (QA không viết test, mục 6) và khuôn báo cáo của nguồn. -->
 
 Coverage là **một** bằng chứng, không thay bảng phủ `FR` → `VR` (mục 5): một dòng đủ phần trăm vẫn có thể bỏ trống
 đường lỗi của một `FR`.

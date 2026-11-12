@@ -5,9 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/common/git-workflow.md @ ef648e01 (MIT). Viết lại, giữ ý về định dạng commit và
-     nội dung PR; luật git, đẩy nhánh và phát hành lấy từ luật lõi (`AGENTS.md`, `method/conventions.md` mục 4),
-     không từ nguồn. -->
 
 # Quy trình git: định dạng commit và PR
 

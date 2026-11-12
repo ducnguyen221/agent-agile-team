@@ -2,12 +2,8 @@
 name: shaping-spec
 description: Use when a request has been registered and a SPEC must be written before any code — turning intent into user stories, WHEN…THEN scenarios, measurable success criteria, out-of-scope items and one batch of clarification questions; also when deciding whether the work is a spike, a bounded change or an architectural change.
 metadata:
-  group: process
-  roles: [analyst, architect]
-source: [obra/superpowers skills/brainstorming/SKILL.md, affaan-m/ECC agents/spec-miner.md]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT, MIT]
-rewrite_before_public: false
+  group: "process"
+  roles: "analyst, architect"
 ---
 
 # Định hình SPEC (Bước 2, nửa đầu)

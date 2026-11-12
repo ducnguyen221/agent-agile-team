@@ -3,7 +3,7 @@ skill: web-qa
 method: baseline pressure-test with subagents and a real browser (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: a118fe6ed1207965e4fb50f1e475bd7195c4c4af
+skill_sha: 883c00ee78e843070d1e2055c736535fcca057e9
 date: 2026-10-23
 result: 4/4 GREEN pass on the current tree (wq-7 new, wq-1 to wq-3 rerun at n = 1) plus a real design-compare run that matched its expectation; RED on wq-7 already passed; earlier rounds 8/9 GREEN pass
 agent_ids:

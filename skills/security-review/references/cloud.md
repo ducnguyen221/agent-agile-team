@@ -4,8 +4,6 @@
 > Bảy nhóm dưới đây là checklist ý — ví dụ nhà cung cấp chỉ để minh hoạ. Mục không kiểm được ghi
 > **Chưa chạy** kèm lý do, không ghi Đạt. Thao tác trên hạ tầng thật là ngoài phạm vi: chỉ đọc cấu hình.
 
-Nguồn: viết lại từ `cloud-infrastructure-security.md` của `affaan-m/ECC` (MIT), mốc ghi ở frontmatter
-`SKILL.md`.
 
 ## 1. IAM và quyền truy cập
 - Quyền tối thiểu: không `*` ở hành động hay tài nguyên nhạy cảm; quyền đọc tách quyền ghi.

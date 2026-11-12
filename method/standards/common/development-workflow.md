@@ -5,9 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/common/development-workflow.md @ ef648e01 (MIT). Viết lại, giữ ý "tra cứu và tái
-     dùng trước khi viết mới" và các bước kiểm trước review; dòng chảy sáu bước và hai cổng người lấy từ
-     `method/process.md`, không từ nguồn. -->
 
 # Quy trình phát triển tính năng
 

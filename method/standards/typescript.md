@@ -5,8 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/typescript/{coding-style,patterns,security,testing}.md @ ef648e01 (MIT). Viết lại,
-     giữ ý; bỏ `hooks.md` của nguồn (cấu hình runtime của nguồn); phần mẫu hook React chuyển sang `react.md`. -->
 
 # Chuẩn TypeScript và JavaScript
 

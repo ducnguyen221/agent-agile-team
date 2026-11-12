@@ -2,12 +2,8 @@
 name: writing-skills
 description: Use when creating a new skill, editing an existing skill (even one line), writing or reviewing a skill's description or pressure tests, choosing how to word guidance for agents, a lesson is proposed for promotion to a skill or rule, or a session or sprint went wrong and someone asks why it took so long, cost so much or ignored the plan.
 metadata:
-  group: meta
-  roles: [architect, analyst]
-source: [obra/superpowers skills/writing-skills/SKILL.md, obra/superpowers skills/writing-skills/testing-skills-with-subagents.md, obra/superpowers skills/writing-skills/persuasion-principles.md, obra/superpowers skills/diagnosing-superpowers]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d]
-license: [MIT, MIT, MIT, MIT]
-rewrite_before_public: false
+  group: "meta"
+  roles: "architect, analyst"
 ---
 
 # Viết skill
@@ -93,8 +89,8 @@ Phân loại lỗi RED **trước** khi viết; dạng chặn được lỗi nà
 ## 5. `description` và frontmatter
 
 - Frontmatter tiếng Anh, thân tiếng Việt. Khoá: `name` (chữ thường, số, gạch nối; tên theo việc làm, ví dụ
-  `writing-plan`, `debugging`) · `description` · `metadata.group` · `metadata.roles` · `source` (repo + đường
-  file) · `source_sha` · `license` · `rewrite_before_public` (`true` khi nguồn không có giấy phép mở).
+  `writing-plan`, `debugging`) · `description` · `metadata.group` · `metadata.roles` (chuỗi các vai, ví dụ
+  `"implementer, qa"`) · `metadata.kind` (tuỳ chọn). Không ghi khoá nguồn: nguồn distill nằm ngoài repo, ghi công ở `NOTICE`.
 - `description` bắt đầu "Use when…", ngôi thứ ba, **chỉ** điều kiện kích hoạt và triệu chứng, <500 ký tự;
   có từ agent sẽ tìm (thông điệp lỗi, triệu chứng, từ đồng nghĩa); nhắc công nghệ chỉ khi skill gắn công nghệ đó.
 - **Không tóm quy trình vào `description`.** Agent làm theo bản tóm và bỏ thân skill: mô tả "review giữa các
@@ -140,7 +136,7 @@ chữ "dự kiến" · `description` kể bước làm ("then", "first", "steps"
 - [ ] RED ≥3 kịch bản (≥3 áp lực mỗi kịch bản) đã chạy, lỗi ghi nguyên văn; kịch bản đạt sẵn đã thay.
 - [ ] GREEN đạt mọi kịch bản; REFACTOR ghi lỗ hổng đã vá; `tests/pressure.md` theo khuôn.
 - [ ] Dạng câu khớp kiểu lỗi, câu chữ đã micro-test có đối chứng; `description` chỉ điều kiện kích hoạt;
-      frontmatter đủ khoá, nguồn khớp `UPSTREAM.md`.
+      frontmatter đủ khoá, không có khoá nguồn.
 - [ ] `python scripts/check.py --self` không phát hiện nào trên file của skill; dòng mục lục `skills/README.md`
       đề xuất cho người giữ file chung.
 

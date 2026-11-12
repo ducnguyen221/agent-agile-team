@@ -28,7 +28,7 @@ updated: 2026-10-04
 | [react.md](react.md) | component, state, hook, RSC, bảo mật, test | `typescript.md` |
 | [web.md](web.md) | HTML/CSS, thiết kế, hiệu năng, CSP, test trình duyệt | `react.md`, `typescript.md` |
 
-Nguồn của từng file ở comment đầu file (repo, đường dẫn, SHA, giấy phép); sổ nguồn: `UPSTREAM.md`.
+Nguồn distill của từng file ghi ở Workshop; repo chỉ giữ `NOTICE`.
 
 ## 2. Bảng đối chiếu chuẩn ↔ skill
 

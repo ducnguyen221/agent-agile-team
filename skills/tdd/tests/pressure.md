@@ -3,7 +3,7 @@ skill: tdd
 method: pressure-test with subagents (RED without skill, GREEN with skill, ORIGINAL with upstream skill)
 model: claude-sonnet-5-5 (SPR-04 reruns and td-4); sonnet (runs of 2026-10-01), same scenario text
 tier: T3
-skill_sha: 994537299f230a89077baa002e24a5bcccdd2766
+skill_sha: df45252b76eed3daae9789147cffd0a5884b259d
 date: 2026-10-04
 result: 4/4 GREEN pass; RED on the new scenario td-4 partial (0/1 pass); the three earlier scenarios passed already at RED (2026-10-01), GREEN not worse than original on 3/3
 ---

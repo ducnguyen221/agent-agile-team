@@ -1,13 +1,9 @@
 ---
 name: hooks-guardrails
 description: Use when a rule must be enforced by the machine rather than by an instruction — formatting or linting after edits, blocking writes to protected paths, scanning for keys before commit, or an opt-in test run before an agent stops - and when someone proposes a hook that calls a model, or a hook does not fire. Not for reviewing code (`code-review`) or for the sprint gates themselves.
-source: ["concept: Claude Code hooks reference (official documentation, read 2026-10-23)", "concept: Codex hooks (official documentation, read 2026-10-23)", "concept: Antigravity hooks (official documentation, read 2026-10-23)"]
-source_sha: [null, null, null]
-license: ["official documentation (ideas only, no text copied)", "official documentation (ideas only, no text copied)", "official documentation (ideas only, no text copied)"]
-rewrite_before_public: false
 metadata:
-  group: verification
-  roles: [implementer, analyst]
+  group: "verification"
+  roles: "implementer, analyst"
 ---
 
 # Hook xác định giữ luật

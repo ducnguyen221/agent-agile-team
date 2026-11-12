@@ -4,7 +4,7 @@ method: pressure-test with subagents (RED without skill, GREEN with skill read b
 model: claude-sonnet-5-5 (GREEN rerun 2026-10-26); claude-sonnet-5-5
 tier: T3
 historical_skill_sha: 05dd26d86f0c111834deb9fe31c5c224e862d754
-skill_sha: 22dad672dc7c4ae54a1d2a076b057a3ed65be4dd
+skill_sha: 2cc4aab36f7df6f3ce8c5875f5baebb8426f40db
 historical_date: 2026-10-04
 date: 2026-10-26
 historical_result: 4/4 GREEN pass; RED on the new scenario te-4 partial; GREEN rerun of te-1 to te-3 (rebuilt from the 2026-10-01 descriptions) 3/3 pass on the tree after the TK9.5 edit

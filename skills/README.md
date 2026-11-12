@@ -12,13 +12,8 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
 | `name` | có | trùng tên thư mục |
 | `description` | có | điều kiện kích hoạt, "Use when…" |
 | `metadata.group` | có | `process` (Quy trình) · `technique` (Kỹ thuật) · `verification` (Kiểm định) · `communication` (Giao tiếp & tối ưu) · `meta` (Meta) |
-| `metadata.roles` | có | danh sách vai dùng skill, hoặc `[all]` |
+| `metadata.roles` | có | chuỗi các vai dùng skill, ngăn bởi dấu phẩy (`"implementer, qa"`), hoặc `"all"` |
 | `metadata.kind` | không | `reference` — skill tham chiếu kỹ thuật (mẫu, bảng tra), không có luật sắt hay cổng; vắng = skill kỷ luật/quy trình |
-| `source` | có | repo + đường file nguồn (danh sách khi gộp nhiều nguồn); nguồn chỉ lấy ý ghi `concept: <tên>` |
-| `source_sha` | có | SHA HEAD đã chốt ở [UPSTREAM.md](../UPSTREAM.md), cùng thứ tự với `source`; `null` cho tài liệu web không có commit, hoặc cho nguồn chỉ lấy ý (`concept:`) |
-| `base_sha` | không | mốc của **bản distill private** đã làm điểm xuất phát — khuyến khích khi có, để lần distill sau đối chiếu được |
-| `license` | có | giấy phép của nguồn; `none` cho nguồn không giấy phép; `source` là danh sách thì `license` là danh sách cùng độ dài, cùng thứ tự |
-| `rewrite_before_public` | có | `true` khi có file lấy từ nguồn không giấy phép — phải viết lại trước khi repo công khai (file nào: [THIRD_PARTY.md](../THIRD_PARTY.md)) |
 
 ## 2. Thử áp lực
 
@@ -118,9 +113,9 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | Skill | Loại | Tệp thử | `result` | `date` |
 |---|---|---|---|---|
 | [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 3/3, 3/3, 3/3 runs Đạt, RED 0/3, 0/3, 3/3 runs Đạt so KB1 and KB2 gave way and KB3 passed as-is, kept as regression; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
-| [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass theo chữ và theo ý; RED 0/3 pass theo chữ (1/3 theo ý); SPR-12 2026-11-08, n = 1 mỗi ca, ca cũ chưa chạy lại | 2026-11-08 |
+| [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/4 GREEN pass theo chữ, 4/4 theo ý (KB15–KB18); SPR-19 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm và RF5 | 2026-11-12 |
 | [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 3/6 GREEN pass theo chữ (5/6 theo ý); RED 1/6 pass theo chữ (2/6 theo ý); SPR-12 2026-11-08, n = 1 mỗi ca, ca cũ chưa chạy lại | 2026-11-08 |
-| [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass theo chữ và theo ý; RED 0/3 pass theo chữ và theo ý (3 Đạt một phần theo ý); SPR-12 2026-11-08, n = 1 mỗi ca, ca cũ chưa chạy lại | 2026-11-08 |
+| [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 2/3 GREEN pass theo chữ, 3/3 theo ý (rs-9, rs-10, rs-11); SPR-19 TK11 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm | 2026-11-12 |
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4 | 2026-10-22 |
 | [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on the current tree (rerun 2026-11-07 at n = 1, wp-1..wp-3; wp-5 not rerun); RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix (2026-10-22) | 2026-11-07 |
 | [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |
@@ -139,20 +134,20 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [tdd](tdd/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass | 2026-10-04 |
 | [worktrees](worktrees/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 4/7 (+3 partial, 0 fail), below threshold; points-right 7/7 | 2026-10-04 |
 | [rag-pageindex](rag-pageindex/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 7/7 (+0 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-26 |
-| [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 11/11 GREEN pass on the current tree (3 new cr-9 to cr-11, plus cr-1 to cr-8 rerun) | 2026-10-23 |
+| [code-review](code-review/tests/pressure.md) | kỷ luật | `pressure.md` | 1/6 GREEN pass theo chữ, 4/6 theo ý (cr-1 đến cr-6, lượt chạy lại); SPR-19 2026-11-12, n = 1 mỗi ca | 2026-11-12 |
 | [plan-review](plan-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on the current tree (rerun 2026-11-07 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-11-07 |
 | [security-audit](security-audit/tests/pressure.md) | kỷ luật | `pressure.md` | 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); SPR-47 CO8 added one sentence to section 5 (daily mode, no hypothesis appendix) | 2026-11-01 |
-| [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (sec-4 new; sec-1, sec-2b, sec-3b rerun at n = 1) | 2026-10-24 |
+| [security-review](security-review/tests/pressure.md) | kỷ luật | `pressure.md` | 3/4 GREEN pass theo chữ và theo ý (sec-1, sec-3b, sec-4; sec-2b một phần); SPR-19 2026-11-12, n = 1 mỗi ca | 2026-11-12 |
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 7/7 GREEN pass on the current tree (ver-7 new, ver-1 to ver-6 rerun) | 2026-10-23 |
 | [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (wq-7 new, wq-1 to wq-3 rerun at n = 1) plus a real design-compare run that matched its expectation | 2026-10-23 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-11-07 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
 | [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (eh-9 new; eh-1, eh-3, eh-4 rerun at n = 1) | 2026-10-24 |
-| [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on KB3 at n = 3 after the TK13 fix (round 2, 2026-10-04, round 1 on the pre-fix text was 1/3) and RED 0/3 pass (RED breaks); rerun n = 1 - KB1, KB2, KB4, KB6 pass, KB5 partial against the expectation, KB7 partial (TK12 had pass; not shown to be a regression); earlier TK12 rerun GREEN 3/3 on the old scenarios and 4 new ones | 2026-10-04 |
+| [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass theo chữ và theo ý (KB8, n = 3 sau sửa SPR-19: 3/3 chữ, 3/3 ý); KB1–KB7 không chạy lại; SPR-19 2026-11-12 | 2026-11-12 |
 | [hooks-guardrails](hooks-guardrails/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 0/3 pass (3 partial) | 2026-10-23 |
-| [gcp-devops](gcp-devops/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 1/3 pass (2 partial) | 2026-10-26 |
-| [gcp-incident-response](gcp-incident-response/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; RED 1/3 pass (2 partial) | 2026-10-26 |
+| [gcp-devops](gcp-devops/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass theo ý, 0/3 Đạt hẳn theo chữ (3 Đạt một phần); SPR-19 2026-11-12, n = 1 mỗi ca | 2026-11-12 |
+| [gcp-incident-response](gcp-incident-response/tests/pressure.md) | kỷ luật | `pressure.md` | 2/3 GREEN pass theo chữ và ý (gi-1, gi-2); gi-3 0/4 chữ, 0/4 ý (Đạt một phần); đối chứng ×3 trên cây chính trước TK5 (thân như d603a73): chữ 0/3, ý 3/3, khác điều kiện chấm, chưa kết luận lùi hay không; SPR-19 2026-11-12, n = 1 mỗi ca (gi-3 ×4) | 2026-11-12 |
 
 Agent reviewer chuyên đề: [docs/agents.md](../docs/agents.md). Gặp tên cũ trong hồ sơ lịch sử:
 [docs/MIGRATION.md](../docs/MIGRATION.md).

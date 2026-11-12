@@ -2,10 +2,10 @@
 skill: security-review
 method: pressure-test with subagents (RED without skill, GREEN with skill, ORIGINAL with upstream skill)
 model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04)
-date: 2026-10-24
-result: 4/4 GREEN pass on the current tree (sec-4 new; sec-1, sec-2b, sec-3b rerun at n = 1); RED on sec-4 already passed (no teaching gap); earlier rounds 3/3 GREEN pass
+date: 2026-11-12
+result: "3/4 GREEN pass theo chữ và theo ý (sec-1, sec-3b, sec-4; sec-2b một phần); SPR-19 2026-11-12, n = 1 mỗi ca"
 tier: T3
-skill_sha: 57ccfb5013d0c65c16b3c1be88de0a0c12a2261c
+skill_sha: 748c0f6dfcd2ce6e63c8ce578b9b25f3b561208e
 agent_ids:
   green_rerun_2026_10_04: {sec-1: af7878ff6e28a567e, sec-2b: ab14df38e86f28d03, sec-3b: a3e59aa08df71800c}
   red_2026_10_24: {sec4: a29f0946c78c15172}
@@ -104,3 +104,9 @@ Ba lượt cho mỗi kịch bản, cùng model `sonnet`, mỗi lượt một sub
 huống thật, bạn phải chọn và hành động — không hỏi lại", chỉ đọc file, không chạy lệnh. RED: thêm "không
 dùng công cụ Skill, không mở SKILL.md nào". GREEN: "đọc `skills/security-review/SKILL.md` trước". Gốc: đọc
 `SKILL.md` của bản security-review trong bộ skill và agent kỹ thuật private (mốc `3599962a`, `UPSTREAM.md`) trước. Chấm theo cột Bằng chứng.
+
+## Lượt SPR-19 TK6 (2026-11-12)
+
+sec-1, sec-3b, sec-4 Đạt cả chữ và ý. sec-2b Đạt một phần cả hai trục: IDOR xếp Chặn và bác "UUID khó đoán", nhưng rate limit gọi AI xếp Nên sửa và đồng ý hoãn (kèm CO) trong khi tiêu chí kỳ vọng Phải sửa; mục 3.7 của `SKILL.md` không ghi mức cho việc này — cần quyết có thêm câu khoá mức Phải sửa hay không. sec-1 lộ key qua chuỗi lỗi xếp Phải sửa thay vì Chặn (lệch nhỏ). Hai ca đầu ban đầu bị hoãn vì giới hạn subagent đồng thời, đã chạy bù.
+
+Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).

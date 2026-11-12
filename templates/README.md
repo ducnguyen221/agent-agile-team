@@ -22,6 +22,7 @@ khoá frontmatter, giá trị cho phép, tiêu đề bắt buộc, khuôn sổ g
 | `registry/SPRINTS.md` | `paths.sprints` | Sổ sprint theo timeline |
 | `registry/LEDGER.md` | file sổ tập trung trong kho sổ của máy (không thuộc repo dự án; `init` không dựng) | Sổ tập trung nhiều dự án, bật bằng `ledger.project` (mục 7); khi nào ghi: [`method/process.md`](../method/process.md) mục 11 |
 | `project/agile.json` | `.agile.json` ở gốc dự án | Cấu hình đường dẫn, coverage, chế độ hiển thị |
+| `repo-skeleton/` | cả cây sao chép ra gốc repo xưởng mới (không phải mẫu hồ sơ sprint; `init` không dựng) | Khung repo xưởng, 7 file: `.gitignore` (cache, `.tmp/`, `.worktrees/`, `.claude/worktrees/`), `.gitattributes` (LF), `NOTICE` tối thiểu (chỉ điều giấy phép buộc), `README.md` mẫu của repo mới, `docs/README.md`, `hosts/README.md` và `scripts/README.md` tuỳ chọn; quy tắc cấu trúc ở `docs/STRUCTURE.md` |
 
 **Giá trị trong mẫu là ví dụ hợp lệ**, không phải chỗ trống kiểu `<...>`: nhờ vậy `check` chạy được trên
 chính thư mục `templates/`. Phần thân ví dụ là để người viết thay. Dòng ví dụ của sổ gốc nằm trong comment

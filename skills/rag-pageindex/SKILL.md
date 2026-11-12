@@ -2,13 +2,9 @@
 name: rag-pageindex
 description: Use when asked to answer questions from, or build a searchable index of, a long PDF through the pageindex MCP tools (tree index with page citations, the agent navigates by reasoning, no embeddings and no API key); not for keyword or embedding search, and not for reviewing a RAG pipeline someone else built (that is the agent rag-pipeline-reviewer).
 metadata:
-  group: technique
-  kind: reference
-  roles: [implementer, researcher]
-source: ["concept: VectifyAI/PageIndex"]
-source_sha: [null]
-license: [MIT]
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "implementer, researcher"
 ---
 
 # RAG không vector bằng cây mục lục (pageindex)
@@ -30,7 +26,7 @@ Cần MCP `pageindex-mcp`. Tên tool gốc: `pi_list_docs`, `pi_pdf_info`, `pi_r
 `pi_get_structure`, `pi_get_pages`, `pi_delete_doc`. **Tên có thể mang tiền tố** tuỳ cách đăng ký (vd qua
 plugin) — tìm theo phần đuôi `pi_*`. `pi_delete_doc` chỉ khi người dùng yêu cầu rõ; không xoá để «dọn» hay để lập lại chỉ mục mà chưa hỏi.
 **Không thấy tool `pi_*` nào thì nói thiếu**, chỉ cách cài (đặt biến `PAGEINDEX_MCP_DIR` trỏ tới thư mục
-cài pageindex-mcp, xem `INSTALL.md` mục 5, đoạn MCP `pageindex-mcp`) và dừng; không bịa kết quả từ trí nhớ.
+cài pageindex-mcp, xem `docs/INSTALL.md` mục 5, đoạn MCP `pageindex-mcp`) và dừng; không bịa kết quả từ trí nhớ.
 
 ## 3. Quy trình A — lập chỉ mục (một lần mỗi tài liệu)
 

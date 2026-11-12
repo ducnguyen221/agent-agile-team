@@ -3,9 +3,9 @@ skill: gcp-devops
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs)
 tier: T3
-skill_sha: 80e316c4ce3a0ac5eafb04a590a76fa85054bc81
-date: 2026-10-26
-result: 3/3 GREEN pass; RED 1/3 pass (2 partial)
+skill_sha: f00715d759a9014cd0ccf5a84aa99c0eb5bb773e
+date: 2026-11-12
+result: "3/3 GREEN pass theo ý, 0/3 Đạt hẳn theo chữ (3 Đạt một phần); SPR-19 2026-11-12, n = 1 mỗi ca"
 agent_ids:
   red: {gd-1: a42256c2c3fb6b3e6, gd-2: afa8d0f877a9cca66, gd-3: ae580f5e05af8d89d}
   green: {gd-1: a4f11a072645a978e, gd-2: a3eac3f057c02e170, gd-3: ad1dbfa9522e1434c}
@@ -42,3 +42,9 @@ công cụ gọi skill (Skill tool). Đọc `<đường tuyệt đối tới wor
 thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên".
 `skill_sha` = băm cây `skills/gcp-devops` trừ `tests/`
 (`git ls-tree <commit>:skills/gcp-devops | awk -F'\t' '$2!="tests"' | git mktree`; không có awk thì lọc bằng Python), tại HEAD `4dc717f`.
+
+## Lượt SPR-19 TK6 (2026-11-12)
+
+Ca gd-1 đến gd-3: cả ba chọn đúng phương án B và đọc đúng `SKILL.md` dưới worktree; theo ý 3/3 Đạt, theo chữ 3 Đạt một phần (gd-1: lệnh mới chỉ liệt kê chưa chạy mà tin nhắn nói "đã chạy"; gd-2: tệp tạm không nêu quyền 0600; gd-3: bước smoke test mới là chú thích chưa phải lệnh chạy được). Người chấm nhận bản câu trả lời rút gọn nhẹ.
+
+Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).

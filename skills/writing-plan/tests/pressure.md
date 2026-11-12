@@ -4,7 +4,7 @@ method: pressure-test with subagents (RED without skill, GREEN with skill read b
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
 historical_skill_sha: 5313ed728f3658b600ebcce39d72fc2f96ca6bbe
-skill_sha: 3588ee84b90566117cf6dfc4667509bc2ab087b1
+skill_sha: facea52255903c690942ad17016d8230cddeac98
 historical_date: 2026-10-03
 date: 2026-11-07
 historical_result: 3/3 GREEN pass; RED 0/3 pass (3 partial)

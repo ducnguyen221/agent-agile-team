@@ -5,8 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/common/coding-style.md @ ef648e01 (MIT). Viết lại, giữ ý; bỏ nhãn mức kiểu nguồn
-     và danh sách tự kiểm riêng (đã có trong skill `code-review` và `verify-before-done`). -->
 
 # Phong cách code chung
 

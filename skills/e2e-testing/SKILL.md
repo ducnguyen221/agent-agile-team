@@ -2,13 +2,9 @@
 name: e2e-testing
 description: Use when writing, structuring or fixing Playwright end-to-end tests - page objects, locators, config, retries, traces, CI runs, flaky or intermittently failing tests, quarantine - or when a bug found in AI-assisted code needs a regression test. Not for component tests (that is `react`) and not for a QA pass that only reports findings (that is `web-qa`).
 metadata:
-  group: technique
-  kind: reference
-  roles: [implementer, qa]
-source: [affaan-m/ECC skills/e2e-testing/SKILL.md, affaan-m/ECC skills/ai-regression-testing/SKILL.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT, MIT]
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "implementer, qa"
 ---
 
 # E2E với Playwright

@@ -1,13 +1,9 @@
 ---
 name: verify-before-done
 description: Use when about to say work is done, fixed, passing or ready, before marking a TK done, committing, opening a PR, moving to the next task, handing back to the coordinator, or accepting another agent success report, and whenever recording a VR.
-source: [obra/superpowers skills/verification-before-completion/SKILL.md, affaan-m/ECC skills/verification-loop/SKILL.md]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT, MIT]
-rewrite_before_public: false
 metadata:
-  group: verification
-  roles: [implementer, qa]
+  group: "verification"
+  roles: "implementer, qa"
 ---
 
 # Kiểm trước khi báo xong

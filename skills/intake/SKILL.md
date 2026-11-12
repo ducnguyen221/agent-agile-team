@@ -2,13 +2,8 @@
 name: intake
 description: "Use when a user hands over a new request in plain words (feature, fix, change or question that implies work), when the intended result or scope is unclear, when there is pressure to skip intake, understate risk or open sprint records for a clear local text change, or when a chat message says `Bật autopilot …` / `Dừng autopilot.` or sounds like approval (\"ok\", \"theo khuyến nghị\")."
 metadata:
-  group: process
-  roles: [analyst]
-source: ["affaan-m/ECC skills/prompt-optimizer (missing-context checklist, via local distill); method/process.md step 1", "affaan-m/ECC skills/intent-driven-development, skills/product-capability (business rules not readable from code; observable acceptance criteria)"]
-source_sha: [c70874fae9eb0e5ad0365beb7e2955899fd1d30f, ef648e01899ba3e8dc6371642deaaf64b4477775]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT, MIT]
-rewrite_before_public: false
+  group: "process"
+  roles: "analyst"
 ---
 
 # Tiếp nhận yêu cầu (Bước 1)

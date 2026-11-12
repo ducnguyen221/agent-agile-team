@@ -5,7 +5,7 @@ model: claude-sonnet-5-5 (GREEN rerun 2026-11-07); claude-sonnet-5-5 (GREEN reru
 date: 2026-11-07
 result: 3/3 GREEN pass on the current tree (rerun 2026-11-07 at n = 1; 0 partial; RED not rerun, scenarios unchanged)
 tier: T3
-skill_sha: f283328961359313ed2d58d22880adceadf7f95c
+skill_sha: 5fb8207666742b60b95820d4aeca002c90560e0c
 agent_ids:
   green_rerun_2026_10_04: {pr-1: a0b1297792d09d237, pr-2: a57c096ba6f7e2d9e, pr-3: aa0d36c0041d52e75}
   green_rerun_2026_10_26: {pr-1: a84a3714b4df74da0, pr-2: aa192efbe7cab9349, pr-3: a273002d6bd425394}

@@ -2,15 +2,13 @@
 name: gcp-devops
 description: Use when deploying or operating a service on Google Cloud (Cloud Run, Cloud SQL, Secret Manager, HTTPS load balancer) - checking gcloud auth and config, building and pushing an image, running a migration job, shifting traffic or rolling back, mounting or rotating a secret, adding a managed certificate, or debugging a revision that will not start or a 403. Not for platform-neutral Docker/CI/rollout patterns (use `deployment`) nor incident investigation (use `gcp-incident-response`).
 metadata:
-  group: technique
-  roles: [implementer]
-source: ["GoogleCloudPlatform/data-agent-kit-plugin — gcloud-auth-verification skill (section 1 derived; rest original)"]
-source_sha: ["c125eaea039b9440b306b428ee2068d79123ddb7"]
-license: [Apache-2.0]
-rewrite_before_public: false
+  group: "technique"
+  roles: "implementer"
 ---
 
 # Vận hành dịch vụ trên Google Cloud (gcloud · Cloud Run · Cloud SQL · Secret Manager)
+
+> Dẫn xuất có sửa đổi từ tài liệu Apache-2.0 của Google; nguồn, bản quyền và giấy phép: xem NOTICE.
 
 > **Kết luận:** mọi lệnh `gcloud` đổi trạng thái chỉ chạy khi project, region và tên tài nguyên **đến từ người dùng
 > hoặc từ cấu hình thật**, sau khi đã `describe` hiện trạng; danh tính do người dùng dựng, agent không sửa hộ; secret

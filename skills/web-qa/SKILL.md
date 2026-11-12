@@ -1,14 +1,9 @@
 ---
 name: web-qa
 description: Use when a web app must be checked in a real browser - verifying a branch or deployment, a UAT round, "test the site", comparing a page against a design image, regression against a previous run, or a bug report that needs reproduction steps and screenshots - and the job is to report, not to fix.
-source: ["garrytan/gstack qa-only/SKILL.md.tmpl", "garrytan/gstack qa/SKILL.md.tmpl and qa/sections exploratory, scope, qa-patterns, browser-verify (report-only ideas: boundaries and charters, counting rules for the score, exact replay, re-verification; the fix loop, atomic commits, repair tiers, self-regulation score and TODO edits dropped; task `TK8` (frontend and QA skills), sprint `SPR-04` (method wave 3))", "affaan-m/ECC skills/browser-qa/SKILL.md (ideas: blast radius, vitals thresholds, breakpoints, limits of automated accessibility checks; ship verdict labels and tool names dropped)", "affaan-m/ECC skills/click-path-audit/SKILL.md (idea only: final state versus the promise of the label, observed as black-box symptoms; source tracing dropped)"]
-source_sha: [96764e80a641e28141ec8297223768029f5bf483, f30b7b788a210d217ea3125bf3001b29cbc2a463, ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
-base_sha: 4c0fdc5736a49b6223a7dfc7626d5495cf55185c
-license: [MIT, MIT, MIT, MIT]
-rewrite_before_public: false
 metadata:
-  group: verification
-  roles: [qa]
+  group: "verification"
+  roles: "qa"
 ---
 
 # Kiểm web trên trình duyệt — chỉ báo cáo

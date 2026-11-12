@@ -1,0 +1,31 @@
+# Môi trường Python và cache
+/.venv/
+/venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.coverage.*
+/htmlcov/
+
+# Nháp tạm của agent — xoá cuối việc (mỗi sprint một thư mục .tmp/<mã sprint>/)
+/.tmp/
+
+# Worktree của làn / sprint — không phải mã của repo
+/.worktrees/
+
+# Bí mật — repo không cần secret nào để chạy
+.env*
+!.env.example
+*.credentials.json
+*.pem
+*.key
+
+# Cấu hình riêng của từng máy và worktree do app tạo
+/.claude/settings.local.json
+/.claude/worktrees/
+
+# Rác hệ điều hành
+.DS_Store
+Thumbs.db
+desktop.ini

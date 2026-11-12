@@ -1,12 +1,13 @@
 """Máy kiểm nợ thử (FR11.5, SC5): mọi skill kỷ luật có `tests/pressure.md`, mọi skill tham chiếu
 (`metadata.kind: reference`) có `tests/retrieval.md`; file thử không còn ở trạng thái chưa chạy;
-mọi file thử có `skill_sha` + `tier`, và `skill_sha` khớp băm cây skill trừ `tests/` tính ở HEAD (công thức:
-`git ls-tree HEAD:skills/<tên>` bỏ mục `tests`, rồi `git mktree`): skill đổi sau khi thử thì test đỏ, đến khi thử lại.
+mọi file thử có `skill_sha` + `tier`, và `skill_sha` khớp băm hành vi của cây skill trừ `tests/` tính ở HEAD (công thức: `tree_hash`:
+sha1 trên từng file, `SKILL.md` chỉ lấy `name`, `description` và thân): skill đổi sau khi thử thì test đỏ, đến khi thử lại.
 """
 
 from __future__ import annotations
 
 import datetime
+import hashlib
 import re
 import subprocess
 
@@ -80,10 +81,25 @@ def missing_test_file(skill: str, root=REPO):
     return None
 
 
+def behaviour_view(rel: str, data: bytes) -> bytes:
+    """Phần hành vi của một file trong cây skill, đưa vào băm. Với `SKILL.md`: chỉ khoá `name`, `description` của frontmatter và
+    thân; khoá quản trị (`metadata` với `group`, `kind`, `roles`, các khoá nguồn đã gỡ) KHÔNG vào băm, vì đổi chúng không đổi
+    cách skill được kích hoạt hay cách nó chỉ dẫn (SPR-19/BR1). File khác: nguyên byte, xuống dòng chuẩn LF."""
+    text = data.decode("utf-8", errors="surrogateescape").replace("\r\n", "\n")
+    if rel == "SKILL.md":
+        lines = text.split("\n")
+        if lines and lines[0] == "---" and "---" in lines[1:]:
+            end = lines.index("---", 1)
+            kept = [ln for ln in lines[1:end] if re.match(r"(?:name|description):", ln)]
+            text = "\n".join([lines[0], *kept, *lines[end:]])
+    return text.encode("utf-8", errors="surrogateescape")
+
+
 def tree_hash(skill: str, repo=REPO):
-    """Băm cây thư mục skill TRỪ `tests/` ở HEAD của `repo`. Trả None CHỈ khi không có lệnh `git`; git có mà lỗi
-    (`ls-tree`/`mktree` mã thoát khác 0: `dubious ownership`, skill chưa commit ở HEAD…) thì test đỏ kèm stderr,
-    không im lặng skip."""
+    """Băm hành vi của cây thư mục skill TRỪ `tests/` ở HEAD của `repo`: sha1 trên `đường\\0độ dài\\0nội dung` của từng file
+    (theo thứ tự đường), với `SKILL.md` chỉ lấy `name`, `description` và thân (`behaviour_view`). Trả None CHỈ khi không có lệnh
+    `git`; git có mà lỗi (`ls-tree`/`cat-file` mã thoát khác 0: `dubious ownership`, skill chưa commit ở HEAD…) thì test đỏ
+    kèm stderr, không im lặng skip."""
     def git(*args, **kw):
         res = subprocess.run(["git", *args], cwd=repo, capture_output=True, timeout=60, **kw)
         if res.returncode != 0:
@@ -91,9 +107,21 @@ def tree_hash(skill: str, repo=REPO):
         return res.stdout
 
     try:
-        ls = git("ls-tree", f"HEAD:skills/{skill}")
-        rows = [r for r in ls.split(b"\n") if r and r.split(b"\t", 1)[1] != b"tests"]
-        return git("mktree", input=b"\n".join(rows) + b"\n").decode().strip()
+        ls = git("ls-tree", "-r", f"HEAD:skills/{skill}")
+        entries = []
+        for row in ls.split(b"\n"):
+            if not row:
+                continue
+            meta, path = row.split(b"\t", 1)
+            rel = path.decode("utf-8", errors="surrogateescape")
+            if rel == "tests" or rel.startswith("tests/"):
+                continue
+            entries.append((rel, meta.split()[2].decode()))
+        digest = hashlib.sha1()
+        for rel, blob in sorted(entries):
+            body = behaviour_view(rel, git("cat-file", "blob", blob))
+            digest.update(rel.encode("utf-8", errors="surrogateescape") + b"\0" + str(len(body)).encode() + b"\0" + body)
+        return digest.hexdigest()
     except FileNotFoundError:
         return None  # không có lệnh git: đây là ca skip duy nhất
     except subprocess.SubprocessError as exc:
@@ -687,53 +715,8 @@ def test_local_grading_paragraph_is_caught():
     assert re.search(r"(?im)^[^|\n]*đáp (?:án )?thay thế[^|\n]*(?:Một phần|Đạt)", two)
 
 
-# TK12.1 (5): mã của hồ sơ riêng (`CO`, `RQ`, `RF`, `TK`, `DN`, `BR`, `VR`, `CQ`, `SPR`) trong `source:` của skill phải nằm trong
-# dấu code kèm tên ngắn trong ngoặc: `TK10` (viết lại phòng sạch), theo AGENTS.md mục "Mã định danh" (RF164).
+# Mã hồ sơ riêng (`CO`, `RF`, `TK`, `DN`, `BR`, `VR`, `CQ`, `SPR`, `RQ`, `FS`): hồ sơ thử không được nêu mã trần của hồ sơ riêng.
 PRIVATE_CODE = re.compile(r"\b(?:(?:SPR|RQ|FS)-\d+|(?:CO|RF|TK|DN|BR|VR|CQ)\d+(?:\.\d+)?)\b")
-# Skill đang nợ dòng `source:` mà làn khác sở hữu SKILL.md: ghi lý do; test dưới đỏ khi hết nợ để người sửa gỡ dòng này.
-SOURCE_CODE_DEBT = {}
-
-
-def source_code_gaps(entries) -> list:
-    """Mã hồ sơ riêng trong các chuỗi `source:` không ở dạng `CODE` (tên ngắn)."""
-    found = []
-    for entry in entries:
-        text = str(entry)
-        for m in PRIVATE_CODE.finditer(text):
-            wrapped = text[max(m.start() - 1, 0):m.start()] == "`" and text[m.end():m.end() + 1] == "`"
-            named = re.match(r"` \([^()]{2,}\)", text[m.end():]) is not None
-            if not (wrapped and named):
-                found.append(m.group(0))
-    return found
-
-
-def source_entries(skill: str) -> list:
-    value = front(REPO / "skills" / skill / "SKILL.md").get("source") or []
-    return value if isinstance(value, list) else [value]
-
-
-@pytest.mark.parametrize("skill", [s for s in SKILLS if s not in SOURCE_CODE_DEBT])
-def test_skill_source_private_codes_carry_a_name_in_code(skill):
-    assert source_code_gaps(source_entries(skill)) == []
-
-
-def test_source_code_debt_is_still_owed():
-    # vòng lặp thay vì parametrize: danh sách nợ rỗng (hết nợ) là trạng thái bình thường, parametrize rỗng sẽ thành ca skip
-    for skill in sorted(SOURCE_CODE_DEBT):
-        assert source_code_gaps(source_entries(skill)), f"`{skill}` hết nợ: gỡ nó khỏi SOURCE_CODE_DEBT"
-
-
-@pytest.mark.parametrize("bad", ["rewrite in SPR-04 TK10: old text", "see CO2 and RQ-021", "`TK10` rewrite", "`CO2`(x)", "`RQ-021` ()",
-                                 "`RF164` (a)", "TK11.2 (name)", "`TK11.2 (name)", "TK10` (name)", "RQ-021` (x y)"])
-def test_source_code_without_code_span_or_name_is_caught(bad):
-    assert source_code_gaps([bad]), f"{bad!r} lọt"
-
-
-@pytest.mark.parametrize("good", ["`TK10` (clean-room rewrite task) in `SPR-04` (wave 3)", "`CO2` (before-public rewrite) and `RQ-021` (same)",
-                                  "affaan-m/ECC skills/api-design/SKILL.md", "concept: ISO/IEC/IEEE 29148 requirement identifiers",
-                                  "concept: BLUF (US Army AR 25-50)", "`TK11.2` (second item)"])
-def test_source_code_in_the_right_form_is_not_blocked(good):
-    assert source_code_gaps([good]) == []
 
 
 # TK12.1 (6): nhãn mức viết thường kiểu nguồn (`high`, `critical`) trong tệp thử phải nằm trong dấu code, không để trần (RF136, RF165).
@@ -830,6 +813,42 @@ def test_tree_hash_ignores_only_the_tests_dir(tmp_path):
     write_skill(repo, "discipline", "body 2")
     commit_all(repo, "edit skill")
     assert tree_hash("x", repo) != first, "đổi SKILL.md phải đổi băm"
+
+
+def test_tree_hash_ignores_admin_metadata_but_not_behaviour(tmp_path):
+    """SPR-19/BR1: khoá quản trị của frontmatter (`metadata`, khoá nguồn) không vào băm; `description` và thân thì có."""
+    repo = git_repo(tmp_path, "discipline")
+    base = tree_hash("x", repo)
+    skill = repo / "skills" / "x" / "SKILL.md"
+    text = skill.read_text(encoding="utf-8")
+    skill.write_text(text.replace("---\n", "---\nsource: [a/b]\nlicense: [MIT]\n", 1), encoding="utf-8")
+    commit_all(repo, "add admin keys")
+    assert tree_hash("x", repo) == base, "khoá quản trị không được đổi băm"
+    skill.write_text(text.replace("name: x\n", "name: x\ndescription: Use when y\n", 1), encoding="utf-8")
+    commit_all(repo, "edit description")
+    assert tree_hash("x", repo) != base, "đổi description phải đổi băm"
+
+
+def test_tree_hash_ignores_roles_but_follows_the_body(tmp_path):
+    """SPR-19/BR1: đổi dạng hay giá trị `metadata.roles` không đổi băm; đổi thân (`SKILL.md` hoặc file kèm) thì đổi."""
+    repo = git_repo(tmp_path, "discipline")
+    skill = repo / "skills" / "x" / "SKILL.md"
+    text = skill.read_text(encoding="utf-8")
+    skill.write_text(text.replace("  kind: discipline\n", "  kind: discipline\n  roles: [qa, implementer]\n", 1), encoding="utf-8")
+    commit_all(repo, "roles as list")
+    base = tree_hash("x", repo)
+    text = skill.read_text(encoding="utf-8")
+    assert "roles: [qa, implementer]" in text, "mẫu thử phải có khoá roles để phép kiểm có nghĩa"
+    skill.write_text(text.replace("roles: [qa, implementer]", 'roles: "implementer, qa"', 1), encoding="utf-8")
+    commit_all(repo, "roles to string")
+    assert tree_hash("x", repo) == base, "đổi `roles` không được đổi băm"
+    skill.write_text(skill.read_text(encoding="utf-8").replace("body", "body changed", 1), encoding="utf-8")
+    commit_all(repo, "edit body")
+    after_body = tree_hash("x", repo)
+    assert after_body != base, "đổi thân phải đổi băm"
+    (repo / "skills" / "x" / "ref.md").write_text("reference\n", encoding="utf-8")
+    commit_all(repo, "add reference")
+    assert tree_hash("x", repo) != after_body, "thêm file kèm phải đổi băm"
 
 
 def test_missing_test_file_is_caught_by_kind(tmp_path):

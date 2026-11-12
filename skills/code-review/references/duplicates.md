@@ -1,9 +1,5 @@
 # Tìm hàm trùng ý — bước thủ công
 
-<!-- Nguồn: obra/superpowers-lab skills/finding-duplicate-functions/SKILL.md @ 51111f7 (MIT). Chỉ lấy ý
-     (hàm cùng mục đích mà khác tên, khác cách viết; vùng hay trùng; chọn hàm sống sót; không gộp khi chưa có
-     test). Viết lại thành năm bước đọc-và-grep thủ công; không mang script, không mang bộ prompt nhiều mô
-     hình; thêm thang mức chung. -->
 
 > **Kết luận:** hàm trùng ý là hàm **cùng hợp đồng** (đầu vào → đầu ra, lỗi, tác dụng phụ) mà khác tên hoặc
 > cách viết, nên grep tên không bắt hết; tìm bằng năm bước đọc được bằng tay — liệt kê, gom, so thân, chọn hàm

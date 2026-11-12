@@ -34,7 +34,7 @@ Role in the multi-repo ACD system (upstream, downstream, bundles, handoff files)
 
 ## Install
 
-Paste the prompt at the end of [INSTALL.md](INSTALL.md) into your agent; it follows that file and asks
+Paste the prompt at the end of [docs/INSTALL.md](docs/INSTALL.md) into your agent; it follows that file and asks
 before touching anything. Manual steps per harness: [`hosts/`](hosts/README.md). Claude Code in short:
 
 ```bash
@@ -55,7 +55,7 @@ Check: `python scripts/check.py --self` ends with `Đạt` (pass). Common proble
 
 ## First sprint
 
-[GUIDE.md](GUIDE.md) walks a newcomer through one sprint; [`samples/order-desk/`](samples/README.md) shows
+[docs/GUIDE.md](docs/GUIDE.md) walks a newcomer through one sprint. Roles of the three documents: this README is the entry point (intro and install), `docs/GUIDE.md` is one first sprint step by step, `docs/OVERVIEW.md` is the overview and lookup; [`samples/order-desk/`](samples/README.md) shows
 a project after four sprints. A full overview of the repository for newcomers (features, how it works, layout,
 install) is [docs/OVERVIEW.md](docs/OVERVIEW.md) (Vietnamese), also published as a web page at
 <https://ducnguyen.vn/agent-agile-team/>.
@@ -71,14 +71,11 @@ install) is [docs/OVERVIEW.md](docs/OVERVIEW.md) (Vietnamese), also published as
 | `templates/` | Sprint documents, project registries, project config |
 | `scripts/` · `tests/` · `samples/` | `init`, `check`, `index`; tests; a sample project with expected results |
 | `hosts/` | Install and loading per harness, and the host plug points |
-| `docs/` | Repository overview; migration map from older skill names; standardization record; troubleshooting; updating from upstream |
+| `docs/` | Repository overview; migration map from older skill names; standardization record; troubleshooting |
 
 ## Acknowledgments
 
-Distilled from Superpowers (obra), Everything Claude Code (affaan-m), gstack (garrytan), with concepts from
-GitHub Spec Kit, OpenSpec, BMAD-METHOD and Kiro/EARS. Exact commits, licences and per-skill sources:
-[UPSTREAM.md](UPSTREAM.md), [NOTICE](NOTICE), [THIRD_PARTY.md](THIRD_PARTY.md). Updating or extending from
-those sources: [docs/updating-from-upstream.md](docs/updating-from-upstream.md).
+Source credits, copyright notices and licences: [NOTICE](NOTICE).
 
 ## Licence
 

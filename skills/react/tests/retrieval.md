@@ -3,7 +3,7 @@ skill: react
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 2937ada8a88466147a77ec5e6a7316c6403e42dc
+skill_sha: 92f47b50893fa6b8f07df34563a0d3c195d38697
 date: 2026-10-04
 result: "strict 3/7 (+4 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:
@@ -109,3 +109,17 @@ dù chủ thể nói rõ phần thiếu.
 - Chỗ đặt state của form nhiều bước (nâng lên tổ tiên chung, giữ khi quay lại): chỉ suy ra từ bảng vị trí state (câu 3).
 - MSW: không có ví dụ phản hồi chậm (`delay`) và handler cho `DELETE` (câu 6).
 - Không có chỗ nào `description` hứa mà thân skill không có.
+
+## Lượt SPR-19 TK6 chạy lại (2026-11-12)
+
+Chạy lại bộ câu của lượt gần nhất: strict 4/7 (lượt trước 3/7), trỏ đúng nơi 7/7, câu tình huống Đạt hẳn 3/6 = 50 % (ngưỡng ≥80 %), câu ranh giới Đạt. Câu 2, 3, 4 vẫn Một phần, thiếu cùng chỗ như lượt trước. Chênh một câu nằm trong nhiễu. Prompt chấm thêm quy tắc "tự nhận kiến thức ngoài skill thì tối đa Một phần" mà thước gốc không có.
+
+Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).
+
+> **Ghi chú SPR-19:** khoá `result` và `date` ở đầu file là của lượt gốc (bảng câu hỏi ở trên); lượt chạy lại sau đổi chữ chỉ ghi ở mục cuối, không ghi đè, vì `result` được tính từ bảng này. `skill_sha` đã đổi sang băm hành vi mới của cây hiện tại.
+
+## Vá nội dung và chạy lại truy xuất (SPR-19 BR1, 2026-11-12)
+
+Chỗ hụt của lượt trước (câu 2 effect đọc giá trị mới nhất, câu 3 form giữ giá trị khi lỗi, câu 4 `use()` và thác tải, câu 6 `React.memo` với prop mới mỗi lần render) là khoảng trống nội dung, nên `references/patterns.md` thêm mục 8, 9, 10, 11 và `SKILL.md` thêm con trỏ ở mục 2, 4, 5, 9. `skill_sha` ở đầu file đã đo lại trên cây có nội dung mới.
+
+Chạy lại: 12 câu (7 câu gốc + 5 câu mới cùng chủ đề, viết sau khi biết chỗ hụt), hai chủ thể độc lập (`sonnet`, cấm công cụ Skill, cấm mở `tests/`), một người chấm `opus` khác người trả lời, thước strict như trên. Kết quả: **cả hai bài 11/11 câu tình huống Đạt, câu ranh giới (chuyển sang `e2e-testing`) Đạt** (tập gốc 6/6) → đạt ngưỡng (trước vá strict 4/7 ở lượt SPR-19, dưới ngưỡng). Giới hạn: n = 2 chủ thể, một người chấm; năm câu mới không hoàn toàn độc lập; bảng ở trên giữ nguyên kết quả lượt gốc (chỉ-thêm). Số liệu gốc: `evidence/rerun-ws.md` của hồ sơ sprint.

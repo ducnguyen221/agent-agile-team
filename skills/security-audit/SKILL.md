@@ -1,14 +1,9 @@
 ---
 name: security-audit
 description: Use when asked for a whole-repository security audit, threat model, OWASP or STRIDE review, pre-launch security sign-off, or a periodic security posture check covering git history, dependencies, CI/CD, infrastructure, webhooks, LLM features and agent skill files - not for a single diff or for code being written.
-source: [garrytan/gstack cso/SKILL.md.tmpl]
-source_sha: [96764e80a641e28141ec8297223768029f5bf483]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT]
-rewrite_before_public: false
 metadata:
-  group: verification
-  roles: [tech-reviewer]
+  group: "verification"
+  roles: "tech-reviewer"
 ---
 
 # Audit bảo mật cả repo

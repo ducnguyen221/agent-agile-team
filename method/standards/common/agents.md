@@ -5,10 +5,6 @@ status: active
 updated: 2026-10-04
 ---
 
-<!-- Nguồn: affaan-m/ECC rules/common/agents.md @ ef648e01 (MIT). Viết lại, giữ ý "chạy song song việc độc lập",
-     "hợp đồng hoàn tất khi giao việc" và "nhiều góc nhìn cho việc phức tạp"; danh mục agent và quy tắc tự gọi
-     agent của nguồn bỏ vì thuộc hệ riêng của nguồn — vai, tier và danh mục agent của repo nằm ở `AGENTS.md`,
-     `roles/`, `agents/`. -->
 
 # Giao việc cho agent
 

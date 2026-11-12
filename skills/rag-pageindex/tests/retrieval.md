@@ -3,7 +3,7 @@ skill: rag-pageindex
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 9781d13985a0335ee4720caa0e040bdb86b5d167
+skill_sha: d46638c3c403a512fc0647ba07b571f852ace705
 date: 2026-10-26
 result: "strict 7/7 (+0 partial, 0 fail) — at threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:
@@ -48,3 +48,9 @@ Cách chấm (một thước cho mọi tệp truy xuất): **Đạt** = trỏ đ
 ## Chạy lại
 
 Chủ thể là agent mới (T3), đọc `skills/rag-pageindex/SKILL.md` bằng đường tuyệt đối (không dùng Skill tool), trả lời bảy câu có chỉ rõ mục trỏ tới; bài RED câu 7 là agent khác không đọc skill. Sau khi chấm, tính lại `skill_sha` (`git ls-tree HEAD:skills/rag-pageindex` bỏ mục `tests`, rồi `git mktree`) và `result` bằng `retrieval_result()` ở `tests/test_skill_tests.py`.
+
+> **Ghi chú SPR-19:** khoá `result` và `date` ở đầu file là của lượt gốc (bảng câu hỏi ở trên); `skill_sha` đã đổi sang băm hành vi mới của cây hiện tại.
+
+## Lượt SPR-19 TK10 chạy lại (2026-11-12)
+
+`SKILL.md` dòng 29 đổi đường tham chiếu cài đặt từ `INSTALL.md` sang `docs/INSTALL.md` (hướng dẫn cài đã dời vào `docs/`, giữ con trỏ ở gốc) và gỡ khoá nguồn khỏi frontmatter. Chạy lại đúng bộ câu của lượt gốc: một chủ thể mới (`claude-sonnet-5-5`, đọc `SKILL.md` bằng đường tuyệt đối, cấm công cụ Skill), một người chấm khác: strict 7/7, 6/6 câu tình huống và câu ranh giới Đạt (ngưỡng ≥80 %), không lùi so với lượt gốc (7/7). Câu 4 mở `docs/INSTALL.md` mục 5 và dùng đúng. Giới hạn: n = 1, cùng họ model; chủ thể được gợi ý mở `docs/INSTALL.md` nên câu 4 hơi được dẫn đường; người chấm nhận bảng kỳ vọng và kết quả lượt trước (có thể thiên về khớp).

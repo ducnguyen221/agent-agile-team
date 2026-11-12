@@ -1,6 +1,6 @@
 # Cloud Run — từ giảm thiểu sang lệnh `gcloud`
 
-> Nguồn: distill từ gemini-cli-extensions/sre (Apache-2.0), đã sửa và rút gọn.
+> Dẫn xuất có sửa đổi từ tài liệu Apache-2.0 của Google; nguồn, bản quyền và giấy phép: xem NOTICE.
 
 Placeholder: `<SERVICE>`, `<REGION>`, `<REVISION_GOOD>`, `<IMAGE>`, `<N>`. Dịch vụ chạy trên Cloud Run; cơ chế traffic chi tiết ở
 skill `gcp-devops` (`references/cloud-run-deploy.md`). Mọi lệnh ghi gắn nhãn rủi ro theo `SKILL.md` mục 2 trước khi chạy.

@@ -8,7 +8,7 @@
 > schema trên bảng thật đi theo `database-migrations`.
 
 Nguồn: tài liệu PostgreSQL (`postgresql.org/docs/current`: Table Partitioning, `pg_trgm`, Row Security Policies, Transaction Isolation,
-Explicit Locking / `SELECT … FOR UPDATE … SKIP LOCKED`, `ALTER TABLE`), bộ thực hành Supabase (MIT, qua ECC) cho mẫu RLS và hàng đợi.
+Explicit Locking / `SELECT … FOR UPDATE … SKIP LOCKED`, `ALTER TABLE`).
 
 ## 1. Chia bảng theo thời gian và dọn dữ liệu cũ
 
@@ -167,3 +167,73 @@ ALTER TABLE orders
 - Bảng thật: `ALTER ... TYPE` giữ khoá `ACCESS EXCLUSIVE` và có thể viết lại cả bảng (PostgreSQL 12 trở lên có thể bỏ qua việc viết lại khi múi giờ phiên là UTC: kiểm bản đang dùng). Làm theo
   `database-migrations`: cột mới `timestamptz`, ghi cả hai, backfill theo lô, kiểm số dòng lệch, chuyển đọc, bỏ cột cũ; chạy diễn tập trên bản sao.
 - Sau khi đổi: đặt `TimeZone` của phiên/ứng dụng rõ ràng; truy vấn "theo ngày" dùng `AT TIME ZONE` đúng múi người dùng; ứng dụng gửi và nhận **ISO 8601 có phần bù**, không giờ trần.
+
+## 7. Tìm toàn văn: cột `tsvector` — cột sinh hay trigger
+
+Tìm theo **từ** (có xếp hạng) dùng `tsvector` + GIN; khác `pg_trgm` ở mục 2 (chuỗi con, gõ sai gần đúng).
+
+- **Mặc định: cột sinh (PostgreSQL 12 trở lên)** — cột lưu, tự cập nhật theo cột nguồn, không cần mã thêm:
+
+```sql
+ALTER TABLE docs ADD COLUMN tsv tsvector
+  GENERATED ALWAYS AS (to_tsvector('simple', f_unaccent(coalesce(title, '') || ' ' || coalesce(body, '')))) STORED;
+CREATE INDEX docs_tsv_idx ON docs USING gin (tsv);
+
+SELECT id FROM docs
+WHERE tsv @@ websearch_to_tsquery('simple', f_unaccent($1))
+ORDER BY ts_rank(tsv, websearch_to_tsquery('simple', f_unaccent($1))) DESC LIMIT 20;
+```
+
+  Biểu thức của cột sinh bắt buộc **immutable**: dùng hàm bọc `f_unaccent` ở mục 2 (`unaccent` gốc chỉ STABLE nên bị từ chối), và luôn truyền tên cấu hình văn bản (`'simple'`, `'english'`) vì `to_tsvector(text)` không cấu hình phụ thuộc cài đặt phiên.
+- **Dùng trigger khi:** bản dưới 12; giá trị cần dữ liệu từ bảng khác hoặc hàm không immutable.
+
+```sql
+CREATE FUNCTION docs_tsv_update() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.tsv := to_tsvector('simple', f_unaccent(coalesce(NEW.title, '') || ' ' || coalesce(NEW.body, '')));
+  RETURN NEW;
+END $$;
+CREATE TRIGGER docs_tsv BEFORE INSERT OR UPDATE OF title, body ON docs
+  FOR EACH ROW EXECUTE FUNCTION docs_tsv_update();
+```
+
+  Trigger không tự điền dòng có sẵn: backfill theo lô (`database-migrations`).
+- Thêm cột sinh `STORED` vào bảng đang có dữ liệu **viết lại cả bảng** dưới khoá nặng: trên bảng thật làm theo `database-migrations` (cột thường + trigger + backfill, rồi đổi sau).
+- `websearch_to_tsquery` nhận cú pháp người dùng gõ (cụm trong nháy, `-từ`, `or`) mà không ném lỗi cú pháp; `to_tsquery` thì ném lỗi với đầu vào thô.
+
+## 8. View vật chất hoá: kết quả tính nặng, chấp nhận cũ một lúc
+
+- Dùng khi truy vấn tổng hợp nặng được **đọc nhiều hơn số lần dữ liệu đổi** và đọc cũ vài phút hay vài giờ chấp nhận được (báo cáo, bảng xếp hạng). Cần số liệu tức thời thì không dùng: index đúng, bảng tóm tắt do ứng dụng cập nhật, hoặc truy vấn trực tiếp.
+- View vật chất hoá **không tự cập nhật**: nó lưu kết quả lúc tạo hoặc lúc làm mới gần nhất.
+
+```sql
+CREATE MATERIALIZED VIEW sales_daily AS
+  SELECT date_trunc('day', created_at) AS day, sum(total) AS revenue
+  FROM orders GROUP BY 1
+  WITH NO DATA;
+CREATE UNIQUE INDEX sales_daily_day ON sales_daily (day);
+REFRESH MATERIALIZED VIEW sales_daily;                -- lần đầu: bắt buộc dạng thường
+REFRESH MATERIALIZED VIEW CONCURRENTLY sales_daily;   -- các lần sau: không chặn đọc
+```
+
+- `REFRESH` thường khoá `ACCESS EXCLUSIVE`: **chặn mọi đọc** trong lúc làm mới. `CONCURRENTLY` không chặn đọc nhưng cần ít nhất một index **unique** (chỉ trên tên cột, không có `WHERE`) trên view, chỉ dùng khi view đã có dữ liệu, và chậm hơn (tính lại rồi so với bản cũ).
+- Lịch làm mới bằng `pg_cron` hoặc job ngoài; ghi thời điểm làm mới gần nhất để hiển thị độ cũ; theo dõi thời gian làm mới vì mỗi lần nó chạy lại **toàn bộ** truy vấn. Dữ liệu lớn tăng nhanh mà làm mới quá chậm: xét bảng tóm tắt cập nhật tăng dần.
+- Index trên view vật chất hoá tạo như bảng thường (mục 2 của `SKILL.md`).
+
+## 9. Số thứ tự liên tục (không lỗ hổng) và vì sao sequence có lỗ hổng
+
+- `sequence`, `identity`, `serial` **không bảo đảm liên tục**: `nextval` không nằm trong giao dịch, nên giao dịch rollback, lỗi vi phạm ràng buộc khi chèn, `INSERT … ON CONFLICT` không chèn, hay máy chủ sập đều "đốt" số đã cấp. Tốt cho khoá chính; sai cho số mà luật đòi liên tục (số hoá đơn theo năm).
+- **Bộ đếm liên tục theo năm** (hoặc theo chuỗi): một dòng bộ đếm cho mỗi khoá, tăng **trong cùng giao dịch** với hàng cần số:
+
+```sql
+CREATE TABLE invoice_counters (year int PRIMARY KEY, last_no int NOT NULL);
+-- trong giao dịch tạo hoá đơn:
+INSERT INTO invoice_counters (year, last_no) VALUES ($1, 1)
+  ON CONFLICT (year) DO UPDATE SET last_no = invoice_counters.last_no + 1
+  RETURNING last_no;
+INSERT INTO invoices (year, no, ...) VALUES ($1, <last_no>, ...);   -- UNIQUE (year, no)
+```
+
+  Giao dịch rollback thì cả hai thay đổi cùng huỷ — không để lại lỗ hổng.
+- **Cái giá đồng thời:** cập nhật cùng một dòng bộ đếm khoá dòng đó tới hết giao dịch, nên các giao dịch tạo hoá đơn **cùng năm xếp hàng**; thông lượng bị giới hạn bởi độ dài giao dịch. Giữ giao dịch ngắn (không gọi API ngoài, không chờ người dùng), cấp số ở **bước cuối** của giao dịch hoặc ở bước "phát hành" riêng thay vì lúc tạo nháp; cần thông lượng cao hơn thì tách bộ đếm theo khoá (chi nhánh, ngày) nếu luật cho phép.
+- Không suy số tiếp theo bằng `max(no) + 1` hay `count(*) + 1`: hai giao dịch cùng đọc ra một số — đua đọc-kiểm-ghi ở mục 4.

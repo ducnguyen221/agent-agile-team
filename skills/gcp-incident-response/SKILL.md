@@ -2,12 +2,8 @@
 name: gcp-incident-response
 description: Use when a Google Cloud service (Cloud Run, GCLB) is degraded or down - an alert fires, errors or latency spike after a change, someone must pick a mitigation under pressure, triage Cloud Logging output without flooding the context window, define or list SLOs, or draft a postmortem timeline. Not for architecture-level SLO design or routine deploys (`gcp-devops`).
 metadata:
-  group: technique
-  roles: [implementer, qa]
-source: ["gemini-cli-extensions/sre (distilled, text only)"]
-source_sha: ["dd2024335e1638dbc58a38d91f339f5e2814967f"]
-license: [Apache-2.0]
-rewrite_before_public: false
+  group: "technique"
+  roles: "implementer, qa"
 ---
 
 # Ứng phó sự cố trên Google Cloud (Cloud Run · giảm thiểu · SLO · triage log)
@@ -17,9 +13,8 @@ rewrite_before_public: false
 > gắn nhãn rủi ro; lệnh phá huỷ hoặc rủi ro cao chờ người dùng gật. Cơ chế chia traffic ở `gcp-devops`; skill này lo
 > **làm gì, theo thứ tự nào** lúc production đang cháy.
 
-> **Nguồn.** Chắt từ `gemini-cli-extensions/sre` (Apache-2.0, HEAD `dd2024335e1638dbc58a38d91f339f5e2814967f`), **chỉ văn bản**;
-> phần chạy của repo nguồn (máy chủ MCP, script Python, điều phối subagent) không đưa vào. Nơi nguồn trích Google SRE
-> Classroom thì skill này cũng trích. Toạ độ dự án lấy từ hồ sơ dự án của bạn.
+> Dẫn xuất có sửa đổi từ tài liệu Apache-2.0 của Google; nguồn, bản quyền và giấy phép: xem NOTICE.
+> Nơi nguồn trích Google SRE Classroom thì skill này cũng trích. Toạ độ dự án lấy từ hồ sơ dự án của bạn.
 
 ## 0. Quy tắc đầu: khám phá trước khi chạm
 

@@ -1,14 +1,9 @@
 ---
 name: plan-review
 description: Use when a draft PLAN (or design doc, or SPEC plus PLAN) must be reviewed before Gate 1 - from medium size up, or when asked to lock in a plan, challenge its scope, or check architecture, code quality, test coverage and performance before any code is written.
-source: [garrytan/gstack plan-eng-review/SKILL.md.tmpl, garrytan/gstack plan-eng-review/sections/review-sections.md.tmpl]
-source_sha: [96764e80a641e28141ec8297223768029f5bf483, 96764e80a641e28141ec8297223768029f5bf483]
-base_sha: 4c0fdc5736a49b6223a7dfc7626d5495cf55185c
-license: [MIT, MIT]
-rewrite_before_public: false
 metadata:
-  group: verification
-  roles: [tech-reviewer, advisor]
+  group: "verification"
+  roles: "tech-reviewer, advisor"
 ---
 
 # Review PLAN trước Cổng 1
