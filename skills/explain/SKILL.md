@@ -10,7 +10,7 @@ metadata:
 
 > **Kết luận:** viết lại **tin gần nhất** (hoặc đoạn/file người dùng chỉ) cho người không rành kỹ thuật: kết luận
 > một câu trước, giải nghĩa mọi viết tắt, ví dụ đời thường, chuyện gì xảy ra · ảnh hưởng · tốn gì · rủi ro gì, chi
-> tiết kỹ thuật tách cuối — và **giữ nguyên mọi dữ kiện** của nguồn. Xong thì tin sau về súc tích. Luật chế độ,
+> tiết kỹ thuật tách cuối — và **giữ nguyên mọi dữ kiện** của nguồn. Luật chế độ,
 > dấu hiệu vào/thoát: [communication.md](../../method/communication.md) mục 1.
 
 ## 1. Nguồn
@@ -44,8 +44,8 @@ mật của nguồn còn đủ, và không có số hay dữ kiện mới. Luậ
 
 ## 4. Thoát
 
-Dấu hiệu thoát, giữ chế độ cả phiên, về súc tích: `method/communication.md` mục 1. Sau lần diễn giải này, tin kế tiếp
-theo `skills/response-style`.
+Khi nào về súc tích, "diễn giải từ giờ", "ngắn gọn lại": một nghĩa duy nhất ở `method/communication.md` mục 1 (bảng
+hai chế độ, hàng "Dấu hiệu thoát"); skill này không nhắc lại.
 
 ## 5. Mẫu
 
@@ -64,7 +64,7 @@ Gia hạn tự động chưa bật nên phải làm tay. Làm tay mất khoảng
 
 | Lỗi | Sửa |
 |---|---|
-| Diễn giải xong vẫn viết dài cho các tin sau | về súc tích ở tin kế (mục 4) |
+| Về súc tích quá sớm hoặc giữ diễn giải quá lâu | theo hàng "Dấu hiệu thoát" ở `method/communication.md` mục 1 |
 | Bỏ cảnh báo vì "nghe đáng sợ" | cảnh báo lên đầu, một câu rõ |
 | Đổi `5 → 20 kết nối` thành "tăng gấp bốn" | giữ số gốc; không thêm số tự tính |
 | Ví dụ làm sai nghĩa kỹ thuật | ví dụ chỉ để hiểu khái niệm; con số và hậu quả vẫn lấy từ nguồn |

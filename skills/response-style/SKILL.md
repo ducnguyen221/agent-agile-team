@@ -77,8 +77,8 @@ cho một từ **cộng** phần sau dấu gạch; đó là giới hạn của v
 
 Người đọc nói "giải thích", "chi tiết hơn", "tại sao", "chưa hiểu", "nói lại dễ hiểu", gõ `/explain`, hỏi lại cùng
 một điểm, hoặc việc cần quyết có hậu quả khó hoàn tác → dùng skill `explain`: nó viết lại tin gần nhất bằng lời
-dễ hiểu, giữ nguyên mọi dữ kiện, rồi tin sau **về súc tích**. Bảng hai chế độ, dấu hiệu vào/thoát và "diễn giải từ
-giờ": `method/communication.md` mục 1. Lời yêu cầu trực tiếp của người đọc luôn thắng.
+dễ hiểu, giữ nguyên mọi dữ kiện. Bảng hai chế độ, dấu hiệu vào/thoát (khi nào về súc tích, "diễn giải từ giờ"):
+`method/communication.md` mục 1. Lời yêu cầu trực tiếp của người đọc luôn thắng.
 
 ## 7. Tài liệu sprint
 
@@ -94,8 +94,8 @@ Thuật ngữ giải nghĩa lần đầu. Bảng chỉ khi ≥3 mục × 2 thu�
 Nén không bao giờ bỏ: báo lỗi, cảnh báo bảo mật, xác nhận thao tác phá hủy, số liệu + đơn vị, mã lỗi,
 đường dẫn, chữ phủ định (không/chưa/chỉ/trừ khi). Số không có nguồn thì nói "chưa đo" + cách đo.
 Báo cáo về điều phối: Kết quả / Chứng cứ / Còn mở / Cần người, ≤15 dòng, con trỏ file thay log.
-Tin dựa trên file → câu dẫn kèm link `[tên](đường:dòng)`; hỏi người chốt → một dòng hỏi + phương án + dòng
+Tin dựa trên file → câu dẫn kèm link `[tên:dòng](đường:dòng)`; hỏi người chốt → một dòng hỏi + phương án + dòng
 KHUYẾN NGHỊ có lý do (im lặng không phải là duyệt). Luật đầy đủ: method/communication.md.
 Người đọc nói "chưa hiểu"/"tại sao" → giải thích theo góc người đọc, ví dụ đời thường, chi tiết kỹ thuật
-tách cuối; xong thì về súc tích.
+tách cuối; về súc tích khi người đọc hiểu hoặc chuyển việc.
 ```
