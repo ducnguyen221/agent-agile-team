@@ -310,3 +310,16 @@ def test_floor_zone_hashes():
             assert _sha(around) == expected[1], f"floor-marker-position: chữ quanh mốc {rel} #{index} khác bản ghim"
             seen.add((rel, index))
     assert seen == set(PINNED_ZONE_HASHES), "floor-zone-hash: bản ghim có vùng không còn trong file"
+
+
+# SPR-20 TK2: chế độ mở chia 13 mục thành 7 luôn chặn + 6 mở mặc định (bản ghim viết tay; đổi thì nêu lý do ở thông điệp commit).
+PINNED_OPEN_ALWAYS_BLOCKED = {"network_fetch", "rules_unlisted", "irreversible_delete", "secret", "auth", "user_soul", "license"}
+PINNED_OPEN_DEFAULT_OPEN = {"push", "branch_merge_local", "version", "main_merge", "tag", "publish"}
+
+
+def test_fence_wiring_pins_7_plus_6():
+    always = rules_constant("OPEN_ALWAYS_BLOCKED")
+    default_open = rules_constant("OPEN_DEFAULT_OPEN")
+    assert set(always) == PINNED_OPEN_ALWAYS_BLOCKED and len(always) == 7, "fence-open-always-changed"
+    assert set(default_open) == PINNED_OPEN_DEFAULT_OPEN and len(default_open) == 6, "fence-open-default-changed"
+    assert set(always) | set(default_open) == PINNED_EXCLUSIONS and not set(always) & set(default_open), "fence-open-partition"
