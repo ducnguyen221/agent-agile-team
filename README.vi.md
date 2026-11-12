@@ -1,6 +1,6 @@
 # agent-agile-team
 
-> **Trạng thái: bản `0.8.0`, kho riêng tư (`.agile.json`: `"visibility": "private"`).** Cài được trên Claude Code,
+> **Trạng thái: bản `0.9.0`, kho riêng tư (`.agile.json`: `"visibility": "private"`).** Cài được trên Claude Code,
 > Codex và Antigravity; chưa đưa lên kho plugin công khai nào. Bản tiếng Anh: [README.md](README.md).
 
 Phương pháp agile cho đội agent AI. Một người giao việc bằng lời thường, xác nhận một tin trao đổi lúc tiếp

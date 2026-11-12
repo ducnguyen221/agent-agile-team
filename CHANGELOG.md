@@ -3,6 +3,15 @@
 Mục mới nhất đứng đầu. Tiêu đề mỗi mục là đúng chuỗi version trong các manifest (test đồng bộ
 version kiểm điều này).
 
+## 0.9.0 (2026-11-12)
+
+- **Đổi, phá tương thích — nguồn distill chỉ ở Workshop (SPR-19):** gỡ `UPSTREAM.md`, `THIRD_PARTY.md`, `docs/updating-from-upstream.md`, mã quét nguồn trong `scripts/check.py` và `tests/test_provenance.py`; gỡ khoá `source`, `source_sha`, `base_sha`, `rewrite_before_public` và `license` dạng danh sách khỏi frontmatter 49 file skill/agent; `NOTICE` còn tên nguồn, dòng bản quyền và văn bản giấy phép. `metadata.roles` là chuỗi ("a, b"). Dự án đọc các file/khoá này phải sửa theo.
+- **Đổi — `skill_sha` băm hành vi:** `tree_hash` ở `tests/test_skill_tests.py` bỏ khoá quản trị của frontmatter (`metadata`, khoá nguồn) khỏi băm; vẫn băm `description`, thân và file kèm. Skill chỉ đổi khoá quản trị không phải thử lại.
+- **Thêm — test ngược:** `tests/test_no_source_leak.py` (không khoá nguồn ở frontmatter, `roles` là chuỗi, không tên nguồn ngoài `NOTICE`; danh sách tên đọc ngoài repo qua `AGENT_AGILE_SOURCE_NAMES`), `tests/test_root_junk.py`, `tests/test_measure_claims.py` (dời từ `test_provenance.py`).
+- **Thêm — cấu trúc repo:** `docs/STRUCTURE.md`, khung `templates/repo-skeleton/` cho repo xưởng; `INSTALL.md` và `GUIDE.md` dời vào `docs/` (con trỏ ngắn ở gốc).
+- **Đổi — `closing-sprint` và `running-sprint`:** thư mục tạm của sprint là `.tmp/<SPR-NN>/` và được dọn ở mọi nhánh của menu đóng sprint; nhánh giữ nguyên/bỏ việc ghi `CO` dọn khi PR gộp.
+- **Sửa — nội dung skill:** `code-review` mục 5.1 (báo hai lựa chọn sau vòng 3, vòng sau chỉ đọc diff từ mốc trước); `postgres` mục 7–9 (toàn văn `tsvector`, view vật chất hoá, số thứ tự liên tục); `react` mục 8–11 (`useEffectEvent`, form action, `use()`, `React.memo`); `gcp-devops`, `gcp-incident-response` ghi "xem `NOTICE`" thay tên nguồn.
+
 ## 0.8.0 (2026-11-12)
 
 - **Đổi — shim git/gh tắt mặc định (SPR-18/TK3, SPR-17/DN2):** `AGENT_AGILE_SHIM` vắng = hook PreToolUse KHÔNG viết lại lệnh Bash/PowerShell ở mọi chế độ quyền; `rewrite` viết lại; `0`/`1` như cũ. Hook `SessionStart` (`scripts/session-env.sh`) chỉ ghi PATH khi `AGENT_AGILE_SHIM=1`; `=0` là công tắc tắt. Test cũ ghim viết lại mặc định ở auto/bypass được đảo.
