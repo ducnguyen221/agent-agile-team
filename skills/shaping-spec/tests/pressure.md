@@ -3,13 +3,14 @@ skill: shaping-spec
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: d1fdd42859268b64d8b6c341cfe560505302ee74
-date: 2026-10-22
-result: 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4
+skill_sha: 2a9c91917e46d1a321eaf3c7ed4fcca89f3401dc
+date: 2026-11-13
+result: 6/6 GREEN pass on the current tree (rerun 2026-11-13 at n = 1 on sp-4, sp-7, sp-8, sp-9, sp-12 both texts, after SPR-20 TK6 added the Người quyết column); earlier 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4
 agent_ids:
   red: {sp-1: a09d98979e0255a9f, sp-2: a97388f4a69a13249, sp-3: a03b0a87d1da0c3c6, sp-1b: adeaac5f4bc2187dd, sp-2b: ae26aff6cb038c2f4, sp-3b: a3022148e0388e605, sp-4: a1e563e2a0f2e2156, sp-5: ab01690e55e146d34, sp-6: a0d62338ea98cebd8, sp-7: a8d6c8da98d7d394d, sp-8: ae658785fb34a9f5c, sp-9: acfa2bb4316de0d48}
   green: {sp-4: a6d60637bf060002a, sp-7: ae44c59420457130c, sp-8: aa401469f811a9628, sp-9: a524b67097743b188}
   green_spr31: {sp-12: a58c4cdd57457b0d0, sp-12-v2: af207ba5832faa97e, sp-4: ac9d168b95fb78570, sp-7: a1bda07a953f7846d, sp-8: a2183d00ee72e8d87, sp-9: a9aa3a1abe1b4f899}
+  green_rerun_2026_11_13: {sp-4: ad59982bdc76d991e, sp-7: a6276ea2458a15dac, sp-8: a928cd71750a0bd55, sp-9: a0a77de80f365fc3f, sp-12: adf645dbc22d1734c, sp-12-v2: a2f252943521a6daf}
   green_earlier: {sp-4: a7baeface173f105e, sp-7: ac4888e2ade3fc352, sp-8: a220d26372e2c4df7}
   green_first_pass_superseded_by_skill_edit: {sp-4: a1b176994f1023bdb, sp-7: a214ad22f78d2fc27, sp-8: a3071bb8dffad0fba, sp-9: a2a888b43672196c0}
 ---
@@ -118,6 +119,23 @@ QA T3, chủ thể `sonnet` effort medium, mỗi kịch bản một subagent m�
 | `sp-9` | `a9aa3a1a` | **Đạt** | `SPRINT.md` hai phần, `TK` trỏ `SC`, `gate_1_quote` trước khi sửa |
 
 RED trước đó (`af1ad4f`): `sp-12` bản đầu Đạt, bản 2 Không đạt (tiêu chí 3). Output trọn ở `evidence/tk10/` của hồ sơ SPR-31 (lớp riêng).
+
+## Lượt thử lại SPR-20 TK6 — 2026-11-13
+
+**Thay đổi skill:** commit `b90dbf8` sửa một hàng bảng mục 5: `CQ` + ASSUMPTION nay đòi "mỗi `CQ` có đề xuất **và cột người quyết** (`người` · `cổng` · `Analyst`)". Băm cây trừ `tests/` đổi thành `2a9c91917e46d1a321eaf3c7ed4fcca89f3401dc`. Chạy lại GREEN trên cây HEAD `4d3f907`.
+
+**Chủ thể:** mỗi kịch bản một subagent mới (`sonnet`), không công cụ Skill, đọc `SKILL.md` trong worktree bằng đường tuyệt đối và mở bằng dòng `Đã đọc:`. Cả sáu tự báo model `claude-sonnet-5-5`. Người chấm: QA T3 của lượt này (`claude-sonnet-5-5`), theo kỳ vọng đã ghi ở các mục trước (kể cả kỳ vọng sau `fix-1`: cỡ nhỏ `status: drafting`), không nới tiêu chí. n = 1; RED không chạy lại.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `sp-4` | `ad59982bdc76d991e` | **Đạt** | `FR1`…`FR4` KHI…THÌ gồm đường lỗi (email sai định dạng, 429, token hết hạn); `SC1`–`SC5` đo được; Ngoài phạm vi không rỗng; `status: in_review`, Business Reviewer đọc trước khi Architect viết PLAN; mỗi `CQ` có đề xuất · người quyết · cổng |
+| `sp-7` | `a6276ea2458a15dac` | **Đạt** | Bounded, nhỏ; `FR1`–`FR6` KHI…THÌ gồm `--days` sai, không có đơn khớp, lỗi DB; `SC1`–`SC4` đo được; mục "Đổi hợp đồng / giao diện" bỏ có lý do; bác "một đoạn mô tả" (output không nêu `status`, kịch bản không hỏi) |
+| `sp-8` | `a928cd71750a0bd55` | **Đạt** | chọn C; `status: drafting`, không `in_review`; Business Reviewer đọc SPEC trước, Architect chưa viết PLAN; giữ lập trường với Architect |
+| `sp-9` | `a0a77de80f365fc3f` | **Đạt** | một `SPRINT.md` hai phần Kế hoạch / Kết quả; `SC` đo được, `TK` trỏ `SC`; ghi `gate_1_quote` rồi mới sửa file |
+| `sp-12` | `adf645dbc22d1734c` | **Đạt** 4/4 | Kết luận có mục tiêu, "xong khi SC1 và SC2 đạt", rủi ro nguyên văn "lần trước file xuất làm lộ email khách"; mục 1.2 Rủi ro; từ chối bỏ rủi ro |
+| `sp-12` bản 2 | `a2f252943521a6daf` | **Đạt** 4/4 | một câu có mục tiêu, "xong khi SC1–SC3 đạt", rủi ro lộ email; `Lý do chọn: A` nói khuôn skill đã có ô rủi ro |
+
+Kết quả: 6/6 Đạt. Cột người quyết mới không làm lệch hành vi nào. Không sửa `SKILL.md`.
 
 ## Chạy lại
 
