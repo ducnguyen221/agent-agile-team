@@ -2,12 +2,8 @@
 name: id-convention
 description: Use when writing or editing a sprint document or registry, assigning a code to a new item (task, risk, finding, blocker, decision, request, sprint), cross-referencing an item, mentioning a coded item in chat, or reviewing a document for bare, single-letter, invented or renumbered codes.
 metadata:
-  group: communication
-  roles: [all]
-source: ["github/spec-kit (US, FR and SC item codes; clarification markers)", "concept: ISO/IEC/IEEE 29148 requirement identifiers", "concept: MoSCoW prioritisation (written as words)"]
-source_sha: [d2ddd910266ad14afe79c5414c88ee316aca6e9a, null, null]
-license: ["MIT (ideas only, no text copied)", "proprietary standard (ideas only)", "none (method, ideas only)"]
-rewrite_before_public: false
+  group: "communication"
+  roles: "all"
 ---
 
 # Chuẩn mã định danh

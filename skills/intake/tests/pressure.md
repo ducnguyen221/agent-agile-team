@@ -3,7 +3,7 @@ skill: intake
 method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 5c2308b (intake, round 4); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: 8d6d00ff1bb6dcd8abd76b647016e2d07e90a8c4
+skill_sha: 7aa4c5bbc695699158499be91c1dc5ba11911f4e
 source_sha256: b5eab2a3ec7c978f1565cf74d6ce3a4e5396a376561ab42d5b699b60d1430116
 requested_effort: "medium"
 date: 2026-11-08

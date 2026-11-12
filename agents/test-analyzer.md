@@ -2,10 +2,6 @@
 name: test-analyzer
 description: Use when a change adds or edits behavior and an independent check is needed that its tests really cover it - untested branches and error paths, assertions that catch no regression, flaky patterns; read-only, does not write tests. Not for browser or UI testing (web-qa), writing tests first (tdd), or running the sprint test plan (QA role).
 tools: [Read, Grep, Glob, Bash]
-source: [affaan-m/ECC agents/pr-test-analyzer.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT]
-rewrite_before_public: false
 ---
 
 # Phân tích test của thay đổi

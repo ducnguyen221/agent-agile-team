@@ -2,11 +2,6 @@
 name: database-reviewer
 description: Use when SQL, migrations, schema, indexes, row-level security or database performance changed (PostgreSQL first) and an independent review is needed for query plans, data types, constraints, locking and least privilege; read-only, never edits code or runs writes.
 tools: [Read, Grep, Glob, Bash]
-source: [affaan-m/ECC agents/database-reviewer.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT]
-rewrite_before_public: false
 ---
 
 # Reviewer cơ sở dữ liệu

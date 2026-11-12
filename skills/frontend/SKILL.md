@@ -2,13 +2,9 @@
 name: frontend
 description: Use when building or debugging the client-side delivery of a web app - Vite config, plugins, env variables, dev proxy, bundle size and chunking, lazy-loaded routes, stale chunks after a deploy, library mode - or choosing app-level routing and state, or when a page loads slowly. Not for component, hook or component-test details (that is `react`) nor browser flows (`e2e-testing`).
 metadata:
-  group: technique
-  kind: reference
-  roles: [implementer, qa]
-source: [affaan-m/ECC skills/frontend-patterns/SKILL.md, affaan-m/ECC skills/vite-patterns/SKILL.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT, MIT]
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "implementer, qa"
 ---
 
 # Frontend: build, routing, state ứng dụng, tải trang

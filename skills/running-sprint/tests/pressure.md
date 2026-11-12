@@ -4,11 +4,11 @@ method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
 historical_skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
-skill_sha: f729c7ba82bb15c9526aae52c9f9a9d4d21b1bc1
+skill_sha: 2a354ed7e716f8e080f47b867ce1d60bf7fbeb1f
 historical_date: 2026-10-05
-date: 2026-11-08
+date: 2026-11-12
 historical_result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
-result: "3/3 GREEN pass theo chữ và theo ý; RED 0/3 pass theo chữ và theo ý (3 Đạt một phần theo ý); SPR-12 2026-11-08, n = 1 mỗi ca, ca cũ chưa chạy lại"
+result: "1/3 GREEN pass theo chữ, 3/3 theo ý (rs-9, rs-10, rs-11); SPR-19 2026-11-12, n = 1 mỗi ca"
 candidate_source_sha256: fe5d4e6dc3af8e35773d21a198e04569882a497652e063ca96fad8bac87c51b3
 candidate_tested: true
 agent_ids:
@@ -164,7 +164,7 @@ Kết quả: 1/1 **Đạt** (kịch bản mới, chưa có RED). Không sửa `S
 
 Thân skill đổi hai chỗ nhỏ theo luật mới (`AGENTS.md`, `method/process.md` mục 2, `method/sizing.md` mục 1): mục 2 việc 2
 thêm câu "việc làm thẳng không có sprint nên không tới skill này"; mục 8 hàng "Hỏi anh ấy một câu cho chắc" ghi rõ lượt
-trao đổi tiếp nhận thuộc Bước 1, đã qua. **Kỳ vọng của `rs-2` … `rs-8` không đổi** (mọi kịch bản đều sau Cổng 1). 
+trao đổi tiếp nhận thuộc Bước 1, đã qua. **Kỳ vọng của `rs-2` … `rs-8` không đổi** (mọi kịch bản đều sau Cổng 1).
 
 ## Chạy lại sau đổi luật trao đổi tiếp nhận (2026-10-05, QA)
 
@@ -209,3 +209,9 @@ Trước: cây base `024631a` (`.tmp/base/`); sau: cây TK1 (chưa commit lúc �
 | `rs-11-autopilot` | A | A | có | a9b2e08e1661da8f1 | a70bd2718e54cfabb |
 
 Kết luận: lựa chọn và các điểm then chốt của câu trả lời giữ nguyên ở mọi ca; không ca nào cần sửa con trỏ. Chi tiết: `evidence/TK1-baseline.md` và `evidence/TK1-after.md` trong hồ sơ SPR-16. Giới hạn: n = 1 mỗi ca, chủ thể và người so cùng họ model, so theo lựa chọn và điểm then chốt chứ chưa chấm lại theo thước đầy đủ.
+
+## Lượt SPR-19 TK6 (2026-11-12)
+
+Ca rs-9, rs-10, rs-11 (lượt SPR-12 TK5 v2): theo ý 3/3 Đạt; theo chữ chỉ rs-10 Đạt. rs-9 Đạt một phần (thiếu cột "cần ai" là Đức khi ghi BR); rs-11 Đạt một phần (viết "Autopilot vẫn bật" thay vì "tạm dừng"). Lượt SPR-12 ghi 3/3 theo chữ; với n = 1 chưa tách được nhiễu lấy mẫu khỏi lùi thật, không chạy đối chứng trên bản base.
+
+Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).

@@ -5,7 +5,7 @@ model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun
 date: 2026-10-04
 result: 3/3 GREEN pass, GREEN not worse than original on 3/3; RED already passed 2/3 after two hardening rounds; GREEN rerun 2026-10-04 3/3 pass on the tree at HEAD 05032b4 (SPR-04 TK11.10, skill body unchanged since 2026-10-01 so this attaches skill_sha and tier)
 tier: T3
-skill_sha: dd4058bb4dd3044fc9303b27acf4c64c1f5d47f1
+skill_sha: bb9e31c8ba7c1a74f81bd3c6eaa17de332770fbf
 agent_ids:
   green_rerun_2026_10_04: {dbg-1b: a62ed15f76c59821d, dbg-2b: a8d02943f0ada32c4, dbg-3b: a4ab72aa54cf68e4b}
 ---

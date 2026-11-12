@@ -2,13 +2,9 @@
 name: react
 description: Use when writing, changing or reviewing React function components, hooks, state placement, forms, Suspense or error boundaries, or component tests (React Testing Library, Vitest, MSW). Not for build tooling, routing or bundle loading (that is `frontend`) and not for browser-driven user flows (that is `e2e-testing`).
 metadata:
-  group: technique
-  kind: reference
-  roles: [implementer, qa]
-source: [affaan-m/ECC skills/react-patterns/SKILL.md, affaan-m/ECC skills/react-testing/SKILL.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT, MIT]
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "implementer, qa"
 ---
 
 # React: component, hook, test component

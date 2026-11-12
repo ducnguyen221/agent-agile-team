@@ -3,7 +3,7 @@ skill: react
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 2937ada8a88466147a77ec5e6a7316c6403e42dc
+skill_sha: e022260a35467441357e7ff2e4198781b2e45e02
 date: 2026-10-04
 result: "strict 3/7 (+4 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:
@@ -109,3 +109,11 @@ dù chủ thể nói rõ phần thiếu.
 - Chỗ đặt state của form nhiều bước (nâng lên tổ tiên chung, giữ khi quay lại): chỉ suy ra từ bảng vị trí state (câu 3).
 - MSW: không có ví dụ phản hồi chậm (`delay`) và handler cho `DELETE` (câu 6).
 - Không có chỗ nào `description` hứa mà thân skill không có.
+
+## Lượt SPR-19 TK6 chạy lại (2026-11-12)
+
+Chạy lại bộ câu của lượt gần nhất: strict 4/7 (lượt trước 3/7), trỏ đúng nơi 7/7, câu tình huống Đạt hẳn 3/6 = 50 % (ngưỡng ≥80 %), câu ranh giới Đạt. Câu 2, 3, 4 vẫn Một phần, thiếu cùng chỗ như lượt trước. Chênh một câu nằm trong nhiễu. Prompt chấm thêm quy tắc "tự nhận kiến thức ngoài skill thì tối đa Một phần" mà thước gốc không có.
+
+Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).
+
+> **Ghi chú SPR-19:** khoá `result` và `date` ở đầu file là của lượt gốc (bảng câu hỏi ở trên); lượt chạy lại sau đổi chữ chỉ ghi ở mục cuối, không ghi đè, vì `result` được tính từ bảng này. `skill_sha` đã đổi sang băm hành vi mới của cây hiện tại.

@@ -3,7 +3,7 @@ skill: api-design
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: f2758a4820cf4bf978183471913dfc98338f3f0e
+skill_sha: 1760fab9f373305996a69930e6d5aed3b5bea4b8
 date: 2026-10-04
 result: "strict 3/7 (+4 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

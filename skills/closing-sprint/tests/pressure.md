@@ -3,9 +3,9 @@ skill: closing-sprint
 method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 688619d (round 2); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
 model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: 6816f9ad359896b89506ea8a4c0ebf81048e5cb9
-date: 2026-11-08
-result: "3/3 GREEN pass theo chữ và theo ý; RED 0/3 pass theo chữ (1/3 theo ý); SPR-12 2026-11-08, n = 1 mỗi ca, ca cũ chưa chạy lại"
+skill_sha: f9a66f4b138d059d83e65812a4ad6b541e846b5f
+date: 2026-11-12
+result: "3/4 GREEN pass theo chữ, 4/4 theo ý (KB15–KB18); SPR-19 2026-11-12, n = 1 mỗi ca, chạy lại sau đổi chữ thân bài"
 agent_ids:
   sonnet_spr12_red2_3a9e2d1_2026_11_08: {KB15: abbc00d6820070836, KB16: ac45ee05c15b16dae, KB17: a0dadd3c916c077fa}
   sonnet_spr12_green2_688619d_2026_11_08: {KB15: ab6d4425a802fe7ee, KB16: a05c4f3e08ec3caf5, KB17: af813de17b6f51431}
@@ -319,3 +319,9 @@ QA T3 (`claude-sonnet-5-5`, subagent effort medium, n = 1 — chưa lặp), mỗ
 | `KB18` | A | C | A | aa06f9bd09e4c77e0 | aa684429bf622e141 |
 
 GREEN: Đẩy `spr-31-export` đúng remote/ref rồi `gh pr create`; không gộp PR, không tag, không đẩy `main`. RED trượt vì skill chưa biết cờ (coi cờ là sai cú pháp hoặc coi push là luôn hỏi). Giới hạn: n = 1, chủ thể và người so cùng họ model; so theo lựa chọn và điểm then chốt.
+
+## Lượt SPR-19 TK6 (2026-11-12)
+
+Ca KB15–KB18 (lượt SPR-16 2026-11-09): 3/4 Đạt theo chữ, 4/4 theo ý. KB17 Đạt một phần theo chữ (câu trả lời không nói "danh sách loại", để chỗ giữ chỗ thay các dòng CHANGELOG); quyết định và hành động đúng. Tiêu chí KB18 do người chạy tách từ chữ kỳ vọng, chưa đăng ký riêng trước lượt.
+
+Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).

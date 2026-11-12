@@ -2,12 +2,8 @@
 name: running-sprint
 description: "Use when a PLAN has passed gate 1 and tasks must now be executed, by a fresh subagent per task with a review after each or by one agent inline, keeping PROGRESS as the ledger and stopping only for the four stop conditions; also when autopilot is on for the sprint, or `Dừng autopilot.` / `Thu hồi duyệt thay SPR-NN.` arrives mid-run."
 metadata:
-  group: process
-  roles: [analyst, implementer]
-source: ["obra/superpowers skills/subagent-driven-development/ (SKILL.md, implementer-prompt.md, task-reviewer-prompt.md, re-review-prompt.md)", "obra/superpowers skills/executing-plans/SKILL.md", "obra/superpowers skills/dispatching-parallel-agents/SKILL.md"]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d]
-license: [MIT, MIT, MIT]
-rewrite_before_public: false
+  group: "process"
+  roles: "analyst, implementer"
 ---
 
 # Chạy sprint (Bước 3)

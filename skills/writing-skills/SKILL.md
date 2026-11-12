@@ -2,12 +2,8 @@
 name: writing-skills
 description: Use when creating a new skill, editing an existing skill (even one line), writing or reviewing a skill's description or pressure tests, choosing how to word guidance for agents, a lesson is proposed for promotion to a skill or rule, or a session or sprint went wrong and someone asks why it took so long, cost so much or ignored the plan.
 metadata:
-  group: meta
-  roles: [architect, analyst]
-source: [obra/superpowers skills/writing-skills/SKILL.md, obra/superpowers skills/writing-skills/testing-skills-with-subagents.md, obra/superpowers skills/writing-skills/persuasion-principles.md, obra/superpowers skills/diagnosing-superpowers]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d, 8ca22dba9a94f28898bbce59f2537ff4d87c747d]
-license: [MIT, MIT, MIT, MIT]
-rewrite_before_public: false
+  group: "meta"
+  roles: "architect, analyst"
 ---
 
 # Viết skill

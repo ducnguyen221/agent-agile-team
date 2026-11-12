@@ -2,11 +2,6 @@
 name: rag-pipeline-reviewer
 description: Use when a retrieval-augmented generation pipeline is built, changed or debugged - vector store or tree index, chunking, embeddings, reranking, retrieval logic, citation, evaluation harness - or someone asks about retrieval accuracy; read-only, never edits code.
 tools: [Read, Grep, Glob, Bash]
-source: [affaan-m/ECC agents/rag-pipeline-reviewer.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT]
-rewrite_before_public: false
 ---
 
 # Reviewer pipeline RAG

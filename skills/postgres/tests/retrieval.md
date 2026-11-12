@@ -3,7 +3,7 @@ skill: postgres
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 6c9c5c180155648d31cee60d878c995d95555748
+skill_sha: f56eccbc275715e69481a9bbfeb7690e74335dc6
 date: 2026-10-04
 result: "strict 4/7 (+2 partial, 1 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 6/7"
 agent_ids:
@@ -103,3 +103,11 @@ Bộ câu hỏi giữ nguyên chữ của lượt trước (bộ câu cũ giữ 
 - `description` đã hứa "connection and timeout settings"; thân skill nay có `lock_timeout` và PgBouncer ở `references/diagnostics.md` mục 3.1–3.2.
 - Chủ thể nêu: không có phần viết lại truy vấn hay tăng statistics target (câu 4); không nêu `jsonb_ops` / `jsonb_path_ops` hay cú pháp index biểu thức (câu 5).
 - Nguồn của phần thêm ở `TK11.8`: tài liệu PostgreSQL (Client Connection Defaults), tài liệu PgBouncer (cấu hình, bảng tính năng theo chế độ gộp).
+
+## Lượt SPR-19 TK6 chạy lại (2026-11-12)
+
+Chạy lại bộ câu của lượt gần nhất: strict 4/7, 3 câu tình huống Đạt hẳn trên 6 (ngưỡng ≥80 %), câu ranh giới Đạt — giống hệt lượt trước câu theo câu, không lùi sau đổi chữ. Ba chỗ hụt là khoảng trống nội dung đã biết (câu 1 thiếu cột `tsvector` sinh sẵn so với trigger; câu 4 không có mục materialized view; câu 6 thiếu lý do sequence có gap). Người trả lời và người chấm đều sonnet; lời giao do người điều phối soạn nên không độc lập hoàn toàn.
+
+Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).
+
+> **Ghi chú SPR-19:** khoá `result` và `date` ở đầu file là của lượt gốc (bảng câu hỏi ở trên); lượt chạy lại sau đổi chữ chỉ ghi ở mục cuối, không ghi đè, vì `result` được tính từ bảng này. `skill_sha` đã đổi sang băm hành vi mới của cây hiện tại.

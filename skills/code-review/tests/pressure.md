@@ -3,9 +3,9 @@ skill: code-review
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: f25deca35f5300f26a3cddcc95665e928463243f
-date: 2026-10-23
-result: 11/11 GREEN pass on the current tree (3 new cr-9 to cr-11, plus cr-1 to cr-8 rerun); RED on the three new scenarios 0/3 pass (3 partial); earlier rounds 2026-10-04 8/8 GREEN pass
+skill_sha: 0818151f873dff58b2417732f39014327eda9c61
+date: 2026-11-12
+result: "1/6 GREEN pass theo chữ, 4/6 theo ý (cr-1 đến cr-6, lượt chạy lại); SPR-19 2026-11-12, n = 1 mỗi ca"
 agent_ids:
   red: {cr4: a271d593244c9237e, cr5: aaecd867d1856eebe, cr6: a07176d4fa0bdc33a}
   green: {cr4: aad5d938c1bad1e0e, cr5: a07ac7d0967aa0527, cr6: a401b01bb0a78d377}
@@ -172,3 +172,9 @@ GREEN đổi thành "KHÔNG đọc file nào trên máy, ngoài các file nêu �
 (`git ls-tree <commit>:skills/code-review | awk -F'\t' '$2!="tests"' | git mktree`). Gốc (chỉ cho ba kịch bản cũ):
 kịch bản 1 đọc bản private `code-review-routing` (mốc `4c0fdc57`) + superpowers `requesting-code-review`, kịch bản 2
 đọc `requesting-code-review` + `code-reviewer.md`, kịch bản 3 đọc `receiving-code-review`.
+
+## Lượt SPR-19 TK6 (2026-11-12)
+
+Ca cr-1 đến cr-6 (6 trong 11 ca của lượt 2026-10-23): 1/6 Đạt theo chữ (cr-4), 4/6 theo ý (cr-2, cr-3, cr-4, cr-5); cr-1 và cr-6 Đạt một phần; không ca nào Không đạt. Đáng xem lại: cr-6 báo "Phải sửa" ở `refund.py:15` khi chưa mở file; cr-1 giao `test-analyzer` mà không giao reviewer tổng quát. Tiêu chí do người chạy rút lại từ file này, người chấm có lúc chặt hơn bản gốc; không có đối chứng cùng người chấm nên chưa kết luận lùi hay không.
+
+Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).

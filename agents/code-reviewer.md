@@ -2,10 +2,6 @@
 name: code-reviewer
 description: Use for an independent general-purpose review of a diff before merge - security, correctness, quality, tests - filtered by certainty, 0 findings allowed; read-only. Not the process skill code-review (who reviews, in what order), and not for language or topic depth (python-, typescript-, react-, database-reviewer, security-reviewer).
 tools: [Read, Grep, Glob, Bash]
-source: [affaan-m/ECC agents/code-reviewer.md, affaan-m/ECC commands/code-review.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT, MIT]
-rewrite_before_public: false
 ---
 
 # Reviewer tổng quát

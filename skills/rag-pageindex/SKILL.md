@@ -2,13 +2,9 @@
 name: rag-pageindex
 description: Use when asked to answer questions from, or build a searchable index of, a long PDF through the pageindex MCP tools (tree index with page citations, the agent navigates by reasoning, no embeddings and no API key); not for keyword or embedding search, and not for reviewing a RAG pipeline someone else built (that is the agent rag-pipeline-reviewer).
 metadata:
-  group: technique
-  kind: reference
-  roles: [implementer, researcher]
-source: ["concept: VectifyAI/PageIndex"]
-source_sha: [null]
-license: [MIT]
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "implementer, researcher"
 ---
 
 # RAG không vector bằng cây mục lục (pageindex)

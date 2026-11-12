@@ -3,7 +3,7 @@ skill: error-handling
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 223235a62dead419c86f359fd6ef428650f50c5a
+skill_sha: 75e882b7561f48b1aeac5d8ee8e02b31da061d29
 date: 2026-10-04
 result: "strict 0/7 (+7 partial, 0 fail) — below threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

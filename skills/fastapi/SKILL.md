@@ -2,14 +2,9 @@
 name: fastapi
 description: Use when building, extending, or reviewing a FastAPI service — routers, Pydantic request and response schemas, dependency injection, async endpoints calling a database or external service, background tasks, streaming responses, file uploads, authentication and authorization, error envelopes, OpenAPI docs, tests with dependency overrides, or production settings.
 metadata:
-  group: technique
-  kind: reference
-  roles: [implementer, tech-reviewer]
-source: affaan-m/ECC skills/fastapi-patterns/SKILL.md
-source_sha: ef648e01899ba3e8dc6371642deaaf64b4477775
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: MIT
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "implementer, tech-reviewer"
 ---
 
 # FastAPI — mẫu cho dịch vụ chạy production

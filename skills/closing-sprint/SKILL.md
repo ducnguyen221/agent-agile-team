@@ -2,12 +2,8 @@
 name: closing-sprint
 description: "Use when closing a sprint after verification has no open blockers: evidence preflight before gate 2, version proposal, updating living specs, registries and docs after the verdict, checking the tree to be merged, and the branch menu; also when autopilot is on for the sprint being closed."
 metadata:
-  group: process
-  roles: [analyst, implementer]
-source: ["obra/superpowers skills/finishing-a-development-branch/SKILL.md", "garrytan/gstack document-release/SKILL.md.tmpl (via local distill)", "concept: preflight evidence gate by size and risk (references/preflight.md, clean-room rewrite: old text removed first, new writer saw only a noun-phrase idea list; task `TK10` (clean-room rewrite), sprint `SPR-04` (method wave 3))", "affaan-m/ECC commands/learn-eval.md", "concept: release notes built from the sprint report, internal and external versions (references/release-notes.md, clean-room rewrite: old text removed first, new writer saw only a noun-phrase idea list; task `TK10` (clean-room rewrite), sprint `SPR-04` (method wave 3))", "garrytan/gstack ship/SKILL.md.tmpl and ship/sections tests, plan-completion, pr-body (ideas only: integrate base, check lanes, failure ownership, plan-versus-diff audit, PR body; automatic bump, changelog, commit, push and PR creation dropped; task `TK9` (verification and closing), sprint `SPR-04` (method wave 3))", "garrytan/gstack land-and-deploy/SKILL.md.tmpl (idea only: CI gate on the exact head commit)", "affaan-m/ECC commands/update-docs.md (references/docs-sync.md)", "affaan-m/ECC skills/living-docs-governance (idea only, via templates/registry/feature-spec.md; references/docs-sync.md)"]
-source_sha: [8ca22dba9a94f28898bbce59f2537ff4d87c747d, 96764e80a641e28141ec8297223768029f5bf483, null, c70874fae9eb0e5ad0365beb7e2955899fd1d30f, null, f30b7b788a210d217ea3125bf3001b29cbc2a463, f30b7b788a210d217ea3125bf3001b29cbc2a463, ef648e01899ba3e8dc6371642deaaf64b4477775, ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT, MIT, none, MIT, none, MIT, MIT, MIT, MIT]  # none = idea-only sources of references/preflight.md and references/release-notes.md
-rewrite_before_public: false  # both private-derived files were rewritten clean-room (writer saw only noun-phrase idea lists)
+  group: "process"
+  roles: "analyst, implementer"
 ---
 
 # Đóng sprint (Bước 5–6 và sau Cổng 2)

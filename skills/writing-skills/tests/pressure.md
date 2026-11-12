@@ -3,9 +3,9 @@ skill: writing-skills
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 tier: T3 (the RED and first GREEN of 2026-10-01 ran at T2)
 model: claude-sonnet-5-5 (GREEN rerun and KB3 rerun 2026-10-03; RED and first GREEN of 2026-10-01 ran as `sonnet`)
-skill_sha: 5c5200b97d8568024d69118e3d734b4102ce3b80
-date: 2026-10-04
-result: 3/3 GREEN pass on KB3 at n = 3 after the TK13 fix (round 2, 2026-10-04, skill_sha changed; round 1 on the pre-fix text was 1/3) and RED 0/3 pass (RED breaks, kept from round 1, same prompt, not rerun); rerun n = 1 each on the fixed text - KB1 pass, KB2 pass, KB4 pass, KB5 partial against the pre-written expectation (result string format, same as TK12), KB6 pass, KB7 partial (no --plugin-dir flag named; TK12 had pass; the pre-fix text gave 1 pass 2 partial on three reruns, so not shown to be a regression); earlier - round 1 KB3 n = 3 (TK13) 1/3 GREEN pass, 0/3 RED pass; TK12 rerun GREEN 3/3 on KB1-KB3 and KB4-KB7 (KB5 partial against the expectation); n = 1 runs 3/3 GREEN pass after the TK9 rewrite; QA2 after fix-2 new KB8 GREEN pass (n = 1, no RED)
+skill_sha: e94483352b1895ad4a59d45140ea63c3c0043dfc
+date: 2026-11-12
+result: "1/1 GREEN pass theo chữ và theo ý (KB8, lượt QA2 fix-2 chạy lại); SPR-19 2026-11-12, n = 1"
 agent_ids:
   green_rerun: {1: a7645bb29eb1a5d5d, 2: a96ae872197ca1cbe, 3: ae8c088ffc5b5e89c}
   kb3_rerun_neutral_c: {red: aa0475ae5a2473a65, green: a0534369da5997176}
@@ -196,3 +196,9 @@ SKILL.md nào", GREEN thay bằng "đọc `skills/writing-skills/SKILL.md` (và 
 Kịch bản 2 cần hai file mẫu: một PROGRESS ghi 2 vòng review và 5 phiên; một transcript JSONL ≈500 dòng có
 30 lần đọc cùng file, 9 lần cùng lệnh test hỏng, một dòng log 200.000 ký tự rồi một bản ghi compact, 40 lần
 sửa sau compact, 2 vòng review, 150 lần `git status`. Chấm theo cột "Bằng chứng".
+
+## Lượt SPR-19 TK6 (2026-11-12)
+
+Chỉ chạy ca KB8 của lượt gần nhất (QA2 fix-2): chọn B, viết dòng `Phán quyết:`, không mở `BR`, ghi "Chưa chạy", dẫn đúng `diagnosing.md` mục 1 — Đạt cả chữ và ý. Không chạy lại KB1–KB7 của lượt trước (KB2 cần hai file mẫu không còn trong repo). Dòng checklist "không có khoá nguồn" chỉ được kiểm gián tiếp qua việc đọc `SKILL.md`.
+
+Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời; n = 1 mỗi ca, không chạy RED. `skill_sha` ở trên tính theo công thức băm hành vi mới (khoá quản trị của frontmatter không vào băm).

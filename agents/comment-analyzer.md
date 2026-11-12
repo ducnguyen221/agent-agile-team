@@ -2,11 +2,6 @@
 name: comment-analyzer
 description: Use when changed code adds or edits comments, docstrings or API documentation and an independent check is needed that they match the code, cover what matters, and will not rot - or before handing over code whose comments others will rely on; read-only, never edits code.
 tools: [Read, Grep, Glob]
-source: [affaan-m/ECC agents/comment-analyzer.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775]
-base_sha: 3599962a013653191c41676021c7e7dc519ee351
-license: [MIT]
-rewrite_before_public: false
 ---
 
 # Phân tích comment

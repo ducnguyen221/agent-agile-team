@@ -2,12 +2,8 @@
 name: writing-plan
 description: Use when a SPEC exists (or the user has given clear requirements) for work that takes more than one step, and a PLAN must be written before any code — defining tasks with files, interfaces, explicit test-first steps, review focus, risks and decisions that an engineer who has never seen the codebase can execute without guessing.
 metadata:
-  group: process
-  roles: [architect]
-source: "obra/superpowers skills/writing-plans/SKILL.md (v6.4.2)"
-source_sha: 8ca22dba9a94f28898bbce59f2537ff4d87c747d
-license: MIT
-rewrite_before_public: false
+  group: "process"
+  roles: "architect"
 ---
 
 # Viết PLAN (Bước 2, nửa sau)

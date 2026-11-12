@@ -5,7 +5,7 @@ model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun
 date: 2026-11-07
 result: 3/3 GREEN pass; GREEN rerun 2026-11-07 3/3 pass on the tree at HEAD c95884b (SPR-13 TK5, skill body gained the product-code paragraph); GREEN rerun 2026-10-22 3/3 pass on the tree at HEAD 61ba051 (SPR-31 TK6, skill body gained the pre-gate-1 TK renumbering exception); earlier rerun 2026-10-04 3/3 pass on 05032b4
 tier: T3
-skill_sha: d1fc2d4f0aeb941ac103c8433b69384873fd6786
+skill_sha: d7c6b936ab14d52689eb7ffce2b7aedc069855cc
 agent_ids:
   green_rerun_2026_10_04: {idc-1: a8dd30ce5a179ac73, idc-2: a9e3e87063dc127a8, idc-3: ad46e35a2016c4733}
   green_rerun_2026_10_22: {idc-1: a36383306ad2b27b9, idc-2: a52a4d3efd751748e, idc-3: afc4749b0ead27ecc}

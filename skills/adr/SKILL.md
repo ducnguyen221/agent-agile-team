@@ -2,13 +2,9 @@
 name: adr
 description: Use when a technical decision will be hard to undo or will touch several parts of a system - platform, framework, datastore, auth model, a changed contract or data model, a new cross-service dependency - when a large-size task needs its design choices written down, or when an accepted decision is being replaced.
 metadata:
-  group: technique
-  kind: reference
-  roles: [architect]
-source: "concept: architecture decision records - short, numbered, at least two real options, superseded not edited (clean-room rewrite: old text removed first, new writer saw only a noun-phrase idea list; task `TK10` (clean-room rewrite), sprint `SPR-04` (method wave 3))"
-source_sha: null
-license: none
-rewrite_before_public: false
+  group: "technique"
+  kind: "reference"
+  roles: "architect"
 ---
 
 # Ghi quyết định kiến trúc (ADR)

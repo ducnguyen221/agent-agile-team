@@ -3,7 +3,7 @@ skill: rag-pageindex
 method: retrieval
 model: claude-sonnet-5-5
 tier: T3
-skill_sha: 9781d13985a0335ee4720caa0e040bdb86b5d167
+skill_sha: d24ac803625e434a1322ed8d7c7466b8b757db9f
 date: 2026-10-26
 result: "strict 7/7 (+0 partial, 0 fail) — at threshold (≥4/5 scenario questions strict pass and the boundary question strict pass); points-right 7/7"
 agent_ids:

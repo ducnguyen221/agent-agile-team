@@ -2,10 +2,6 @@
 name: code-explorer
 description: Use when you must understand how an existing feature works before changing it - trace entry points, execution flow, layers and dependencies into a map with file:line; read-only. Not for broad file hunting (use the harness search agent) and not for judging a diff (code-reviewer).
 tools: [Read, Grep, Glob, Bash]
-source: [affaan-m/ECC agents/code-explorer.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT]
-rewrite_before_public: false
 ---
 
 # Người thăm dò code

@@ -2,12 +2,8 @@
 name: bug-triage
 description: Use when someone reports a defect - a crash, a stack trace, a log full of errors, "it is broken" - and the team must decide how serious it is and when it will be handled, especially when the reporter pushes an urgency label from another tracker, wants it fixed before the failure was ever seen, or insists everything is critical.
 metadata:
-  group: process
-  roles: [analyst]
-source: "concept: bug triage - reproduce first, grade by consequence, route by grade (clean-room rewrite: old text removed first, new writer saw only a noun-phrase idea list; task `TK10` (clean-room rewrite), sprint `SPR-04` (method wave 3))"
-source_sha: null
-license: none
-rewrite_before_public: false
+  group: "process"
+  roles: "analyst"
 ---
 
 # Phân loại lỗi

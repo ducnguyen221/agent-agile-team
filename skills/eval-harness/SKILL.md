@@ -2,12 +2,8 @@
 name: eval-harness
 description: Use when a feature that calls the product's own model (a prompt, a tool-using assistant, an agent chain) needs pass/fail criteria, a regression check after a prompt or model change, or someone claims "evals are green" or "pass rate went up", or when a reviewer brief, review agent or reviewer model changes and must be re-scored on past misses and known-clean diffs (incident to eval, shadow mode). Not for pressure-testing a skill or a rule (that is `writing-skills`) and not for ordinary unit tests (`tdd`).
 metadata:
-  group: meta
-  roles: [architect, qa]
-source: [affaan-m/ECC skills/eval-harness/SKILL.md]
-source_sha: [ef648e01899ba3e8dc6371642deaaf64b4477775]
-license: [MIT]
-rewrite_before_public: false
+  group: "meta"
+  roles: "architect, qa"
 ---
 
 # Eval cho tính năng có gọi mô hình

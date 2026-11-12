@@ -3,7 +3,7 @@ skill: security-audit
 method: pressure-test with subagents (RED without skill, GREEN with skill read by absolute path; Skill tool forbidden in both)
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
-skill_sha: a0325a0ba879d3ab5e56e48dbcda2c13e010cb52
+skill_sha: ac6b1f7fa2194d992de23549453d07365e15956f
 date: 2026-11-01
 result: 9/9 GREEN pass (n = 3 per scenario, 3/3 scenarios sa-1 to sa-3); RED 0/9 pass (9 partial); SPR-47 CO8 added one sentence to section 5 (daily mode, no hypothesis appendix)
 agent_ids: ghi ở hồ sơ SPR-47 (18 lượt: sa-1..sa-3 × RED/GREEN × n=3, mỗi lượt một subagent mới; chấm bởi một subagent Opus riêng)
