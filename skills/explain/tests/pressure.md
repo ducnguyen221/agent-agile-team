@@ -3,9 +3,9 @@ skill: explain
 method: pressure-test with subagents (RED without skill, GREEN with skill read first)
 model: sonnet (subagent alias, runners); grader opus
 date: 2026-11-13
-result: 3/3 GREEN pass (CM-3, CM-4, CM-4b, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed)
+result: 3/3 GREEN pass (CM-3 rerun on final tree; CM-4, CM-4b on the first tree, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed)
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: ab7e6369c3c88d98289a6221ecb684217c166862
+skill_sha: b0a86387e9d7c0f352a1be4da1cc4a0dd0419de0
 ---
 
 # Thử áp lực — explain
@@ -26,6 +26,10 @@ theo bảng chấm cuối `scenarios.txt`; CM-3 hiểu **nghiêm** (số tự t�
 | CM-4b "diễn giải từ giờ" giữ chế độ | **Đạt sẵn** 0/3 | **Đạt** 3/3 (8–10 dòng, ví dụ đời thường, đúng dữ kiện) | mục C |
 
 Ghi chú của grader (không tính trượt): vài lượt thêm khẳng định nhỏ không có ở nguồn ("không đụng dữ liệu"); cm3-1 giải nghĩa p95 là "nhóm 5 % lượt chậm nhất" (ca biên).
+
+## Lần chạy lại trên bản skill cuối (2026-11-13, sau vòng sửa của Tech Reviewer)
+
+`SKILL.md` đổi sau lần chạy đầu: luật chép hai nơi được rút về `method/communication.md` (mục 1), ví dụ mẫu đổi chủ đề (TLS, không còn trùng kịch bản CM-4), thêm hàng "giải nghĩa thuật ngữ sai" vào bảng lỗi. Chạy lại CM-3 n = 3 trên bản cuối (`skill_sha` ở đầu file): **3/3 Đạt** (9/9 dữ kiện, 4/4 viết tắt, p95 giải nghĩa đúng, không số hay đường dẫn mới). Vòng giữa (trước khi thêm hàng lỗi giải nghĩa) có 2/3 lượt giải nghĩa p95 sai — hàng lỗi mới vá việc đó. CM-4 và CM-4b **không** chạy lại: thân skill chỉ rút bớt chỗ chép luật, kịch bản ấy nền đã đạt sẵn.
 
 ## Giới hạn
 
