@@ -7,7 +7,7 @@ skill_sha: c8037fc5b39840079ed565dd3ce73d9dbb7d49e8
 source_sha256: b5eab2a3ec7c978f1565cf74d6ce3a4e5396a376561ab42d5b699b60d1430116
 requested_effort: "medium"
 date: 2026-11-13
-result: "SPR-23 TK1 in-25 GREEN 2/2 pass + in-24 regression 1/1 pass (RED in-25: 1 Trượt, 1 Một phần; in-24 RED 2/2 Đạt, không phân biệt); SPR-20 TK24 giữ: 9/9 GREEN pass (8 ca lựa chọn cho sẵn + in-14 trả lời tự do chấm mù); RED 4 Đạt, 3 Một phần, 2 Không đạt (in-9, in-14); SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; ca cờ/chế độ/ruleset cũ in-14..in-23 đã bỏ"
+result: "3/3 GREEN pass (SPR-23 TK1: in-25 ×2 + in-24 hồi quy ×1, ca tự do, người chấm không mù); RED in-25 1 Trượt, 1 Một phần, in-24 RED 2/2 Đạt (không phân biệt); n = 2 mỗi ca, cùng họ model; trước đó SPR-20 TK24: 9/9 GREEN pass, RED 4 Đạt, 3 Một phần, 2 Không đạt"
 agent_ids:
   sonnet_spr23_tk1_red_8e17875_2026_11_13: {in-24-run1: a22d5860dca945acc, in-24-run2: a29d42fc1a42fed4a, in-25-run1: a59845a5eaea69827, in-25-run2: af47c75a5ac7bd72b}
   sonnet_spr23_tk1_green_2026_11_13: {in-25-run1: a8adfd33469f4c5cd, in-25-run2: a59fd7d27bdf869a6, in-24-regression: a88eb7a3822288474}
