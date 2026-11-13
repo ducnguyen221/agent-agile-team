@@ -60,6 +60,33 @@ def test_guard_move_into_tmp_alone_or_delete_alone_still_allowed(tmp_path):
         assert_allowed(repo, cmd)
 
 
+# --- TK27c: nguồn chuyển/chép thuộc .git (lỗ hai bước: `mv .git .tmp/x/g` rồi lệnh riêng `rm -rf .tmp/x`) ----------
+
+@pytest.mark.parametrize("cmd", [
+    "mv .git .tmp/x/g",
+    "mv .git/ .tmp/x",
+    "mv -t .tmp/x .git",
+    "mv a .git .tmp/x",
+    "Move-Item .git .tmp/x",
+    "move .git .tmp\\x",
+    "ren .git g",
+    "Rename-Item .git g",
+    "mv .g* .tmp/x",
+    "robocopy .git .tmp/x /E",
+    "cp -r .git .tmp/x",
+    "bash -c 'mv .git .tmp/x'",
+])
+def test_guard_move_or_copy_git_source_blocked(tmp_path, cmd):
+    assert_blocked(active_repo(tmp_path), cmd, "irreversible_delete")
+
+
+def test_guard_move_non_git_source_still_allowed(tmp_path):
+    repo = active_repo(tmp_path)
+    for cmd in ("mv src .tmp/x", "mv .gitignore .tmp/x", "mv a .git-notes", "cp -r src .tmp/x", "robocopy src .tmp/x /E",
+                "mv .tmp/x .git", "cp .git/HEAD .tmp/x"):
+        assert_allowed(repo, cmd)
+
+
 # --- A1 (ii): đích xoá thuộc .git ---------------------------------------------------------------------------------
 
 @pytest.mark.parametrize("cmd", [

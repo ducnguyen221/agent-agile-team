@@ -800,6 +800,31 @@ def _moves_into_tmp(tokens: list[str]) -> bool:
     return any(_in_tmp_name(tokens[i]) for i in _copy_destinations(tokens))
 
 
+def _git_source_moved(tokens: list[str]) -> bool:
+    """`mv`/`move`/`Move-Item`/`ren`/`Rename-Item`/`robocopy`, hay `cp -r`/`Copy-Item -Recurse`, có NGUỒN thuộc `.git`: đưa cơ chế hoàn tác ra khỏi
+    cây ngay cả khi đích không ở `.tmp/` hay phần xoá nằm ở lệnh riêng (`mv .git .tmp/x/g`, rồi `rm -rf .tmp/x`)."""
+    if not tokens:
+        return False
+    name, args = _exe_name(tokens[0]), tokens[1:]
+    if name == "robocopy":
+        positional = [a for a in args if not ROBOCOPY_FLAG.fullmatch(a) and not a.startswith("-")]
+        return bool(positional) and _is_git_path(positional[0])
+    if name in COPY_RECURSIVE_NAMES:
+        flags = [a for a in args if a.startswith("-")]
+        if name == "cp":
+            recursive = any(re.fullmatch(r"-[A-Za-z]*[rRa][A-Za-z]*", a) or a.lower() == "--recursive" for a in flags)
+        else:
+            recursive = any(re.fullmatch(r"-r[a-z]*", a.lower()) for a in flags)
+        if not recursive:
+            return False
+    elif name not in MOVE_COMMANDS:
+        return False
+    destinations = _copy_destinations(tokens)
+    return any(
+        _is_git_path(tokens[i]) for i in range(1, len(tokens)) if i not in destinations and not tokens[i].startswith("-")
+    )
+
+
 def _recursive_listing(name: str, args: list[str]) -> list[str] | None:
     """`Get-ChildItem`/`gci`/`ls`/`dir` có cờ đệ quy: danh sách đường nó liệt kê (rỗng = thư mục hiện tại); không phải → None."""
     if name not in LISTING_COMMANDS:
@@ -877,6 +902,8 @@ def _command_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
         return _git_item(args, ctx)
     if name == "find":
         return _find_item(args, ctx, depth)
+    if _git_source_moved(tokens):
+        return "irreversible_delete"
     if name == "robocopy":
         return _robocopy_purge_item(args, ctx)
     if name in DELETE_COMMANDS:
