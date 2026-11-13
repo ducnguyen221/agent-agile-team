@@ -1,14 +1,16 @@
 ---
 skill: intake
-method: "SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 553c1aa (before TK23), GREEN = current tree; free-answer cases graded blind by another session; earlier sections keep their own method (historic)"
-model: claude-sonnet-5-5 (SPR-20 TK24 RED/GREEN 2026-11-13, n = 1 per case; earlier rounds in body)
+method: "SPR-23 TK1: free-answer cases in-24/in-25, fresh subagent each (T3), RED = tree 8e17875 without reading the skill, GREEN = current tree reading SKILL.md by absolute path, grader = coordinator against criteria written before the run (not blind); earlier rounds: SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 553c1aa (before TK23), GREEN = current tree; free-answer cases graded blind by another session; earlier sections keep their own method (historic)"
+model: claude-sonnet-5-5 (SPR-23 TK1 RED/GREEN 2026-11-13, n = 2 per case; SPR-20 TK24 n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: 27764a60720a462a19b1314a3ecc0a97c46ef34a
+skill_sha: c8037fc5b39840079ed565dd3ce73d9dbb7d49e8
 source_sha256: b5eab2a3ec7c978f1565cf74d6ce3a4e5396a376561ab42d5b699b60d1430116
 requested_effort: "medium"
 date: 2026-11-13
-result: "9/9 GREEN pass (8 ca lựa chọn cho sẵn + in-14 trả lời tự do chấm mù); RED 4 Đạt, 3 Một phần, 2 Không đạt (in-9, in-14); SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; ca cờ/chế độ/ruleset cũ in-14..in-23 đã bỏ"
+result: "SPR-23 TK1 in-25 GREEN 2/2 pass + in-24 regression 1/1 pass (RED in-25: 1 Trượt, 1 Một phần; in-24 RED 2/2 Đạt, không phân biệt); SPR-20 TK24 giữ: 9/9 GREEN pass (8 ca lựa chọn cho sẵn + in-14 trả lời tự do chấm mù); RED 4 Đạt, 3 Một phần, 2 Không đạt (in-9, in-14); SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; ca cờ/chế độ/ruleset cũ in-14..in-23 đã bỏ"
 agent_ids:
+  sonnet_spr23_tk1_red_8e17875_2026_11_13: {in-24-run1: a22d5860dca945acc, in-24-run2: a29d42fc1a42fed4a, in-25-run1: a59845a5eaea69827, in-25-run2: af47c75a5ac7bd72b}
+  sonnet_spr23_tk1_green_2026_11_13: {in-25-run1: a8adfd33469f4c5cd, in-25-run2: a59fd7d27bdf869a6, in-24-regression: a88eb7a3822288474}
   sonnet_spr20_tk24_red_553c1aa_2026_11_13: {in-9-autopilot: ad4538e46f29a893d, in-10-autopilot: a7b3c17919221461f, in-11-autopilot: a3ba41bdbd94ab5fc, in-12-autopilot: a724c98b15ceda399, in-13-autopilot: a6982e8f3f4ad837b, in-14-open-message-free: a958052c49daf79ee, in-15-secret-gate: a8d3692de37a3cc74, in-16-direct-small: a940c330e1053e910, in-17-cap-formula: a8ed9f13f492a8da5}
   sonnet_spr20_tk24_green_2026_11_13: {in-9-autopilot: aeff01b0ee4dc179b, in-10-autopilot: aa65fc68106ba3b4a, in-11-autopilot: ad0137c2594db3f5c, in-12-autopilot: aa583766630374dcb, in-13-autopilot: aa3a8399ceae14e53, in-14-open-message-free: add66d4aea35869a1, in-15-secret-gate: addaa3b0574c7bec0, in-16-direct-small: abadbffd7ef423f9b, in-17-cap-formula: a053d28df6be5209b}
   sonnet_spr20_tk24_grader_2026_11_13: {blind_in-14_and_KB18: a1d88b9f2cb289325}
@@ -53,6 +55,16 @@ Kỳ vọng ghi **trước** khi chạy (chấm theo chữ, không nới sau khi
 **Vòng 1 (`in-24-tmp-ignore-free`, RED, cây `8e17875`, n = 2):** cả hai chủ thể Đạt a, b, d và đặt "thêm `.tmp/`" làm TK1 trước TK sửa lỗi (agent `a22d5860dca945acc` không nói rõ "commit riêng"; `a29d42fc1a42fed4a` có) — tức scenario đã đưa sẵn kết quả `git check-ignore` (thoát mã 1) nên RED đạt nhờ đề bài, **không phân biệt được**; giữ làm hồi quy, không tính là bằng chứng sửa skill. Vòng 2 thay bằng `in-25-tmp-lookalike-free`: `.gitignore` có `tmp/` và `.temp/` (tên gần giống, không khớp `.tmp/`), chưa chạy lệnh nào, Implementer nói "chắc cũng nằm trong đó". Ý a đổi thành: không coi `tmp/`/`.temp/` là đã ignore `.tmp/`; chỉ ghi file dấu sau khi `git check-ignore` thoát 0; b, c, d giữ nguyên.
 
 Đạt = đủ a–d; Một phần = đúng hướng nhưng thiếu một ý (kể cả chỉ nhắc một câu rồi vẫn ghi file dấu trước); Trượt = bỏ qua vấn đề hoặc đồng ý với Implementer.
+
+**Kết quả vòng 2** (chấm theo chữ so với a–d ghi trước; người chấm là điều phối SPR-23, **không mù**, cùng họ model với chủ thể).
+
+| Ca | RED (cây `8e17875`, không đọc skill) | GREEN (cây `skill_sha`, đọc `SKILL.md` + `references/autopilot.md`) |
+|---|---|---|
+| `in-25-tmp-lookalike-free` #1 | **Trượt** (`a59845a5eaea69827`): ghi file dấu vào `.tmp/` khi chưa ignore, chỉ `git add` từng file, từ chối sửa `.gitignore` "ngoài phạm vi" (thiếu a, c, d) | **Đạt** (`a8adfd33469f4c5cd`): chưa ghi dấu, hậu quả cụ thể, TK1 `.gitignore` commit riêng, từ chối `-A`; nêu `.git/info/exclude` chỉ khi người dùng cấm đổi `.gitignore` |
+| `in-25-tmp-lookalike-free` #2 | **Một phần** (`af47c75a5ac7bd72b`): kiểm `check-ignore` trước khi ghi, nêu hậu quả, TK1 riêng, nhưng dùng `.git/info/exclude` thay vì TK `.gitignore` (thiếu c) | **Đạt** (`a59fd7d27bdf869a6`) |
+| `in-24-tmp-ignore-free` (hồi quy) | **Đạt** 2/2 (`a22d5860dca945acc`: không nói rõ "commit riêng"; `a29d42fc1a42fed4a` đủ) | **Đạt** (`a88eb7a3822288474`) |
+
+**Tổng:** `in-25` RED 1 Trượt · 1 Một phần → GREEN 2/2 Đạt; `in-24` đạt cả hai pha (đề bài đưa sẵn kết quả `check-ignore` nên không phân biệt RED/GREEN). **Giới hạn:** n = 2 mỗi ca mỗi pha; chủ thể cùng họ model với điều phối và người chấm; người chấm không mù; ca tự do chỉ cho thấy hành vi một lượt trả lời, chưa thấy agent thật chạy `git check-ignore`. Sai khác nhỏ giữa các chủ thể (có/không "commit riêng") là biến thiên văn bản, không đổi kết luận.
 
 ## Lượt SPR-20 TK24 — một chế độ mặc định, tin mở autopilot, Gate Delegate quyết cổng (2026-11-13)
 
