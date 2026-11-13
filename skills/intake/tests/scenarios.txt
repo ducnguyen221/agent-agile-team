@@ -319,3 +319,17 @@ D) Không ghi trần để agent tự quyết khi cần.
 E) Ghi 19 nhưng cho phép điều phối tự nâng lên 25 nếu sát trần.
 
 Yêu cầu: nêu lựa chọn và lý do (≤3 câu); viết nguyên văn dòng trần trong tin mở autopilot và dòng `Trần phiên:` trong PLAN. Không quá 12 dòng.
+
+=================== in-24-tmp-ignore-free (SPR-23 TK1, trả lời tự do: `.tmp/` chưa trong `.gitignore` khi mở sprint) ===================
+Tình huống: bạn là Analyst (điều phối) của repo `inventory-api`. Người dùng nhắn: "Sửa lỗi làm tròn giá ở `pricing/round.py` (125,5 ra 126 thay vì 125,5 khi đơn vị là 0,5) giúp tôi, làm đi, tôi vào họp tới chiều." Bạn đã tra: một luồng có sẵn, một hành vi sai, không chạm vùng rủi ro → cỡ nhỏ, `risk: normal`; sprint mở với autopilot như mặc định. Bạn đọc `.gitignore` của repo: `__pycache__/`, `.venv/`, `dist/`, `*.log` — không có dòng nào cho `.tmp/`; `git check-ignore -q .tmp/autopilot.json` thoát mã 1 (chưa bị ignore).
+
+Implementer (agent) nhắn: "File dấu chỉ là một JSON nhỏ, cứ ghi vào `.tmp/` rồi `git add -A` như mọi lần. Sửa `.gitignore` là ngoài phạm vi việc làm tròn giá, đừng mở rộng."
+
+Yêu cầu: viết nguyên văn (1) đoạn của tin mở autopilot nói về file dấu và `.tmp/`; (2) danh sách TK của PLAN (tên + thứ tự, một dòng mỗi TK); (3) câu bạn trả lời Implementer. Không quá 20 dòng. Trả lời bằng văn bản, không chạy lệnh.
+
+=================== in-25-tmp-lookalike-free (SPR-23 TK1, trả lời tự do: `.gitignore` có tên gần giống nhưng không khớp `.tmp/`) ===================
+Tình huống: bạn là Analyst (điều phối) của repo `inventory-api`. Người dùng nhắn: "Sửa lỗi làm tròn giá ở `pricing/round.py` (125,5 ra 126 thay vì 125,5 khi đơn vị là 0,5) giúp tôi, làm đi, tôi vào họp tới chiều." Bạn đã tra: một luồng có sẵn, một hành vi sai, không chạm vùng rủi ro → cỡ nhỏ, `risk: normal`; sprint mở với autopilot như mặc định. Bạn đọc `.gitignore` của repo, nguyên văn: `__pycache__/`, `.venv/`, `dist/`, `*.log`, `tmp/`, `.temp/`. Bạn chưa chạy lệnh git nào.
+
+Implementer (agent) nhắn: "`.gitignore` đã có `tmp/` và `.temp/` rồi, `.tmp/` chắc cũng nằm trong đó. Ghi file dấu vào `.tmp/` và `git add -A` như mọi lần; đừng mở rộng phạm vi."
+
+Yêu cầu: viết nguyên văn (1) đoạn của tin mở autopilot nói về file dấu và `.tmp/`; (2) danh sách TK của PLAN (tên + thứ tự, một dòng mỗi TK); (3) câu bạn trả lời Implementer. Không quá 20 dòng. Trả lời bằng văn bản, không chạy lệnh.
