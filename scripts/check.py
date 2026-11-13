@@ -149,7 +149,7 @@ NEXT_ID_PREFIX = {"requests": "RQ", "specs": "FS", "sprints": "SPR"}
 WIDTH_KEY = {"RQ": "request", "FS": "feature", "SPR": "sprint"}
 
 # Ngày hiệu lực luật `plain-summary` (SPR-21 FR4): hồ sơ có `created` từ ngày này mới bị xét. Tạm đặt xa; TK10 chốt ngày thật.
-PLAIN_SUMMARY_EFFECTIVE = "2099-01-01"
+PLAIN_SUMMARY_EFFECTIVE = "2026-11-13"
 PLAIN_SUMMARY_HEADING = "Tóm tắt cho người không chuyên"
 
 REQUIRED_HEADINGS = {
