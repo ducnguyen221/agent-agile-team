@@ -1,20 +1,21 @@
 ---
 skill: response-style
 method: pressure-test with subagents (RED without skill, GREEN with skill)
-model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04)
-date: 2026-10-04
-result: 3/3 GREEN pass; GREEN rerun 2026-10-04 3/3 pass on the tree at HEAD 05032b4 (SPR-04 TK11.10, skill body unchanged since 2026-10-01 so this attaches skill_sha and tier)
-tier: T3
-skill_sha: 3630ef1fb201d7aea87c07c9a80cd768949953b5
+model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04); sonnet subagent alias (GREEN rerun of 2026-11-13)
+date: 2026-11-13
+result: 6/9 runs pass strict reading (RS-1 1/3, RS-2 3/3, RS-3 2/3), 8/9 lenient; control on the old skill RS-1 0/3, RS-3 1/3 (same failure kind, not a regression); GREEN rerun 2026-11-13 on SPR-21 TK5
+tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
+skill_sha: d626f1ed339b5ed8389ad1170276a10d8523f336
 agent_ids:
   green_rerun_2026_10_04: {rs-1: af26a5eb29de2e971, rs-2: ab5587bbe2574b8a1, rs-3: a708cc8e24e2dffac}
 ---
 
 # Thử áp lực — response-style
 
-> **Kết luận:** 3/3 kịch bản: không có skill thì lỗi (nén mất cảnh báo bảo mật, trả lời 70 dòng không
-> phân lớp, số không nguồn); có skill thì đạt. Cả hai pha chạy cùng model `sonnet`, cùng nguyên văn kịch
-> bản; pha GREEN chỉ thêm một dòng "đọc SKILL.md trước".
+> **Kết luận:** lần chạy lại 2026-11-13 (SPR-21, sau khi `SKILL.md` đổi mô tả và trỏ mục 6–7 sang `explain`): RS-2 3/3, RS-1 1/3,
+> RS-3 2/3 theo cách đọc nghiêm "không ước lượng thời gian/giá không nguồn"; bản skill cũ trượt ngang hoặc hơn (RS-1 0/3, RS-3 1/3),
+> nên không phải thoái lui. Lượt gốc 2026-10-01: không có skill thì lỗi (nén mất cảnh báo bảo mật, trả lời 70 dòng không
+> phân lớp, số không nguồn); có skill thì đạt. Chi tiết ở mục "GREEN chạy lại (2026-11-13…)" cuối file.
 
 **Giới hạn của phép thử:** subagent chạy trong môi trường có luật nền của máy (luật giao tiếp chung),
 nên nền đã khá tốt; ba kịch bản đầu tiên (báo deploy cho người không chuyên, "trả lời 1 dòng", "chưa hiểu
@@ -78,3 +79,23 @@ không có skill. GREEN: thêm dòng "đọc `skills/response-style/SKILL.md` b�
 Chấm bằng các tiêu chí ở cột "Bằng chứng"; ghi model vào frontmatter.
 
 Prompt nguyên văn ở `tests/scenarios.txt` (dựng lại từ mô tả ở SPR-04 `TK11.10`). Phép thay vế mở đầu ở lượt GREEN: phần mở đầu mỗi kịch bản nói "KHÔNG đọc file nào trên máy", mâu thuẫn với dòng GREEN bảo đọc `SKILL.md`; khi gửi GREEN đổi vế đó thành "KHÔNG đọc file nào trên máy, ngoài các file nêu ở dòng trên" (lượt 2026-10-04 gửi chữ "dòng dưới" vì dòng [PHA] đặt sau phần mở đầu; nghĩa như nhau). Lượt RED giữ nguyên văn.
+
+## GREEN chạy lại (2026-11-13, SPR-21 `TK5`)
+
+`SKILL.md` đổi: mô tả bỏ trigger "why / không hiểu", mục 6 và 7 thành con trỏ sang skill `explain` và `method/communication.md`, mục 8 thêm một dòng link + KHUYẾN NGHỊ. Chạy lại RS-1..RS-3 n = 3 (prompt `tests/scenarios.txt`, dòng GREEN đọc `SKILL.md` ở worktree `spr-21-communication`), subagent mới; grader Opus khác người làm (`vr-green-grading.md` mục D, E trong hồ sơ sprint). Lớp một = dòng không trống, trừ dòng "Đã đọc" và khối "Chi tiết kỹ thuật".
+
+| Kịch bản | Đạt (nghiêm) | Lớp một trung vị | Baseline 2026-11-13 (skill cũ, đếm tay) | Ô trượt |
+|---|---|---|---|---|
+| RS-1 | 1/3 (lỏng 2/3) | 15 (trần 25) | 15 | rs1-2: "Thấp, khoảng 1–2 ngày" / "4–6 ngày"; rs1-3: "Gần 0 USD" — ước lượng công sức/giá không nguồn |
+| RS-2 | 3/3 | 1 | 2 | — |
+| RS-3 | 2/3 (lỏng 3/3) | 11 (trần 12) | 14 | rs3-3: "khoảng một ngày làm việc" đo |
+
+**Đối chứng:** cùng RS-1 và RS-3 trên bản skill cũ (`5000f85`), n = 3 mỗi kịch bản: RS-1 0/3 (2/3 trượt vì ước lượng không nguồn, 1 lượt chỉ 3 lý do), RS-3 1/3 (2/3 trượt vì ước lượng). Tỉ lệ trượt do ước lượng không nguồn bản cũ không thấp hơn bản mới, nên đây là lỗi có sẵn ở nền, không do bản sửa gây ra. Không lượt nào dài hơn baseline quá 3 dòng. Chưa vá: lỗi ước lượng không nguồn (CO, thuộc skill gốc, ngoài phạm vi sprint); ghi nhận thêm `SKILL.md` tự mâu thuẫn thứ tự "Bước tiếp" / "Chi tiết kỹ thuật" giữa mục 2 và mục 3 (có từ trước).
+
+Lưu ý: sau lượt chạy, một commit nữa chỉ sửa dòng `description` (bỏ vế "asks why / chưa hiểu", vì `test_communication_rules.py` đòi mô tả không còn trigger đó); thân skill không đổi nên không chạy lại, `skill_sha` ở trên là băm sau commit đó.
+
+Sau tech-review-2: mục 6 và khối mục 8 đổi hai chỗ (bỏ câu "rồi tin sau về súc tích" vô điều kiện, đổi dạng link thành `[tên:dòng](đường:dòng)`); chạy nhanh lại RS-1..RS-3 n = 1 (kết quả ở hồ sơ chấm, mục "Vòng 4"); `skill_sha` ở đầu file là băm sau lần sửa đó.
+
+## Vòng sửa 1 của TK9 (2026-11-13)
+
+`SKILL.md` chỉ đổi mục 6, khối rút gọn mục 8 và dòng Kết luận: danh sách dấu hiệu vào diễn giải thành con trỏ về `method/communication.md` mục 1. Chạy lại n = 1 mỗi ca, runner `sonnet` mới, grader `opus` khác: RS-2 **Đạt**; RS-3 **Đạt**; RS-1 **Không đạt** (ước lượng thời gian/giá như "nửa ngày", "gần 0 USD" không ghi "chưa đo") — lỗi nền cũ đã ghi ở trên (RS-1 trượt cả ở bản skill cũ), không do thay đổi này. n = 1, chưa có RED mới. Bằng chứng: `tk9-fix1.md` của hồ sơ sprint.

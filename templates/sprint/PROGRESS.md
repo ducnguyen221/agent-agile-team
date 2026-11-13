@@ -32,7 +32,7 @@ links:
      Câu dẫn: trước mỗi bảng / danh sách mã ghi một câu nói tài liệu nào và mã là gì, nghĩa in đậm — ví dụ
      "SPEC có 3 **user story** (US):" (skill id-convention). -->
 
-> **Kết luận:** <!-- MỘT câu, viết lại mỗi lần cập nhật: xong bao nhiêu việc, vướng gì, vòng kiểm định thứ mấy. -->
+> **Kết luận:** <!-- MỘT câu bằng lời thường, viết lại mỗi lần cập nhật: xong bao nhiêu việc (số đếm đúng), vướng gì, vòng kiểm định thứ mấy; không dùng mã trần, mã nào nhắc thì kèm tên. -->
 > 1/2 việc Đạt; chưa có vướng mắc; chưa vào vòng kiểm định.
 
 ## 1. Bảng trạng thái việc

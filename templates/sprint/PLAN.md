@@ -30,8 +30,12 @@ links:
      Câu dẫn: trước mỗi bảng / danh sách mã ghi một câu nói tài liệu nào và mã là gì, nghĩa in đậm — ví dụ
      "SPEC có 3 **user story** (US):" (skill id-convention). -->
 
-> **Kết luận:** <!-- MỘT câu: cách làm chính + số việc + điều cần người quyết (nếu có). -->
+> **Kết luận:** <!-- MỘT câu: cách làm chính + số việc + điều cần người quyết (nếu có). Một câu cho người đọc nắm ý chính; mục tóm tắt bên dưới là cho người không chuyên. -->
 > Thêm một điểm tra cứu đơn hàng chỉ-đọc qua 2 việc; không có quyết định nào cần người ngoài Cổng 1.
+
+## Tóm tắt cho người không chuyên
+
+<!-- 3–5 câu cho người không chuyên: việc gì · vì sao · ảnh hưởng · rủi ro · cần anh làm/quyết gì; mã kèm tên, viết tắt có nghĩa ở lần đầu. -->
 
 ## Mục tiêu
 

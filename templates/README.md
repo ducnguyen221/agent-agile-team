@@ -141,6 +141,7 @@ Giá trị là token tiếng Anh cho máy đọc; thân tài liệu dùng nhãn 
 `check` so tiêu đề cấp 2 (`## `) theo kiểu **chứa cụm**, không phân biệt hoa thường, bỏ qua số thứ tự đầu
 dòng (`## 3. Rủi ro` khớp "Rủi ro"). Thứ tự không bị kiểm. Tài liệu sprint và spec sống còn phải có khối
 trích bắt đầu bằng `> **Kết luận:**` trước tiêu đề cấp 2 đầu tiên.
+Mẫu SPEC và PLAN còn có mục `## Tóm tắt cho người không chuyên` (không nằm trong bảng dưới): luật `plain-summary` (Nên sửa) chỉ xét hồ sơ có `created` từ ngày hiệu lực.
 
 | Tài liệu | Cụm tiêu đề cấp 2 bắt buộc |
 |---|---|

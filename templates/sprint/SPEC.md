@@ -31,8 +31,12 @@ links:
      Câu dẫn: trước mỗi bảng / danh sách mã ghi một câu nói tài liệu nào và mã là gì, nghĩa in đậm — ví dụ
      "SPEC có 3 **user story** (US):" (skill id-convention). -->
 
-> **Kết luận:** <!-- MỘT câu: sprint làm gì, cho ai, xong khi nào. Người không chuyên đọc câu này là đủ. -->
+> **Kết luận:** <!-- MỘT câu: sprint làm gì, cho ai, xong khi nào. Một câu cho người đọc nắm ý chính; mục tóm tắt bên dưới là cho người không chuyên. -->
 > Sprint SPR-01 cho người dùng tra trạng thái đơn hàng trong một bước; xong khi SC1 (tra nhanh) đạt.
+
+## Tóm tắt cho người không chuyên
+
+<!-- 3–5 câu cho người không chuyên: việc gì · vì sao · ảnh hưởng · rủi ro · cần anh làm/quyết gì; mã kèm tên, viết tắt có nghĩa ở lần đầu. -->
 
 ## 1. Bối cảnh
 
