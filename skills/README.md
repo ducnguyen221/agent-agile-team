@@ -42,7 +42,7 @@ cấp. Nhóm ghi trong frontmatter `metadata.group` và trong mục lục dướ
 
 | Skill | Dùng khi |
 |---|---|
-| [intake](intake/SKILL.md) | tiếp nhận yêu cầu: một lượt trao đổi gom (mục tiêu, câu hỏi phản biện, khuyến nghị bậc, mở sprint hay làm thẳng) → ghi `RQ-`, định cỡ/rủi ro, 11 điểm thiếu ngữ cảnh → ASSUMPTION/`CQ` |
+| [intake](intake/SKILL.md) | tiếp nhận yêu cầu: một tin gom không chờ trả lời (mục tiêu, câu hỏi phản biện, khuyến nghị bậc, mở sprint hay làm thẳng) cùng tin mở autopilot (tự bật, người ký cổng là Gate Delegate) → ghi `RQ-`, định cỡ/rủi ro, 11 điểm thiếu ngữ cảnh → ASSUMPTION/`CQ` |
 | [shaping-spec](shaping-spec/SKILL.md) | 3 đường Spike/Bounded/Architectural, viết SPEC, gom `CQ`, không code trước Cổng 1 |
 | [writing-plan](writing-plan/SKILL.md) | `TK` có file + giao diện + bước RED→GREEN→commit, trọng tâm review ≤5 |
 | [running-sprint](running-sprint/SKILL.md) | hai chế độ thực thi, brief/review theo việc, phán quyết, 4 điều kiện dừng, 3 vòng khuyến nghị |
@@ -113,9 +113,9 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | Skill | Loại | Tệp thử | `result` | `date` |
 |---|---|---|---|---|
 | [bug-triage](bug-triage/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 scenarios GREEN pass at n = 3 (KB1-KB3 at three runs per phase, GREEN 3/3, 3/3, 3/3 runs Đạt, RED 0/3, 0/3, 3/3 runs Đạt so KB1 and KB2 gave way and KB3 passed as-is, kept as regression; the grader is the same model family as the subjects, CQ3) | 2026-10-04 |
-| [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass (KB19, ca mới về bản cài), RED Một phần; SPR-20 TK8 2026-11-13, n = 1; KB15–KB18 giữ kết quả lượt SPR-19 | 2026-11-13 |
-| [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 10/10 GREEN pass theo chữ (6 ca lựa chọn cho sẵn, 4 ca trả lời tự do); RED 6/6 pass ở ca lựa chọn (đáp án lộ trong lựa chọn), 0/4 pass ở ca tự do; SPR-20 2026-11-13, n = 1 mỗi ca, ca cũ chưa chạy lại | 2026-11-13 |
-| [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 2/3 GREEN pass theo chữ, 3/3 theo ý (rs-9, rs-10, rs-11); SPR-20 TK8 2026-11-13, n = 1 mỗi ca, chạy lại sau thêm mục 10 (tin mở) và brief cấm ghi delegation | 2026-11-13 |
+| [closing-sprint](closing-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 5/5 GREEN pass (KB15, KB16, KB17, KB18 tự do, KB19); RED 4 ca: 2 Một phần, 2 Không đạt; SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; KB19 chỉ chạy GREEN, ca +đẩy-nhánh cũ đã bỏ | 2026-11-13 |
+| [intake](intake/tests/pressure.md) | kỷ luật | `pressure.md` | 9/9 GREEN pass (8 ca lựa chọn cho sẵn + in-14 trả lời tự do chấm mù); RED 4 Đạt, 3 Một phần, 2 Không đạt (in-9, in-14); SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; ca cờ/chế độ/ruleset cũ in-14..in-23 đã bỏ | 2026-11-13 |
+| [running-sprint](running-sprint/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass (rs-9, rs-10, rs-11, rs-12); RED 3 ca: 1 Đạt, 2 Một phần; SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; rs-10 chỉ chạy GREEN | 2026-11-13 |
 | [shaping-spec](shaping-spec/tests/pressure.md) | kỷ luật | `pressure.md` | 6/6 GREEN pass on the current tree (rerun 2026-11-13 at n = 1 on sp-4, sp-7, sp-8, sp-9, sp-12 both texts, after SPR-20 TK6 added the Người quyết column); earlier 1/1 GREEN pass (sp-12, both texts); RED on af1ad4f 0/1 pass (sp-12 v2); old scenarios 4/4 | 2026-11-13 |
 | [writing-plan](writing-plan/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass on the current tree (rerun 2026-11-13 at n = 1, wp-1..wp-3, after SPR-20 TK6 added the Người quyết column; wp-5 not rerun); RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix (2026-10-22) | 2026-11-13 |
 | [adr](adr/tests/retrieval.md) | tham chiếu | `retrieval.md` | strict 6/7 (+1 partial, 0 fail), at threshold; points-right 7/7 | 2026-10-04 |

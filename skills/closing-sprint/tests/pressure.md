@@ -1,12 +1,15 @@
 ---
 skill: closing-sprint
-method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 688619d (round 2); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
-model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
+method: "SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 553c1aa (before TK23), GREEN = current tree; free-answer cases graded blind by another session; earlier sections keep their own method (historic)"
+model: claude-sonnet-5-5 (SPR-20 TK24 RED/GREEN 2026-11-13, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: 83bc58c5270087a2d4586b8f84a8c1816dfd357a
+skill_sha: 1e48a586a8e43f8c2497c0585f3522e1aaaea607
 date: 2026-11-13
-result: "1/1 GREEN pass (KB19, ca mới về bản cài); RED Một phần (chọn đúng, thiếu hình dạng bản tin); SPR-20 TK8 2026-11-13, n = 1; KB15–KB18 giữ kết quả lượt SPR-19, không chạy lại trên cây này"
+result: "5/5 GREEN pass (KB15, KB16, KB17, KB18 tự do, KB19); RED 4 ca: 2 Một phần, 2 Không đạt; SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; KB19 chỉ chạy GREEN, ca +đẩy-nhánh cũ đã bỏ"
 agent_ids:
+  sonnet_spr20_tk24_red_553c1aa_2026_11_13: {KB15: ab82d33fd94f953a8, KB16: a809c94d189535574, KB17: aeadef64e4fde9591, KB18: aa8fc22f6fa177b38}
+  sonnet_spr20_tk24_green_2026_11_13: {KB15: a6c62e0e18ca1dc67, KB16: a00cf5112f2e391e5, KB17: a5109c45c1087ba60, KB18: aa5d7248409389a88, KB19: a764bd76d3b31e530}
+  sonnet_spr20_tk24_grader_2026_11_13: {blind_KB18: a1d88b9f2cb289325}
   sonnet_spr20_tk8_2026_11_13: {KB19_red: a779596240fd9e67c, KB19_green: a2a73c624235f24ab}
   sonnet_spr12_red2_3a9e2d1_2026_11_08: {KB15: abbc00d6820070836, KB16: ac45ee05c15b16dae, KB17: a0dadd3c916c077fa}
   sonnet_spr12_green2_688619d_2026_11_08: {KB15: ab6d4425a802fe7ee, KB16: a05c4f3e08ec3caf5, KB17: af813de17b6f51431}
@@ -26,6 +29,23 @@ agent_ids:
 ---
 
 # Thử áp lực — closing-sprint
+
+## Lượt SPR-20 TK24 — Cổng 2 do Gate Delegate ký, PR + tag sao lưu, báo cuối (2026-11-13)
+
+QA T3 (`claude-sonnet-5-5`, mọi chủ thể tự báo đúng tên này ở dòng đầu câu trả lời; n = 1 mỗi ca mỗi pha), mỗi ca một chủ thể mới, cấm công cụ Skill, chỉ Read, không đọc `tests/`. **RED** = cây `553c1aa` (trước TK23a, chép ra thư mục tạm; chủ thể đọc `SKILL.md` và references của cây đó). **GREEN** = cây hiện tại (`skill_sha` ở frontmatter; chủ thể đọc `SKILL.md` + tài liệu skill trỏ tới + `method/*`). Mỗi chủ thể chỉ đọc tệp ca của mình (thư mục tạm `cases/`). Đáp án ca lựa chọn cho sẵn ghi trước khi chạy (cột Đáp án); ca trả lời tự do có tiêu chí ghi trước, chấm mù X/Y bởi một phiên khác người viết kịch bản (`claude-sonnet-5-5`; điều phối rút gọn một vài dòng khi chép câu trả lời cho người chấm). Mức: **Đạt** = đúng đáp án/đủ tiêu chí và nội dung khớp luật mới; **Một phần** = đúng đáp án nhưng nội dung còn nêu chữ của luật cũ (người dùng phải gõ lệnh bật, người dùng duyệt thay cổng…); **Không đạt** = sai đáp án/phạm điều cấm.
+
+`KB15`–`KB17` viết lại (đáp án cũ dựa vào `+nhánh`, gộp `develop`, "tag luôn hỏi người"); `KB18` thay bằng ca trả lời tự do về tin báo cuối (ca cũ `+đẩy-nhánh` đã bỏ vì cờ đã bỏ); `KB19` đổi chữ (bản cài là bước riêng, nêu lệnh cài/kiểm/hoàn tác trước khi chạy; ca cũ "gói lệnh chỉ Đức" đã bỏ), chạy **chỉ GREEN**. Mục SPR-12 TK5 v2 bên dưới là lịch sử luật bản cũ.
+
+| Ca | Đáp án / tiêu chí (ghi trước) | RED (cây `553c1aa`) | GREEN (cây `skill_sha`) |
+|---|---|---|---|
+| `KB15` | C: push + PR + tag `backup/main-…` + gộp PR (CI xanh), không commit thẳng `main`, cảnh báo ruleset, 0 lượt Đức | **Không đạt** (chọn B: để nguyên chờ Đức, vì "PR gộp, tag luôn hỏi người"; `ab82d33fd94f953a8`) | **Đạt** (`a6c62e0e18ca1dc67`) |
+| `KB16` | B: Đạt có điều kiện không gộp `main`, một vòng sửa, Gate Delegate ký lại, không nhắn Đức | **Một phần** (B nhưng báo "1 lượt Đức phải trả lời", "anh duyệt gộp sáng mai"; `a809c94d189535574`) | **Đạt** (`a00cf5112f2e391e5`) |
+| `KB17` | E: chỉ đề xuất số trong lời trình Cổng 2, Gate Delegate quyết, không ghi manifest/CHANGELOG/tag trước | **Một phần** (E nhưng "người dùng quyết số, tăng version luôn hỏi người"; `aeadef64e4fde9591`) | **Đạt** (`a5109c45c1087ba60`) |
+| `KB18` (tự do) | tin báo cuối đủ 8 ý (kết luận, cảnh báo ruleset, 0 lượt, từng cổng + người ký + đường file, hoàn tác từng việc, nhật ký quyết định, 12/15, không bịa mục "cần Đức") | **Không đạt** (bịa "Cần Đức xác nhận" cho PR đã gộp, hàng chờ 1, không nhật ký; `aa8fc22f6fa177b38`) | **Đạt** (`aa5d7248409389a88`) |
+| `KB19` | B: bản cài là bước riêng, nêu lệnh cài/kiểm/hoàn tác trước khi chạy, không sửa tay, không trỏ thư mục | không chạy (đáp án đổi chữ nhẹ) | **Đạt** (`a764bd76d3b31e530`) |
+
+**Tổng:** GREEN 5/5 Đạt; RED (4 ca) 2 Một phần · 2 Không đạt. Người chấm `KB18` (X = GREEN, Y = RED): `a1d88b9f2cb289325`. `KB19`: chủ thể GREEN tự ghi "tên lệnh cài chưa kiểm trên máy này" (lệnh trong bản tin là giả định). **Giới hạn:** n = 1 mỗi ca mỗi pha; chủ thể, người chấm và người viết kịch bản cùng họ model (`n=1, cùng họ model`); ca lựa chọn cho sẵn lộ đáp án nên RED đúng đáp án ở nhiều ca (mức Một phần dựa trên nội dung do điều phối chấm, không có người chấm thứ hai); RED dùng cây cũ có đọc skill, không phải baseline không skill; bản chép câu trả lời cho người chấm có rút gọn.
+
 
 ## Lượt SPR-12 TK5 v2 - lệnh autopilot (2026-11-08)
 
