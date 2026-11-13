@@ -79,7 +79,7 @@ và Không áp dụng không bao giờ là Đạt.
   agent: Kết quả / Chứng cứ / Còn mở / Cần người, ≤2.000 token, con trỏ thay log.
 - Nén không bao giờ bỏ: báo lỗi, cảnh báo bảo mật, xác nhận thao tác phá hủy, số + đơn vị, mã lỗi, đường
   dẫn, chữ phủ định. "Một từ" = một từ **cộng** điều chặn. Số không nguồn → nói "chưa đo" + cách đo.
-- **Trao đổi với người:** tóm tắt từ file → link `[tên:dòng](đường:dòng)`; hỏi chốt → KHUYẾN NGHỊ; "chưa hiểu / tại sao" hay hậu quả khó hoàn tác → diễn giải (`explain`), xong về súc tích. Luật: `method/communication.md`.
+- **Trao đổi với người:** tóm tắt từ file → link `[tên:dòng](đường:dòng)`; hỏi chốt → dòng hỏi "?" + KHUYẾN NGHỊ (im lặng ≠ duyệt); "chưa hiểu" → diễn giải (`explain`), xong về súc tích. Luật: `method/communication.md`.
 - Brief cho subagent chép khối rút gọn của `skills/response-style`.
 
 ## Mã định danh và thang mức
