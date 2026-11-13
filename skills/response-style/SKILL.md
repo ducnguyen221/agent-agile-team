@@ -1,6 +1,6 @@
 ---
 name: response-style
-description: Use when replying to a person or to another agent, writing a brief for a subagent, or drafting a sprint document, and the length, structure, register or level of detail of the response has to be chosen — including when the reader asks for a one-line answer, asks "why" or says they do not understand.
+description: Use when replying to a person or to another agent, writing a brief for a subagent, or drafting a sprint document, and the length, structure, register or level of detail of the response has to be chosen — including when the reader asks for a one-line answer.
 metadata:
   group: "communication"
   roles: "all"
@@ -8,8 +8,8 @@ metadata:
 
 # Văn phong phản hồi
 
-> **Kết luận:** câu đầu là kết luận hoặc điều người đọc cần làm; độ dài theo **người đọc × việc**; có
-> **lối ra giải thích** khi người đọc yêu cầu hoặc chưa hiểu; và dù nén đến đâu cũng **không mất** báo
+> **Kết luận:** câu đầu là kết luận hoặc điều người đọc cần làm; độ dài theo **người đọc × việc**; người đọc
+> yêu cầu hoặc chưa hiểu thì chuyển sang skill `explain`; và dù nén đến đâu cũng **không mất** báo
 > lỗi, cảnh báo bảo mật, số liệu, chữ phủ định. Luật giao tiếp của môi trường (nếu có) thắng skill này;
 > skill không chép lại luật đó.
 
@@ -75,26 +75,15 @@ cho một từ **cộng** phần sau dấu gạch; đó là giới hạn của v
 
 ## 6. Lối ra giải thích
 
-**Dấu hiệu chuyển** (một là đủ): người đọc nói "giải thích rõ hơn", "chi tiết hơn", "tại sao", "nghĩa là
-gì", "chưa hiểu", "nói lại dễ hiểu"; hỏi lại cùng một điểm; phản hồi cho thấy hiểu sai; hoặc việc cần
-quyết mà hậu quả khó hoàn tác.
-
-**Trong chế độ giải thích:**
-- Mở bằng kết luận một câu, rồi đi theo **góc người đọc**: chuyện gì xảy ra, ảnh hưởng gì, tốn gì, rủi
-  ro gì, có đường lui không.
-- Ví dụ đời thường cho khái niệm kỹ thuật ("một cuốn sổ ghi mỗi lần đổi giá").
-- Thuật ngữ vẫn xuất hiện, nhưng sau lời giải nghĩa; "Chi tiết kỹ thuật" tách cuối.
-- Kết bằng điều người đọc cần quyết (nếu có), với phương án đề xuất.
-
-**Thoát:** giữ chế độ cho chủ đề đó tới khi người đọc hiểu hoặc chuyển việc; rồi về súc tích. Người đọc
-nói "trả lời chi tiết từ giờ" → giữ cả phiên; "ngắn gọn lại" → về mặc định. Lời yêu cầu trực tiếp của
-người đọc luôn thắng.
+Người đọc nói "giải thích", "chi tiết hơn", "tại sao", "chưa hiểu", "nói lại dễ hiểu", gõ `/explain`, hỏi lại cùng
+một điểm, hoặc việc cần quyết có hậu quả khó hoàn tác → dùng skill `explain`: nó viết lại tin gần nhất bằng lời
+dễ hiểu, giữ nguyên mọi dữ kiện. Bảng hai chế độ, dấu hiệu vào/thoát (khi nào về súc tích, "diễn giải từ giờ"):
+`method/communication.md` mục 1. Lời yêu cầu trực tiếp của người đọc luôn thắng.
 
 ## 7. Tài liệu sprint
 
-SPEC / PLAN / PROGRESS / REPORT viết giọng **người**: khối `> **Kết luận:**` một câu ở đầu; mỗi mã kèm tên
-lần đầu trong đoạn; bảng khi ≥3 mục; ưu tiên bằng chữ (Bắt buộc / Nên có / Có thì tốt / Không làm đợt
-này). REPORT có mục "Tóm tắt cho người không chuyên" viết như mục 6.
+SPEC / PLAN / PROGRESS / REPORT viết giọng **người**, hai lớp (người / agent): `method/communication.md` mục 4. Mỗi mã
+kèm tên lần đầu trong đoạn; bảng khi ≥3 mục; ưu tiên bằng chữ (Bắt buộc / Nên có / Có thì tốt / Không làm đợt này).
 
 ## 8. Khối rút gọn — chép vào brief subagent
 
@@ -105,6 +94,8 @@ Thuật ngữ giải nghĩa lần đầu. Bảng chỉ khi ≥3 mục × 2 thu�
 Nén không bao giờ bỏ: báo lỗi, cảnh báo bảo mật, xác nhận thao tác phá hủy, số liệu + đơn vị, mã lỗi,
 đường dẫn, chữ phủ định (không/chưa/chỉ/trừ khi). Số không có nguồn thì nói "chưa đo" + cách đo.
 Báo cáo về điều phối: Kết quả / Chứng cứ / Còn mở / Cần người, ≤15 dòng, con trỏ file thay log.
+Tin dựa trên file → câu dẫn kèm link `[tên:dòng](đường:dòng)`; hỏi người chốt → một dòng hỏi + phương án + dòng
+KHUYẾN NGHỊ có lý do (im lặng không phải là duyệt). Luật đầy đủ: method/communication.md.
 Người đọc nói "chưa hiểu"/"tại sao" → giải thích theo góc người đọc, ví dụ đời thường, chi tiết kỹ thuật
-tách cuối; xong thì về súc tích.
+tách cuối; về súc tích khi người đọc hiểu hoặc chuyển việc.
 ```

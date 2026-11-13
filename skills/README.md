@@ -90,7 +90,8 @@ Cột "Loại": **tham chiếu** = `metadata.kind: reference`.
 
 | Skill | Dùng khi |
 |---|---|
-| [response-style](response-style/SKILL.md) | chọn độ dài, cấu trúc, giọng khi trả lời người hay agent; lối ra giải thích |
+| [response-style](response-style/SKILL.md) | chọn độ dài, cấu trúc, giọng khi trả lời người hay agent; trỏ sang `explain` khi người đọc chưa hiểu |
+| [explain](explain/SKILL.md) | `/explain` hoặc "chưa hiểu / tại sao / nói dễ hiểu hơn": viết lại tin gần nhất bằng lời dễ hiểu, giữ nguyên dữ kiện, xong về súc tích |
 | [id-convention](id-convention/SKILL.md) | đặt, đọc, nhắc chéo, kiểm mã mục trong tài liệu sprint và chat |
 | [token-economy](token-economy/SKILL.md) | phiên dài, output lớn, subagent báo cáo, nén ngữ cảnh, tuyên bố tiết kiệm token |
 
@@ -141,7 +142,8 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [verify-before-done](verify-before-done/tests/pressure.md) | kỷ luật | `pressure.md` | 7/7 GREEN pass on the current tree (ver-7 new, ver-1 to ver-6 rerun) | 2026-10-23 |
 | [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (wq-7 new, wq-1 to wq-3 rerun at n = 1) plus a real design-compare run that matched its expectation | 2026-10-23 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-11-07 |
-| [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-10-04 |
+| [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 6/9 runs pass strict reading | 2026-11-13 |
+| [explain](explain/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; SC4 nền đạt sẵn (CM-4/CM-4b không phân biệt được) | 2026-11-13 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
 | [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (eh-9 new; eh-1, eh-3, eh-4 rerun at n = 1) | 2026-10-24 |
 | [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass theo chữ và theo ý (KB8, n = 3 sau sửa SPR-19: 3/3 chữ, 3/3 ý); KB1–KB7 không chạy lại; SPR-19 2026-11-12 | 2026-11-12 |
