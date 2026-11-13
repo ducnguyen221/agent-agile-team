@@ -10,7 +10,7 @@ metadata:
 
 > **Kết luận:** tiếp nhận là bước **một lượt trao đổi gom** giữa Analyst (T1) và người dùng: đọc và phân tích
 > đầu bài trước, rồi gửi **một tin** — mục tiêu theo cách hiểu · câu hỏi phản biện · khuyến nghị bậc (làm thẳng /
-> rất nhỏ / nhỏ / vừa / lớn **cho từng việc, kèm lý do và nhãn rủi ro**) · có mở sprint không — chờ xác nhận, rồi mới ghi `RQ-`, tách
+> rất nhỏ / nhỏ / vừa / lớn **cho từng việc, kèm lý do và nhãn rủi ro**) · có mở sprint không — không chờ trả lời (tin này chính là tin mở autopilot, mục 6), rồi ghi `RQ-` theo khuyến nghị, tách
 > mục tiêu, định cỡ và rủi ro (chỉ nâng), ghi **ASSUMPTION**, gom điểm còn lại thành `CQ` cho Cổng 1. Hỏi lẻ
 > nhiều lượt ở bước này là lỗi quy trình; bỏ hẳn lượt trao đổi khi người dùng đã nói "không cần sprint" hoặc việc
 > là làm thẳng không mơ hồ.
@@ -31,8 +31,8 @@ mapping hay chỉ định cho người nhận việc. Trước PLAN/assignment, 
 | # | Việc | Ghi vào |
 |---|---|---|
 | 1 | **Đọc và phân tích** đầu bài: tra repo, sổ gốc, spec sống; đọc `method/sizing.md` mục 1–2 và rà 11 điểm (mục 2) — tra được thì tra, không hỏi | nháp của Analyst |
-| 2 | **Một tin trao đổi gom** cho người dùng (mục 1.1): mục tiêu theo cách hiểu · câu hỏi phản biện · khuyến nghị bậc · có mở sprint không | chat |
-| 3 | **Chờ xác nhận.** Chưa xác nhận thì chưa `RQ-`, chưa sprint, chưa chạm mã. Người dùng chọn làm thẳng → làm ngay, kiểm, báo; hết bước | — |
+| 2 | **Một tin gom** cho người dùng (mục 1.1; chính là tin mở autopilot, mục 6): mục tiêu theo cách hiểu · câu hỏi phản biện kèm đề xuất · khuyến nghị bậc · có mở sprint không | chat |
+| 3 | **Không chờ trả lời.** Người dùng nói lại thì lời đó thắng; không thì theo khuyến nghị: `RQ-`, sprint (làm thẳng → làm ngay, kiểm, báo; hết bước) | — |
 | 4 | Một dòng `RQ-` mới: ngày, tóm tắt một câu, trạng thái `mới`, **kèm câu trả lời của người dùng** (mục tiêu đã chốt, định nghĩa xong, phạm vi ngoài, bậc đã xác nhận) | sổ REQUESTS |
 | 5 | Tách mục tiêu: một mục tiêu = một sprint; nhiều mục tiêu → nhiều sprint cùng trỏ một `RQ-` | sổ SPRINTS (khi mở sprint) |
 | 6 | Ghi bậc đã xác nhận và `risk_tags`; bất kỳ nhãn rủi ro nào ở `method/sizing.md` mục 2 → `risk: high`, `size: large`, kể cả sau xác nhận (báo lại một câu) | frontmatter SPEC |
@@ -157,7 +157,7 @@ Việc xoá hay ghi đè dữ liệu thì tiêu chí gồm cả **cách khôi ph
 
 | Lỗi | Sửa |
 |---|---|
-| Lời giao mơ hồ → đoán rồi làm luôn | mở tin trao đổi gom: nhắc lại mục tiêu, hỏi phản biện có đề xuất, khuyến nghị bậc; chờ xác nhận |
+| Lời giao mơ hồ → đoán rồi làm luôn | mở tin trao đổi gom: nhắc lại mục tiêu, hỏi phản biện có đề xuất, khuyến nghị bậc; không chờ trả lời, theo khuyến nghị |
 | Lời giao mơ hồ → tự ghi `RQ-` và ASSUMPTION thay cho hỏi | điều thuộc ý muốn người dùng phải hỏi ở tin trao đổi; ASSUMPTION chỉ cho điều tự giả định được, có "nếu sai thì đổi gì" |
 | Hỏi một câu, chờ, hỏi câu nữa | một tin gom ở tiếp nhận; phần còn lại thành `CQ`, hỏi một lần ở Cổng 1 (trừ một tin bổ sung cho ô Brief còn trống, mục 1) |
 | Tự quyết bậc rồi dựng hồ sơ, không hỏi người dùng có cần sprint không | tin trao đổi phải có khuyến nghị bậc + câu "có mở sprint không"; người dùng xác nhận mới ghi |
@@ -169,4 +169,4 @@ Việc xoá hay ghi đè dữ liệu thì tiêu chí gồm cả **cách khôi ph
 
 ## 6. Lệnh autopilot — nhận, nhắc lại, ghi
 
-ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Mục 6": kênh hợp lệ, cú pháp (chế độ mở/chặt, `Chặn thêm`, `Mở SPR-NN`, `/autopilot`), kiểm ruleset, ghi `delegation` và file dấu, danh sách loại, lời nhắc lại.
+ĐỌC KHI mở sprint hay nhận `Dừng autopilot.` → [references/autopilot.md](references/autopilot.md), mục "Mục 6": autopilot tự bật (một chế độ), ghi `delegation` và file dấu, tin mở autopilot bắt buộc, trần phiên theo công thức, cách dừng.

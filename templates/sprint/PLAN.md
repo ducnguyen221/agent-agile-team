@@ -62,7 +62,7 @@ links:
 
 ## File luật và file sàn cứng sẽ chạm
 
-<!-- Bảng (file, ★ = sàn cứng · vùng/dòng · sửa gì và ảnh hưởng · việc `TK`) cho mọi file luật hoặc file sàn cứng (`method/autopilot.md`, `hooks/hooks.json`, `scripts/git_fence.py`…) PLAN sẽ sửa. Có file sàn cứng thì cổng đi **người**, không duyệt thay (luật `gate-route-floor`). Không chạm thì ghi "Không có." -->
+<!-- Bảng (file, ★ = sàn cứng · vùng/dòng · sửa gì và ảnh hưởng · việc `TK`) cho mọi file luật hoặc file sàn cứng (`method/autopilot.md`, `hooks/hooks.json`, `scripts/autopilot_guard.py`…) PLAN sẽ sửa. Có file sàn cứng thì cổng đi **người**, không duyệt thay (luật `gate-route-floor`). Không chạm thì ghi "Không có." -->
 
 Không có.
 

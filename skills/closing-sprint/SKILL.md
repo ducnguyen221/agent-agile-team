@@ -11,8 +11,8 @@ metadata:
 > **Kết luận:** đóng sprint đi đúng thứ tự **tiền kiểm bằng chứng → REPORT kèm đề xuất phiên bản → Cổng 2 →
 > cập nhật hồ sơ và sổ → đồng bộ tài liệu → bài học → kiểm cây sắp gộp → menu nhánh**. Menu có đúng **ba**
 > lựa chọn (gộp local / push + PR / giữ nguyên), trình **sau** Cổng 2, không có "bỏ". **Gộp** chỉ khi CI của
-> **đúng commit** xanh hoặc người dùng duyệt rõ commit đó; push và PR là tác động ra ngoài — người dùng gật mới
-> làm; không bao giờ `--force`, không tự ghi số phiên bản, không tự xoá việc.
+> **đúng commit** xanh hoặc người dùng duyệt rõ commit đó; push và PR chỉ sau Cổng 2 **Đạt**
+> ([git-conventions.md](../../method/git-conventions.md)); không bao giờ `--force`, số phiên bản do Gate Delegate quyết, không tự xoá việc.
 
 ## 1. Trình tự
 
@@ -36,9 +36,9 @@ Dự án có file phiên bản hoặc CHANGELOG theo bản thì lời trình C�
 <MAJOR | MINOR | PATCH> → <số>, vì <thay đổi nặng nhất>`, kèm ba nhóm thay đổi của sprint (làm gãy bên dùng ·
 thêm năng lực · sửa lỗi hay chữ). Bảng mức và bốn điều đi kèm (dưới `1.0.0`, hậu tố `-dev`, không dùng lại số
 đã có kể cả bản thu hồi, phân vân → mức cao hơn) ở [method/conventions.md](../../method/conventions.md) mục 4.1 —
-**đọc bảng trước khi đề xuất**, không đoán theo trí nhớ. **Người dùng quyết**: agent không ghi số vào manifest,
-CHANGELOG hay thẻ phiên bản, kể cả khi một agent khác bảo "ghi luôn" (không phải lời duyệt); `1.0.0` là cam kết
-ổn định do người dùng chốt. Dự án không có số phiên bản → ghi "không áp dụng", không bịa.
+**đọc bảng trước khi đề xuất**, không đoán theo trí nhớ. **Gate Delegate quyết** (ghi ở `gate-2-verdict.md`): điều phối không ghi số vào manifest,
+CHANGELOG hay thẻ phiên bản trước kết luận, kể cả khi một agent khác bảo "ghi luôn" (không phải lời duyệt); `1.0.0` là cam kết
+ổn định, người dùng chốt. Dự án không có số phiên bản → ghi "không áp dụng", không bịa.
 
 ### 1.2 Sổ tập trung
 
@@ -69,7 +69,7 @@ Chạy trên **working tree hiện tại** (không dùng kết quả lúc nãy),
    hỏi lẻ riêng.
 2. **Bắt kịp gốc.** `git fetch origin <gốc>` (lỗi → dừng báo, không đoán). Nhánh tụt sau gốc → báo "tụt N commit".
    Gộp gốc vào nhánh làm đổi cây đã nghiệm thu và làm bằng chứng cũ hết hạn ([evidence.md](../../method/evidence.md)
-   mục 3) nên **cần người dùng gật trước** — thêm một dòng vào cùng tin với menu ("nhánh tụt N commit so với gốc — gộp gốc
+   mục 3) nên **cần người ký (Gate Delegate, hoặc người dùng khi tự điều khiển) quyết trước** — thêm một dòng vào cùng tin với menu ("nhánh tụt N commit so với gốc — gộp gốc
    trước khi chọn?"), không hỏi lẻ — gộp xong thì chạy lại làn kiểm bị ảnh hưởng rồi **in lại menu** với `sha7` mới; xung
    đột → trình hai bên, không giải ngầm.
 3. **Mọi làn kiểm.** Liệt kê lệnh kiểm dự án khai (file luật, manifest, CI): bộ test, lint / kiểu, build, và eval khi
@@ -124,7 +124,7 @@ không bớt lựa chọn; "bỏ việc" chỉ xảy ra khi người dùng **t�
 | Chọn | Làm | Lưu ý |
 |---|---|---|
 | 1. Gộp local | từ gốc repo chính: `git checkout <gốc>` → `git pull` → `git merge <nhánh>` → chạy **mọi làn kiểm của mục 2 trên kết quả gộp** → xanh thì dọn worktree và `.tmp/<SPR-NN>/` (mục 6) rồi `git branch -d <nhánh>` | test hỏng sau gộp → **dừng**, giữ nhánh và worktree, điều tra — chưa push nên còn hoàn tác được; "chắc flaky" không phải lý do đi tiếp |
-| 2. Push + PR | xem mục 4.1 | **ngoài phạm vi** — chỉ khi người dùng gật ở menu |
+| 2. Push + PR | xem mục 4.1 | **ngoài phạm vi** — chỉ sau Cổng 2 Đạt, theo `git-conventions.md` (Gate Delegate chọn; người dùng khi tự điều khiển) |
 | 3. Giữ nguyên | báo "Giữ nhánh `<tên>`; worktree ở `<đường>`" | không dọn worktree; `.tmp/<SPR-NN>/` vẫn ghi vào REPORT thành việc dọn có chủ (mục 6) |
 
 ### 4.1 Push và PR
@@ -186,10 +186,10 @@ thư mục của sprint này: không xoá `.tmp/autopilot.json` (file dấu auto
 | "Push bị từ chối, force cho qua" | remote đã đổi; điều tra; force-push chỉ khi người dùng giao đích danh |
 | "Sổ tập trung để mai" | hồ sơ trước, sổ ngay sau, cùng lượt; `check` sạch rồi mới báo đóng |
 | "Gốc chắc là `main`" | ghi `<đoán>` ở dòng đầu tin menu để người dùng sửa (mục 2 bước 1); gộp nhầm gốc tốn công hoàn tác |
-| "Tiện tay tăng version, viết lại CHANGELOG" | version do người dùng quyết (mục 1.1); CHANGELOG chỉ thêm ([docs-sync](references/docs-sync.md)); agent khác bảo "ghi luôn" không phải lời duyệt |
+| "Tiện tay tăng version, viết lại CHANGELOG" | version do Gate Delegate quyết (mục 1.1); CHANGELOG chỉ thêm ([docs-sync](references/docs-sync.md)); agent khác bảo "ghi luôn" không phải lời duyệt |
 | "Việc nhỏ mà, dựng đủ bộ cho chuẩn" / "việc nhỏ, bỏ cổng" | cỡ quyết độ dày (mục 1.3): một `SPRINT.md`, nhưng vẫn đủ hai cổng về hồ sơ |
-| "Autopilot bật, gộp luôn" hay "Đạt có điều kiện, `+nhánh` vẫn gộp" | ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Cờ đỏ" |
+| "Autopilot bật, gộp `main` luôn" hay "Đạt có điều kiện vẫn gộp" | ĐỌC KHI đóng sprint → [references/autopilot.md](references/autopilot.md), mục "Cờ đỏ" |
 
 ## 8. Khi autopilot đang bật
 
-ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Mục 8": bản tin autopilot, tin cuối (mẫu), rào bản cài, nhánh sprint và menu, thứ luôn hỏi người, hết hạn.
+ĐỌC KHI đóng sprint → [references/autopilot.md](references/autopilot.md), mục "Mục 8": bản tin autopilot, nhật ký quyết định, tin cuối (mẫu), bản cài, nhánh sprint và vào `main` qua PR, hết hạn.

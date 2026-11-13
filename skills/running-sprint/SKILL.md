@@ -226,6 +226,6 @@ Giữ nguyên sổ, tiền kiểm, bốn điều kiện dừng, phán quyết. K
 | "Nhớ `TK4` nói gì rồi" | nhớ là bản tóm tắt; brief có giá trị chính xác — đọc lại |
 | "Phiên con báo xong" hay "xin thêm quyền một lần" (autopilot) | ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Cờ đỏ" |
 
-## 9. Khi autopilot đang bật
+## 9. Khi autopilot đang bật (mặc định mọi sprint)
 
-ĐỌC KHI nhận hoặc ghi lệnh autopilot → [references/autopilot.md](references/autopilot.md), mục "Mục 9": file dấu theo phiên con, sổ phiên con, danh sách loại, `Dừng autopilot.`, `Thu hồi duyệt thay`, brief cấm ghi `delegation`; "Mục 10": tin mở sprint.
+ĐỌC KHI chạy sprint hay nhận `Dừng autopilot.` → [references/autopilot.md](references/autopilot.md), mục "Mục 9": file dấu theo phiên con, sổ phiên con, bảy mục luôn chặn, `Dừng autopilot.`, `Thu hồi duyệt thay`, brief cấm ghi `delegation`; "Mục 10": tin mở autopilot.
