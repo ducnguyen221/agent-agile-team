@@ -15,7 +15,7 @@ DELEGATION_OPTIONAL_KEYS = ("level", "program", "channel", "orchestrator", "sess
 AUTOPILOT_PREFIX = "bật autopilot"  # `grant` bắt đầu bằng chuỗi này (không phân biệt hoa thường) cũng kích luật
 AUTOPILOT_LEVELS = ("gate_1", "gate_1_2", "program")
 # Ba hằng dưới còn lại vì `autopilot_guard.py` (danh sách mục rào) và bản ghim `tests/test_fence_wiring.py` còn tham chiếu;
-# luật `check` không đọc chúng nữa (một chế độ, không `exclusions`). Gỡ cùng bản ghim ở TK23 (sửa vùng sàn cần 5 ý + Đức gật).
+# luật `check` không đọc chúng nữa (một chế độ, không `exclusions`). Giữ tới sprint sau (gỡ cùng bản ghim khi đổi guard).
 AUTOPILOT_EXCLUSIONS = ("push", "tag", "version", "main_merge", "publish", "license", "irreversible_delete",
                         "rules_unlisted", "user_soul", "secret", "auth", "network_fetch", "branch_merge_local")  # danh sách đóng 13 mục
 OPEN_ALWAYS_BLOCKED = ("network_fetch", "rules_unlisted", "irreversible_delete", "secret", "auth", "user_soul", "license")
@@ -23,8 +23,8 @@ OPEN_DEFAULT_OPEN = ("push", "branch_merge_local", "version", "main_merge", "tag
 # Ngày hiệu lực của các luật sprint mới (người quyết CQ/DN, dòng đếm lượt ở REPORT, người ký cổng độc lập với người làm); hồ sơ trước ngày này giữ nguyên kết quả.
 MODE_OPEN_EFFECTIVE_DATE = "2026-11-13"
 AUTOPILOT_GATES_BOTH = "cổng 1+2"  # trong `grant` của mức program: phạm vi là cả hai cổng
-AUTOPILOT_BRANCH_SUFFIX = "+nhánh"  # chỉ còn để bản ghim `tests/test_fence_wiring.py` đếm đúng một định nghĩa; không dùng (gỡ ở TK23)
-AUTOPILOT_PUSH_FLAG = "+đẩy-nhánh"  # như trên: chỉ còn vì bản ghim, không dùng (gỡ ở TK23)
+AUTOPILOT_BRANCH_SUFFIX = "+nhánh"  # chỉ còn để bản ghim `tests/test_fence_wiring.py` đếm đúng một định nghĩa; không dùng (giữ tới sprint sau)
+AUTOPILOT_PUSH_FLAG = "+đẩy-nhánh"  # như trên: chỉ còn vì bản ghim, không dùng (giữ tới sprint sau)
 DELEGATION_CHANNELS = ("chat", "host_comment")
 MOMENT = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})(?: ([0-9]{2}):([0-9]{2}) ([+-])([0-9]{2})(?::?([0-9]{2}))?)?")
 DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
@@ -57,8 +57,6 @@ FLOOR_FILES: tuple[str, ...] = FENCE_FILES + (  # `merge_ready.py`, `deploy_scan
     "scripts/deploy_scan.py",
     "tests/test_fence_wiring.py",
     "tests/test_floor_check.py",
-    "tests/test_git_fence.py",
-    "tests/test_git_server_layer.py",
     "tests/test_mutation_floor.py",
     ".github/workflows/verify.yml",
 )

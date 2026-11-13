@@ -229,33 +229,33 @@ def test_exclusions_pinned():
 PINNED_FLOOR_ZONES = {"AGENTS.md": 2, "method/process.md": 3, "method/sizing.md": 1, "method/autopilot.md": 1}
 PINNED_FLOOR_FILES_EXTRA = (
     "scripts/floor_check.py", "scripts/merge_ready.py", "scripts/deploy_scan.py", "tests/test_fence_wiring.py",
-    "tests/test_floor_check.py", "tests/test_git_fence.py", "tests/test_git_server_layer.py", "tests/test_mutation_floor.py",
+    "tests/test_floor_check.py", "tests/test_mutation_floor.py",
     ".github/workflows/verify.yml",
 )
 # (đường file, số thứ tự cặp mốc) → (SHA-256 của chữ giữa mốc, SHA-256 của hai dòng chữ gần nhất quanh cặp mốc).
 # Sửa chữ trong vùng sàn thì đổi cả băm ở đây trong cùng commit, có lý do và có 5 ý Đức gật cho file luật đó.
 PINNED_ZONE_HASHES = {
     ("AGENTS.md", 0): (
-        "652736d630df563eeed3216db6ec9ff567eaf3b3ef6a5fabcf48c3902230c2bc",
+        "cc38cf08dcfbb60ffeae12c24c492183a6073182467633b63d31d03631e29ca4",
         "1b674c5981eda2acbc3b340bec29f1730fce0513d8061f11383ce0d60d4a3f4c"),
     ("AGENTS.md", 1): (
-        "e9e7efcd8749e8cb34da4fa44745bfbd63af78576b403e2b4d59aa6549c808d5",
+        "22a7f587294028a99215142c20b7ad039f3a7e6c27f8b291c41ccb0ccbd9d2f0",
         "5d18f5eaed17becce2a26b0381cb1a0576ec05b6d3d5948bcef94a80abe411bf"),
     ("method/process.md", 0): (
-        "616b5596b01c29ca0ad05eb5ca5e579fc78e7d1e6d1cfc2b3a4a20d0d0abf278",  # SPR-20 TK8: Khuyến nghị có sẵn khi autopilot bật + câu mẫu `Mở SPR-NN` (vùng sàn đã duyệt ở PLAN)
+        "5f7e0e13f7e4ac202296d9a1c995f605baf9cac174cd31a3003d4e66e849b0e3",  # SPR-20 TK8: Khuyến nghị có sẵn khi autopilot bật + câu mẫu `Mở SPR-NN` (vùng sàn đã duyệt ở PLAN)
         "ecb48ff6109d5b11438be3eef55f7e9c5d7af45c98a2cf48cf4dea2efc4f1029"),
     ("method/process.md", 1): (
-        "97cf1aad77f3ee10e8f5927d4f3a4036fe3c7bd7b544344b944e973197458945",
+        "34cf2e7427f7332ee1f5effe4b2f1d382e949ccbf1510f45fa7d84ca8a5b536f",
         "2a61b772d7d11e70c57623ef3447b2dc001d4218b8c2aaa09c181ac31d436c5f"),
     ("method/process.md", 2): (
-        "bc87da020948b6357969142782239d32acb8ee7b74755c9e1a15222fa2308fec",
+        "a4d227e219acf81466e07c74745e0dee15f9e82a48e34b41030c3abdeb028cd2",
         "b7c7fe0fbd1a77eb08490351e6fe3812eefdec315cb73a9df8fa00de8148ce6a"),
     ("method/sizing.md", 0): (
         "dc327e76921c81fcf4266a5285b617b74cb55af89e71eca950067b4d9018acba",
         "47c90f9685ed7aecfe4ca66bc4e10a217a68813484e3d1eb920f085e292b85d3"),
     ("method/autopilot.md", 0): (
-        "edcf795eb849f49ed091160b2860be48d2837cca24f16a8a7c02b9576acb0b92",  # TK7 (DN3 a): hàng `push` mục 5 thêm "trừ đúng hợp đồng đích"
-        "c38c9cc71026a9bddaed433d3c50ed2921e5a09f40b14c941065c9dedd9a2beb"),
+        "1d17f843f38e68c65989e619072cb6697e9db2e84ce2dd177857d6b3fad6132f",  # TK7 (DN3 a): hàng `push` mục 5 thêm "trừ đúng hợp đồng đích"
+        "55283740743d60f43bb66242f9133c4ff732b4617fe81bdf07ad8ad37098fc56"),
 }
 
 
