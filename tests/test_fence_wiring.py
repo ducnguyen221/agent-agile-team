@@ -254,7 +254,7 @@ PINNED_ZONE_HASHES = {
         "dc327e76921c81fcf4266a5285b617b74cb55af89e71eca950067b4d9018acba",
         "47c90f9685ed7aecfe4ca66bc4e10a217a68813484e3d1eb920f085e292b85d3"),
     ("method/autopilot.md", 0): (
-        "c411b9f05ba750d308a0d0ec3e958dee2f5a4d8b6445aef61bf3445b235c1b08",  # TK27d: dạng dính `-Destination:x`, cwd trong `.git`, `git -c gc.*=now`, không có công cụ quét secret thì không đẩy (soát hẹp RF1-RF4, RF7); TK7 (DN3 a): hàng `push` mục 5 thêm "trừ đúng hợp đồng đích"; TK27b (đã thay hàng `push` cũ ở TK21): bảy mục luôn chặn, mẫu hook mới, lệnh phá hoàn tác, đẩy chỉ khi có lời cấp (Sec RF1-RF4)
+        "fe819d68e6ac51ce6f6e0ef5a365bcdc2f8e964e8c1475564a9cfd8d994b02ea",  # TK28b (Đức 13/11): quét secret bằng công cụ sẵn có hoặc skill security-review/agent security-reviewer + dò mẫu khoá, không cần công cụ chuyên dụng; TK27d: dạng dính `-Destination:x`, cwd trong `.git`, `git -c gc.*=now`, không có công cụ quét secret thì không đẩy (soát hẹp RF1-RF4, RF7); TK7 (DN3 a): hàng `push` mục 5 thêm "trừ đúng hợp đồng đích"; TK27b (đã thay hàng `push` cũ ở TK21): bảy mục luôn chặn, mẫu hook mới, lệnh phá hoàn tác, đẩy chỉ khi có lời cấp (Sec RF1-RF4)
         "55283740743d60f43bb66242f9133c4ff732b4617fe81bdf07ad8ad37098fc56"),
 }
 

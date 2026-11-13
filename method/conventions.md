@@ -65,7 +65,7 @@ Không có ngoại lệ "cho nhanh"; vi phạm là phát hiện mức **Chặn**
 | **Version do Gate Delegate quyết, không ghi đè CHANGELOG** | Gate Delegate quyết version theo bảng mục 4.1, chỉ có hiệu lực khi Cổng 2 Đạt; agent làm việc chỉ **đề xuất** mức tăng kèm lý do, và chỉ **thêm** mục vào CHANGELOG dưới tiêu đề đang mở, không viết lại mục cũ |
 | **Commit** | thông điệp một dòng tóm tắt + thân ngắn nêu *vì sao*; mỗi `TK` ít nhất một commit; commit ghi mã `TK` khi có |
 | **Worktree** | ưu tiên công cụ worktree của harness; thư mục worktree nằm trong `.gitignore`; không `cd` sang worktree khác (skill `worktrees`) |
-| **Push, PR, gộp vào nhánh chính** | tác động ra ngoài: chỉ sau Cổng 2 **Đạt** và khi PLAN có lời cấp (mặc định lời của người dùng, trích nguyên văn từ chat), kèm kiểm ruleset và quét secret (không có công cụ quét → không đẩy, ghi `BR`; `method/autopilot.md` mục 5); Đạt có điều kiện thì không; menu ở skill `closing-sprint` |
+| **Push, PR, gộp vào nhánh chính** | tác động ra ngoài: chỉ sau Cổng 2 **Đạt** và khi PLAN có lời cấp (mặc định lời của người dùng, trích nguyên văn từ chat), kèm kiểm ruleset và quét secret toàn bộ diff đẩy (công cụ sẵn có, hoặc `security-review`/`security-reviewer` kèm dò mẫu khoá và tên file nhạy cảm; ghi kết quả vào báo cáo cuối; nghi ngờ hoặc không quét được → không đẩy, ghi `BR`; `method/autopilot.md` mục 5); Đạt có điều kiện thì không; menu ở skill `closing-sprint` |
 | **Cấu hình harness và file luật** | không sửa để nới quyền cho mình; sửa qua đường chính thức của môi trường và luôn qua người dùng |
 
 ### 4.1 Quy tắc số phiên bản
