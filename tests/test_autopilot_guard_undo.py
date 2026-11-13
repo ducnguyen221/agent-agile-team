@@ -159,7 +159,7 @@ def test_guard_ordinary_git_commands_pass(tmp_path):
     repo = active_repo(tmp_path)
     for cmd in ("git push", "git push origin main", "git push -u origin spr-20/x", "git push origin HEAD:refs/heads/x", "git push origin main:main",
                 "git push --dry-run", "git tag v1", "git merge x", "git commit -m 'x'", "git reset --hard HEAD~1", "git branch -d merged",
-                "git gc", "git gc --prune=2.weeks.ago", "git reflog", "git reflog show", "git update-ref refs/heads/x HEAD", "git branch -m a b",
+                "git gc", "git gc --no-prune", "git reflog", "git reflog show", "git update-ref refs/heads/x HEAD", "git branch -m a b",
                 "git push --tags", "git prune"):
         assert_allowed(repo, cmd)
 
@@ -266,6 +266,15 @@ def test_guard_cwd_inside_git_still_allows_reading(tmp_path):
     "git -c gc.pruneExpire=now prune",
     "git -C . -c gc.pruneExpire=all gc --aggressive",
     "git -c GC.PruneExpire=NOW gc",
+    # TK27e: mọi hạn bất kỳ (không liệt kê), `--prune=`/`--expire=` tường minh, maintenance
+    "git -c gc.pruneExpire=1.second.ago gc",
+    "git -c gc.pruneExpire=2.weeks.ago gc",
+    "git -c gc.reflogExpireUnreachable=1.second.ago -c gc.pruneExpire=1.second.ago gc",
+    "git gc --prune=1.second.ago",
+    "git prune --expire=1.second.ago",
+    "git prune --expire 1.second.ago",
+    "git -c gc.pruneExpire=now maintenance run --task=gc",
+    "git -c gc.pruneExpire=1.minute.ago maintenance run --task=gc",
 ])
 def test_guard_git_config_zero_expiry_blocked(tmp_path, cmd):
     assert_blocked(active_repo(tmp_path), cmd, "irreversible_delete")
@@ -273,6 +282,53 @@ def test_guard_git_config_zero_expiry_blocked(tmp_path, cmd):
 
 def test_guard_git_config_other_values_pass(tmp_path):
     repo = active_repo(tmp_path)
-    for cmd in ("git -c gc.pruneExpire=2.weeks.ago gc", "git -c core.x=now status", "git -c gc.auto=0 gc", "git commit -m x",
+    for cmd in ("git gc", "git -c core.editor=x commit", "git -c user.name=x commit", "git maintenance run", "git gc --auto", "git -c gc.auto=0 gc",
+                "git -c core.x=now status", "git commit -m x",
                 "git push origin main", "mv a b", "rm -rf .tmp/x", "cp -r .git backup"):
         assert_allowed(repo, cmd)
+
+
+# --- TK27e: MỘT bộ phân tích tham số PowerShell (`-Tên:giá-trị` và `-Tên giá-trị`) cho nguồn/đích/tên mới ----------------------
+
+@pytest.mark.parametrize("cmd", [
+    "Rename-Item .git -NewName:g",
+    "Rename-Item -Path:.git -NewName:g",
+    "Rename-Item -NewName:g -Path:.git",
+    "Rename-Item -NewName g -Path .git",
+    "Rename-Item -LiteralPath:.git -NewName g",
+    "Rename-Item -LiteralPath .git -NewName:g",
+    "rni .git g",
+    "rni .git -NewName:g",
+    "RENAME-ITEM -PATH:'.git' -NEWNAME:g",
+    "rename-item -pa:.git -n:g",
+    "Rename-Item -Path .git -NewName g -Force",
+    "Rename-Item g -NewName:.git",
+    "Rename-Item -Path:g -NewName:.git",
+    "ren g .git",
+    "Remove-Item -Recurse -Include .git",
+    "Remove-Item -Path:. -Filter:.git -Recurse",
+    "Move-Item -Path:.git -Destination:D:/y -Force",
+    "Move-Item -Force -LiteralPath .git -Destination D:/y",
+    "mi -Path:.git D:/y",
+])
+def test_guard_ps_parameter_forms_git_blocked(tmp_path, cmd):
+    assert_blocked(active_repo(tmp_path), cmd, "irreversible_delete")
+
+
+def test_guard_ps_parameter_forms_ordinary_allowed(tmp_path):
+    repo = active_repo(tmp_path)
+    for cmd in ("Rename-Item a.txt -NewName:b.txt", "Rename-Item a.txt -NewName b.txt", "Rename-Item -Path:src -NewName:src2",
+                "Rename-Item -LiteralPath:a.txt -NewName:b.txt -Force", "rni a b", "Move-Item a b", "Move-Item -Path:a -Destination:b",
+                "Remove-Item .tmp/x -Recurse", "Remove-Item -Path:.tmp/x -Recurse -Force", "Remove-Item a.txt -Confirm:$false",
+                "Copy-Item a b -Recurse", "mv -f a b"):
+        assert_allowed(repo, cmd)
+
+
+def test_guard_rename_inside_tmp_counts_as_move_in_tmp(tmp_path):
+    repo = active_repo(tmp_path)
+    assert_blocked(repo, "Rename-Item .tmp/x -NewName:y; Remove-Item .tmp/y -Recurse", "irreversible_delete")
+    assert_blocked(repo, "Rename-Item -Path:src -NewName:.tmp/y; Remove-Item .tmp/y -Recurse", "irreversible_delete")
+
+
+def test_guard_three_separate_commands_rename_then_move_then_delete_blocked(tmp_path):
+    assert_blocked(active_repo(tmp_path), "Rename-Item .git -NewName:g; mv g .tmp/x; rm -rf .tmp/x", "irreversible_delete")

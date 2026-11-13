@@ -339,10 +339,8 @@ def _git_item(args: list[str], ctx: Context) -> str | None:
     luật chữ ở method/git-conventions.md."""
     sub, rest = _git_parse(args)
     config = _git_config(args)
-    if sub in ("gc", "prune", "reflog") and any(
-        re.fullmatch(r"gc\.(reflogexpire\w*|pruneexpire)", key) and value in ("now", "all", "0") for key, value in config.items()
-    ):  # `git -c gc.pruneExpire=now gc`: đặt hạn hết hạn bằng 0 qua cấu hình, tương đương `--prune=now`
-        return "irreversible_delete"
+    if sub in ("gc", "prune", "reflog", "maintenance") and any(re.fullmatch(r"gc\..*expire\w*", key) for key in config):
+        return "irreversible_delete"  # `git -c gc.pruneExpire=<hạn bất kỳ> gc`: đặt hạn hết hạn qua cấu hình = `--prune=<hạn>`; không liệt kê hạn
     if sub == "stash":
         if "--all" in rest or any(_cluster(a, "a") for a in rest):
             return MARKER
@@ -363,10 +361,11 @@ def _git_item(args: list[str], ctx: Context) -> str | None:
     if sub == "reflog":
         return "irreversible_delete" if rest[:1] in (["expire"], ["delete"]) else None
     if sub == "gc":
-        prune_now = any(a.lower() in ("--prune=now", "--prune=all") for a in rest)
-        return "irreversible_delete" if prune_now or any(a == "--prune" and nxt.lower() in ("now", "all") for a, nxt in zip(rest, rest[1:])) else None
+        prune_set = any(a.lower().startswith(("--prune=", "--expire=")) for a in rest)  # mọi hạn tường minh (`--prune=1.second.ago`), không chỉ `now`
+        return "irreversible_delete" if prune_set or any(a == "--prune" and nxt.lower() in ("now", "all") for a, nxt in zip(rest, rest[1:])) else None
     if sub == "prune":
-        return "irreversible_delete" if "now" in [a.lower() for a in rest] or "--expire=now" in [a.lower() for a in rest] else None
+        low = [a.lower() for a in rest]
+        return "irreversible_delete" if "now" in low or "--expire" in low or any(a.startswith("--expire=") for a in low) else None
     if sub == "update-ref":
         return "irreversible_delete" if "-d" in rest or "--delete" in rest else None
     if sub == "push":
@@ -387,19 +386,14 @@ def _git_item(args: list[str], ctx: Context) -> str | None:
 
 
 def _delete_parts(name: str, args: list[str]) -> tuple[bool, list[str]]:
-    """(có cờ đệ quy?, đích). Nhận `rm` kiểu POSIX (cụm cờ chứa r/R, `--recursive`), PowerShell (`-r…` viết tắt của -Recurse), `/s` của cmd."""
+    """(có cờ đệ quy?, đích). Nhận `rm` kiểu POSIX (cụm cờ chứa r/R, `--recursive`), PowerShell (`-r…` viết tắt của -Recurse), `/s` của cmd;
+    đích lấy từ `_ps_split` (đối số vị trí, `-Path`, `-LiteralPath`, cả dạng dính `-Path:x`)."""
     recursive = False
-    targets: list[str] = []
-    literal = False
     for arg in args:
         low = arg.lower()
-        if literal:
-            targets.append(arg)
-        elif arg == "--":
-            literal = True
-        elif _colon_value(arg, r"path|p[a-z]*|literalpath|lit[a-z]*") is not None:  # `-Path:x`, `-LiteralPath:x` dính liền
-            targets.append(_arg_value(arg))
-        elif low in ("/s", "/q") and name in ("rmdir", "rd", "del", "erase"):
+        if arg == "--":
+            break
+        if low in ("/s", "/q") and name in ("rmdir", "rd", "del", "erase"):
             recursive = recursive or low == "/s"
         elif arg.startswith("-") and len(arg) > 1:
             if low == "--recursive":
@@ -408,9 +402,7 @@ def _delete_parts(name: str, args: list[str]) -> tuple[bool, list[str]]:
                 recursive = recursive or "r" in low
             elif re.fullmatch(r"-r[a-z]*(:.*)?", low):
                 recursive = True
-        else:
-            targets.append(arg)
-    return recursive, targets
+    return recursive, [value for _, value in _ps_split([name] + args).src]
 
 
 def tmp_target_ok(target: str, ctx: Context) -> bool:
@@ -673,22 +665,110 @@ def _arg_value(token: str) -> str:
     return token if value is None else value
 
 
+_PS_COMMON_VALUES = ("erroraction", "warningaction", "informationaction", "errorvariable", "warningvariable", "informationvariable",
+                     "outvariable", "outbuffer", "pipelinevariable")
+_PS_COMMON_SWITCHES = ("verbose", "debug")
+_PS_PARAMS = {  # loại cmdlet → (tham số CÓ giá trị, cờ công tắc)
+    "remove": (("path", "literalpath", "filter", "include", "exclude", "stream", "credential"), ("recurse", "force", "confirm", "whatif", "usetransaction")),
+    "move": (("path", "literalpath", "destination", "filter", "include", "exclude", "credential"), ("force", "passthru", "confirm", "whatif", "usetransaction")),
+    "rename": (("path", "literalpath", "newname", "credential"), ("force", "passthru", "confirm", "whatif", "usetransaction")),
+    "copy": (("path", "literalpath", "destination", "filter", "include", "exclude", "credential", "fromsession", "tosession"),
+             ("container", "force", "passthru", "recurse", "confirm", "whatif", "usetransaction")),
+}
+_PS_ALIASES = {"ea": "erroraction", "wa": "warningaction", "ia": "informationaction", "ev": "errorvariable", "wv": "warningvariable",
+               "iv": "informationvariable", "ov": "outvariable", "ob": "outbuffer", "pv": "pipelinevariable", "lp": "literalpath",
+               "pspath": "path", "cf": "confirm", "wi": "whatif", "db": "debug", "vb": "verbose"}
+_PS_KIND = {**dict.fromkeys(("rm", "ri", "del", "erase", "rmdir", "rd", "remove-item"), "remove"),
+            **dict.fromkeys(("mv", "mi", "move", "move-item"), "move"),
+            **dict.fromkeys(("ren", "rename", "rni", "rename-item"), "rename"),
+            **dict.fromkeys(("cp", "cpi", "copy", "copy-item"), "copy")}
+
+
+def _ps_param(kind: str, word: str) -> str | None:
+    """Tên tham số PowerShell đầy đủ cho `-word` (khớp tiền tố duy nhất, không phân biệt hoa thường, hay bí danh); mơ hồ hay lạ → None."""
+    low = _PS_ALIASES.get(word.lower(), word.lower())
+    values, switches = _PS_PARAMS[kind]
+    names = values + switches + _PS_COMMON_VALUES + _PS_COMMON_SWITCHES
+    if low in names:
+        return low
+    found = [n for n in names if n.startswith(low)]
+    return found[0] if len(found) == 1 else None
+
+
+class _PsArgs:
+    """Kết quả phân tích tham số của rm/mv/ren/cp và cmdlet tương ứng. Mỗi mục là (vị trí token, giá trị): `src` NGUỒN, `dst` ĐÍCH,
+    `new` TÊN MỚI (Rename-Item), `other` mọi giá trị còn lại đã tiêu thụ (Include/Filter/Exclude/…: vẫn xét như thứ có thể thuộc `.git`)."""
+
+    def __init__(self, kind: str | None) -> None:
+        self.kind = kind
+        self.src: list[tuple[int, str]] = []
+        self.dst: list[tuple[int, str]] = []
+        self.new: list[tuple[int, str]] = []
+        self.other: list[tuple[int, str]] = []
+
+
+def _ps_split(tokens: list[str]) -> _PsArgs:
+    """MỘT bộ phân tích tham số cho mọi cmdlet xoá/chuyển/đổi tên/chép (và bí danh, bản POSIX): nhận `-Tên:giá-trị` và `-Tên giá-trị`
+    (tiền tố duy nhất, hoa thường tuỳ ý; nháy đã bị `tokenize` bỏ), `-t`/`--target-directory`; tách tham số có giá trị khỏi cờ công tắc
+    để suy ra NGUỒN, ĐÍCH, TÊN MỚI. Tiền tố mơ hồ (`-f`, `-p`) coi là cờ công tắc: token sau vẫn là đối số vị trí (chặn thừa, không hở)."""
+    kind = _PS_KIND.get(_exe_name(tokens[0])) if tokens else None
+    parts = _PsArgs(kind)
+    if kind is None:
+        return parts
+    values = _PS_PARAMS[kind][0] + _PS_COMMON_VALUES
+    cmd_flags = _exe_name(tokens[0]) in ("rmdir", "rd", "del", "erase")
+    positional: list[tuple[int, str]] = []
+    literal = False
+    index = 1
+    while index < len(tokens):
+        token, low = tokens[index], tokens[index].lower()
+        if literal:
+            positional.append((index, token))
+        elif token == "--":
+            literal = True
+        elif low in ("-t", "--target-directory") and index + 1 < len(tokens):
+            index += 1
+            parts.dst.append((index, tokens[index]))
+        elif low.startswith("--target-directory="):
+            parts.dst.append((index, token.split("=", 1)[1]))
+        elif cmd_flags and low in ("/s", "/q"):
+            pass
+        elif token.startswith("--") or (token.startswith("-") and len(token) > 1):
+            found = None if token.startswith("--") else _COLON_FLAG.fullmatch(token)
+            canon = None if token.startswith("--") else _ps_param(kind, found.group(1) if found else token[1:])
+            value = found.group(2).strip("'\"") if found else None
+            at = index
+            if value is None and canon in values and index + 1 < len(tokens):
+                index += 1
+                value, at = tokens[index], index
+            if value is not None:
+                bucket = parts.dst if canon == "destination" else parts.new if canon == "newname" else \
+                    parts.src if canon in ("path", "literalpath", None) else parts.other
+                bucket.append((at, value))
+        else:
+            positional.append((index, token))
+        index += 1
+    if kind == "rename":  # chỗ trống theo thứ tự: Path rồi NewName (bỏ chỗ đã gán bằng tên); thừa → coi là nguồn
+        for item in positional:
+            if not parts.src:
+                parts.src.append(item)
+            elif not parts.new:
+                parts.new.append(item)
+            else:
+                parts.src.append(item)
+    elif kind == "remove":
+        parts.src += positional
+    elif positional and not parts.dst:  # move/copy: đối số vị trí cuối là ĐÍCH nếu chưa có `-Destination`/`-t`; một mình thì vừa nguồn vừa đích (chặn thừa)
+        parts.dst.append(positional[-1])
+        parts.src += positional[:-1] or ([positional[-1]] if not parts.src else [])
+    else:
+        parts.src += positional
+    return parts
+
+
 def _copy_destinations(tokens: list[str]) -> set[int]:
-    """Vị trí token là ĐÍCH của cp/Copy-Item/Move-Item: giá trị sau `-Destination`/`-t`/`--target-directory` (cả dạng dính
-    `-Destination:x`), không thì đối số vị trí cuối. `-Path:x`/`-LiteralPath:x` dính liền là NGUỒN, không phải đối số vị trí."""
-    explicit: set[int] = set()
-    positional: list[int] = []
-    for index in range(1, len(tokens)):
-        token = tokens[index]
-        low = token.lower()
-        before = tokens[index - 1].lower() if index > 1 else ""
-        if before in ("-t", "--target-directory") or re.fullmatch(r"-dest[a-z]*", before):
-            explicit.add(index)
-        elif low.startswith("--target-directory=") or _colon_value(token, r"dest[a-z]*") is not None:
-            explicit.add(index)
-        elif not token.startswith("-") or _colon_value(token, r"path|p[a-z]*|literalpath|lit[a-z]*") is not None:
-            positional.append(index)
-    return explicit or ({positional[-1]} if positional else set())
+    """Vị trí token là ĐÍCH của cp/Copy-Item/Move-Item (`-Destination`, `-t`, hay đối số vị trí cuối), theo `_ps_split`."""
+    return {index for index, _ in _ps_split(tokens).dst}
 
 
 def _heredoc_marks(line: str, quote: str) -> tuple[list["re.Match[str]"], str]:
@@ -826,7 +906,10 @@ def _moves_into_tmp(tokens: list[str]) -> bool:
             return False
     elif name not in MOVE_COMMANDS:
         return False
-    return any(_in_tmp_name(_arg_value(tokens[i])) for i in _copy_destinations(tokens))
+    parts = _ps_split(tokens)
+    if parts.kind == "rename":  # đổi tên cây nằm trong `.tmp/` (hay thành tên trong `.tmp/`) tính như chuyển trong vùng tạm
+        return any(_in_tmp_name(value) for _, value in parts.src + parts.new)
+    return any(_in_tmp_name(value) for _, value in parts.dst)
 
 
 def _git_source_moved(tokens: list[str]) -> bool:
@@ -841,11 +924,9 @@ def _git_source_moved(tokens: list[str]) -> bool:
         return bool(positional) and _is_git_path(positional[0])
     if name not in MOVE_COMMANDS:
         return False
-    destinations = _copy_destinations(tokens)
-    return any(
-        _is_git_path(_arg_value(tokens[i])) for i in range(1, len(tokens))
-        if i not in destinations and (not tokens[i].startswith("-") or _arg_value(tokens[i]) != tokens[i])
-    )
+    parts = _ps_split(tokens)
+    checked = parts.src + parts.other + (parts.new if parts.kind == "rename" else [])  # tên mới là `.git` = thay `.git`; đích của mv thì không tính
+    return any(_is_git_path(value) for _, value in checked)
 
 
 def _recursive_listing(name: str, args: list[str]) -> list[str] | None:
@@ -934,7 +1015,7 @@ def _command_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
         return _robocopy_purge_item(args, ctx)
     if name in DELETE_COMMANDS:
         recursive, targets = _delete_parts(name, args)
-        if any(_is_git_path(t) for t in targets):  # xoá thứ thuộc `.git` (kể cả không đệ quy): phá cơ chế hoàn tác
+        if any(_is_git_path(t) for t in targets + [v for _, v in _ps_split(tokens).other]):  # xoá thứ thuộc `.git` (kể cả không đệ quy): phá cơ chế hoàn tác
             return "irreversible_delete"
         if not recursive:
             return None

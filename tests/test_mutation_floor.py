@@ -108,7 +108,7 @@ def ignore_check_inverted(root: Path) -> None:
 
 
 def git_dir_delete_open(root: Path) -> None:
-    edit(root, GUARD, "if any(_is_git_path(t) for t in targets):", "if False:")
+    edit(root, GUARD, "if any(_is_git_path(t) for t in targets + [v for _, v in _ps_split(tokens).other]):", "if False:")
 
 
 def tmp_move_ignored(root: Path) -> None:
@@ -136,7 +136,19 @@ def session_cap_formula_off(root: Path) -> None:
 
 
 def colon_dest_open(root: Path) -> None:
-    edit(root, GUARD, 'elif low.startswith("--target-directory=") or _colon_value(token, r"dest[a-z]*") is not None:', 'elif low.startswith("--target-directory="):')
+    edit(root, GUARD, 'bucket = parts.dst if canon == "destination" else parts.new', 'bucket = parts.other if canon == "destination" else parts.new')
+
+
+def named_param_colon_open(root: Path) -> None:
+    edit(root, GUARD, 'found = None if token.startswith("--") else _COLON_FLAG.fullmatch(token)', "found = None")
+
+
+def rename_newname_open(root: Path) -> None:
+    edit(root, GUARD, '(parts.new if parts.kind == "rename" else [])', "[]")
+
+
+def gc_any_expiry_open(root: Path) -> None:
+    edit(root, GUARD, 'any(re.fullmatch(r"gc\..*expire\w*", key) for key in config)', 'any(re.fullmatch(r"gc\..*expire\w*", key) and value in ("now", "all", "0") for key, value in config.items())')
 
 
 def cwd_in_git_open(root: Path) -> None:
@@ -144,7 +156,7 @@ def cwd_in_git_open(root: Path) -> None:
 
 
 def gc_config_open(root: Path) -> None:
-    edit(root, GUARD, 'if sub in ("gc", "prune", "reflog") and any(', "if False and any(")
+    edit(root, GUARD, 'if sub in ("gc", "prune", "reflog", "maintenance") and any(', "if False and any(")
 
 
 # SPR-20 TK21: sáu đột biến tinh (hợp đồng đích, nhánh được bảo vệ, alias, nhánh đẩy) nhắm mô-đun rào git thường trực và suite của nó;
@@ -170,6 +182,10 @@ MUTATIONS = {
     "branch-big-d-open": Mutation(branch_big_d_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
     # SPR-20 TK27d: ba đột biến phủ dạng dính `-Destination:x`, thư mục làm việc trong `.git`, `git -c gc.*=now`.
     "colon-dest-open": Mutation(colon_dest_open, f"{UNDO}::test_guard_colon_attached_powershell_flags_blocked", (UNDO,)),
+    # TK27e: ba đột biến phủ bộ phân tích tham số chung (dạng dính `-Tên:giá-trị`, tên mới là `.git`) và hạn hết hạn bất kỳ của `gc`.
+    "named-param-colon-open": Mutation(named_param_colon_open, f"{UNDO}::test_guard_ps_parameter_forms_git_blocked", (UNDO,)),
+    "rename-newname-open": Mutation(rename_newname_open, f"{UNDO}::test_guard_ps_parameter_forms_git_blocked", (UNDO,)),
+    "gc-any-expiry-open": Mutation(gc_any_expiry_open, f"{UNDO}::test_guard_git_config_zero_expiry_blocked", (UNDO,)),
     "cwd-in-git-open": Mutation(cwd_in_git_open, f"{UNDO}::test_guard_delete_or_move_with_cwd_inside_git_blocked", (UNDO,)),
     "gc-config-open": Mutation(gc_config_open, f"{UNDO}::test_guard_git_config_zero_expiry_blocked", (UNDO,)),
     "session-cap-formula-off": Mutation(session_cap_formula_off, "tests/test_check.py::test_delegation_session_cap_must_not_exceed_the_formula", ("tests/test_check.py",)),
