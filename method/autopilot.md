@@ -256,7 +256,7 @@ Không đánh giá: <phần không đọc hoặc không kiểm được>
 
 - Mỗi cổng duyệt thay có mục `## Bản ghi duyệt thay` ([process.md](process.md) mục 3) và file `evidence/gate-N-verdict.md`.
 - **Báo cuối** — REPORT mục "Bản tin autopilot" (`SPRINT.md` dùng cùng tiêu đề), người dùng đọc sau, không chặn việc: dòng đầu cảnh báo nếu `main` chưa có ruleset · một câu kết luận (là dòng đầu khi không có cảnh báo) ·
-  `Số lượt Đức phải trả lời: <số>` · một dòng mỗi cổng (cổng · kết luận · người ký · đường tới file kết luận) · hàng chờ người (mục "Việc cần người", mỗi việc theo bốn phần của [communication.md](communication.md) mục 3) · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do.
+  `Số lượt Đức phải trả lời: <số>` · một dòng mỗi cổng (cổng · kết luận · người ký · đường tới file kết luận) · hàng chờ người (mục "Việc cần người"; việc nào là câu hỏi cần người quyết thì theo bốn phần của [communication.md](communication.md) mục 3) · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do.
 - **Nhật ký quyết định** — REPORT (và `SPRINT.md`) có mục này; Đức đọc lại sau. Mỗi quyết định của Gate Delegate hay điều phối là một dòng: quyết gì · ai ký (nhãn · vai · tier · model) · bằng chứng (đường file hay lệnh + kết quả) · lệnh hoàn tác.
   Luật `check` `decision-log-missing`: ít nhất một dòng đủ `Ai ký` (nhãn · vai · tier · model), `Bằng chứng`, `Lệnh hoàn tác`; `SPRINT.md` ghi bằng gạch đầu dòng `- **Nhật ký quyết định:**` kèm bảng cùng cột.
 

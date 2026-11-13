@@ -1,13 +1,13 @@
 ---
 skill: intake
-method: "SPR-23 TK1: free-answer cases in-24/in-25, fresh subagent each (T3), RED = tree 8e17875 without reading the skill, GREEN = current tree reading SKILL.md by absolute path, grader = coordinator against criteria written before the run (not blind); earlier rounds: SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 553c1aa (before TK23), GREEN = current tree; free-answer cases graded blind by another session; earlier sections keep their own method (historic)"
-model: claude-sonnet-5-5 (SPR-23 TK1 RED/GREEN 2026-11-13, n = 2 for in-25, 1 for in-24 GREEN; SPR-20 TK24 n = 1 per case; earlier rounds in body)
+method: "SPR-24 TK2: stop-command cases in-26/in-27, fresh subagent each (T3), RED = tree a6c3774 without reading the skill, GREEN = tree 030e9f7 reading SKILL.md and references/autopilot.md by absolute path, grader = coordinator against criteria written before the run (not blind); earlier: SPR-23 TK1: free-answer cases in-24/in-25, fresh subagent each (T3), RED = tree 8e17875 without reading the skill, GREEN = current tree reading SKILL.md by absolute path, grader = coordinator against criteria written before the run (not blind); earlier rounds: SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 553c1aa (before TK23), GREEN = current tree; free-answer cases graded blind by another session; earlier sections keep their own method (historic)"
+model: claude-sonnet-5-5 (SPR-24 TK2 RED/GREEN 2026-11-14, n = 1 per case; SPR-23 TK1 RED/GREEN 2026-11-13, n = 2 for in-25, 1 for in-24 GREEN; SPR-20 TK24 n = 1 per case; earlier rounds in body)
 tier: T3
 skill_sha: 86b070491241f24030907d94d06937abf602b209
 source_sha256: b5eab2a3ec7c978f1565cf74d6ce3a4e5396a376561ab42d5b699b60d1430116
 requested_effort: "medium"
 date: 2026-11-14
-result: "3/3 GREEN pass (SPR-23 TK1: in-25 ×2 + in-24 hồi quy ×1, ca tự do, người chấm không mù); RED in-25 1 Trượt, 1 Một phần, in-24 RED 2/2 Đạt (không phân biệt); n = 2 mỗi ca in-25 (in-24 GREEN n = 1), cùng họ model; trước đó SPR-20 TK24: 9/9 GREEN pass, RED 4 Đạt, 3 Một phần, 2 Không đạt"
+result: "2/2 GREEN pass (SPR-24 TK2: in-26 + in-27, ca tự do, người chấm không mù); RED in-26 Đạt (lộ đáp án), in-27 Một phần; n = 1 mỗi ca, cùng họ model; trước đó SPR-23 TK1: 3/3 GREEN pass; SPR-20 TK24: 9/9 GREEN pass, RED 4 Đạt, 3 Một phần, 2 Không đạt"
 agent_ids:
   sonnet_spr24_tk2_red_a6c3774_2026_11_14: {in-26: a3711cf1dfafc2555, in-27: a3ebd476d5acea9da}
   sonnet_spr24_tk2_green_2026_11_14: {in-26: a49b81d568f9db4e7, in-27: ad22cc1d094fb2e23}

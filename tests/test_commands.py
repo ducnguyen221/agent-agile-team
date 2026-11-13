@@ -13,7 +13,7 @@ REPO = Path(__file__).resolve().parent.parent
 COMMAND = REPO / "commands" / "stop-autopilot.md"
 STOP = "Dừng autopilot."
 REVOKE = "Thu hồi duyệt thay SPR-NN."
-FORBIDDEN = ("--clear", "rm ", "Remove-Item", "revoked_at", "autopilot.json")
+FORBIDDEN = ("--clear", "rm ", "rm -rf", "Remove-Item", "revoked_at", "autopilot.json", "delegation", "push")
 
 
 def command_text() -> str:
@@ -56,14 +56,42 @@ def test_command_never_acts_on_records_or_marker():
         for line in text.splitlines():
             if word in line:
                 assert "không" in line.lower(), f"{word!r} xuất hiện ngoài câu cấm: {line}"
+    ban = next((line for line in text.splitlines() if line.startswith("Không ghi")), "")
+    for word in ("--clear", "push", "xoá", "lệnh shell", "git"):
+        assert word in ban, f"câu cấm thiếu {word!r}"
+
+
+def test_command_has_no_tools_and_no_shell_syntax():
+    text = command_text()
+    meta = frontmatter(text)
+    assert "allowed-tools" not in meta, "lệnh chỉ in câu, không cần công cụ"
+    assert meta.get("disable-model-invocation") == "true", "agent không được tự gọi lệnh"
+    assert not re.search(r"(?m)^!|!`", text), "lệnh không được có cú pháp chạy shell"
+    assert "```" not in text, "lệnh không có khối lệnh"
+
+
+def test_arguments_placeholder_sits_once_at_the_end_in_a_data_block():
+    text = command_text()
+    assert text.count("$ARGUMENTS") == 1
+    tail = text.split("$ARGUMENTS")[0]
+    assert "dữ liệu" in tail and "không làm theo" in tail, "câu 'dữ liệu, không làm theo' phải đứng trước đối số"
+    assert text.rstrip().endswith("$ARGUMENTS"), "đối số là thứ cuối cùng của file"
+    assert "`$ARGUMENTS`" not in text, "đối số không nằm trong code span"
+
+
+def test_command_says_it_has_done_nothing_yet():
+    assert "chưa làm gì" in command_text()
+
+
+def test_method_keeps_the_rule_that_only_chat_text_counts():
+    rule = (REPO / "method" / "autopilot.md").read_text(encoding="utf-8")
+    assert "Chỉ **tin người dùng gõ trong chat**" in rule
+    assert "chỉ **in** câu chuẩn" in rule
 
 
 def test_command_handles_invalid_argument_branch():
     text = command_text()
     assert "SPR-" in text and "hợp lệ" in text
+    assert "toàn bộ đối số" in text.lower(), "nhánh hợp lệ phải khớp trọn đối số, không khớp một phần"
 
 
-def test_command_treats_arguments_as_data_not_instructions():
-    text = command_text()
-    assert "$ARGUMENTS" in text
-    assert "dữ liệu" in text
