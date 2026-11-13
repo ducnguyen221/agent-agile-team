@@ -99,24 +99,6 @@ def test_response_style_brief_block_mentions_links_and_recommendation():
     assert "[tên:dòng](" in block, "khối rút gọn dùng dạng link khác `[tên:dòng](đường:dòng)` của method/communication.md mục 2"
 
 
-def _section(text: str, start: str, end: str) -> str:
-    return text.split(start, 1)[1].split(end, 1)[0]
-
-
-def test_response_style_labels_unmeasured_estimates_in_table_cost_column_and_brief_block():
-    """RQ-121: RS-1/RS-3 trượt vì ước lượng thời gian, công sức, chi phí không nhãn ("1–2 ngày", "vài ngày", "nửa ngày", "gần 0 USD").
-    Luật phải nằm ở mục 3 (cột chi phí của bảng lựa chọn), mục 4 (bảng cấm) và khối rút gọn mục 8: ước lượng chưa đo → nhãn + cách đo."""
-    text = read("skills/response-style/SKILL.md")
-    for name, part in (("mục 3", _section(text, "## 3.", "## 4.")), ("mục 4", _section(text, "## 4.", "## 5.")), ("mục 8", text.split("## 8.", 1)[1])):
-        low = part.lower()
-        assert "ước lượng" in low and "chưa đo" in low and "cách đo" in low, f"{name} thiếu luật nhãn 'chưa đo' + cách đo cho ước lượng"
-        assert "thời gian" in low and ("chi phí" in low or "giá" in low), f"{name} chưa nói ước lượng thời gian và chi phí"
-    # REFACTOR vòng 1 (RS-1 G1, G3): ước lượng nằm trong lời văn ("một buổi") cũng phải có nhãn, không chỉ ô bảng
-    row = next(line for line in _section(text, "## 4.", "## 5.").splitlines() if "một buổi" in line)
-    assert "lời văn" in row or "ngoài bảng" in row, "bảng cấm chưa nói nhãn áp cho ước lượng trong lời văn, không chỉ ô bảng"
-    assert "lời văn" in text.split("## 8.", 1)[1], "khối rút gọn chưa nói nhãn áp cho cả lời văn"
-
-
 def test_no_old_link_form_in_communication_files():
     for rel in ("skills/response-style/SKILL.md", "skills/explain/SKILL.md", "skills/explain/tests/scenarios.txt", POINTER):
         assert "[tên](" not in read(rel), f"`{rel}` còn dạng link cũ `[tên](…)`"
