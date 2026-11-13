@@ -4,7 +4,8 @@
 > và mỗi tin dựa trên file thì kèm **link tới file đó**, mỗi câu hỏi cần người chốt thì kèm **phương án và khuyến
 > nghị**. Tài liệu sprint có hai lớp: lớp một cho người, lớp hai cho agent. Đây là nơi chuẩn của các luật đó;
 > `AGENTS.md` và mẫu chỉ **trỏ tới**; skill `explain` là quy trình thi hành mục 1, skill `response-style` giữ luật
-> súc tích mặc định, khối rút gọn ở mục 8 của nó là bản chép cho subagent. Hai chỗ nói khác nhau thì file này thắng.
+> súc tích mặc định, khối rút gọn ở mục 8 của nó là bản chép cho subagent. Hai chỗ nói khác nhau về **cách trình bày** thì
+> file này thắng; luật secret, cổng và lượt 5 ý của `AGENTS.md` luôn thắng.
 
 Luật không đổi (nằm ở `AGENTS.md` mục Văn phong phản hồi và skill `response-style` mục 5): dù nén hay diễn giải,
 **không bao giờ mất** báo lỗi, cảnh báo bảo mật, xác nhận thao tác phá hủy, số liệu + đơn vị, đường dẫn, mã lỗi,
@@ -14,23 +15,26 @@ chữ phủ định.
 
 | | Súc tích (mặc định) | Diễn giải |
 |---|---|---|
-| Dấu hiệu vào | không có yêu cầu khác | người dùng gõ `/explain` (kèm đường dẫn thì diễn giải file đó), hoặc nói "giải thích", "diễn giải", "nói dễ hiểu hơn", "chưa hiểu", "tại sao", "nghĩa là gì"; hỏi lại cùng một điểm; phản hồi cho thấy hiểu sai; hậu quả khó hoàn tác |
+| Dấu hiệu vào (danh sách **duy nhất**; nơi khác chỉ trỏ về đây) | không có yêu cầu khác | người dùng gõ `/explain` (kèm đường dẫn thì diễn giải file đó), hoặc nói "giải thích", "diễn giải", "nói dễ hiểu hơn", "chưa hiểu", "chi tiết hơn", "tại sao", "nghĩa là gì"; hỏi lại cùng một điểm; phản hồi cho thấy hiểu sai; hoặc tin đang đòi người quyết một việc có hậu quả khó hoàn tác (mục 3) |
 | Cách trả lời | theo `skills/response-style`: câu đầu là kết luận, không dẫn nhập, không tóm tắt lặp | viết lại **tin gần nhất** (hoặc đoạn/file người dùng chỉ) bằng lời dễ hiểu — xem skill `explain` |
 | Dấu hiệu thoát | — | giữ chế độ cho chủ đề đó tới khi người dùng hiểu hoặc chuyển việc, rồi tin sau về súc tích; "diễn giải từ giờ" giữ chế độ cả phiên; "ngắn gọn lại" về mặc định |
 
 - Mặc định phải súc tích để tiết kiệm token; chế độ diễn giải **chỉ bật theo yêu cầu**, trừ việc có hậu quả khó hoàn
-  tác (mục 3 dưới đây).
+  tác (mục 3 dưới đây). "Tại sao" và "nghĩa là gì" chỉ tính khi hỏi về **chính tin hay đoạn vừa gửi**; câu hỏi mới
+  ("tại sao build hỏng?") thì trả lời súc tích. "Hậu quả khó hoàn tác" chỉ bật diễn giải khi tin **đang đòi người
+  quyết** điều đó, không bật vì nhắc tới nó.
 - Host không có lệnh gạch chéo thì câu của người dùng có tác dụng như lệnh. Lời yêu cầu trực tiếp của người dùng
   luôn thắng.
 - **Cách diễn giải:** mở bằng kết luận một câu; giải nghĩa mọi viết tắt và thuật ngữ ở lần đầu; bỏ mã trần; ví dụ
   đời thường cho khái niệm khó; nêu chuyện gì xảy ra, ảnh hưởng gì tới người đọc, tốn gì, rủi ro gì, có đường lui
-  không; "Chi tiết kỹ thuật" tách xuống cuối; kết bằng điều người đọc cần quyết kèm khuyến nghị.
+  không; "Chi tiết kỹ thuật" tách xuống cuối; kết bằng điều người đọc cần quyết kèm khuyến nghị **chỉ khi nguồn có việc cần quyết**; nguồn không có thì kết bằng
+  việc người đọc cần làm, hoặc không kết thêm gì.
 - **Giữ nguyên dữ kiện:** diễn giải làm rõ, không bỏ, không thêm sự kiện. Số liệu + đơn vị, đường dẫn, mã lỗi,
   chữ phủ định, cảnh báo bảo mật của nguồn còn nguyên; cảnh báo và hậu quả khó hoàn tác đưa lên **đầu** tin. Chỗ
   nguồn mơ hồ thì ghi "nguồn không nói rõ" thay vì đoán. **Không thêm số mới**, kể cả số tự tính từ số của nguồn
   (ví dụ "chậm gấp 4,4 lần" khi nguồn chỉ nêu hai số gốc).
-- **Nguồn dài hơn 200 dòng:** hỏi người dùng muốn phần nào (một câu), không tự cắt. `/explain` khi chưa có tin trước
-  thì hỏi "diễn giải gì?".
+- **Nguồn dài hơn 200 dòng** mà người dùng chưa nêu phần cần: hỏi muốn phần nào (một câu), không tự cắt; đã nêu phần
+  thì diễn giải phần đó. `/explain` khi chưa có tin trước thì hỏi "diễn giải gì?".
 
 ## 2. Link tới file chi tiết
 
@@ -39,12 +43,15 @@ chữ phủ định.
   (một `TK`, `DN`, `RF`…). Không dùng đường tuyệt đối trong link bấm; không bọc link trong khối code.
 - **Khi nào bắt buộc:** tin có (a) danh sách hay bảng mã lấy từ một tài liệu, (b) tóm tắt nội dung một file, (c) câu
   hỏi cần người quyết dựa trên chi tiết trong file, hoặc (d) tin dừng, tin mở sprint, tin cuối. **Trước** danh
-  sách, bảng hay câu hỏi đó có một câu dẫn kèm link tới tài liệu nguồn. Câu dẫn của skill `id-convention` ("SPEC
+  sách, bảng hay câu hỏi đó có một câu dẫn kèm link tới tài liệu nguồn. Với tin mở, dừng, cuối của autopilot, link
+  áp khi có file tài liệu để trỏ; khuôn của `method/autopilot.md` không đổi. Câu dẫn của skill `id-convention` ("SPEC
   có 3 **user story** (US):") giữ nguyên, tên tài liệu trong đó thành link.
 - **Khi nào không cần:** câu trả lời không dựa trên file nào, hoặc là xác nhận 1–3 câu. Không thêm link cho đẹp.
 - **File ngoài thư mục phiên** (ví dụ hồ sơ ở nơi khác khi phiên mở ở repo mã): trước hết dùng cơ chế của host để
   mở thư mục hoặc gửi file, nếu có. Không có thì nêu đường dẫn tuyệt đối trong dấu code **và** một câu nói rõ
   "file ngoài thư mục phiên, cần mở thư mục để bấm được"; không giả làm link bấm được.
+- **Không link tới file secret** (`.env*`, `~/.secret/`, `*.pem`, `*.key`, `*credentials*`) và không để đường tuyệt
+  đối lộ thư mục kho secret; cần nhắc thì nêu loại file, không nêu đường.
 - **Không để link gãy:** file có thật và dòng nằm trong file tại lúc gửi; file vừa đổi thì dùng mã (`TK4`) thay số
   dòng.
 
@@ -60,8 +67,10 @@ Khi agent cần người chốt một việc, tin có đúng bốn phần theo t
 2. **Câu dẫn kèm link** tới file chi tiết (mục 2): `Chi tiết: [<tên>:<dòng>](<đường>:<dòng>)`.
 3. **Phương án** — bảng khi ≥ 3 phương án × ≥ 2 thuộc tính, ngược lại danh sách; mỗi phương án nêu đánh đổi và
    rủi ro, công sức, khi nào nên chọn.
-4. **`KHUYẾN NGHỊ:`** phương án nghiêng về + lý do một câu + việc chờ hoặc việc làm tiếp được nếu người chưa trả
-   lời. **Im lặng không bao giờ là duyệt** cổng, lượt 5 ý hay việc không đảo ngược.
+4. **`KHUYẾN NGHỊ:`** phương án nghiêng về + lý do một câu + việc chờ, hoặc việc làm tiếp nếu người chưa trả lời.
+   **Im lặng không bao giờ là duyệt:** cổng, lượt 5 ý, việc không đảo ngược, việc chạm secret, việc ra ngoài phạm vi
+   đã duyệt, và không tự chọn phương án đang hỏi. Việc làm tiếp chỉ là việc **không phụ thuộc quyết định** và đã nằm
+   trong phạm vi đã duyệt.
 
 Mẫu điền sẵn:
 
@@ -73,7 +82,7 @@ Chi tiết: [PLAN TK3:97](docs/plans/x/PLAN.md:97).
 | A. Làm ngay | tránh sửa gấp; rủi ro bộ nhớ trên máy 2 GB | +1 phiên | đã có đơn lớn |
 | B. Để sprint sau | xuất lỗi nếu gặp tệp lớn sớm | 0 | chưa có đơn lớn |
 | C. Chặn tệp lớn, báo "lọc theo ngày" | người dùng cuối phải xuất nhiều lần | +0,2 phiên | muốn rẻ nhất |
-**KHUYẾN NGHỊ:** B — chưa có đơn nào > 50 MB. Nếu anh chưa trả lời, em làm tiếp TK1–TK2 và giữ TK3 chờ.
+**KHUYẾN NGHỊ:** B — chưa có đơn nào > 50 MB. Nếu anh chưa trả lời, em làm tiếp TK1–TK2 (không phụ thuộc quyết định này), giữ TK3 chờ và không tự chọn phương án.
 ```
 
 - Phần 2 (link) chỉ bỏ được khi **không có file nào** chứa căn cứ hay chi tiết của quyết định; có file (dù mới biết
@@ -83,6 +92,8 @@ Chi tiết: [PLAN TK3:97](docs/plans/x/PLAN.md:97).
 - Nhiều câu hỏi cùng lúc thì gom thành **một** tin, nêu số lượng đầu tin ("có 3 **quyết định** (DN) chờ anh:"), mỗi
   câu theo bốn phần trên.
 - Quyết định **không đảo ngược được** thì riêng câu hỏi đó chuyển sang chế độ diễn giải (mục 1) trước khi hỏi.
+- Khi autopilot bật, mẫu bốn phần áp cho mục "Việc cần người" ở báo cuối và hồ sơ của Gate Delegate; `method/autopilot.md`
+  không đổi.
 
 ## 4. Tài liệu sprint hai lớp
 
@@ -97,4 +108,4 @@ Chi tiết: [PLAN TK3:97](docs/plans/x/PLAN.md:97).
 
 Skill `response-style` mục 5 (bất khả xâm phạm khi nén) và `AGENTS.md` mục Văn phong phản hồi vẫn là luật của mặc
 định súc tích; file này chỉ thêm link, mẫu câu hỏi, chế độ diễn giải và hai lớp tài liệu. Hai chỗ nói khác nhau
-thì file ở `method/` thắng và chỗ kia sửa theo.
+về cách trình bày thì file này thắng và chỗ kia sửa theo; luật secret, cổng và lượt 5 ý của `AGENTS.md` luôn thắng.

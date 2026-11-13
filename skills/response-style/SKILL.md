@@ -9,7 +9,7 @@ metadata:
 # Văn phong phản hồi
 
 > **Kết luận:** câu đầu là kết luận hoặc điều người đọc cần làm; độ dài theo **người đọc × việc**; người đọc
-> yêu cầu hoặc chưa hiểu thì chuyển sang skill `explain`; và dù nén đến đâu cũng **không mất** báo
+> cần diễn giải thì chuyển sang skill `explain` (dấu hiệu: `method/communication.md` mục 1); và dù nén đến đâu cũng **không mất** báo
 > lỗi, cảnh báo bảo mật, số liệu, chữ phủ định. Luật giao tiếp của môi trường (nếu có) thắng skill này;
 > skill không chép lại luật đó.
 
@@ -75,9 +75,8 @@ cho một từ **cộng** phần sau dấu gạch; đó là giới hạn của v
 
 ## 6. Lối ra giải thích
 
-Người đọc nói "giải thích", "chi tiết hơn", "tại sao", "chưa hiểu", "nói lại dễ hiểu", gõ `/explain`, hỏi lại cùng
-một điểm, hoặc việc cần quyết có hậu quả khó hoàn tác → dùng skill `explain`: nó viết lại tin gần nhất bằng lời
-dễ hiểu, giữ nguyên mọi dữ kiện. Bảng hai chế độ, dấu hiệu vào/thoát (khi nào về súc tích, "diễn giải từ giờ"):
+Người đọc cần diễn giải (gõ `/explain` hoặc theo danh sách dấu hiệu vào ở `method/communication.md` mục 1) → dùng skill
+`explain`: nó viết lại tin gần nhất bằng lời dễ hiểu, giữ nguyên mọi dữ kiện. Danh sách dấu hiệu vào/thoát chỉ nằm ở
 `method/communication.md` mục 1. Lời yêu cầu trực tiếp của người đọc luôn thắng.
 
 ## 7. Tài liệu sprint
@@ -96,6 +95,6 @@ Nén không bao giờ bỏ: báo lỗi, cảnh báo bảo mật, xác nhận tha
 Báo cáo về điều phối: Kết quả / Chứng cứ / Còn mở / Cần người, ≤15 dòng, con trỏ file thay log.
 Tin dựa trên file → câu dẫn kèm link `[tên:dòng](đường:dòng)`; hỏi người chốt → một dòng hỏi + phương án + dòng
 KHUYẾN NGHỊ có lý do (im lặng không phải là duyệt). Luật đầy đủ: method/communication.md.
-Người đọc nói "chưa hiểu"/"tại sao" → giải thích theo góc người đọc, ví dụ đời thường, chi tiết kỹ thuật
-tách cuối; về súc tích khi người đọc hiểu hoặc chuyển việc.
+Người đọc cần diễn giải (dấu hiệu: method/communication.md mục 1) → giải thích theo góc người đọc, ví dụ đời thường,
+chi tiết kỹ thuật tách cuối; về súc tích khi người đọc hiểu hoặc chuyển việc.
 ```

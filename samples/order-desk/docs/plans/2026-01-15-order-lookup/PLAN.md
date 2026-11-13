@@ -31,6 +31,13 @@ links:
 > **Kết luận:** <!-- MỘT câu: cách làm chính + số việc + điều cần người quyết (nếu có). -->
 > Thêm một điểm tra cứu đơn hàng chỉ-đọc qua 2 việc; không có quyết định nào cần người ngoài Cổng 1.
 
+## Tóm tắt cho người không chuyên
+
+Cách làm là thêm một chức năng tra cứu chỉ-đọc ở phía dịch vụ, rồi một màn hình để nhân viên gõ mã đơn. Việc chia làm
+hai bước nhỏ, mỗi bước có bài kiểm tự động và đều quay lui được bằng một lệnh. Rủi ro chính là mã đơn cũ lẫn chữ hoa và
+chữ thường có thể làm tra hụt; cách xử lý là chuẩn hoá mã về chữ hoa trước khi tra. Không có quyết định nào cần người ngoài
+Cổng 1.
+
 ## Mục tiêu
 
 <!-- Nhắc lại mục tiêu sprint bằng một câu và trỏ SPEC. -->

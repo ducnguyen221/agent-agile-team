@@ -32,6 +32,13 @@ links:
 > **Kết luận:** <!-- MỘT câu: sprint làm gì, cho ai, xong khi nào. Người không chuyên đọc câu này là đủ. -->
 > Sprint SPR-01 cho người dùng tra trạng thái đơn hàng trong một bước; xong khi SC1 (tra nhanh) đạt.
 
+## Tóm tắt cho người không chuyên
+
+Nhân viên bán hàng hiện chưa có cách tra trạng thái một đơn chỉ bằng mã đơn. Sprint này thêm đúng việc đó: gõ mã đơn
+thì thấy trạng thái hiện tại và lúc cập nhật gần nhất. Mã không có thì hệ thống báo "không tìm thấy" và không để lộ đơn
+khác. Chỉ nhân viên được tra; khách hàng tự tra và việc sửa trạng thái nằm ngoài sprint. Người duyệt chỉ cần xác nhận
+phạm vi này ở Cổng 1.
+
 ## 1. Bối cảnh
 
 <!-- Vì sao cần làm. 3–6 gạch đầu dòng; số liệu phải có nguồn. Trỏ yêu cầu gốc RQ-NNN và tính năng FS-NNN.

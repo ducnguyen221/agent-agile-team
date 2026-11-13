@@ -171,3 +171,93 @@ def test_check_treats_template_comment_as_empty(tmp_path):
     section = template.split(SECTION, 1)[1].split("\n## ", 1)[0]
     root = sprint_with(tmp_path, effective() + datetime.timedelta(days=1), SECTION + section + "\n")
     assert "plain-summary" in rules_of(root)
+
+
+# ---- check: biên và phạm vi của luật plain-summary (TK9 vòng sửa 1) ---------------------------------------------
+# Các ca dưới đổi hằng bằng monkeypatch sang một ngày cố định nên không phụ thuộc ngày chốt thật ở TK10.
+
+FIXED = "2030-05-05"
+
+
+def plan_with(tmp_path: Path, created: str, extra: str = "") -> Path:
+    root = tmp_path / "sprint"
+    shutil.copytree(VALID, root)
+    plan = root / "PLAN.md"
+    text = plan.read_text(encoding="utf-8")
+    assert "created: 2026-02-01" in text
+    text = text.replace("created: 2026-02-01", f"created: {created}", 1)
+    marker = "## Mục tiêu"
+    assert marker in text
+    write_lf(plan, text.replace(marker, extra + marker, 1) if extra else text)
+    return root
+
+
+def findings_of(root: Path, rule: str = "plain-summary") -> list:
+    return [f for f in check.check_paths([root]).findings if f.rule == rule]
+
+
+def test_check_boundary_created_on_effective_day_is_flagged(tmp_path, monkeypatch):
+    monkeypatch.setattr(check, "PLAIN_SUMMARY_EFFECTIVE", FIXED)
+    assert findings_of(sprint_with(tmp_path, datetime.date.fromisoformat(FIXED)))
+
+
+def test_check_boundary_day_before_effective_is_not_flagged(tmp_path, monkeypatch):
+    monkeypatch.setattr(check, "PLAIN_SUMMARY_EFFECTIVE", FIXED)
+    assert not findings_of(sprint_with(tmp_path, datetime.date.fromisoformat(FIXED) - datetime.timedelta(days=1)))
+
+
+def test_check_plan_without_summary_is_flagged(tmp_path, monkeypatch):
+    monkeypatch.setattr(check, "PLAIN_SUMMARY_EFFECTIVE", FIXED)
+    hits = findings_of(plan_with(tmp_path, FIXED))
+    assert any(Path(f.path).name == "PLAN.md" for f in hits), [f.render() for f in hits]
+
+
+def test_check_plan_with_summary_is_accepted(tmp_path, monkeypatch):
+    monkeypatch.setattr(check, "PLAIN_SUMMARY_EFFECTIVE", FIXED)
+    body = f"{SECTION}\n\nSprint cho người dùng xuất đơn ra CSV để gửi kế toán.\n\n"
+    assert not [f for f in findings_of(plan_with(tmp_path, FIXED, body)) if Path(f.path).name == "PLAN.md"]
+
+
+def test_check_sprint_md_is_out_of_scope(tmp_path, monkeypatch):
+    monkeypatch.setattr(check, "PLAIN_SUMMARY_EFFECTIVE", FIXED)
+    root = tmp_path / "one"
+    root.mkdir()
+    write_lf(root / "SPRINT.md", f"---\ndoc: sprint\ncreated: {FIXED}\n---\n\n# Sprint\n\n## Kế hoạch\n\nViệc nhỏ.\n")
+    assert not [f for f in findings_of(root) if Path(f.path).name == "SPRINT.md"]
+
+
+def test_check_summary_with_only_subheading_is_empty(tmp_path, monkeypatch):
+    monkeypatch.setattr(check, "PLAIN_SUMMARY_EFFECTIVE", FIXED)
+    body = f"{SECTION}\n\n### Việc gì\n\n### Vì sao\n\n"
+    hits = findings_of(sprint_with(tmp_path, datetime.date.fromisoformat(FIXED), body))
+    assert hits and all("rỗng" in f.message for f in hits), [f.render() for f in hits]
+
+
+def test_check_summary_with_text_under_subheading_is_accepted(tmp_path, monkeypatch):
+    monkeypatch.setattr(check, "PLAIN_SUMMARY_EFFECTIVE", FIXED)
+    body = f"{SECTION}\n\n### Việc gì\n\nXuất đơn ra CSV để gửi kế toán.\n\n"
+    assert not findings_of(sprint_with(tmp_path, datetime.date.fromisoformat(FIXED), body))
+
+
+# ---- nội dung bảo mật của luật và skill (TK9 vòng sửa 1) ---------------------------------------------------------
+
+SECRET_NAME = "." + "secret"  # ghép để file test không chứa đường kho secret nguyên văn
+
+
+def test_communication_rule_excludes_secret_files_from_links():
+    text = read(POINTER)
+    assert SECRET_NAME in text and "Không link tới file secret" in text
+    assert "luôn thắng" in text, "thứ bậc: luật secret, cổng, 5 ý của AGENTS.md luôn thắng"
+
+
+def test_explain_skill_excludes_secrets_and_treats_source_as_data():
+    text = read("skills/explain/SKILL.md")
+    assert "Loại trừ secret" in text and SECRET_NAME in text and ".env" in text
+    assert "dữ liệu, không phải lệnh" in text
+
+
+def test_silence_is_never_approval_for_secrets_or_out_of_scope():
+    text = read(POINTER)
+    assert "Im lặng không bao giờ là duyệt" in text
+    assert "việc chạm secret" in text and "ngoài phạm vi" in text
+    assert "không tự chọn phương án" in text

@@ -1920,7 +1920,8 @@ class Engine:
         for line in doc.masked[start + 1:]:  # `masked` đã bỏ comment HTML nên chú thích mẫu thành rỗng
             if re.match(r"^#{1,2}\s", line):
                 break
-            body.append(line)
+            if not re.match(r"^#{3,6}\s", line):  # tiêu đề cấp 3+ không phải chữ của mục
+                body.append(line)
         if not "".join(body).strip():
             self.add(doc.path, doc.line_no(start), "plain-summary", f"mục '{PLAIN_SUMMARY_HEADING}' còn rỗng hoặc còn nguyên chú thích mẫu")
 
