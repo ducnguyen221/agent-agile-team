@@ -5,7 +5,7 @@ model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun
 date: 2026-11-13
 result: 6/9 runs pass strict reading (RS-1 1/3, RS-2 3/3, RS-3 2/3), 8/9 lenient; control on the old skill RS-1 0/3, RS-3 1/3 (same failure kind, not a regression); GREEN rerun 2026-11-13 on SPR-21 TK5
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: 98cf784a061e8ab9c406845adf4bf9fa2b2a67d6
+skill_sha: d626f1ed339b5ed8389ad1170276a10d8523f336
 agent_ids:
   green_rerun_2026_10_04: {rs-1: af26a5eb29de2e971, rs-2: ab5587bbe2574b8a1, rs-3: a708cc8e24e2dffac}
 ---
@@ -95,3 +95,7 @@ Prompt nguyên văn ở `tests/scenarios.txt` (dựng lại từ mô tả ở SP
 Lưu ý: sau lượt chạy, một commit nữa chỉ sửa dòng `description` (bỏ vế "asks why / chưa hiểu", vì `test_communication_rules.py` đòi mô tả không còn trigger đó); thân skill không đổi nên không chạy lại, `skill_sha` ở trên là băm sau commit đó.
 
 Sau tech-review-2: mục 6 và khối mục 8 đổi hai chỗ (bỏ câu "rồi tin sau về súc tích" vô điều kiện, đổi dạng link thành `[tên:dòng](đường:dòng)`); chạy nhanh lại RS-1..RS-3 n = 1 (kết quả ở hồ sơ chấm, mục "Vòng 4"); `skill_sha` ở đầu file là băm sau lần sửa đó.
+
+## Vòng sửa 1 của TK9 (2026-11-13)
+
+`SKILL.md` chỉ đổi mục 6, khối rút gọn mục 8 và dòng Kết luận: danh sách dấu hiệu vào diễn giải thành con trỏ về `method/communication.md` mục 1. Chạy lại n = 1 mỗi ca, runner `sonnet` mới, grader `opus` khác: RS-2 **Đạt**; RS-3 **Đạt**; RS-1 **Không đạt** (ước lượng thời gian/giá như "nửa ngày", "gần 0 USD" không ghi "chưa đo") — lỗi nền cũ đã ghi ở trên (RS-1 trượt cả ở bản skill cũ), không do thay đổi này. n = 1, chưa có RED mới. Bằng chứng: `tk9-fix1.md` của hồ sơ sprint.
