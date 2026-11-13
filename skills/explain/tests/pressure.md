@@ -5,14 +5,14 @@ model: sonnet (subagent alias, runners); grader opus
 date: 2026-11-13
 result: 3/3 GREEN pass (CM-3 rerun on final tree; CM-4, CM-4b on the first tree, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed)
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: b0a86387e9d7c0f352a1be4da1cc4a0dd0419de0
+skill_sha: 01b5133c40f87832f8e8942edf98f85d5bb52633
 ---
 
 # Thử áp lực — explain
 
 > **Kết luận:** nền (không skill) trượt CM-3 (diễn giải đúng dữ kiện) cả 3 lượt; có skill đạt 3/3 ở CM-3, CM-4, CM-4b. **CM-4 và
 > CM-4b nền đã đạt sẵn** (0/3 trượt), nên hai kịch bản này không phân biệt được có/không skill — SC4 chưa chứng minh
-> được bằng phép thử này (CO, chủ: điều phối). CM-3 được chạy lại trên bản skill cuối (3/3), nhưng bảng lỗi của `SKILL.md` dùng cùng dữ kiện CM-3 (`5 → 20 kết nối`, p95) nên lần chạy lại **bị nhiễm**, không tính bằng chứng độc lập (Tech Review 2, RF3 — chờ quyết: đổi ví dụ rồi chạy lại hoặc giữ kịch bản held-out). CM-4/CM-4b chỉ đo trên cây đầu. Ca "chưa hiểu" để xem skill nào chạy (RK6) **chưa đo**: skill chưa cài vào danh mục
+> được bằng phép thử này (CO, chủ: điều phối). CM-3 được chạy lại trên bản skill cuối (3/3), nhưng bảng lỗi của `SKILL.md` dùng cùng dữ kiện CM-3 (`5 → 20 kết nối`, p95) nên lần chạy lại **bị nhiễm**, không tính bằng chứng độc lập (Tech Review 2, RF3 — chờ quyết: đổi ví dụ rồi chạy lại hoặc giữ kịch bản held-out). CM-4/CM-4b đo trên cây đầu và chạy nhanh lại n = 1 sau khi luật thoát chế độ chỉ còn một nghĩa ở `communication.md` (xem mục "Vòng 4" của hồ sơ chấm). Ca "chưa hiểu" để xem skill nào chạy (RK6) **chưa đo**: skill chưa cài vào danh mục
 > của harness, subagent được ép đọc file skill.
 
 Prompt nguyên văn: `tests/scenarios.txt`. RED: "không dùng Skill tool, không mở SKILL.md". GREEN: thêm dòng "đọc

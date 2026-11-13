@@ -93,6 +93,12 @@ def test_response_style_brief_block_mentions_links_and_recommendation():
     block = text.split("## 8.", 1)[1]
     assert "link" in block.lower(), "khối rút gọn cho subagent thiếu dòng về link (FR5.3)"
     assert "KHUYẾN NGHỊ" in block, "khối rút gọn cho subagent thiếu dòng về khuyến nghị (FR5.3)"
+    assert "[tên:dòng](" in block, "khối rút gọn dùng dạng link khác `[tên:dòng](đường:dòng)` của method/communication.md mục 2"
+
+
+def test_no_old_link_form_in_communication_files():
+    for rel in ("skills/response-style/SKILL.md", "skills/explain/SKILL.md", "skills/explain/tests/scenarios.txt", POINTER):
+        assert "[tên](" not in read(rel), f"`{rel}` còn dạng link cũ `[tên](…)`"
 
 
 def test_skills_readme_lists_explain():

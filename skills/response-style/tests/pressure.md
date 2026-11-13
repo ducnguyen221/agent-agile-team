@@ -5,7 +5,7 @@ model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun
 date: 2026-11-13
 result: 6/9 runs pass strict reading (RS-1 1/3, RS-2 3/3, RS-3 2/3), 8/9 lenient; control on the old skill RS-1 0/3, RS-3 1/3 (same failure kind, not a regression); GREEN rerun 2026-11-13 on SPR-21 TK5
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: a065a9144968565d06b53b48b5e3cb384d16ad9d
+skill_sha: 98cf784a061e8ab9c406845adf4bf9fa2b2a67d6
 agent_ids:
   green_rerun_2026_10_04: {rs-1: af26a5eb29de2e971, rs-2: ab5587bbe2574b8a1, rs-3: a708cc8e24e2dffac}
 ---
@@ -93,3 +93,5 @@ Prompt nguyên văn ở `tests/scenarios.txt` (dựng lại từ mô tả ở SP
 **Đối chứng:** cùng RS-1 và RS-3 trên bản skill cũ (`5000f85`), n = 3 mỗi kịch bản: RS-1 0/3 (2/3 trượt vì ước lượng không nguồn, 1 lượt chỉ 3 lý do), RS-3 1/3 (2/3 trượt vì ước lượng). Tỉ lệ trượt do ước lượng không nguồn bản cũ không thấp hơn bản mới, nên đây là lỗi có sẵn ở nền, không do bản sửa gây ra. Không lượt nào dài hơn baseline quá 3 dòng. Chưa vá: lỗi ước lượng không nguồn (CO, thuộc skill gốc, ngoài phạm vi sprint); ghi nhận thêm `SKILL.md` tự mâu thuẫn thứ tự "Bước tiếp" / "Chi tiết kỹ thuật" giữa mục 2 và mục 3 (có từ trước).
 
 Lưu ý: sau lượt chạy, một commit nữa chỉ sửa dòng `description` (bỏ vế "asks why / chưa hiểu", vì `test_communication_rules.py` đòi mô tả không còn trigger đó); thân skill không đổi nên không chạy lại, `skill_sha` ở trên là băm sau commit đó.
+
+Sau tech-review-2: mục 6 và khối mục 8 đổi hai chỗ (bỏ câu "rồi tin sau về súc tích" vô điều kiện, đổi dạng link thành `[tên:dòng](đường:dòng)`); chạy nhanh lại RS-1..RS-3 n = 1 (kết quả ở hồ sơ chấm, mục "Vòng 4"); `skill_sha` ở đầu file là băm sau lần sửa đó.
