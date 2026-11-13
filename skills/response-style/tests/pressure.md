@@ -3,7 +3,7 @@ skill: response-style
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04); sonnet subagent alias (GREEN rerun of 2026-11-13)
 date: 2026-11-14
-result: Một phần (SPR-25 2026-11-14) - nhãn ước lượng chưa đo - RED RS-1 0/3 và RS-3 0/3 (ô nhãn); GREEN vòng 2 ô nhãn RS-1 2/3 (3/3 chấm lỏng), RS-3 3/3, RS-2 3/3; theo cả bốn ô RS-1 2/3, RS-2 3/3, RS-3 1/3 (Đạt có điều kiện). Lượt SPR-21 trước đó RS-1 1/3, RS-2 3/3, RS-3 2/3 theo cách đọc nghiêm
+result: Một phần (SPR-25 2026-11-14) - ô nhãn RED RS-1 0/3 và RS-3 0/3; vòng 2 ô nhãn RS-1 2/3, RS-3 3/3; vòng sửa 1 theo bảng chấm khoá trước RS-1 1/3, RS-2 3/3, RS-3 1/3 (SC4 Không đạt, chuyển đường B hoặc C). Lượt SPR-21 trước đó RS-1 1/3, RS-2 3/3, RS-3 2/3 theo cách đọc nghiêm
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
 skill_sha: 24a898b55af04691d540c7ca31a7a6ef3f66e253
 agent_ids:
@@ -111,3 +111,15 @@ Sau tech-review-2: mục 6 và khối mục 8 đổi hai chỗ (bỏ câu "rồi
 | RS-3 | **0/3** (ô 1 trượt: "1–2 ngày", "nửa ngày đến một ngày công") | 2/3 (một lượt không có bảng lựa chọn: ô 4) | **1/3** theo cả bốn ô: ô 1 đạt 3/3; lượt đầu trượt ô 2 (13 dòng, trần 12; 12 nếu không đếm dòng kẻ bảng), lượt hai trượt ô 4 (khuyến nghị nằm ngoài bảng) |
 
 **Kết luận trung thực.** Lỗi gốc của RQ-121 (ước lượng không nhãn) giảm từ 6/6 lượt trượt ở RED xuống 1/6 lượt trượt ô 1 ở vòng 2 (RS-1 lượt đầu, mơ hồ), RS-3 ô 1 đạt 3/3. Nhưng theo cả bốn ô, vòng 2 chỉ đạt RS-1 2/3, RS-2 3/3, RS-3 1/3, chưa đạt "n = 3 đạt cả hai". Hai lượt RS-3 trượt vì **hình dạng/độ dài** (13 dòng; khuyến nghị ngoài bảng), loại lỗi đã thấy ở SPR-21 (một lượt RS-3 không bảng) và nhãn dài làm bảng dày thêm một dòng; không sửa thêm trong sprint này (n = 3, ô đếm dòng mơ hồ về dòng kẻ bảng), ghi thành việc để lại. Chưa chạy lại RS-2 sau vòng 1 ngoài hai lần ở trên (đã 3/3 cả hai). Bằng chứng: bảng chấm ở hồ sơ sprint SPR-25 (`SPRINT.md` mục 4), câu trả lời nằm trong transcript phiên (không lưu vào repo).
+
+## SPR-25 vòng sửa 1 (2026-11-14): đường A theo khuyến nghị của Fable, bảng chấm khoá trước khi đo
+
+Không đổi `SKILL.md` ở vòng này (`skill_sha` giữ nguyên). Việc làm: (1) khoá bốn ô chấm vào `tests/scenarios.txt` (bảng v1) trước khi đo; (2) lượt "red" = bản skill hiện hành trước mọi sửa của vòng này (runner có đọc `SKILL.md`, không phải nền không skill), RS-1 và RS-3 n = 3; (3) khoá thêm các điểm mơ hồ grader nêu (bảng v2); (4) lượt "green" = mẫu mới, bản skill không đổi, RS-1, RS-2, RS-3 n = 3. Runner `sonnet` mới mỗi lượt, grader `fable` khác các lượt trước (trước đó là `opus`), câu trả lời thô lưu ở `evidence/rs-<ca>-<pha><lượt>.md` của hồ sơ sprint (CO6 của Fable đã làm).
+
+| Kịch bản | Lượt red (bảng v1) | Lượt green (bảng v1 + v2) | Ô trượt |
+|---|---|---|---|
+| RS-1 | 2/3 (lượt trượt: "giữ 7 ngày", tham số do agent đặt, mơ hồ) | **1/3** | ô 1: "hoãn quyết định 1–2 quý" (số thời gian trong điều kiện chọn) và "0 USD thêm" không nhãn; đọc rộng thì 3/3 |
+| RS-2 | không chạy | **3/3** | — |
+| RS-3 | 3/3 | **1/3** | ô 4: hai lượt không có bảng lựa chọn (khuyến nghị đo trước nằm trong văn xuôi) |
+
+**Kết luận trung thực.** SC4 (RS-1 và RS-3 đều 3/3) **không đạt** sau vòng A. Số không hội tụ với n = 3: cùng một bản skill cho RS-3 3/3 ở lượt red, 1/3 ở lượt green; lỗi nhãn còn lại là các giá trị "gần số" ("0 USD thêm", "1–2 quý") nằm ngoài chỗ skill chỉ rõ; lỗi mới ở RS-3 là bỏ bảng khi câu trả lời đúng là "chưa có số, đo trước". Theo khuyến nghị của Fable, không chạy vòng ba; chuyển sang đường B hoặc C và bàn giao (Đức quyết). Bảng chấm v2 khoá các điểm mơ hồ nhưng grader còn nêu: ô (1) khi tin không có ước lượng nào, ô (4) với RS-3 khi câu trả lời đúng là không đưa phương án, "đã đọc" ở pha green chưa có ô chấm. Runner và grader đều là Claude (grader nay khác tier với runner).
