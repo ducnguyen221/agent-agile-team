@@ -3,7 +3,7 @@ skill: explain
 method: pressure-test with subagents (RED without skill, GREEN with skill read first)
 model: sonnet (subagent alias, runners); grader opus
 date: 2026-11-13
-result: 3/3 GREEN pass (CM-3 rerun on final tree; CM-4, CM-4b on the first tree, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed); vòng sửa 1 (ép đọc SKILL.md): CM-3 3/3, CM-4 1/1, CM-4b 1/1, CM-6 1/1 (CM-6 chưa có RED); vòng sửa 2 (nạp thật, không đọc SKILL.md): skill khớp 4/4 qua mô tả mới, nhưng CM-3 0/3 nghiêm (không đọc thân skill)
+result: 3/3 GREEN pass (CM-3 rerun on final tree; CM-4, CM-4b on the first tree, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed); vòng sửa 1 (ép đọc SKILL.md) CM-3 3/3, CM-4 1/1, CM-4b 1/1, CM-6 1/1 (CM-6 chưa có RED); vòng sửa 2 (nạp thật, không đọc SKILL.md) skill khớp 4/4 qua mô tả mới, nhưng CM-3 0/3 nghiêm (không đọc thân skill)
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
 skill_sha: ea3fdd88a8aa73d51f8fdc6dd212140c8d22e336
 ---
