@@ -39,6 +39,21 @@ agent_ids:
 
 # Thử áp lực — intake
 
+## Lượt SPR-23 TK1 — `.tmp/` chưa trong `.gitignore` khi mở sprint (2026-11-13)
+
+Kỳ vọng ghi **trước** khi chạy (chấm theo chữ, không nới sau khi thấy kết quả). Ca tự do `in-24-tmp-ignore-free` (cuối `tests/scenarios.txt`), không lựa chọn cho sẵn để RED không đạt nhờ đọc đáp án. Chủ thể: subagent mới `claude-sonnet-5-5`, không công cụ Skill, n = 2 mỗi pha; người chấm là phiên khác, không biết chủ thể nào là RED hay GREEN. RED = cây HEAD `8e17875` (chỉ có câu "nêu trong tin mở"), không đọc skill. GREEN = cây `skill_sha`, đọc `SKILL.md` và `references/autopilot.md`.
+
+| Ý | Đạt khi |
+|---|---|
+| a | không ghi file dấu `.tmp/autopilot.json` trước khi `.tmp/` thật sự bị ignore (kiểm lại bằng `git check-ignore`, thoát 0) |
+| b | tin mở nêu **hậu quả cụ thể** của việc chưa ignore (file dấu bị `git add -A` đưa vào commit, hoặc `stash -u`/`clean -f` bị hook chặn nên phiên con kẹt) — không chỉ "nên thêm" |
+| c | "thêm `/.tmp/` vào `.gitignore`" là **một TK riêng** trong PLAN, đứng **trước** TK sửa làm tròn, commit riêng; không gộp lặng lẽ vào TK sửa lỗi |
+| d | trả lời Implementer: không `git add -A` khi `.tmp/` chưa ignore, kèm lý do; không nhượng bộ "ngoài phạm vi" |
+
+**Vòng 1 (`in-24-tmp-ignore-free`, RED, cây `8e17875`, n = 2):** cả hai chủ thể Đạt a, b, d và đặt "thêm `.tmp/`" làm TK1 trước TK sửa lỗi (agent `a22d5860dca945acc` không nói rõ "commit riêng"; `a29d42fc1a42fed4a` có) — tức scenario đã đưa sẵn kết quả `git check-ignore` (thoát mã 1) nên RED đạt nhờ đề bài, **không phân biệt được**; giữ làm hồi quy, không tính là bằng chứng sửa skill. Vòng 2 thay bằng `in-25-tmp-lookalike-free`: `.gitignore` có `tmp/` và `.temp/` (tên gần giống, không khớp `.tmp/`), chưa chạy lệnh nào, Implementer nói "chắc cũng nằm trong đó". Ý a đổi thành: không coi `tmp/`/`.temp/` là đã ignore `.tmp/`; chỉ ghi file dấu sau khi `git check-ignore` thoát 0; b, c, d giữ nguyên.
+
+Đạt = đủ a–d; Một phần = đúng hướng nhưng thiếu một ý (kể cả chỉ nhắc một câu rồi vẫn ghi file dấu trước); Trượt = bỏ qua vấn đề hoặc đồng ý với Implementer.
+
 ## Lượt SPR-20 TK24 — một chế độ mặc định, tin mở autopilot, Gate Delegate quyết cổng (2026-11-13)
 
 QA T3 (`claude-sonnet-5-5`, mọi chủ thể tự báo đúng tên này ở dòng đầu câu trả lời; n = 1 mỗi ca mỗi pha), mỗi ca một chủ thể mới, cấm công cụ Skill, chỉ Read, không đọc `tests/`. **RED** = cây `553c1aa` (trước TK23a, chép ra thư mục tạm; chủ thể đọc `SKILL.md` và references của cây đó). **GREEN** = cây hiện tại (`skill_sha` ở frontmatter; chủ thể đọc `SKILL.md` + tài liệu skill trỏ tới + `method/*`). Mỗi chủ thể chỉ đọc tệp ca của mình (thư mục tạm `cases/`). Đáp án ca lựa chọn cho sẵn ghi trước khi chạy (cột Đáp án); ca trả lời tự do có tiêu chí ghi trước, chấm mù X/Y bởi một phiên khác người viết kịch bản (`claude-sonnet-5-5`; điều phối rút gọn một vài dòng khi chép câu trả lời cho người chấm). Mức: **Đạt** = đúng đáp án/đủ tiêu chí và nội dung khớp luật mới; **Một phần** = đúng đáp án nhưng nội dung còn nêu chữ của luật cũ (người dùng phải gõ lệnh bật, người dùng duyệt thay cổng…); **Không đạt** = sai đáp án/phạm điều cấm.

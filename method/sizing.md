@@ -50,6 +50,35 @@ trông ra sao, hay phải chọn giữa nhiều cách) không phải làm thẳn
   vẫn hợp lệ: `SPRINT.md` cỡ rất nhỏ bốn phần, và bốn file cỡ nhỏ ([templates/README.md](../templates/README.md) mục 4).
 - **Người làm không tự chấm ở mọi bậc.** Việc rất nhỏ không có agent thứ hai thì ghi "tự kiểm, chưa độc lập".
 
+### 1.1 Ngưỡng nhỏ ↔ vừa (đo được)
+
+Bảng ở mục 1 nói "một `FR`", "một luồng có sẵn" nhưng không nói đếm thế nào; ngưỡng dưới đây là **cách đo** cùng định nghĩa đó,
+dùng khi phân vân giữa nhỏ và vừa (và để tính trần phiên ở [autopilot.md](autopilot.md) mục 2.1). Việc là **nhỏ khi cả năm
+điều đúng**; một điều sai thì là **vừa** (đã nằm ở luật "phân vân → chọn bậc nặng hơn"). Rất nhỏ, làm thẳng và lớn không đổi.
+
+| # | Điều kiện của nhỏ | Cách đo | Sai khi |
+|---|---|---|---|
+| 1 | đúng một `FR` | đếm `FR` ở mức một trong SPEC; kịch bản `FR1.1`, `FR1.2` cùng một `FR1` vẫn là một | từ hai `FR` trở lên (hai hành vi cần kiểm riêng) |
+| 2 | không có hành vi hay luồng mới | không có `US` mới; việc chỉ đổi điều kiện, giá trị, chữ hay thứ tự trong luồng đã chạy được | thêm bước, màn hình, lệnh, đường vào hay kiểu đầu ra mới |
+| 3 | không đổi hợp đồng / giao diện / schema | như mục 1; có phải sửa chỗ gọi nơi khác vì hàm đổi chữ ký thì sai | đổi chữ ký công khai, trường dữ liệu, định dạng file hay cấu hình |
+| 4 | tối đa 4 `TK` | đếm `TK` mức một trong PLAN; việc con `TK2.3` không tính | từ 5 `TK` |
+| 5 | ước tính tối đa 8 phiên agent | số phiên = số `TK` + 4 (một reviewer, hai lần Gate Delegate, một lần giao lại sau review); 8 là trần cơ sở cỡ nhỏ | ước tính trên 8 |
+
+Điều 4 và 5 là **một** phép đo (4 `TK` + 4 = 8), ghi cả hai để người đọc thấy số nào chạm trần. Số `TK` và số phiên là
+**ước lượng lúc lập PLAN**, không chấm lại cỡ khi thực tế vượt: vượt ước lượng gấp đôi đi theo mục 3 (PLAN hỏng, tách sprint).
+
+| Ví dụ | `FR` · `TK` · phiên ước | Điều sai | Cỡ |
+|---|---|---|---|
+| tra đơn bỏ khoảng trắng đầu/cuối mã (mẫu ở `templates/SPRINT.md`) | 1 · 1 · 5 | — | nhỏ |
+| đổi quy tắc làm tròn giá trong hàm đang chạy, kèm test | 1 · 2 · 6 | — | nhỏ |
+| thêm xuất Excel cho báo cáo có sẵn | 1 · 2 · 6 | 2 (đầu ra mới) | **vừa** |
+| sửa hai lỗi độc lập trong cùng module | 2 · 2 · 6 | 1 | **vừa**; hoặc tách hai sprint nhỏ (mục 3) |
+| đổi một luồng có sẵn nhưng phải chạm ba mô-đun, năm `TK` | 1 · 5 · 9 | 4, 5 | **vừa** |
+| đổi tên trường `price` thành `unit_price` ở API công khai | 1 · 3 · 7 | 3 | **lớn** (hợp đồng, mục 1) |
+
+**Không áp ngược.** Bảng này làm rõ cách đo, không đổi cỡ đã ghi: hồ sơ cũ giữ nguyên `size` trong frontmatter, và `check` không
+chấm lại cỡ theo số `TK` hay số phiên.
+
 <!-- san-cung:start -->
 ## 2. Rủi ro nâng cỡ
 
