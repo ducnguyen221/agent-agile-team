@@ -37,7 +37,7 @@ trông ra sao, hay phải chọn giữa nhiều cách) không phải làm thẳn
   trong test đi kèm là hai thao tác; tự kiểm/chạy test đi kèm không tính thêm. Sàn cỡ vẫn áp: sửa hành vi một luồng
   có sẵn là nhỏ, tính năng mới là vừa, vùng rủi ro là lớn. Không chia một mục tiêu thành nhiều lượt làm thẳng để
   né sprint; đếm toàn bộ việc cần để mục tiêu xong, chỉ tách các mục tiêu độc lập.
-- **Phân vân giữa hai bậc → chọn bậc nặng hơn**. Nghi cần hơn 2 thao tác hay kết quả chưa rõ thì không phải làm
+- **Phân vân giữa hai bậc → chọn bậc nặng hơn.** Nghi cần hơn 2 thao tác hay kết quả chưa rõ thì không phải làm
   thẳng; nghi có đổi hành vi hay hợp đồng thì không phải rất nhỏ; nghi hơn một luồng thì không phải nhỏ.
 - **Bậc được khuyến nghị, không tự quyết một chiều:** Analyst nêu bậc khuyến nghị và "có mở sprint không" trong
   **một** tin trao đổi tiếp nhận ([process.md](process.md) mục 2); người dùng xác nhận hay đổi. Bỏ lượt này khi
@@ -92,8 +92,8 @@ phức tạp kỹ thuật nhưng vẫn lớn/high. Human model/effort override k
 
 ### 3.1 Ngưỡng nhỏ ↔ vừa (đo được)
 
-Bảng ở mục 1 nói "một `FR`", "một luồng có sẵn" nhưng không nói đếm thế nào; ngưỡng dưới đây là **cách đo** định nghĩa đó (điều 1–3) cộng hai số **mới** làm sàn cho lúc phân vân (điều 4–5),
-dùng khi phân vân giữa nhỏ và vừa (và để tính trần phiên ở [autopilot.md](autopilot.md) mục 2.1). Việc là **nhỏ khi cả năm
+Bảng ở mục 1 nói "một `FR`", "một luồng có sẵn" nhưng không nói đếm thế nào; ngưỡng dưới đây là **cách đo** định nghĩa đó (điều 1–3) cộng hai số **mới** (điều 4–5) áp **vô điều kiện**,
+dùng để chọn giữa nhỏ và vừa (và để tính trần phiên ở [autopilot.md](autopilot.md) mục 2.1). Việc chỉ là **nhỏ khi cả năm
 điều đúng**; một điều sai thì **ít nhất là vừa** (riêng điều 3 sai là lớn, mục 1). Năm điều là **điều kiện cần, chưa đủ**: các dấu hiệu khác của hàng Nhỏ ở mục 1 (kể cả "không có quyết định kiến trúc") và vùng rủi ro ở mục 2 vẫn áp. Rất nhỏ, làm thẳng và lớn không đổi.
 
 | # | Điều kiện của nhỏ | Cách đo | Sai khi |
@@ -105,7 +105,7 @@ dùng khi phân vân giữa nhỏ và vừa (và để tính trần phiên ở [
 | 5 | ước tính tối đa 8 phiên agent | số phiên = số `TK` + 4 (một reviewer, hai lần Gate Delegate, một lần giao lại sau review); 8 là trần cơ sở cỡ nhỏ | ước tính trên 8 |
 
 Điều 4 và 5 cho cùng một con số (4 `TK` + 4 = 8), ghi cả hai để người đọc thấy số nào chạm trần; cột "phiên ước" ở các ví dụ vừa/lớn dùng công thức của cỡ nhỏ làm thước, không phải trần của cỡ đó. Số `TK` và số phiên là
-**ước lượng lúc lập PLAN**, không chấm lại cỡ khi thực tế vượt: vượt ước lượng gấp đôi đi theo mục 3 (PLAN hỏng, tách sprint). Tiếp nhận chưa có PLAN thì ước theo số việc dự kiến; PLAN ra từ 5 `TK` cho việc đã mở cỡ nhỏ thì **nâng lên vừa** (mục 4: ghi `Phán quyết:` kèm lý do, đổi hồ sơ sang bốn file). Phiên thử áp lực hay phiên nghiên cứu ngoài bảy bước chuẩn không nằm trong công thức: ước thêm riêng.
+**ước lượng lúc lập PLAN**, không chấm lại cỡ khi thực tế vượt: vượt ước lượng gấp đôi đi theo mục 3 (PLAN hỏng, tách sprint). Tiếp nhận chưa có PLAN thì ước theo số việc dự kiến; PLAN ra từ 5 `TK` cho việc đã mở cỡ nhỏ thì **nâng lên vừa** (ghi `Phán quyết:` kèm lý do như mục 4 cho phép nâng cỡ ở bất kỳ bước nào; hình tài liệu theo "Hình tài liệu khớp cỡ" ở mục 1, tức sang bốn file). Phiên thử áp lực hay phiên nghiên cứu ngoài bảy bước chuẩn không nằm trong công thức: ước thêm riêng.
 
 | Ví dụ | `FR` · `TK` · phiên ước | Điều sai | Cỡ |
 |---|---|---|---|
