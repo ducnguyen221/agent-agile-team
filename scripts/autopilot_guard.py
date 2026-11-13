@@ -81,7 +81,6 @@ MAX_UNWRAP = 3
 MAX_WALK_DEPTH = 6  # độ sâu tối đa khi dò file dấu lồng trong đích dọn .tmp/
 NESTED = "nested"  # đơn vị chặn riêng: lồng shell quá sâu, không phân tích được
 MARKER = "marker"  # đơn vị chặn riêng: đụng tới chính file dấu
-MAIN_LOCAL_MERGE = "main-local-merge"  # mã nội bộ cũ của chế độ mở; không còn mẫu lệnh nào sinh ra nó (TK21), TK22 gỡ cùng chế độ
 SPECIAL_ITEMS = frozenset({NESTED, MARKER})
 WRITE_TOOLS = frozenset({"write", "edit", "multiedit", "notebookedit", "apply_patch", "write_to_file", "replace_file_content",
                          "multi_replace_file_content"})
@@ -198,10 +197,10 @@ def find_repo_root(start: str) -> str | None:
 
 
 def load_active(marker: str) -> tuple[set[str], bool]:
-    """(mục đang chặn, file dấu hỏng?). File hỏng → chặn cả 13 mục. `exclusions` thiếu mục bắt buộc → bổ sung đủ;
-    chỉ `branch_merge_local` được vắng khi khoá `exclusions` là danh sách không có nó (lệnh `+nhánh`)."""
+    """(mục đang chặn, file dấu hỏng?). Một chế độ (SPR-20 TK22): file dấu hợp lệ chặn bảy mục luôn-chặn của
+    `_autopilot_rules.OPEN_ALWAYS_BLOCKED`; khoá `mode`/`exclusions` (file dấu kiểu cũ) bị bỏ qua. File không đọc được hoặc không
+    phải đối tượng JSON → chặn cả 13 mục và báo hỏng."""
     known = known_exclusions()
-    required = {e for e in known if e != "branch_merge_local"}
     try:
         with open(marker, encoding="utf-8-sig") as handle:
             data = json.load(handle)
@@ -209,19 +208,8 @@ def load_active(marker: str) -> tuple[set[str], bool]:
         return set(known), True
     if not isinstance(data, dict):
         return set(known), True
-    mode = data.get("mode", "secure")
-    if mode == "open":  # SPR-20: chế độ mở chặn 7 mục + mục file dấu ghi + gộp cục bộ vào `main`; mục khác tự chạy trong hợp đồng
-        from _autopilot_rules import OPEN_ALWAYS_BLOCKED  # nạp muộn như `known_exclusions`
-        listed = data.get("exclusions")
-        if not isinstance(listed, list):
-            return set(known) | {MAIN_LOCAL_MERGE}, False  # khoá hỏng ở chế độ mở: đóng an toàn bằng cả 13 mục
-        return set(OPEN_ALWAYS_BLOCKED) | {e for e in listed if isinstance(e, str) and e in known} | {MAIN_LOCAL_MERGE}, False
-    if mode != "secure":
-        return set(known), True  # `mode` lạ = file dấu hỏng
-    listed = data.get("exclusions")
-    if not isinstance(listed, list):
-        return set(known), False
-    return required | ({"branch_merge_local"} & {e for e in listed if isinstance(e, str)}), False
+    from _autopilot_rules import OPEN_ALWAYS_BLOCKED  # nạp muộn như `known_exclusions`
+    return set(OPEN_ALWAYS_BLOCKED), False
 
 
 # --- phân tích lệnh -------------------------------------------------------------------------------------------
@@ -301,12 +289,17 @@ def _git_parse(args: list[str]) -> tuple[str, list[str]]:
 
 
 def _git_item(args: list[str]) -> str | None:
-    """Chỉ hai lệnh git còn nằm trong hook: `stash` cất file chưa theo dõi (file dấu nằm trong `.tmp/`) và `worktree remove --force`
-    (xoá cây thư mục). Mọi lệnh git khác (đẩy, tag, gộp, reset, clean…) không còn bị hook chặn: luật chữ ở method/git-conventions.md."""
+    """Ba mẫu git còn nằm trong hook, đều để bảo vệ thứ không theo dõi (file dấu nằm trong `.tmp/`) hoặc cây thư mục: `stash -a`/`--all`
+    (cất cả file bị gitignore), `clean` có `-f` kết hợp `-x`/`-X` (xoá cả file bị gitignore) và `worktree remove --force`. `stash -u`,
+    `stash push -m`, `clean -f`/`-fd` thường vẫn qua. Mọi lệnh git khác không còn bị hook chặn: luật chữ ở method/git-conventions.md."""
     sub, rest = _git_parse(args)
-    if sub == "stash":  # `-u`/`--include-untracked`/`-a`/`--all` cất cả file chưa theo dõi: file dấu (trong .tmp/) bị lấy đi
-        stashes_untracked = "--include-untracked" in rest or "--all" in rest or any(_cluster(a, "ua") for a in rest)
-        return MARKER if stashes_untracked else None
+    if sub == "stash":  # file dấu nằm trong `.tmp/` (bị gitignore): chỉ `-a`/`--all` mới cất nó
+        return MARKER if "--all" in rest or any(_cluster(a, "a") for a in rest) else None
+    if sub == "clean":  # `-x`/`-X` kéo file bị gitignore vào phạm vi xoá; phải kèm `-f`/`--force` mới thật sự xoá
+        opts = rest[:rest.index("--")] if "--" in rest else rest
+        forced = "--force" in opts or any(_cluster(a, "f") for a in opts)
+        ignored = any(_cluster(a, "xX") for a in opts)
+        return MARKER if forced and ignored else None
     if sub == "worktree":
         forced = "--force" in rest or any(_cluster(a, "f") for a in rest)
         return "irreversible_delete" if rest[:1] == ["remove"] and forced else None

@@ -641,7 +641,7 @@ def test_guard_git_c_from_outside_repo_finds_marker(tmp_path):
     outside = tmp_path / "outside"
     outside.mkdir()
     rel = fwd(os.path.relpath(repo, outside))
-    for cmd in ("git -C {r} worktree remove --force x", "git -C {rel} worktree remove --force x", "git -C {rel} stash -u", "cd {rel} && rm -rf x",
+    for cmd in ("git -C {r} worktree remove --force x", "git -C {rel} worktree remove --force x", "git -C {rel} stash -a", "cd {rel} && rm -rf x",
                 "bash -c 'git -C {rel} worktree remove --force x'", "git -c a=b -C {rel} worktree remove --force x", "Set-Location {rel}; rm -rf x"):
         rc, _, err = run("claude", claude(cmd.format(r=fwd(repo), rel=rel), outside))
         assert rc == 2, (cmd, err)
@@ -1031,16 +1031,20 @@ def test_guard_heredoc_body_for_shell_still_analyzed(tmp_path, cmd, item):
     assert (MARKER_REASON if item == "marker" else "'{}'".format(item)) in err
 
 
-@pytest.mark.parametrize("cmd", ["git stash -u", "git stash --include-untracked", "git stash -a", "git stash --all", "git stash push -u",
-                                 "git stash push --include-untracked -m x", "git stash -ua", "git -C . stash -u"])
-def test_guard_stash_with_untracked_blocked(tmp_path, cmd):
+@pytest.mark.parametrize("cmd", ["git stash -a", "git stash --all", "git stash push -a", "git stash push --all -m x", "git stash -ua", "git stash -au",
+                                 "git stash push -ua", "git -C . stash -a",
+                                 "git clean -fdx", "git clean -xdf", "git clean -fX", "git clean -f -x", "git clean --force -x", "git clean -f -X",
+                                 "git clean -x --force", "git clean -fdX", "git -C . clean -fdx"])
+def test_guard_marker_pattern_blocked(tmp_path, cmd):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     assert_marker_blocked(repo, cmd)
 
 
-def test_guard_stash_plain_allowed(tmp_path):
+def test_guard_stash_and_clean_plain_allowed(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    for cmd in ("git stash", "git stash list", "git stash pop", "git stash push -m x", "git stash show -p"):
+    for cmd in ("git stash", "git stash list", "git stash pop", "git stash push -m x", "git stash show -p", "git stash -u", "git stash --include-untracked",
+                "git stash push -u", "git stash push --include-untracked -m x", "git -C . stash -u",
+                "git clean -f", "git clean -fd", "git clean -d -f", "git clean --force", "git clean -n", "git clean -nx", "git clean -x"):
         assert_allowed(repo, cmd)
 
 

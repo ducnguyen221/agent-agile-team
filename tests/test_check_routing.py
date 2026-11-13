@@ -130,24 +130,3 @@ def test_decision_owner_present_is_clean(tmp_path):
 
 def test_decision_owner_not_required_for_old_sprint(tmp_path):
     assert _hits(_with_decisions(tmp_path, DN_NO_OWNER, "2026-11-12"), "decision-owner-missing") == []
-
-
-# --- biến AGENT_AGILE_PROTECTED_REPOS vắng (FR4.3) -------------------------------------------------------------
-
-def _open_sprint(tmp_path):
-    root = _pending_delegated(tmp_path)
-    _rewrite(root / "PLAN.md", "  revoked_at: null\n", "  revoked_at: null\n  mode: open\n  level: gate_1\n  exclusions: [network_fetch, rules_unlisted, irreversible_delete, secret, auth, user_soul, license]\n  channel: chat\n  orchestrator: agent-orch\n  sessions_cap: null\n")
-    return root
-
-
-def test_protected_repos_note_when_open_and_variable_missing(tmp_path):
-    root = _open_sprint(tmp_path)
-    hits = [f for f in check.check_paths([root], env={}).findings if f.rule == "protected-repos-unconfigured"]
-    assert len(hits) == 1 and hits[0].level == "Ghi chú"
-    set_env = check.check_paths([root], env={"AGENT_AGILE_PROTECTED_REPOS": "x=full"}).findings
-    assert not [f for f in set_env if f.rule == "protected-repos-unconfigured"]
-
-
-def test_protected_repos_note_silent_for_secure_sprint(tmp_path):
-    root = _pending_delegated(tmp_path)
-    assert not [f for f in check.check_paths([root], env={}).findings if f.rule == "protected-repos-unconfigured"]

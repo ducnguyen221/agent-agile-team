@@ -2367,9 +2367,6 @@ def test_plain_quote_without_delegation_stays_clean(tmp_path):
 # --- Autopilot trên khối `delegation` (SPR-12 TK3, FR1.13) --------------------------------------------------
 
 AUTOPILOT_FIXTURES = FIXTURES / "autopilot"
-ALL_EXCLUSIONS = ("push, tag, version, main_merge, publish, license, irreversible_delete, rules_unlisted, "
-                  "user_soul, secret, auth, network_fetch, branch_merge_local")
-WITHOUT_BRANCH_MERGE = "[" + ALL_EXCLUSIONS.replace(", branch_merge_local", "") + "]"
 AUTOPILOT_GRANT = '"Bật autopilot cổng 1 cho SPR-03."'
 GATES_1_2_GRANT = '"Bật autopilot cổng 1+2 cho SPR-03 tới hết sprint."'
 PROGRAM_GRANT = '"Bật autopilot chương trình doi-skill gồm SPR-03…SPR-05 tới 2026-12-31, cổng 1+2."'
@@ -2383,7 +2380,7 @@ def autopilot_plan(root: Path, **fields) -> Path:
     _rewrite(path, "  tech-reviewer: [T1, agent-d]\n", "  gate-delegate: [T1, agent-d]\n")
     block = {"grant": AUTOPILOT_GRANT, "grant_at": "2026-02-01 08:30 +07", "scope": "[gate_1]", "expires": "sprint_end",
              "by": "agent-d", "tier": "T1", "files": "[]", "revoked_at": "null", "level": "gate_1",
-             "exclusions": f"[{ALL_EXCLUSIONS}]", "channel": "chat", "orchestrator": "agent-orch", "sessions_cap": "null"}
+             "channel": "chat", "orchestrator": "agent-orch", "sessions_cap": "null"}
     block.update(fields)
     body = "".join(f"  {k}: {v}\n" for k, v in block.items() if v is not None)
     head, rest = path.read_text(encoding="utf-8").split("delegation:\n", 1)
@@ -2409,15 +2406,11 @@ def test_autopilot_gate_delegate_by_ok(tmp_path):
     {"level": "program", "program": "doi-skill", "expires": "2026-12-31", "scope": "[gate_1]",
      "grant": '"Bật autopilot chương trình doi-skill gồm SPR-03…SPR-05 tới 2026-12-31, cổng 1."'},
     {"level": "program", "program": "doi-skill", "expires": "2026-12-31", "scope": "[gate_1, gate_2]",
-     "grant": '"BẬT AUTOPILOT chương trình doi-skill tới 2026-12-31, CỔNG 1+2 +NHÁNH."', "exclusions": WITHOUT_BRANCH_MERGE},
+     "grant": '"BẬT AUTOPILOT chương trình doi-skill tới 2026-12-31, CỔNG 1+2."'},
     {"grant": '"  BẬT AUTOPILOT cổng 1 cho SPR-03."'},  # tiền tố không phân biệt hoa thường, bỏ khoảng trắng đầu
-    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "exclusions": WITHOUT_BRANCH_MERGE,
-     "grant": '"Bật autopilot cổng 1+2 cho SPR-03 tới hết sprint +nhánh."'},
-    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "exclusions": WITHOUT_BRANCH_MERGE,
-     "grant": '"Bật autopilot cổng 1+2 cho SPR-03 +nhánh. "'},  # dấu chấm và khoảng trắng cuối không tính
     {"channel": "host_comment", "sessions_cap": "20", "orchestrator": "null"},
     {"channel": None, "orchestrator": None, "sessions_cap": None},  # ba khoá tuỳ chọn vắng
-], ids=["gate_1_2", "program-1+2", "program-1", "program-casefold", "prefix-case", "branch-merge-allowed", "branch-merge-trailing-dot", "host_comment", "optional-absent"])
+], ids=["gate_1_2", "program-1+2", "program-1", "program-casefold", "prefix-case", "host_comment", "optional-absent"])
 def test_autopilot_valid_variants_stay_clean(tmp_path, fields):
     root = make_sprint(tmp_path)
     autopilot_plan(root, **fields)
@@ -2471,21 +2464,6 @@ def test_autopilot_channel_file_rejected(tmp_path, value):
     _only_hit(root, "channel")
 
 
-@pytest.mark.parametrize("removed", ["push", "tag", "version", "main_merge", "publish", "license", "irreversible_delete",
-                                     "rules_unlisted", "user_soul", "secret", "auth", "network_fetch"])
-def test_autopilot_exclusions_cannot_shrink(tmp_path, removed):
-    root = make_sprint(tmp_path)
-    kept = [e.strip() for e in ALL_EXCLUSIONS.split(",") if e.strip() != removed]
-    autopilot_plan(root, exclusions=f"[{', '.join(kept)}]")
-    _only_hit(root, removed)
-
-
-def test_autopilot_exclusions_duplicate_item(tmp_path):
-    root = make_sprint(tmp_path)
-    autopilot_plan(root, exclusions=f"[{ALL_EXCLUSIONS}, push]")
-    _only_hit(root, "trùng: push")
-
-
 @pytest.mark.parametrize("grant", [
     '"Bật autopilot cho SPR-03."',  # vắng chữ mức = cổng 1 (method/autopilot.md mục 2)
     '"Bật autopilot cổng 1 cho SPR-03 (chương trình dời skill)."',  # chữ mức chỉ tính ngay sau tiền tố
@@ -2495,17 +2473,6 @@ def test_autopilot_level_word_default_and_position(tmp_path, grant):
     root = make_sprint(tmp_path)
     autopilot_plan(root, grant=grant)
     assert [f.render() for f in check.check_paths([root]).findings] == []
-
-
-@pytest.mark.parametrize("fields", [
-    {"grant": '"Bật autopilot cổng 1 cho SPR-03 +nhánh."'},  # gate_1 không có Cổng 2 để gộp sau
-    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": '"Bật autopilot cổng 1+2 +nhánh cho SPR-03."'},  # giữa câu
-    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": GATES_1_2_GRANT},  # không có +nhánh
-], ids=["gate_1-with-suffix", "suffix-mid-sentence", "no-suffix"])
-def test_autopilot_branch_merge_local_cannot_be_dropped(tmp_path, fields):
-    root = make_sprint(tmp_path)
-    autopilot_plan(root, exclusions=WITHOUT_BRANCH_MERGE, **fields)
-    _only_hit(root, "branch_merge_local")
 
 
 @pytest.mark.parametrize("grant,level,scope", [
@@ -2522,22 +2489,8 @@ def test_autopilot_grant_text_must_match_level(tmp_path, grant, level, scope):
     _only_hit(root, "lời cấp nêu mức")
 
 
-def test_autopilot_branch_merge_local_absent_needs_branch_suffix(tmp_path):
-    root = make_sprint(tmp_path)
-    autopilot_plan(root, exclusions=WITHOUT_BRANCH_MERGE)
-    _only_hit(root, "branch_merge_local")
-
-
-@pytest.mark.parametrize("exclusions", [f"[{ALL_EXCLUSIONS}, extra_item]", "push", "[]", "[1, 2]"],
-                         ids=["extra-item", "not-a-list", "empty", "not-strings"])
-def test_autopilot_exclusions_outside_closed_list_or_wrong_shape(tmp_path, exclusions):
-    root = make_sprint(tmp_path)
-    autopilot_plan(root, exclusions=exclusions)
-    _only_hit(root, "exclusions")
-
-
-@pytest.mark.parametrize("missing", ["level", "expires", "exclusions"])
-def test_autopilot_grant_requires_level_and_exclusions(tmp_path, missing):
+@pytest.mark.parametrize("missing", ["level", "expires"])
+def test_autopilot_grant_requires_level_and_expires(tmp_path, missing):
     root = make_sprint(tmp_path)
     autopilot_plan(root, **{missing: None})
     _only_hit(root, missing)
@@ -2589,9 +2542,8 @@ def test_autopilot_old_checks_still_apply_after_autopilot_rules(tmp_path):
 def test_autopilot_rules_apply_to_gate_2_report(tmp_path):
     root = make_sprint(tmp_path)
     delegate_report(root)
-    _rewrite(root / "REPORT.md", "  revoked_at: null\n", "  revoked_at: null\n  level: gate_1_2\n  exclusions: []\n")
-    _rewrite(root / "REPORT.md", "  scope: [gate_2]\n", "  scope: [gate_2, gate_1]\n")
-    _only_hit(root, "exclusions")
+    _rewrite(root / "REPORT.md", "  revoked_at: null\n", "  revoked_at: null\n  level: gate_1_2\n")
+    _only_hit(root, "phạm vi")  # level gate_1_2 đòi scope có cả hai cổng, REPORT chỉ khai gate_2
 
 
 def test_autopilot_new_keys_are_known_while_gate_is_pending(tmp_path):
@@ -2662,44 +2614,63 @@ def test_autopilot_files_token_with_punctuation_in_grant_ok(tmp_path, grant):
 
 
 def test_delegation_fence_file_ignores_zone_only_files_and_plain_delegation(tmp_path):
-    """FR1.5: file chỉ có vùng sàn (`method/sizing.md`) không bị `delegation-fence-file`; khối không nêu file giữ nguyên."""
+    """FR1.5: file chỉ có vùng sàn (`method/sizing.md`) không bị `delegation-floor-file`; khối không nêu file giữ nguyên."""
     root = make_sprint(tmp_path)
     delegate_plan(root)
     plan = root / "PLAN.md"
     base = plan.read_text(encoding="utf-8")
     write_lf(plan, base)
-    assert "delegation-fence-file" not in rules_of(check.check_paths([root]))
+    assert "delegation-floor-file" not in rules_of(check.check_paths([root]))
     write_lf(plan, base.replace("risk_tags: []", "risk_tags: [rules]", 1).replace("  files: []\n", "  files: [method/sizing.md]\n", 1))
-    assert "delegation-fence-file" not in rules_of(check.check_paths([root]))
+    assert "delegation-floor-file" not in rules_of(check.check_paths([root]))
     write_lf(plan, base.replace("risk_tags: []", "risk_tags: [rules]", 1).replace("  files: []\n", "  files: [scripts/floor_check.py]\n", 1))
-    assert "delegation-fence-file" in rules_of(check.check_paths([root]))
+    assert "delegation-floor-file" in rules_of(check.check_paths([root]))
 
 
-# --- cờ +đẩy-nhánh (SPR-16 TK7, DN3 a) -------------------------------------------------------------------------------
-
-WITHOUT_PUSH = "[" + ALL_EXCLUSIONS.replace("push, ", "", 1) + "]"
-PUSH_GRANT = '"Bật autopilot cổng 1+2 cho SPR-03 tới hết sprint +đẩy-nhánh."'
+# --- Người ký cổng độc lập với người làm (SPR-20 TK22) -----------------------------------------------------
 
 
-def test_autopilot_push_flag_allows_dropping_push(tmp_path):
+def _new_delegated_plan(root: Path) -> None:
+    """PLAN duyệt thay là khối MỚI (lời cấp từ ngày luật độc lập có hiệu lực)."""
+    delegate_plan(root)
+    _rewrite(root / "PLAN.md", "gate_1_at: 2026-02-01 09:00 +07", "gate_1_at: 2026-11-13 09:00 +07")
+    _rewrite(root / "PLAN.md", "grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-11-13 08:30 +07")
+
+
+def _signer_hits(root: Path) -> list:
+    return [f for f in check.check_paths([root]).findings if f.rule == "gate-signer-independence"]
+
+
+def test_signer_matching_a_worker_session_in_a_sibling_document_is_flagged(tmp_path):
+    """Người ký (`by: agent-d`) trùng nhãn implementer ở PROGRESS cùng sprint: Phải sửa, mã luật riêng."""
     root = make_sprint(tmp_path)
-    autopilot_plan(root, level="gate_1_2", scope="[gate_1, gate_2]", grant=PUSH_GRANT, exclusions=WITHOUT_PUSH)
+    _new_delegated_plan(root)
+    _rewrite(root / "PROGRESS.md", "  implementer: [T2, agent-e]\n", "  implementer: [T2, agent-d]\n")
+    _rewrite(root / "PROGRESS.md", "  tech-reviewer: [T1, agent-d]\n", "  tech-reviewer: [T1, agent-h]\n")
+    hits = _signer_hits(root)
+    assert len(hits) == 1 and "agent-d" in hits[0].message and "implementer" in hits[0].message, [f.render() for f in hits]
+    assert check.RULES["gate-signer-independence"][0] == "Phải sửa"
+
+
+def test_signer_with_tier_below_a_worker_is_flagged(tmp_path):
+    """Người ký khai tier T2 mà analyst (người làm) là T1: tier người ký thấp hơn người làm."""
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root)
+    _rewrite(root / "PLAN.md", "  tier: T1\n", "  tier: T2\n")
+    hits = _signer_hits(root)
+    assert len(hits) == 1 and "T2" in hits[0].message and "T1" in hits[0].message, [f.render() for f in hits]
+
+
+def test_independent_signer_with_enough_tier_is_clean(tmp_path):
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root)
     assert [f.render() for f in check.check_paths([root]).findings] == []
 
 
-@pytest.mark.parametrize("fields", [
-    {"grant": '"Bật autopilot cổng 1 cho SPR-03 +đẩy-nhánh."'},  # cổng 1 không có Cổng 2 để đẩy sau
-    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": '"Bật autopilot cổng 1+2 +đẩy-nhánh cho SPR-03."'},  # giữa câu
-    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": GATES_1_2_GRANT},  # không có cờ
-    {"level": "gate_1_2", "scope": "[gate_1, gate_2]", "grant": '"Bật autopilot cổng 1+2 cho SPR-03 +push."'},  # +push không tồn tại
-], ids=["gate_1-with-flag", "flag-mid-sentence", "no-flag", "plus-push"])
-def test_autopilot_push_cannot_be_dropped_without_flag(tmp_path, fields):
+def test_signer_rule_ignores_old_delegation_blocks(tmp_path):
+    """Hồ sơ cũ (lời cấp trước ngày hiệu lực) không sinh phát hiện mới dù nhãn trùng ở tài liệu anh em."""
     root = make_sprint(tmp_path)
-    autopilot_plan(root, exclusions=WITHOUT_PUSH, **fields)
-    _only_hit(root, "push")
-
-
-def test_autopilot_push_flag_does_not_drop_branch_merge_local(tmp_path):
-    root = make_sprint(tmp_path)
-    autopilot_plan(root, level="gate_1_2", scope="[gate_1, gate_2]", grant=PUSH_GRANT, exclusions=WITHOUT_BRANCH_MERGE)
-    _only_hit(root, "branch_merge_local")
+    delegate_plan(root)
+    _rewrite(root / "PROGRESS.md", "  implementer: [T2, agent-e]\n", "  implementer: [T2, agent-d]\n")
+    _rewrite(root / "PROGRESS.md", "  tech-reviewer: [T1, agent-d]\n", "  tech-reviewer: [T1, agent-h]\n")
+    assert _signer_hits(root) == []

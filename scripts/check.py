@@ -75,13 +75,13 @@ RULES: dict[str, tuple[str, str]] = {
     "leak-denylist": (CHAN, "`--self`: file của repo chứa từ trong danh sách cấm"),
     "root-junk": (PHAI, "`--self`: file hoặc thư mục ở gốc repo không được theo dõi và không bị ignore"),
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
-    "delegation-fence-file": (PHAI, "`delegation.files` nêu file thuộc sàn cứng (`FLOOR_FILES`): không duyệt thay được"),
+    "delegation-floor-file": (PHAI, "`delegation.files` nêu file thuộc sàn cứng (`FLOOR_FILES`): không duyệt thay được"),
+    "gate-signer-independence": (PHAI, "người ký cổng trùng nhãn phiên người làm ở tài liệu cùng sprint, hoặc tier người ký thấp hơn tier người làm (khối duyệt thay từ ngày hiệu lực)"),
     "gate-route-floor": (PHAI, "cổng `delegated` (kể cả còn `pending`) mà bảng 'File luật và file sàn cứng sẽ chạm' khai file sàn cứng, hoặc `risk_tags` có `rules` mà `delegation.files` rỗng: chuyển cổng người, trình lời khuyến nghị"),
     "frontmatter-duplicate-key": (PHAI, "khoá `delegation` lặp trong frontmatter (chỉ một phiên điều phối ghi lời cấp)"),
     "decision-owner-missing": (NEN, "CQ/DN của sprint từ ngày chế độ mở mà bảng thiếu cột hoặc ô 'Người quyết'"),
     "report-missing-ask-count": (NEN, "REPORT của sprint từ ngày chế độ mở thiếu dòng 'số lượt Đức phải trả lời' (có số)"),
     "conditional-pass-merged-main": (PHAI, "Cổng 2 'Đạt có điều kiện' mà bản tin autopilot ghi đã gộp `main`: Đạt có điều kiện thì nhánh chờ người"),
-    "protected-repos-unconfigured": (GHI, "sprint bật autopilot mở mà máy chưa đặt `AGENT_AGILE_PROTECTED_REPOS`: đẩy ở chế độ mở bị chặn `push-repo-unverified`"),
     "hard-floor-marker": (CHAN, "`--self`: cặp mốc `san-cung` ở file luật lệch, mất hoặc thừa so với số cặp quy định"),
     "routing-invalid": (PHAI, "routing evidence marker/JSON/record không hợp lệ"),
     "routing-unknown": (GHI, "routing record có field ngoài schema 1"),
@@ -1048,7 +1048,6 @@ class Engine:
         if doc.kind in ("spec", "plan", "sprint"):
             self.owner_rules(doc)
         if doc.kind in ("plan", "sprint"):
-            self.protected_repos_note(doc)
             self.trace_rule(doc)
             self.order_rules(doc)
         if doc.kind == "plan":
@@ -1339,14 +1338,14 @@ class Engine:
         if problem is not None:
             return bad(*problem)
         listed = block.get("files")
-        if isinstance(listed, list):  # file thuộc sàn cứng không duyệt thay được; file chỉ có VÙNG sàn do floor_check bảo vệ, riêng chế độ mở (SPR-20 FR6.4) coi cả file đó là sàn
-            floor = set(rules.FLOOR_FILES) | (set(rules.FLOOR_ZONES) if block.get("mode") == "open" else set())
+        if isinstance(listed, list):  # file thuộc sàn cứng không duyệt thay được; file chỉ có VÙNG sàn do floor_check bảo vệ
+            floor = set(rules.FLOOR_FILES)
             for item in listed:
                 norm = item.strip().replace("\\", "/") if isinstance(item, str) else ""
                 while norm.startswith("./"):
                     norm = norm[2:]
                 if norm in floor:
-                    self.add(path, doc.key_line("delegation.files"), "delegation-fence-file",
+                    self.add(path, doc.key_line("delegation.files"), "delegation-floor-file",
                              f"{norm} thuộc sàn cứng, không duyệt thay được")
         grant = block.get("grant")
         if not (isinstance(grant, str) and grant.strip()):
@@ -1373,6 +1372,9 @@ class Engine:
                            f"delegation.expires: {expires!r} phải là sprint_end hoặc ngày YYYY-MM-DD")
             if gate_at is not None and until[0] < gate_at[0]:
                 return bad("delegation.expires", f"quá hạn: hạn {expires} trước ngày cổng")
+        signer = block.get("by")
+        if isinstance(signer, str) and signer.strip() and signer != "pending":  # trước kiểm T1 để tier thấp hơn người làm cũng được gọi tên
+            self._signer_independence(doc, block, signer)
         if block.get("tier") != "T1":
             return bad("delegation.tier" if "tier" in block else "delegation", f"người duyệt thay phải là T1, đang là {block.get('tier')!r}")
         by = block.get("by")
@@ -1429,6 +1431,40 @@ class Engine:
             return bad("risk_tags", f"risk_tags có {', '.join(sorted(tags & DELEGATION_FORBIDDEN_TAGS))} — vùng cấm duyệt thay")
         if "rules" in tags and not files:
             return bad("delegation.files", "risk_tags có rules mà delegation.files rỗng — file luật phải nêu đích danh trong lời cấp")
+
+    def _signer_independence(self, doc: Doc, block: dict, by: str) -> None:
+        """Người ký cổng độc lập với người làm (SPR-20 TK22): `delegation.by` không trùng nhãn vai thực thi ở tài liệu KHÁC của cùng
+        sprint (cùng thư mục; trùng ngay trong file này do `self-review` báo), và tier người ký (`delegation.tier`) không thấp hơn tier
+        của vai thực thi nào trong sprint. Chỉ áp cho khối duyệt thay mới (`grant_at` từ `MODE_OPEN_EFFECTIVE_DATE`): hồ sơ cũ giữ nguyên kết quả."""
+        moment = parse_moment(block.get("grant_at"))
+        if moment is None or moment[0].isoformat() < rules.MODE_OPEN_EFFECTIVE_DATE:
+            return
+        same_label: list[str] = []
+        worker_tiers: list[tuple[str, str]] = []
+        for path in sorted(doc.path.resolve().parent.glob("*.md")):
+            sibling = self.doc(path)
+            if sibling is None or sibling.kind not in ("spec", "plan", "progress", "report", "sprint"):
+                continue
+            roles = sibling.data.get("roles")
+            if not isinstance(roles, dict):
+                continue
+            for role, value in roles.items():
+                if role not in EXECUTORS or not (isinstance(value, list) and len(value) >= 2):
+                    continue
+                if value[0] in c.TIERS:
+                    worker_tiers.append((role, value[0]))
+                if value[1] == by and path != doc.path.resolve():
+                    same_label.append(f"{role} ở {path.name}")
+        line = doc.key_line("delegation.by")
+        if same_label:
+            self.add(doc.path, line, "gate-signer-independence",
+                     f"người ký '{by}' trùng nhãn người làm cùng sprint ({', '.join(sorted(set(same_label)))}): phiên ký cổng phải là phiên khác")
+        signer = block.get("tier")
+        if signer in c.TIERS:
+            below = sorted({f"{role} {tier}" for role, tier in worker_tiers if tier < signer})  # "T1" < "T2" < "T3": tier thấp hơn = số lớn hơn
+            if below:
+                self.add(doc.path, doc.key_line("delegation.tier"), "gate-signer-independence",
+                         f"tier người ký {signer} thấp hơn tier người làm ({', '.join(below)})")
 
     def _route_floor(self, doc: Doc, gate: str, done: bool) -> None:
         """Định tuyến cổng (SPR-20 FR6.2-FR6.3): cổng `delegated` mà PLAN khai file sàn cứng, hoặc có `rules` mà `delegation.files`
@@ -1536,13 +1572,6 @@ class Engine:
                 self.add(doc.path, doc.line_no(idx), "conditional-pass-merged-main",
                          "Cổng 2 là Đạt có điều kiện mà bản tin ghi đã gộp `main`: Đạt có điều kiện thì nhánh chờ người gộp")
                 return
-
-    def protected_repos_note(self, doc: Doc) -> None:
-        """FR4.3: sprint bật autopilot mở mà máy chưa đặt danh sách repo được bảo vệ."""
-        block = doc.data.get("delegation")
-        if isinstance(block, dict) and block.get("mode") == "open" and not self.env.get("AGENT_AGILE_PROTECTED_REPOS"):
-            self.add(doc.path, doc.key_line("delegation"), "protected-repos-unconfigured",
-                     "sprint bật autopilot mở mà máy chưa đặt AGENT_AGILE_PROTECTED_REPOS — đẩy ở chế độ mở bị chặn push-repo-unverified")
 
     def _unknown_delegation_key(self, doc: Doc, mode_key: str) -> bool:
         """Khối `delegation` có khoá ngoài bảng không; có thì báo một lần cho mỗi (tài liệu, khoá lạ) — khối là CHUNG của
