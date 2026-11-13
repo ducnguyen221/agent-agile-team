@@ -5,7 +5,7 @@
 > nghị**. Tài liệu sprint có hai lớp: lớp một cho người, lớp hai cho agent. Đây là nơi chuẩn của các luật đó;
 > `AGENTS.md` và mẫu chỉ **trỏ tới**; skill `explain` là quy trình thi hành mục 1, skill `response-style` giữ luật
 > súc tích mặc định, khối rút gọn ở mục 8 của nó là bản chép cho subagent. Hai chỗ nói khác nhau về **cách trình bày** thì
-> file này thắng; luật secret, cổng và lượt 5 ý của `AGENTS.md` luôn thắng.
+> file này thắng; luật cổng/secret của `AGENTS.md` và luật môi trường (nếu có) luôn thắng.
 
 Luật không đổi (nằm ở `AGENTS.md` mục Văn phong phản hồi và skill `response-style` mục 5): dù nén hay diễn giải,
 **không bao giờ mất** báo lỗi, cảnh báo bảo mật, xác nhận thao tác phá hủy, số liệu + đơn vị, đường dẫn, mã lỗi,
@@ -68,7 +68,7 @@ Khi agent cần người chốt một việc, tin có đúng bốn phần theo t
 3. **Phương án** — bảng khi ≥ 3 phương án × ≥ 2 thuộc tính, ngược lại danh sách; mỗi phương án nêu đánh đổi và
    rủi ro, công sức, khi nào nên chọn.
 4. **`KHUYẾN NGHỊ:`** phương án nghiêng về + lý do một câu + việc chờ, hoặc việc làm tiếp nếu người chưa trả lời.
-   **Im lặng không bao giờ là duyệt:** cổng, lượt 5 ý, việc không đảo ngược, việc chạm secret, việc ra ngoài phạm vi
+   **Im lặng không bao giờ là duyệt:** cổng, việc không đảo ngược, việc chạm secret, việc ra ngoài phạm vi
    đã duyệt, và không tự chọn phương án đang hỏi. Việc làm tiếp chỉ là việc **không phụ thuộc quyết định** và đã nằm
    trong phạm vi đã duyệt.
 
@@ -108,4 +108,4 @@ Chi tiết: [PLAN TK3:97](docs/plans/x/PLAN.md:97).
 
 Skill `response-style` mục 5 (bất khả xâm phạm khi nén) và `AGENTS.md` mục Văn phong phản hồi vẫn là luật của mặc
 định súc tích; file này chỉ thêm link, mẫu câu hỏi, chế độ diễn giải và hai lớp tài liệu. Hai chỗ nói khác nhau
-về cách trình bày thì file này thắng và chỗ kia sửa theo; luật secret, cổng và lượt 5 ý của `AGENTS.md` luôn thắng.
+về cách trình bày thì file này thắng và chỗ kia sửa theo; luật cổng/secret của `AGENTS.md` và luật môi trường (nếu có) luôn thắng.

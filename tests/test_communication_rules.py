@@ -72,6 +72,9 @@ def test_explain_skill_exists_with_use_when_description():
     assert re.search(r"^description: Use when", front, re.M), "description phải bắt đầu bằng `Use when`"
     assert "/explain" in front, "description phải nêu lệnh `/explain`"
     assert re.search(r"group: \"?communication\"?", front), "metadata.group phải là communication"
+    desc = re.search(r"^description: (.*)$", front, re.M).group(1)
+    for phrase in ("giải thích", "diễn giải", "nói dễ hiểu hơn", "chưa hiểu", "tại sao", "nghĩa là gì"):
+        assert phrase in desc, f"description của `explain` thiếu cụm kích hoạt `{phrase}` (mô tả là kênh định tuyến)"
 
 
 def test_explain_skill_has_tests():
