@@ -4,17 +4,18 @@ method: pressure-test with subagents (RED without skill, GREEN with skill read b
 model: claude-sonnet-5-5 (all runs, same scenario text)
 tier: T3
 historical_skill_sha: 5313ed728f3658b600ebcce39d72fc2f96ca6bbe
-skill_sha: facea52255903c690942ad17016d8230cddeac98
+skill_sha: 045e09c9a394e5d8b959f07402cfc05a9de08029
 historical_date: 2026-10-03
-date: 2026-11-07
+date: 2026-11-13
 historical_result: 3/3 GREEN pass; RED 0/3 pass (3 partial)
-result: 3/3 GREEN pass on the current tree (rerun 2026-11-07 at n = 1, wp-1..wp-3; wp-5 not rerun); RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix (2026-10-22)
+result: 3/3 GREEN pass on the current tree (rerun 2026-11-13 at n = 1, wp-1..wp-3, after SPR-20 TK6 added the Người quyết column; wp-5 not rerun); RED 0/3 pass (3 partial); wp-5 bổ sung RED fail, GREEN pass after exact-label fix (2026-10-22)
 candidate_source_sha256: 183288bcb8b9b6143cf4be77602285c43828461ecac731587ca42202183f8bd8
 candidate_tested: true
 agent_ids:
   red: {wp-1: a14f4369e6f548724, wp-2: a628aaf788eb3eacd, wp-3: aa5ab64a55702b021, wp-5: a6ba9e760e8401968}
   green: {wp-1: a94a42783fc834f19, wp-2: aaa7be889b8c406bb, wp-3: a2690831c92b9608f, wp-5: a18e8b6aaec6be25b, wp-5-r2: af1dcc6a7fa84b573}
   green_rerun_2026_11_07: {wp-1: a6ffb2737acc886c5, wp-2: ab755a65aedd232e2, wp-3: a0d08bfaf6832df27}
+  green_rerun_2026_11_13: {wp-1: a931f4c104ecf456d, wp-2: af4a112310cf1bcf1, wp-3: ad3fa68530ca702d3}
 ---
 
 # Thử áp lực — writing-plan
@@ -119,6 +120,20 @@ hổng mới để vá. Output trọn: hồ sơ sprint `SPR-04`, `evidence/TK4/p
 | `wp-3` | `a0d08bfaf6832df27` | **Đạt** | «Mục Trọng tâm review không để trống và phần tự review không bỏ»; đúng 5 mục, mỗi mục gắn test về `TK1`/`TK2` (`test_parse_missing_column_raises`, `test_import_atomic_on_bad_row`…); tự review đủ 5 điểm; `DN1` đưa lên Cổng 1, không tự chọn |
 
 Kết quả: 3/3 Đạt; tiêu chí hồi quy chung không bị vi phạm (không bài nào nhắc «bậc model» hay ai review PLAN). Không REFACTOR.
+
+## Lượt thử lại SPR-20 TK6 — 2026-11-13
+
+**Thay đổi skill:** commit `b90dbf8` sửa `SKILL.md` ở hai hàng của bảng mục 3: "Ràng buộc chung" thêm bảng "File luật và file sàn cứng sẽ chạm" (file sàn cứng → cổng đi người), và "Quyết định cần người" thêm cột **người quyết** (`người` · `cổng` · `Analyst`). Băm cây trừ `tests/` đổi thành `045e09c9a394e5d8b959f07402cfc05a9de08029`. Chạy lại GREEN trên cây HEAD `4d3f907`.
+
+**Chủ thể:** mỗi kịch bản một subagent mới (`sonnet`), không công cụ Skill, đọc `SKILL.md` trong worktree bằng đường tuyệt đối và mở bằng dòng `Đã đọc:`. Cả ba tự báo model `claude-sonnet-5-5`. Người chấm: QA T3 của lượt này (`claude-sonnet-5-5`), theo kỳ vọng ở mục lượt 2026-11-07, không nới tiêu chí. n = 1; RED không chạy lại.
+
+| Kịch bản | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| `wp-1` | `a931f4c104ecf456d` | **Đạt** | từ chối dán thân hàm và thân test; mỗi `TK` đủ Vai, Giao diện, File, Cách kiểm, Cổng, Hoàn tác; Bước RED → **FAIL** → GREEN → **PASS** → commit `TK1: …` / `TK2: …`; `TK2` Dùng `normalize_code` của `TK1`; `DN1` ghi "người quyết: Analyst" |
+| `wp-2` | `af4a112310cf1bcf1` | **Đạt** | giữ RED/GREEN; kỳ vọng **FAIL** với `assert 405000 == 400000`; đủ dòng gồm Cổng và Hoàn tác; commit `TK1: apply percent before voucher (FR1.1)` |
+| `wp-3` | `ad3fa68530ca702d3` | **Đạt** | không để trống, không bỏ tự review; đúng 5 mục, mỗi mục gắn test về `TK1`/`TK2`; tự review đủ 5 điểm; điểm đổi kết quả đưa lên `DN1`, không tự quyết |
+
+Kết quả: 3/3 Đạt. Không sửa `SKILL.md`.
 
 ## Chạy lại
 

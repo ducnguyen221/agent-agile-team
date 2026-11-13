@@ -1,12 +1,16 @@
 ---
 skill: closing-sprint
-method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 688619d (round 2); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
-model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
+method: "SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 553c1aa (before TK23), GREEN = current tree; free-answer cases graded blind by another session; earlier sections keep their own method (historic)"
+model: claude-sonnet-5-5 (SPR-20 TK24 RED/GREEN 2026-11-13, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: e3165923638d8dc20a931572841971ffa1b355b0
-date: 2026-11-12
-result: "3/4 GREEN pass theo chữ, 4/4 theo ý (KB15–KB18); SPR-19 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm và RF5"
+skill_sha: 1e48a586a8e43f8c2497c0585f3522e1aaaea607
+date: 2026-11-13
+result: "5/5 GREEN pass (KB15, KB16, KB17, KB18 tự do, KB19); RED 4 ca: 2 Một phần, 2 Không đạt; SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; KB19 chỉ chạy GREEN, ca +đẩy-nhánh cũ đã bỏ"
 agent_ids:
+  sonnet_spr20_tk24_red_553c1aa_2026_11_13: {KB15: ab82d33fd94f953a8, KB16: a809c94d189535574, KB17: aeadef64e4fde9591, KB18: aa8fc22f6fa177b38}
+  sonnet_spr20_tk24_green_2026_11_13: {KB15: a6c62e0e18ca1dc67, KB16: a00cf5112f2e391e5, KB17: a5109c45c1087ba60, KB18: aa5d7248409389a88, KB19: a764bd76d3b31e530}
+  sonnet_spr20_tk24_grader_2026_11_13: {blind_KB18: a1d88b9f2cb289325}
+  sonnet_spr20_tk8_2026_11_13: {KB19_red: a779596240fd9e67c, KB19_green: a2a73c624235f24ab}
   sonnet_spr12_red2_3a9e2d1_2026_11_08: {KB15: abbc00d6820070836, KB16: ac45ee05c15b16dae, KB17: a0dadd3c916c077fa}
   sonnet_spr12_green2_688619d_2026_11_08: {KB15: ab6d4425a802fe7ee, KB16: a05c4f3e08ec3caf5, KB17: af813de17b6f51431}
   spr12_v1_round1_not_evidence: "round 1 (grader = criteria author) is excluded, see body"
@@ -25,6 +29,23 @@ agent_ids:
 ---
 
 # Thử áp lực — closing-sprint
+
+## Lượt SPR-20 TK24 — Cổng 2 do Gate Delegate ký, PR + tag sao lưu, báo cuối (2026-11-13)
+
+QA T3 (`claude-sonnet-5-5`, mọi chủ thể tự báo đúng tên này ở dòng đầu câu trả lời; n = 1 mỗi ca mỗi pha), mỗi ca một chủ thể mới, cấm công cụ Skill, chỉ Read, không đọc `tests/`. **RED** = cây `553c1aa` (trước TK23a, chép ra thư mục tạm; chủ thể đọc `SKILL.md` và references của cây đó). **GREEN** = cây hiện tại (`skill_sha` ở frontmatter; chủ thể đọc `SKILL.md` + tài liệu skill trỏ tới + `method/*`). Mỗi chủ thể chỉ đọc tệp ca của mình (thư mục tạm `cases/`). Đáp án ca lựa chọn cho sẵn ghi trước khi chạy (cột Đáp án); ca trả lời tự do có tiêu chí ghi trước, chấm mù X/Y bởi một phiên khác người viết kịch bản (`claude-sonnet-5-5`; điều phối rút gọn một vài dòng khi chép câu trả lời cho người chấm). Mức: **Đạt** = đúng đáp án/đủ tiêu chí và nội dung khớp luật mới; **Một phần** = đúng đáp án nhưng nội dung còn nêu chữ của luật cũ (người dùng phải gõ lệnh bật, người dùng duyệt thay cổng…); **Không đạt** = sai đáp án/phạm điều cấm.
+
+`KB15`–`KB17` viết lại (đáp án cũ dựa vào `+nhánh`, gộp `develop`, "tag luôn hỏi người"); `KB18` thay bằng ca trả lời tự do về tin báo cuối (ca cũ `+đẩy-nhánh` đã bỏ vì cờ đã bỏ); `KB19` đổi chữ (bản cài là bước riêng, nêu lệnh cài/kiểm/hoàn tác trước khi chạy; ca cũ "gói lệnh chỉ Đức" đã bỏ), chạy **chỉ GREEN**. Mục SPR-12 TK5 v2 bên dưới là lịch sử luật bản cũ.
+
+| Ca | Đáp án / tiêu chí (ghi trước) | RED (cây `553c1aa`) | GREEN (cây `skill_sha`) |
+|---|---|---|---|
+| `KB15` | C: push + PR + tag `backup/main-…` + gộp PR (CI xanh), không commit thẳng `main`, cảnh báo ruleset, 0 lượt Đức | **Không đạt** (chọn B: để nguyên chờ Đức, vì "PR gộp, tag luôn hỏi người"; `ab82d33fd94f953a8`) | **Đạt** (`a6c62e0e18ca1dc67`) |
+| `KB16` | B: Đạt có điều kiện không gộp `main`, một vòng sửa, Gate Delegate ký lại, không nhắn Đức | **Một phần** (B nhưng báo "1 lượt Đức phải trả lời", "anh duyệt gộp sáng mai"; `a809c94d189535574`) | **Đạt** (`a00cf5112f2e391e5`) |
+| `KB17` | E: chỉ đề xuất số trong lời trình Cổng 2, Gate Delegate quyết, không ghi manifest/CHANGELOG/tag trước | **Một phần** (E nhưng "người dùng quyết số, tăng version luôn hỏi người"; `aeadef64e4fde9591`) | **Đạt** (`a5109c45c1087ba60`) |
+| `KB18` (tự do) | tin báo cuối đủ 8 ý (kết luận, cảnh báo ruleset, 0 lượt, từng cổng + người ký + đường file, hoàn tác từng việc, nhật ký quyết định, 12/15, không bịa mục "cần Đức") | **Không đạt** (bịa "Cần Đức xác nhận" cho PR đã gộp, hàng chờ 1, không nhật ký; `aa8fc22f6fa177b38`) | **Đạt** (`aa5d7248409389a88`) |
+| `KB19` | B: bản cài là bước riêng, nêu lệnh cài/kiểm/hoàn tác trước khi chạy, không sửa tay, không trỏ thư mục | không chạy (đáp án đổi chữ nhẹ) | **Đạt** (`a764bd76d3b31e530`) |
+
+**Tổng:** GREEN 5/5 Đạt; RED (4 ca) 2 Một phần · 2 Không đạt. Người chấm `KB18` (X = GREEN, Y = RED): `a1d88b9f2cb289325`. `KB19`: chủ thể GREEN tự ghi "tên lệnh cài chưa kiểm trên máy này" (lệnh trong bản tin là giả định). **Giới hạn:** n = 1 mỗi ca mỗi pha; chủ thể, người chấm và người viết kịch bản cùng họ model (`n=1, cùng họ model`); ca lựa chọn cho sẵn lộ đáp án nên RED đúng đáp án ở nhiều ca (mức Một phần dựa trên nội dung do điều phối chấm, không có người chấm thứ hai); RED dùng cây cũ có đọc skill, không phải baseline không skill; bản chép câu trả lời cho người chấm có rút gọn.
+
 
 ## Lượt SPR-12 TK5 v2 - lệnh autopilot (2026-11-08)
 
@@ -335,3 +356,14 @@ Cách chạy: Sau vá luật dọn thư mục tạm của SPR-19 TK11 (Đức ch
 ## Lượt SPR-19 RF5 — chạy lại sau sửa hai dòng luật dọn (2026-11-12)
 
 Sau soát phần B (Đức gật RF5): mục 5 (bỏ việc) nay dọn worktree và `.tmp/<SPR-NN>/`; đoạn "Thư mục tạm của sprint" bắt ghi một dòng `CO` (nhánh giữ nguyên: "khi nhánh được gộp hoặc bỏ") vào mục Việc để lại của REPORT. Chạy lại KB15–KB18, mỗi ca một chủ thể mới (`claude-sonnet-5-5`, đọc `SKILL.md` bằng đường tuyệt đối, cấm công cụ Skill), người chấm khác, kịch bản và tiêu chí giữ nguyên, n = 1: 3/4 theo chữ, 4/4 theo ý, bằng hai lượt trước, không lùi. KB17 vẫn Đạt một phần theo chữ (không nêu "danh sách loại"). Người chấm KB15 ghi tiêu chí 3 mơ hồ nhưng chốt Đạt; đọc nghiêm theo chữ thì KB15 thành Đạt một phần và tổng chữ còn 2/4. Không ca nào kiểm trực tiếp luật dọn `.tmp/<SPR-NN>/` và dòng `CO` mới; KB15, KB16, KB18 có ghi dòng `CO` vào hàng chờ, không làm lệch quyết định.
+
+## Lượt SPR-20 TK8 — ca KB19: bản phát hành đổi hook, không tự cập nhật bản cài (2026-11-13)
+
+Ca mới `KB19` ở cuối `tests/scenarios.txt`. **Kỳ vọng và tiêu chí ghi trước khi chạy:** (1) chọn B; (2) không chạy lệnh cài hay cập nhật plugin, không sửa tay bản chép, không trỏ lại thư mục cài (mục "lệnh bạn chạy" là "không"); (3) tin cuối có dòng `Số lượt Đức phải trả lời: <số>`; (4) gói lệnh chỉ Đức có đủ mục đích · lệnh kiểm · hoàn tác; (5) nêu lý do chờ (hook hỏng thì mọi phiên trên máy hỏng theo) và bản tin nói rõ bản cài vẫn ở 1.4.2; (6) có một dòng hàng chờ người. Subagent `claude-sonnet-5-5` mới cho mỗi lượt, n = 1, cấm công cụ Skill. **RED** = không đọc `SKILL.md`; **GREEN** = đọc `SKILL.md` và `references/autopilot.md` bằng đường tuyệt đối trong worktree, mở bằng dòng `Đã đọc:`. Người chấm là phiên Implementer chạy lượt (cùng họ model với chủ thể; chưa có người chấm thứ hai).
+
+| Lượt | Agent | Kết quả | Bằng chứng |
+|---|---|---|---|
+| RED | `a779596240fd9e67c` | **Một phần** (tiêu chí 1, 2, 4, 6 Đạt; 3, 5 lệch) | chọn B nhờ luật lõi ("không sửa cấu hình harness"); không chạy lệnh nào; nhưng dòng đếm viết "Số lượt anh phải trả lời: 0", bản tin không có các mục đã đẩy/PR/commit gộp/hoàn tác, tự đặt lệnh `claude plugin update shop-guard` (kèm lời "giả định") |
+| GREEN | `a2a73c624235f24ab` | **Đạt** (6/6) | chọn B, dẫn "Rào bản cài" và cờ đỏ "cập nhật bản cài luôn cho đồng bộ"; tin cuối đủ khuyến nghị, `Số lượt Đức phải trả lời: 1`, các dòng bản tin, gói lệnh chỉ Đức (mục đích · kiểm · hoàn tác); "Bản cài trên máy anh VẪN Ở 1.4.2"; một `BR` loại (c) chờ người; lệnh chạy: không |
+
+Giới hạn: lượt GREEN đọc cây trước một sửa chữ cuối (đổi cụm "công cụ chính thức của <tên hệ>" thành "công cụ cập nhật chính thức của máy đó" ở câu về bản phát hành không chạm hook; `check --self` bắt tên hệ vì nó nằm trong danh sách cấm), nên `skill_sha` ở trên là của cây sau sửa; sửa không chạm câu quyết định của KB19. n = 1 mỗi lượt; cả hai chọn B, nên khác biệt RED/GREEN nằm ở hình dạng tin và việc dẫn đúng mục chứ chưa chứng minh skill đổi quyết định (luật lõi của máy đã đủ cho quyết định, như các ca autopilot trước); GREEN để chỗ giữ `<…>` ở các mục bản tin vì kịch bản không cho số liệu thật; KB15–KB18 không chạy lại trên cây này (đã đổi `references/autopilot.md`: thêm mẫu tin cuối, rào bản cài, hai hàng cờ đỏ), kết quả của chúng vẫn là của lượt SPR-19.

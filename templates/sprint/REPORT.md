@@ -159,13 +159,33 @@ REPORT có 1 **carry-over** (CO), đã ghi thành dòng mới trong sổ REQUEST
   attempt so với số manifest yêu cầu, trạng thái đối chiếu ledger, unknown còn lại và việc đổi criteria có
   re-evaluate cả baseline/candidate hay mở experiment mới. Không coi thiếu record là 100% coverage.
 
-## Bản tin autopilot (tuỳ chọn)
+## Bản tin autopilot
 
-<!-- Mục tuỳ chọn, `check` không đòi; người dùng đọc sau, không chặn việc. Sprint bật autopilot ghi theo
-     `method/autopilot.md` mục 8: một dòng mỗi cổng duyệt thay (cổng · kết luận · người ký · đường tới file kết luận) ·
-     hàng chờ người (`BR` chờ người) · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do. -->
+<!-- Tin cuối sprint (một tin gom cùng Cổng 2), người dùng đọc sau, không chặn việc. Ghi theo `method/autopilot.md`
+     mục 8: dòng đầu cảnh báo nếu `main` chưa có ruleset · một dòng mỗi cổng duyệt thay (cổng · kết luận · người ký · đường
+     tới file kết luận) · hàng chờ người (`BR` chờ người) · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do.
+     Luôn ghi dòng "số lượt Đức phải trả lời" (`check` báo thiếu ở REPORT sprint mới); việc không xảy ra thì ghi "không có". Ghi thật những gì đã làm; không ghi đã gộp `main` khi Cổng 2 là Đạt có điều kiện (`check` báo Phải sửa). -->
 
-Không áp dụng — sprint không bật autopilot.
+- **Số lượt Đức phải trả lời:** <số> — không tính hộp xác nhận của rào máy (mục tiêu ≤ 1 sprint ký thay, ≤ 2 sprint cổng người).
+- **Cổng duyệt thay:** Không áp dụng — sprint không bật autopilot.
+- **Đã đẩy:** không đẩy. <!-- nhánh · remote · sha -->
+- **PR:** không có. <!-- số/đường PR, trạng thái -->
+- **Commit gộp:** không có. <!-- sha và nhánh đích; Đạt có điều kiện thì không gộp, nhánh chờ người -->
+- **Tag · bản phát hành:** không có. <!-- tên tag, đường bản phát hành -->
+- **Hoàn tác từng bước:** không áp dụng. <!-- mỗi việc đã đẩy/gộp/tag/phát hành một lệnh hoàn tác -->
+- **Hàng chờ người · nhánh chờ gộp · số phiên / trần · lần dừng:** không có.
+- **Gói lệnh chỉ Đức:** không có. <!-- mỗi lệnh ghi mục đích · lệnh kiểm · hoàn tác -->
+- **Bản cài:** không đổi. <!-- bản phát hành chạm hook hay guard thì cập nhật bản cài ở bước riêng: nêu lệnh cài, lệnh kiểm, lệnh hoàn tác trước khi chạy -->
+- **Đề xuất sprint kế:** không có.
+
+## Nhật ký quyết định
+
+<!-- Mỗi quyết định của Gate Delegate hay phiên điều phối một dòng, để Đức đọc lại sau (`method/autopilot.md` mục 8).
+     Ghi thật: ai ký (nhãn · vai · tier · model), bằng chứng (đường file hoặc lệnh + kết quả), lệnh hoàn tác. -->
+
+| Quyết định | Ai ký | Bằng chứng | Lệnh hoàn tác |
+|---|---|---|---|
+| Không có quyết định nào ngoài hai cổng. | — | — | — |
 
 ## 8. Cổng 2 — nghiệm thu
 

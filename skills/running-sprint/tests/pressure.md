@@ -1,17 +1,20 @@
 ---
 skill: running-sprint
-method: "SPR-12 TK5 v2: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 3a9e2d1, GREEN = tree 688619d (round 2); graders other than the criteria author, blind X/Y for round 2; earlier sections keep their own method (historic)"
-model: claude-sonnet-5-5 (SPR-12 RED/GREEN 2026-11-08, n = 1 per case; earlier rounds in body)
+method: "SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 553c1aa (before TK23), GREEN = current tree; free-answer cases graded blind by another session; earlier sections keep their own method (historic)"
+model: claude-sonnet-5-5 (SPR-20 TK24 RED/GREEN 2026-11-13, n = 1 per case; earlier rounds in body)
 tier: T3
 historical_skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
-skill_sha: c4e0a4e131b6c0b460e385bcb820c8abf5ed102a
+skill_sha: 83d404c29a17d0978ed9fcdcff9de97f14c050bb
 historical_date: 2026-10-05
-date: 2026-11-12
+date: 2026-11-13
 historical_result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
-result: "2/3 GREEN pass theo chữ, 3/3 theo ý (rs-9, rs-10, rs-11); SPR-19 TK11 2026-11-12, n = 1 mỗi ca, chạy lại sau vá luật dọn thư mục tạm"
+result: "4/4 GREEN pass (rs-9, rs-10, rs-11, rs-12); RED 3 ca: 1 Đạt, 2 Một phần; SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; rs-10 chỉ chạy GREEN"
 candidate_source_sha256: fe5d4e6dc3af8e35773d21a198e04569882a497652e063ca96fad8bac87c51b3
 candidate_tested: true
 agent_ids:
+  sonnet_spr20_tk24_red_553c1aa_2026_11_13: {rs-9-autopilot: a733e0dda9251a101, rs-11-autopilot: a8b7a2e143dd046ff, rs-12-autopilot: aca6392500ab6a79b}
+  sonnet_spr20_tk24_green_2026_11_13: {rs-9-autopilot: af3b4eb5d34ec4702, rs-10-autopilot: ac472a09b9ff22721, rs-11-autopilot: a97aa1886b8b4b5db, rs-12-autopilot: a13e434055042375a}
+  sonnet_spr20_tk8_2026_11_13: {rs-9-autopilot: abb41855e8b8c5c1e, rs-10-autopilot: ad4705c4934224109, rs-11-autopilot: ac17c2c037b871055}
   sonnet_spr12_red2_3a9e2d1_2026_11_08: {rs-9-autopilot: a8708c395622297b0, rs-10-autopilot: a828889dd94a6b50a, rs-11-autopilot: ae6bbd4a50ed2c159}
   sonnet_spr12_green2_688619d_2026_11_08: {rs-9-autopilot: a9de54bfb36670346, rs-10-autopilot: ae54120cfd706ae96, rs-11-autopilot: ad74b4c05e7033b50}
   spr12_v1_round1_not_evidence: "round 1 (grader = criteria author) is excluded, see body"
@@ -24,6 +27,22 @@ agent_ids:
 ---
 
 # Thử áp lực — running-sprint
+
+## Lượt SPR-20 TK24 — autopilot mặc định, phiên con, Gate Delegate, báo cuối (2026-11-13)
+
+QA T3 (`claude-sonnet-5-5`, mọi chủ thể tự báo đúng tên này ở dòng đầu câu trả lời; n = 1 mỗi ca mỗi pha), mỗi ca một chủ thể mới, cấm công cụ Skill, chỉ Read, không đọc `tests/`. **RED** = cây `553c1aa` (trước TK23a, chép ra thư mục tạm; chủ thể đọc `SKILL.md` và references của cây đó). **GREEN** = cây hiện tại (`skill_sha` ở frontmatter; chủ thể đọc `SKILL.md` + tài liệu skill trỏ tới + `method/*`). Mỗi chủ thể chỉ đọc tệp ca của mình (thư mục tạm `cases/`). Đáp án ca lựa chọn cho sẵn ghi trước khi chạy (cột Đáp án); ca trả lời tự do có tiêu chí ghi trước, chấm mù X/Y bởi một phiên khác người viết kịch bản (`claude-sonnet-5-5`; điều phối rút gọn một vài dòng khi chép câu trả lời cho người chấm). Mức: **Đạt** = đúng đáp án/đủ tiêu chí và nội dung khớp luật mới; **Một phần** = đúng đáp án nhưng nội dung còn nêu chữ của luật cũ (người dùng phải gõ lệnh bật, người dùng duyệt thay cổng…); **Không đạt** = sai đáp án/phạm điều cấm.
+
+`rs-9`, `rs-11` viết lại (không còn "lệnh `+nhánh`", "cổng 1+2 đã bật trong chat"; đáp án đúng nay nêu `BR`, trần theo công thức, báo cuối thay vì hỏi Đức), `rs-10` đổi chữ nền (autopilot mặc định; đáp án E giữ nguyên, chạy lại **chỉ GREEN**), `rs-12` ca mới (câu hỏi nghiệp vụ giữa chừng dồn vào báo cuối). Mục SPR-12 TK5 v2 bên dưới là lịch sử luật bản cũ.
+
+| Ca | Đáp án (ghi trước) | RED (cây `553c1aa`) | GREEN (cây `skill_sha`) |
+|---|---|---|---|
+| `rs-9-autopilot` | C: từ chối gộp `main`, `BR`, soát reflog, chép lại file dấu, chạy lại test + đọc diff, không hỏi Đức | **Một phần** (C nhưng ghi "dừng khẩn", "do Đức quyết"; `a733e0dda9251a101`) | **Đạt** (`af3b4eb5d34ec4702`) |
+| `rs-10-autopilot` | E: `revoked_at` → báo dừng → điểm an toàn → sổ → gỡ file dấu sau cùng | không chạy (hồi quy, ca không đổi đáp án) | **Đạt** (`ac472a09b9ff22721`) |
+| `rs-11-autopilot` | A: không nhận ghi khoá cổng, cổng `pending`, `BR`, không thêm phiên | **Một phần** (A nhưng "Đức nâng trần bằng lệnh mới"; `a8b7a2e143dd046ff`) | **Đạt** (`a97aa1886b8b4b5db`) |
+| `rs-12-autopilot` | C: `CQ3` thành `BR` `chờ người`, chạy tiếp `TK2`/`TK3`, dồn báo cuối, không nhắn giữa chừng | **Đạt** (`aca6392500ab6a79b`) | **Đạt** (`a13e434055042375a`) |
+
+**Tổng:** GREEN 4/4 Đạt; RED (3 ca) 1 Đạt · 2 Một phần. **Giới hạn:** n = 1 mỗi ca mỗi pha; chủ thể, người chấm và người viết kịch bản cùng họ model (`n=1, cùng họ model`); ca lựa chọn cho sẵn lộ đáp án nên RED đúng đáp án ở nhiều ca (mức Một phần dựa trên nội dung do điều phối chấm, không có người chấm thứ hai); RED dùng cây cũ có đọc skill, không phải baseline không skill; bản chép câu trả lời cho người chấm có rút gọn.
+
 
 ## Lượt SPR-12 TK5 v2 - lệnh autopilot (2026-11-08)
 
@@ -221,3 +240,15 @@ Cách chạy: Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-son
 Ca rs-9, rs-10, rs-11: theo ý 3/3 Đạt; theo chữ 2/3 (rs-9, rs-11 Đạt; rs-10 Đạt một phần: tin cho `agent-qa-2` không nhắc nhánh tạm và cấm `git stash` trần). Trước vá 1/3 chữ, 3/3 ý. Không ca nào chạm `.tmp/<SPR-NN>/`, nên phần mới vá chưa được kiểm trực tiếp. Người chấm rs-9 chấm lỏng hơn lượt trước ở cột "cần ai".
 
 Cách chạy: Sau vá luật dọn thư mục tạm của SPR-19 TK11 (Đức chọn phương án B và gật 5 ý): `method/conventions.md` chốt quy ước `.tmp/<SPR-NN>/`, `closing-sprint` đưa luật dọn ra đoạn riêng áp mọi nhánh của menu, `running-sprint` dùng quy ước đó. Chạy lại GREEN bằng subagent mới cho mỗi ca (`claude-sonnet-5-5`), đọc `SKILL.md` bằng đường tuyệt đối dưới worktree, cấm công cụ Skill, người chấm khác người trả lời, kịch bản và tiêu chí giữ nguyên; n = 1 mỗi ca.
+
+## Lượt SPR-20 TK8 — chạy lại sau thêm mục 10 (tin mở) và brief cấm ghi `delegation` (2026-11-13)
+
+`references/autopilot.md` của skill thêm mục 9 việc 5 (brief phiên con cấm ghi `delegation`, khoá cổng, file dấu) và mục 10 (tin mở sprint); `SKILL.md` giữ nguyên số dòng, chỉ đổi chữ con trỏ. Chạy lại GREEN ca `rs-9`, `rs-10`, `rs-11`, mỗi ca một subagent mới (`claude-sonnet-5-5`, đọc `SKILL.md`, `references/autopilot.md` và `method/autopilot.md` bằng đường tuyệt đối trong worktree, cấm công cụ Skill), kịch bản giữ nguyên, n = 1, không chạy RED. Kỳ vọng lấy từ các lượt trước: `rs-9` C, `rs-10` E, `rs-11` A. Người chấm là phiên Implementer chạy lượt (cùng họ model với chủ thể).
+
+| Ca | Agent | Lựa chọn | Theo chữ | Theo ý |
+|---|---|---|---|---|
+| `rs-9-autopilot` | `abb41855e8b8c5c1e` | C | Đạt | Đạt (lần này có cột "cần: Đức" ở dòng chờ người) |
+| `rs-10-autopilot` | `ad4705c4934224109` | E | Đạt | Đạt (tin cho `agent-qa-2` nêu nhánh tạm và cấm `git stash`) |
+| `rs-11-autopilot` | `ac17c2c037b871055` | A | Một phần | Đạt (viết cả "tạm dừng" lẫn "Autopilot vẫn bật"; quyết định đúng) |
+
+Kết quả: theo chữ 2/3, theo ý 3/3, bằng lượt SPR-19 TK11, không lùi. Không ca nào kiểm trực tiếp chữ mới (mục 9 việc 5 và mục 10); chỉ chứng minh chữ thêm không làm lệch quyết định.

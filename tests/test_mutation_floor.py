@@ -1,4 +1,4 @@
-"""Test đột biến của rào (SPR-16 FR3): gỡ rào bằng chín cách trên **bản sao** trong thư mục tạm, bộ test ghim phải đỏ
+"""Test đột biến của rào (SPR-16 FR3): gỡ rào bằng tám cách trên **bản sao** trong thư mục tạm, bộ test ghim phải đỏ
 đúng test được chỉ định; bản sao chưa đột biến phải xanh; đột biến nào sống thì suite này đỏ và nêu mã đột biến.
 
 File này thuộc sàn cứng (`FLOOR_FILES`). Một cơ chế chỉ được gọi là "rào máy" khi đột biến tương ứng ở đây đã đỏ (FR3.3).
@@ -19,11 +19,12 @@ from typing import Callable, Optional
 import pytest
 
 REPO = Path(__file__).resolve().parent.parent
-PINNED_SUITES = ("tests/test_fence_wiring.py", "tests/test_floor_check.py", "tests/test_git_fence.py",
-                 "tests/test_autopilot_guard.py", "tests/test_check.py")
+PINNED_SUITES = ("tests/test_fence_wiring.py", "tests/test_floor_check.py",
+                 "tests/test_autopilot_guard.py", "tests/test_autopilot_guard_undo.py", "tests/test_check.py")
 KEYWORDS = "fence or floor or marker or autopilot or delegation or push"
 IGNORE = shutil.ignore_patterns(".git", ".tmp", ".claude", "__pycache__", ".pytest_cache", "*.pyc", ".env", ".env.*")
 WIRING = "tests/test_fence_wiring.py"
+UNDO = "tests/test_autopilot_guard_undo.py"
 
 
 @dataclass
@@ -86,45 +87,80 @@ def guard_imports_check(root: Path) -> None:
          "from check import AUTOPILOT_EXCLUSIONS")
 
 
-def drop_exclusion(root: Path) -> None:
-    edit(root, "scripts/_autopilot_rules.py", '("push", "tag",', '("tag",')
+def drop_always_blocked(root: Path) -> None:
+    """Bỏ `irreversible_delete` khỏi tập bảy mục luôn chặn: guard không còn chặn xoá khi file dấu hợp lệ (thay đột biến cũ trỏ danh sách 13 mục, nay chỉ dùng khi file dấu hỏng)."""
+    edit(root, "scripts/_autopilot_rules.py", '"network_fetch", "rules_unlisted", "irreversible_delete", "secret"', '"network_fetch", "rules_unlisted", "secret"')
 
 
-def push_allow_all(root: Path) -> None:
-    """Nhánh đẩy của `git_fence` luôn trả 'không đụng': chèn `return Verdict()` ngay sau dòng def của `_push_verdict`."""
-    path = root / "scripts" / "git_fence.py"
-    text = path.read_text(encoding="utf-8")
-    match = re.search(r"^def _push_verdict\(.*\) -> Verdict:\n", text, re.M)
-    assert match, "không thấy _push_verdict trong git_fence.py"
-    path.write_bytes((text[:match.end()] + "    return Verdict()\n" + text[match.end():]).encode("utf-8"))
+GUARD = "scripts/autopilot_guard.py"
 
 
-def drop_listed_check(root: Path) -> None:
-    """Hợp đồng đích không còn đòi danh tính repo được xác minh bằng danh sách (dấu hiệu 1)."""
-    edit(root, "scripts/git_fence.py", "    return (ctx.signals_for(target) if target else sig).listed is True", "    return True")
+def stash_all_open(root: Path) -> None:
+    edit(root, GUARD, 'if "--all" in rest or any(_cluster(a, "a") for a in rest):', "if False:")
 
 
-def drop_targets_check(root: Path) -> None:
-    edit(root, "scripts/git_fence.py", '    if dest not in contract["push_targets"]:\n        return "push-target-unknown"', "    pass")
+def clean_x_open(root: Path) -> None:
+    edit(root, GUARD, 'if forced and any(_cluster(a, "xX") for a in opts):', "if False:")
 
 
-def drop_url_check(root: Path) -> None:
-    edit(root, "scripts/git_fence.py", '        return "push-url-mismatch"', "        pass")
+def ignore_check_inverted(root: Path) -> None:
+    edit(root, GUARD, "return None if ctx.marker_ignored() else MARKER", "return MARKER")
 
 
-def drop_protected_branch_check(root: Path) -> None:
-    """`_on_protected_branch` luôn nói 'không phải nhánh được bảo vệ'."""
-    path = root / "scripts" / "git_fence.py"
-    text = path.read_text(encoding="utf-8")
-    match = re.search(r"^def _on_protected_branch\(.*\) -> bool:\n", text, re.M)
-    assert match, "không thấy _on_protected_branch"
-    path.write_bytes((text[:match.end()] + "    return False\n" + text[match.end():]).encode("utf-8"))
+def git_dir_delete_open(root: Path) -> None:
+    edit(root, GUARD, "if any(_is_git_path(t) for t in targets + [v for _, v in _ps_split(tokens).other]):", "if False:")
 
 
-def drop_alias_expansion(root: Path) -> None:
-    edit(root, "scripts/git_fence.py", "        seg = expand_alias(seg, ctx.cwd)\n", "")
+def tmp_move_ignored(root: Path) -> None:
+    edit(root, GUARD, "        ctx.tmp_moved = True", "        pass")
 
 
+def pipeline_delete_open(root: Path) -> None:
+    edit(root, GUARD, 'item = "irreversible_delete"  # `Get-ChildItem', 'item = None  # `Get-ChildItem')
+
+
+def reflog_expire_open(root: Path) -> None:
+    edit(root, GUARD, 'return "irreversible_delete" if rest[:1] in (["expire"], ["delete"]) else None', "return None")
+
+
+def push_force_open(root: Path) -> None:
+    edit(root, GUARD, 'or a.startswith("--force") or _cluster(a, "fd")', 'or _cluster(a, "fd")')
+
+
+def branch_big_d_open(root: Path) -> None:
+    edit(root, GUARD, 'any(_cluster(a, "D") for a in rest) or (deleting and forced)', "(deleting and forced)")
+
+
+def session_cap_formula_off(root: Path) -> None:
+    edit(root, "scripts/check.py", "cap > formula and not", "cap > 10 ** 9 and not")
+
+
+def colon_dest_open(root: Path) -> None:
+    edit(root, GUARD, 'bucket = parts.dst if canon == "destination" else parts.new', 'bucket = parts.other if canon == "destination" else parts.new')
+
+
+def named_param_colon_open(root: Path) -> None:
+    edit(root, GUARD, 'found = None if token.startswith("--") else _COLON_FLAG.fullmatch(token)', "found = None")
+
+
+def rename_newname_open(root: Path) -> None:
+    edit(root, GUARD, '(parts.new if parts.kind == "rename" else [])', "[]")
+
+
+def gc_any_expiry_open(root: Path) -> None:
+    edit(root, GUARD, 'any(re.fullmatch(r"gc\..*expire\w*", key) for key in config)', 'any(re.fullmatch(r"gc\..*expire\w*", key) and value in ("now", "all", "0") for key, value in config.items())')
+
+
+def cwd_in_git_open(root: Path) -> None:
+    edit(root, GUARD, "self.in_git = _is_git_path(self.cwd)", "self.in_git = False")
+
+
+def gc_config_open(root: Path) -> None:
+    edit(root, GUARD, 'if sub in ("gc", "prune", "reflog", "maintenance") and any(', "if False and any(")
+
+
+# SPR-20 TK21: sáu đột biến tinh (hợp đồng đích, nhánh được bảo vệ, alias, nhánh đẩy) nhắm mô-đun rào git thường trực và suite của nó;
+# hai file đó đã gỡ nên sáu đột biến bỏ theo, còn tám đột biến của dòng nối/vùng sàn/danh sách mục. Đây là gỡ cơ chế, không phải sửa test cho qua kiểm.
 MUTATIONS = {
     "drop-call": Mutation(drop_call, f"{WIRING}::test_check_calls_rules_validator", (WIRING,)),
     "drop-result": Mutation(drop_result, f"{WIRING}::test_check_uses_validator_result", (WIRING,)),
@@ -133,21 +169,26 @@ MUTATIONS = {
     "move-marker": Mutation(move_marker, f"{WIRING}::test_floor_zone_hashes", (WIRING,)),
     "remove-fence-file": Mutation(remove_fence_file, f"{WIRING}::test_fence_files_exist", (WIRING,)),
     "guard-imports-check": Mutation(guard_imports_check, f"{WIRING}::test_guard_does_not_import_check", (WIRING,)),
-    "drop-exclusion": Mutation(drop_exclusion, f"{WIRING}::test_exclusions_pinned", (WIRING,)),
-    # Thêm sau vòng 2 kiểm định (Astra RV7): đột biến tinh trong git_fence.py, mỗi cái đỏ đúng test ghim của hợp đồng/nhánh/alias.
-    "drop-listed-check": Mutation(drop_listed_check, "tests/test_git_fence.py::test_contract_needs_the_protected_list_to_name_the_repo",
-                                  ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "drop-targets-check": Mutation(drop_targets_check, "tests/test_git_fence.py::test_contract_rejections",
-                                   ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "drop-url-check": Mutation(drop_url_check, "tests/test_git_fence.py::test_contract_pushurl_changed_after_writing",
-                               ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "drop-protected-branch-check": Mutation(drop_protected_branch_check,
-                                            "tests/test_git_fence.py::test_local_history_commands_on_main_are_forbidden_at_full",
-                                            ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "drop-alias-expansion": Mutation(drop_alias_expansion, "tests/test_git_fence.py::test_repo_alias_for_push_is_seen",
-                                     ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "push-allow-all": Mutation(push_allow_all, "tests/test_git_fence.py::test_push_to_main_without_marker_in_protected_repo",
-                               ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
+    "drop-always-blocked": Mutation(drop_always_blocked, f"{WIRING}::test_fence_wiring_pins_7_plus_6", (WIRING,)),
+    # SPR-20 TK27b: mười đột biến phủ rào mới của guard và trần phiên (mỗi cái trúng đúng một test ghim; hằng chết `drop-exclusion` cũ được thay bằng `drop-always-blocked`).
+    "stash-all-open": Mutation(stash_all_open, "tests/test_autopilot_guard.py::test_guard_marker_pattern_blocked", ("tests/test_autopilot_guard.py",)),
+    "clean-x-open": Mutation(clean_x_open, f"{UNDO}::test_guard_stash_all_and_clean_x_blocked_in_both_ignore_states", (UNDO,)),
+    "ignore-check-inverted": Mutation(ignore_check_inverted, f"{UNDO}::test_guard_stash_clean_allowed_when_marker_ignored", (UNDO,)),
+    "git-dir-delete-open": Mutation(git_dir_delete_open, f"{UNDO}::test_guard_delete_inside_git_always_blocked", (UNDO,)),
+    "tmp-move-ignored": Mutation(tmp_move_ignored, f"{UNDO}::test_guard_move_into_tmp_then_delete_blocked", (UNDO,)),
+    "pipeline-delete-open": Mutation(pipeline_delete_open, f"{UNDO}::test_guard_other_recursive_delete_forms_blocked", (UNDO,)),
+    "reflog-expire-open": Mutation(reflog_expire_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
+    "push-force-open": Mutation(push_force_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
+    "branch-big-d-open": Mutation(branch_big_d_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
+    # SPR-20 TK27d: ba đột biến phủ dạng dính `-Destination:x`, thư mục làm việc trong `.git`, `git -c gc.*=now`.
+    "colon-dest-open": Mutation(colon_dest_open, f"{UNDO}::test_guard_colon_attached_powershell_flags_blocked", (UNDO,)),
+    # TK27e: ba đột biến phủ bộ phân tích tham số chung (dạng dính `-Tên:giá-trị`, tên mới là `.git`) và hạn hết hạn bất kỳ của `gc`.
+    "named-param-colon-open": Mutation(named_param_colon_open, f"{UNDO}::test_guard_ps_parameter_forms_git_blocked", (UNDO,)),
+    "rename-newname-open": Mutation(rename_newname_open, f"{UNDO}::test_guard_ps_parameter_forms_git_blocked", (UNDO,)),
+    "gc-any-expiry-open": Mutation(gc_any_expiry_open, f"{UNDO}::test_guard_git_config_zero_expiry_blocked", (UNDO,)),
+    "cwd-in-git-open": Mutation(cwd_in_git_open, f"{UNDO}::test_guard_delete_or_move_with_cwd_inside_git_blocked", (UNDO,)),
+    "gc-config-open": Mutation(gc_config_open, f"{UNDO}::test_guard_git_config_zero_expiry_blocked", (UNDO,)),
+    "session-cap-formula-off": Mutation(session_cap_formula_off, "tests/test_check.py::test_delegation_session_cap_must_not_exceed_the_formula", ("tests/test_check.py",)),
 }
 
 
@@ -204,7 +245,7 @@ def test_pristine_copy_is_green(pristine):
 def test_mutant_is_killed(slug, pristine, tmp_path):
     mutation = MUTATIONS[slug]
     if mutation.needs and not (REPO / mutation.needs).is_file():
-        pytest.skip(f"{mutation.needs} chưa tồn tại; TK8 tạo mô-đun và bỏ skip này")
+        pytest.skip(f"{mutation.needs} không tồn tại")
     root = fresh_copy(pristine, tmp_path)
     mutation.apply(root)
     failed, errors = run_pinned_detail(root, mutation.suites)
@@ -237,8 +278,6 @@ def test_load_error_is_not_a_kill(pristine, tmp_path):
         require_killed("drop-call", mutation, failed, errors)
 
 
-@pytest.mark.skipif(not (REPO / "tests" / "test_git_fence.py").is_file(),
-                    reason="test_git_fence.py do TK8 tạo; bật lại khi suite tồn tại")
 def test_pinned_suites_complete():
     missing = [s for s in PINNED_SUITES if not (REPO / s).is_file()]
     assert not missing, f"bộ ghim thiếu suite: {missing}"

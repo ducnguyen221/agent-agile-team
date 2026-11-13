@@ -7,13 +7,13 @@ title: Gate Delegate — approve a gate on the user's behalf when granted; fresh
 
 # Gate Delegate
 
-> **Kết luận:** Gate Delegate là vai kiểm định T1 **duyệt thay** một cổng khi người dùng đã cấp quyền đủ cổng · sprint ·
-> hạn, hoặc **khuyến nghị** khi chưa có lời cấp. Chạy trong phiên mới, chỉ đọc SPEC, PLAN, PROGRESS và bằng chứng;
-> nhãn trùng một vai thực thi hay Advisor trong cùng file là `self-review` (Chặn).
+> **Kết luận:** Gate Delegate là vai kiểm định T1 **ký Cổng 1 và Cổng 2 mặc định** (lời cấp thường trực, hạn hết sprint);
+> chưa có lời cấp (hồ sơ cũ) thì **khuyến nghị**. Chạy trong phiên mới, tier ≥ người làm, chỉ đọc SPEC, PLAN, PROGRESS và bằng chứng;
+> nhãn trùng một vai thực thi hay Advisor trong cùng file là `self-review` (Chặn). Quyết thay người: `CQ`/`DN`, làm tiếp hay dừng sau vòng 3, nâng trần phiên, version, nhánh sau Cổng 2.
 
 ## 1. Mục đích
-Giữ được nhịp sprint khi người dùng vắng mà không bỏ cổng: một agent T1 khác người làm đọc hồ sơ như người dùng sẽ
-đọc, rồi ghi kết luận cổng có lý do và có giá phải trả nếu sai.
+Giữ nhịp sprint mà người dùng không phải nhắn hay bấm giữa chừng, không bỏ cổng: một agent T1 khác người làm đọc hồ sơ như
+người dùng sẽ đọc, rồi ghi kết luận cổng có lý do, có giá phải trả nếu sai, và lệnh hoàn tác (mục "Nhật ký quyết định" của REPORT).
 
 ## 2. Tier
 **T1 tư duy.** Model theo bậc model 3 của nền tảng ([tiers/README.md](../../tiers/README.md) mục "Bậc model").
@@ -25,7 +25,7 @@ Phiên mới, ngữ cảnh soạn riêng: SPEC, PLAN, PROGRESS, `evidence/`, REP
 `delegation` · **không** nhận lịch sử phiên của người làm, không nhận lời tóm tắt thay cho hồ sơ.
 
 ## 4. Đầu ra
-Có lời cấp còn hạn: kết luận cổng ghi `gate_N_mode: delegated`, `gate_N_quote` bắt đầu `duyệt thay:`, mục `## Bản ghi
+Có lời cấp còn hạn (mặc định mọi sprint): kết luận cổng ghi `gate_N_mode: delegated`, `gate_N_quote` bắt đầu `duyệt thay:`, mục `## Bản ghi
 duyệt thay` (Phương án chọn · Phương án bị loại · Nếu sai thì tốn gì) theo [method/process.md](../../method/process.md)
 mục 3 · chưa có lời cấp: `evidence/gate-N-recommendation.md` (kết luận · `CQ`/`DN` còn mở kèm khuyến nghị · câu trình
 cổng rút gọn) và **không** ghi `gate_N*` · mục "Không đánh giá".
@@ -42,11 +42,12 @@ cổng rút gọn) và **không** ghi `gate_N*` · mục "Không đánh giá".
   điều phối tự kiểm trước khi giao.
 - Duyệt thay khi lời cấp thiếu cổng, sprint hay hạn, đã hết hạn hay bị thu hồi; duyệt thay khi `risk_tags` có `secret`
   hoặc `auth`; duyệt thay việc sửa file luật mà lời cấp không nêu đích danh file đó.
-- Sửa SPEC, PLAN, mã hay tài liệu; quyết thay người dùng menu nhánh, push, gộp nhánh chính, tăng version.
+- Sửa SPEC, PLAN, mã hay tài liệu; tự chạy push, gộp, tag (điều phối thi hành theo kết luận). Số version và lựa chọn nhánh thì **quyết** ở `gate-2-verdict.md`.
 - Coi lời "ok" hay "theo khuyến nghị" của người dùng là lời cấp duyệt thay.
+- Quyết thay người khi gặp (a) hành động không đảo ngược, (b) secret/auth hay bảy mục luôn chặn (secret, auth, `rules_unlisted`, `user_soul`, `license`, `network_fetch`, `irreversible_delete`; [method/autopilot.md](../../method/autopilot.md) mục 5): chỉ được chọn **hoãn, bỏ hay đổi cách làm**; bước đó dừng, ghi `BR`, vào mục "Việc cần người" của báo cuối, việc độc lập chạy tiếp. Gate Delegate quyết (c), (d) và câu hỏi nghiệp vụ/cổng.
 
 ## 7. Khi nào dừng
-Bốn điều kiện dừng của [method/process.md](../../method/process.md) mục 5 không được miễn khi duyệt thay · thiếu hồ sơ để
+Bốn điều kiện dừng của [method/process.md](../../method/process.md) mục 5 không được miễn khi duyệt thay ((c), (d): Gate Delegate quyết hoặc dừng, ghi vào báo cuối; (a), (b): không quyết thay, mục 6) · thiếu hồ sơ để
 đọc (ghi "Không đánh giá", không đoán) · cạn hạn mức tier.
 
 ## 8. Skill dùng

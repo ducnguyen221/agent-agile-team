@@ -18,18 +18,15 @@ SCRIPTS = REPO / "scripts"
 RULES = SCRIPTS / "_autopilot_rules.py"
 CHECK = SCRIPTS / "check.py"
 GUARD = SCRIPTS / "autopilot_guard.py"
-GIT_FENCE = SCRIPTS / "git_fence.py"
 
 # Bản ghim viết tay: mỗi lần danh sách đổi, đổi cả chỗ này trong cùng commit và nêu lý do ở thông điệp commit.
 PINNED_FENCE_FILES = (
     "method/autopilot.md",
-    "method/git-permissions.md",  # TK7: luật quyền git và gh, thêm cùng commit tạo file
     "skills/intake/references/autopilot.md",
     "skills/running-sprint/references/autopilot.md",
     "skills/closing-sprint/references/autopilot.md",
     "scripts/_autopilot_rules.py",
     "scripts/autopilot_guard.py",
-    "scripts/git_fence.py",  # TK8: rào git thường trực, thêm cùng commit tạo file
     "scripts/autopilot-hook.sh",
     "hooks/hooks.json",
 )
@@ -184,7 +181,7 @@ def test_validator_is_a_function_taking_block():
     assert isinstance(node, ast.FunctionDef) and [a.arg for a in node.args.args] == ["block"]
 
 
-@pytest.mark.parametrize("path", [GUARD, GIT_FENCE], ids=lambda p: p.name)
+@pytest.mark.parametrize("path", [GUARD], ids=lambda p: p.name)
 def test_guard_does_not_import_check(path):
     if not path.exists():
         pytest.skip(f"{path.name} chưa tồn tại ở thời điểm này")
@@ -232,33 +229,33 @@ def test_exclusions_pinned():
 PINNED_FLOOR_ZONES = {"AGENTS.md": 2, "method/process.md": 3, "method/sizing.md": 1, "method/autopilot.md": 1}
 PINNED_FLOOR_FILES_EXTRA = (
     "scripts/floor_check.py", "scripts/merge_ready.py", "scripts/deploy_scan.py", "tests/test_fence_wiring.py",
-    "tests/test_floor_check.py", "tests/test_git_fence.py", "tests/test_git_server_layer.py", "tests/test_mutation_floor.py",
+    "tests/test_floor_check.py", "tests/test_mutation_floor.py",
     ".github/workflows/verify.yml",
 )
 # (đường file, số thứ tự cặp mốc) → (SHA-256 của chữ giữa mốc, SHA-256 của hai dòng chữ gần nhất quanh cặp mốc).
 # Sửa chữ trong vùng sàn thì đổi cả băm ở đây trong cùng commit, có lý do và có 5 ý Đức gật cho file luật đó.
 PINNED_ZONE_HASHES = {
     ("AGENTS.md", 0): (
-        "652736d630df563eeed3216db6ec9ff567eaf3b3ef6a5fabcf48c3902230c2bc",
+        "4f3b98a6913e0d5ef2bd16832c3c86da0c41959cc3b8721758a15692b6527a15",  # TK27b: Gate Delegate không quyết thay ở (a), (b), bảy mục luôn chặn (Sec RF1)
         "1b674c5981eda2acbc3b340bec29f1730fce0513d8061f11383ce0d60d4a3f4c"),
     ("AGENTS.md", 1): (
-        "e9e7efcd8749e8cb34da4fa44745bfbd63af78576b403e2b4d59aa6549c808d5",
+        "f6c45f132903c33cf32a4e5434829f2afc35d127e807f1c5db6ef7bd87bcfb47",  # TK27b: lệnh phá hoàn tác + đẩy chỉ khi có lời cấp, kiểm ruleset, quét secret (Sec RF3, RF4)
         "5d18f5eaed17becce2a26b0381cb1a0576ec05b6d3d5948bcef94a80abe411bf"),
     ("method/process.md", 0): (
-        "b2a3f70d7bf37e74f83b80da6704cf411aa55441affc64a0a6dc76f398cae8b4",
+        "49b0eba555d5560aa81f72079e3f0bf012065b94185f8b38a4a7bb18c20f084b",  # SPR-20 TK8: Khuyến nghị có sẵn khi autopilot bật + câu mẫu `Mở SPR-NN` (vùng sàn đã duyệt ở PLAN); TK27b: lời cấp thật trích nguyên văn từ chat, câu mẫu chỉ là ví dụ (QA lệch 1)
         "ecb48ff6109d5b11438be3eef55f7e9c5d7af45c98a2cf48cf4dea2efc4f1029"),
     ("method/process.md", 1): (
-        "97cf1aad77f3ee10e8f5927d4f3a4036fe3c7bd7b544344b944e973197458945",
+        "46c568486b7986e0f7ec30197687361aaa199067688b25ead162163cd97051ec",  # TK27b: điều kiện dừng (a), (b) vào "Việc cần người" (Sec RF1)
         "2a61b772d7d11e70c57623ef3447b2dc001d4218b8c2aaa09c181ac31d436c5f"),
     ("method/process.md", 2): (
-        "bc87da020948b6357969142782239d32acb8ee7b74755c9e1a15222fa2308fec",
+        "a4d227e219acf81466e07c74745e0dee15f9e82a48e34b41030c3abdeb028cd2",
         "b7c7fe0fbd1a77eb08490351e6fe3812eefdec315cb73a9df8fa00de8148ce6a"),
     ("method/sizing.md", 0): (
         "dc327e76921c81fcf4266a5285b617b74cb55af89e71eca950067b4d9018acba",
         "47c90f9685ed7aecfe4ca66bc4e10a217a68813484e3d1eb920f085e292b85d3"),
     ("method/autopilot.md", 0): (
-        "edcf795eb849f49ed091160b2860be48d2837cca24f16a8a7c02b9576acb0b92",  # TK7 (DN3 a): hàng `push` mục 5 thêm "trừ đúng hợp đồng đích"
-        "c38c9cc71026a9bddaed433d3c50ed2921e5a09f40b14c941065c9dedd9a2beb"),
+        "fe819d68e6ac51ce6f6e0ef5a365bcdc2f8e964e8c1475564a9cfd8d994b02ea",  # TK28b (Đức 13/11): quét secret bằng công cụ sẵn có hoặc skill security-review/agent security-reviewer + dò mẫu khoá, không cần công cụ chuyên dụng; TK27d: dạng dính `-Destination:x`, cwd trong `.git`, `git -c gc.*=now`, không có công cụ quét secret thì không đẩy (soát hẹp RF1-RF4, RF7); TK7 (DN3 a): hàng `push` mục 5 thêm "trừ đúng hợp đồng đích"; TK27b (đã thay hàng `push` cũ ở TK21): bảy mục luôn chặn, mẫu hook mới, lệnh phá hoàn tác, đẩy chỉ khi có lời cấp (Sec RF1-RF4)
+        "55283740743d60f43bb66242f9133c4ff732b4617fe81bdf07ad8ad37098fc56"),
 }
 
 
@@ -310,3 +307,16 @@ def test_floor_zone_hashes():
             assert _sha(around) == expected[1], f"floor-marker-position: chữ quanh mốc {rel} #{index} khác bản ghim"
             seen.add((rel, index))
     assert seen == set(PINNED_ZONE_HASHES), "floor-zone-hash: bản ghim có vùng không còn trong file"
+
+
+# SPR-20 TK2: chế độ mở chia 13 mục thành 7 luôn chặn + 6 mở mặc định (bản ghim viết tay; đổi thì nêu lý do ở thông điệp commit).
+PINNED_OPEN_ALWAYS_BLOCKED = {"network_fetch", "rules_unlisted", "irreversible_delete", "secret", "auth", "user_soul", "license"}
+PINNED_OPEN_DEFAULT_OPEN = {"push", "branch_merge_local", "version", "main_merge", "tag", "publish"}
+
+
+def test_fence_wiring_pins_7_plus_6():
+    always = rules_constant("OPEN_ALWAYS_BLOCKED")
+    default_open = rules_constant("OPEN_DEFAULT_OPEN")
+    assert set(always) == PINNED_OPEN_ALWAYS_BLOCKED and len(always) == 7, "fence-open-always-changed"
+    assert set(default_open) == PINNED_OPEN_DEFAULT_OPEN and len(default_open) == 6, "fence-open-default-changed"
+    assert set(always) | set(default_open) == PINNED_EXCLUSIONS and not set(always) & set(default_open), "fence-open-partition"

@@ -6,7 +6,7 @@
 # trả mã đó mà tự dò file dấu `.tmp/autopilot.json`
 # (không phân biệt hoa thường) đi lên từ $CLAUDE_PROJECT_DIR và $PWD tới thư mục có `.git`: có thì chặn (thoát 2), không thì cho qua (thoát 0).
 # `--clear <thư mục>` không đọc stdin. Guard luôn là autopilot_guard.py cạnh chính launcher (không có biến môi trường đổi đường).
-# Nhánh dự phòng dùng lệnh dựng sẵn của sh, và thêm một lời gọi `git ls-files` cho dấu hiệu 3 khi có `git` (không có thì bỏ qua dấu hiệu đó), nên vẫn chạy được khi PATH rỗng.
+# Nhánh dự phòng chỉ dùng lệnh dựng sẵn của sh, nên vẫn chạy được khi PATH rỗng.
 
 here=${0%/*}
 [ "$here" = "$0" ] && here=.
@@ -25,27 +25,6 @@ has_marker() {
         esac
       done
     fi
-    [ -e "$cur/.git" ] && return 1
-    case $cur in
-      */*) ;;
-      *) return 1 ;;
-    esac
-    parent=${cur%/*}
-    if [ -z "$parent" ]; then
-      [ "$cur" = "/" ] && return 1
-      parent=/
-    fi
-    [ "$parent" = "$cur" ] && return 1
-    cur=$parent
-  done
-}
-
-# Dấu hiệu 2 của rào git thường trực (method/git-permissions.md): có `.agile.json` ở một thư mục tổ tiên tới thư mục có `.git`.
-has_agile() {
-  cur=${1%/}
-  [ -n "$1" ] || return 1
-  while :; do
-    [ -e "$cur/.agile.json" ] && return 0
     [ -e "$cur/.git" ] && return 1
     case $cur in
       */*) ;;
@@ -96,18 +75,6 @@ fi
 
 if has_marker "$CLAUDE_PROJECT_DIR" || has_marker "$PWD"; then
   echo "$reason" >&2
-  exit 2
-fi
-# Dấu hiệu 3: chỉ mục còn `.agile.json` (kể cả khi file đã bị xoá khỏi cây làm việc). Cần `git`; không có thì bỏ qua dấu hiệu này.
-# Dấu hiệu 1 (danh sách bảo vệ, JSON) không dò được ở nhánh dự phòng: mất mức bảo vệ đó khi Python lỗi (method/git-permissions.md mục 8).
-has_indexed_agile() {
-  [ -n "$1" ] || return 1
-  command -v git >/dev/null 2>&1 || return 1
-  git -C "$1" ls-files --error-unmatch -- ':/.agile.json' >/dev/null 2>&1
-}
-
-if has_agile "$CLAUDE_PROJECT_DIR" || has_agile "$PWD" || has_indexed_agile "$CLAUDE_PROJECT_DIR" || has_indexed_agile "$PWD"; then
-  echo "git-fence: không chạy được guard (Python hay guard lỗi) — chặn vì repo được bảo vệ (.agile.json); cần Đức nói trong chat" >&2
   exit 2
 fi
 exit 0

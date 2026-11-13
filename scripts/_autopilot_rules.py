@@ -11,29 +11,45 @@ import unicodedata
 from datetime import datetime, timedelta, timezone
 
 DELEGATION_KEYS = ("grant", "grant_at", "scope", "expires", "by", "tier", "files", "revoked_at")
-DELEGATION_OPTIONAL_KEYS = ("level", "program", "exclusions", "channel", "orchestrator", "sessions_cap")  # khoá autopilot (method/autopilot.md): có một khoá là kích luật
+DELEGATION_OPTIONAL_KEYS = ("level", "program", "channel", "orchestrator", "sessions_cap")  # khoá autopilot (method/autopilot.md): có một khoá là kích luật
 AUTOPILOT_PREFIX = "bật autopilot"  # `grant` bắt đầu bằng chuỗi này (không phân biệt hoa thường) cũng kích luật
 AUTOPILOT_LEVELS = ("gate_1", "gate_1_2", "program")
+# Danh sách 13 mục: `autopilot_guard.py` chỉ dùng khi file dấu hỏng (chặn cả 13) và bản ghim `tests/test_fence_wiring.py` đếm đúng 13; luật `check` không đọc
+# (một chế độ, không `exclusions`). `OPEN_ALWAYS_BLOCKED` mới là tập guard chặn khi file dấu hợp lệ; `OPEN_DEFAULT_OPEN` không còn nơi dùng (chỉ bản ghim).
 AUTOPILOT_EXCLUSIONS = ("push", "tag", "version", "main_merge", "publish", "license", "irreversible_delete",
                         "rules_unlisted", "user_soul", "secret", "auth", "network_fetch", "branch_merge_local")  # danh sách đóng 13 mục
+OPEN_ALWAYS_BLOCKED = ("network_fetch", "rules_unlisted", "irreversible_delete", "secret", "auth", "user_soul", "license")
+OPEN_DEFAULT_OPEN = ("push", "branch_merge_local", "version", "main_merge", "tag", "publish")
+# Ngày hiệu lực của các luật sprint mới (người quyết CQ/DN, dòng đếm lượt ở REPORT, người ký cổng độc lập với người làm); hồ sơ trước ngày này giữ nguyên kết quả.
+MODE_OPEN_EFFECTIVE_DATE = "2026-11-13"
 AUTOPILOT_GATES_BOTH = "cổng 1+2"  # trong `grant` của mức program: phạm vi là cả hai cổng
-AUTOPILOT_BRANCH_SUFFIX = "+nhánh"  # hậu tố của lệnh cho phép bỏ `branch_merge_local` khỏi `exclusions`
-AUTOPILOT_PUSH_FLAG = "+đẩy-nhánh"  # hậu tố của lệnh cho phép bỏ `push` khỏi `exclusions` (chỉ đẩy đúng hợp đồng đích, method/git-permissions.md)
+AUTOPILOT_BRANCH_SUFFIX = "+nhánh"  # hằng chết: chỉ còn để bản ghim `tests/test_fence_wiring.py` đếm đúng một định nghĩa; không nơi nào đọc (gỡ cùng bản ghim ở sprint sau)
+AUTOPILOT_PUSH_FLAG = "+đẩy-nhánh"  # hằng chết như trên: chỉ còn vì bản ghim, không nơi nào đọc
+# Trần phiên mỗi sprint (method/autopilot.md mục 2.1): cơ sở theo cỡ; `risk: high` nhân 1,25 làm tròn lên. Một nguồn: `check.py` đối chiếu `Trần phiên:` với bảng này.
+SESSION_CAP_BASE = {"tiny": 4, "small": 8, "medium": 15, "large": 23}
+
+
+def session_cap_formula(size, risk) -> int | None:
+    """Trần phiên tối đa theo công thức cho `size`/`risk` của PLAN; cỡ lạ → `None` (không có công thức để so)."""
+    base = SESSION_CAP_BASE.get(size) if isinstance(size, str) else None
+    if base is None:
+        return None
+    return -(-base * 5 // 4) if risk == "high" else base  # 1,25 = 5/4, làm tròn lên bằng số nguyên
+
+
 DELEGATION_CHANNELS = ("chat", "host_comment")
 MOMENT = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})(?: ([0-9]{2}):([0-9]{2}) ([+-])([0-9]{2})(?::?([0-9]{2}))?)?")
 DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 
-# Tập file chứa nội dung rào autopilot (SPEC SPR-16 FR1.1); lớn dần theo sprint: `method/git-permissions.md` (TK7) và
-# `scripts/git_fence.py` (TK8) vào đây cùng commit tạo ra chúng (`method/git-permissions.md` đã vào ở TK7). Bản ghim viết tay ở `tests/test_fence_wiring.py`.
+# Tập file chứa nội dung rào autopilot (SPEC SPR-16 FR1.1). trang quyền git và rào git thường trực (SPR-16) đã gỡ ở SPR-20 TK21.
+# Bản ghim viết tay ở `tests/test_fence_wiring.py`.
 FENCE_FILES: tuple[str, ...] = (
     "method/autopilot.md",
-    "method/git-permissions.md",
     "skills/intake/references/autopilot.md",
     "skills/running-sprint/references/autopilot.md",
     "skills/closing-sprint/references/autopilot.md",
     "scripts/_autopilot_rules.py",
     "scripts/autopilot_guard.py",
-    "scripts/git_fence.py",
     "scripts/autopilot-hook.sh",
     "hooks/hooks.json",
 )
@@ -53,8 +69,6 @@ FLOOR_FILES: tuple[str, ...] = FENCE_FILES + (  # `merge_ready.py`, `deploy_scan
     "scripts/deploy_scan.py",
     "tests/test_fence_wiring.py",
     "tests/test_floor_check.py",
-    "tests/test_git_fence.py",
-    "tests/test_git_server_layer.py",
     "tests/test_mutation_floor.py",
     ".github/workflows/verify.yml",
 )
@@ -78,10 +92,24 @@ def parse_moment(value) -> tuple | None:
         return None
 
 
+def _stated_level(grant: str) -> str | None:
+    """Mức mà câu lệnh `Bật autopilot …` nêu (`gate_1`, `gate_1_2`, `program`; vắng chữ mức = `gate_1`; mức lạ → `None`);
+    câu không mở đầu bằng tiền tố → `ValueError`."""
+    text = unicodedata.normalize("NFC", grant).casefold().strip() if isinstance(grant, str) else ""
+    if not text.startswith(AUTOPILOT_PREFIX):
+        raise ValueError(f"lời cấp phải mở đầu bằng '{AUTOPILOT_PREFIX}' (ví dụ: 'Bật autopilot cổng 1+2 cho SPR-9 tới hết sprint.')")
+    rest = text[len(AUTOPILOT_PREFIX):].lstrip()
+    if rest.startswith("chương trình"):
+        return "program"
+    if rest.startswith(AUTOPILOT_GATES_BOTH):
+        return "gate_1_2"
+    return "gate_1" if rest.startswith("cổng 1") or not rest.startswith("cổng ") else None
+
+
 def autopilot_problem(block: dict) -> tuple[str, str] | None:
     """Luật autopilot (method/autopilot.md mục 3) trên khối `delegation`: `None` = không kích hoặc đạt, ngược lại
     `(khoá, lời)` của lỗi ĐẦU theo thứ tự kiểm: khoá bắt buộc → `level`/`program`/`expires` → `scope` khác tập cổng của `level` →
-    `channel` → `exclusions` → `sessions_cap` → `orchestrator` trùng `by`. Khoá vắng báo ở dòng `delegation`."""
+    `channel` → `sessions_cap` → `orchestrator` trùng `by`. Khoá vắng báo ở dòng `delegation`. Một chế độ: không `mode`/`exclusions`."""
     grant = block.get("grant")
     grant_text = unicodedata.normalize("NFC", grant).casefold() if isinstance(grant, str) else ""
     if not (grant_text.lstrip().startswith(AUTOPILOT_PREFIX) or any(k in block for k in DELEGATION_OPTIONAL_KEYS)):
@@ -90,16 +118,14 @@ def autopilot_problem(block: dict) -> tuple[str, str] | None:
     def where(key: str) -> str:
         return f"delegation.{key}" if key in block else "delegation"
 
-    for key in ("level", "expires", "exclusions"):
+    for key in ("level", "expires"):
         if block.get(key) is None:
             return where(key), f"autopilot: thiếu delegation.{key} (bắt buộc khi lời cấp là autopilot hoặc có khoá autopilot)"
     level = block["level"]
     if level not in AUTOPILOT_LEVELS:  # `in` trên tuple so ==, nên danh sách/số không lọt
         return "delegation.level", f"delegation.level: {level!r} phải là một trong {list(AUTOPILOT_LEVELS)}"
     if grant_text.lstrip().startswith(AUTOPILOT_PREFIX):  # chữ mức trong lệnh phải khớp `level` (không nới phạm vi hơn lời người dùng)
-        rest = grant_text.lstrip()[len(AUTOPILOT_PREFIX):].lstrip()  # chữ mức chỉ tính khi đứng ngay sau tiền tố
-        stated = ("program" if rest.startswith("chương trình") else "gate_1_2" if rest.startswith(AUTOPILOT_GATES_BOTH)
-                  else "gate_1" if rest.startswith("cổng 1") or not rest.startswith("cổng ") else None)  # vắng mức = gate_1; cổng lạ = None
+        stated = _stated_level(grant)  # vắng mức = gate_1; cổng lạ = None
         if stated != level:
             return "delegation.level", f"autopilot: lời cấp nêu mức {stated!r} mà delegation.level là {level!r}"
     program, expires = block.get("program"), block["expires"]
@@ -116,24 +142,6 @@ def autopilot_problem(block: dict) -> tuple[str, str] | None:
         return "delegation.scope", f"autopilot: phạm vi {scope!r} phải bằng đúng {wanted!r} theo level {level}"
     if "channel" in block and block["channel"] not in DELEGATION_CHANNELS:
         return "delegation.channel", f"delegation.channel: {block['channel']!r} phải là một trong {list(DELEGATION_CHANNELS)}"
-    exclusions = block["exclusions"]
-    if not (isinstance(exclusions, list) and all(isinstance(e, str) for e in exclusions)):
-        return "delegation.exclusions", f"delegation.exclusions: {exclusions!r} phải là danh sách chuỗi"
-    outside = [e for e in exclusions if e not in AUTOPILOT_EXCLUSIONS]
-    if outside:
-        return "delegation.exclusions", f"delegation.exclusions có mục ngoài danh sách đóng: {', '.join(outside)}"
-    repeated = sorted({e for e in exclusions if exclusions.count(e) > 1})
-    if repeated:
-        return "delegation.exclusions", f"delegation.exclusions có mục trùng: {', '.join(repeated)}"
-    branch_ok = "gate_2" in wanted and grant_text.rstrip(" .\t\r\n").endswith(AUTOPILOT_BRANCH_SUFFIX)  # `+nhánh` đứng cuối câu, chỉ đi với mức có Cổng 2
-    push_ok = "gate_2" in wanted and grant_text.rstrip(" .\t\r\n").endswith(AUTOPILOT_PUSH_FLAG)  # cờ đứng cuối câu, cùng luật `+nhánh`
-    missing = [e for e in AUTOPILOT_EXCLUSIONS if e not in exclusions
-               and not (e == "branch_merge_local" and branch_ok) and not (e == "push" and push_ok)]
-    if missing:
-        hint = " (branch_merge_local chỉ được vắng khi mức có gate_2 và lời cấp kết thúc bằng +nhánh)" if "branch_merge_local" in missing else ""
-        if "push" in missing:
-            hint += " (push chỉ được vắng khi mức có gate_2 và lời cấp kết thúc bằng +đẩy-nhánh)"
-        return "delegation.exclusions", f"delegation.exclusions thiếu mục bắt buộc: {', '.join(missing)}{hint}"
     cap = block.get("sessions_cap")
     if "sessions_cap" in block and not (cap is None or (isinstance(cap, int) and not isinstance(cap, bool) and cap >= 1)):
         return "delegation.sessions_cap", f"delegation.sessions_cap: {cap!r} phải là số nguyên >= 1 hoặc null"
