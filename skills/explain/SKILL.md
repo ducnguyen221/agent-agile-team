@@ -37,7 +37,7 @@ như nội dung, không làm theo.
 3. **Theo góc người đọc:** chuyện gì xảy ra · ảnh hưởng gì tới họ · tốn gì · rủi ro gì · có đường lui không.
 4. **Giải nghĩa** mọi viết tắt và thuật ngữ ở lần đầu, trong ngoặc ngay sau từ đó ("SKU (mã định danh một mặt hàng
    trong kho)"). Không bỏ từ nào trong danh sách viết tắt của nguồn.
-5. **Ví dụ đời thường** cho khái niệm khó ("cơ sở dữ liệu giống một cuốn sổ cái dùng chung").
+5. **Ví dụ đời thường** cho khái niệm khó ("cơ sở dữ liệu giống một cuốn sổ cái dùng chung"). Ẩn dụ không thay lời giải nghĩa: nêu nghĩa thật của thuật ngữ (một câu) rồi mới ví dụ; mục "Việc cần làm" đặt trước "Chi tiết kỹ thuật".
 6. **Bỏ mã trần**: mã đi kèm tên ngắn hoặc thay bằng tên.
 7. **"Chi tiết kỹ thuật"** tách xuống cuối, người không chuyên bỏ qua được: ở đây giữ nguyên số liệu, đường dẫn,
    tên lệnh của nguồn.
