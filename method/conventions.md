@@ -60,12 +60,12 @@ Không có ngoại lệ "cho nhanh"; vi phạm là phát hiện mức **Chặn**
 | **Không force-push** | không `push --force`, không `--force-with-lease` lên nhánh chung; viết lại lịch sử chỉ trên nhánh riêng chưa đẩy, và là điều kiện dừng (a) nếu được yêu cầu trên nhánh đã đẩy |
 | **Không sửa cấu hình kiểm để qua** | không nới linter, không bỏ rule, không hạ ngưỡng coverage, không đánh dấu `skip`/`xfail` để test xanh. Đổi cấu hình kiểm là một `TK` riêng có lý do trong PLAN |
 | **Không `git stash` trần** | dùng commit tạm trên nhánh làm việc, hoặc `stash push -m <tên duy nhất>` rồi `apply` theo mã (stash dùng chung giữa nhiều phiên) |
-| **Không `reset --hard`, không xoá nhánh chưa gộp** | `reset --hard`, `clean -fd[x]`, `checkout -- .`, `restore .` chỉ khi đã commit sao lưu vào `backup/<ngày-giờ>` (`method/git-conventions.md`); xoá nhánh chưa gộp, đẩy ép và phá hoàn tác (`reflog expire`, `gc --prune=now`, `update-ref -d`, `filter-branch`, xoá tag/nhánh `backup/*` hay `.git`, `push --delete`/`+ref`) vẫn cấm |
+| **Không `reset --hard`, không xoá nhánh chưa gộp** | `reset --hard`, `clean -fd[x]`, `checkout -- .`, `restore .` chỉ khi đã commit sao lưu vào `backup/<ngày-giờ>` (`method/git-conventions.md`); xoá nhánh chưa gộp (`branch -D`), đẩy ép và phá hoàn tác (`reflog expire`, `gc --prune=now`, `update-ref -d`, `filter-branch`, xoá tag/nhánh `backup/*` hay `.git`, `push --delete`/`+ref`) vẫn cấm |
 | **Không commit secret** | `.env*`, khoá, token; chỉ `.env.example`. Secret lọt vào diff → Chặn và báo để xoay vòng |
 | **Version do Gate Delegate quyết, không ghi đè CHANGELOG** | Gate Delegate quyết version theo bảng mục 4.1, chỉ có hiệu lực khi Cổng 2 Đạt; agent làm việc chỉ **đề xuất** mức tăng kèm lý do, và chỉ **thêm** mục vào CHANGELOG dưới tiêu đề đang mở, không viết lại mục cũ |
 | **Commit** | thông điệp một dòng tóm tắt + thân ngắn nêu *vì sao*; mỗi `TK` ít nhất một commit; commit ghi mã `TK` khi có |
 | **Worktree** | ưu tiên công cụ worktree của harness; thư mục worktree nằm trong `.gitignore`; không `cd` sang worktree khác (skill `worktrees`) |
-| **Push, PR, gộp vào nhánh chính** | tác động ra ngoài: chỉ sau Cổng 2 **Đạt** và khi PLAN có lời cấp (mặc định lời của người dùng, trích nguyên văn từ chat), kèm kiểm ruleset và quét secret (`method/autopilot.md` mục 5); Đạt có điều kiện thì không; menu ở skill `closing-sprint` |
+| **Push, PR, gộp vào nhánh chính** | tác động ra ngoài: chỉ sau Cổng 2 **Đạt** và khi PLAN có lời cấp (mặc định lời của người dùng, trích nguyên văn từ chat), kèm kiểm ruleset và quét secret (không có công cụ quét → không đẩy, ghi `BR`; `method/autopilot.md` mục 5); Đạt có điều kiện thì không; menu ở skill `closing-sprint` |
 | **Cấu hình harness và file luật** | không sửa để nới quyền cho mình; sửa qua đường chính thức của môi trường và luôn qua người dùng |
 
 ### 4.1 Quy tắc số phiên bản

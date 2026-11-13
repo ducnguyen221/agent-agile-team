@@ -13,7 +13,7 @@ import subprocess
 import pytest
 
 import autopilot_guard
-from test_autopilot_guard import MARKER_REASON, assert_allowed, assert_blocked, assert_marker_blocked, good_marker, make_repo
+from test_autopilot_guard import MARKER_REASON, assert_allowed, assert_blocked, assert_marker_blocked, good_marker, make_repo, run
 
 pytestmark = pytest.mark.skipif(shutil.which("git") is None, reason="cần git")
 
@@ -73,7 +73,6 @@ def test_guard_move_into_tmp_alone_or_delete_alone_still_allowed(tmp_path):
     "Rename-Item .git g",
     "mv .g* .tmp/x",
     "robocopy .git .tmp/x /E",
-    "cp -r .git .tmp/x",
     "bash -c 'mv .git .tmp/x'",
 ])
 def test_guard_move_or_copy_git_source_blocked(tmp_path, cmd):
@@ -83,7 +82,9 @@ def test_guard_move_or_copy_git_source_blocked(tmp_path, cmd):
 def test_guard_move_non_git_source_still_allowed(tmp_path):
     repo = active_repo(tmp_path)
     for cmd in ("mv src .tmp/x", "mv .gitignore .tmp/x", "mv a .git-notes", "cp -r src .tmp/x", "robocopy src .tmp/x /E",
-                "mv .tmp/x .git", "cp .git/HEAD .tmp/x"):
+                "mv .tmp/x .git", "cp .git/HEAD .tmp/x",
+                # TK27d: sao chép không phá gì (nguồn còn nguyên); chỉ chép vào `.tmp/` rồi xoá ở đó mới bị chặn (`_moves_into_tmp`)
+                "cp -r .git backup", "cp -r .git .tmp/x", "Copy-Item .git D:/b -Recurse"):
         assert_allowed(repo, cmd)
 
 
@@ -207,3 +208,71 @@ def test_guard_marker_ignored_helper_reports_both_states(tmp_path):
     assert autopilot_guard._marker_ignored(str(ignored), str(ignored / ".tmp" / "autopilot.json")) is True
     assert autopilot_guard._marker_ignored(str(plain), str(plain / ".tmp" / "autopilot.json")) is False
     assert MARKER_REASON  # nhập dùng chung: lý do chặn file dấu giữ nguyên
+
+
+# --- TK27d: dạng dính `-Destination:x`/`-Path:x`, cwd trong `.git`, glob `?git`, `git -c gc.*=now` ------------------------------
+
+@pytest.mark.parametrize("cmd", [
+    "Move-Item -Path .git -Destination:.tmp/g; Remove-Item .tmp/g -Recurse -Force",
+    "Move-Item src -Destination:.tmp/x; Remove-Item .tmp/x -Recurse",
+    "Move-Item -LiteralPath:.git -Destination:.tmp/g",
+    "Move-Item -Path:.git -Destination .tmp/g",
+    "move-item -PATH:'.git' -DESTINATION:.tmp/g",
+    "Move-Item -Path .git -Destination:D:/y",
+    "Remove-Item -Path:.git -Recurse",
+    "Remove-Item -LiteralPath:.git/index",
+    "Move-Item -Path ?git -Destination:D:/y",
+    "rm -rf [.]git",
+    "rm .git/../?git/index",
+])
+def test_guard_colon_attached_powershell_flags_blocked(tmp_path, cmd):
+    assert_blocked(active_repo(tmp_path), cmd, "irreversible_delete")
+
+
+def test_guard_colon_attached_flags_ordinary_use_allowed(tmp_path):
+    repo = active_repo(tmp_path)
+    for cmd in ("Move-Item -Path a -Destination:b", "Move-Item -LiteralPath:a -Destination:.tmp/x", "Copy-Item -Path:.git -Destination:D:/b -Recurse",
+                "Remove-Item -Path:.tmp/x -Recurse", "rm *", "rm -f *.txt"):
+        assert_allowed(repo, cmd)
+
+
+def _in_dir(cmd, cwd):
+    return {"tool_name": "Bash", "tool_input": {"command": cmd}, "cwd": str(cwd)}
+
+
+@pytest.mark.parametrize("cmd", ["cd .git && rm objects/pack/*", "cd .git; mv objects D:/y", "cd .git/objects && rm -f pack/x", "pushd ?git; rm HEAD",
+                                 "cd [.]git && Remove-Item index"])
+def test_guard_delete_or_move_after_cd_into_git_blocked(tmp_path, cmd):
+    assert_blocked(active_repo(tmp_path), cmd, "irreversible_delete")
+
+
+@pytest.mark.parametrize("cmd", ["rm objects/pack/x", "mv objects D:/y", "Remove-Item index"])
+def test_guard_delete_or_move_with_cwd_inside_git_blocked(tmp_path, cmd):
+    repo = active_repo(tmp_path)
+    rc, _, err = run("claude", _in_dir(cmd, repo / ".git"))
+    assert rc == 2 and "'irreversible_delete'" in err, (cmd, rc, err)
+
+
+def test_guard_cwd_inside_git_still_allows_reading(tmp_path):
+    repo = active_repo(tmp_path)
+    for cmd in ("ls objects", "cat HEAD", "git log"):
+        assert run("claude", _in_dir(cmd, repo / ".git"))[0] == 0, cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "git -c gc.pruneExpire=now gc",
+    "git -c gc.reflogExpire=now -c gc.reflogExpireUnreachable=now -c gc.pruneExpire=now gc",
+    "git -c gc.reflogExpire=now reflog expire --all",
+    "git -c gc.pruneExpire=now prune",
+    "git -C . -c gc.pruneExpire=all gc --aggressive",
+    "git -c GC.PruneExpire=NOW gc",
+])
+def test_guard_git_config_zero_expiry_blocked(tmp_path, cmd):
+    assert_blocked(active_repo(tmp_path), cmd, "irreversible_delete")
+
+
+def test_guard_git_config_other_values_pass(tmp_path):
+    repo = active_repo(tmp_path)
+    for cmd in ("git -c gc.pruneExpire=2.weeks.ago gc", "git -c core.x=now status", "git -c gc.auto=0 gc", "git commit -m x",
+                "git push origin main", "mv a b", "rm -rf .tmp/x", "cp -r .git backup"):
+        assert_allowed(repo, cmd)

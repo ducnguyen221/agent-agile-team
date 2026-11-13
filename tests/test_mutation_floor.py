@@ -135,6 +135,18 @@ def session_cap_formula_off(root: Path) -> None:
     edit(root, "scripts/check.py", "cap > formula and not", "cap > 10 ** 9 and not")
 
 
+def colon_dest_open(root: Path) -> None:
+    edit(root, GUARD, 'elif low.startswith("--target-directory=") or _colon_value(token, r"dest[a-z]*") is not None:', 'elif low.startswith("--target-directory="):')
+
+
+def cwd_in_git_open(root: Path) -> None:
+    edit(root, GUARD, "self.in_git = _is_git_path(self.cwd)", "self.in_git = False")
+
+
+def gc_config_open(root: Path) -> None:
+    edit(root, GUARD, 'if sub in ("gc", "prune", "reflog") and any(', "if False and any(")
+
+
 # SPR-20 TK21: sáu đột biến tinh (hợp đồng đích, nhánh được bảo vệ, alias, nhánh đẩy) nhắm mô-đun rào git thường trực và suite của nó;
 # hai file đó đã gỡ nên sáu đột biến bỏ theo, còn tám đột biến của dòng nối/vùng sàn/danh sách mục. Đây là gỡ cơ chế, không phải sửa test cho qua kiểm.
 MUTATIONS = {
@@ -156,6 +168,10 @@ MUTATIONS = {
     "reflog-expire-open": Mutation(reflog_expire_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
     "push-force-open": Mutation(push_force_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
     "branch-big-d-open": Mutation(branch_big_d_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
+    # SPR-20 TK27d: ba đột biến phủ dạng dính `-Destination:x`, thư mục làm việc trong `.git`, `git -c gc.*=now`.
+    "colon-dest-open": Mutation(colon_dest_open, f"{UNDO}::test_guard_colon_attached_powershell_flags_blocked", (UNDO,)),
+    "cwd-in-git-open": Mutation(cwd_in_git_open, f"{UNDO}::test_guard_delete_or_move_with_cwd_inside_git_blocked", (UNDO,)),
+    "gc-config-open": Mutation(gc_config_open, f"{UNDO}::test_guard_git_config_zero_expiry_blocked", (UNDO,)),
     "session-cap-formula-off": Mutation(session_cap_formula_off, "tests/test_check.py::test_delegation_session_cap_must_not_exceed_the_formula", ("tests/test_check.py",)),
 }
 

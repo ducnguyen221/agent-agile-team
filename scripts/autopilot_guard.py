@@ -280,6 +280,7 @@ class Context:
         self.marker = os.path.abspath(marker) if marker else None
         self.cwd = os.path.abspath(cwd)
         self.root = find_repo_root(self.cwd)
+        self.in_git = _is_git_path(self.cwd)  # thư mục lệnh (hay đích `cd`) nằm trong `.git`: mọi lệnh xoá/chuyển bị chặn
         self.cwd_changed = False  # đã gặp thao tác đổi thư mục (cd, pushd, env -C…, kể cả trong subshell/bash -c)
         self.tmp_moved = False  # đã gặp `mv`/`robocopy`/`cp -r`… với đích dưới `.tmp/`: phần xoá phía sau không còn ngoại lệ dọn tạm
         self._ignored: bool | None = None
@@ -338,6 +339,10 @@ def _git_item(args: list[str], ctx: Context) -> str | None:
     luật chữ ở method/git-conventions.md."""
     sub, rest = _git_parse(args)
     config = _git_config(args)
+    if sub in ("gc", "prune", "reflog") and any(
+        re.fullmatch(r"gc\.(reflogexpire\w*|pruneexpire)", key) and value in ("now", "all", "0") for key, value in config.items()
+    ):  # `git -c gc.pruneExpire=now gc`: đặt hạn hết hạn bằng 0 qua cấu hình, tương đương `--prune=now`
+        return "irreversible_delete"
     if sub == "stash":
         if "--all" in rest or any(_cluster(a, "a") for a in rest):
             return MARKER
@@ -392,6 +397,8 @@ def _delete_parts(name: str, args: list[str]) -> tuple[bool, list[str]]:
             targets.append(arg)
         elif arg == "--":
             literal = True
+        elif _colon_value(arg, r"path|p[a-z]*|literalpath|lit[a-z]*") is not None:  # `-Path:x`, `-LiteralPath:x` dính liền
+            targets.append(_arg_value(arg))
         elif low in ("/s", "/q") and name in ("rmdir", "rd", "del", "erase"):
             recursive = recursive or low == "/s"
         elif arg.startswith("-") and len(arg) > 1:
@@ -649,8 +656,26 @@ def _marker_item(tokens: list[str], ctx: Context) -> str | None:
     return MARKER if ref_at and not _read_only(name, tokens[1:], ctx) else None
 
 
+_COLON_FLAG = re.compile(r"-([a-z]+):(.*)", re.IGNORECASE | re.DOTALL)
+
+
+def _colon_value(token: str, names: str) -> str | None:
+    """Giá trị của cờ PowerShell dạng dính `-Tên:giá-trị` khi tên khớp mẫu `names` (không phân biệt hoa thường); không khớp → None."""
+    found = _COLON_FLAG.fullmatch(token)
+    if found and re.fullmatch(names, found.group(1).lower()):
+        return found.group(2).strip("'\"")
+    return None
+
+
+def _arg_value(token: str) -> str:
+    """Đường thật của một đối số: bỏ phần `-Destination:`/`-Path:`/`-LiteralPath:` dính liền nếu có."""
+    value = _colon_value(token, r"dest[a-z]*|path|p[a-z]*|literalpath|lit[a-z]*")
+    return token if value is None else value
+
+
 def _copy_destinations(tokens: list[str]) -> set[int]:
-    """Vị trí token là ĐÍCH của cp/Copy-Item: giá trị sau `-Destination`/`-t`/`--target-directory`, không thì đối số vị trí cuối."""
+    """Vị trí token là ĐÍCH của cp/Copy-Item/Move-Item: giá trị sau `-Destination`/`-t`/`--target-directory` (cả dạng dính
+    `-Destination:x`), không thì đối số vị trí cuối. `-Path:x`/`-LiteralPath:x` dính liền là NGUỒN, không phải đối số vị trí."""
     explicit: set[int] = set()
     positional: list[int] = []
     for index in range(1, len(tokens)):
@@ -659,9 +684,9 @@ def _copy_destinations(tokens: list[str]) -> set[int]:
         before = tokens[index - 1].lower() if index > 1 else ""
         if before in ("-t", "--target-directory") or re.fullmatch(r"-dest[a-z]*", before):
             explicit.add(index)
-        elif low.startswith("--target-directory="):
+        elif low.startswith("--target-directory=") or _colon_value(token, r"dest[a-z]*") is not None:
             explicit.add(index)
-        elif not token.startswith("-"):
+        elif not token.startswith("-") or _colon_value(token, r"path|p[a-z]*|literalpath|lit[a-z]*") is not None:
             positional.append(index)
     return explicit or ({positional[-1]} if positional else set())
 
@@ -770,11 +795,15 @@ def _in_tmp_name(path: str) -> bool:
 
 
 def _is_git_path(path: str) -> bool:
-    """Đích xoá thuộc `.git`: có thành phần đúng `.git`, hay glob bắt đầu bằng dấu chấm khớp `.git` (`.g*`)."""
+    """Đích xoá thuộc `.git`: có thành phần đúng `.git`, hay glob khớp `.git` (bắt đầu bằng dấu chấm như `.g*`, hoặc có từ 3 ký tự thường như
+    `?git`, `[.]git`; glob chỉ toàn ký tự đại diện như `*` không tính)."""
     for comp in path.replace("\\", "/").split("/"):
         low = comp.lower()
-        if low == ".git" or (low.startswith(".") and GLOB_CHARS & set(low) and fnmatch.fnmatchcase(".git", low)):
+        if low == ".git":
             return True
+        if GLOB_CHARS & set(low) and fnmatch.fnmatchcase(".git", low):
+            if low.startswith(".") or len(low.translate({ord(c): None for c in "*?[]"})) >= 3:
+                return True
     return False
 
 
@@ -797,31 +826,25 @@ def _moves_into_tmp(tokens: list[str]) -> bool:
             return False
     elif name not in MOVE_COMMANDS:
         return False
-    return any(_in_tmp_name(tokens[i]) for i in _copy_destinations(tokens))
+    return any(_in_tmp_name(_arg_value(tokens[i])) for i in _copy_destinations(tokens))
 
 
 def _git_source_moved(tokens: list[str]) -> bool:
-    """`mv`/`move`/`Move-Item`/`ren`/`Rename-Item`/`robocopy`, hay `cp -r`/`Copy-Item -Recurse`, có NGUỒN thuộc `.git`: đưa cơ chế hoàn tác ra khỏi
-    cây ngay cả khi đích không ở `.tmp/` hay phần xoá nằm ở lệnh riêng (`mv .git .tmp/x/g`, rồi `rm -rf .tmp/x`)."""
+    """`mv`/`move`/`Move-Item`/`ren`/`Rename-Item`/`robocopy` có NGUỒN thuộc `.git`: đưa cơ chế hoàn tác ra khỏi cây ngay cả khi đích không ở
+    `.tmp/` hay phần xoá nằm ở lệnh riêng (`mv .git .tmp/x/g`, rồi `rm -rf .tmp/x`). Sao chép (`cp`, `Copy-Item`) không tính: nguồn còn nguyên;
+    sao chép vào `.tmp/` rồi xoá ở đó đã bị `_moves_into_tmp` chặn."""
     if not tokens:
         return False
     name, args = _exe_name(tokens[0]), tokens[1:]
     if name == "robocopy":
         positional = [a for a in args if not ROBOCOPY_FLAG.fullmatch(a) and not a.startswith("-")]
         return bool(positional) and _is_git_path(positional[0])
-    if name in COPY_RECURSIVE_NAMES:
-        flags = [a for a in args if a.startswith("-")]
-        if name == "cp":
-            recursive = any(re.fullmatch(r"-[A-Za-z]*[rRa][A-Za-z]*", a) or a.lower() == "--recursive" for a in flags)
-        else:
-            recursive = any(re.fullmatch(r"-r[a-z]*", a.lower()) for a in flags)
-        if not recursive:
-            return False
-    elif name not in MOVE_COMMANDS:
+    if name not in MOVE_COMMANDS:
         return False
     destinations = _copy_destinations(tokens)
     return any(
-        _is_git_path(tokens[i]) for i in range(1, len(tokens)) if i not in destinations and not tokens[i].startswith("-")
+        _is_git_path(_arg_value(tokens[i])) for i in range(1, len(tokens))
+        if i not in destinations and (not tokens[i].startswith("-") or _arg_value(tokens[i]) != tokens[i])
     )
 
 
@@ -886,6 +909,7 @@ def _command_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
     name, args = _exe_name(tokens[0]), tokens[1:]
     if name in CD_COMMANDS:
         ctx.enter()
+        ctx.in_git = ctx.in_git or any(_is_git_path(_arg_value(a)) for a in args)
         return None
     if name in EVAL_COMMANDS:
         return _nested_string(" ".join(args), ctx, depth)
@@ -903,6 +927,8 @@ def _command_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
     if name == "find":
         return _find_item(args, ctx, depth)
     if _git_source_moved(tokens):
+        return "irreversible_delete"
+    if ctx.in_git and (name in DELETE_COMMANDS or name in MOVE_COMMANDS):  # `cd .git && rm objects/pack/*`: đường tương đối trỏ vào `.git`
         return "irreversible_delete"
     if name == "robocopy":
         return _robocopy_purge_item(args, ctx)
