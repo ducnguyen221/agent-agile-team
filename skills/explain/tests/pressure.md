@@ -5,7 +5,7 @@ model: sonnet (subagent alias, runners); grader opus
 date: 2026-11-13
 result: 3/3 GREEN pass (CM-3 rerun on final tree; CM-4, CM-4b on the first tree, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed); vòng sửa 1 (ép đọc SKILL.md) CM-3 3/3, CM-4 1/1, CM-4b 1/1, CM-6 1/1 (CM-6 chưa có RED); vòng sửa 2 (nạp thật, không đọc SKILL.md) skill khớp 4/4 qua mô tả mới, nhưng CM-3 0/3 nghiêm (không đọc thân skill); vòng sửa 3 (hết nhiễm, ép đọc SKILL.md, không Skill tool vì skill chưa có trong danh mục) CM-3 2/3 nghiêm, 1 lượt trượt vì thêm khẳng định suy diễn
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: 7134e0cfc5bc7f99efaee853e3d2bfcb5314f3cc
+skill_sha: c67d68e86067b7dfb518c94ceee7df257754ca28
 ---
 
 # Thử áp lực — explain
@@ -50,4 +50,8 @@ Gửi từng prompt trong `tests/scenarios.txt` cho subagent mới. RED: không 
 
 ## Vòng sửa 3 của TK9 (2026-11-13, gỡ nhiễm)
 
-Ví dụ trong `SKILL.md` (giải nghĩa viết tắt, bảng lỗi) đổi sang miền khác hẳn CM-3 (SKU, `120 → 300 đơn/ngày`, SLA), nên CM-3 nay là kịch bản held-out thật. `description` thêm cụm "chi tiết hơn" (response-style không có cụm này, RK6 không trùng); câu trả lời cho `/explain` file secret thêm "không mở file". **Đường đo:** skill `agent-agile-team:explain` chưa có trong danh mục Skill tool của phiên nên không nạp thật được; chạy dạng ép đọc `SKILL.md`, runner `sonnet` mới mỗi lượt, grader `opus` khác, n = 3. Kết quả **2/3 Đạt** (nghiêm). Lượt trượt (cm3-3) đủ 9/9 dữ kiện nhưng thêm khẳng định suy diễn ("ai đọc được log sẽ thấy mật khẩu", "dữ liệu đi qua đường truyền ở dạng đọc được"); hai lượt Đạt có ghi chú nhẹ (p95 "khách chậm nhất" chưa chính xác). Không chạy lại để chọn kết quả đẹp; mức bằng chứng là ép đọc, không phải nạp thật. Bằng chứng: `tk9-fix3.md` của hồ sơ sprint.
+Ví dụ trong `SKILL.md` (giải nghĩa viết tắt, bảng lỗi) đổi sang miền khác hẳn CM-3 (SKU, `120 → 300 đơn/ngày`, SLA), nên CM-3 không còn trùng ví dụ của skill (độc lập hơn, nhưng cùng tác giả và cùng họ model nên chưa gọi là held-out thật). `description` thêm cụm "chi tiết hơn" (response-style không có cụm này, RK6 không trùng); câu trả lời cho `/explain` file secret thêm "không mở file". **Đường đo:** skill `agent-agile-team:explain` chưa có trong danh mục Skill tool của phiên nên không nạp thật được; chạy dạng ép đọc `SKILL.md`, runner `sonnet` mới mỗi lượt, grader `opus` khác, n = 3. Kết quả **2/3 Đạt** (nghiêm). Lượt trượt (cm3-3) đủ 9/9 dữ kiện nhưng thêm khẳng định suy diễn ("ai đọc được log sẽ thấy mật khẩu", "dữ liệu đi qua đường truyền ở dạng đọc được"); hai lượt Đạt có ghi chú nhẹ (p95 "khách chậm nhất" chưa chính xác). Không chạy lại để chọn kết quả đẹp; mức bằng chứng là ép đọc, không phải nạp thật. Bằng chứng: `tk9-fix3.md` của hồ sơ sprint.
+
+## Vòng sửa 4 của TK9 (2026-11-13, đóng 2 Nên sửa của Opus)
+
+`SKILL.md` đổi: bản mẫu mục 5 sang miền khác hẳn CM-3 (DKIM/DNS/DMARC, không còn TLS, ORM, p95, mật khẩu); `method/communication.md` nêu `AGENTS.md` giữ vế cốt lõi, file này thắng khi khác, và đổi ví dụ số suy ra khỏi số của CM-3. **Đường đo:** ép đọc `SKILL.md` (không phải nạp thật qua danh mục skill), runner `sonnet` mới mỗi lượt, prompt CM-3 nguyên văn, grader `opus` khác, n = 3. Kết quả **0/3 Đạt nghiêm**: cả ba đủ 9/9 dữ kiện, cảnh báo ở đầu, không số lạ, nhưng không lượt nào nêu nghĩa thật của N+1 (chỉ ẩn dụ "lấy từng món một"), nên tiêu chí (b) Một phần; cả ba đặt "Việc cần làm" sau "Chi tiết kỹ thuật". Vòng 3 là 2/3, vòng 4 là 0/3 trên cùng n = 3: chênh trong nhiễu của n nhỏ, chưa kết luận đổi bản mẫu làm tệ đi; chưa sửa skill để vá N+1 (ngoài phạm vi vòng này). Bằng chứng: `tk9-fix4.md` của hồ sơ sprint.
