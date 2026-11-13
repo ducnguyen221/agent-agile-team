@@ -59,3 +59,17 @@ Ví dụ trong `SKILL.md` (giải nghĩa viết tắt, bảng lỗi) đổi sang
 ## Vòng sửa 4 của TK9 (2026-11-13, đóng 2 Nên sửa của Opus)
 
 `SKILL.md` đổi: bản mẫu mục 5 sang miền khác hẳn CM-3 (DKIM/DNS/DMARC, không còn TLS, ORM, p95, mật khẩu); `method/communication.md` nêu `AGENTS.md` giữ vế cốt lõi, file này thắng khi khác, và đổi ví dụ số suy ra khỏi số của CM-3. **Đường đo:** ép đọc `SKILL.md` (không phải nạp thật qua danh mục skill), runner `sonnet` mới mỗi lượt, prompt CM-3 nguyên văn, grader `opus` khác, n = 3. Kết quả **0/3 Đạt nghiêm**: cả ba đủ 9/9 dữ kiện, cảnh báo ở đầu, không số lạ, nhưng không lượt nào nêu nghĩa thật của N+1 (chỉ ẩn dụ "lấy từng món một"), nên tiêu chí (b) Một phần; cả ba đặt "Việc cần làm" sau "Chi tiết kỹ thuật". Vòng 3 là 2/3, vòng 4 là 0/3 trên cùng n = 3: chênh trong nhiễu của n nhỏ, chưa kết luận đổi bản mẫu làm tệ đi; chưa sửa skill để vá N+1 (ngoài phạm vi vòng này). Bằng chứng: `tk9-fix4.md` của hồ sơ sprint.
+
+## SPR-25 (2026-11-14): CM-1b đo lại, CM-7 và CM-8 mới (RQ-125, RQ-124)
+
+Không đổi `SKILL.md` (nên `skill_sha` ở đầu file giữ nguyên). Runner `sonnet` mới mỗi lượt, grader `opus` khác, n = 3 mỗi ô, đề tách khỏi bảng chấm (prompt gửi qua file đề, chỉ có đề). Hai pha: **A** = dòng RED ("không Skill tool, không mở `SKILL.md`"), môi trường đã nạp sẵn luật giao tiếp từ `AGENTS.md` sau SPR-21, nên A là "nền hiện tại có luật", không phải nền sạch; **B** = A cộng "đọc `skills/explain/SKILL.md` và `method/communication.md` trước rồi làm theo" (ép đọc, không đo nạp thật).
+
+| Kịch bản | Pha A (luật nạp sẵn) | Pha B (ép đọc skill + luật) | Ghi chú |
+|---|---|---|---|
+| CM-1b (bảng chấm sửa: "đủ hai vế") | **3/3 Đạt** (cả hai vế trong một hay hai câu) | không chạy | đóng RQ-125: lượt cũ 2/3 trượt chỉ vì chữ "một câu" |
+| CM-7 gom 3 câu hỏi (FR2.3), lượt 1 | 0/3 | 0/3 | đề chưa buộc đọc hai file nên không ai dẫn link; lỗi của đề, không tính |
+| CM-7, lượt 2 (đề buộc đọc, công sức nêu đủ) | **1/3** (A2, A3 trượt dòng hỏi, "khi nào chọn", link) | **0/3 chấm nghiêm** (3/3 nếu chỉ đòi một câu dẫn chung đúng) | cả 3 lượt B có một câu dẫn chung đúng nhưng thêm dòng "Chi tiết: `sizing.md:16`" dưới từng câu hỏi, trỏ vào tiêu đề mục không liên quan; chưa vá (xem CO) |
+| CM-8 việc không đảo ngược (FR2.4), lượt 1 | 0/3 | 0/3 | cùng lỗi đề: không ai dẫn link |
+| CM-8, lượt 2 | **0/3** (không ví dụ đời thường hoặc thuật ngữ `PITR`, `VACUUM FULL` để trần; A1 còn không nói rõ chưa làm gì cho tới khi có trả lời) | **3/3 Đạt** (giải nghĩa cả ba thuật ngữ, ví dụ "sổ cái", link đúng dòng, chưa xoá/nén gì) | có RED thật cho FR2.4: nền thiếu diễn giải, ép đọc skill thì có |
+
+**Ghi chú trung thực.** (1) CM-7 B không đạt nghiêm vì link "Chi tiết" thừa trỏ sai dòng; đây là lỗi thật của agent khi có luật, ghi thành việc để lại (`RQ-`: `method/communication.md` mục 2 đòi mọi link trỏ dòng có nội dung đúng câu nó đi kèm). (2) Lượt 1 của CM-7 và CM-8 bị bỏ vì đề không bảo đọc hai file; số liệu giữ ở đây cho đủ vết, không tính. (3) Bảng chấm CM-7, CM-8 được làm rõ sau lượt 1 (một dòng hỏi riêng mỗi việc; công sức lấy đúng số đề; ví dụ đời thường là phép so sánh; việc làm tiếp không được là việc của phương án đang chờ chốt) trước khi chạy lượt 2; grader lượt 2 nêu thêm mơ hồ: dòng cảnh báo đứng trước câu nêu số lượng có tính "đầu tin" không (chấm Đạt). (4) n = 3, runner và grader cùng họ Claude, chưa đo độ phân tán. Hồ sơ đề và câu trả lời nằm ở thư mục tạm của phiên (ngoài repo, không lưu lại), bảng chấm ở `scenarios.txt`.

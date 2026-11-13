@@ -99,3 +99,15 @@ Sau tech-review-2: mục 6 và khối mục 8 đổi hai chỗ (bỏ câu "rồi
 ## Vòng sửa 1 của TK9 (2026-11-13)
 
 `SKILL.md` chỉ đổi mục 6, khối rút gọn mục 8 và dòng Kết luận: danh sách dấu hiệu vào diễn giải thành con trỏ về `method/communication.md` mục 1. Chạy lại n = 1 mỗi ca, runner `sonnet` mới, grader `opus` khác: RS-2 **Đạt**; RS-3 **Đạt**; RS-1 **Không đạt** (ước lượng thời gian/giá như "nửa ngày", "gần 0 USD" không ghi "chưa đo") — lỗi nền cũ đã ghi ở trên (RS-1 trượt cả ở bản skill cũ), không do thay đổi này. n = 1, chưa có RED mới. Bằng chứng: `tk9-fix1.md` của hồ sơ sprint.
+
+## SPR-25 (2026-11-14): nhãn "chưa đo" cho ước lượng thời gian, công sức, chi phí (RQ-121)
+
+`SKILL.md` đổi hai vòng (mục 3 cột chi phí/thời gian, mục 4 hàng cấm, khối rút gọn mục 8): công thức `<giá trị> (ước tính, chưa đo — cách đo: …)` ngay sau từng giá trị; vòng 2 mở rộng ra "mọi chỗ trong tin — ô bảng, câu dẫn, lời văn, kế hoạch theo ngày". Dạng câu: lỗi hình dạng (có làm, thiếu nhãn) nên dùng công thức, không dùng danh sách cấm (skill `writing-skills` mục 4). Runner `sonnet` mới mỗi lượt (đọc `SKILL.md` ở worktree, không Skill tool), grader `opus` khác, n = 3 mỗi ô, đề `tests/scenarios.txt` nguyên văn. Tiêu chí (1): không ước lượng thời gian/công sức/chi phí nào thiếu nhãn + cách đo; (2) lớp một đúng trần dòng; (3) RS-2: một từ cộng điều chặn; (4) câu đầu là kết luận, bảng có đánh dấu khuyến nghị.
+
+| Kịch bản | RED (skill trước sửa) | GREEN vòng 1 (sau mục 3/4/8) | GREEN vòng 2 (mở ra lời văn) |
+|---|---|---|---|
+| RS-1 | **0/3** (ô 1 trượt: "Thấp, vài ngày", "3–5 ngày công", "nửa ngày", "Gần như 0 USD", lịch "Ngày 1–2…") | 1/3 (trượt ô 1: "một buổi" trong câu dẫn và phần "Còn mở") | **2/3** (H1 trượt vì một mục lịch "Ngày 5" không có nhãn; chấm lỏng "chỉ giá trị số mới là ước lượng" thì 3/3) |
+| RS-2 | không chạy (đạt sẵn ở lượt 2026-11-13) | **3/3** | **3/3** |
+| RS-3 | **0/3** (ô 1 trượt: "1–2 ngày", "nửa ngày đến một ngày công") | 2/3 (G1 không có bảng lựa chọn: ô 4) | **1/3** theo cả bốn ô: ô 1 đạt 3/3; H1 trượt ô 2 (13 dòng, trần 12; 12 nếu không đếm dòng kẻ bảng), H2 trượt ô 4 (khuyến nghị nằm ngoài bảng) |
+
+**Kết luận trung thực.** Lỗi gốc của RQ-121 (ước lượng không nhãn) giảm từ 6/6 lượt trượt ở RED xuống 1/6 lượt trượt ô 1 ở vòng 2 (RS-1 H1, mơ hồ), RS-3 ô 1 đạt 3/3. Nhưng theo cả bốn ô, vòng 2 chỉ đạt RS-1 2/3, RS-2 3/3, RS-3 1/3, chưa đạt "n = 3 đạt cả hai". Hai lượt RS-3 trượt vì **hình dạng/độ dài** (13 dòng; khuyến nghị ngoài bảng), loại lỗi đã thấy ở SPR-21 (RS-3 G1 không bảng) và nhãn dài làm bảng dày thêm một dòng; không sửa thêm trong sprint này (n = 3, ô đếm dòng mơ hồ về dòng kẻ bảng), ghi thành việc để lại. Chưa chạy lại RS-2 sau vòng 1 ngoài hai lần ở trên (đã 3/3 cả hai). Bằng chứng: bảng chấm ở hồ sơ sprint SPR-25 (`SPRINT.md` mục 4), câu trả lời nằm trong transcript phiên (không lưu vào repo).
