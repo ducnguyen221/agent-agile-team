@@ -9,8 +9,8 @@ Mã thoát: 0 = Đạt (không có Chặn/Phải sửa) · 1 = Không đạt · 
 không đọc được, frontmatter ngoài tập con YAML, `.agile.json` hỏng).
 
 Biến môi trường: `AGENT_AGILE_DENYLIST` — đường tới danh sách từ cấm ngoài repo (chỉ `--self` dùng);
-`AGENT_AGILE_LEDGER` — mẫu đường file sổ tập trung, chứa `{project}` (chỉ dự án khai `ledger.project` mới dùng);
-`AGENT_AGILE_PROTECTED_REPOS` — danh sách repo được bảo vệ của rào git (chỉ để nhắc khi sprint bật autopilot mở).
+`AGENT_AGILE_LEDGER` — mẫu đường file sổ tập trung, chứa `{project}` (chỉ dự án khai `ledger.project` mới dùng).
+(`AGENT_AGILE_PROTECTED_REPOS` của rào git đã gỡ ở SPR-20 TK21: không còn đọc.)
 Hợp đồng luật: `templates/README.md`; mô tả từng luật: `scripts/README.md`.
 """
 
@@ -76,9 +76,9 @@ RULES: dict[str, tuple[str, str]] = {
     "root-junk": (PHAI, "`--self`: file hoặc thư mục ở gốc repo không được theo dõi và không bị ignore"),
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
     "delegation-floor-file": (PHAI, "`delegation.files` nêu file thuộc sàn cứng (`FLOOR_FILES`): không duyệt thay được"),
-    "gate-signer-independence": (PHAI, "người ký cổng trùng nhãn phiên người làm ở tài liệu cùng sprint, hoặc tier người ký thấp hơn tier người làm (khối duyệt thay từ ngày hiệu lực)"),
-    "decision-log-missing": (PHAI, "REPORT có Cổng 2 duyệt thay mới mà thiếu mục 'Nhật ký quyết định' đủ ai ký · model · bằng chứng · lệnh hoàn tác"),
-    "session-cap-missing": (PHAI, "PLAN có Cổng 1 duyệt thay mới mà mục 'Ước lượng' thiếu dòng 'Trần phiên: <số>'"),
+    "gate-signer-independence": (PHAI, "người ký cổng trùng nhãn phiên người làm ở tài liệu cùng sprint, tier người ký thấp hơn tier người làm, hoặc cổng đã kết luận thiếu `evidence/gate-<N>-verdict.md` / dòng đầu lệch quote (khối duyệt thay từ ngày hiệu lực)"),
+    "decision-log-missing": (PHAI, "REPORT hoặc SPRINT.md có Cổng 2 duyệt thay mới mà thiếu mục 'Nhật ký quyết định' đủ ai ký · model · bằng chứng · lệnh hoàn tác"),
+    "session-cap-missing": (PHAI, "PLAN hoặc SPRINT.md có Cổng 1 duyệt thay mới mà thiếu 'Trần phiên: <số>', sessions_cap không khớp (null/vắng không hợp lệ) hoặc số vượt công thức cỡ × rủi ro mà không có dòng 'nâng trần' ở Nhật ký quyết định"),
     "gate-route-floor": (PHAI, "cổng `delegated` (kể cả còn `pending`) mà bảng 'File luật và file sàn cứng sẽ chạm' khai file sàn cứng, hoặc `risk_tags` có `rules` mà `delegation.files` rỗng: chuyển cổng người, trình lời khuyến nghị"),
     "frontmatter-duplicate-key": (PHAI, "khoá `delegation` lặp trong frontmatter (chỉ một phiên điều phối ghi lời cấp)"),
     "decision-owner-missing": (NEN, "CQ/DN của sprint từ ngày chế độ mở mà bảng thiếu cột hoặc ô 'Người quyết'"),
@@ -1376,7 +1376,7 @@ class Engine:
                 return bad("delegation.expires", f"quá hạn: hạn {expires} trước ngày cổng")
         signer = block.get("by")
         if isinstance(signer, str) and signer.strip() and signer != "pending":  # trước kiểm T1 để tier thấp hơn người làm cũng được gọi tên
-            self._signer_independence(doc, block, signer)
+            self._signer_independence(doc, block, signer, gate)
         self._autopilot_records(doc, gate, block)
         if block.get("tier") != "T1":
             return bad("delegation.tier" if "tier" in block else "delegation", f"người duyệt thay phải là T1, đang là {block.get('tier')!r}")
@@ -1435,13 +1435,23 @@ class Engine:
         if "rules" in tags and not files:
             return bad("delegation.files", "risk_tags có rules mà delegation.files rỗng — file luật phải nêu đích danh trong lời cấp")
 
-    def _signer_independence(self, doc: Doc, block: dict, by: str) -> None:
+    def _signer_independence(self, doc: Doc, block: dict, by: str, gate: str) -> None:
         """Người ký cổng độc lập với người làm (SPR-20 TK22): `delegation.by` không trùng nhãn vai thực thi ở tài liệu KHÁC của cùng
         sprint (cùng thư mục; trùng ngay trong file này do `self-review` báo), và tier người ký (`delegation.tier`) không thấp hơn tier
-        của vai thực thi nào trong sprint. Chỉ áp cho khối duyệt thay mới (`grant_at` từ `MODE_OPEN_EFFECTIVE_DATE`): hồ sơ cũ giữ nguyên kết quả."""
+        của vai thực thi nào trong sprint; cổng đã kết luận phải có `evidence/gate-<N>-verdict.md` mà dòng đầu chép đúng `gate_<N>_quote`
+        (TK27b). Chỉ áp cho khối duyệt thay mới (`grant_at` từ `MODE_OPEN_EFFECTIVE_DATE`): hồ sơ cũ giữ nguyên kết quả. Một phát hiện
+        (file, dòng, nội dung) chỉ báo một lần dù `SPRINT.md` có hai cổng `delegated` chung một khối."""
         moment = parse_moment(block.get("grant_at"))
         if moment is None or moment[0].isoformat() < rules.MODE_OPEN_EFFECTIVE_DATE:
             return
+
+        def once(line: int, message: str) -> None:
+            key = (doc.path.resolve(), "signer", line, message)
+            if key not in self.delegation_flagged:
+                self.delegation_flagged.add(key)
+                self.add(doc.path, line, "gate-signer-independence", message)
+
+        self._verdict_file(doc, gate, once)
         same_label: list[str] = []
         worker_tiers: list[tuple[str, str]] = []
         for path in sorted(doc.path.resolve().parent.glob("*.md")):
@@ -1460,14 +1470,32 @@ class Engine:
                     same_label.append(f"{role} ở {path.name}")
         line = doc.key_line("delegation.by")
         if same_label:
-            self.add(doc.path, line, "gate-signer-independence",
-                     f"người ký '{by}' trùng nhãn người làm cùng sprint ({', '.join(sorted(set(same_label)))}): phiên ký cổng phải là phiên khác")
+            once(line, f"người ký '{by}' trùng nhãn người làm cùng sprint ({', '.join(sorted(set(same_label)))}): phiên ký cổng phải là phiên khác")
         signer = block.get("tier")
         if signer in c.TIERS:
             below = sorted({f"{role} {tier}" for role, tier in worker_tiers if tier < signer})  # "T1" < "T2" < "T3": tier thấp hơn = số lớn hơn
             if below:
-                self.add(doc.path, doc.key_line("delegation.tier"), "gate-signer-independence",
-                         f"tier người ký {signer} thấp hơn tier người làm ({', '.join(below)})")
+                once(doc.key_line("delegation.tier"), f"tier người ký {signer} thấp hơn tier người làm ({', '.join(below)})")
+
+    @staticmethod
+    def _verdict_file(doc: Doc, gate: str, once) -> None:
+        """Cổng `delegated` đã kết luận: `evidence/gate-<N>-verdict.md` (cạnh tài liệu) tồn tại và dòng đầu của nó bằng `gate_<N>_quote`
+        (`method/autopilot.md` mục 6.3). Thiếu hay lệch → một phát hiện ở dòng `gate_<N>_mode`."""
+        number = gate[-1]
+        name = f"gate-{number}-verdict.md"
+        verdict = doc.path.resolve().parent / "evidence" / name
+        line = doc.key_line(f"{gate}_mode")
+        if not verdict.is_file():
+            once(line, f"Cổng {number} duyệt thay mà thiếu evidence/{name} (kết luận của Gate Delegate)")
+            return
+        try:
+            first = verdict.read_text(encoding="utf-8-sig", errors="replace").split("\n", 1)[0].strip()
+        except OSError:
+            once(line, f"evidence/{name} không đọc được")
+            return
+        quote = doc.data.get(f"{gate}_quote")
+        if isinstance(quote, str) and first != quote.strip():
+            once(line, f"dòng đầu của evidence/{name} không khớp {gate}_quote")
 
     def _autopilot_records(self, doc: Doc, gate: str, block: dict) -> None:
         """Hồ sơ phải có của duyệt thay mới (SPR-20 TK25; chỉ khi `grant_at` từ `MODE_OPEN_EFFECTIVE_DATE`, hồ sơ cũ giữ nguyên kết quả):
@@ -1477,32 +1505,77 @@ class Engine:
         moment = parse_moment(block.get("grant_at"))
         if moment is None or moment[0].isoformat() < rules.MODE_OPEN_EFFECTIVE_DATE:
             return
-        if gate == "gate_2" and doc.kind == "report":
+        if gate == "gate_2" and doc.kind in ("report", "sprint"):
             if not self._has_decision_log(doc):
                 self.add(doc.path, doc.key_line("gate_2_mode"), "decision-log-missing",
-                         "Cổng 2 duyệt thay mà REPORT không có mục 'Nhật ký quyết định' với dòng đủ ai ký (nhãn · vai · tier · model), "
-                         "bằng chứng và lệnh hoàn tác")
-        elif gate == "gate_1" and doc.kind == "plan":
-            cap = None
-            inside = False
-            for line in doc.raw:
-                if line.startswith("## "):
-                    inside = line[3:].strip().casefold() == "ước lượng"
-                elif inside and (m := re.match(r"\s*(?:[-*]\s*)?(?:\*\*)?trần phiên:?(?:\*\*)?:?\s*(\d+)\b", line, re.IGNORECASE)):
-                    cap = int(m.group(1))
-                    break
-            if cap is None or cap < 1:
-                self.add(doc.path, doc.key_line("gate_1_mode"), "session-cap-missing",
-                         "Cổng 1 duyệt thay mà mục 'Ước lượng' của PLAN không có dòng 'Trần phiên: <số nguyên >= 1>'")
+                         f"Cổng 2 duyệt thay mà {'REPORT' if doc.kind == 'report' else 'SPRINT.md'} không có mục 'Nhật ký quyết định' với dòng đủ ai ký "
+                         "(nhãn · vai · tier · model), bằng chứng và lệnh hoàn tác")
+        elif gate == "gate_1" and doc.kind in ("plan", "sprint"):
+            problem = self._session_cap_problem(doc, block)
+            if problem:
+                self.add(doc.path, doc.key_line("gate_1_mode"), "session-cap-missing", problem)
+
+    def _session_cap_problem(self, doc: Doc, block: dict) -> str | None:
+        """Trần phiên của duyệt thay mới (`method/autopilot.md` mục 2.1): dòng `Trần phiên: <N>` (PLAN: mục 'Ước lượng'; `SPRINT.md`: cả file),
+        `delegation.sessions_cap` là số nguyên khớp N (null hay vắng không hợp lệ), N không vượt công thức theo `size`/`risk` — vượt thì
+        Nhật ký quyết định (của file này hoặc tài liệu cùng sprint) phải có dòng 'nâng trần'."""
+        cap, inside = None, doc.kind == "sprint"
+        for line in doc.raw:
+            if doc.kind == "plan" and line.startswith("## "):
+                inside = line[3:].strip().casefold() == "ước lượng"
+            elif inside and (m := re.match(r"\s*(?:[-*]\s*)?(?:\*\*)?trần phiên:?(?:\*\*)?:?\s*(\d+)\b", line, re.IGNORECASE)):
+                cap = int(m.group(1))
+                break
+        where = "mục 'Ước lượng' của PLAN" if doc.kind == "plan" else "SPRINT.md"
+        if cap is None or cap < 1:
+            return f"Cổng 1 duyệt thay mà {where} không có dòng 'Trần phiên: <số nguyên >= 1>'"
+        held = block.get("sessions_cap")
+        if not isinstance(held, int) or isinstance(held, bool):
+            return f"delegation.sessions_cap phải là số nguyên khớp 'Trần phiên: {cap}' (null hay vắng không hợp lệ ở hồ sơ mới)"
+        if held != cap:
+            return f"'Trần phiên: {cap}' khác delegation.sessions_cap ({held})"
+        formula = rules.session_cap_formula(doc.data.get("size"), doc.data.get("risk"))
+        if formula is not None and cap > formula and not self._cap_raise_logged(doc):
+            return (f"Trần phiên {cap} vượt công thức {formula} (cỡ {doc.data.get('size')}, rủi ro {doc.data.get('risk')}, method/autopilot.md mục 2.1) "
+                    "mà Nhật ký quyết định không có dòng 'nâng trần'")
+        return None
+
+    def _cap_raise_logged(self, doc: Doc) -> bool:
+        """Nhật ký quyết định của `doc` hay của tài liệu .md cùng thư mục có một dòng nói 'nâng trần'."""
+        for path in sorted(doc.path.resolve().parent.glob("*.md")):
+            other = doc if path == doc.path.resolve() else self.doc(path)
+            if other is not None and any("nâng trần" in line.casefold() for _, line in self._log_lines(other)):
+                return True
+        return False
+
+    @staticmethod
+    def _log_lines(doc: Doc):
+        """`(đầu mục?, dòng)` thuộc mục 'Nhật ký quyết định': tiêu đề `#…` đúng tên đó, hoặc gạch đầu dòng `- **Nhật ký quyết định:**` (hết ở tiêu đề kế
+        hay gạch đầu dòng cấp một kế)."""
+        inside = False
+        for line in doc.raw:
+            if re.match(r"#{1,6}\s", line):
+                inside = line.lstrip("#").strip().casefold() == "nhật ký quyết định"
+                if inside:
+                    yield True, line
+                continue
+            if re.match(r"[-*]\s+(?:\*\*)?nhật ký quyết định", line.casefold()):
+                inside = True
+                yield True, line
+                continue
+            if inside and re.match(r"[-*]\s", line):
+                inside = False
+            if inside:
+                yield False, line
 
     @staticmethod
     def _has_decision_log(doc: Doc) -> bool:
-        inside, header = False, None
-        for line in doc.raw:
-            if line.startswith("## "):
-                inside, header = line[3:].strip().casefold() == "nhật ký quyết định", None
+        header = None
+        for start, line in Engine._log_lines(doc):
+            if start:
+                header = None
                 continue
-            cells = c.table_cells(line) if inside else None
+            cells = c.table_cells(line)
             if cells is None or c.is_separator_row(cells):
                 continue
             folded = [cell.casefold() for cell in cells]

@@ -47,7 +47,7 @@ nội dung nguồn còn thiếu khi cần cho phần việc được giao.
 **Người dùng cần làm gì:** giao yêu cầu bằng lời thường ở Bước 1, đọc tin mở autopilot và báo cuối. Muốn can
 thiệp thì nói `Dừng autopilot.`, hoặc tự ký một cổng bằng **"duyệt"** / **"điều chỉnh: <gì>"** (lời đó thắng,
 ghi `gate_N_mode: human`). Bốn điều kiện dừng (mục 5), sau vòng 3 (mục 6) và cạn hạn mức tier: Gate Delegate quyết
-hoặc dừng, ghi vào báo cuối.
+hoặc dừng, ghi vào báo cuối — trừ (a), (b) và bảy mục luôn chặn: Gate Delegate không quyết thay, việc vào "Việc cần người" của báo cuối.
 
 ## 2. Bước 1 — Tiếp nhận (một lượt trao đổi gom)
 
@@ -150,7 +150,7 @@ không có nghĩa duyệt kết quả. Agent không được suy một lời "ok
 Mặc định cổng do **Gate Delegate** ký: một agent T1 **phiên mới, khác người làm, tier ≥ người làm, không phải Advisor của sprint** ghi kết luận cổng với `gate_N_mode: delegated`, `gate_N_quote` bắt đầu `duyệt thay:`. Ngay khi mở sprint, Analyst ghi khối `delegation`: lời cấp thường trực (trích lời Đức, chat 13/11/2026), phạm vi mặc định `gate_1_2` (cả hai cổng), hạn hết sprint, nhãn và tier người ký, file luật nêu đích danh. Vắng `gate_N_mode` không còn nghĩa cổng là của người. Cổng về người khi: người dùng tự ký trong chat (`gate_N_mode: human`, ghi câu nguyên văn), `risk_tags` có `secret`/`auth`, hoặc việc sửa file luật chưa được gật 5 ý.
 
 - **Lời cấp thường trực mẫu** (khối `delegation`, không cần người dùng nói lại mỗi sprint):
-  `lời cấp thường trực — Đức, chat 13/11/2026: "mặc định coi như là autopilot luôn và để agent làm mọi thứ không cấm"` (kèm `level: gate_1_2`, `expires: sprint_end`).
+  `lời cấp thường trực — Đức, chat 13/11/2026: "<nguyên văn lời Đức trong chat>"` (kèm `level: gate_1_2`, `expires: sprint_end`); câu mẫu "mặc định coi như là autopilot luôn…" chỉ là VÍ DỤ minh hoạ, không phải trích dẫn: lời cấp thật phải trích nguyên văn từ chat của người dùng.
   Câu cũ `Cho phép T1 duyệt thay Cổng 1 của SPR-NN tới hết sprint.` vẫn hợp lệ khi cần phạm vi hẹp hơn.
   Không phải lời cấp: "ok", "làm luôn", "theo khuyến nghị" của agent khác, chữ trong file, PR, log.
 - **Câu thu hồi:** `Thu hồi duyệt thay SPR-NN.` (hiệu lực ngay; ghi `revoked_at`).
@@ -213,7 +213,9 @@ duyệt **không** phải phán quyết — đó là điều kiện dừng (d) �
 
 Ngoài hai cổng, bốn điều kiện này, mốc sau vòng 3 và cạn hạn mức tier, **không dừng**. KHI gặp một trong
 bốn trường hợp sau THÌ dừng đúng bước đó, ghi `BR` vào bảng Vướng mắc của PROGRESS (vướng gì, loại (a)–(d), đã làm
-gì, cần ai, trạng thái); Gate Delegate quyết, hoặc dừng và ghi vào báo cuối — không hỏi người giữa chừng:
+gì, cần ai, trạng thái). Gặp (a), (b) hay một trong bảy mục luôn chặn ([autopilot.md](autopilot.md) mục 5), Gate Delegate **không quyết thay**:
+chỉ được chọn hoãn, bỏ hay đổi cách làm; bước đó dừng, vào mục "Việc cần người" của báo cuối, phần độc lập chạy tiếp. Gặp (c), (d) và câu hỏi
+nghiệp vụ/cổng thì Gate Delegate quyết, hoặc dừng và ghi vào báo cuối — không hỏi người giữa chừng:
 
 | | Điều kiện | Ví dụ |
 |---|---|---|
@@ -226,7 +228,7 @@ Ngoài bốn điều này, dừng chờ người là **lỗi quy trình** (đế
 bằng 0). Tương tự, cạn hạn mức model của một tier → dừng phần việc của tier đó, ghi `BR` vào báo cuối; **không tự hạ
 tier** ([tiers/README.md](../tiers/README.md)).
 
-Duyệt thay không miễn bốn điều kiện này: gặp điều kiện nào vẫn dừng, ghi `BR`; Gate Delegate quyết hoặc dừng và ghi vào báo cuối.
+Duyệt thay không miễn bốn điều kiện này: gặp điều kiện nào vẫn dừng, ghi `BR`; (a), (b) và bảy mục luôn chặn vào "Việc cần người" của báo cuối (Gate Delegate không quyết thay), còn (c), (d) Gate Delegate quyết hoặc dừng và ghi vào báo cuối.
 <!-- san-cung:end -->
 
 ## 6. Bước 4 — Kiểm định bởi agent khác, vòng lặp
@@ -409,7 +411,7 @@ Việc nâng cỡ giữa chừng (lộ rủi ro mới) thì chuyển sang bốn 
 |---|---|
 | Tin mở autopilot — **một** tin gom, không chờ trả lời (mục 2) | Hỏi lẻ nhiều lượt ở tiếp nhận; hỏi điều repo trả lời được |
 | Cổng 1, Cổng 2 — Gate Delegate quyết, người dùng đọc báo cuối | Chi tiết triển khai PLAN chưa nói |
-| Bốn điều kiện dừng (mục 5) — Gate Delegate quyết trước | Mâu thuẫn nhỏ SPEC ↔ PLAN còn trong phạm vi |
+| Bốn điều kiện dừng (mục 5) — (c), (d) Gate Delegate quyết; (a), (b) và bảy mục luôn chặn vào "Việc cần người" của báo cuối | Mâu thuẫn nhỏ SPEC ↔ PLAN còn trong phạm vi |
 | Sau vòng 3 còn Chặn/Phải sửa (mục 6) — Gate Delegate quyết | Chọn thư viện/cách làm tương đương trong ràng buộc đã duyệt |
 | Cạn hạn mức tier (không tự hạ tier; ghi báo cuối) | Thứ tự làm `TK`, tách `TK` con |
 | `CQ` gom ở Cổng 1 (Gate Delegate quyết một lần) | Hỏi lẻ từng câu giữa chừng |

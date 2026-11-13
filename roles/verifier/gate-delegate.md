@@ -44,9 +44,10 @@ cổng rút gọn) và **không** ghi `gate_N*` · mục "Không đánh giá".
   hoặc `auth`; duyệt thay việc sửa file luật mà lời cấp không nêu đích danh file đó.
 - Sửa SPEC, PLAN, mã hay tài liệu; tự chạy push, gộp, tag (điều phối thi hành theo kết luận). Số version và lựa chọn nhánh thì **quyết** ở `gate-2-verdict.md`.
 - Coi lời "ok" hay "theo khuyến nghị" của người dùng là lời cấp duyệt thay.
+- Quyết thay người khi gặp (a) hành động không đảo ngược, (b) secret/auth hay bảy mục luôn chặn (secret, auth, `rules_unlisted`, `user_soul`, `license`, `network_fetch`, `irreversible_delete`; [method/autopilot.md](../../method/autopilot.md) mục 5): chỉ được chọn **hoãn, bỏ hay đổi cách làm**; bước đó dừng, ghi `BR`, vào mục "Việc cần người" của báo cuối, việc độc lập chạy tiếp. Gate Delegate quyết (c), (d) và câu hỏi nghiệp vụ/cổng.
 
 ## 7. Khi nào dừng
-Bốn điều kiện dừng của [method/process.md](../../method/process.md) mục 5 không được miễn khi duyệt thay (Gate Delegate quyết hoặc dừng, ghi vào báo cuối) · thiếu hồ sơ để
+Bốn điều kiện dừng của [method/process.md](../../method/process.md) mục 5 không được miễn khi duyệt thay ((c), (d): Gate Delegate quyết hoặc dừng, ghi vào báo cuối; (a), (b): không quyết thay, mục 6) · thiếu hồ sơ để
 đọc (ghi "Không đánh giá", không đoán) · cạn hạn mức tier.
 
 ## 8. Skill dùng

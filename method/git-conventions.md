@@ -10,7 +10,7 @@ updated: 2026-11-13
 
 1. **Nhánh.** Mỗi sprint một nhánh `spr-NN/<tên>` trong worktree riêng ([skills/worktrees](../skills/worktrees/SKILL.md)). Không commit thẳng `main`. Vào `main` chỉ qua PR, sau Cổng 2 **Đạt** (Đạt có điều kiện thì không).
 2. **Tag sao lưu.** Ngay trước khi gộp PR: `git tag backup/main-<YYYYMMDD-HHMM> main`. Không xoá tag này.
-3. **Ba lệnh cấm** (gốc ở [AGENTS.md](../AGENTS.md)): không đẩy ép (`--force`, `+ref`); không `reset --hard`, `clean -fd`/`-fdx`, `checkout -- .`, `restore .` khi chưa sao lưu (mục 4); không xoá nhánh chưa gộp.
+3. **Ba lệnh cấm** (gốc ở [AGENTS.md](../AGENTS.md)): không đẩy ép (`--force`, `+ref`); không `reset --hard`, `clean -fd`/`-fdx`, `checkout -- .`, `restore .` khi chưa sao lưu (mục 4); không xoá nhánh chưa gộp. **Cấm thêm — lệnh phá cơ chế hoàn tác** (bảng dưới sống nhờ reflog, nhánh và tag sao lưu): `git reflog expire`, `git gc --prune=now`, `git update-ref -d`, `git filter-branch`/`git filter-repo`, xoá tag hay nhánh `backup/*`, xoá `.git`, `git push --delete`/`+ref`, `git branch -D`. Hook chặn các lệnh này khi autopilot bật (`method/autopilot.md` mục 5.1); phần hook không bắt được (`filter-branch`, chuyển `.git` vào `.tmp/` rồi xoá) vẫn cấm bằng chữ.
 4. **Sao lưu việc chưa commit** — một ref trần không đủ, file chưa theo dõi không vào ref. Làm đúng bốn lệnh: `git switch -c backup/<YYYYMMDD-HHMM>` → `git add -A` → `git commit -m "sao lưu"` → `git switch <nhánh làm>`. File bị `.gitignore` không vào bản sao lưu; `clean -fdx` xoá cả chúng nên không cứu được phần đó.
 
 | Ca | Hoàn tác |

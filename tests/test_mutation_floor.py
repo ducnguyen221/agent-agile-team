@@ -20,10 +20,11 @@ import pytest
 
 REPO = Path(__file__).resolve().parent.parent
 PINNED_SUITES = ("tests/test_fence_wiring.py", "tests/test_floor_check.py",
-                 "tests/test_autopilot_guard.py", "tests/test_check.py")
+                 "tests/test_autopilot_guard.py", "tests/test_autopilot_guard_undo.py", "tests/test_check.py")
 KEYWORDS = "fence or floor or marker or autopilot or delegation or push"
 IGNORE = shutil.ignore_patterns(".git", ".tmp", ".claude", "__pycache__", ".pytest_cache", "*.pyc", ".env", ".env.*")
 WIRING = "tests/test_fence_wiring.py"
+UNDO = "tests/test_autopilot_guard_undo.py"
 
 
 @dataclass
@@ -86,8 +87,52 @@ def guard_imports_check(root: Path) -> None:
          "from check import AUTOPILOT_EXCLUSIONS")
 
 
-def drop_exclusion(root: Path) -> None:
-    edit(root, "scripts/_autopilot_rules.py", '("push", "tag",', '("tag",')
+def drop_always_blocked(root: Path) -> None:
+    """Bỏ `irreversible_delete` khỏi tập bảy mục luôn chặn: guard không còn chặn xoá khi file dấu hợp lệ (thay đột biến cũ trỏ danh sách 13 mục, nay chỉ dùng khi file dấu hỏng)."""
+    edit(root, "scripts/_autopilot_rules.py", '"network_fetch", "rules_unlisted", "irreversible_delete", "secret"', '"network_fetch", "rules_unlisted", "secret"')
+
+
+GUARD = "scripts/autopilot_guard.py"
+
+
+def stash_all_open(root: Path) -> None:
+    edit(root, GUARD, 'if "--all" in rest or any(_cluster(a, "a") for a in rest):', "if False:")
+
+
+def clean_x_open(root: Path) -> None:
+    edit(root, GUARD, 'if forced and any(_cluster(a, "xX") for a in opts):', "if False:")
+
+
+def ignore_check_inverted(root: Path) -> None:
+    edit(root, GUARD, "return None if ctx.marker_ignored() else MARKER", "return MARKER")
+
+
+def git_dir_delete_open(root: Path) -> None:
+    edit(root, GUARD, "if any(_is_git_path(t) for t in targets):", "if False:")
+
+
+def tmp_move_ignored(root: Path) -> None:
+    edit(root, GUARD, "        ctx.tmp_moved = True", "        pass")
+
+
+def pipeline_delete_open(root: Path) -> None:
+    edit(root, GUARD, 'item = "irreversible_delete"  # `Get-ChildItem', 'item = None  # `Get-ChildItem')
+
+
+def reflog_expire_open(root: Path) -> None:
+    edit(root, GUARD, 'return "irreversible_delete" if rest[:1] in (["expire"], ["delete"]) else None', "return None")
+
+
+def push_force_open(root: Path) -> None:
+    edit(root, GUARD, 'or a.startswith("--force") or _cluster(a, "fd")', 'or _cluster(a, "fd")')
+
+
+def branch_big_d_open(root: Path) -> None:
+    edit(root, GUARD, 'any(_cluster(a, "D") for a in rest) or (deleting and forced)', "(deleting and forced)")
+
+
+def session_cap_formula_off(root: Path) -> None:
+    edit(root, "scripts/check.py", "cap > formula and not", "cap > 10 ** 9 and not")
 
 
 # SPR-20 TK21: sáu đột biến tinh (hợp đồng đích, nhánh được bảo vệ, alias, nhánh đẩy) nhắm mô-đun rào git thường trực và suite của nó;
@@ -100,7 +145,18 @@ MUTATIONS = {
     "move-marker": Mutation(move_marker, f"{WIRING}::test_floor_zone_hashes", (WIRING,)),
     "remove-fence-file": Mutation(remove_fence_file, f"{WIRING}::test_fence_files_exist", (WIRING,)),
     "guard-imports-check": Mutation(guard_imports_check, f"{WIRING}::test_guard_does_not_import_check", (WIRING,)),
-    "drop-exclusion": Mutation(drop_exclusion, f"{WIRING}::test_exclusions_pinned", (WIRING,)),
+    "drop-always-blocked": Mutation(drop_always_blocked, f"{WIRING}::test_fence_wiring_pins_7_plus_6", (WIRING,)),
+    # SPR-20 TK27b: mười đột biến phủ rào mới của guard và trần phiên (mỗi cái trúng đúng một test ghim; hằng chết `drop-exclusion` cũ được thay bằng `drop-always-blocked`).
+    "stash-all-open": Mutation(stash_all_open, "tests/test_autopilot_guard.py::test_guard_marker_pattern_blocked", ("tests/test_autopilot_guard.py",)),
+    "clean-x-open": Mutation(clean_x_open, f"{UNDO}::test_guard_stash_all_and_clean_x_blocked_in_both_ignore_states", (UNDO,)),
+    "ignore-check-inverted": Mutation(ignore_check_inverted, f"{UNDO}::test_guard_stash_clean_allowed_when_marker_ignored", (UNDO,)),
+    "git-dir-delete-open": Mutation(git_dir_delete_open, f"{UNDO}::test_guard_delete_inside_git_always_blocked", (UNDO,)),
+    "tmp-move-ignored": Mutation(tmp_move_ignored, f"{UNDO}::test_guard_move_into_tmp_then_delete_blocked", (UNDO,)),
+    "pipeline-delete-open": Mutation(pipeline_delete_open, f"{UNDO}::test_guard_other_recursive_delete_forms_blocked", (UNDO,)),
+    "reflog-expire-open": Mutation(reflog_expire_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
+    "push-force-open": Mutation(push_force_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
+    "branch-big-d-open": Mutation(branch_big_d_open, f"{UNDO}::test_guard_undo_breaking_git_commands_blocked", (UNDO,)),
+    "session-cap-formula-off": Mutation(session_cap_formula_off, "tests/test_check.py::test_delegation_session_cap_must_not_exceed_the_formula", ("tests/test_check.py",)),
 }
 
 

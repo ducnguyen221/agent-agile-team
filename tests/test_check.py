@@ -2630,12 +2630,26 @@ def test_delegation_fence_file_ignores_zone_only_files_and_plain_delegation(tmp_
 # --- Người ký cổng độc lập với người làm (SPR-20 TK22) -----------------------------------------------------
 
 
-def _new_delegated_plan(root: Path) -> None:
-    """PLAN duyệt thay là khối MỚI (lời cấp từ ngày luật độc lập có hiệu lực)."""
+def _write_verdict(root: Path, gate: int, quote: str) -> None:
+    """`evidence/gate-<N>-verdict.md` do Gate Delegate ghi: dòng đầu chép đúng `gate_<N>_quote`."""
+    (root / "evidence").mkdir(exist_ok=True)
+    write_lf(root / "evidence" / f"gate-{gate}-verdict.md", quote + "\n\nNgười ký: agent-d · gate-delegate · T1 · Fable 5.2\n")
+
+
+PLAN_QUOTE = "duyệt thay: chọn phương án a — xem mục Bản ghi duyệt thay"
+REPORT_QUOTE = "duyệt thay: Đạt — xem mục Bản ghi duyệt thay"
+
+
+def _new_delegated_plan(root: Path, cap: int = 8, verdict: bool = True) -> None:
+    """PLAN duyệt thay là khối MỚI (lời cấp từ ngày luật độc lập có hiệu lực): trần phiên `cap` ở mục Ước lượng khớp `delegation.sessions_cap`,
+    kèm file kết luận của Gate Delegate."""
     delegate_plan(root)
     _rewrite(root / "PLAN.md", "gate_1_at: 2026-02-01 09:00 +07", "gate_1_at: 2026-11-13 09:00 +07")
     _rewrite(root / "PLAN.md", "grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-11-13 08:30 +07")
-    _rewrite(root / "PLAN.md", "## Ước lượng\n\n", "## Ước lượng\n\nTrần phiên: 8 (cỡ nhỏ × rủi ro thường, mục 2.1)\n\n")
+    _rewrite(root / "PLAN.md", "  revoked_at: null\n", f"  revoked_at: null\n  level: gate_1\n  sessions_cap: {cap}\n")
+    _rewrite(root / "PLAN.md", "## Ước lượng\n\n", f"## Ước lượng\n\nTrần phiên: {cap} (cỡ nhỏ × rủi ro thường, mục 2.1)\n\n")
+    if verdict:
+        _write_verdict(root, 1, PLAN_QUOTE)
 
 
 def _signer_hits(root: Path) -> list:
@@ -2686,6 +2700,7 @@ DECISION_LOG_OK = DECISION_LOG_HEAD + "| Đạt Cổng 2 | agent-d · gate-deleg
 def _new_delegated_report(root: Path, log: str | None = DECISION_LOG_OK) -> None:
     """REPORT duyệt thay là khối MỚI (lời cấp từ ngày luật có hiệu lực); `log` chèn trước mục Cổng 2 (None = không có mục)."""
     delegate_report(root)
+    _write_verdict(root, 2, REPORT_QUOTE)
     _rewrite(root / "REPORT.md", "gate_2_at: 2026-02-02 17:00 +07", "gate_2_at: 2026-11-13 17:00 +07")
     _rewrite(root / "REPORT.md", "grant_at: 2026-02-02 08:00 +07", "grant_at: 2026-11-13 08:00 +07")
     if log is not None:
@@ -2748,3 +2763,154 @@ def test_session_cap_ignores_old_delegation_blocks(tmp_path):
     root = make_sprint(tmp_path)
     delegate_plan(root)
     assert _rule_hits(root, "session-cap-missing") == []
+
+
+# --- TK27b: trần phiên khớp khối delegation và công thức; file kết luận cổng; SPRINT.md; khử trùng ---------------------------------
+
+import _autopilot_rules as _rules  # noqa: E402
+
+
+@pytest.mark.parametrize("size,risk,expected", [
+    ("tiny", "normal", 4), ("small", "normal", 8), ("medium", "normal", 15), ("large", "normal", 23),
+    ("tiny", "high", 5), ("small", "high", 10), ("medium", "high", 19), ("large", "high", 29), ("huge", "normal", None),
+])
+def test_session_cap_formula_table(size, risk, expected):
+    """Bảng `method/autopilot.md` mục 2.1: cơ sở theo cỡ; rủi ro cao nhân 1,25 làm tròn lên."""
+    assert _rules.session_cap_formula(size, risk) == expected
+
+
+def test_session_cap_line_must_match_delegation_sessions_cap(tmp_path):
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root)
+    _rewrite(root / "PLAN.md", "  sessions_cap: 8\n", "  sessions_cap: 9\n")
+    hits = _rule_hits(root, "session-cap-missing")
+    assert len(hits) == 1 and "sessions_cap" in hits[0].message, [f.render() for f in hits]
+
+
+@pytest.mark.parametrize("value", ["null", None], ids=["null", "absent"])
+def test_new_block_sessions_cap_null_or_absent_is_flagged(tmp_path, value):
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root)
+    _rewrite(root / "PLAN.md", "  sessions_cap: 8\n", "" if value is None else "  sessions_cap: null\n")
+    hits = _rule_hits(root, "session-cap-missing")
+    assert len(hits) == 1 and "sessions_cap" in hits[0].message, [f.render() for f in hits]
+
+
+def test_old_block_with_null_sessions_cap_is_not_flagged(tmp_path):
+    root = make_sprint(tmp_path)
+    autopilot_plan(root)  # grant_at 2026-02-01, sessions_cap: null
+    assert _rule_hits(root, "session-cap-missing") == []
+
+
+@pytest.mark.parametrize("size,risk,cap,flagged", [
+    ("medium", "normal", 15, False), ("medium", "normal", 16, True),
+    ("small", "normal", 8, False), ("small", "normal", 9, True),
+    ("large", "high", 29, False), ("large", "high", 30, True), ("large", "normal", 23, False), ("large", "normal", 24, True),
+])
+def test_delegation_session_cap_must_not_exceed_the_formula(tmp_path, size, risk, cap, flagged):
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root, cap=cap)
+    _rewrite(root / "PLAN.md", "size: medium", f"size: {size}")
+    _rewrite(root / "PLAN.md", "risk: normal", f"risk: {risk}")
+    hits = _rule_hits(root, "session-cap-missing")
+    assert bool(hits) is flagged, [f.render() for f in hits]
+    if flagged:
+        assert len(hits) == 1 and "công thức" in hits[0].message
+
+
+def test_session_cap_above_formula_is_allowed_with_a_decision_log_line(tmp_path):
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root, cap=20)
+    _rewrite(root / "PLAN.md", "size: medium", "size: small")
+    assert len(_rule_hits(root, "session-cap-missing")) == 1
+    log = ("\n## Nhật ký quyết định\n\n| Quyết định | Ai ký | Bằng chứng | Lệnh hoàn tác |\n|---|---|---|---|\n"
+           "| Nâng trần phiên 8 → 20 | agent-d · gate-delegate · T1 · Fable 5.2 | evidence/gate-1-verdict.md | sửa lại Trần phiên và sessions_cap |\n")
+    write_lf(root / "PLAN.md", (root / "PLAN.md").read_text(encoding="utf-8") + log)
+    assert _rule_hits(root, "session-cap-missing") == []
+
+
+def test_verdict_file_must_exist_for_a_new_concluded_delegated_gate(tmp_path):
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root, verdict=False)
+    hits = _signer_hits(root)
+    assert len(hits) == 1 and "gate-1-verdict.md" in hits[0].message, [f.render() for f in hits]
+    root2 = make_sprint(tmp_path / "r")
+    _new_delegated_report(root2)
+    (root2 / "evidence" / "gate-2-verdict.md").unlink()
+    hits = _signer_hits(root2)
+    assert len(hits) == 1 and "gate-2-verdict.md" in hits[0].message, [f.render() for f in hits]
+
+
+def test_verdict_first_line_must_equal_the_gate_quote(tmp_path):
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root)
+    _write_verdict(root, 1, "duyệt thay: một kết luận khác")
+    hits = _signer_hits(root)
+    assert len(hits) == 1 and "dòng đầu" in hits[0].message, [f.render() for f in hits]
+
+
+def test_old_delegated_gate_needs_no_verdict_file(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    delegate_report(root)
+    assert _signer_hits(root) == []
+
+
+def _new_two_gate_sprint(tmp_path: Path, *, cap_line: str | None = "Trần phiên: 4 (cỡ rất nhỏ × rủi ro thường, mục 2.1)",
+                         block_cap: int | None = 4, log: str | None = None, tier: str = "T1") -> Path:
+    """`SPRINT.md` có cả hai cổng `delegated` đã kết luận, khối `delegation` MỚI (lời cấp từ ngày hiệu lực)."""
+    root = _two_gate_sprint(tmp_path, gate_1_done=True, gate_2_done=True)
+    path = root / "SPRINT.md"
+    text = path.read_text(encoding="utf-8")
+    cap_keys = "  level: gate_1_2\n" + ("" if block_cap is None else f"  sessions_cap: {block_cap}\n")
+    for old, new in (("  note: x\n", cap_keys), ("grant_at: 2026-01-20 08:30 +07", "grant_at: 2026-11-13 08:30 +07"),
+                     ("gate_1_at: 2026-01-20 09:40 +07", "gate_1_at: 2026-11-13 09:40 +07"),
+                     ("gate_2_at: 2026-01-21 10:00 +07", "gate_2_at: 2026-11-14 10:00 +07"), ("  tier: T1\n", f"  tier: {tier}\n")):
+        assert old in text, old
+        text = text.replace(old, new, 1)
+    if cap_line:
+        text = text.replace("## 1. Kế hoạch\n\n", "## 1. Kế hoạch\n\n" + cap_line + "\n\n", 1)
+    write_lf(path, text + (log or ""))
+    _write_verdict(root, 1, "duyệt thay: sửa chữ — xem mục Bản ghi duyệt thay")
+    _write_verdict(root, 2, "duyệt thay: Đạt — xem mục Bản ghi duyệt thay")
+    return root
+
+
+SPRINT_LOG_OK = ("\n- **Nhật ký quyết định:**\n\n| Quyết định | Ai ký | Bằng chứng | Lệnh hoàn tác |\n|---|---|---|---|\n"
+                 "| Đạt Cổng 2 | agent-d · gate-delegate · T1 · Fable 5.2 | evidence/gate-2-verdict.md | git revert abc1234 |\n")
+
+
+def test_new_sprint_file_with_cap_and_log_is_clean(tmp_path):
+    root = _new_two_gate_sprint(tmp_path, log=SPRINT_LOG_OK)
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_new_sprint_file_without_session_cap_line_is_flagged(tmp_path):
+    root = _new_two_gate_sprint(tmp_path, cap_line=None, log=SPRINT_LOG_OK)
+    assert len(_rule_hits(root, "session-cap-missing")) == 1
+
+
+def test_new_sprint_file_cap_must_match_block_and_formula(tmp_path):
+    root = _new_two_gate_sprint(tmp_path, cap_line="Trần phiên: 5", block_cap=4, log=SPRINT_LOG_OK)
+    hits = _rule_hits(root, "session-cap-missing")
+    assert len(hits) == 1 and "sessions_cap" in hits[0].message, [f.render() for f in hits]
+    (tmp_path / "b").mkdir()
+    root2 = _new_two_gate_sprint(tmp_path / "b", cap_line="Trần phiên: 5", block_cap=5, log=SPRINT_LOG_OK)  # rất nhỏ: công thức 4
+    hits = _rule_hits(root2, "session-cap-missing")
+    assert len(hits) == 1 and "công thức" in hits[0].message, [f.render() for f in hits]
+
+
+def test_new_sprint_file_without_decision_log_is_flagged(tmp_path):
+    root = _new_two_gate_sprint(tmp_path)
+    assert len(_rule_hits(root, "decision-log-missing")) == 1
+
+
+def test_new_sprint_file_decision_log_bullet_without_table_is_flagged(tmp_path):
+    root = _new_two_gate_sprint(tmp_path, log="\n- **Nhật ký quyết định:** Không có quyết định nào ngoài hai cổng.\n")
+    assert len(_rule_hits(root, "decision-log-missing")) == 1
+
+
+def test_signer_finding_is_reported_once_for_a_sprint_file_with_two_delegated_gates(tmp_path):
+    root = _new_two_gate_sprint(tmp_path, tier="T2", log=SPRINT_LOG_OK)
+    hits = _signer_hits(root)
+    assert len(hits) == 1 and "T2" in hits[0].message, [f.render() for f in hits]

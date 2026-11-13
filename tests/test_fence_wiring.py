@@ -236,16 +236,16 @@ PINNED_FLOOR_FILES_EXTRA = (
 # Sửa chữ trong vùng sàn thì đổi cả băm ở đây trong cùng commit, có lý do và có 5 ý Đức gật cho file luật đó.
 PINNED_ZONE_HASHES = {
     ("AGENTS.md", 0): (
-        "cc38cf08dcfbb60ffeae12c24c492183a6073182467633b63d31d03631e29ca4",
+        "4f3b98a6913e0d5ef2bd16832c3c86da0c41959cc3b8721758a15692b6527a15",  # TK27b: Gate Delegate không quyết thay ở (a), (b), bảy mục luôn chặn (Sec RF1)
         "1b674c5981eda2acbc3b340bec29f1730fce0513d8061f11383ce0d60d4a3f4c"),
     ("AGENTS.md", 1): (
-        "22a7f587294028a99215142c20b7ad039f3a7e6c27f8b291c41ccb0ccbd9d2f0",
+        "f6c45f132903c33cf32a4e5434829f2afc35d127e807f1c5db6ef7bd87bcfb47",  # TK27b: lệnh phá hoàn tác + đẩy chỉ khi có lời cấp, kiểm ruleset, quét secret (Sec RF3, RF4)
         "5d18f5eaed17becce2a26b0381cb1a0576ec05b6d3d5948bcef94a80abe411bf"),
     ("method/process.md", 0): (
-        "5f7e0e13f7e4ac202296d9a1c995f605baf9cac174cd31a3003d4e66e849b0e3",  # SPR-20 TK8: Khuyến nghị có sẵn khi autopilot bật + câu mẫu `Mở SPR-NN` (vùng sàn đã duyệt ở PLAN)
+        "49b0eba555d5560aa81f72079e3f0bf012065b94185f8b38a4a7bb18c20f084b",  # SPR-20 TK8: Khuyến nghị có sẵn khi autopilot bật + câu mẫu `Mở SPR-NN` (vùng sàn đã duyệt ở PLAN); TK27b: lời cấp thật trích nguyên văn từ chat, câu mẫu chỉ là ví dụ (QA lệch 1)
         "ecb48ff6109d5b11438be3eef55f7e9c5d7af45c98a2cf48cf4dea2efc4f1029"),
     ("method/process.md", 1): (
-        "34cf2e7427f7332ee1f5effe4b2f1d382e949ccbf1510f45fa7d84ca8a5b536f",
+        "46c568486b7986e0f7ec30197687361aaa199067688b25ead162163cd97051ec",  # TK27b: điều kiện dừng (a), (b) vào "Việc cần người" (Sec RF1)
         "2a61b772d7d11e70c57623ef3447b2dc001d4218b8c2aaa09c181ac31d436c5f"),
     ("method/process.md", 2): (
         "a4d227e219acf81466e07c74745e0dee15f9e82a48e34b41030c3abdeb028cd2",
@@ -254,7 +254,7 @@ PINNED_ZONE_HASHES = {
         "dc327e76921c81fcf4266a5285b617b74cb55af89e71eca950067b4d9018acba",
         "47c90f9685ed7aecfe4ca66bc4e10a217a68813484e3d1eb920f085e292b85d3"),
     ("method/autopilot.md", 0): (
-        "1d17f843f38e68c65989e619072cb6697e9db2e84ce2dd177857d6b3fad6132f",  # TK7 (DN3 a): hàng `push` mục 5 thêm "trừ đúng hợp đồng đích"
+        "e48cc18d121cdf721b76c108b367ff670c2ac26ba65cb21dfc904bce402773dc",  # TK7 (DN3 a): hàng `push` mục 5 thêm "trừ đúng hợp đồng đích"; TK27b (đã thay hàng `push` cũ ở TK21): bảy mục luôn chặn, mẫu hook mới, lệnh phá hoàn tác, đẩy chỉ khi có lời cấp (Sec RF1-RF4)
         "55283740743d60f43bb66242f9133c4ff732b4617fe81bdf07ad8ad37098fc56"),
 }
 

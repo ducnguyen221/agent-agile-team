@@ -35,8 +35,10 @@ Một người + nhiều agent phát triển phần mềm theo sprint = một m�
 
 <!-- san-cung:start -->
 **Dừng chỉ khi:** (a) hành động không đảo ngược, (b) chạm bảo mật/secret, (c) tác động ra ngoài
-phạm vi/worktree đã giao, (d) PLAN hỏng — giả định sai làm đổi tiêu chí thành công. Ghi `BR`: Gate Delegate quyết,
-hoặc dừng và ghi vào báo cuối; không hỏi người giữa chừng. Ngoài đó, dừng là lỗi. **Làm thẳng** (bậc ở `method/sizing.md`): việc 1–2 thao tác có
+phạm vi/worktree đã giao, (d) PLAN hỏng — giả định sai làm đổi tiêu chí thành công. Ghi `BR`, không hỏi người giữa
+chừng. (a), (b), bảy mục luôn chặn (`method/autopilot.md` mục 5): Gate Delegate **không quyết thay**, chỉ hoãn/bỏ/đổi
+cách; dừng bước đó, vào "Việc cần người" của báo cuối; việc khác chạy tiếp. (c), (d), câu hỏi nghiệp
+vụ/cổng: Gate Delegate quyết. Ngoài đó, dừng là lỗi. **Làm thẳng** (bậc ở `method/sizing.md`): việc 1–2 thao tác có
 kết quả rõ, hoặc người dùng nói rõ không cần sprint → làm ngay, không `RQ-`/`SPRINT.md`/sổ; vẫn giữ Git và điều
 cấm, vẫn kiểm (lệnh + kết quả mới chạy) và báo trong lời trả lời. Không áp khi chạm `risk_tags`, file luật, secret,
 hành động không đảo ngược — trừ khi người dùng nói rõ không cần sprint; lúc đó mọi cổng xin phép khác vẫn giữ (sửa
@@ -87,7 +89,7 @@ và Không áp dụng không bao giờ là Đạt.
   tài liệu: SPEC `US` `FR` (`FR3.2` kịch bản) `SC` `CQ` · PLAN `TK` (`TK2.3` việc con) `RK` `DN` ·
   PROGRESS `BR` · REPORT `VR` `RF` `LN` `CO`. Sổ gốc: `RQ-014` `FS-007` `SPR-12`, tăng dần, không tái dùng.
 - Mã luôn kèm tên ngắn (mọi lần trong chat). Trước mọi danh sách / bảng mã: câu dẫn nói tài liệu nào và mã
-  là gì, nghĩa in đậm — "SPEC có 10 **user story** (US):", "Sổ gốc REQUESTS có 4 **request** (RQ):".
+  là gì, nghĩa in đậm — "SPEC có 10 **user story** (US):".
   Nhắc chéo `TK4 → FR3.2`, sang tài liệu khác `FS-007/FR3.2`.
   Mã hệ khác để trong dấu code + tên. Không đánh số lại; mục bỏ giữ mã, trạng thái `bỏ`.
 - Cấm: mã một chữ cái + số, tiền tố tự chế, `P1/P2` cho ưu tiên (viết Bắt buộc / Nên có / Có thì tốt /
@@ -99,11 +101,13 @@ và Không áp dụng không bao giờ là Đạt.
 ## Git và điều cấm
 
 - Không bỏ hook (`--no-verify`), không force-push, không xoá nhánh chưa gộp, không `git stash` trần, không commit
-  secret; không `reset --hard`/`clean -fd[x]`/`checkout -- .`/`restore .` khi chưa commit sao lưu vào `backup/<ngày-giờ>`
-  (`method/git-conventions.md`).
+  secret; không `reset --hard`/`clean -fd[x]`/`checkout -- .`/`restore .` khi chưa commit sao lưu vào `backup/<ngày-giờ>`;
+  không phá hoàn tác: `reflog expire`, `gc --prune=now`, `update-ref -d`, `filter-branch`/`-repo`, xoá tag/nhánh
+  `backup/*` hay `.git`, `push --delete`/`+ref` (`method/git-conventions.md`).
 - Không sửa config linter/test hay hạ ngưỡng coverage (mặc định 80 % code mới/sửa) để qua kiểm.
-- Version do Gate Delegate quyết theo bảng phiên bản; không ghi đè CHANGELOG (chỉ thêm). Push, PR, gộp nhánh
-  chính: sau Cổng 2 Đạt; Đạt có điều kiện thì không.
+- Version do Gate Delegate quyết theo bảng phiên bản; không ghi đè CHANGELOG (chỉ thêm). Push, PR, gộp `main`, tag,
+  phát hành: chỉ khi PLAN có lời cấp + Cổng 2 Đạt, sau kiểm ruleset và quét secret
+  (`method/autopilot.md` mục 5); Đạt có điều kiện thì không.
 - Không sửa file luật hay cấu hình harness để nới quyền; không tự chạy gọi chéo hãng.
 - File tạm trong `.tmp/`, xoá khi xong; không đọc, in, chép giá trị secret.
 <!-- san-cung:end -->

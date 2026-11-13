@@ -21,7 +21,7 @@ updated: 2026-11-13
   vào báo cuối. Không ký cổng.
 - **Phiên con:** phiên phụ hoặc subagent do điều phối mở cho một việc theo vai; mỗi lần giao là một dòng sổ.
 - **Hàng chờ người:** các `BR` trong bảng Vướng mắc của PROGRESS có cột "cần ai" là người dùng và trạng thái
-  `chờ người`; báo cuối liệt kê lại. Không dựng sổ mới. Chỉ có khi Gate Delegate không quyết được hoặc cổng về người (mục 3).
+  `chờ người`; báo cuối liệt kê lại. Không dựng sổ mới. Chỉ có khi Gate Delegate không quyết được, việc chạm (a), (b) hay bảy mục luôn chặn (mục 5), hoặc cổng về người (mục 3).
 - **File dấu:** `.tmp/autopilot.json` — chỉ có một vai: báo cho hook xoá đệ quy rằng autopilot đang bật (mục 5.2). Hỏng thì đóng an toàn.
 
 ## 2. Chế độ mặc định và tin mở autopilot
@@ -58,7 +58,7 @@ Dừng: gõ `Dừng autopilot.` (hoặc `Thu hồi duyệt thay SPR-NN.` cho m�
 | vừa | 15 | 19 |
 | lớn | 23 | 29 |
 
-Hồ sơ cũ có `sessions_cap: null` thì hằng cũ 25 áp; sprint mới ghi số cụ thể.
+Hồ sơ cũ (`grant_at` trước 2026-11-13) có `sessions_cap: null` thì hằng cũ 25 áp; hồ sơ mới ghi số cụ thể, `null` không hợp lệ. `check` (luật `session-cap-missing`) đối chiếu: dòng `Trần phiên: <N>` khớp `sessions_cap`, N không vượt công thức ở bảng trên (`_autopilot_rules.session_cap_formula`); nâng trần cao hơn công thức phải có dòng "nâng trần" trong Nhật ký quyết định. `SPRINT.md` cũng áp.
 
 ## 3. Khối `delegation` — lời cấp thường trực
 
@@ -88,7 +88,7 @@ gate_1_at: 2026-11-20 10:15 +07
 gate_1_quote: "duyệt thay: chọn DN1 phương án b — bản ghi ở PLAN mục Bản ghi duyệt thay"
 gate_1_mode: delegated
 delegation:
-  grant: "lời cấp thường trực — Đức, chat 13/11/2026: mặc định coi như là autopilot luôn và để agent làm mọi thứ không cấm"
+  grant: "lời cấp thường trực — Đức, chat <ngày>: <trích nguyên văn từ chat thật>"  # VÍ DỤ minh hoạ, không phải trích dẫn: lời cấp thật phải chép nguyên văn từ chat của người dùng
   grant_at: 2026-11-20 09:00 +07
   scope: [gate_1, gate_2]
   expires: sprint_end
@@ -124,7 +124,8 @@ delegation:
 ## 5. Những thứ luôn chặn
 
 Danh sách là **đóng**, mọi sprint như nhau, không cờ nào mở được. Gặp một mục, hoặc điều kiện dừng (a)–(c) của [process.md](process.md) mục 5 →
-dừng **đúng bước đó**, ghi `BR`, chạy tiếp phần không phụ thuộc; Gate Delegate quyết hoặc việc vào báo cuối. Điều kiện (d) — PLAN hỏng — dừng cả sprint (mục 7). Không điều kiện nào được miễn.
+dừng **đúng bước đó**, ghi `BR`, chạy tiếp phần không phụ thuộc. Với một trong bảy việc dưới đây hoặc điều kiện (a), (b), Gate Delegate **không quyết thay**:
+chỉ được chọn hoãn, bỏ hay đổi cách làm; việc vào mục "Việc cần người" của báo cuối. Với (c), Gate Delegate quyết hoặc việc vào báo cuối. Điều kiện (d) — PLAN hỏng — dừng cả sprint (mục 7). Không điều kiện nào được miễn.
 
 | Mục | Việc | Rào |
 |---|---|---|
@@ -136,7 +137,7 @@ dừng **đúng bước đó**, ghi `BR`, chạy tiếp phần không phụ thu�
 | `network_fetch` | tải dữ liệu thật từ mạng khi chưa có phép từng URL | hành vi |
 | `irreversible_delete` | xoá không đảo ngược | máy một phần (mục 5.1) + hành vi |
 
-Đẩy, tag, gộp, version, phát hành **không** nằm ở đây: chúng đi theo [git-conventions.md](git-conventions.md) (PR sau Cổng 2 Đạt, tag sao lưu trước khi gộp, version do Gate Delegate quyết).
+Đẩy, PR, gộp `main`, tag, phát hành **không** nằm ở đây: chỉ khi PLAN có **lời cấp** (mặc định lời Đức 13/11/2026, trích nguyên văn từ chat thật vào PLAN của sprint) và Cổng 2 **Đạt**, theo [git-conventions.md](git-conventions.md) (PR, tag sao lưu trước khi gộp, version do Gate Delegate quyết). Trước khi đẩy: kiểm ruleset của `main` (không có → cảnh báo đầu báo cuối, không chặn) và quét secret trên diff đẩy bằng công cụ quét secret có sẵn trên máy (nếu có) (không có công cụ → ghi `CO`, không bịa kết quả).
 
 ### 5.1 Rào máy: chặn được gì, không chặn được gì
 
@@ -144,17 +145,21 @@ dừng **đúng bước đó**, ghi `BR`, chạy tiếp phần không phụ thu�
   → chặn **trước khi chạy**, lý do `autopilot: '<mục>' cần người dùng nói trong chat — lệnh không chạy`.
 - **Tìm file dấu:** từ thư mục làm việc của sự kiện đi lên, xét `.tmp/autopilot.json` ở từng cấp; dừng sau cấp đầu tiên có `.git` (thư mục, hoặc **file** `gitdir:` của worktree).
   Worktree không thấy file dấu ở gốc repo chính — điều phối chép vào từng worktree (mục 5.2). File hỏng → chặn mọi lệnh khớp mẫu (đóng an toàn).
-- **Mẫu có sẵn — chỉ xoá không đảo ngược:** `rm` có `-r`/`-R`/`--recursive`, `Remove-Item`/`rmdir /s` đệ quy, `find … -delete`, `find … -exec` mà lệnh sau thuộc mục này, `git worktree remove --force`. **Cho qua** khi mọi đích
+- **Mẫu có sẵn — chỉ xoá không đảo ngược:** `rm` có `-r`/`-R`/`--recursive`, `Remove-Item`/`rmdir /s` đệ quy, `find … -delete`, `find … -exec` mà lệnh sau thuộc mục này (kể cả `-exec rm` không đệ quy), `Get-ChildItem … -Recurse | Remove-Item`, `[IO.Directory]::Delete(…, $true)`,
+  `robocopy … /MIR`/`/PURGE`, `busybox rm`, `git worktree remove --force`; **mọi lệnh xoá có đích thuộc `.git`** (kể cả không đệ quy, `rm .git/index`) luôn chặn; và các lệnh git phá cơ chế hoàn tác: `reflog expire|delete`,
+  `gc --prune=now`, `prune` kèm `now`, `update-ref -d`, `push` xoá hay ép (`--delete`, `-d`, `--force*`, `-f`, `--mirror`, refspec `:ref`/`+ref`), `branch -D` (đẩy thường, tag, gộp, `commit`, `reset` vẫn qua). **Cho qua** (trừ nhóm `.git` và nhóm git) khi mọi đích
   là đường con thật sự nằm trong `<gốc repo>/.tmp/` (không chứa `..`, không phải chính `.tmp/`, không phải hay chứa file dấu; đích xét theo chuỗi trước khi shell mở rộng, glob chỉ ở thành phần cuối và không khớp
-  `autopilot.json`, không theo liên kết; đã gặp `cd` trước đó trong lệnh ghép thì không còn ngoại lệ). Dọn thư mục thử dưới `.tmp/` thì `--clear` từng thư mục chứa file dấu trước rồi mới `rm -rf`.
-- **Bảo vệ chính file dấu:** lệnh shell không chỉ-đọc có đối số trỏ tới file dấu (hay `.tmp/` bao nó, hay glob khớp nó), chuyển hướng `>` vào nó, `git stash -a`/`--all`, `git clean -f` kèm `-x`/`-X`, và tool ghi file
+  `autopilot.json`, không theo liên kết; đã gặp `cd` trước đó, hay `mv`/`move`/`Move-Item`/`ren`/`Rename-Item`/`robocopy`/`cp -r` có đích dưới `.tmp/` ở bước trước trong cùng lệnh ghép, thì không còn ngoại lệ). Dọn thư mục thử dưới `.tmp/` thì `--clear` từng thư mục chứa file dấu trước rồi mới `rm -rf`.
+- **Bảo vệ chính file dấu:** lệnh shell không chỉ-đọc có đối số trỏ tới file dấu (hay `.tmp/` bao nó, hay glob khớp nó), chuyển hướng `>` vào nó, `git stash -a`/`--all`, `git clean -f` kèm `-x`/`-X` (kể cả `-c clean.requireForce=false`), và tool ghi file
   (`Write`, `Edit`, `MultiEdit`, `NotebookEdit`) có đích là file dấu đều bị chặn. `cp` được cho qua khi file dấu chỉ là **nguồn**. Lối kết thúc duy nhất bằng máy: `python scripts/autopilot_guard.py --clear <thư mục làm việc>`
-  (chỉ điều phối gọi, sau `Dừng autopilot.` hoặc thu hồi, xoá sau cùng — mục 7; hoặc người dùng tự xoá).
+  (chỉ điều phối gọi, sau `Dừng autopilot.` hoặc thu hồi, xoá sau cùng — mục 7; hoặc người dùng tự xoá). `git stash -u`/`--include-untracked` và `git clean -f[d]` chỉ bị chặn khi file dấu **không** bị gitignore
+  (`git check-ignore -q`; lỗi kiểm = không ignore): vì vậy `.tmp/` phải nằm trong `.gitignore` trước khi ghi file dấu (mục 5.2).
 - **Lệnh ghép:** tách thô theo `&&`, `||`, `;`, `|`, `&`, xuống dòng, ngoặc tròn và dấu huyền, không hiểu dấu nháy (chấp nhận chặn nhầm). Tiền tố (`timeout`, `env`, `sudo`, `nice`, `command`, `xargs`, `nohup`, `time`)
   được bỏ trước khi xét; `bash -c`/`sh -c`/`pwsh -Command`/`cmd /c` mở tối đa ba lớp, sâu hơn thì chặn.
-- **Không chặn được** (đều là rào hành vi, điều phối tự soát): lệnh gián tiếp (script, Makefile, alias, `python -c`, `Start-Process`, `Invoke-Expression`, thoát ký tự); `gh api`; công cụ không phải shell
+- **Không chặn được** (đều là rào hành vi, điều phối tự soát): lệnh gián tiếp (script, Makefile, alias, `python -c`, `Start-Process`, thoát ký tự; `eval`/`Invoke-Expression`/`iex` chỉ được xét khi nằm trong lệnh shell trực tiếp); `gh api`; dạng xoá hay chuyển chưa liệt kê (`git filter-branch`/`filter-repo`, `.NET` khác `Directory.Delete`, `del` qua `cmd /c` nhiều lớp, `python -c`…); công cụ không phải shell
   (MCP, `Monitor`, Codex `write_stdin`); hook chưa đăng ký, Codex chưa được **người dùng** trust qua `/hooks`, Antigravity chưa đăng ký; phiên con chạy ngoài repo có file dấu; tự gọi `--clear`; và **phiên con có quyền ghi** xoá hay sửa được file dấu —
   giới hạn lớn nhất còn lại. Bù bằng kiểm: điều phối kiểm sự có mặt và nội dung file dấu trong thư mục phiên con **khi giao** và **khi nhận báo**; thiếu hoặc lệch → phiên con đã ra khỏi rào: dừng nó, ghi `BR`, soát `git reflog` và nhánh.
+- **Luật chữ bù cho phần máy không chặn được:** không chuyển file đang theo dõi hay `.git` vào `.tmp/` (rồi xoá ở đó); không xoá tag/nhánh `backup/*`; không `filter-branch`/`filter-repo`. Vi phạm là lỗi quy trình, điều phối soát `git reflog` khi nhận báo.
 - Rào máy là lưới an toàn, không phải ranh giới bảo mật; phần không đảo ngược phía remote (đẩy ép, xoá nhánh chính) chỉ ruleset của `main` mới chặn được — khuyến nghị mạnh, chủ repo đặt một lần ([git-conventions.md](git-conventions.md)).
 <!-- san-cung:end -->
 
@@ -168,7 +173,7 @@ dừng **đúng bước đó**, ghi `BR`, chạy tiếp phần không phụ thu�
 - **Một file dấu mỗi thư mục làm việc.** `intake` ghi ở gốc repo khi mở sprint. Điều phối chép (`cp`) vào `.tmp/` của thư mục làm việc (worktree) của mỗi phiên con **trước** khi giao việc, `sprints` = đúng sprint phiên con đó làm.
 - **Xoá:** khi kết thúc (`Dừng autopilot.`, thu hồi, hết hạn), **sau cùng** — sau khi mọi phiên con liên quan đã báo dừng ở điểm an toàn (mục 7), bằng `--clear`.
   `Thu hồi duyệt thay SPR-NN.` bỏ `SPR-NN` khỏi `sprints` của mọi file dấu có nó; file nào còn `sprints` rỗng thì xoá.
-- Không commit file dấu: `.tmp/` phải nằm trong `.gitignore` của dự án; chưa có thì Analyst nêu trong tin mở autopilot.
+- Không commit file dấu: `.tmp/` phải nằm trong `.gitignore` của dự án. `intake` kiểm (`git check-ignore -q .tmp/autopilot.json`) **trước khi** ghi file dấu; chưa ignore thì thêm `.tmp/` vào `.gitignore` rồi mới ghi, và nêu trong tin mở autopilot. Hook chỉ coi `git stash -u`/`git clean -f` là vô hại khi file dấu đã bị ignore (mục 5.1).
 
 ## 6. Phiên điều phối và phiên con
 
@@ -199,7 +204,7 @@ Bảng trong PROGRESS mục "Sổ phiên con", một dòng mỗi lần giao:
 - Điều phối **không** ký cổng, không viết kết luận, không gợi ý kết luận. Brief cho Gate Delegate là mẫu cố định dưới đây; điều phối chỉ điền chỗ `<…>`. PROGRESS ghi đường tới brief.
 - Gate Delegate ghi `evidence/gate-N-verdict.md` trong phiên của nó, rồi chính nó ghi các khoá cổng (`gate_N`, `gate_N_at`, `gate_N_mode: delegated`, `gate_N_quote` = **đúng dòng đầu** của file kết luận)
   và mục `## Bản ghi duyệt thay`; không sửa phần khác. Điều phối chỉ kiểm khớp dòng đầu ↔ `gate_N_quote`.
-- Gate Delegate quyết thay người: chấp nhận hay không `CQ`/`DN`, làm tiếp hay dừng sau vòng 3, nâng trần phiên, số version theo [conventions.md](conventions.md) mục 4.1, nhánh sau Cổng 2. Điều phối thi hành theo kết luận.
+- Gate Delegate quyết thay người: chấp nhận hay không `CQ`/`DN`, làm tiếp hay dừng sau vòng 3, nâng trần phiên, số version theo [conventions.md](conventions.md) mục 4.1, nhánh sau Cổng 2. Điều phối thi hành theo kết luận. **Không quyết thay** ở (a), (b) và bảy mục luôn chặn (mục 5): chỉ chọn hoãn, bỏ hay đổi cách làm.
   Trước Cổng 2, mọi `CO` phải có hướng xử lý đã ghi. **Cổng 2 "Đạt có điều kiện" không mở gộp `main`** (mục 7).
 - Gate Delegate cạn hạn mức → cổng giữ `pending`, sprint dừng (mục 7); không tự hạ tier.
 
@@ -250,9 +255,9 @@ Không đánh giá: <phần không đọc hoặc không kiểm được>
 
 - Mỗi cổng duyệt thay có mục `## Bản ghi duyệt thay` ([process.md](process.md) mục 3) và file `evidence/gate-N-verdict.md`.
 - **Báo cuối** — REPORT mục "Bản tin autopilot" (`SPRINT.md` dùng cùng tiêu đề), người dùng đọc sau, không chặn việc: dòng đầu cảnh báo nếu `main` chưa có ruleset ·
-  `Số lượt Đức phải trả lời: <số>` · một dòng mỗi cổng (cổng · kết luận · người ký · đường tới file kết luận) · hàng chờ người · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do.
+  `Số lượt Đức phải trả lời: <số>` · một dòng mỗi cổng (cổng · kết luận · người ký · đường tới file kết luận) · hàng chờ người (mục "Việc cần người") · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do.
 - **Nhật ký quyết định** — REPORT (và `SPRINT.md`) có mục này; Đức đọc lại sau. Mỗi quyết định của Gate Delegate hay điều phối là một dòng: quyết gì · ai ký (nhãn · vai · tier · model) · bằng chứng (đường file hay lệnh + kết quả) · lệnh hoàn tác.
-  Luật `check` cho mục này đến ở TK25 của SPR-20.
+  Luật `check` `decision-log-missing`: ít nhất một dòng đủ `Ai ký` (nhãn · vai · tier · model), `Bằng chứng`, `Lệnh hoàn tác`; `SPRINT.md` ghi bằng gạch đầu dòng `- **Nhật ký quyết định:**` kèm bảng cùng cột.
 
 ## 9. Ba host
 

@@ -946,9 +946,11 @@ def test_guard_find_exec_over_marker_dir(tmp_path, cmd, item):
 def test_guard_find_exec_elsewhere_or_read_only_allowed(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
     (repo / "build").mkdir()
-    for cmd in ("find build -exec rm {} +", "find . -name '*.py'", "find .tmp -exec grep level {} +", "find . -exec cat {} +",
+    # TK27b A1(iii): `find … -exec rm` chỉ qua khi điểm bắt đầu nằm trong `.tmp/` (trước đây `find build -exec rm {} +` qua)
+    for cmd in ("find .tmp/x -exec rm {} +", "find . -name '*.py'", "find .tmp -exec grep level {} +", "find . -exec cat {} +",
                 "find .tmp -name x -print", "find build -type f -exec ls {} +"):
         assert_allowed(repo, cmd)
+    assert_blocked(repo, "find build -exec rm {} +", "irreversible_delete")
 
 
 def test_guard_absolute_paths_from_outside_the_tree(tmp_path, outside):
@@ -1042,9 +1044,9 @@ def test_guard_marker_pattern_blocked(tmp_path, cmd):
 
 def test_guard_stash_and_clean_plain_allowed(tmp_path):
     repo = make_repo(tmp_path, branch="spr-12", marker=good_marker())
-    for cmd in ("git stash", "git stash list", "git stash pop", "git stash push -m x", "git stash show -p", "git stash -u", "git stash --include-untracked",
-                "git stash push -u", "git stash push --include-untracked -m x", "git -C . stash -u",
-                "git clean -f", "git clean -fd", "git clean -d -f", "git clean --force", "git clean -n", "git clean -nx", "git clean -x"):
+    # TK27b A3: `stash -u` và `clean -f[d]` chỉ còn qua khi file dấu bị gitignore (repo thật) — các ca đó ở tests/test_autopilot_guard_undo.py
+    for cmd in ("git stash", "git stash list", "git stash pop", "git stash push -m x", "git stash show -p",
+                "git clean -n", "git clean -nx", "git clean -x"):
         assert_allowed(repo, cmd)
 
 

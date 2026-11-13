@@ -1,6 +1,6 @@
 # 0001. Đặt rào git thường trực cho repo được bảo vệ, kèm hai lớp độc lập
 
-Trạng thái: superseded (SPR-20, 13/11/2026: git-fence và shim gỡ hẳn; an toàn dựa vào git để quay lại và ruleset GitHub; xem plan SPR-20 bản 2) · Sprint: SPR-16 (chương trình SPR-15) · Liên quan: `method/git-permissions.md`, `method/autopilot.md` mục 5, PLAN mục Kiến trúc của SPR-16
+Trạng thái: superseded (SPR-20, 13/11/2026: git-fence và shim gỡ hẳn; an toàn dựa vào git để quay lại và ruleset GitHub; xem plan SPR-20 bản 2) · Sprint: SPR-16 (chương trình SPR-15) · Liên quan: `method/git-permissions.md` (đã gỡ), `method/autopilot.md` mục 5, PLAN mục Kiến trúc của SPR-16
 
 ## Bối cảnh
 
@@ -28,6 +28,6 @@ cần một lớp chặn trước khi lệnh chạy (hook) lẫn một lớp kh�
 
 - Dễ hơn: đưa việc ra ngoài là luôn qua người; cờ `+đẩy-nhánh` cho đẩy nhánh sprint đúng hợp đồng đích mà không mở cửa nhánh chính.
 - Khó hơn: hỏi nhiều hơn ở repo được bảo vệ; mỗi lần đổi hợp đồng đổi cùng lúc luật, công cụ kiểm, mẫu và test; guard thêm vài lời gọi `git` chỉ-đọc (tổng ≤4 giây).
-- Bị cố định: `method/git-permissions.md` và các file trong `FENCE_FILES` là sàn cứng, sprint duyệt thay không sửa được; danh sách bảo vệ nằm ngoài repo.
+- Bị cố định: `method/git-permissions.md` (đã gỡ) và các file trong `FENCE_FILES` là sàn cứng, sprint duyệt thay không sửa được; danh sách bảo vệ nằm ngoài repo.
 - Quay lại: tắt plugin hoặc `git revert` các commit TK7–TK9 của SPR-16; hook thật ghi vào cấu hình người dùng khôi phục từ bản ghi. Phần còn là rào hành vi
-  (script, công cụ MCP/terminal, `gh` nhắm repo khác) nói thẳng ở `method/git-permissions.md` mục 8 — ADR này không hứa chặn chúng.
+  (script, công cụ MCP/terminal, `gh` nhắm repo khác) nói thẳng ở `method/git-permissions.md` (đã gỡ) mục 8 — ADR này không hứa chặn chúng.

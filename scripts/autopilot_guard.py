@@ -11,12 +11,15 @@ thư mục lệnh và thư mục phiên khác nhau thì thấy file dấu ở đ
 không in; antigravity in `{}`). Có file dấu và lệnh khớp mục loại → chặn: claude/codex in lý do ở stderr rồi thoát 2;
 antigravity in JSON `deny` ở stdout, thoát 0. Lý do: `autopilot: '<mục loại>' cần người dùng nói trong chat — lệnh không chạy`.
 
-Mục có mẫu lệnh: chỉ `irreversible_delete` (xoá đệ quy ngoài `.tmp/`, `find -delete`, `git worktree remove --force`). Lệnh git khác (đẩy, tag, gộp,
-`reset --hard`, `branch -D`, `clean -f`) không còn bị hook chặn (SPR-20 TK21): luật chữ ở method/git-conventions.md. Các mục khác là rào hành vi.
+Mục có mẫu lệnh: chỉ `irreversible_delete` — xoá đệ quy ngoài `.tmp/`, mọi lệnh xoá có đích thuộc `.git`, `find -delete`/`-exec rm`,
+`Get-ChildItem -Recurse | Remove-Item`, `[IO.Directory]::Delete(…, $true)`, `robocopy /MIR`, `busybox rm`, chuỗi `mv`/`robocopy`/`cp -r` vào `.tmp/` rồi xoá,
+`git worktree remove --force` và các lệnh git phá hoàn tác (`reflog expire`, `gc --prune=now`, `update-ref -d`, `push` xoá hay ép, `branch -D`; SPR-20 TK27b).
+Lệnh git khác (đẩy thường, tag, gộp, `commit`, `reset`) không bị hook chặn (TK21): luật chữ ở method/git-conventions.md. Các mục khác là rào hành vi.
 Ngoài danh sách loại, hook bảo vệ chính file dấu: lệnh shell không chỉ-đọc có đối số trỏ tới file dấu (hoặc `.tmp/` bao nó, hay glob khớp
 nó) và công cụ ghi file (`Write`, `Edit`, `MultiEdit`, `NotebookEdit`, `apply_patch`, `write_to_file`, `replace_file_content`…) có đường
-đích là file dấu đều bị chặn với lý do `file dấu là rào`. Việc đăng ký matcher cho công cụ ghi file thuộc cấu hình harness (chưa làm).
-Tên mục lấy từ `_autopilot_rules.AUTOPILOT_EXCLUSIONS` (một nguồn; test ghim đúng 13 mục). Không gọi tiến trình con.
+đích là file dấu đều bị chặn với lý do `file dấu là rào`. Claude đã đăng ký matcher cho công cụ ghi file ở hooks/hooks.json; Codex và Antigravity chưa.
+Danh sách đóng 13 mục lấy từ `_autopilot_rules.AUTOPILOT_EXCLUSIONS` chỉ dùng khi file dấu hỏng (chặn cả 13); file dấu hợp lệ chặn bảy mục
+`OPEN_ALWAYS_BLOCKED`. Tiến trình con duy nhất: `git check-ignore -q <file dấu>` khi gặp `git stash -u` hay `git clean -f` (lỗi → coi là không ignore).
 
 Không phân tích chuỗi chương trình tuỳ ý (`awk 'BEGIN{system(…)}'`, `perl -e`, `ruby -e`, `node -e`, `python -c`): giới hạn đã biết.
 
@@ -36,6 +39,7 @@ import fnmatch
 import json
 import os
 import re
+import subprocess
 import sys
 import traceback
 from typing import TextIO
@@ -75,6 +79,13 @@ DELETE_COMMANDS = frozenset({"rm", "ri", "del", "erase", "rmdir", "rd", "remove-
 CD_COMMANDS = frozenset({"cd", "chdir", "pushd", "popd", "set-location", "sl", "push-location", "pop-location"})
 CHDIR_OPTIONS = {"env": frozenset({"-C", "--chdir"}), "sudo": frozenset({"-D", "--chdir"})}  # dạng tách rời: giá trị ở token kế
 FIND_EXEC = frozenset({"-exec", "-execdir", "-ok", "-okdir"})
+MOVE_COMMANDS = frozenset({"mv", "move", "move-item", "mi", "ren", "rename", "rename-item", "rni", "robocopy"})  # đích dưới `.tmp/` → bỏ ngoại lệ dọn tạm cho phần xoá phía sau
+COPY_RECURSIVE_NAMES = frozenset({"cp", "copy-item", "cpi"})  # chỉ tính khi có cờ đệ quy
+LISTING_COMMANDS = frozenset({"get-childitem", "gci", "ls", "dir"})  # `… -Recurse | Remove-Item`
+SEP_KEEP = re.compile("(" + SEPARATORS.pattern + ")")  # như SEPARATORS nhưng giữ dấu ngăn để biết ống dẫn
+CHAIN_BREAKS = frozenset({"&&", "||", ";", "&", chr(10), chr(13)})  # dấu ngăn cắt mạch ống dẫn
+IO_DELETE = re.compile(r"\[(?:system\.)?io\.directory\]\s*::\s*delete\s*\([^)]*\$true|\.delete\s*\(\s*\$true\s*\)", re.IGNORECASE)
+ROBOCOPY_FLAG = re.compile(r"/[A-Za-z]+(?::.*)?")
 UNSAFE_PATH_CHARS = set(",$%`~{}()<>!^\"'\n\r;|&")
 GLOB_CHARS = set("*?[")
 MAX_UNWRAP = 3
@@ -270,6 +281,14 @@ class Context:
         self.cwd = os.path.abspath(cwd)
         self.root = find_repo_root(self.cwd)
         self.cwd_changed = False  # đã gặp thao tác đổi thư mục (cd, pushd, env -C…, kể cả trong subshell/bash -c)
+        self.tmp_moved = False  # đã gặp `mv`/`robocopy`/`cp -r`… với đích dưới `.tmp/`: phần xoá phía sau không còn ngoại lệ dọn tạm
+        self._ignored: bool | None = None
+
+    def marker_ignored(self) -> bool:
+        """File dấu bị gitignore (`git check-ignore -q`, chạy ở thư mục lệnh)? Lỗi kiểm → False (coi là không ignore). Nhớ kết quả."""
+        if self._ignored is None:
+            self._ignored = bool(self.marker) and _marker_ignored(self.cwd, self.marker)
+        return self._ignored
 
     def enter(self) -> None:
         """Ghi nhận một thao tác đổi thư mục. Không tính đường đi (`cd` trong subshell hay vế pipeline không đổi thư mục của lệnh
@@ -288,21 +307,77 @@ def _git_parse(args: list[str]) -> tuple[str, list[str]]:
     return "", []
 
 
-def _git_item(args: list[str]) -> str | None:
-    """Ba mẫu git còn nằm trong hook, đều để bảo vệ thứ không theo dõi (file dấu nằm trong `.tmp/`) hoặc cây thư mục: `stash -a`/`--all`
-    (cất cả file bị gitignore), `clean` có `-f` kết hợp `-x`/`-X` (xoá cả file bị gitignore) và `worktree remove --force`. `stash -u`,
-    `stash push -m`, `clean -f`/`-fd` thường vẫn qua. Mọi lệnh git khác không còn bị hook chặn: luật chữ ở method/git-conventions.md."""
+def _git_config(args: list[str]) -> dict[str, str]:
+    """Các `-c khoá=giá-trị` của tuỳ chọn toàn cục (khoá viết thường)."""
+    found: dict[str, str] = {}
+    index = 0
+    while index < len(args) and args[index].startswith("-"):
+        if args[index] == "-c" and index + 1 < len(args):
+            key, _, value = args[index + 1].partition("=")
+            found[key.lower()] = value.lower()
+        index += 2 if args[index] in GIT_VALUE_OPTIONS else 1
+    return found
+
+
+def _marker_ignored(cwd: str, marker: str) -> bool:
+    """`git check-ignore -q <file dấu>` chạy ở `cwd`: True khi git nói file bị ignore. Mọi lỗi (không phải repo, git vắng, quá giờ) → False."""
+    try:
+        done = subprocess.run(["git", "-C", cwd, "check-ignore", "-q", "--", marker], capture_output=True, timeout=10,
+                              stdin=subprocess.DEVNULL, env=dict(os.environ, GIT_OPTIONAL_LOCKS="0"))
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return done.returncode == 0
+
+
+def _git_item(args: list[str], ctx: Context) -> str | None:
+    """Mẫu git còn nằm trong hook. (1) Bảo vệ file dấu (`.tmp/`): `stash -a`/`--all` và `clean -f` kèm `-x`/`-X` (kể cả `-c clean.requireForce=false`,
+    không cần `-f`) luôn chặn; `stash -u`/`--include-untracked` và `clean -f` chỉ chặn khi file dấu KHÔNG bị gitignore (`git check-ignore -q`,
+    lỗi kiểm = không ignore). (2) Phá cơ chế hoàn tác, mục `irreversible_delete`: `worktree remove --force`, `reflog expire|delete`,
+    `gc --prune=now`, `prune` kèm `now`, `update-ref -d`, `push` xoá hay ép (`--delete`, `-d`, `--force*`, `-f`, `--mirror`, `--prune`,
+    refspec `:ref` hay `+ref`), `branch -D`. Mọi lệnh git khác (đẩy thường, gộp, tag, commit, `reset`) không bị hook chặn:
+    luật chữ ở method/git-conventions.md."""
     sub, rest = _git_parse(args)
-    if sub == "stash":  # file dấu nằm trong `.tmp/` (bị gitignore): chỉ `-a`/`--all` mới cất nó
-        return MARKER if "--all" in rest or any(_cluster(a, "a") for a in rest) else None
-    if sub == "clean":  # `-x`/`-X` kéo file bị gitignore vào phạm vi xoá; phải kèm `-f`/`--force` mới thật sự xoá
+    config = _git_config(args)
+    if sub == "stash":
+        if "--all" in rest or any(_cluster(a, "a") for a in rest):
+            return MARKER
+        if "--include-untracked" in rest or any(_cluster(a, "u") for a in rest):
+            return None if ctx.marker_ignored() else MARKER
+        return None
+    if sub == "clean":  # `-x`/`-X` kéo file bị gitignore vào phạm vi xoá; phải kèm `-f`/`--force` (hay requireForce=false) mới thật sự xoá
         opts = rest[:rest.index("--")] if "--" in rest else rest
-        forced = "--force" in opts or any(_cluster(a, "f") for a in opts)
-        ignored = any(_cluster(a, "xX") for a in opts)
-        return MARKER if forced and ignored else None
+        no_force_needed = config.get("clean.requireforce") in ("false", "0", "no", "off")
+        forced = "--force" in opts or any(_cluster(a, "f") for a in opts) or no_force_needed
+        if forced and any(_cluster(a, "xX") for a in opts):
+            return MARKER
+        dry_run = "--dry-run" in opts or any(_cluster(a, "n") for a in opts)
+        return MARKER if forced and not dry_run and not ctx.marker_ignored() else None
     if sub == "worktree":
         forced = "--force" in rest or any(_cluster(a, "f") for a in rest)
         return "irreversible_delete" if rest[:1] == ["remove"] and forced else None
+    if sub == "reflog":
+        return "irreversible_delete" if rest[:1] in (["expire"], ["delete"]) else None
+    if sub == "gc":
+        prune_now = any(a.lower() in ("--prune=now", "--prune=all") for a in rest)
+        return "irreversible_delete" if prune_now or any(a == "--prune" and nxt.lower() in ("now", "all") for a, nxt in zip(rest, rest[1:])) else None
+    if sub == "prune":
+        return "irreversible_delete" if "now" in [a.lower() for a in rest] or "--expire=now" in [a.lower() for a in rest] else None
+    if sub == "update-ref":
+        return "irreversible_delete" if "-d" in rest or "--delete" in rest else None
+    if sub == "push":
+        skip = False
+        for a in rest:
+            if skip:
+                skip = False
+            elif a in ("-o", "--push-option", "--repo", "--receive-pack", "--exec"):
+                skip = True
+            elif a in ("--delete", "--mirror", "--prune") or a.startswith("--force") or _cluster(a, "fd") or a[:1] in (":", "+"):
+                return "irreversible_delete"
+        return None
+    if sub == "branch":
+        deleting = "--delete" in rest or any(_cluster(a, "d") for a in rest)
+        forced = "--force" in rest or any(_cluster(a, "f") for a in rest)
+        return "irreversible_delete" if any(_cluster(a, "D") for a in rest) or (deleting and forced) else None
     return None
 
 
@@ -529,6 +604,9 @@ def _find_item(args: list[str], ctx: Context, depth: int) -> str | None:
             if stripped and not _read_only(_exe_name(stripped[0]), stripped[1:], ctx):
                 if any(_covers_marker(t, ctx) for t in (starts or ["."])):
                     return MARKER
+            if stripped and _exe_name(stripped[0]) in DELETE_COMMANDS:  # `find … -exec rm {} +`: mọi điểm bắt đầu phải nằm trong `.tmp/`
+                if ctx.cwd_changed or not all(tmp_target_ok(t, ctx) for t in (starts or ["."])):
+                    return "irreversible_delete"
             return None
     return None
 
@@ -686,13 +764,71 @@ def _join_and_strip(text: str) -> str:
     return LINE_CONTINUATION.sub(" ", _strip_heredoc_bodies(LINE_CONTINUATION.sub(" ", text)))
 
 
+def _in_tmp_name(path: str) -> bool:
+    """Đường có thành phần `.tmp` (đích chuyển/chép vào vùng tạm)."""
+    return ".tmp" in [c.lower() for c in path.replace("\\", "/").split("/")]
+
+
+def _is_git_path(path: str) -> bool:
+    """Đích xoá thuộc `.git`: có thành phần đúng `.git`, hay glob bắt đầu bằng dấu chấm khớp `.git` (`.g*`)."""
+    for comp in path.replace("\\", "/").split("/"):
+        low = comp.lower()
+        if low == ".git" or (low.startswith(".") and GLOB_CHARS & set(low) and fnmatch.fnmatchcase(".git", low)):
+            return True
+    return False
+
+
+def _moves_into_tmp(tokens: list[str]) -> bool:
+    """`mv`/`move`/`Move-Item`/`ren`/`Rename-Item`/`robocopy`, hay `cp -r`/`Copy-Item -Recurse`, có ĐÍCH dưới `.tmp/`: chuyển/chép cây vào vùng tạm
+    rồi xoá ở đó là cách đưa `.git` hay file đang theo dõi ra khỏi cây mà không bị coi là xoá ngoài `.tmp/`."""
+    if not tokens:
+        return False
+    name, args = _exe_name(tokens[0]), tokens[1:]
+    if name == "robocopy":
+        positional = [a for a in args if not ROBOCOPY_FLAG.fullmatch(a) and not a.startswith("-")]
+        return len(positional) > 1 and _in_tmp_name(positional[1])
+    if name in COPY_RECURSIVE_NAMES:
+        flags = [a for a in args if a.startswith("-")]
+        if name == "cp":
+            recursive = any(re.fullmatch(r"-[A-Za-z]*[rRa][A-Za-z]*", a) or a.lower() == "--recursive" for a in flags)
+        else:
+            recursive = any(re.fullmatch(r"-r[a-z]*", a.lower()) for a in flags)
+        if not recursive:
+            return False
+    elif name not in MOVE_COMMANDS:
+        return False
+    return any(_in_tmp_name(tokens[i]) for i in _copy_destinations(tokens))
+
+
+def _recursive_listing(name: str, args: list[str]) -> list[str] | None:
+    """`Get-ChildItem`/`gci`/`ls`/`dir` có cờ đệ quy: danh sách đường nó liệt kê (rỗng = thư mục hiện tại); không phải → None."""
+    if name not in LISTING_COMMANDS:
+        return None
+    if not any(a.startswith("-") and re.fullmatch(r"-r[a-z]*", a.lower()) for a in args):
+        return None
+    return [a for a in args if not a.startswith("-")]
+
+
+def _robocopy_purge_item(args: list[str], ctx: Context) -> str | None:
+    """`robocopy … /MIR` (hay `/PURGE`) xoá ở đích mọi thứ không có ở nguồn: chỉ cho qua khi đích nằm trong `.tmp/`."""
+    if not any(a.lower() in ("/mir", "/purge") for a in args):
+        return None
+    positional = [a for a in args if not ROBOCOPY_FLAG.fullmatch(a) and not a.startswith("-")]
+    if len(positional) > 1 and not ctx.cwd_changed and tmp_target_ok(positional[1], ctx):
+        return None
+    return "irreversible_delete"
+
+
 def _segment_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
     tokens, _ = _strip_prefixes(tokens, ctx)
     if not tokens:
         return None
     if _is_clear_command(tokens):  # lối dừng tường minh của điều phối (rào hành vi, xem docstring)
         return None
-    return _command_item(tokens, ctx, depth) or _marker_item(tokens, ctx)
+    item = _command_item(tokens, ctx, depth) or _marker_item(tokens, ctx)
+    if _moves_into_tmp(tokens):
+        ctx.tmp_moved = True  # từ đây phần xoá phía sau (cùng chuỗi) không còn ngoại lệ dọn `.tmp/`
+    return item
 
 
 def _nested_string(text: str, ctx: Context, depth: int) -> str | None:
@@ -735,15 +871,21 @@ def _command_item(tokens: list[str], ctx: Context, depth: int) -> str | None:
             if arg.lower() in WRAPPER_FLAGS or re.fullmatch(r"-[a-z]*c[a-z]*", arg):
                 return _analyze(" ".join(args[index + 1:]), ctx, depth + 1) if depth < MAX_UNWRAP else NESTED
         return None
+    if name == "busybox" and args:  # `busybox rm -rf x`: applet là lệnh thật
+        return _command_item(args, ctx, depth)
     if name == "git":
-        return _git_item(args)
+        return _git_item(args, ctx)
     if name == "find":
         return _find_item(args, ctx, depth)
+    if name == "robocopy":
+        return _robocopy_purge_item(args, ctx)
     if name in DELETE_COMMANDS:
         recursive, targets = _delete_parts(name, args)
+        if any(_is_git_path(t) for t in targets):  # xoá thứ thuộc `.git` (kể cả không đệ quy): phá cơ chế hoàn tác
+            return "irreversible_delete"
         if not recursive:
             return None
-        if targets and not ctx.cwd_changed and all(tmp_target_ok(t, ctx) for t in targets):
+        if targets and not ctx.cwd_changed and not ctx.tmp_moved and all(tmp_target_ok(t, ctx) for t in targets):
             return None
         return "irreversible_delete"
     return None
@@ -755,8 +897,24 @@ def _analyze(text: str, ctx: Context, depth: int = 0) -> str | None:
     item = _pipe_to_shell(text, ctx, depth)
     if item:
         return item
-    for segment in SEPARATORS.split(text):
-        item = _segment_item(tokenize(segment), ctx, depth)
+    if "irreversible_delete" in ctx.active and IO_DELETE.search(text):  # `[IO.Directory]::Delete(…, $true)`, `(Get-Item x).Delete($true)`: không đọc được đích
+        return "irreversible_delete"
+    parts = SEP_KEEP.split(text)  # [lệnh, dấu ngăn, lệnh, …]
+    listing: list[str] | None = None  # đường mà một `Get-ChildItem -Recurse` phía trước ống dẫn đang liệt kê
+    for index in range(0, len(parts), 2):
+        if index and parts[index - 1] in CHAIN_BREAKS:
+            listing = None
+        tokens = tokenize(parts[index])
+        item = _segment_item(list(tokens), ctx, depth)
+        stripped, _ = _strip_prefixes(list(tokens), Context(set(), ctx.cwd))
+        if stripped and not item:
+            name = _exe_name(stripped[0])
+            paths = _recursive_listing(name, stripped[1:])
+            if paths is not None:
+                listing = paths
+            elif listing is not None and name in DELETE_COMMANDS and not _delete_parts(name, stripped[1:])[1]:
+                if not (listing and not ctx.cwd_changed and all(tmp_target_ok(t, ctx) for t in listing)):
+                    item = "irreversible_delete"  # `Get-ChildItem … -Recurse | Remove-Item`: xoá đệ quy qua ống dẫn
         if item and (item in SPECIAL_ITEMS or item in ctx.active):
             return item
     return None

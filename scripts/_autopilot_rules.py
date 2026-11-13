@@ -14,8 +14,8 @@ DELEGATION_KEYS = ("grant", "grant_at", "scope", "expires", "by", "tier", "files
 DELEGATION_OPTIONAL_KEYS = ("level", "program", "channel", "orchestrator", "sessions_cap")  # khoá autopilot (method/autopilot.md): có một khoá là kích luật
 AUTOPILOT_PREFIX = "bật autopilot"  # `grant` bắt đầu bằng chuỗi này (không phân biệt hoa thường) cũng kích luật
 AUTOPILOT_LEVELS = ("gate_1", "gate_1_2", "program")
-# Ba hằng dưới còn lại vì `autopilot_guard.py` (danh sách mục rào) và bản ghim `tests/test_fence_wiring.py` còn tham chiếu;
-# luật `check` không đọc chúng nữa (một chế độ, không `exclusions`). Giữ tới sprint sau (gỡ cùng bản ghim khi đổi guard).
+# Danh sách 13 mục: `autopilot_guard.py` chỉ dùng khi file dấu hỏng (chặn cả 13) và bản ghim `tests/test_fence_wiring.py` đếm đúng 13; luật `check` không đọc
+# (một chế độ, không `exclusions`). `OPEN_ALWAYS_BLOCKED` mới là tập guard chặn khi file dấu hợp lệ; `OPEN_DEFAULT_OPEN` không còn nơi dùng (chỉ bản ghim).
 AUTOPILOT_EXCLUSIONS = ("push", "tag", "version", "main_merge", "publish", "license", "irreversible_delete",
                         "rules_unlisted", "user_soul", "secret", "auth", "network_fetch", "branch_merge_local")  # danh sách đóng 13 mục
 OPEN_ALWAYS_BLOCKED = ("network_fetch", "rules_unlisted", "irreversible_delete", "secret", "auth", "user_soul", "license")
@@ -23,8 +23,20 @@ OPEN_DEFAULT_OPEN = ("push", "branch_merge_local", "version", "main_merge", "tag
 # Ngày hiệu lực của các luật sprint mới (người quyết CQ/DN, dòng đếm lượt ở REPORT, người ký cổng độc lập với người làm); hồ sơ trước ngày này giữ nguyên kết quả.
 MODE_OPEN_EFFECTIVE_DATE = "2026-11-13"
 AUTOPILOT_GATES_BOTH = "cổng 1+2"  # trong `grant` của mức program: phạm vi là cả hai cổng
-AUTOPILOT_BRANCH_SUFFIX = "+nhánh"  # chỉ còn để bản ghim `tests/test_fence_wiring.py` đếm đúng một định nghĩa; không dùng (giữ tới sprint sau)
-AUTOPILOT_PUSH_FLAG = "+đẩy-nhánh"  # như trên: chỉ còn vì bản ghim, không dùng (giữ tới sprint sau)
+AUTOPILOT_BRANCH_SUFFIX = "+nhánh"  # hằng chết: chỉ còn để bản ghim `tests/test_fence_wiring.py` đếm đúng một định nghĩa; không nơi nào đọc (gỡ cùng bản ghim ở sprint sau)
+AUTOPILOT_PUSH_FLAG = "+đẩy-nhánh"  # hằng chết như trên: chỉ còn vì bản ghim, không nơi nào đọc
+# Trần phiên mỗi sprint (method/autopilot.md mục 2.1): cơ sở theo cỡ; `risk: high` nhân 1,25 làm tròn lên. Một nguồn: `check.py` đối chiếu `Trần phiên:` với bảng này.
+SESSION_CAP_BASE = {"tiny": 4, "small": 8, "medium": 15, "large": 23}
+
+
+def session_cap_formula(size, risk) -> int | None:
+    """Trần phiên tối đa theo công thức cho `size`/`risk` của PLAN; cỡ lạ → `None` (không có công thức để so)."""
+    base = SESSION_CAP_BASE.get(size) if isinstance(size, str) else None
+    if base is None:
+        return None
+    return -(-base * 5 // 4) if risk == "high" else base  # 1,25 = 5/4, làm tròn lên bằng số nguyên
+
+
 DELEGATION_CHANNELS = ("chat", "host_comment")
 MOMENT = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})(?: ([0-9]{2}):([0-9]{2}) ([+-])([0-9]{2})(?::?([0-9]{2}))?)?")
 DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
