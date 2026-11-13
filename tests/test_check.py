@@ -3044,3 +3044,127 @@ def test_decision_log_name_without_effort_matches_table_id_with_effort(tmp_path,
     row = f"| Đạt Cổng 2 | agent-d · gate-delegate · T1 · {model} | evidence/gate-2-verdict.md | git revert abc1234 |\n"
     _new_delegated_report(root, log=DECISION_LOG_HEAD + row)
     assert _rule_hits(root, "decision-log-missing") == []
+
+
+# --- RQ-058/RQ-059: tier sai không che self-review; cổng đã kết luận mà vai thực thi còn `pending`; vòng chéo file ---
+
+def test_gate_delegate_below_t1_sharing_executor_label_reports_both(tmp_path):
+    """`gate-delegate` tier sai vẫn báo `roles-invalid` NHƯNG nhãn vẫn vào `holders`: trùng nhãn vai thực thi vẫn `self-review`."""
+    root = _spec_roles(tmp_path, SPEC_ROLES + "  gate-delegate: [T2, agent-x]\n  implementer: [T2, agent-x]\n")
+    found = {f.rule for f in check.check_paths([root]).findings}
+    assert {"roles-invalid", "self-review"} <= found, found
+
+
+def _pending_gate2(root: Path, label: str = "pending") -> None:
+    _new_delegated_report(root)
+    _rewrite(root / "REPORT.md", "  implementer: [T2, agent-e]\n", f"  implementer: [T2, {label}]\n")
+
+
+def _pending_hits(root: Path) -> list:
+    return [f for f in _delegation_hits(root) if "pending" in f.message]
+
+
+def test_gate2_delegated_concluded_with_pending_executor_is_flagged(tmp_path):
+    root = make_sprint(tmp_path)
+    _pending_gate2(root)
+    hits = _pending_hits(root)
+    assert len(hits) == 1 and "implementer" in hits[0].message, [f.render() for f in check.check_paths([root]).findings]
+
+
+def test_gate2_delegated_with_named_executor_is_clean(tmp_path):
+    root = make_sprint(tmp_path)
+    _pending_gate2(root, "agent-e")
+    assert _pending_hits(root) == []
+
+
+def test_gate1_delegated_checks_only_analyst_and_architect_for_pending(tmp_path):
+    """Cổng 1 chỉ xét analyst/architect: implementer `pending` ở PLAN không bị báo; architect `pending` thì có."""
+    ok = make_sprint(tmp_path / "ok")
+    _new_delegated_plan(ok)
+    _rewrite(ok / "PLAN.md", PLAN_ROLES, PLAN_ROLES + "  implementer: [T2, pending]\n")
+    assert _pending_hits(ok) == []
+    bad = make_sprint(tmp_path / "bad")
+    _new_delegated_plan(bad)
+    _rewrite(bad / "PLAN.md", "  architect: [T1, agent-b]\n", "  architect: [T1, pending]\n")
+    hits = _pending_hits(bad)
+    assert len(hits) == 1 and "architect" in hits[0].message, [f.render() for f in check.check_paths([bad]).findings]
+
+
+def test_pending_executor_old_record_or_open_gate_is_clean(tmp_path):
+    """Hồ sơ cũ (grant_at trước ngày hiệu lực) và cổng chưa kết luận: không phát hiện."""
+    old = make_sprint(tmp_path / "old")
+    delegate_report(old)
+    _rewrite(old / "REPORT.md", "  implementer: [T2, agent-e]\n", "  implementer: [T2, pending]\n")
+    assert _pending_hits(old) == []
+    fresh = make_sprint(tmp_path / "fresh")
+    _rewrite(fresh / "REPORT.md", "  implementer: [T2, agent-e]\n", "  implementer: [T2, pending]\n")
+    assert _pending_hits(fresh) == []
+
+
+def _new_doc(root: Path, name: str) -> None:
+    """Tài liệu không có `delegation`: cửa ngày lấy theo `created` (mới)."""
+    text = (root / name).read_text(encoding="utf-8")
+    write_lf(root / name, text.replace("created: 2026-02-01", "created: 2026-11-14", 1))
+
+
+def _cross_hits(root: Path, name: str) -> list:
+    return [f for f in check.check_paths([root]).findings if f.rule == "self-review" and f.path.name == name]
+
+
+@pytest.mark.parametrize("sibling,add,label", [
+    ("SPEC.md", "", "agent-a"),                                     # analyst ở SPEC
+    ("PROGRESS.md", "  architect: [T1, agent-x]\n", "agent-x"),     # architect ở PROGRESS
+    ("PROGRESS.md", "  gate-delegate: [T1, agent-x]\n", "agent-x"),  # gate-delegate ở PROGRESS
+])
+def test_advisor_label_matching_a_sibling_document_is_self_review(tmp_path, sibling, add, label):
+    root = make_sprint(tmp_path)
+    _rewrite(root / "PROGRESS.md", "  tech-reviewer: [T1, agent-d]\n", "  tech-reviewer: [T1, agent-d]\n" + add)
+    _rewrite(root / "PLAN.md", PLAN_ROLES, PLAN_ROLES + f"  advisor: [T1, {label}]\n")
+    _new_doc(root, "PLAN.md")
+    hits = _cross_hits(root, "PLAN.md")
+    assert len(hits) == 1 and sibling in hits[0].message and "advisor" in hits[0].message, [f.render() for f in hits]
+
+
+def test_advisor_matching_two_siblings_is_reported_once(tmp_path):
+    root = make_sprint(tmp_path)
+    _rewrite(root / "PLAN.md", PLAN_ROLES, PLAN_ROLES + "  advisor: [T1, agent-a]\n")  # analyst agent-a ở SPEC và PROGRESS
+    _new_doc(root, "PLAN.md")
+    assert len(_cross_hits(root, "PLAN.md")) == 1
+
+
+def test_gate_delegate_label_matching_a_sibling_executor_is_self_review(tmp_path):
+    root = make_sprint(tmp_path)
+    _rewrite(root / "PLAN.md", PLAN_ROLES, PLAN_ROLES + "  gate-delegate: [T1, agent-e]\n")  # implementer agent-e ở PROGRESS
+    _new_doc(root, "PLAN.md")
+    hits = _cross_hits(root, "PLAN.md")
+    assert len(hits) == 1 and "PROGRESS.md" in hits[0].message and "gate-delegate" in hits[0].message, [f.render() for f in hits]
+
+
+def test_cross_file_roles_distinct_labels_or_old_record_are_clean(tmp_path):
+    distinct = make_sprint(tmp_path / "distinct")
+    _rewrite(distinct / "PLAN.md", PLAN_ROLES, PLAN_ROLES + "  advisor: [T1, agent-z]\n  gate-delegate: [T1, agent-y]\n")
+    _new_doc(distinct, "PLAN.md")
+    assert _cross_hits(distinct, "PLAN.md") == []
+    old = make_sprint(tmp_path / "old")  # created 2026-02: hồ sơ cũ giữ nguyên kết quả
+    _rewrite(old / "PLAN.md", PLAN_ROLES, PLAN_ROLES + "  advisor: [T1, agent-a]\n  gate-delegate: [T1, agent-e]\n")
+    assert _cross_hits(old, "PLAN.md") == []
+
+
+def test_cross_file_roles_repeated_advisor_label_is_not_reported_in_every_file(tmp_path):
+    """Opus RF1: advisor cùng nhãn khai ở SPEC và PLAN, PLAN có architect trùng nhãn → chỉ PLAN (tự báo trong file) báo, SPEC/PROGRESS không báo lặp."""
+    root = make_sprint(tmp_path)
+    _rewrite(root / "PLAN.md", PLAN_ROLES, PLAN_ROLES + "  advisor: [T1, agent-b]\n")  # architect agent-b ở PLAN cùng file
+    _rewrite(root / "SPEC.md", "  analyst: [T1, agent-a]\n", "  analyst: [T1, agent-a]\n  advisor: [T1, agent-b]\n")
+    for name in ("SPEC.md", "PLAN.md", "PROGRESS.md"):
+        _new_doc(root, name)
+    total = [f for f in check.check_paths([root]).findings if f.rule == "self-review"]
+    assert len(total) == 1 and total[0].path.name == "PLAN.md", [f.render() for f in total]
+
+
+def test_cross_file_roles_never_compares_a_document_with_itself(tmp_path):
+    """Opus RF2: advisor trùng architect ngay trong PLAN → đúng một phát hiện (trong file), vòng chéo file không tự so với chính nó."""
+    root = make_sprint(tmp_path)
+    _rewrite(root / "PLAN.md", PLAN_ROLES, PLAN_ROLES + "  advisor: [T1, agent-b]\n")
+    _new_doc(root, "PLAN.md")
+    assert len(_cross_hits(root, "PLAN.md")) == 1
+

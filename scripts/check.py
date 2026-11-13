@@ -1322,8 +1322,7 @@ class Engine:
                 self.add(doc.path, rline, "roles-invalid", f"{role}: {value!r} phải là [T1|T2|T3, nhãn-agent] hoặc thêm \"note\"")
                 continue
             if role in T1_ONLY_ROLES and value[0] != "T1":
-                self.add(doc.path, rline, "roles-invalid", f"{role}: tier {value[0]} phải là T1")
-                continue
+                self.add(doc.path, rline, "roles-invalid", f"{role}: tier {value[0]} phải là T1")  # không `continue`: nhãn vẫn vào holders để self-review dò được
             holders.setdefault(value[1], set()).add(role)
         for agent, held in holders.items():
             if agent == "pending":
@@ -1337,6 +1336,41 @@ class Engine:
             if held & ADVISORS and conflicts:
                 self.add(doc.path, line, "self-review",
                          f"agent '{agent}' vừa tư vấn (advisor) vừa giữ vai soạn hoặc duyệt thay ({', '.join(sorted(conflicts))})")
+        self._roles_across_files(doc, roles)
+
+    def _roles_across_files(self, doc: Doc, roles: dict) -> None:
+        """Vòng chéo file (RQ-058): `advisor` trùng nhãn analyst/architect/gate-delegate, và `gate-delegate` trùng nhãn vai thực thi, ở tài
+        liệu KHÁC cùng thư mục sprint → `self-review` kèm tên file anh em (một phát hiện cho mỗi vai, gom mọi file trùng). Chỉ hồ sơ mới:
+        cửa ngày theo `delegation.grant_at` nếu có, không thì theo `created`; hồ sơ cũ giữ nguyên kết quả."""
+        block = doc.data.get("delegation")
+        moment = parse_moment(block.get("grant_at")) if isinstance(block, dict) else None
+        day = moment[0].isoformat() if moment else str(doc.data.get("created", ""))
+        if not (DATE.fullmatch(day) and day >= rules.MODE_OPEN_EFFECTIVE_DATE):
+            return
+        targets = {"advisor": ADVISOR_CONFLICTS, "gate-delegate": EXECUTORS}
+        mine = {r: roles[r][1] for r in targets if isinstance(roles.get(r), list) and len(roles[r]) >= 2 and isinstance(roles[r][1], str)}
+        mine = {r: lab for r, lab in mine.items() if lab != "pending"}
+        if not mine:
+            return
+        found: dict = {r: [] for r in mine}
+        for path in sorted(doc.path.resolve().parent.glob("*.md")):
+            sibling = self.doc(path)
+            if path == doc.path.resolve() or sibling is None or sibling.kind not in ("spec", "plan", "progress", "report", "sprint"):
+                continue
+            theirs = sibling.data.get("roles")
+            if not isinstance(theirs, dict):
+                continue
+            for role, label in mine.items():
+                for other in sorted(targets[role]):
+                    value = theirs.get(other)
+                    if isinstance(value, list) and len(value) >= 2 and value[1] == label:
+                        held = theirs.get(role)  # file anh em cũng giữ đúng vai này với cùng nhãn: nó tự báo, không báo lặp ở đây
+                        if not (isinstance(held, list) and len(held) >= 2 and held[1] == label):
+                            found[role].append(f"{other} ở {path.name}")
+        for role, hits in found.items():
+            if hits:
+                self.add(doc.path, doc.key_line(f"roles.{role}"), "self-review",
+                         f"agent '{mine[role]}' giữ vai {role} mà cùng nhãn với {', '.join(hits)} trong sprint: phải là phiên khác")
 
     def _gates(self, doc: Doc) -> None:
         data = doc.data
@@ -1433,6 +1467,11 @@ class Engine:
         if isinstance(signer, str) and signer.strip() and signer != "pending":  # trước kiểm T1 để tier thấp hơn người làm cũng được gọi tên
             self._signer_independence(doc, block, signer, gate)
         self._autopilot_records(doc, gate, block)
+        if grant_at[0].isoformat() >= rules.MODE_OPEN_EFFECTIVE_DATE and isinstance(data.get("roles"), dict):  # RQ-059: cổng đã kết luận thì vai thực thi không còn `pending`
+            for role in sorted(({"analyst", "architect"} if gate == "gate_1" else EXECUTORS) & set(data["roles"])):
+                value = data["roles"][role]
+                if isinstance(value, list) and len(value) >= 2 and value[1] == "pending":
+                    bad(f"roles.{role}", f"vai thực thi {role} còn nhãn pending mà {gate} đã kết luận")
         if block.get("tier") != "T1":
             return bad("delegation.tier" if "tier" in block else "delegation", f"người duyệt thay phải là T1, đang là {block.get('tier')!r}")
         by = block.get("by")
