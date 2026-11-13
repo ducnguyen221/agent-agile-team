@@ -59,6 +59,8 @@ Launcher gọi `scripts/autopilot_guard.py` bằng `python3`, `python` hoặc `p
 guard vắng hay lỗi: launcher tự dò file dấu bằng `sh` và chỉ chặn khi có file dấu, nên không làm hỏng công cụ shell của dự án chưa bật
 autopilot. Codex và Antigravity chưa có hook này: xem [method/autopilot.md](../../method/autopilot.md).
 
+**Lệnh dừng.** Plugin kèm `commands/stop-autopilot.md`: gõ `/agent-agile-team:stop-autopilot` (kèm `SPR-NN` nếu chỉ thu hồi một sprint) để lấy câu chuẩn `Dừng autopilot.` hoặc `Thu hồi duyệt thay SPR-NN.`; lệnh chỉ in câu, người dùng phải gửi câu đó trong chat.
+
 ## 3. Kiểm, cập nhật, gỡ
 
 - **Kiểm:** mở phiên **mới**, hỏi agent "luật lõi agent-agile-team nói gì về hai cổng?" — trả lời đúng là luật
