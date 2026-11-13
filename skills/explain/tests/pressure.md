@@ -5,7 +5,7 @@ model: sonnet (subagent alias, runners); grader opus
 date: 2026-11-13
 result: 3/3 GREEN pass (CM-3 rerun on final tree; CM-4, CM-4b on the first tree, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed); vòng sửa 1 (ép đọc SKILL.md) CM-3 3/3, CM-4 1/1, CM-4b 1/1, CM-6 1/1 (CM-6 chưa có RED); vòng sửa 2 (nạp thật, không đọc SKILL.md) skill khớp 4/4 qua mô tả mới, nhưng CM-3 0/3 nghiêm (không đọc thân skill); vòng sửa 3 (hết nhiễm, ép đọc SKILL.md, không Skill tool vì skill chưa có trong danh mục) CM-3 2/3 nghiêm, 1 lượt trượt vì thêm khẳng định suy diễn
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: d07fa69a0fa20c34c605dfae75f0d2e139d9f3e7
+skill_sha: c506b52e5d1a757858fb543768ddc5506df8ddca
 ---
 
 # Thử áp lực — explain
@@ -33,7 +33,7 @@ Ghi chú của grader (không tính trượt): vài lượt thêm khẳng địn
 
 ## Vòng chốt (2026-11-13)
 
-Vòng chốt: thêm dòng ẩn dụ (ẩn dụ không thay lời giải nghĩa; "Việc cần làm" trước "Chi tiết kỹ thuật") vào `SKILL.md`; `skill_sha` tính lại; chưa đo lại ở bước này (kết quả ở đầu file là của bản trước, QA đo ở bước sau).
+Vòng chốt: thêm dòng ẩn dụ (ẩn dụ không thay lời giải nghĩa; "Việc cần làm" trước "Chi tiết kỹ thuật") vào `SKILL.md`; `skill_sha` tính lại; sau đó chỉ sửa chữ dòng ẩn dụ (Việc cần làm ở phần kết, sau Chi tiết kỹ thuật), chưa đo lại ở bước này (kết quả ở đầu file là của bản trước, QA đo ở bước sau).
 
 ## Giới hạn
 
