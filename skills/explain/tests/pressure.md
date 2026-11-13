@@ -3,9 +3,9 @@ skill: explain
 method: pressure-test with subagents (RED without skill, GREEN with skill read first)
 model: sonnet (subagent alias, runners); grader opus
 date: 2026-11-13
-result: 3/3 GREEN pass (CM-3 rerun on final tree; CM-4, CM-4b on the first tree, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed); vòng sửa 1 (ép đọc SKILL.md) CM-3 3/3, CM-4 1/1, CM-4b 1/1, CM-6 1/1 (CM-6 chưa có RED); vòng sửa 2 (nạp thật, không đọc SKILL.md) skill khớp 4/4 qua mô tả mới, nhưng CM-3 0/3 nghiêm (không đọc thân skill)
+result: 3/3 GREEN pass (CM-3 rerun on final tree; CM-4, CM-4b on the first tree, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed); vòng sửa 1 (ép đọc SKILL.md) CM-3 3/3, CM-4 1/1, CM-4b 1/1, CM-6 1/1 (CM-6 chưa có RED); vòng sửa 2 (nạp thật, không đọc SKILL.md) skill khớp 4/4 qua mô tả mới, nhưng CM-3 0/3 nghiêm (không đọc thân skill); vòng sửa 3 (hết nhiễm, ép đọc SKILL.md, không Skill tool vì skill chưa có trong danh mục) CM-3 2/3 nghiêm, 1 lượt trượt vì thêm khẳng định suy diễn
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: ea3fdd88a8aa73d51f8fdc6dd212140c8d22e336
+skill_sha: 7134e0cfc5bc7f99efaee853e3d2bfcb5314f3cc
 ---
 
 # Thử áp lực — explain
@@ -47,3 +47,7 @@ Gửi từng prompt trong `tests/scenarios.txt` cho subagent mới. RED: không 
 ## Vòng sửa 2 của TK9 (2026-11-13, đóng RF-A của Opus)
 
 `SKILL.md` đổi: `description` trả lại các cụm kích hoạt ("giải thích", "diễn giải", "nói dễ hiểu hơn", "chưa hiểu", "tại sao" / "nghĩa là gì"), thêm câu trả lời cho `/explain` một file secret. Chạy nạp thật (runner `sonnet` mới mỗi lượt, chỉ đọc `AGENTS.md` và danh mục dựng lại từ frontmatter hiện tại, không Skill tool, không mở `SKILL.md`), grader `opus` khác: skill `explain` được khớp **4/4** (CM-3 n = 3 và ca "nói dễ hiểu hơn, tại sao" n = 1, chế độ diễn giải đúng, ca "tại sao" Đạt). Chấm nghiêm CM-3 nạp thật **0/3**: cả ba lượt tự tính "4,4 / 4,5 lần" và không giải nghĩa ORM, vì runner không được đọc thân skill (luật không thêm số, giải nghĩa mọi viết tắt nằm ở thân). Đây là giới hạn của phép thử nạp thật (chỉ đo định tuyến, không đo thi hành thân skill), không phải hồi quy; đo thi hành thân vẫn là các lượt ép đọc ở trên. Bằng chứng: `tk9-fix2.md` của hồ sơ sprint.
+
+## Vòng sửa 3 của TK9 (2026-11-13, gỡ nhiễm)
+
+Ví dụ trong `SKILL.md` (giải nghĩa viết tắt, bảng lỗi) đổi sang miền khác hẳn CM-3 (SKU, `120 → 300 đơn/ngày`, SLA), nên CM-3 nay là kịch bản held-out thật. `description` thêm cụm "chi tiết hơn" (response-style không có cụm này, RK6 không trùng); câu trả lời cho `/explain` file secret thêm "không mở file". **Đường đo:** skill `agent-agile-team:explain` chưa có trong danh mục Skill tool của phiên nên không nạp thật được; chạy dạng ép đọc `SKILL.md`, runner `sonnet` mới mỗi lượt, grader `opus` khác, n = 3. Kết quả **2/3 Đạt** (nghiêm). Lượt trượt (cm3-3) đủ 9/9 dữ kiện nhưng thêm khẳng định suy diễn ("ai đọc được log sẽ thấy mật khẩu", "dữ liệu đi qua đường truyền ở dạng đọc được"); hai lượt Đạt có ghi chú nhẹ (p95 "khách chậm nhất" chưa chính xác). Không chạy lại để chọn kết quả đẹp; mức bằng chứng là ép đọc, không phải nạp thật. Bằng chứng: `tk9-fix3.md` của hồ sơ sprint.

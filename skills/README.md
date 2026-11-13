@@ -143,7 +143,7 @@ số câu Đạt hẳn trên tổng số câu (kèm số Một phần và Không
 | [web-qa](web-qa/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (wq-7 new, wq-1 to wq-3 rerun at n = 1) plus a real design-compare run that matched its expectation | 2026-10-23 |
 | [id-convention](id-convention/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass | 2026-11-07 |
 | [response-style](response-style/tests/pressure.md) | kỷ luật | `pressure.md` | 6/9 runs pass strict reading | 2026-11-13 |
-| [explain](explain/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; SC4 nền đạt sẵn (CM-4/CM-4b không phân biệt được); vòng sửa 1: CM-3 3/3, CM-4/4b/6 n = 1 Đạt (CM-6 chưa có RED); vòng sửa 2: nạp thật khớp skill 4/4, CM-3 nạp thật 0/3 nghiêm (không đọc thân skill) | 2026-11-13 |
+| [explain](explain/tests/pressure.md) | kỷ luật | `pressure.md` | 3/3 GREEN pass; SC4 nền đạt sẵn (CM-4/CM-4b không phân biệt được); vòng sửa 1: CM-3 3/3, CM-4/4b/6 n = 1 Đạt (CM-6 chưa có RED); vòng sửa 2: nạp thật khớp skill 4/4, CM-3 nạp thật 0/3 nghiêm (không đọc thân skill); vòng sửa 3: gỡ nhiễm, CM-3 ép đọc 2/3 nghiêm | 2026-11-13 |
 | [token-economy](token-economy/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (rerun 2026-10-26 at n = 1; 0 partial; RED not rerun, scenarios unchanged) | 2026-10-26 |
 | [eval-harness](eval-harness/tests/pressure.md) | kỷ luật | `pressure.md` | 4/4 GREEN pass on the current tree (eh-9 new; eh-1, eh-3, eh-4 rerun at n = 1) | 2026-10-24 |
 | [writing-skills](writing-skills/tests/pressure.md) | kỷ luật | `pressure.md` | 1/1 GREEN pass theo chữ và theo ý (KB8, n = 3 sau sửa SPR-19: 3/3 chữ, 3/3 ý); KB1–KB7 không chạy lại; SPR-19 2026-11-12 | 2026-11-12 |
