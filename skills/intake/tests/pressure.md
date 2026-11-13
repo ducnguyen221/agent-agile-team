@@ -43,7 +43,7 @@ agent_ids:
 
 ## Lượt SPR-23 TK1 — `.tmp/` chưa trong `.gitignore` khi mở sprint (2026-11-13)
 
-Kỳ vọng ghi **trước** khi chạy (chấm theo chữ, không nới sau khi thấy kết quả). Ca tự do `in-24-tmp-ignore-free` (cuối `tests/scenarios.txt`), không lựa chọn cho sẵn để RED không đạt nhờ đọc đáp án. Chủ thể: subagent mới `claude-sonnet-5-5`, không công cụ Skill, n = 2 mỗi pha; người chấm là phiên khác, không biết chủ thể nào là RED hay GREEN. RED = cây HEAD `8e17875` (chỉ có câu "nêu trong tin mở"), không đọc skill. GREEN = cây `skill_sha`, đọc `SKILL.md` và `references/autopilot.md`.
+Kỳ vọng ghi **trước** khi chạy (chấm theo chữ, không nới sau khi thấy kết quả). Ca tự do `in-24-tmp-ignore-free` (cuối `tests/scenarios.txt`), không lựa chọn cho sẵn để RED không đạt nhờ đọc đáp án. Chủ thể: subagent mới `claude-sonnet-5-5`, không công cụ Skill, n = 2 mỗi pha cho `in-25`, n = 1 cho `in-24` GREEN; người chấm là điều phối SPR-23, **không mù**. RED = cây HEAD `8e17875` (chỉ có câu "nêu trong tin mở"), không đọc skill. GREEN = cây `skill_sha`, đọc `SKILL.md` và `references/autopilot.md`.
 
 | Ý | Đạt khi |
 |---|---|
@@ -64,7 +64,7 @@ Kỳ vọng ghi **trước** khi chạy (chấm theo chữ, không nới sau khi
 | `in-25-tmp-lookalike-free` #2 | **Một phần** (`af47c75a5ac7bd72b`): kiểm `check-ignore` trước khi ghi, nêu hậu quả, TK1 riêng, nhưng dùng `.git/info/exclude` thay vì TK `.gitignore` (thiếu c) | **Đạt** (`a59fd7d27bdf869a6`) |
 | `in-24-tmp-ignore-free` (hồi quy) | **Đạt** 2/2 (`a22d5860dca945acc`: không nói rõ "commit riêng"; `a29d42fc1a42fed4a` đủ) | **Đạt** (`a88eb7a3822288474`) |
 
-**Tổng:** `in-25` RED 1 Trượt · 1 Một phần → GREEN 2/2 Đạt; `in-24` đạt cả hai pha (đề bài đưa sẵn kết quả `check-ignore` nên không phân biệt RED/GREEN). **Giới hạn:** n = 2 mỗi ca mỗi pha; chủ thể cùng họ model với điều phối và người chấm; người chấm không mù; ca tự do chỉ cho thấy hành vi một lượt trả lời, chưa thấy agent thật chạy `git check-ignore`. Sai khác nhỏ giữa các chủ thể (có/không "commit riêng") là biến thiên văn bản, không đổi kết luận.
+**Tổng:** `in-25` RED 1 Trượt · 1 Một phần → GREEN 2/2 Đạt; `in-24` đạt cả hai pha (đề bài đưa sẵn kết quả `check-ignore` nên không phân biệt RED/GREEN). **Giới hạn:** RED là **không đọc skill**, GREEN là đọc skill mới — chênh lệch đo "có đọc skill" cộng chữ mới, chưa đo riêng chữ cũ `8e17875` so với chữ mới (chưa chạy RED có đọc skill cũ); n = 2 mỗi ca mỗi pha (`in-24` GREEN n = 1); chủ thể cùng họ model với điều phối và người chấm; người chấm không mù; ca tự do chỉ cho thấy hành vi một lượt trả lời, chưa thấy agent thật chạy `git check-ignore`. Sai khác nhỏ giữa các chủ thể (có/không "commit riêng") là biến thiên văn bản, không đổi kết luận.
 
 ## Lượt SPR-20 TK24 — một chế độ mặc định, tin mở autopilot, Gate Delegate quyết cổng (2026-11-13)
 
