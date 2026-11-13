@@ -37,7 +37,7 @@ trông ra sao, hay phải chọn giữa nhiều cách) không phải làm thẳn
   trong test đi kèm là hai thao tác; tự kiểm/chạy test đi kèm không tính thêm. Sàn cỡ vẫn áp: sửa hành vi một luồng
   có sẵn là nhỏ, tính năng mới là vừa, vùng rủi ro là lớn. Không chia một mục tiêu thành nhiều lượt làm thẳng để
   né sprint; đếm toàn bộ việc cần để mục tiêu xong, chỉ tách các mục tiêu độc lập.
-- **Phân vân giữa hai bậc → chọn bậc nặng hơn.** Nghi cần hơn 2 thao tác hay kết quả chưa rõ thì không phải làm
+- **Phân vân giữa hai bậc → chọn bậc nặng hơn** (nhỏ ↔ vừa: đo theo mục 3.1). Nghi cần hơn 2 thao tác hay kết quả chưa rõ thì không phải làm
   thẳng; nghi có đổi hành vi hay hợp đồng thì không phải rất nhỏ; nghi hơn một luồng thì không phải nhỏ.
 - **Bậc được khuyến nghị, không tự quyết một chiều:** Analyst nêu bậc khuyến nghị và "có mở sprint không" trong
   **một** tin trao đổi tiếp nhận ([process.md](process.md) mục 2); người dùng xác nhận hay đổi. Bỏ lượt này khi
@@ -94,18 +94,18 @@ phức tạp kỹ thuật nhưng vẫn lớn/high. Human model/effort override k
 
 Bảng ở mục 1 nói "một `FR`", "một luồng có sẵn" nhưng không nói đếm thế nào; ngưỡng dưới đây là **cách đo** định nghĩa đó (điều 1–3) cộng hai số **mới** làm sàn cho lúc phân vân (điều 4–5),
 dùng khi phân vân giữa nhỏ và vừa (và để tính trần phiên ở [autopilot.md](autopilot.md) mục 2.1). Việc là **nhỏ khi cả năm
-điều đúng**; một điều sai thì **ít nhất là vừa** (điều 3 sai là lớn, mục 1; đã nằm ở luật "phân vân → chọn bậc nặng hơn"). Rất nhỏ, làm thẳng và lớn không đổi.
+điều đúng**; một điều sai thì **ít nhất là vừa** (riêng điều 3 sai là lớn, mục 1). Năm điều là **điều kiện cần, chưa đủ**: các dấu hiệu khác của hàng Nhỏ ở mục 1 (kể cả "không có quyết định kiến trúc") và vùng rủi ro ở mục 2 vẫn áp. Rất nhỏ, làm thẳng và lớn không đổi.
 
 | # | Điều kiện của nhỏ | Cách đo | Sai khi |
 |---|---|---|---|
 | 1 | đúng một `FR` | đếm `FR` ở mức một trong SPEC; kịch bản `FR1.1`, `FR1.2` cùng một `FR1` vẫn là một | từ hai `FR` trở lên (hai hành vi cần kiểm riêng) |
-| 2 | không có hành vi hay luồng mới | không có `US` mới; việc chỉ đổi điều kiện, giá trị, chữ hay thứ tự trong luồng đã chạy được | thêm bước, màn hình, lệnh, đường vào hay kiểu đầu ra mới |
-| 3 | không đổi hợp đồng / giao diện / schema | như mục 1; có phải sửa chỗ gọi nơi khác vì hàm đổi chữ ký thì sai | đổi chữ ký công khai, trường dữ liệu, định dạng file đầu ra hay khoá cấu hình mà bên khác đọc |
+| 2 | không có hành vi hay luồng mới | không thêm `US` cho việc người dùng chưa làm được trước đây; việc chỉ đổi điều kiện, giá trị, chữ hay thứ tự trong luồng đã chạy được | thêm bước, màn hình, lệnh, đường vào hay kiểu đầu ra mới |
+| 3 | không đổi hợp đồng / giao diện / schema | như mục 1; đổi chữ ký hàm chỉ dùng trong một mô-đun thì vẫn đúng | đổi chữ ký công khai hay mà bên ngoài mô-đun gọi, trường dữ liệu, định dạng file đầu ra hay khoá cấu hình mà bên khác đọc |
 | 4 | tối đa 4 `TK` | đếm `TK` mức một trong PLAN; việc con `TK2.3` không tính | từ 5 `TK` |
 | 5 | ước tính tối đa 8 phiên agent | số phiên = số `TK` + 4 (một reviewer, hai lần Gate Delegate, một lần giao lại sau review); 8 là trần cơ sở cỡ nhỏ | ước tính trên 8 |
 
-Điều 4 và 5 là **một** phép đo (4 `TK` + 4 = 8), ghi cả hai để người đọc thấy số nào chạm trần. Số `TK` và số phiên là
-**ước lượng lúc lập PLAN**, không chấm lại cỡ khi thực tế vượt: vượt ước lượng gấp đôi đi theo mục 3 (PLAN hỏng, tách sprint).
+Điều 4 và 5 cho cùng một con số (4 `TK` + 4 = 8), ghi cả hai để người đọc thấy số nào chạm trần; cột "phiên ước" ở các ví dụ vừa/lớn dùng công thức của cỡ nhỏ làm thước, không phải trần của cỡ đó. Số `TK` và số phiên là
+**ước lượng lúc lập PLAN**, không chấm lại cỡ khi thực tế vượt: vượt ước lượng gấp đôi đi theo mục 3 (PLAN hỏng, tách sprint). Tiếp nhận chưa có PLAN thì ước theo số việc dự kiến; PLAN ra từ 5 `TK` cho việc đã mở cỡ nhỏ thì **nâng lên vừa** (mục 4: ghi `Phán quyết:` kèm lý do, đổi hồ sơ sang bốn file). Phiên thử áp lực hay phiên nghiên cứu ngoài bảy bước chuẩn không nằm trong công thức: ước thêm riêng.
 
 | Ví dụ | `FR` · `TK` · phiên ước | Điều sai | Cỡ |
 |---|---|---|---|
