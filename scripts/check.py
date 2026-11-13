@@ -1007,6 +1007,54 @@ def _tk_key(code: str) -> tuple:
 # --- Bộ máy kiểm ----------------------------------------------------------------------------------------
 
 
+def known_models() -> list[tuple[str, ...]] | None:
+    """Tên model có thật theo bảng tier (`AGENT_AGILE_TIERS`), mỗi tên tách thành các từ chữ-số thường (`claude-fable-5-2` → claude, fable, 5, 2);
+    None khi thiếu hay hỏng bảng (khi đó không kiểm tên model: không bắt thêm khi không có gì để đối chiếu). Lấy mọi chuỗi dưới khoá `models`."""
+    path = os.environ.get("AGENT_AGILE_TIERS", "")
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8-sig")) if path else None
+    except (OSError, ValueError):
+        return None
+    found: set[tuple[str, ...]] = set()
+
+    def walk(node: object) -> None:
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key == "models" and isinstance(value, dict):
+                    found.update(_model_words(v) for v in value.values() if isinstance(v, str))
+                walk(value)
+        elif isinstance(node, list):
+            for item in node:
+                walk(item)
+
+    walk(data)
+    found.discard(())
+    return sorted(found) or None
+
+
+def _model_words(text: str) -> tuple[str, ...]:
+    return tuple(w for w in re.split(r"[^0-9a-z]+", text.casefold()) if w)
+
+
+EFFORT_WORDS = ("low", "medium", "high", "xhigh", "max")
+
+
+def model_is_known(model: str, known: list[tuple[str, ...]]) -> bool:
+    """`Fable 5.2` khớp `claude-fable-5-2`: bỏ chú thích trong ngoặc, so theo TỪ. Khớp khi các từ ghi bằng các từ của tên thật, hoặc là đuôi của nó
+    (bỏ tiền tố hãng, đúng ranh giới từ). Hậu tố effort được bỏ ở cả hai phía (`gemini-4-argon-high` ghi nguyên id hay `Gemini 4 Argon` đều khớp); effort không đối chiếu với bảng.
+    Từ đầu phải là chữ, phải có từ chữ số, độ dài ghép từ 4 ký tự: `Claude`, `Fable`, `Fable 5`, `le 5.2` không khớp."""
+    words = _model_words(re.sub(r"[(][^)]*[)]", " ", model))
+    candidates = [words] + ([words[:-1]] if words and words[-1] in EFFORT_WORDS else [])
+    for cand in candidates:
+        if len("".join(cand)) < 4 or not cand[0][0].isalpha() or not any(w.isdigit() for w in cand):
+            continue
+        for k in known:
+            for full in (k, k[:-1] if k[-1] in EFFORT_WORDS else k):  # id bảng có hậu tố effort: so cả bản đã bỏ hậu tố
+                if full == cand or full[-len(cand):] == cand:
+                    return True
+    return False
+
+
 class Engine:
     def __init__(self, env=None):
         self.env = os.environ if env is None else env
@@ -1513,10 +1561,12 @@ class Engine:
         if moment is None or moment[0].isoformat() < rules.MODE_OPEN_EFFECTIVE_DATE:
             return
         if gate == "gate_2" and doc.kind in ("report", "sprint"):
-            if not self._has_decision_log(doc):
+            unknown: list[str] = []
+            if not self._has_decision_log(doc, known_models(), unknown):
+                hint = f"; model không có trong bảng tier: {', '.join(sorted(set(unknown)))}" if unknown else ""
                 self.add(doc.path, doc.key_line("gate_2_mode"), "decision-log-missing",
                          f"Cổng 2 duyệt thay mà {'REPORT' if doc.kind == 'report' else 'SPRINT.md'} không có mục 'Nhật ký quyết định' với dòng đủ ai ký "
-                         "(nhãn · vai · tier · model), bằng chứng và lệnh hoàn tác")
+                         f"(nhãn · vai · tier · model có trong bảng tier), bằng chứng và lệnh hoàn tác{hint}")
         elif gate == "gate_1" and doc.kind in ("plan", "sprint"):
             problem = self._session_cap_problem(doc, block)
             if problem:
@@ -1576,7 +1626,7 @@ class Engine:
                 yield False, line
 
     @staticmethod
-    def _has_decision_log(doc: Doc) -> bool:
+    def _has_decision_log(doc: Doc, known: list[tuple[str, ...]] | None = None, unknown: list[str] | None = None) -> bool:
         header = None
         for start, line in Engine._log_lines(doc):
             if start:
@@ -1595,7 +1645,11 @@ class Engine:
             filled = [cells[i].strip() not in ("", "—", "-", "–") for i in (header["bằng chứng"], header["lệnh hoàn tác"])]
             parts = [p for p in re.split(r"\s*·\s*", cells[header["ai ký"]]) if p.strip()]
             if all(filled) and len(parts) >= 4:
-                return True
+                model = parts[3].strip("` ")
+                if known is None or model_is_known(model, known):
+                    return True
+                if unknown is not None:
+                    unknown.append(model)
         return False
 
     def _route_floor(self, doc: Doc, gate: str, done: bool) -> None:
@@ -2417,6 +2471,18 @@ def summary(report: Report) -> str:
     return text
 
 
+def by_dir_block(report: Report) -> list[str]:
+    """`--by-dir`: số phát hiện theo thư mục chứa file, mỗi thư mục một dòng (chỉ thư mục có phát hiện); chỉ in thêm, không đổi mức luật."""
+    table: dict[str, dict[str, int]] = {}
+    for f in report.findings:
+        row = table.setdefault(c.display(f.path.parent), dict.fromkeys((CHAN, PHAI, NEN, GHI), 0))
+        row[f.level] += 1
+    lines = ["theo thư mục:"]
+    for name, row in sorted(table.items()):
+        lines.append(f"  {name}: " + " · ".join(f"{k} {v}" for k, v in row.items() if v))
+    return lines
+
+
 def main(argv=None, env=None) -> int:
     c.utf8_stdio()
     env = os.environ if env is None else env
@@ -2427,6 +2493,7 @@ def main(argv=None, env=None) -> int:
     parser.add_argument("--routing-manifest", help="manifest applicability độc lập của pilot routing")
     parser.add_argument("--include-evidence", action="store_true",
                         help="khi quét thư mục: quét cả thư mục evidence/ nằm cạnh tài liệu sprint (mặc định bỏ qua)")
+    parser.add_argument("--by-dir", action="store_true", help="in thêm số phát hiện theo từng thư mục (không đổi mức luật)")
     args = parser.parse_args(argv)
     if not args.self_mode and not args.paths:
         parser.error("cần ít nhất một đường dẫn, hoặc --self")
@@ -2450,6 +2517,9 @@ def main(argv=None, env=None) -> int:
     for finding in report.findings:
         print(finding.render())
     print(summary(report))
+    if args.by_dir:
+        for line in by_dir_block(report):
+            print(line)
     return report.exit_code
 
 
