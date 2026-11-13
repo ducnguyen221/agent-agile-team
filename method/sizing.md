@@ -94,18 +94,18 @@ phức tạp kỹ thuật nhưng vẫn lớn/high. Human model/effort override k
 
 Bảng ở mục 1 nói "một `FR`", "một luồng có sẵn" nhưng không nói đếm thế nào; ngưỡng dưới đây là **cách đo** định nghĩa đó (điều 1–3) cộng hai số **mới** (điều 4–5) áp **vô điều kiện**,
 dùng để chọn giữa nhỏ và vừa (và để tính trần phiên ở [autopilot.md](autopilot.md) mục 2.1). Việc chỉ là **nhỏ khi cả năm
-điều đúng**; một điều sai thì **ít nhất là vừa** (riêng điều 3 sai là lớn, mục 1). Năm điều là **điều kiện cần, chưa đủ**: các dấu hiệu khác của hàng Nhỏ ở mục 1 (kể cả "không có quyết định kiến trúc") và vùng rủi ro ở mục 2 vẫn áp. Rất nhỏ, làm thẳng và lớn không đổi.
+điều đúng**; một điều sai thì **ít nhất là vừa** (điều 3 sai ở hợp đồng ra ngoài là lớn, mục 1; đổi giao diện nội bộ giữa mô-đun là vừa, mục 5). Năm điều là **điều kiện cần, chưa đủ**: các dấu hiệu khác của hàng Nhỏ ở mục 1 (kể cả "không có quyết định kiến trúc") và vùng rủi ro ở mục 2 vẫn áp. Rất nhỏ, làm thẳng và lớn không đổi.
 
 | # | Điều kiện của nhỏ | Cách đo | Sai khi |
 |---|---|---|---|
 | 1 | đúng một `FR` | đếm `FR` ở mức một trong SPEC; kịch bản `FR1.1`, `FR1.2` cùng một `FR1` vẫn là một | từ hai `FR` trở lên (hai hành vi cần kiểm riêng) |
 | 2 | không có hành vi hay luồng mới | không thêm `US` cho việc người dùng chưa làm được trước đây; việc chỉ đổi điều kiện, giá trị, chữ hay thứ tự trong luồng đã chạy được | thêm bước, màn hình, lệnh, đường vào hay kiểu đầu ra mới |
-| 3 | không đổi hợp đồng / giao diện / schema | như mục 1; đổi chữ ký hàm chỉ dùng trong một mô-đun thì vẫn đúng | đổi chữ ký công khai hay chữ ký mà bên ngoài mô-đun gọi, trường dữ liệu, định dạng file đầu ra hay khoá cấu hình mà bên khác đọc |
+| 3 | không đổi hợp đồng / giao diện / schema | như mục 1; đổi chữ ký hàm chỉ dùng trong một mô-đun thì vẫn đúng | đổi chữ ký công khai hoặc hợp đồng mà bên ngoài dự án dùng (lớn); đổi chữ ký giữa các mô-đun nội bộ (vừa); đổi trường dữ liệu, định dạng file đầu ra hay khoá cấu hình mà bên khác đọc (lớn) |
 | 4 | tối đa 4 `TK` | đếm `TK` mức một trong PLAN; việc con `TK2.3` không tính | từ 5 `TK` |
 | 5 | ước tính tối đa 8 phiên agent | số phiên = số `TK` + 4 (một reviewer, hai lần Gate Delegate, một lần giao lại sau review); 8 là trần cơ sở cỡ nhỏ | ước tính trên 8 |
 
 Điều 4 và 5 cho cùng một con số (4 `TK` + 4 = 8), ghi cả hai để người đọc thấy số nào chạm trần; cột "phiên ước" ở các ví dụ vừa/lớn dùng công thức của cỡ nhỏ làm thước, không phải trần của cỡ đó. Số `TK` và số phiên là
-**ước lượng lúc lập PLAN**, không chấm lại cỡ khi thực tế vượt: vượt ước lượng gấp đôi đi theo mục 3 (PLAN hỏng, tách sprint). Tiếp nhận chưa có PLAN thì ước theo số việc dự kiến; PLAN ra từ 5 `TK` cho việc đã mở cỡ nhỏ thì **nâng lên vừa** (ghi `Phán quyết:` kèm lý do như mục 4 cho phép nâng cỡ ở bất kỳ bước nào; hình tài liệu theo "Hình tài liệu khớp cỡ" ở mục 1, tức sang bốn file). Phiên thử áp lực hay phiên nghiên cứu ngoài bảy bước chuẩn không nằm trong công thức: ước thêm riêng.
+**ước lượng lúc lập PLAN**, không chấm lại cỡ khi thực tế vượt: vượt ước lượng gấp đôi đi theo mục 3 (PLAN hỏng, tách sprint). Tiếp nhận chưa có PLAN thì ước theo số việc dự kiến; PLAN ra từ 5 `TK` cho việc đã mở cỡ nhỏ thì **nâng lên vừa** (ghi `Phán quyết:` kèm lý do như mục 4 cho phép nâng cỡ ở bất kỳ bước nào; hình tài liệu theo "Hình tài liệu khớp cỡ" ở mục 1, tức sang bốn file). Phiên thử áp lực hay phiên nghiên cứu ngoài sáu bước chuẩn không nằm trong công thức: ước thêm riêng.
 
 | Ví dụ | `FR` · `TK` · phiên ước | Điều sai | Cỡ |
 |---|---|---|---|
