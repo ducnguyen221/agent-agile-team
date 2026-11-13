@@ -14,7 +14,7 @@ updated: 2026-10-04
 
 ## Chọn ai làm
 
-- Vai và tier theo bảng ở `AGENTS.md` (mục Vai và tier); đọc bảng tier → model từ nguồn cấu hình ngoài repo, thiếu
+- Vai và tier: `AGENTS.md` (mục Vai và tier) và `roles/README.md`; đọc bảng tier → model từ nguồn cấu hình ngoài repo, thiếu
   thì hỏi, không đoán. Giao việc xong ghi **vai · tier · model** vào PROGRESS.
 - Reviewer là agent khác người làm; agent chuyên đề (bảo mật, dữ liệu, Python, FastAPI…) chỉ kéo khi rủi ro
   của việc thật sự thuộc chuyên đề đó — skill `code-review` quyết định.

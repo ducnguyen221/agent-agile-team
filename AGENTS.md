@@ -1,6 +1,6 @@
 # agent-agile-team — luật lõi
 
-Một người + nhiều agent phát triển phần mềm theo sprint = một mục tiêu. Chi tiết: `method/`, `roles/`,
+Chi tiết: `method/`, `roles/`,
 `tiers/`, `skills/`, `templates/`. Khi file này khác chi tiết, chi tiết thắng.
 
 ## Dùng skill
@@ -8,18 +8,14 @@ Một người + nhiều agent phát triển phần mềm theo sprint = một m�
 - Trước khi trả lời hay hành động — kể cả câu hỏi làm rõ, kể cả "chỉ xem file" — rà danh mục skill. Thấy
   skill có thể khớp dù chỉ một phần: **gọi ngay**, đọc hết, rồi làm theo; đọc xong thấy không hợp thì bỏ
   và nói vì sao.
-- Thứ tự: skill **quy trình** trước (định hình spec, viết plan, chạy sprint, debug, review), skill **kỹ
-  thuật** sau. "Làm X" → định hình spec trước; "sửa lỗi" → debug trước.
-- Cờ đỏ: nghĩ "việc này đơn giản, khỏi cần skill" chính là lúc phải rà.
-- Skill đã đọc ở phiên trước không tính: skill đổi, đọc lại bản hiện tại.
+- Thứ tự: skill **quy trình** trước (spec, plan, sprint, debug, review), **kỹ thuật** sau; "làm X" → spec trước, "sửa lỗi" → debug trước.
+- Skill đã đọc ở phiên trước không tính: đọc lại bản hiện tại.
 - Lệnh trực tiếp của người dùng thắng skill; skill thắng thói quen mặc định.
 - Subagent nhận brief cho một việc cụ thể thì làm theo brief, không tự mở rộng bằng skill khác.
 
 ## Quy trình sáu bước
 
-1. **Tiếp nhận** (T1, **một tin gom**): đọc đầu bài, phân tích, rồi gửi **tin mở autopilot**: mục tiêu theo cách
-   hiểu · khuyến nghị bậc (làm thẳng / rất nhỏ / nhỏ / vừa / lớn) · có mở sprint không · vai, tier, model, effort,
-   trần phiên, người ký cổng, cách dừng. Không chờ trả lời: câu hỏi phản biện kèm đề xuất; ghi `RQ-`, rủi ro (chỉ
+1. **Tiếp nhận** (T1, **một tin gom**): đọc đầu bài, phân tích, rồi gửi **tin mở autopilot** (mẫu: `method/autopilot.md` mục 2; có khuyến nghị bậc làm thẳng / rất nhỏ / nhỏ / vừa / lớn). Không chờ trả lời: câu hỏi phản biện kèm đề xuất; ghi `RQ-`, rủi ro (chỉ
    nâng), **ASSUMPTION**, `CQ` cho Cổng 1. Không hỏi lẻ. Bỏ tin này khi "không cần sprint" hoặc làm thẳng không mơ hồ.
 2. **SPEC rồi PLAN** → **Cổng 1**, Gate Delegate (phiên mới, T1) ký. Từ cỡ vừa, Tech Reviewer/Advisor review PLAN
    trước. Hồ sơ: kết luận, `CQ`, `DN`, rủi ro, ước lượng, trần phiên. Ký thì ghi
@@ -50,23 +46,13 @@ và Không áp dụng không bao giờ là Đạt.
 
 ## Vai và tier
 
-| Vai | Nhóm | Tier | Việc |
-|---|---|---|---|
-| Analyst (điều phối, Distiller) | Thực thi | T1 | tiếp nhận, SPEC, điều phối, phán quyết, REPORT, bài học |
-| Architect | Thực thi | T1 | PLAN, thiết kế, ADR |
-| Implementer | Thực thi | T2 | mã, test, tài liệu theo `TK` |
-| QA | Thực thi | T3 | chạy test, coverage, kiểm trình duyệt, ghi `VR` |
-| Researcher | Thực thi | T3 | tìm, đọc, dossier có nguồn; không kết luận |
-| Business Reviewer | Kiểm định | T1 | đáp ứng `US`/`FR`/`SC` |
-| Tech Reviewer (+ security, data, backend, frontend) | Kiểm định | T1 | code, test, bảo mật, dữ liệu; kéo chuyên đề khi rủi ro cao |
-| Gate Delegate | Kiểm định | T1 | ký Cổng 1 và 2 mặc định; phiên mới, khác người làm, tier ≥ |
-| Advisor | Tư vấn | T1 | phản biện SPEC/PLAN trước Cổng 1; không viết, không duyệt |
+Thực thi: **Analyst** (T1; điều phối, Distiller; tiếp nhận, SPEC, điều phối, phán quyết, REPORT, bài học) · **Architect** (T1; PLAN, ADR) · **Implementer** (T2; mã, test, tài liệu theo `TK`) · **QA** (T3; chạy test, coverage, kiểm trình duyệt, ghi `VR`) · **Researcher** (T3; dossier có nguồn, không kết luận).
+Kiểm định: **Business Reviewer** (T1; `US`/`FR`/`SC`) · **Tech Reviewer** (T1; code, test, bảo mật, dữ liệu; + security, data, backend, frontend khi rủi ro cao) · **Gate Delegate** (T1; ký Cổng 1 và 2 mặc định; phiên mới, khác người làm, tier ≥). Tư vấn: **Advisor** (T1; phản biện SPEC/PLAN trước Cổng 1; không viết, không duyệt). Thẻ vai: `roles/README.md`.
 
 - **Người làm không tự chấm.** Kiểm định do agent khác (phiên/subagent mới, ngữ cảnh soạn riêng, không dán
   lịch sử). Reviewer được trả 0 phát hiện, phải ghi phần không đánh giá. Việc nhỏ: một agent giữ nhiều
   vai thực thi, Analyst luôn điều phối.
-- Giao việc theo **tier**, không theo tên model; bảng tier → model đọc từ file mà biến môi trường
-  `AGENT_AGILE_TIERS` trỏ tới (ngoài repo); thiếu bảng thì hỏi, không đoán. **Luôn ghi vai · tier · model · effort** vào PROGRESS khi giao subagent (effort: số 1–5, `method/effort-scale.md`).
+- Giao việc theo **tier**, không theo tên model; bảng tier → model đọc từ `AGENT_AGILE_TIERS` (ngoài repo); thiếu bảng thì hỏi, không đoán. **Luôn ghi vai · tier · model · effort** vào PROGRESS khi giao subagent (effort: số 1–5, `method/effort-scale.md`).
 - Cạn hạn mức: dừng tier đó, ghi `BR`, báo — **không tự hạ tier**. Người dùng chỉ định đè → làm theo,
   ghi `"note"` trong `roles`. Muốn hãng khác → chỉ **tư vấn**, người dùng quyết.
 
@@ -79,7 +65,7 @@ và Không áp dụng không bao giờ là Đạt.
   agent: Kết quả / Chứng cứ / Còn mở / Cần người, ≤2.000 token, con trỏ thay log.
 - Nén không bao giờ bỏ: báo lỗi, cảnh báo bảo mật, xác nhận thao tác phá hủy, số + đơn vị, mã lỗi, đường
   dẫn, chữ phủ định. "Một từ" = một từ **cộng** điều chặn. Số không nguồn → nói "chưa đo" + cách đo.
-- **Trao đổi với người:** tóm tắt từ file → link `[tên:dòng](đường:dòng)`; hỏi chốt → dòng hỏi "?" + KHUYẾN NGHỊ (im lặng ≠ duyệt); "chưa hiểu" → diễn giải (`explain`), xong về súc tích. Luật: `method/communication.md`.
+- **Trao đổi với người** (luật: `method/communication.md`): tóm tắt từ file → link `[tên:dòng](đường:dòng)`; file ngoài thư mục phiên → đường tuyệt đối trong dấu code, không làm link, nói rõ chưa bấm được. Hỏi chốt → một dòng hỏi kết thúc "?", bảng phương án (đánh đổi · rủi ro · công sức · khi nào chọn), **KHUYẾN NGHỊ** + lý do, link căn cứ; chưa trả lời → chỉ làm việc không phụ thuộc quyết định, không tự chọn; im lặng không là duyệt cổng, việc không đảo ngược. "Chưa hiểu / tại sao / chi tiết hơn", hỏi lại, hậu quả khó hoàn tác của quyết định đang hỏi → diễn giải (`explain`): đủ dữ kiện, không thêm sự kiện hay số suy ra, giải nghĩa viết tắt; xong về súc tích.
 - Brief cho subagent chép khối rút gọn của `skills/response-style`.
 
 ## Mã định danh và thang mức
@@ -89,8 +75,7 @@ và Không áp dụng không bao giờ là Đạt.
   PROGRESS `BR` · REPORT `VR` `RF` `LN` `CO`. Sổ gốc: `RQ-014` `FS-007` `SPR-12`, tăng dần, không tái dùng.
 - Mã luôn kèm tên ngắn (mọi lần trong chat). Trước mọi danh sách / bảng mã: câu dẫn nói tài liệu nào và mã
   là gì, nghĩa in đậm — "SPEC có 10 **user story** (US):".
-  Nhắc chéo `TK4 → FR3.2`, sang tài liệu khác `FS-007/FR3.2`.
-  Mã hệ khác để trong dấu code + tên. Không đánh số lại; mục bỏ giữ mã, trạng thái `bỏ`.
+  Không đánh số lại; mục bỏ giữ mã, trạng thái `bỏ`. Nhắc chéo, mã hệ khác: skill `id-convention`.
 - Cấm: mã một chữ cái + số, tiền tố tự chế, `P1/P2` cho ưu tiên (viết Bắt buộc / Nên có / Có thì tốt /
   Không làm đợt này). Ngoại lệ duy nhất: tier `T1/T2/T3`.
 - Phát hiện: **Chặn / Phải sửa / Nên sửa / Ghi chú**. Kết luận: **Đạt / Đạt có điều kiện / Không đạt**.
