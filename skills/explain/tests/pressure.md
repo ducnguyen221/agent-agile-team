@@ -5,7 +5,7 @@ model: sonnet (subagent alias, runners); grader opus
 date: 2026-11-13
 result: 3/3 GREEN pass (CM-3 rerun on final tree; CM-4, CM-4b on the first tree, n = 3 each); RED 3/3 failed at CM-3, 0/3 failed at CM-4 and CM-4b (baseline already passed); vòng sửa 1 (ép đọc SKILL.md) CM-3 3/3, CM-4 1/1, CM-4b 1/1, CM-6 1/1 (CM-6 chưa có RED); vòng sửa 2 (nạp thật, không đọc SKILL.md) skill khớp 4/4 qua mô tả mới, nhưng CM-3 0/3 nghiêm (không đọc thân skill); vòng sửa 3 (hết nhiễm, ép đọc SKILL.md, không Skill tool vì skill chưa có trong danh mục) CM-3 2/3 nghiêm, 1 lượt trượt vì thêm khẳng định suy diễn
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: c67d68e86067b7dfb518c94ceee7df257754ca28
+skill_sha: d07fa69a0fa20c34c605dfae75f0d2e139d9f3e7
 ---
 
 # Thử áp lực — explain
@@ -30,6 +30,10 @@ Ghi chú của grader (không tính trượt): vài lượt thêm khẳng địn
 ## Lần chạy lại trên bản skill cuối (2026-11-13, sau vòng sửa của Tech Reviewer)
 
 `SKILL.md` đổi sau lần chạy đầu: luật chép hai nơi được rút về `method/communication.md` (mục 1), ví dụ mẫu đổi chủ đề (TLS, không còn trùng kịch bản CM-4), thêm hàng "giải nghĩa thuật ngữ sai" vào bảng lỗi. Chạy lại CM-3 n = 3 trên bản cuối (`skill_sha` ở đầu file): **3/3 Đạt** (9/9 dữ kiện, 4/4 viết tắt, p95 giải nghĩa đúng, không số hay đường dẫn mới). Vòng giữa (trước khi thêm hàng lỗi giải nghĩa) có 2/3 lượt giải nghĩa p95 sai — hàng lỗi mới vá việc đó. CM-4 và CM-4b **không** chạy lại: thân skill chỉ rút bớt chỗ chép luật, kịch bản ấy nền đã đạt sẵn.
+
+## Vòng chốt (2026-11-13)
+
+Vòng chốt: thêm dòng ẩn dụ (ẩn dụ không thay lời giải nghĩa; "Việc cần làm" trước "Chi tiết kỹ thuật") vào `SKILL.md`; `skill_sha` tính lại; chưa đo lại ở bước này (kết quả ở đầu file là của bản trước, QA đo ở bước sau).
 
 ## Giới hạn
 
