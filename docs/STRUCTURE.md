@@ -19,7 +19,7 @@
 | `.claude-plugin/`, `.codex-plugin/`, `.github/` | manifest plugin, CI (`verify.yml`) |
 | `.claude/` | **không theo dõi**: chỉ có cấu hình riêng của máy và worktree do app tạo (`.claude/worktrees/`), đã ignore |
 | `method/`, `roles/`, `tiers/`, `templates/` | luật chơi, thẻ vai, bảng tier, khuôn hồ sơ |
-| `skills/`, `agents/`, `hooks/`, `shims/` | 36 skill, 13 agent, hook của plugin, shim `git`/`gh` |
+| `skills/`, `agents/`, `hooks/` | 36 skill, 13 agent, hook của plugin |
 | `scripts/`, `tests/`, `evals/` | công cụ `init`/`check`/`index`, bộ pytest, bộ eval |
 | `samples/`, `hosts/`, `docs/` | dự án mẫu, hướng dẫn theo harness, tài liệu người đọc |
 

@@ -129,7 +129,7 @@ def test_open_sentence_naming_a_non_floor_file_is_clean(tmp_path):
     assert _rules_hit(root) == []
 
 
-@pytest.mark.parametrize("floor_file", ["AGENTS.md", "method/process.md", "scripts/git_fence.py"])
+@pytest.mark.parametrize("floor_file", ["AGENTS.md", "method/process.md", "scripts/autopilot_guard.py"])
 def test_open_sentence_naming_a_floor_or_zone_file_is_flagged(tmp_path, floor_file):
     root = _open_plan(tmp_path, files=f"[{floor_file}]", grant=OPEN_SENTENCE.format(file=floor_file))
     assert _rules_hit(root) == ["delegation-fence-file"]

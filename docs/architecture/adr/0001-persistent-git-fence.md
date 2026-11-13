@@ -1,6 +1,6 @@
 # 0001. Đặt rào git thường trực cho repo được bảo vệ, kèm hai lớp độc lập
 
-Trạng thái: proposed · Sprint: SPR-16 (chương trình SPR-15) · Liên quan: `method/git-permissions.md`, `method/autopilot.md` mục 5, PLAN mục Kiến trúc của SPR-16
+Trạng thái: superseded (SPR-20, 13/11/2026: git-fence và shim gỡ hẳn; an toàn dựa vào git để quay lại và ruleset GitHub; xem plan SPR-20 bản 2) · Sprint: SPR-16 (chương trình SPR-15) · Liên quan: `method/git-permissions.md`, `method/autopilot.md` mục 5, PLAN mục Kiến trúc của SPR-16
 
 ## Bối cảnh
 

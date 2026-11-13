@@ -32,17 +32,15 @@ DELEGATION_CHANNELS = ("chat", "host_comment")
 MOMENT = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})(?: ([0-9]{2}):([0-9]{2}) ([+-])([0-9]{2})(?::?([0-9]{2}))?)?")
 DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 
-# Tập file chứa nội dung rào autopilot (SPEC SPR-16 FR1.1); lớn dần theo sprint: `method/git-permissions.md` (TK7) và
-# `scripts/git_fence.py` (TK8) vào đây cùng commit tạo ra chúng (`method/git-permissions.md` đã vào ở TK7). Bản ghim viết tay ở `tests/test_fence_wiring.py`.
+# Tập file chứa nội dung rào autopilot (SPEC SPR-16 FR1.1). trang quyền git và rào git thường trực (SPR-16) đã gỡ ở SPR-20 TK21.
+# Bản ghim viết tay ở `tests/test_fence_wiring.py`.
 FENCE_FILES: tuple[str, ...] = (
     "method/autopilot.md",
-    "method/git-permissions.md",
     "skills/intake/references/autopilot.md",
     "skills/running-sprint/references/autopilot.md",
     "skills/closing-sprint/references/autopilot.md",
     "scripts/_autopilot_rules.py",
     "scripts/autopilot_guard.py",
-    "scripts/git_fence.py",
     "scripts/autopilot-hook.sh",
     "hooks/hooks.json",
 )

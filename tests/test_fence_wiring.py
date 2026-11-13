@@ -18,18 +18,15 @@ SCRIPTS = REPO / "scripts"
 RULES = SCRIPTS / "_autopilot_rules.py"
 CHECK = SCRIPTS / "check.py"
 GUARD = SCRIPTS / "autopilot_guard.py"
-GIT_FENCE = SCRIPTS / "git_fence.py"
 
 # Bản ghim viết tay: mỗi lần danh sách đổi, đổi cả chỗ này trong cùng commit và nêu lý do ở thông điệp commit.
 PINNED_FENCE_FILES = (
     "method/autopilot.md",
-    "method/git-permissions.md",  # TK7: luật quyền git và gh, thêm cùng commit tạo file
     "skills/intake/references/autopilot.md",
     "skills/running-sprint/references/autopilot.md",
     "skills/closing-sprint/references/autopilot.md",
     "scripts/_autopilot_rules.py",
     "scripts/autopilot_guard.py",
-    "scripts/git_fence.py",  # TK8: rào git thường trực, thêm cùng commit tạo file
     "scripts/autopilot-hook.sh",
     "hooks/hooks.json",
 )
@@ -184,7 +181,7 @@ def test_validator_is_a_function_taking_block():
     assert isinstance(node, ast.FunctionDef) and [a.arg for a in node.args.args] == ["block"]
 
 
-@pytest.mark.parametrize("path", [GUARD, GIT_FENCE], ids=lambda p: p.name)
+@pytest.mark.parametrize("path", [GUARD], ids=lambda p: p.name)
 def test_guard_does_not_import_check(path):
     if not path.exists():
         pytest.skip(f"{path.name} chưa tồn tại ở thời điểm này")

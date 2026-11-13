@@ -1,7 +1,6 @@
-"""SPR-20 TK4: `autopilot_guard.py` theo `mode` của file dấu (FR1.3, FR2.3, FR4.2, SC2).
+"""SPR-20 TK4: `autopilot_guard.py` theo `mode` của file dấu (FR1.3, FR4.2, SC2): bộ mục đang chặn của chế độ mở và chế độ chặt.
 
-Chế độ mở chặn 7 mục luôn chặn, mục file dấu ghi thêm và gộp cục bộ vào `main` (`main-local-merge`); push, tag, version… do rào git
-(`git_fence`) và hợp đồng đích quyết ở TK5. File dấu `mode: secure` hoặc vắng `mode` giữ hành vi cũ.
+Phần kiểm lệnh git (đẩy, tag, gộp, rào git thường trực, `_keep_ask`) đã gỡ ở SPR-20 TK21; phần chế độ dời TK22.
 """
 
 from __future__ import annotations
@@ -55,188 +54,23 @@ def test_unknown_mode_is_a_corrupt_marker(tmp_path):
     assert broken and set(active) == set(ALL)
 
 
-def test_secure_marker_missing_mode_blocks_push(tmp_path):
-    repo = make_repo(tmp_path, marker=good_marker())
-    assert_blocked(repo, "git push origin feat", "push")
-
-
 def test_secure_marker_explicit_mode_keeps_thirteen(tmp_path):
     marker = good_marker()
     marker["mode"] = "secure"
     repo = make_repo(tmp_path, marker=marker)
     active, _ = autopilot_guard.load_active(str(repo / ".tmp" / "autopilot.json"))
     assert set(active) == set(ALL) - {"branch_merge_local"} | {"branch_merge_local"} & set(ALL)
-    assert_blocked(repo, "git push origin feat", "push")
 
 
-def test_open_marker_merge_on_release_passes(tmp_path):
-    assert_allowed(make_repo(tmp_path, branch="release", marker=open_marker()), "git merge feat")
-
-
-def test_open_marker_merge_on_main_blocked(tmp_path):
-    assert_blocked(make_repo(tmp_path, branch="main", marker=open_marker()), "git merge feat", "main-local-merge")
-
-
-def test_open_marker_pull_on_main_blocked(tmp_path):
-    assert_blocked(make_repo(tmp_path, branch="main", marker=open_marker()), "git pull origin main", "main-local-merge")
-
-
-def test_open_marker_pull_ff_only_on_main_blocked_when_repo_not_push_only(tmp_path):
-    assert_blocked(make_repo(tmp_path, branch="main", marker=open_marker()), "git pull --ff-only", "main-local-merge")
-
-
-def test_open_marker_checkout_main_then_merge_blocked(tmp_path):
-    assert_blocked(make_repo(tmp_path, branch="release", marker=open_marker()), "git checkout main && git merge feat", "main-local-merge")
-
-
-@pytest.mark.parametrize("cmd,item", [("rm -rf build", "irreversible_delete"), ("git reset --hard HEAD~1", "irreversible_delete")])
+@pytest.mark.parametrize("cmd,item", [("rm -rf build", "irreversible_delete")])
 def test_open_marker_keeps_always_blocked_items(tmp_path, cmd, item):
     assert_blocked(make_repo(tmp_path, branch="release", marker=open_marker()), cmd, item)
-
-
-def test_open_marker_extra_blocks_tag_that_open_mode_would_allow(tmp_path):
-    assert_blocked(make_repo(tmp_path, branch="release", marker=open_marker(["tag"])), "git tag v1.0.0", "tag")
 
 
 def test_open_marker_is_still_protected_file(tmp_path):
     repo = make_repo(tmp_path, branch="release", marker=open_marker())
     rc, _, err = run("claude", claude("rm .tmp/autopilot.json", repo))
     assert rc == 2 and "file dấu" in err
-
-
-def _force_level(monkeypatch, level):
-    sig = autopilot_guard.git_fence.Signals(listed=True, level=level, marker=True)
-    monkeypatch.setattr(autopilot_guard.git_fence, "protection", lambda *a, **k: sig)
-
-
-def test_open_marker_pull_ff_only_on_main_passes_when_repo_is_push_only(tmp_path, monkeypatch):
-    repo = make_repo(tmp_path, branch="main", marker=open_marker())
-    _force_level(monkeypatch, "push-only")
-    rc, _, err = run("claude", claude("git pull --ff-only", repo))
-    assert "main-local-merge" not in err, err
-
-
-def test_open_marker_plain_pull_on_main_still_blocked_when_repo_is_push_only(tmp_path, monkeypatch):
-    repo = make_repo(tmp_path, branch="main", marker=open_marker())
-    _force_level(monkeypatch, "push-only")
-    assert_blocked(repo, "git pull origin main", "main-local-merge")
-
-
-def test_open_marker_pull_ff_only_on_main_blocked_when_repo_is_full(tmp_path, monkeypatch):
-    repo = make_repo(tmp_path, branch="main", marker=open_marker())
-    _force_level(monkeypatch, "full")
-    assert_blocked(repo, "git pull --ff-only", "main-local-merge")
-
-
-def _marker_path(repo):
-    return str(repo / ".tmp" / "autopilot.json")
-
-
-def test_keep_ask_main_session_open_marker_bypass_mode(tmp_path):
-    repo = make_repo(tmp_path, marker=open_marker())
-    assert autopilot_guard._keep_ask({"permission_mode": "bypassPermissions"}, _marker_path(repo)) is True
-
-
-def test_keep_ask_false_when_open_marker_exclusions_key_is_broken(tmp_path):
-    marker = open_marker()
-    marker["exclusions"] = "all"  # soát RF4: khoá hỏng = file dấu hỏng, không giữ hỏi
-    repo = make_repo(tmp_path, marker=marker)
-    assert autopilot_guard._keep_ask({"permission_mode": "bypassPermissions"}, _marker_path(repo)) is False
-
-
-@pytest.mark.parametrize("payload", [
-    {"permission_mode": "bypassPermissions", "agent_id": "a1"}, {"permission_mode": "bypassPermissions", "agent_id": ""},
-    {"permission_mode": "bypassPermissions", "agent_type": "general-purpose"},
-    {"permission_mode": "auto"}, {"permission_mode": "default"}, {"permission_mode": "plan"}, {}],
-    ids=["agent_id", "agent_id-empty", "agent_type", "auto-unmeasured-interactive", "default-unmeasured", "plan-unmeasured", "no-mode-codex"])
-def test_keep_ask_false_for_subagent_other_host_or_unmeasured_mode(tmp_path, payload):
-    repo = make_repo(tmp_path, marker=open_marker())
-    assert autopilot_guard._keep_ask(payload, _marker_path(repo)) is False
-
-
-def test_keep_ask_false_without_marker_or_with_secure_or_corrupt_marker(tmp_path):
-    bypass = {"permission_mode": "bypassPermissions"}
-    assert autopilot_guard._keep_ask(bypass, None) is False
-    secure = make_repo(tmp_path / "s", marker=good_marker())
-    assert autopilot_guard._keep_ask(bypass, _marker_path(secure)) is False
-    broken = make_repo(tmp_path / "b", marker="{not json")
-    assert autopilot_guard._keep_ask(bypass, _marker_path(broken)) is False
-
-
-# --- sửa theo soát độc lập (RF2): `pull --ff-only` chỉ miễn khi thật sự chỉ tiến con trỏ theo upstream ----------------
-
-@pytest.mark.parametrize("cmd", ["git pull --ff-only --no-ff origin feat", "git pull --ff-only --rebase", "git pull --ff-only origin feat",
-                                 "git pull --ff-only . feat", "git pull --ff-only --squash origin", "git pull --rebase --ff-only",
-                                 "git pull --ff-only --no-ff-only", "git -c branch.main.merge=refs/heads/feat pull --ff-only",
-                                 "git pull --ff-only ../wt-feat", "git pull --ff-only https://h/r.git", "git pull --ff-only --ff-only",
-                                 "git pull -ff-only", "git pull --ff-only=false", "git pull --ff-o", "git pull --reb", "git pull --squ",
-                                 "git pull --no-com", "git pull -qr", "git pull --ff-only -q", "git pull --ff-only origin main",
-                                 "git pull --ff-only origin refs/heads/a:refs/heads/b", "git pull --ff-only origin +x",
-                                 "git pull --ff-only origin a..b", "git --config-env=a=B pull --ff-only", "git --exec-path=/x pull --ff-only"])
-def test_pull_ff_only_with_override_flag_or_refspec_stays_blocked_on_push_only_main(tmp_path, monkeypatch, cmd):
-    repo = make_repo(tmp_path, branch="main", marker=open_marker())
-    _force_level(monkeypatch, "push-only")
-    assert_blocked(repo, cmd, "main-local-merge")
-
-
-def test_pull_ff_only_after_cd_does_not_borrow_the_cwd_level(tmp_path, monkeypatch):
-    repo = make_repo(tmp_path, branch="main", marker=open_marker())
-    _force_level(monkeypatch, "push-only")
-    assert_blocked(repo, "cd .. && git pull --ff-only", "main-local-merge")
-
-
-# --- RF-A1 (vòng 3): phép gán biến môi trường ở bất kỳ đoạn nào của chuỗi làm `pull --ff-only` mất miễn ----------------
-
-ENV_CHAIN_CMDS = [
-    "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=branch.main.merge GIT_CONFIG_VALUE_0=refs/heads/feat git pull --ff-only",
-    "GIT_CONFIG_GLOBAL=/x/cfg git pull --ff-only", "GIT_CONFIG_PARAMETERS='a=b' git pull --ff-only",
-    "export GIT_CONFIG_COUNT=1 && git pull --ff-only", '$env:GIT_CONFIG_GLOBAL="x"; git pull --ff-only',
-    "set GIT_CONFIG_GLOBAL=x && git pull --ff-only", "HOME=/x git pull --ff-only", "A=1 B=2 git pull --ff-only",
-    "USERPROFILE=/x git pull --ff-only", "XDG_CONFIG_HOME=/x git pull --ff-only", "PATH=/x git pull --ff-only",
-    "env HOME=/x git pull --ff-only", "HOME=/x bash -c 'git pull --ff-only'",
-]
-
-
-def _fence_verdict(cmd, repo):
-    ctx = autopilot_guard.Context(set(), str(repo))
-    ctx.env = {}
-    segments: list = []
-    autopilot_guard._collect_segments(cmd, ctx, 0, segments)
-    return autopilot_guard.git_fence.classify(
-        segments, autopilot_guard.git_fence.FenceContext(str(repo), {}, autopilot_guard.git_fence.default_runner, marker=True, keep_ask=True))
-
-
-@pytest.mark.parametrize("cmd", ENV_CHAIN_CMDS)
-def test_pull_ff_only_with_env_assignment_in_chain_stays_blocked_on_push_only_main(tmp_path, monkeypatch, cmd):
-    repo = make_repo(tmp_path, branch="main", marker=open_marker())
-    _force_level(monkeypatch, "push-only")
-    assert_blocked(repo, cmd, "main-local-merge")
-
-
-@pytest.mark.parametrize("cmd", ENV_CHAIN_CMDS)
-def test_fence_asks_pull_ff_only_with_env_assignment_in_chain_at_push_only(tmp_path, monkeypatch, cmd):
-    repo = make_repo(tmp_path, branch="main", marker=open_marker())
-    _force_level(monkeypatch, "push-only")
-    assert _fence_verdict(cmd, repo).kind == autopilot_guard.git_fence.ASK, cmd
-
-
-@pytest.mark.parametrize("cmd", ["git pull --ff-only", "git -C . pull --ff-only"])
-def test_plain_pull_ff_only_without_env_stays_exempt_in_both_fences(tmp_path, monkeypatch, cmd):
-    repo = make_repo(tmp_path, branch="main", marker=open_marker())
-    _force_level(monkeypatch, "push-only")
-    rc, _, err = run("claude", claude(cmd, repo))
-    assert "main-local-merge" not in err, err
-    assert _fence_verdict(cmd, repo).kind == autopilot_guard.git_fence.AUTO
-
-
-def test_end_to_end_main_session_gets_ask_and_subagent_gets_deny(tmp_path):
-    repo = make_repo(tmp_path, branch="release", marker=open_marker())
-    main_session = dict(claude("gh label create bug", repo), permission_mode="bypassPermissions")
-    subagent = dict(main_session, agent_id="a1")
-    rc_main, out_main, err_main = run("claude", main_session)
-    rc_sub, out_sub, err_sub = run("claude", subagent)
-    assert rc_main == 0 and '"ask"' in out_main, (rc_main, out_main, err_main)
-    assert rc_sub == 2 and "gh-ask-b" in err_sub, (rc_sub, out_sub, err_sub)
 
 
 def test_corrupt_marker_blocks_thirteen(tmp_path):

@@ -1,4 +1,4 @@
-"""Test đột biến của rào (SPR-16 FR3): gỡ rào bằng chín cách trên **bản sao** trong thư mục tạm, bộ test ghim phải đỏ
+"""Test đột biến của rào (SPR-16 FR3): gỡ rào bằng tám cách trên **bản sao** trong thư mục tạm, bộ test ghim phải đỏ
 đúng test được chỉ định; bản sao chưa đột biến phải xanh; đột biến nào sống thì suite này đỏ và nêu mã đột biến.
 
 File này thuộc sàn cứng (`FLOOR_FILES`). Một cơ chế chỉ được gọi là "rào máy" khi đột biến tương ứng ở đây đã đỏ (FR3.3).
@@ -19,7 +19,7 @@ from typing import Callable, Optional
 import pytest
 
 REPO = Path(__file__).resolve().parent.parent
-PINNED_SUITES = ("tests/test_fence_wiring.py", "tests/test_floor_check.py", "tests/test_git_fence.py",
+PINNED_SUITES = ("tests/test_fence_wiring.py", "tests/test_floor_check.py",
                  "tests/test_autopilot_guard.py", "tests/test_check.py")
 KEYWORDS = "fence or floor or marker or autopilot or delegation or push"
 IGNORE = shutil.ignore_patterns(".git", ".tmp", ".claude", "__pycache__", ".pytest_cache", "*.pyc", ".env", ".env.*")
@@ -90,41 +90,8 @@ def drop_exclusion(root: Path) -> None:
     edit(root, "scripts/_autopilot_rules.py", '("push", "tag",', '("tag",')
 
 
-def push_allow_all(root: Path) -> None:
-    """Nhánh đẩy của `git_fence` luôn trả 'không đụng': chèn `return Verdict()` ngay sau dòng def của `_push_verdict`."""
-    path = root / "scripts" / "git_fence.py"
-    text = path.read_text(encoding="utf-8")
-    match = re.search(r"^def _push_verdict\(.*\) -> Verdict:\n", text, re.M)
-    assert match, "không thấy _push_verdict trong git_fence.py"
-    path.write_bytes((text[:match.end()] + "    return Verdict()\n" + text[match.end():]).encode("utf-8"))
-
-
-def drop_listed_check(root: Path) -> None:
-    """Hợp đồng đích không còn đòi danh tính repo được xác minh bằng danh sách (dấu hiệu 1)."""
-    edit(root, "scripts/git_fence.py", "    return (ctx.signals_for(target) if target else sig).listed is True", "    return True")
-
-
-def drop_targets_check(root: Path) -> None:
-    edit(root, "scripts/git_fence.py", '    if dest not in contract["push_targets"]:\n        return "push-target-unknown"', "    pass")
-
-
-def drop_url_check(root: Path) -> None:
-    edit(root, "scripts/git_fence.py", '        return "push-url-mismatch"', "        pass")
-
-
-def drop_protected_branch_check(root: Path) -> None:
-    """`_on_protected_branch` luôn nói 'không phải nhánh được bảo vệ'."""
-    path = root / "scripts" / "git_fence.py"
-    text = path.read_text(encoding="utf-8")
-    match = re.search(r"^def _on_protected_branch\(.*\) -> bool:\n", text, re.M)
-    assert match, "không thấy _on_protected_branch"
-    path.write_bytes((text[:match.end()] + "    return False\n" + text[match.end():]).encode("utf-8"))
-
-
-def drop_alias_expansion(root: Path) -> None:
-    edit(root, "scripts/git_fence.py", "        seg = expand_alias(seg, ctx.cwd)\n", "")
-
-
+# SPR-20 TK21: sáu đột biến tinh (hợp đồng đích, nhánh được bảo vệ, alias, nhánh đẩy) nhắm mô-đun rào git thường trực và suite của nó;
+# hai file đó đã gỡ nên sáu đột biến bỏ theo, còn tám đột biến của dòng nối/vùng sàn/danh sách mục. Đây là gỡ cơ chế, không phải sửa test cho qua kiểm.
 MUTATIONS = {
     "drop-call": Mutation(drop_call, f"{WIRING}::test_check_calls_rules_validator", (WIRING,)),
     "drop-result": Mutation(drop_result, f"{WIRING}::test_check_uses_validator_result", (WIRING,)),
@@ -134,20 +101,6 @@ MUTATIONS = {
     "remove-fence-file": Mutation(remove_fence_file, f"{WIRING}::test_fence_files_exist", (WIRING,)),
     "guard-imports-check": Mutation(guard_imports_check, f"{WIRING}::test_guard_does_not_import_check", (WIRING,)),
     "drop-exclusion": Mutation(drop_exclusion, f"{WIRING}::test_exclusions_pinned", (WIRING,)),
-    # Thêm sau vòng 2 kiểm định (Astra RV7): đột biến tinh trong git_fence.py, mỗi cái đỏ đúng test ghim của hợp đồng/nhánh/alias.
-    "drop-listed-check": Mutation(drop_listed_check, "tests/test_git_fence.py::test_contract_needs_the_protected_list_to_name_the_repo",
-                                  ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "drop-targets-check": Mutation(drop_targets_check, "tests/test_git_fence.py::test_contract_rejections",
-                                   ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "drop-url-check": Mutation(drop_url_check, "tests/test_git_fence.py::test_contract_pushurl_changed_after_writing",
-                               ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "drop-protected-branch-check": Mutation(drop_protected_branch_check,
-                                            "tests/test_git_fence.py::test_local_history_commands_on_main_are_forbidden_at_full",
-                                            ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "drop-alias-expansion": Mutation(drop_alias_expansion, "tests/test_git_fence.py::test_repo_alias_for_push_is_seen",
-                                     ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
-    "push-allow-all": Mutation(push_allow_all, "tests/test_git_fence.py::test_push_to_main_without_marker_in_protected_repo",
-                               ("tests/test_git_fence.py",), needs="scripts/git_fence.py"),
 }
 
 
@@ -204,7 +157,7 @@ def test_pristine_copy_is_green(pristine):
 def test_mutant_is_killed(slug, pristine, tmp_path):
     mutation = MUTATIONS[slug]
     if mutation.needs and not (REPO / mutation.needs).is_file():
-        pytest.skip(f"{mutation.needs} chưa tồn tại; TK8 tạo mô-đun và bỏ skip này")
+        pytest.skip(f"{mutation.needs} không tồn tại")
     root = fresh_copy(pristine, tmp_path)
     mutation.apply(root)
     failed, errors = run_pinned_detail(root, mutation.suites)
@@ -237,8 +190,6 @@ def test_load_error_is_not_a_kill(pristine, tmp_path):
         require_killed("drop-call", mutation, failed, errors)
 
 
-@pytest.mark.skipif(not (REPO / "tests" / "test_git_fence.py").is_file(),
-                    reason="test_git_fence.py do TK8 tạo; bật lại khi suite tồn tại")
 def test_pinned_suites_complete():
     missing = [s for s in PINNED_SUITES if not (REPO / s).is_file()]
     assert not missing, f"bộ ghim thiếu suite: {missing}"
