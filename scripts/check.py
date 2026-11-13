@@ -56,6 +56,7 @@ RULES: dict[str, tuple[str, str]] = {
     "task-without-trace": (PHAI, "việc `TK` không trỏ `FR`/`SC` nào (việc con kế thừa việc cha)"),
     "task-order": (PHAI, "`Đầu vào:` của `TK` trỏ `TK` số ≥ chính nó — số `TK` phải là thứ tự làm"),
     "task-gap": (GHI, "số `TK` cấp một không liền 1…N theo thứ tự xuất hiện"),
+    "plain-summary": (NEN, "SPEC/PLAN tạo từ ngày hiệu lực thiếu mục `## Tóm tắt cho người không chuyên`, hoặc mục còn rỗng / còn nguyên chú thích mẫu"),
     "plan-goal-block": (GHI, "mục Mục tiêu của PLAN thiếu một trong ba dòng nhãn (mẫu PLAN)"),
     "report-sc-without-vr": (PHAI, "`SC` của SPEC không có `VR` nào trong REPORT"),
     "report-fr-without-vr": (PHAI, "`FR` của SPEC không có `VR` nào trỏ tới nó hoặc kịch bản con (trừ `bỏ`/NOT_APPLICABLE)"),
@@ -146,6 +147,10 @@ ADVISOR_CONFLICTS = {"analyst", "architect", "gate-delegate"}  # tác giả SPEC
 T1_ONLY_ROLES = {"gate-delegate", "advisor"}  # hai vai buộc tier T1
 NEXT_ID_PREFIX = {"requests": "RQ", "specs": "FS", "sprints": "SPR"}
 WIDTH_KEY = {"RQ": "request", "FS": "feature", "SPR": "sprint"}
+
+# Ngày hiệu lực luật `plain-summary` (SPR-21 FR4): hồ sơ có `created` từ ngày này mới bị xét. Tạm đặt xa; TK10 chốt ngày thật.
+PLAIN_SUMMARY_EFFECTIVE = "2099-01-01"
+PLAIN_SUMMARY_HEADING = "Tóm tắt cho người không chuyên"
 
 REQUIRED_HEADINGS = {
     "spec": ("Bối cảnh", "Câu chuyện người dùng", "Yêu cầu chức năng", "Tiêu chí thành công", "Ngoài phạm vi", "Câu hỏi cần làm rõ"),
@@ -1054,6 +1059,8 @@ class Engine:
             self.order_rules(doc)
         if doc.kind == "plan":
             self.plan_goal_rule(doc)
+        if doc.kind in ("spec", "plan"):
+            self.plain_summary_rule(doc)
         if doc.kind in ("report", "sprint"):
             self.verification_rules(doc)
             self.stop_message_rules(doc)
@@ -1898,6 +1905,24 @@ class Engine:
                 parts.append(nxt)
             return doc.line_no(idx), " ".join(parts).split(OUTPUT_FIELD)[0]
         return None
+
+    def plain_summary_rule(self, doc: Doc) -> None:
+        """SPEC/PLAN tạo từ ngày hiệu lực phải có mục tóm tắt cho người không chuyên, có chữ thật (chú thích mẫu = rỗng)."""
+        created = str(doc.data.get("created", ""))
+        if not (DATE.fullmatch(created) and created >= str(PLAIN_SUMMARY_EFFECTIVE)):
+            return  # `created` thiếu / không đọc được / trước ngày hiệu lực: không báo
+        start = next((i for i, line in enumerate(doc.masked)
+                      if re.match(r"^##\s+(?:[0-9]+(?:\.[0-9]+)*\.?\s+)?" + re.escape(PLAIN_SUMMARY_HEADING) + r"\s*$", line)), None)
+        if start is None:
+            self.add(doc.path, doc.start, "plain-summary", f"thiếu mục '## {PLAIN_SUMMARY_HEADING}' (3–5 câu cho người không chuyên)")
+            return
+        body = []
+        for line in doc.masked[start + 1:]:  # `masked` đã bỏ comment HTML nên chú thích mẫu thành rỗng
+            if re.match(r"^#{1,2}\s", line):
+                break
+            body.append(line)
+        if not "".join(body).strip():
+            self.add(doc.path, doc.line_no(start), "plain-summary", f"mục '{PLAIN_SUMMARY_HEADING}' còn rỗng hoặc còn nguyên chú thích mẫu")
 
     def plan_goal_rule(self, doc: Doc) -> None:
         """Mục `## Mục tiêu` của PLAN có đủ ba dòng nhãn của mẫu (SPEC 7.8)."""
