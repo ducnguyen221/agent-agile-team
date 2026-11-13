@@ -2,10 +2,10 @@
 skill: response-style
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04); sonnet subagent alias (GREEN rerun of 2026-11-13)
-date: 2026-11-13
-result: 6/9 runs pass strict reading (RS-1 1/3, RS-2 3/3, RS-3 2/3), 8/9 lenient; control on the old skill RS-1 0/3, RS-3 1/3 (same failure kind, not a regression); GREEN rerun 2026-11-13 on SPR-21 TK5
+date: 2026-11-14
+result: Một phần (SPR-25 2026-11-14) - nhãn ước lượng chưa đo - RED RS-1 0/3 và RS-3 0/3 (ô nhãn); GREEN vòng 2 ô nhãn RS-1 2/3 (3/3 chấm lỏng), RS-3 3/3, RS-2 3/3; theo cả bốn ô RS-1 2/3, RS-2 3/3, RS-3 1/3 (Đạt có điều kiện). Lượt SPR-21 trước đó RS-1 1/3, RS-2 3/3, RS-3 2/3 theo cách đọc nghiêm
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: d626f1ed339b5ed8389ad1170276a10d8523f336
+skill_sha: 24a898b55af04691d540c7ca31a7a6ef3f66e253
 agent_ids:
   green_rerun_2026_10_04: {rs-1: af26a5eb29de2e971, rs-2: ab5587bbe2574b8a1, rs-3: a708cc8e24e2dffac}
 ---
