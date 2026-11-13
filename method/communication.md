@@ -3,7 +3,7 @@
 > **Kết luận:** agent nói với người theo hai chế độ — **súc tích** (mặc định) và **diễn giải** (khi người đọc cần) —
 > và mỗi tin dựa trên file thì kèm **link tới file đó**, mỗi câu hỏi cần người chốt thì kèm **phương án và khuyến
 > nghị**. Tài liệu sprint có hai lớp: lớp một cho người, lớp hai cho agent. Đây là nơi chuẩn của các luật đó;
-> `AGENTS.md` và mẫu chỉ **trỏ tới**; skill `explain` là quy trình thi hành mục 1, skill `response-style` giữ luật
+> `AGENTS.md` giữ vế cốt lõi; file này là bản đầy đủ và thắng khi hai bên khác; mẫu chỉ **trỏ tới**; skill `explain` là quy trình thi hành mục 1, skill `response-style` giữ luật
 > súc tích mặc định, khối rút gọn ở mục 8 của nó là bản chép cho subagent. Hai chỗ nói khác nhau về **cách trình bày** thì
 > file này thắng; luật cổng/secret của `AGENTS.md` và luật môi trường (nếu có) luôn thắng.
 
@@ -32,7 +32,7 @@ chữ phủ định.
 - **Giữ nguyên dữ kiện:** diễn giải làm rõ, không bỏ, không thêm sự kiện. Số liệu + đơn vị, đường dẫn, mã lỗi,
   chữ phủ định, cảnh báo bảo mật của nguồn còn nguyên; cảnh báo và hậu quả khó hoàn tác đưa lên **đầu** tin. Chỗ
   nguồn mơ hồ thì ghi "nguồn không nói rõ" thay vì đoán. **Không thêm số mới**, kể cả số tự tính từ số của nguồn
-  (ví dụ "chậm gấp 4,4 lần" khi nguồn chỉ nêu hai số gốc).
+  (ví dụ "tăng 60 %" khi nguồn chỉ nêu hai số gốc 50 và 80).
 - **Nguồn dài hơn 200 dòng** mà người dùng chưa nêu phần cần: hỏi muốn phần nào (một câu), không tự cắt; đã nêu phần
   thì diễn giải phần đó. `/explain` khi chưa có tin trước thì hỏi "diễn giải gì?".
 

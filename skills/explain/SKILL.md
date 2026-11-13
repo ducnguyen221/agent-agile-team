@@ -56,16 +56,15 @@ hai chế độ, hàng "Dấu hiệu thoát"); skill này không nhắc lại.
 
 ## 5. Mẫu
 
-Nguồn (mọi dữ kiện bản mẫu dùng): "Chứng chỉ TLS của trang web hết hạn sau 12 ngày. Gia hạn tự động chưa bật. Gia hạn
-tay mất khoảng 10 phút, không cần dừng dịch vụ. Khuyến nghị: gia hạn tay ngay rồi bật gia hạn tự động."
+Nguồn (mọi dữ kiện bản mẫu dùng): "Tên miền công ty chưa có bản ghi DKIM nên thư gửi đi dễ bị xếp vào thư rác. Thêm bản ghi DKIM vào DNS mất khoảng 20 phút, có hiệu lực sau tối đa 48 giờ. Cảnh báo: không gửi khoá riêng DKIM qua email hay chat. Khuyến nghị: thêm DKIM ngay rồi mới bật chính sách DMARC."
 
 ```
-Chứng chỉ TLS của trang web hết hạn sau 12 ngày; nên gia hạn tay ngay.
-Chứng chỉ TLS (giấy xác nhận trang web là thật) giống giấy phép treo ở cửa tiệm: có hạn, hết hạn thì phải đổi.
-Gia hạn tự động chưa bật nên phải làm tay. Làm tay mất khoảng 10 phút, không cần dừng dịch vụ.
-**Chi tiết kỹ thuật:** hết hạn sau 12 ngày; gia hạn tự động chưa bật; gia hạn tay khoảng 10 phút, không cần dừng dịch vụ.
-**Cần anh quyết:** cho gia hạn tay ngay chứ?
-**KHUYẾN NGHỊ:** có — gia hạn tay ngay rồi bật gia hạn tự động.
+Cảnh báo: không gửi khoá riêng DKIM qua email hay chat. Tên miền công ty chưa có bản ghi DKIM; nên thêm ngay.
+DKIM (chữ ký số gắn vào mỗi thư, để người nhận biết thư đúng từ công ty) giống con dấu đỏ trên phong bì: thiếu dấu thì thư dễ bị nghi là giả và bị xếp vào thư rác.
+DNS (danh bạ của tên miền) là nơi đặt bản ghi này; thêm mất khoảng 20 phút, có hiệu lực sau tối đa 48 giờ. DMARC (quy định người nhận xử lý thư không có chữ ký) chỉ bật sau khi đã thêm DKIM.
+**Chi tiết kỹ thuật:** chưa có bản ghi DKIM; thêm vào DNS khoảng 20 phút, hiệu lực tối đa 48 giờ; không gửi khoá riêng DKIM qua email hay chat; thêm DKIM trước, bật DMARC sau.
+**Cần anh quyết:** cho thêm bản ghi DKIM ngay chứ?
+**KHUYẾN NGHỊ:** có — thêm DKIM ngay rồi mới bật DMARC.
 ```
 
 ## 6. Lỗi hay gặp
