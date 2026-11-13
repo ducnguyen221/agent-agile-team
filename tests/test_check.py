@@ -2730,6 +2730,47 @@ def test_decision_log_row_must_have_signer_model_evidence_and_undo(tmp_path, row
     assert len(_rule_hits(root, "decision-log-missing")) == 1
 
 
+@pytest.fixture(autouse=True)
+def _no_real_tiers(monkeypatch):
+    """Máy của Đức đặt AGENT_AGILE_TIERS trỏ bảng thật; test không phụ thuộc nó (RQ-111)."""
+    monkeypatch.delenv("AGENT_AGILE_TIERS", raising=False)
+
+
+def _tiers_file(tmp_path: Path, monkeypatch, models: list) -> None:
+    import json
+    path = tmp_path / "tiers.json"
+    path.write_text(json.dumps({"schema": 2, "tiers": {"T1": {"models": {"claude": models[0], "codex": models[-1]}}},
+                                "roles": {"analyst": {"tier": "T1", "models": {"claude": models[0]}}}}), encoding="utf-8")
+    monkeypatch.setenv("AGENT_AGILE_TIERS", str(path))
+
+
+def test_decision_log_model_must_exist_in_tiers_file(tmp_path, monkeypatch):
+    """RQ-111: tên model ở 'Ai ký' phải có thật trong tiers.json (khi có bảng); nhãn người ký thì không bị kiểm."""
+    root = make_sprint(tmp_path / "s")
+    _tiers_file(tmp_path, monkeypatch, ["claude-fable-5-2", "gpt-6-astra"])
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + "| Đạt Cổng 2 | nhãn-lạ-tự-đặt · gate-delegate · T1 · Fable 9.9 | evidence/gate-2-verdict.md | git revert abc1234 |\n")
+    hits = _rule_hits(root, "decision-log-missing")
+    assert len(hits) == 1
+    assert "Fable 9.9" in hits[0].message
+
+
+@pytest.mark.parametrize("model", ["Fable 5.2", "`claude-fable-5-2`", "gpt-6-astra", "GPT 6 Astra"])
+def test_decision_log_model_found_in_tiers_file_is_clean(tmp_path, monkeypatch, model):
+    root = make_sprint(tmp_path / "s")
+    _tiers_file(tmp_path, monkeypatch, ["claude-fable-5-2", "gpt-6-astra"])
+    row = f"| Đạt Cổng 2 | nhãn-lạ-tự-đặt · gate-delegate · T1 · {model} | evidence/gate-2-verdict.md | git revert abc1234 |\n"
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + row)
+    assert _rule_hits(root, "decision-log-missing") == []
+
+
+def test_decision_log_model_not_checked_without_tiers_file(tmp_path, monkeypatch):
+    """Thiếu bảng (env chưa đặt hay trỏ file không có) thì không kiểm tên model — không bắt thêm."""
+    root = make_sprint(tmp_path / "s")
+    monkeypatch.setenv("AGENT_AGILE_TIERS", str(tmp_path / "khong-co.json"))
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + "| Đạt Cổng 2 | agent-d · gate-delegate · T1 · Model Bịa 1 | evidence/gate-2-verdict.md | git revert abc1234 |\n")
+    assert _rule_hits(root, "decision-log-missing") == []
+
+
 def test_complete_decision_log_is_clean(tmp_path):
     root = make_sprint(tmp_path)
     _new_delegated_report(root)
@@ -2914,3 +2955,92 @@ def test_signer_finding_is_reported_once_for_a_sprint_file_with_two_delegated_ga
     root = _new_two_gate_sprint(tmp_path, tier="T2", log=SPRINT_LOG_OK)
     hits = _signer_hits(root)
     assert len(hits) == 1 and "T2" in hits[0].message, [f.render() for f in hits]
+
+
+# --- --by-dir: tách nguồn phát hiện theo thư mục (RQ-115) -----------------------------------------------------
+
+
+def c_display(path: Path) -> str:
+    return check.c.display(path)
+
+
+def test_by_dir_splits_findings_per_directory_without_changing_levels(tmp_path, capsys):
+    bad = make_sprint(tmp_path / "x")
+    _new_delegated_report(bad, log=None)
+    good = make_sprint(tmp_path / "y")
+    plain = check.check_paths([tmp_path])
+    code_plain = check.main([str(tmp_path)])
+    capsys.readouterr()
+    code = check.main(["--by-dir", str(tmp_path)])
+    out = capsys.readouterr().out
+    assert code == code_plain == plain.exit_code
+    assert "theo thư mục" in out
+    block = out.split("theo thư mục", 1)[1].splitlines()
+    rows = [line for line in block if "Phải sửa" in line]
+    assert len(rows) == 1 and rows[0].strip().startswith(c_display(bad)) and c_display(good) not in out
+    assert f"Phải sửa {len(plain.findings)}" in rows[0]  # tổng theo thư mục = tổng chung (một thư mục có phát hiện)
+
+
+def test_without_by_dir_output_has_no_directory_block(tmp_path, capsys):
+    _new_delegated_report(make_sprint(tmp_path / "x"), log=None)
+    check.main([str(tmp_path)])
+    assert "theo thư mục" not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("model", ["Claude", "Fable", "Fable 5", "GPT 6", "Opus", "Gemini"])
+def test_decision_log_model_partial_name_is_not_a_known_model(tmp_path, monkeypatch, model):
+    """Khớp lỏng bị cấm: tên thiếu phiên bản / chỉ tên hãng không phải model có thật trong bảng (RF1 của kiểm)."""
+    root = make_sprint(tmp_path / "s")
+    _tiers_file(tmp_path, monkeypatch, ["claude-fable-5-2", "gpt-6-astra"])
+    row = f"| Đạt Cổng 2 | agent-d · gate-delegate · T1 · {model} | evidence/gate-2-verdict.md | git revert abc1234 |\n"
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + row)
+    assert len(_rule_hits(root, "decision-log-missing")) == 1
+
+
+@pytest.mark.parametrize("model", ["Fable 5.2 (high)", "Fable 5.2 xhigh", "`claude-fable-5-2` · max"])
+def test_decision_log_model_effort_suffix_is_ignored(tmp_path, monkeypatch, model):
+    root = make_sprint(tmp_path / "s")
+    _tiers_file(tmp_path, monkeypatch, ["claude-fable-5-2", "gpt-6-astra"])
+    row = f"| Đạt Cổng 2 | agent-d · gate-delegate · T1 · {model} | evidence/gate-2-verdict.md | git revert abc1234 |\n"
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + row)
+    assert _rule_hits(root, "decision-log-missing") == []
+
+
+@pytest.mark.parametrize("content", ["not json", "[1, 2]", '{"tiers": {"T1": {"models": "x"}}}'])
+def test_decision_log_broken_tiers_file_skips_model_check(tmp_path, monkeypatch, content):
+    root = make_sprint(tmp_path / "s")
+    bad = tmp_path / "tiers.json"
+    bad.write_text(content, encoding="utf-8")
+    monkeypatch.setenv("AGENT_AGILE_TIERS", str(bad))
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + "| Đạt Cổng 2 | agent-d · gate-delegate · T1 · Model Bịa 1 | evidence/gate-2-verdict.md | git revert abc1234 |\n")
+    assert _rule_hits(root, "decision-log-missing") == []
+
+
+@pytest.mark.parametrize("model", ["gemini-4-argon-high", "Gemini 4 Argon high", "gemini-3.8-flash-medium"])
+def test_decision_log_table_id_with_effort_suffix_matches_itself(tmp_path, monkeypatch, model):
+    """RF4 (Gate Delegate Cổng 2): id trong bảng thật có hậu tố effort, ghi đúng nguyên id thì phải qua."""
+    root = make_sprint(tmp_path / "s")
+    _tiers_file(tmp_path, monkeypatch, ["gemini-4-argon-high", "gemini-3.8-flash-medium"])
+    row = f"| Đạt Cổng 2 | agent-d · gate-delegate · T1 · {model} | evidence/gate-2-verdict.md | git revert abc1234 |\n"
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + row)
+    assert _rule_hits(root, "decision-log-missing") == []
+
+
+@pytest.mark.parametrize("model", ["ble 5.2", "le 5.2", "t6astra", "Fable 5.2x"])
+def test_decision_log_model_must_match_on_word_boundary(tmp_path, monkeypatch, model):
+    """RF5: khớp đuôi theo từ, không theo ký tự (`le 5.2` không phải `claude-fable-5-2`)."""
+    root = make_sprint(tmp_path / "s")
+    _tiers_file(tmp_path, monkeypatch, ["claude-fable-5-2", "gpt-6-astra"])
+    row = f"| Đạt Cổng 2 | agent-d · gate-delegate · T1 · {model} | evidence/gate-2-verdict.md | git revert abc1234 |\n"
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + row)
+    assert len(_rule_hits(root, "decision-log-missing")) == 1
+
+
+@pytest.mark.parametrize("model", ["Gemini 4 Argon", "gemini-3.8-flash", "Gemini 3.8 Flash (medium)"])
+def test_decision_log_name_without_effort_matches_table_id_with_effort(tmp_path, monkeypatch, model):
+    """Reviewer vòng 2: ghi tên không kèm effort phải khớp id bảng có hậu tố effort."""
+    root = make_sprint(tmp_path / "s")
+    _tiers_file(tmp_path, monkeypatch, ["gemini-4-argon-high", "gemini-3.8-flash-medium"])
+    row = f"| Đạt Cổng 2 | agent-d · gate-delegate · T1 · {model} | evidence/gate-2-verdict.md | git revert abc1234 |\n"
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + row)
+    assert _rule_hits(root, "decision-log-missing") == []

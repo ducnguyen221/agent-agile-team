@@ -21,7 +21,7 @@ python scripts/init.py <gốc-dự-án> --apply             # ghi .agile.json + 
 python scripts/init.py <gốc-dự-án> --apply --sprint <slug> (--title "<mục tiêu>" | --title-file <file>) [--tiny]
        [--size tiny|small|medium|large] [--risk normal|high] [--risk-tags a,b] [--request RQ-NNN] [--feature FS-NNN]
        [--date YYYY-MM-DD]
-python scripts/check.py <file.md|.agile.json|thư-mục> [...] [--include-evidence]   # thư mục: quét đệ quy *.md và mọi .agile.json
+python scripts/check.py <file.md|.agile.json|thư-mục> [...] [--include-evidence] [--by-dir]   # thư mục: quét đệ quy *.md và mọi .agile.json
 python scripts/check.py <thư-mục-pilot> --routing-manifest <manifest.json>
 python scripts/check.py --self [--root <repo>]
 python scripts/index.py <gốc-dự-án> [--check]          # --check: không ghi, thoát 1 nếu sổ chưa cập nhật
@@ -42,6 +42,7 @@ của một thư mục sprint bằng tổng số phát hiện của các file `.
 Thư mục `evidence` ở chỗ khác (cha không có tài liệu sprint) là tài liệu thật của dự án và vẫn được quét. Cờ
 `--include-evidence` quét lại cả `evidence/` cạnh tài liệu sprint (hành vi cũ). Đường file truyền đích danh, hoặc
 chính thư mục `evidence/` truyền làm gốc quét, luôn được kiểm, có cờ hay không. `--self` không đổi và không nhận cờ này.
+`--by-dir` in thêm, sau dòng tổng, số phát hiện theo từng thư mục chứa file (chỉ thư mục có phát hiện); không đổi mức luật hay mã thoát. Dùng để tách nguồn khi quét hồ sơ cũ.
 
 ## Rào máy autopilot
 
@@ -150,7 +151,7 @@ dấu huyền. Mã bị bắt có dấu huyền sát bên thì phát hiện kèm
 | `delegation-floor-file` | Phải sửa | Khối `delegation` mà `delegation.files` nêu một file thuộc sàn cứng (`FLOOR_FILES`: `FENCE_FILES`, `floor_check.py`, các test ghim, `verify.yml`…): không duyệt thay được. File chỉ chứa **vùng** sàn (`AGENTS.md`, `method/{process,sizing,autopilot}.md`) không bị luật này báo — `floor_check` so vùng đó với base |
 | `gate-signer-independence` | Phải sửa | Khối `delegation` mới (`grant_at` từ 2026-11-13) mà `delegation.by` trùng nhãn vai thực thi ở tài liệu khác cùng sprint (trùng trong cùng file do `self-review` báo), hoặc `delegation.tier` thấp hơn tier của một vai thực thi trong sprint, hoặc cổng `delegated` đã kết luận mà `evidence/gate-<N>-verdict.md` (cạnh tài liệu) vắng hay có dòng đầu khác `gate_<N>_quote`. Một phát hiện chỉ báo một lần dù `SPRINT.md` có hai cổng. Hồ sơ cũ không bị áp. |
 | `gate-route-floor` | Phải sửa | Cổng `gate_N_mode: delegated` (kể cả còn `pending`, không đợi kết luận) mà bảng `## File luật và file sàn cứng sẽ chạm` của PLAN khai file thuộc `FLOOR_FILES` hoặc có vùng sàn (`FLOOR_ZONES`), hoặc `risk_tags` có `rules` mà `delegation.files` rỗng: cổng đi người, trình lời khuyến nghị. Báo một lần mỗi lý do cho mỗi tài liệu |
-| `decision-log-missing` | Phải sửa | REPORT hay `SPRINT.md` có Cổng 2 `delegated` đã kết luận, khối `delegation` có `grant_at` từ 2026-11-13, mà không có mục `## Nhật ký quyết định` (hay gạch đầu dòng `- **Nhật ký quyết định:**` kèm bảng) chứa ít nhất một dòng bảng đủ cột `Ai ký` (bốn phần nhãn · vai · tier · model cách nhau bằng `·`), `Bằng chứng` và `Lệnh hoàn tác` khác rỗng và khác `—` (`method/autopilot.md` mục 8). Hồ sơ cũ không bị áp |
+| `decision-log-missing` | Phải sửa | REPORT hay `SPRINT.md` có Cổng 2 `delegated` đã kết luận, khối `delegation` có `grant_at` từ 2026-11-13, mà không có mục `## Nhật ký quyết định` (hay gạch đầu dòng `- **Nhật ký quyết định:**` kèm bảng) chứa ít nhất một dòng bảng đủ cột `Ai ký` (bốn phần nhãn · vai · tier · model cách nhau bằng `·`), `Bằng chứng` và `Lệnh hoàn tác` khác rỗng và khác `—` (`method/autopilot.md` mục 8). Khi `AGENT_AGILE_TIERS` trỏ bảng tier đọc được, phần `model` của `Ai ký` phải có trong bảng (chỉ model có tier ở khoá `models`, không phải mọi model hãng có; so khoá chữ-số sau khi bỏ chú thích ngoặc và hậu tố effort: `Fable 5.2` khớp `claude-fable-5-2`, còn `Claude`, `Fable`, `Fable 5` thì không); thiếu bảng thì không kiểm tên model. Nhãn người ký không bị kiểm. Hồ sơ cũ không bị áp |
 | `session-cap-missing` | Phải sửa | PLAN (mục `## Ước lượng`) hay `SPRINT.md` có Cổng 1 `delegated` đã kết luận, khối `delegation` có `grant_at` từ 2026-11-13, mà thiếu dòng `Trần phiên: <số nguyên >= 1>`, hoặc `delegation.sessions_cap` null/vắng/khác số đó, hoặc số vượt công thức theo `size`/`risk` (`_autopilot_rules.session_cap_formula`, bảng `method/autopilot.md` mục 2.1) mà Nhật ký quyết định (của file hay tài liệu cùng sprint) không có dòng "nâng trần". Hồ sơ cũ không bị áp |
 | `frontmatter-duplicate-key` | Phải sửa | Khoá `delegation` lặp ở frontmatter: chỉ phiên điều phối ghi một khối. Thay `frontmatter-syntax` cho đúng trường hợp này; khoá lặp khác vẫn là `frontmatter-syntax` |
 | `decision-owner-missing` | Nên sửa | Bảng `CQ`/`DN` (cột đầu `Mã`) của SPEC/PLAN/SPRINT có `created` từ `MODE_OPEN_EFFECTIVE_DATE` mà thiếu cột hoặc ô `Người quyết` (người · cổng · Analyst). Hồ sơ cũ hơn ngày đó không bị báo |
