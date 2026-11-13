@@ -37,7 +37,7 @@ trông ra sao, hay phải chọn giữa nhiều cách) không phải làm thẳn
   trong test đi kèm là hai thao tác; tự kiểm/chạy test đi kèm không tính thêm. Sàn cỡ vẫn áp: sửa hành vi một luồng
   có sẵn là nhỏ, tính năng mới là vừa, vùng rủi ro là lớn. Không chia một mục tiêu thành nhiều lượt làm thẳng để
   né sprint; đếm toàn bộ việc cần để mục tiêu xong, chỉ tách các mục tiêu độc lập.
-- **Phân vân giữa hai bậc → chọn bậc nặng hơn** (nhỏ ↔ vừa: đo theo mục 3.1). Nghi cần hơn 2 thao tác hay kết quả chưa rõ thì không phải làm
+- **Phân vân giữa hai bậc → chọn bậc nặng hơn**. Nghi cần hơn 2 thao tác hay kết quả chưa rõ thì không phải làm
   thẳng; nghi có đổi hành vi hay hợp đồng thì không phải rất nhỏ; nghi hơn một luồng thì không phải nhỏ.
 - **Bậc được khuyến nghị, không tự quyết một chiều:** Analyst nêu bậc khuyến nghị và "có mở sprint không" trong
   **một** tin trao đổi tiếp nhận ([process.md](process.md) mục 2); người dùng xác nhận hay đổi. Bỏ lượt này khi
@@ -100,7 +100,7 @@ dùng khi phân vân giữa nhỏ và vừa (và để tính trần phiên ở [
 |---|---|---|---|
 | 1 | đúng một `FR` | đếm `FR` ở mức một trong SPEC; kịch bản `FR1.1`, `FR1.2` cùng một `FR1` vẫn là một | từ hai `FR` trở lên (hai hành vi cần kiểm riêng) |
 | 2 | không có hành vi hay luồng mới | không thêm `US` cho việc người dùng chưa làm được trước đây; việc chỉ đổi điều kiện, giá trị, chữ hay thứ tự trong luồng đã chạy được | thêm bước, màn hình, lệnh, đường vào hay kiểu đầu ra mới |
-| 3 | không đổi hợp đồng / giao diện / schema | như mục 1; đổi chữ ký hàm chỉ dùng trong một mô-đun thì vẫn đúng | đổi chữ ký công khai hay mà bên ngoài mô-đun gọi, trường dữ liệu, định dạng file đầu ra hay khoá cấu hình mà bên khác đọc |
+| 3 | không đổi hợp đồng / giao diện / schema | như mục 1; đổi chữ ký hàm chỉ dùng trong một mô-đun thì vẫn đúng | đổi chữ ký công khai hay chữ ký mà bên ngoài mô-đun gọi, trường dữ liệu, định dạng file đầu ra hay khoá cấu hình mà bên khác đọc |
 | 4 | tối đa 4 `TK` | đếm `TK` mức một trong PLAN; việc con `TK2.3` không tính | từ 5 `TK` |
 | 5 | ước tính tối đa 8 phiên agent | số phiên = số `TK` + 4 (một reviewer, hai lần Gate Delegate, một lần giao lại sau review); 8 là trần cơ sở cỡ nhỏ | ước tính trên 8 |
 
