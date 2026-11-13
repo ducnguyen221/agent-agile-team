@@ -77,6 +77,8 @@ RULES: dict[str, tuple[str, str]] = {
     "agents-md-budget": (PHAI, "`--self`: `AGENTS.md` quá 120 dòng hoặc quá 10 KB"),
     "delegation-floor-file": (PHAI, "`delegation.files` nêu file thuộc sàn cứng (`FLOOR_FILES`): không duyệt thay được"),
     "gate-signer-independence": (PHAI, "người ký cổng trùng nhãn phiên người làm ở tài liệu cùng sprint, hoặc tier người ký thấp hơn tier người làm (khối duyệt thay từ ngày hiệu lực)"),
+    "decision-log-missing": (PHAI, "REPORT có Cổng 2 duyệt thay mới mà thiếu mục 'Nhật ký quyết định' đủ ai ký · model · bằng chứng · lệnh hoàn tác"),
+    "session-cap-missing": (PHAI, "PLAN có Cổng 1 duyệt thay mới mà mục 'Ước lượng' thiếu dòng 'Trần phiên: <số>'"),
     "gate-route-floor": (PHAI, "cổng `delegated` (kể cả còn `pending`) mà bảng 'File luật và file sàn cứng sẽ chạm' khai file sàn cứng, hoặc `risk_tags` có `rules` mà `delegation.files` rỗng: chuyển cổng người, trình lời khuyến nghị"),
     "frontmatter-duplicate-key": (PHAI, "khoá `delegation` lặp trong frontmatter (chỉ một phiên điều phối ghi lời cấp)"),
     "decision-owner-missing": (NEN, "CQ/DN của sprint từ ngày chế độ mở mà bảng thiếu cột hoặc ô 'Người quyết'"),
@@ -1375,6 +1377,7 @@ class Engine:
         signer = block.get("by")
         if isinstance(signer, str) and signer.strip() and signer != "pending":  # trước kiểm T1 để tier thấp hơn người làm cũng được gọi tên
             self._signer_independence(doc, block, signer)
+        self._autopilot_records(doc, gate, block)
         if block.get("tier") != "T1":
             return bad("delegation.tier" if "tier" in block else "delegation", f"người duyệt thay phải là T1, đang là {block.get('tier')!r}")
         by = block.get("by")
@@ -1465,6 +1468,55 @@ class Engine:
             if below:
                 self.add(doc.path, doc.key_line("delegation.tier"), "gate-signer-independence",
                          f"tier người ký {signer} thấp hơn tier người làm ({', '.join(below)})")
+
+    def _autopilot_records(self, doc: Doc, gate: str, block: dict) -> None:
+        """Hồ sơ phải có của duyệt thay mới (SPR-20 TK25; chỉ khi `grant_at` từ `MODE_OPEN_EFFECTIVE_DATE`, hồ sơ cũ giữ nguyên kết quả):
+        REPORT ở Cổng 2 phải có mục `## Nhật ký quyết định` với ít nhất một dòng đủ ai ký (nhãn · vai · tier · model, bốn phần cách nhau
+        bằng `·`), bằng chứng, lệnh hoàn tác (`method/autopilot.md` mục 8); PLAN ở Cổng 1 phải có dòng `Trần phiên: <số nguyên >= 1>`
+        trong mục `## Ước lượng` (mục 2.1)."""
+        moment = parse_moment(block.get("grant_at"))
+        if moment is None or moment[0].isoformat() < rules.MODE_OPEN_EFFECTIVE_DATE:
+            return
+        if gate == "gate_2" and doc.kind == "report":
+            if not self._has_decision_log(doc):
+                self.add(doc.path, doc.key_line("gate_2_mode"), "decision-log-missing",
+                         "Cổng 2 duyệt thay mà REPORT không có mục 'Nhật ký quyết định' với dòng đủ ai ký (nhãn · vai · tier · model), "
+                         "bằng chứng và lệnh hoàn tác")
+        elif gate == "gate_1" and doc.kind == "plan":
+            cap = None
+            inside = False
+            for line in doc.raw:
+                if line.startswith("## "):
+                    inside = line[3:].strip().casefold() == "ước lượng"
+                elif inside and (m := re.match(r"\s*(?:[-*]\s*)?(?:\*\*)?trần phiên:?(?:\*\*)?:?\s*(\d+)\b", line, re.IGNORECASE)):
+                    cap = int(m.group(1))
+                    break
+            if cap is None or cap < 1:
+                self.add(doc.path, doc.key_line("gate_1_mode"), "session-cap-missing",
+                         "Cổng 1 duyệt thay mà mục 'Ước lượng' của PLAN không có dòng 'Trần phiên: <số nguyên >= 1>'")
+
+    @staticmethod
+    def _has_decision_log(doc: Doc) -> bool:
+        inside, header = False, None
+        for line in doc.raw:
+            if line.startswith("## "):
+                inside, header = line[3:].strip().casefold() == "nhật ký quyết định", None
+                continue
+            cells = c.table_cells(line) if inside else None
+            if cells is None or c.is_separator_row(cells):
+                continue
+            folded = [cell.casefold() for cell in cells]
+            if header is None:
+                if "ai ký" in folded and "bằng chứng" in folded and "lệnh hoàn tác" in folded:
+                    header = {name: folded.index(name) for name in ("ai ký", "bằng chứng", "lệnh hoàn tác")}
+                continue
+            if len(cells) <= max(header.values()):
+                continue
+            filled = [cells[i].strip() not in ("", "—", "-", "–") for i in (header["bằng chứng"], header["lệnh hoàn tác"])]
+            parts = [p for p in re.split(r"\s*·\s*", cells[header["ai ký"]]) if p.strip()]
+            if all(filled) and len(parts) >= 4:
+                return True
+        return False
 
     def _route_floor(self, doc: Doc, gate: str, done: bool) -> None:
         """Định tuyến cổng (SPR-20 FR6.2-FR6.3): cổng `delegated` mà PLAN khai file sàn cứng, hoặc có `rules` mà `delegation.files`

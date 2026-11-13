@@ -2635,6 +2635,7 @@ def _new_delegated_plan(root: Path) -> None:
     delegate_plan(root)
     _rewrite(root / "PLAN.md", "gate_1_at: 2026-02-01 09:00 +07", "gate_1_at: 2026-11-13 09:00 +07")
     _rewrite(root / "PLAN.md", "grant_at: 2026-02-01 08:30 +07", "grant_at: 2026-11-13 08:30 +07")
+    _rewrite(root / "PLAN.md", "## Ước lượng\n\n", "## Ước lượng\n\nTrần phiên: 8 (cỡ nhỏ × rủi ro thường, mục 2.1)\n\n")
 
 
 def _signer_hits(root: Path) -> list:
@@ -2674,3 +2675,76 @@ def test_signer_rule_ignores_old_delegation_blocks(tmp_path):
     _rewrite(root / "PROGRESS.md", "  implementer: [T2, agent-e]\n", "  implementer: [T2, agent-d]\n")
     _rewrite(root / "PROGRESS.md", "  tech-reviewer: [T1, agent-d]\n", "  tech-reviewer: [T1, agent-h]\n")
     assert _signer_hits(root) == []
+
+
+# --- Nhật ký quyết định và trần phiên (SPR-20 TK25) ---------------------------------------------------------
+
+DECISION_LOG_HEAD = "## Nhật ký quyết định\n\n| Quyết định | Ai ký | Bằng chứng | Lệnh hoàn tác |\n|---|---|---|---|\n"
+DECISION_LOG_OK = DECISION_LOG_HEAD + "| Đạt Cổng 2 | agent-d · gate-delegate · T1 · Fable 5.2 | evidence/gate-2-verdict.md | git revert abc1234 |\n"
+
+
+def _new_delegated_report(root: Path, log: str | None = DECISION_LOG_OK) -> None:
+    """REPORT duyệt thay là khối MỚI (lời cấp từ ngày luật có hiệu lực); `log` chèn trước mục Cổng 2 (None = không có mục)."""
+    delegate_report(root)
+    _rewrite(root / "REPORT.md", "gate_2_at: 2026-02-02 17:00 +07", "gate_2_at: 2026-11-13 17:00 +07")
+    _rewrite(root / "REPORT.md", "grant_at: 2026-02-02 08:00 +07", "grant_at: 2026-11-13 08:00 +07")
+    if log is not None:
+        _rewrite(root / "REPORT.md", "## 8. Cổng 2", log + "\n## 8. Cổng 2")
+
+
+def _rule_hits(root: Path, rule: str) -> list:
+    return [f for f in check.check_paths([root]).findings if f.rule == rule]
+
+
+def test_new_delegated_report_without_decision_log_is_flagged(tmp_path):
+    root = make_sprint(tmp_path)
+    _new_delegated_report(root, log=None)
+    assert len(_rule_hits(root, "decision-log-missing")) == 1
+    assert check.RULES["decision-log-missing"][0] == "Phải sửa"
+
+
+@pytest.mark.parametrize("row", [
+    "| Không có quyết định nào ngoài hai cổng. | — | — | — |\n",
+    "| Đạt Cổng 2 | agent-d · gate-delegate · T1 | evidence/gate-2-verdict.md | git revert abc1234 |\n",
+    "| Đạt Cổng 2 | agent-d · gate-delegate · T1 · Fable 5.2 | — | git revert abc1234 |\n",
+    "| Đạt Cổng 2 | agent-d · gate-delegate · T1 · Fable 5.2 | evidence/gate-2-verdict.md |  |\n",
+], ids=["placeholder", "no-model", "no-evidence", "no-undo"])
+def test_decision_log_row_must_have_signer_model_evidence_and_undo(tmp_path, row):
+    root = make_sprint(tmp_path)
+    _new_delegated_report(root, log=DECISION_LOG_HEAD + row)
+    assert len(_rule_hits(root, "decision-log-missing")) == 1
+
+
+def test_complete_decision_log_is_clean(tmp_path):
+    root = make_sprint(tmp_path)
+    _new_delegated_report(root)
+    assert [f.render() for f in check.check_paths([root]).findings] == []
+
+
+def test_old_delegated_report_without_decision_log_not_flagged(tmp_path):
+    """Hồ sơ cũ (lời cấp trước ngày hiệu lực) không sinh phát hiện mới."""
+    root = make_sprint(tmp_path)
+    delegate_report(root)
+    assert _rule_hits(root, "decision-log-missing") == []
+
+
+def test_new_delegated_plan_without_session_cap_is_flagged(tmp_path):
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root)
+    _rewrite(root / "PLAN.md", "Trần phiên: 8 (cỡ nhỏ × rủi ro thường, mục 2.1)\n\n", "")
+    assert len(_rule_hits(root, "session-cap-missing")) == 1
+    assert check.RULES["session-cap-missing"][0] == "Phải sửa"
+
+
+@pytest.mark.parametrize("line", ["Trần phiên: <N>", "Trần phiên: tám", "Trần phiên: 0"], ids=["placeholder", "word", "zero"])
+def test_session_cap_line_must_carry_a_positive_number(tmp_path, line):
+    root = make_sprint(tmp_path)
+    _new_delegated_plan(root)
+    _rewrite(root / "PLAN.md", "Trần phiên: 8", line)
+    assert len(_rule_hits(root, "session-cap-missing")) == 1
+
+
+def test_session_cap_ignores_old_delegation_blocks(tmp_path):
+    root = make_sprint(tmp_path)
+    delegate_plan(root)
+    assert _rule_hits(root, "session-cap-missing") == []
