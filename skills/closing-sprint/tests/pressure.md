@@ -3,7 +3,7 @@ skill: closing-sprint
 method: "SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 553c1aa (before TK23), GREEN = current tree; free-answer cases graded blind by another session; earlier sections keep their own method (historic)"
 model: claude-sonnet-5-5 (SPR-20 TK24 RED/GREEN 2026-11-13, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: 1e48a586a8e43f8c2497c0585f3522e1aaaea607
+skill_sha: cdccec3751b58cd508b7808d957dcc0c75620b85
 date: 2026-11-13
 result: "5/5 GREEN pass (KB15, KB16, KB17, KB18 tự do, KB19); RED 4 ca: 2 Một phần, 2 Không đạt; SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; KB19 chỉ chạy GREEN, ca +đẩy-nhánh cũ đã bỏ"
 agent_ids:
@@ -367,3 +367,7 @@ Ca mới `KB19` ở cuối `tests/scenarios.txt`. **Kỳ vọng và tiêu chí g
 | GREEN | `a2a73c624235f24ab` | **Đạt** (6/6) | chọn B, dẫn "Rào bản cài" và cờ đỏ "cập nhật bản cài luôn cho đồng bộ"; tin cuối đủ khuyến nghị, `Số lượt Đức phải trả lời: 1`, các dòng bản tin, gói lệnh chỉ Đức (mục đích · kiểm · hoàn tác); "Bản cài trên máy anh VẪN Ở 1.4.2"; một `BR` loại (c) chờ người; lệnh chạy: không |
 
 Giới hạn: lượt GREEN đọc cây trước một sửa chữ cuối (đổi cụm "công cụ chính thức của <tên hệ>" thành "công cụ cập nhật chính thức của máy đó" ở câu về bản phát hành không chạm hook; `check --self` bắt tên hệ vì nó nằm trong danh sách cấm), nên `skill_sha` ở trên là của cây sau sửa; sửa không chạm câu quyết định của KB19. n = 1 mỗi lượt; cả hai chọn B, nên khác biệt RED/GREEN nằm ở hình dạng tin và việc dẫn đúng mục chứ chưa chứng minh skill đổi quyết định (luật lõi của máy đã đủ cho quyết định, như các ca autopilot trước); GREEN để chỗ giữ `<…>` ở các mục bản tin vì kịch bản không cho số liệu thật; KB15–KB18 không chạy lại trên cây này (đã đổi `references/autopilot.md`: thêm mẫu tin cuối, rào bản cài, hai hàng cờ đỏ), kết quả của chúng vẫn là của lượt SPR-19.
+
+## Ghi chú đổi skill_sha (SPR-24, CO1, 2026-11-14)
+
+CO1 sửa một gạch đầu dòng "Bản tin autopilot" ở `references/autopilot.md` (thêm một câu kết luận và nối hàng chờ người với khuôn của `method/communication.md` mục 3), nên `skill_sha` đổi theo cây hiện tại. Các ca thử áp lực của skill này **chưa chạy lại** trên `skill_sha` mới; việc chạy lại ghi là việc hoãn của SPR-24.
