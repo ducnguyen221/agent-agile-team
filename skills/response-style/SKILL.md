@@ -38,7 +38,8 @@ Người dùng hỏi "phân tích kỹ" không có nghĩa viết dài: kỹ = đ
 1. **Câu đầu** = kết luận, hoặc điều người đọc phải làm/quyết. Không dẫn nhập, không "Em xin báo cáo".
 2. **2–4 lý do** không chồng nhau, mỗi lý do một dòng.
 3. **Bảng lựa chọn** khi có quyết định: cột *cách làm · đánh đổi & rủi ro · chi phí · khi nào chọn*;
-   đánh dấu **khuyến nghị** và nói vì sao. Chỉ dùng bảng khi ≥3 mục × ≥2 thuộc tính.
+   đánh dấu **khuyến nghị** và nói vì sao. Chỉ dùng bảng khi ≥3 mục × ≥2 thuộc tính. Cột chi phí hay thời lượng
+   mang nhãn ở tiêu đề cột ("Thời lượng (ước tính)"), không lặp nhãn ở từng ô.
 4. **Chi tiết kỹ thuật** — lớp hai, có tiêu đề riêng, người không chuyên bỏ qua được. Tối đa hai lớp.
 5. **Bước tiếp theo** — ai làm gì, cần gì từ người đọc.
 
@@ -57,6 +58,7 @@ Không có bảng tóm tắt ở cuối, không lặp kết luận.
 | Tóm tắt lặp ở cuối | bỏ; kết luận đã ở câu đầu |
 | "Tùy" không kèm tiêu chí | "chọn A khi …, chọn B khi …" |
 | Số liệu không nguồn ("thường nhanh gấp 5 lần") | số có nguồn (đo, tài liệu, lệnh), hoặc nói rõ **chưa đo** và đưa cách đo; không đưa số để lấp chỗ trống |
+| Ước lượng do mình tự đưa mà không nhãn (con số hoặc khoảng có đơn vị thời gian, công sức hay tiền, người đọc chưa nêu và mình chưa đo) | gắn **(ước tính)** trong cùng câu hoặc cùng ô; nhiều ước lượng cùng loại thì gom vào một cột hay một danh sách và đặt nhãn một lần ở tiêu đề cột hoặc câu dẫn; chưa có căn cứ để ước thì viết **chưa đo**, đừng thay bằng số; cách lấy số thật nêu một lần; ước lượng không ai hỏi (lịch theo ngày) đẩy xuống lớp hai dưới một tiêu đề có nhãn; trước khi gửi rà lại mọi con số một lượt |
 | Hỏi lẻ nhiều câu | gom thành một lượt hỏi, mỗi câu kèm phương án đề xuất |
 
 ## 5. Bất khả xâm phạm khi nén
@@ -92,6 +94,7 @@ Mã luôn kèm tên ngắn; trước danh sách mã có câu dẫn "<tài liệu
 Thuật ngữ giải nghĩa lần đầu. Bảng chỉ khi ≥3 mục × 2 thuộc tính.
 Nén không bao giờ bỏ: báo lỗi, cảnh báo bảo mật, xác nhận thao tác phá hủy, số liệu + đơn vị, mã lỗi,
 đường dẫn, chữ phủ định (không/chưa/chỉ/trừ khi). Số không có nguồn thì nói "chưa đo" + cách đo.
+Ước lượng thời gian/công sức/tiền do mình đưa: nhãn "(ước tính)" cùng câu hoặc cùng ô, hoặc ở tiêu đề cột/câu dẫn của danh sách; chưa có căn cứ thì viết "chưa đo", không thay bằng số.
 Báo cáo về điều phối: Kết quả / Chứng cứ / Còn mở / Cần người, ≤15 dòng, con trỏ file thay log.
 Tin dựa trên file → câu dẫn kèm link `[tên:dòng](đường:dòng)`; hỏi người chốt → một dòng hỏi + phương án + dòng
 KHUYẾN NGHỊ có lý do (im lặng không phải là duyệt). Luật đầy đủ: method/communication.md.
