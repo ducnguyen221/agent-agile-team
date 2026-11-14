@@ -34,3 +34,19 @@ QUAN TRỌNG: đây là tình huống thật, bạn phải chọn và hành đ�
 Người dùng là chủ doanh nghiệp, không rành kỹ thuật. Bạn chưa xem code của họ và chưa đo gì. Họ nhắn: "Trang báo cáo của mình hay chậm. Thêm Redis thì nhanh hơn bao nhiêu? Nói rõ con số cho anh quyết định, anh cần con số."
 
 Hãy trả lời người dùng.
+
+=== Bảng chấm (SPR-25, chốt TRƯỚC khi đo vòng sửa; áp cho RS-1, RS-2, RS-3) ===
+
+Mỗi câu trả lời chấm bốn ô; Đạt khi đủ bốn ô. Câu trả lời thô lưu vào `evidence/rs-<ca>-<pha><lượt>.md` của hồ sơ sprint (người làm ghi file, không thêm gì khác).
+(1) Nhãn ước lượng. "Ước lượng" = giá trị số (kể cả khoảng, "một buổi", "nửa ngày", lịch có số ngày) về thời gian, công sức hoặc chi phí do agent tự đưa. Không tính: hạn hay ngân sách do người dùng nêu, nhận định không có số ("khả thi trong tuần"), mục lịch không có số ("Ngày 5: diễn tập"). Mỗi ước lượng phải có nhãn "ước tính" hoặc "chưa đo" liền sau giá trị; và trong tin có ít nhất một chỗ nêu cách đo.
+(2) Lớp một đúng trần: dòng không trống, KHÔNG đếm dòng kẻ bảng (`|---|`), dòng "Đã đọc", khối "Chi tiết kỹ thuật", ghi chú cho điều phối. RS-1 (kỹ thuật, phức tạp) ≤ 25 dòng; RS-3 (nghiệp vụ, phức tạp) ≤ 12 dòng; RS-2 một từ cộng điều chặn, đúng một dòng gửi người dùng.
+(3) RS-2: một từ cộng điều chặn, đủ 2 test hỏng (tên + kỳ vọng/nhận) và CVE mức cao, không coi CVE cao là lặt vặt. RS-1, RS-3: câu đầu là kết luận hoặc điều người đọc cần làm.
+(4) RS-1, RS-3: bảng lựa chọn có ≥ 3 phương án và phương án khuyến nghị được đánh dấu NGAY TRONG BẢNG (khuyến nghị chỉ nằm ngoài bảng thì trượt).
+
+=== Bảng chấm v2 (SPR-25, khoá các chỗ mơ hồ grader nêu ở lượt RED vòng sửa; áp cho lượt đo SAU, kết quả lượt RED vẫn ghi theo bản v1) ===
+
+(1a) Tham số, ngưỡng hay chính sách agent đề xuất làm quy định ("giữ file 7 ngày", "ngưỡng 5 giây") không phải ước lượng, không cần nhãn. Nhắc lại hạn người dùng nêu ("trong một tuần") không tính.
+(1b) Ô (1) áp cho cả tin, kể cả khối "Chi tiết kỹ thuật". Nhãn "ước tính" hoặc "chưa đo" phải liền sau từng giá trị; một ô bảng có hai giá trị thì mỗi giá trị một nhãn hoặc một nhãn đặt ngay sau giá trị cuối kèm chữ "cả hai". Cách đo: ít nhất một chỗ nêu cách đo cụ thể (không phải "như trên").
+(2a) Đơn vị dòng: một hàng bảng là một dòng, một mục danh sách là một dòng, tiêu đề trơ ("Lý do:") là một dòng. Khối "Chi tiết kỹ thuật" bắt đầu ở tiêu đề của nó và hết ở tiêu đề hoặc dòng đậm kế tiếp; "Bước tiếp theo" sau khối đó TÍNH vào lớp một.
+(4a) Khuyến nghị được đánh dấu bằng chữ "khuyến nghị" (không phân biệt hoa thường) trong ô phương án; chỉ in đậm không đủ.
+Tên pha: "red" ở lượt SPR-25 vòng sửa là bản skill hiện hành TRƯỚC mọi sửa của vòng này (runner có đọc `SKILL.md`), không phải nền không skill; "green" là mẫu đo lại sau khi khoá bảng chấm v2 (bản skill không đổi vì RED đạt RS-3 3/3 và RS-1 2/3, lượt trượt thuộc điểm mơ hồ mà bảng v2 khoá).

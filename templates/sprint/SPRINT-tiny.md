@@ -67,4 +67,5 @@ Kết quả có 1 **verification result** (VR):
 | VR1 (test câu báo lỗi) | SC1 | `pytest tests/test_ui.py` | Chưa chạy | Tech Reviewer · agent-d |
 
 - **Hoàn tác / đã đổi gì:** câu báo lỗi trong `ui/orders.html`; hoàn tác bằng `git revert`.
+- **Nhật ký quyết định:** Không có quyết định nào ngoài hai cổng. <!-- mỗi quyết định: quyết gì · ai ký (nhãn · vai · tier · model) · bằng chứng · lệnh hoàn tác -->
 - **Cổng 2:** chờ nghiệm thu (gộp vào lời báo cuối).
