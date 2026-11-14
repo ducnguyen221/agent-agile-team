@@ -173,7 +173,7 @@ REPORT có 1 **carry-over** (CO), đã ghi thành dòng mới trong sổ REQUEST
 - **PR:** không có. <!-- số/đường PR, trạng thái -->
 - **Commit gộp:** không có. <!-- sha và nhánh đích; Đạt có điều kiện thì không gộp, nhánh chờ người -->
 - **Tag · bản phát hành:** không có. <!-- tên tag, đường bản phát hành -->
-- **Hoàn tác từng bước:** không áp dụng. <!-- mỗi việc đã đẩy/gộp/tag/phát hành một lệnh hoàn tác -->
+- **Hoàn tác từng bước:** không áp dụng. <!-- mỗi việc một dòng riêng, kể cả từng lần đẩy nhánh: đẩy/gộp/tag/phát hành, mỗi việc một lệnh hoàn tác -->
 - **Hàng chờ người · nhánh chờ gộp · số phiên / trần · lần dừng:** không có.
 - **Gói lệnh chỉ Đức:** không có. <!-- mỗi lệnh ghi mục đích · lệnh kiểm · hoàn tác -->
 - **Bản cài:** không đổi. <!-- bản phát hành chạm hook hay guard thì cập nhật bản cài ở bước riêng: nêu lệnh cài, lệnh kiểm, lệnh hoàn tác trước khi chạy -->
