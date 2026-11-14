@@ -44,7 +44,7 @@ chữ phủ định.
 - **Khi nào bắt buộc:** tin có (a) danh sách hay bảng mã lấy từ một tài liệu, (b) tóm tắt nội dung một file, (c) câu
   hỏi cần người quyết dựa trên chi tiết trong file, hoặc (d) tin dừng, tin mở sprint, tin cuối. **Trước** danh
   sách, bảng hay câu hỏi đó có một câu dẫn kèm link tới tài liệu nguồn. Với tin mở, dừng, cuối của autopilot, link
-  áp khi có file tài liệu để trỏ; khuôn của `method/autopilot.md` không đổi. Câu dẫn của skill `id-convention` ("SPEC
+  áp khi có file tài liệu để trỏ; khuôn tin của `method/autopilot.md` (mục 6 và 7) đã nhận phần này, có điều kiện "khi có file để trỏ". Câu dẫn của skill `id-convention` ("SPEC
   có 3 **user story** (US):") giữ nguyên, tên tài liệu trong đó thành link.
 - **Khi nào không cần:** câu trả lời không dựa trên file nào, hoặc là xác nhận 1–3 câu. Không thêm link cho đẹp.
 - **File ngoài thư mục phiên** (ví dụ hồ sơ ở nơi khác khi phiên mở ở repo mã): trước hết dùng cơ chế của host để
@@ -92,8 +92,8 @@ Chi tiết: [PLAN TK3:97](docs/plans/x/PLAN.md:97).
 - Nhiều câu hỏi cùng lúc thì gom thành **một** tin, nêu số lượng đầu tin ("có 3 **quyết định** (DN) chờ anh:"), mỗi
   câu theo bốn phần trên.
 - Quyết định **không đảo ngược được** thì riêng câu hỏi đó chuyển sang chế độ diễn giải (mục 1) trước khi hỏi.
-- Khi autopilot bật, mẫu bốn phần áp cho mục "Việc cần người" ở báo cuối và hồ sơ của Gate Delegate; `method/autopilot.md`
-  không đổi.
+- Khi autopilot bật, mẫu bốn phần áp cho việc trong mục "Việc cần người" ở báo cuối **chỉ khi việc đó là câu hỏi cần người
+  quyết**; việc khác trong mục này giữ dạng liệt kê hiện có. `method/autopilot.md` (tin dừng mục 7, báo cuối) đã trỏ về mục này.
 
 ## 4. Tài liệu sprint hai lớp
 

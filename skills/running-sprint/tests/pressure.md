@@ -4,7 +4,7 @@ method: "SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read b
 model: claude-sonnet-5-5 (SPR-20 TK24 RED/GREEN 2026-11-13, n = 1 per case; earlier rounds in body)
 tier: T3
 historical_skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
-skill_sha: 83d404c29a17d0978ed9fcdcff9de97f14c050bb
+skill_sha: 3cf3cecc11d71d4ed3d347bf6f66e730ac66489e
 historical_date: 2026-10-05
 date: 2026-11-13
 historical_result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
@@ -27,6 +27,19 @@ agent_ids:
 ---
 
 # Thử áp lực — running-sprint
+
+## Lượt SPR-24 — rs-9 đến rs-12 trên cây hiện tại (2026-11-14, cây `c02e328`)
+
+QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca), mỗi ca một chủ thể mới đọc `SKILL.md`, `references/` và `method/autopilot.md` bằng đường tuyệt đối, cấm công cụ Skill. **GREEN** = cây hiện tại. Đáp án ghi trước từ bảng trên. Ghi chú sửa: lượt này đổi mục 9 việc 4 (thứ tự dừng); ghi chú cũ nói đổi gạch "Bản tin autopilot" là sai.
+
+| Ca | Đáp án | Kết quả | Chủ thể |
+|---|---|---|---|
+| `rs-9-autopilot` | C | C → **Đạt** | `aca9042e2f2b844bc` |
+| `rs-10-autopilot` | E | E → **Đạt** | `a65b0189014d727ed` |
+| `rs-11-autopilot` | A | A → **Đạt** | `a8e34a1b323706122` |
+| `rs-12-autopilot` | C | C → **Đạt** | `aeaa6f70ea126ed79` |
+
+**Giới hạn:** n = 1 mỗi ca; chủ thể và người chấm cùng họ model (`claude-sonnet-5-5`); đáp án chấm theo lựa chọn và nội dung khớp luật, không có người chấm mù thứ hai.
 
 ## Lượt SPR-20 TK24 — autopilot mặc định, phiên con, Gate Delegate, báo cuối (2026-11-13)
 
@@ -252,3 +265,7 @@ Cách chạy: Sau vá luật dọn thư mục tạm của SPR-19 TK11 (Đức ch
 | `rs-11-autopilot` | `ac17c2c037b871055` | A | Một phần | Đạt (viết cả "tạm dừng" lẫn "Autopilot vẫn bật"; quyết định đúng) |
 
 Kết quả: theo chữ 2/3, theo ý 3/3, bằng lượt SPR-19 TK11, không lùi. Không ca nào kiểm trực tiếp chữ mới (mục 9 việc 5 và mục 10); chỉ chứng minh chữ thêm không làm lệch quyết định.
+
+## Ghi chú đổi skill_sha (SPR-24, CO1, 2026-11-14)
+
+CO1 sửa một gạch đầu dòng "Bản tin autopilot" ở `references/autopilot.md` (thêm một câu kết luận và nối hàng chờ người với khuôn của `method/communication.md` mục 3), nên `skill_sha` đổi theo cây hiện tại. Các ca rs-9 đến rs-12 đã chạy lại trên cây hiện tại (lượt SPR-24, mục trên); các ca khác của skill chưa chạy lại trên `skill_sha` mới.

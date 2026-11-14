@@ -15,7 +15,7 @@
 
 Chi tiết: [method/autopilot.md](../../../method/autopilot.md) mục 2, 5, 8. Cổng 2 do Gate Delegate phiên mới ký (phiên điều phối và Analyst không ký); riêng sprint `risk_tags` `secret`/`auth` cổng về người.
 
-- **Bản tin autopilot** — REPORT mục "Bản tin autopilot" (`SPRINT.md` dùng cùng tiêu đề), người dùng đọc sau, không chặn việc: dòng đầu cảnh báo nếu `main` chưa có ruleset · một dòng mỗi cổng (cổng · kết luận · người ký · đường tới `evidence/gate-N-verdict.md`) · hàng chờ người (`BR` `chờ người`) · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do.
+- **Bản tin autopilot** — REPORT mục "Bản tin autopilot" (`SPRINT.md` dùng cùng tiêu đề), người dùng đọc sau, không chặn việc: dòng đầu cảnh báo nếu `main` chưa có ruleset · một câu kết luận (là dòng đầu khi không có cảnh báo) · một dòng mỗi cổng (cổng · kết luận · người ký · đường tới `evidence/gate-N-verdict.md`) · hàng chờ người (mục "Việc cần người"; việc nào là câu hỏi cần người quyết thì theo bốn phần của `method/communication.md` mục 3) · nhánh chờ gộp · số phiên đã dùng / trần · mọi lần dừng và lý do.
 - **Nhật ký quyết định** — REPORT (và `SPRINT.md`) có mục này: mỗi quyết định của Gate Delegate hay điều phối một dòng — quyết gì · ai ký (nhãn · vai · tier · model) · bằng chứng · lệnh hoàn tác.
 - **Nhánh sprint, menu:** Gate Delegate ghi lựa chọn (gộp local / push + PR / giữ nguyên) và số version ở `gate-2-verdict.md`; điều phối thi hành. Cổng 2 **Đạt**: sau khi CI của đúng commit xanh, push nhánh sprint, mở PR bằng `gh pr create`, tạo tag `backup/main-<ngày-giờ>`, rồi gộp PR; không đẩy ép, không commit thẳng `main`. Cổng 2 **Đạt có điều kiện**: không gộp `main`, nhánh vào hàng chờ người của bản tin.
 - Hết hạn hay hết sprint: bỏ sprint khỏi `sprints` của mọi file dấu (gốc repo và worktree phiên con), file nào rỗng thì xoá, sau cùng.
@@ -27,17 +27,19 @@ Một tin gom, gửi khi đóng sprint: Cổng 2 + bản tin + nhật ký quyế
 ```
 Cổng 2 — sprint <SPR-> (<mục tiêu>): <Đạt / Đạt có điều kiện / Không đạt>.
 Cảnh báo: <`main` chưa có ruleset — khuyến nghị mạnh, chủ repo đặt một lần> hoặc "không"
-Khuyến nghị (T1, vai <vai>): <một câu: chọn gì, loại gì, sai thì tốn gì>
+Khuyến nghị (T1, vai <vai>): <một câu, thì đã xong: đã chọn gì, đã loại gì, sai thì tốn gì>
 Bản tin autopilot:
 - Số lượt Đức phải trả lời: <số> (không tính hộp xác nhận của rào máy)
 - Cổng duyệt thay: <cổng · kết luận · người ký · evidence/gate-N-verdict.md>, mỗi cổng một dòng
 - Đã đẩy: <nhánh · remote · sha> hoặc "không" · PR: <số, trạng thái> hoặc "không"
 - Commit gộp: <sha, nhánh đích> hoặc "không" · Tag · bản phát hành: <tên, đường> hoặc "không"
-- Hoàn tác từng bước: <mỗi việc đã đẩy, gộp, tag, phát hành một lệnh hoàn tác>
+- Hoàn tác từng bước: <mỗi việc một dòng riêng, kể cả từng lần đẩy nhánh (không gộp vào dòng của PR hay commit gộp): đẩy, gộp, tag, phát hành — mỗi việc một lệnh hoàn tác>
 - Hàng chờ người · nhánh chờ gộp · phiên đã dùng / trần · mọi lần dừng và lý do
 Nhật ký quyết định: <mỗi dòng: quyết gì · ai ký (nhãn · vai · tier · model) · bằng chứng · lệnh hoàn tác>
 Đề xuất sprint kế: <một câu>
 ```
 
+- **Viết theo việc đã xong:** tin gửi khi sprint đã đóng, nên dòng "Khuyến nghị" và mọi dòng khác viết ở thì đã xong ("đã chọn", "đã loại"), không viết như việc còn chờ, trừ hàng chờ người.
+- **Chỉ dữ kiện có trong hồ sơ:** không thêm model, tên, số, phương án bị loại hay lý do không có trong hồ sơ sprint; trường không có dữ kiện thì ghi "chưa ghi" hoặc "không".
 - **Dòng đếm lượt** có mặt ở mọi REPORT; `check` báo Nên sửa khi REPORT sprint mới thiếu. Đạt có điều kiện thì bản tin không ghi đã gộp `main`; `check` báo Phải sửa nếu có.
 - **Bản cài:** bản phát hành chạm hook hay guard (`hooks/hooks.json`, `scripts/autopilot-hook.sh`, `scripts/autopilot_guard.py`, `scripts/_autopilot_rules.py`) thì cập nhật bản cài là đổi cấu hình máy: làm ở **bước riêng**, nêu rõ lệnh cài, lệnh kiểm (xem phiên bản đang cài) và lệnh hoàn tác (cài lại bản trước) **trước khi chạy**, rồi mới chạy; không sửa tay bản chép, không trỏ lại thư mục cài. Lý do: hook hỏng thì mọi phiên trên máy hỏng theo. Bản phát hành không chạm hook hay guard thì cập nhật bản cài chỉ qua công cụ cập nhật chính thức của máy đó; ghi vào bản tin.
