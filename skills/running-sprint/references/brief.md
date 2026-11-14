@@ -14,7 +14,7 @@
 | 2 | Yêu cầu | "Đọc trước: `PLAN.md` mục `TKn` — đó là yêu cầu của bạn, dùng đúng giá trị ghi ở đó" + Ràng buộc chung của PLAN (chép nguyên văn hoặc trỏ mục) |
 | 3 | Ngữ cảnh brief không biết | giao diện `TK` trước đã **sinh thật** (tên, chữ ký đúng như trong code), phán quyết đã ghi ở PROGRESS liên quan vùng này, phát hiện gác lại ở vùng này (trỏ dòng sổ) |
 | 4 | Giải mơ hồ | điểm mơ hồ Analyst đã thấy trong brief và cách Analyst quyết (một dòng mỗi điểm) |
-| 5 | Hợp đồng | thư mục làm việc · file báo cáo (`.tmp/TKn-report.md`) · khối hợp đồng ở mục 3 · khối văn phong rút gọn (skill `response-style` mục 8) |
+| 5 | Hợp đồng | thư mục làm việc · file báo cáo (`TKn-report.md` trong thư mục hồ sơ sprint `paths.sprint_dir`, không phải `.tmp/`) · khối hợp đồng ở mục 3 · khối văn phong rút gọn (skill `response-style` mục 8) |
 
 Giá trị chính xác (số, chuỗi, chữ ký, test) **chỉ** xuất hiện ở mục `TKn` của PLAN — brief trỏ, không
 chép, để không có hai nguồn lệch nhau.
@@ -26,6 +26,7 @@ chép, để không có hai nguồn lệch nhau.
 - **Thiếu ngữ cảnh:** rà nhanh 11 điểm của skill `intake` cho riêng `TK` này — điểm nào PLAN chưa trả
   lời mà Implementer sẽ vấp thì ghi vào phần 3 hoặc 4.
 - **Định dạng ra:** hợp đồng báo cáo (mục 3) có mặt nguyên văn.
+- **Phạm vi hồ sơ:** báo cáo, ảnh và log của `TK` ghi vào thư mục hồ sơ sprint của dự án (`paths.sprint_dir`), không ghi vào `.tmp/` hay thư mục bị git bỏ qua; rà secret trước khi ghi, vì xoá worktree là mất mọi thứ nằm ngoài git.
 - **Tier/model:** ghi model chỉ khi harness cần tham số; luôn ghi vào PROGRESS.
 - **Không mớm:** không ghi "reviewer sẽ không bắt X", không ghi lịch sử các `TK` trước ("trạng thái sau
   TK1–3"), không chép nội dung tài liệu Implementer tự đọc được.

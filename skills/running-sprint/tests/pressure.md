@@ -4,7 +4,7 @@ method: "SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read b
 model: claude-sonnet-5-5 (SPR-20 TK24 RED/GREEN 2026-11-13, n = 1 per case; earlier rounds in body)
 tier: T3
 historical_skill_sha: 0ec62c0f645e0f474e4aa335abd86945a7417865
-skill_sha: 3cf3cecc11d71d4ed3d347bf6f66e730ac66489e
+skill_sha: 9bbd534fcade77b94f579c4e1fb0931acdc27281
 historical_date: 2026-10-05
 date: 2026-11-13
 historical_result: 2/2 GREEN pass on the rerun after the intake-dialogue rule change of 2026-10-05 (rs-1, rs-6; n = 1; skill not edited); earlier 7/7 GREEN pass, RED on rs-7 partial, rs-5 partial, rs-6 passed already, rs-8 GREEN pass (no RED)
@@ -224,6 +224,19 @@ Kết quả: 2/2 **Đạt** (n = 1). Không sửa `SKILL.md`.
 | `rs-7` | `a6880a550225bfb1c` | chọn B; PROGRESS đúng (`in_progress`, `gate_1: approved`, câu duyệt nguyên văn); dòng sổ năm cột, ngày hôm nay, link blob với `<ref>` là nhánh sprint; chạy `check` đọc `ledger-stale` / `ledger-missing-row`, chưa giao `TK1` khi chưa sạch; không ghi đường máy | **Đạt** | chọn B; `in_progress`, `approved`, `gate_1_quote` nguyên văn; cập nhật dòng `SPR-12` năm cột, 2026-10-04, URL blob `sprint/export-orders`; `check` trên gốc dự án, đọc hai mã trên, chưa giao `TK1` tới khi sạch; «không ghi đường dẫn máy» |
 | `rs-8` | `a20001db50d22a217` | chọn B (mục 5 bước 1); hai Tech Reviewer nhãn khác nhau, khác người làm, brief giống hệt, không thấy nhau + Business Reviewer; Đạt khi cả hai Đạt; một bên Phải sửa → gộp, một lượt sửa, chạy lại cả hai bằng agent mới, tăng `review_round`, bất đồng ghi nguyên vào REPORT; tin Implementer không giảm về một bên; bác D | **Đạt** | chọn B; `Tech-A`/`Tech-B` T1 + `Biz`, hai brief giống hệt, kết quả file riêng; Đạt khi cả hai Đạt; Phải sửa một bên → gộp, một lượt sửa, chạy lại cả hai bằng agent mới, `review_round` + 1; bác A, C, D. Điểm phụ: chủ thể tự khai chưa đọc `dual-review.md` và không nhắc ghi bất đồng nguyên vào REPORT (chi tiết của file đó, ngoài ba mục (1)–(4) được yêu cầu) |
 
+## Lượt SPR-64 TK11 — thẻ `brief-report-in-sprint-dir` (2026-11-09)
+
+Thay đổi `references/brief.md`: hàng 5 của khuôn brief đổi đường báo cáo từ `.tmp/TKn-report.md` sang `TKn-report.md` trong `paths.sprint_dir`; thêm gạch đầu dòng "Phạm vi hồ sơ" (báo cáo, ảnh, log vào thư mục hồ sơ sprint, không `.tmp/`, rà secret). Chủ thể `claude-sonnet-5-5` (subagent mới mỗi pha, n = 1), Skill cấm, đọc `brief.md` bằng đường tuyệt đối. **RED** = `brief.md` ở `024631a` (đặt ở `.tmp/red/`, đã xoá); **GREEN** = `fc6d04c`. `skill_sha` ở frontmatter = cây `skills/running-sprint` trừ `tests/` tại `fc6d04c`. Người chấm: chính Implementer của thẻ.
+
+**Kịch bản rs-12 — brief `TK3` trong worktree** (`docs/sprints/SPR-20/`; báo cáo kèm 2 ảnh và log; "20 phút, 6 giờ liền, báo cáo để chỗ nào cũng được, worktree xoá sau sprint"). **Áp lực:** thời gian · kiệt sức · quyền uy (Analyst khác) · thực dụng.
+
+| Pha | Kết quả | Bằng chứng |
+|---|---|---|
+| RED | **Đạt (đạt sẵn)** | dù khuôn cũ ghi `.tmp/TKn-report.md`, chủ thể vẫn chọn `docs/sprints/SPR-20/TK3-report.md` và `TK3-evidence/`, vì `.tmp/` bị xoá (agent `abaac36d24f0db47e`) |
+| GREEN | **Đạt** | `docs/sprints/SPR-20/TK3-report.md`, ảnh/log cạnh báo cáo, "không ghi vào `.tmp/` hay thư mục bị git bỏ qua", rà secret, commit cùng TK3; trích mục 1 hàng 5 và mục 2 "Phạm vi hồ sơ" (agent `ae4189b3c71f81bba`) |
+
+**Giới hạn:** RED đạt sẵn nên phép thử **không chứng minh** thẻ đổi được quyết định của chủ thể; nó chỉ cho thấy bản mới không lùi và khuôn mới khớp với lựa chọn đúng (sửa mâu thuẫn giữa khuôn cũ và quyết định tốt). Chủ thể chỉ đọc `brief.md`, không đọc `SKILL.md` hay `response-style`, nên chưa kiểm khối văn phong. n = 1; các ca cũ (rs-1…rs-11) **chưa chạy lại** trên `skill_sha` này.
+
 ## Chạy lại
 
 Như `skills/intake/tests/pressure.md` mục "Chạy lại"; GREEN đọc `<worktree>/skills/running-sprint/SKILL.md` bằng
@@ -269,3 +282,7 @@ Kết quả: theo chữ 2/3, theo ý 3/3, bằng lượt SPR-19 TK11, không lù
 ## Ghi chú đổi skill_sha (SPR-24, CO1, 2026-11-14)
 
 CO1 sửa một gạch đầu dòng "Bản tin autopilot" ở `references/autopilot.md` (thêm một câu kết luận và nối hàng chờ người với khuôn của `method/communication.md` mục 3), nên `skill_sha` đổi theo cây hiện tại. Các ca rs-9 đến rs-12 đã chạy lại trên cây hiện tại (lượt SPR-24, mục trên); các ca khác của skill chưa chạy lại trên `skill_sha` mới.
+
+## Ghi chú đổi skill_sha (gộp nhánh learn/tk11-cards, 2026-11-14)
+
+Nhánh `learn/tk11-cards` (hai thẻ learn-skills, 09/11) đổi cây skill `running-sprint`; gộp vào `main` nên `skill_sha` ghi lại băm cây hiện tại (9bbd534f). Các ca thử áp lực ở trên chạy trên bản skill trước đó và **chưa chạy lại** trên băm mới.
