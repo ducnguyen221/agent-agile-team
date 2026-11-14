@@ -1,6 +1,6 @@
 # agent-agile-team
 
-> **Status: version `0.10.0`, private repository (`.agile.json`: `"visibility": "private"`).** Installable on
+> **Status: version `0.11.0`, private repository (`.agile.json`: `"visibility": "private"`).** Installable on
 > Claude Code, Codex and Antigravity; not published to any plugin marketplace. Vietnamese version: [README.vi.md](README.vi.md). Skill bodies and method documents are written
 > in Vietnamese; frontmatter is English.
 
