@@ -28,7 +28,7 @@ Cách làm, theo thứ tự:
 
 Sau khối, in thêm các dòng sau (chữ của bạn, ngắn):
 
-- Gửi nguyên khối trên trong chat mới là đặt goal; lệnh này chưa làm gì.
+- Dán khối trên vào chat và gửi đi thì mới đặt được goal. Chưa gửi thì chưa có goal nào; lệnh này chưa làm gì.
 - Nên chạy cùng chế độ quyền auto: `/goal` không đổi chế độ quyền, nên ở chế độ hỏi từng bước thì agent vẫn dừng chờ bạn bấm.
 - Bên chấm chỉ đọc cuộc trò chuyện và không chạy lệnh, nên bằng chứng phải nằm trong chat (agent dán nguyên văn lệnh và dòng kết quả).
 - Mỗi phiên chỉ một goal: đang có goal khác thì xong hoặc bỏ goal đó trước.
