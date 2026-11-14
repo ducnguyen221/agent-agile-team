@@ -28,6 +28,19 @@ agent_ids:
 
 # Thử áp lực — running-sprint
 
+## Lượt SPR-24 — rs-9 đến rs-12 trên cây hiện tại (2026-11-14, cây `c02e328`)
+
+QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca), mỗi ca một chủ thể mới đọc `SKILL.md`, `references/` và `method/autopilot.md` bằng đường tuyệt đối, cấm công cụ Skill. **GREEN** = cây hiện tại. Đáp án ghi trước từ bảng trên. Ghi chú sửa: lượt này đổi mục 9 việc 4 (thứ tự dừng); ghi chú cũ nói đổi gạch "Bản tin autopilot" là sai.
+
+| Ca | Đáp án | Kết quả | Chủ thể |
+|---|---|---|---|
+| `rs-9-autopilot` | C | C → **Đạt** | `aca9042e2f2b844bc` |
+| `rs-10-autopilot` | E | E → **Đạt** | `a65b0189014d727ed` |
+| `rs-11-autopilot` | A | A → **Đạt** | `a8e34a1b323706122` |
+| `rs-12-autopilot` | C | C → **Đạt** | `aeaa6f70ea126ed79` |
+
+**Giới hạn:** n = 1 mỗi ca; chủ thể và người chấm cùng họ model (`claude-sonnet-5-5`); đáp án chấm theo lựa chọn và nội dung khớp luật, không có người chấm mù thứ hai.
+
 ## Lượt SPR-20 TK24 — autopilot mặc định, phiên con, Gate Delegate, báo cuối (2026-11-13)
 
 QA T3 (`claude-sonnet-5-5`, mọi chủ thể tự báo đúng tên này ở dòng đầu câu trả lời; n = 1 mỗi ca mỗi pha), mỗi ca một chủ thể mới, cấm công cụ Skill, chỉ Read, không đọc `tests/`. **RED** = cây `553c1aa` (trước TK23a, chép ra thư mục tạm; chủ thể đọc `SKILL.md` và references của cây đó). **GREEN** = cây hiện tại (`skill_sha` ở frontmatter; chủ thể đọc `SKILL.md` + tài liệu skill trỏ tới + `method/*`). Mỗi chủ thể chỉ đọc tệp ca của mình (thư mục tạm `cases/`). Đáp án ca lựa chọn cho sẵn ghi trước khi chạy (cột Đáp án); ca trả lời tự do có tiêu chí ghi trước, chấm mù X/Y bởi một phiên khác người viết kịch bản (`claude-sonnet-5-5`; điều phối rút gọn một vài dòng khi chép câu trả lời cho người chấm). Mức: **Đạt** = đúng đáp án/đủ tiêu chí và nội dung khớp luật mới; **Một phần** = đúng đáp án nhưng nội dung còn nêu chữ của luật cũ (người dùng phải gõ lệnh bật, người dùng duyệt thay cổng…); **Không đạt** = sai đáp án/phạm điều cấm.
@@ -255,4 +268,4 @@ Kết quả: theo chữ 2/3, theo ý 3/3, bằng lượt SPR-19 TK11, không lù
 
 ## Ghi chú đổi skill_sha (SPR-24, CO1, 2026-11-14)
 
-CO1 sửa một gạch đầu dòng "Bản tin autopilot" ở `references/autopilot.md` (thêm một câu kết luận và nối hàng chờ người với khuôn của `method/communication.md` mục 3), nên `skill_sha` đổi theo cây hiện tại. Các ca thử áp lực của skill này **chưa chạy lại** trên `skill_sha` mới; việc chạy lại ghi là việc hoãn của SPR-24.
+CO1 sửa một gạch đầu dòng "Bản tin autopilot" ở `references/autopilot.md` (thêm một câu kết luận và nối hàng chờ người với khuôn của `method/communication.md` mục 3), nên `skill_sha` đổi theo cây hiện tại. Các ca rs-9 đến rs-12 đã chạy lại trên cây hiện tại (lượt SPR-24, mục trên); các ca khác của skill chưa chạy lại trên `skill_sha` mới.

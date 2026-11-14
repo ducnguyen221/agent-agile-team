@@ -64,7 +64,18 @@ QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca mỗi lượt), mỗi kịch bản m�
 - Cả 12 RED đều chọn đúng phương án (tiêu chí 1): luật nền của máy đã đủ cho quyết định; skill mới thêm phần chi tiết (khoá, câu chuẩn, sổ, tạm dừng, `+nhánh`), chưa chứng minh đổi quyết định an toàn.
 - `in-10-autopilot` và `in-13-autopilot` không khác biệt RED/GREEN (ca hồi quy, giữ lại).
 - `in-11b-autopilot` GREEN lượt 4 ghi `level: gate_1_2` thay vì `program`; Analyst phân xử sau vòng sửa 3: lỗi thật, hoãn thành `CO` vì `check.py` bắt đúng lỗi này (lệch chữ mức ↔ `level`).
-- Các ca cũ của skill chưa chạy lại trên `skill_sha` này.
+- Các ca cũ của skill (KB1–KB17) chưa chạy lại trên `skill_sha` này; KB18, KB19 đã chạy lại (lượt SPR-24, mục dưới).
+
+## Lượt SPR-24 — KB18, KB19 trên cây hiện tại (2026-11-14, cây `c02e328`)
+
+QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca), mỗi ca một chủ thể mới đọc `SKILL.md`, `references/` và `method/autopilot.md` bằng đường tuyệt đối, cấm công cụ Skill. **GREEN** = cây hiện tại. KB19 chấm theo đáp án ghi trước; KB18 chấm mù bởi một phiên khác người trả lời theo tám ý trong bảng.
+
+| Ca | Đáp án / tiêu chí | Kết quả | Chủ thể | Người chấm |
+|---|---|---|---|---|
+| `KB19` | B | B → **Đạt** | `a858c5979d0671c43` | điều phối đối chiếu đáp án |
+| `KB18` (tự do) | tám ý tin báo cuối | **Một phần** | `a801150cf3deaac92` | `a99d6fc5023cdfdf4` (mù) |
+
+KB18 Một phần: thiếu cách hoàn tác riêng cho việc đẩy nhánh (chỉ có cho gộp và bản phát hành); dòng "Khuyến nghị" viết thì tương lai; thêm dữ kiện không có trong đề (model `claude-fable` cho hai Gate Delegate; một câu về phương án bị loại). Không sửa skill để qua; chưa chạy lại. **Giới hạn:** n = 1; chủ thể, người chấm và người viết kịch bản cùng họ model.
 
 Kết quả ở frontmatter trước lượt này: 4/4 GREEN pass on the current tree after 1 REFACTOR round (KB14 new; KB1, KB3, KB8 rerun); RED on KB14 partial; earlier rounds 3/3 scenarios GREEN pass at n = 3
 
@@ -370,4 +381,4 @@ Giới hạn: lượt GREEN đọc cây trước một sửa chữ cuối (đổ
 
 ## Ghi chú đổi skill_sha (SPR-24, CO1, 2026-11-14)
 
-CO1 sửa một gạch đầu dòng "Bản tin autopilot" ở `references/autopilot.md` (thêm một câu kết luận và nối hàng chờ người với khuôn của `method/communication.md` mục 3), nên `skill_sha` đổi theo cây hiện tại. Các ca thử áp lực của skill này **chưa chạy lại** trên `skill_sha` mới; việc chạy lại ghi là việc hoãn của SPR-24.
+CO1 sửa một gạch đầu dòng "Bản tin autopilot" ở `references/autopilot.md` (thêm một câu kết luận và nối hàng chờ người với khuôn của `method/communication.md` mục 3), nên `skill_sha` đổi theo cây hiện tại. KB18 và KB19 đã chạy lại trên cây hiện tại (lượt SPR-24, mục trên); các ca khác của skill chưa chạy lại trên `skill_sha` mới.
