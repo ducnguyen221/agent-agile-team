@@ -3,7 +3,7 @@ skill: response-style
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04); sonnet subagent alias (GREEN rerun of 2026-11-13)
 date: 2026-11-14
-result: "SPR-28 UAT chốt: nhãn ước tính 93,8 % (30/32) nhánh sửa so 45,5 % (5/11) nhánh cũ; Fable phán quyết Đạt có điều kiện, chờ Đức gật bảng chấm"
+result: "30/32 nhãn ước tính ở nhánh sửa (93,8 %) so 5/11 nhánh cũ (45,5 %), UAT chốt SPR-28; Fable phán quyết Đạt có điều kiện, chờ Đức gật bảng chấm"
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
 skill_sha: cf528e4391a8523e8dde73716881645e1d10e5d2
 agent_ids:
@@ -104,7 +104,7 @@ Sau tech-review-2: mục 6 và khối mục 8 đổi hai chỗ (bỏ câu "rồi
 
 48 lượt Sonnet mù (4 kịch bản UAT × 6 × {skill cũ, skill mới}), 2 grader mù (Opus, Fable), bảng chấm hợp nhất khoá ở commit `b64fce0` trước lượt đo.
 Tỷ lệ nhãn (Opus, chặt hơn): UAT-1 mới 21/23 (91,3 %), UAT-2 mới 9/9; gộp mới 30/32 (93,8 %), gộp cũ 5/11 (45,5 %).
-UAT-3: Σ E = 0 cả hai nhánh, B1–B4 12/12; UAT-4: B2 và B6 12/12 cả hai nhánh. Hai E không nhãn là câu văn xuôi ngoài bảng.
-Phán quyết Fable: **Đạt có điều kiện** (CO1: Đức gật bảng chấm và ngưỡng, vì mọi nhãn dựa vào quy tắc A3 — nhãn ở tiêu đề cột/câu dẫn).
-Giới hạn: khoảng tin cậy 95 % của 30/32 khoảng 80–98 %; runner và grader cùng họ model (RQ-110); B5 UAT-2 chỉ 4/6 nếu đòi đúng chữ "chưa đo".
+UAT-3: Σ E = 0 cả hai nhánh, bốn điều kiện đi kèm đầu 12/12; UAT-4: trần một dòng và giữ điều chặn đều 12/12 cả hai nhánh. Hai E không nhãn là câu văn xuôi ngoài bảng.
+Phán quyết Fable: **Đạt có điều kiện** (CO1: Đức gật bảng chấm và ngưỡng, vì mọi nhãn dựa vào quy tắc nhãn ở tiêu đề cột hoặc câu dẫn).
+Giới hạn: khoảng tin cậy 95 % của 30/32 khoảng 80–98 %; runner và grader cùng họ model (RQ-110); điều kiện "không né" của UAT-2 chỉ 4/6 nếu đòi đúng chữ "chưa đo".
 Hồ sơ: `system/workshop-records/agent-agile-team/plans/2026-11-14-response-style-estimate-label-u1/evidence/` (`fable-phan-quyet-u1.md`, `uat-giai-ma.md`, `uat-cham-*`).
