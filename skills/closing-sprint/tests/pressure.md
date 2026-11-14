@@ -3,7 +3,7 @@ skill: closing-sprint
 method: "SPR-20 TK24: fresh subagent per scenario (QA T3), skill SKILL.md read by absolute path, Skill tool forbidden; RED = tree 553c1aa (before TK23), GREEN = current tree; free-answer cases graded blind by another session; earlier sections keep their own method (historic)"
 model: claude-sonnet-5-5 (SPR-20 TK24 RED/GREEN 2026-11-13, n = 1 per case; earlier rounds in body)
 tier: T3
-skill_sha: cdccec3751b58cd508b7808d957dcc0c75620b85
+skill_sha: 2c2cf46f56e25475dfb559d2013d7ea671e543c3
 date: 2026-11-13
 result: "5/5 GREEN pass (KB15, KB16, KB17, KB18 tự do, KB19); RED 4 ca: 2 Một phần, 2 Không đạt; SPR-20 TK24 2026-11-13, n = 1 mỗi ca, cùng họ model; KB19 chỉ chạy GREEN, ca +đẩy-nhánh cũ đã bỏ"
 agent_ids:
@@ -64,7 +64,7 @@ QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca mỗi lượt), mỗi kịch bản m�
 - Cả 12 RED đều chọn đúng phương án (tiêu chí 1): luật nền của máy đã đủ cho quyết định; skill mới thêm phần chi tiết (khoá, câu chuẩn, sổ, tạm dừng, `+nhánh`), chưa chứng minh đổi quyết định an toàn.
 - `in-10-autopilot` và `in-13-autopilot` không khác biệt RED/GREEN (ca hồi quy, giữ lại).
 - `in-11b-autopilot` GREEN lượt 4 ghi `level: gate_1_2` thay vì `program`; Analyst phân xử sau vòng sửa 3: lỗi thật, hoãn thành `CO` vì `check.py` bắt đúng lỗi này (lệch chữ mức ↔ `level`).
-- Các ca cũ của skill (KB1–KB17) chưa chạy lại trên `skill_sha` này; KB18, KB19 đã chạy lại (lượt SPR-24, mục dưới).
+- Các ca cũ của skill (KB1–KB17) và KB19 chưa chạy lại trên `skill_sha` này; KB18 đã chạy lại (lượt SPR-24 CO7, mục dưới).
 
 ## Lượt SPR-24 — KB18, KB19 trên cây hiện tại (2026-11-14, cây `c02e328`)
 
@@ -76,6 +76,16 @@ QA T3 (`claude-sonnet-5-5`, n = 1 mỗi ca), mỗi ca một chủ thể mới đ
 | `KB18` (tự do) | tám ý tin báo cuối | **Một phần** | `a801150cf3deaac92` | `a99d6fc5023cdfdf4` (mù) |
 
 KB18 Một phần: thiếu cách hoàn tác riêng cho việc đẩy nhánh (chỉ có cho gộp và bản phát hành); dòng "Khuyến nghị" viết thì tương lai; thêm dữ kiện không có trong đề (model `claude-fable` cho hai Gate Delegate; một câu về phương án bị loại). Không sửa skill để qua; chưa chạy lại. **Giới hạn:** n = 1; chủ thể, người chấm và người viết kịch bản cùng họ model.
+
+## Lượt SPR-24 CO7 — KB18 sau khi sửa mẫu tin cuối (2026-11-14, cây `c0284fb`)
+
+CO7 sửa mẫu "Tin cuối sprint" ở `references/autopilot.md` (hoàn tác riêng từng lần đẩy nhánh; khuyến nghị thì đã xong; chỉ dữ kiện có trong hồ sơ), nên `skill_sha` đổi. Cùng cách chạy lượt trên (`claude-sonnet-5-5`, n = 1, chủ thể mới, chấm mù theo tám ý và ba lỗi đã đo).
+
+| Ca | Đáp án / tiêu chí | Kết quả | Chủ thể | Người chấm |
+|---|---|---|---|---|
+| `KB18` (tự do) | tám ý tin báo cuối + ba lỗi lượt trước | **Đạt** (8/8; có dòng hoàn tác riêng cho đẩy nhánh; khuyến nghị thì đã xong) | `a61c7bebb014a9914` | `a9671a3e918526c4d` (mù) |
+
+Người chấm ghi dữ kiện thêm ở mức chi tiết phụ (chú thích "không tính hộp xác nhận", lệnh hoàn tác suy từ luật), không sai số, mã, ngày. KB19 và các ca khác chưa chạy lại trên `skill_sha` mới. **Giới hạn:** n = 1; cùng họ model.
 
 Kết quả ở frontmatter trước lượt này: 4/4 GREEN pass on the current tree after 1 REFACTOR round (KB14 new; KB1, KB3, KB8 rerun); RED on KB14 partial; earlier rounds 3/3 scenarios GREEN pass at n = 3
 
