@@ -2,10 +2,10 @@
 skill: response-style
 method: pressure-test with subagents (RED without skill, GREEN with skill)
 model: sonnet (RED/GREEN/original of 2026-10-01); claude-sonnet-5-5 (GREEN rerun of 2026-10-04); sonnet subagent alias (GREEN rerun of 2026-11-13)
-date: 2026-11-13
-result: 6/9 runs pass strict reading (RS-1 1/3, RS-2 3/3, RS-3 2/3), 8/9 lenient; control on the old skill RS-1 0/3, RS-3 1/3 (same failure kind, not a regression); GREEN rerun 2026-11-13 on SPR-21 TK5
+date: 2026-11-14
+result: "SPR-28 UAT chốt: nhãn ước tính 93,8 % (30/32) nhánh sửa so 45,5 % (5/11) nhánh cũ; Fable phán quyết Đạt có điều kiện, chờ Đức gật bảng chấm"
 tier: tier 2 (cũ T2) runners; tier 3 (cũ T1) grader
-skill_sha: d626f1ed339b5ed8389ad1170276a10d8523f336
+skill_sha: cf528e4391a8523e8dde73716881645e1d10e5d2
 agent_ids:
   green_rerun_2026_10_04: {rs-1: af26a5eb29de2e971, rs-2: ab5587bbe2574b8a1, rs-3: a708cc8e24e2dffac}
 ---
@@ -99,3 +99,12 @@ Sau tech-review-2: mục 6 và khối mục 8 đổi hai chỗ (bỏ câu "rồi
 ## Vòng sửa 1 của TK9 (2026-11-13)
 
 `SKILL.md` chỉ đổi mục 6, khối rút gọn mục 8 và dòng Kết luận: danh sách dấu hiệu vào diễn giải thành con trỏ về `method/communication.md` mục 1. Chạy lại n = 1 mỗi ca, runner `sonnet` mới, grader `opus` khác: RS-2 **Đạt**; RS-3 **Đạt**; RS-1 **Không đạt** (ước lượng thời gian/giá như "nửa ngày", "gần 0 USD" không ghi "chưa đo") — lỗi nền cũ đã ghi ở trên (RS-1 trượt cả ở bản skill cũ), không do thay đổi này. n = 1, chưa có RED mới. Bằng chứng: `tk9-fix1.md` của hồ sơ sprint.
+
+## UAT chốt SPR-28 (2026-11-14) — nhãn ước tính
+
+48 lượt Sonnet mù (4 kịch bản UAT × 6 × {skill cũ, skill mới}), 2 grader mù (Opus, Fable), bảng chấm hợp nhất khoá ở commit `b64fce0` trước lượt đo.
+Tỷ lệ nhãn (Opus, chặt hơn): UAT-1 mới 21/23 (91,3 %), UAT-2 mới 9/9; gộp mới 30/32 (93,8 %), gộp cũ 5/11 (45,5 %).
+UAT-3: Σ E = 0 cả hai nhánh, B1–B4 12/12; UAT-4: B2 và B6 12/12 cả hai nhánh. Hai E không nhãn là câu văn xuôi ngoài bảng.
+Phán quyết Fable: **Đạt có điều kiện** (CO1: Đức gật bảng chấm và ngưỡng, vì mọi nhãn dựa vào quy tắc A3 — nhãn ở tiêu đề cột/câu dẫn).
+Giới hạn: khoảng tin cậy 95 % của 30/32 khoảng 80–98 %; runner và grader cùng họ model (RQ-110); B5 UAT-2 chỉ 4/6 nếu đòi đúng chữ "chưa đo".
+Hồ sơ: `system/workshop-records/agent-agile-team/plans/2026-11-14-response-style-estimate-label-u1/evidence/` (`fable-phan-quyet-u1.md`, `uat-giai-ma.md`, `uat-cham-*`).
